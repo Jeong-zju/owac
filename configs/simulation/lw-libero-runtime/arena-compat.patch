@@ -1,0 +1,13 @@
+--- a/isaaclab_arena/embodiments/__init__.py
++++ b/isaaclab_arena/embodiments/__init__.py
+@@ -4,5 +4,8 @@
+ # SPDX-License-Identifier: Apache-2.0
+ 
+ from .franka.franka import *
+-from .g1.g1 import *
+-from .gr1t2.gr1t2 import *
++import os
++
++if os.environ.get("OWAC_FRANKA_ONLY") != "1":
++    from .g1.g1 import *
++    from .gr1t2.gr1t2 import *

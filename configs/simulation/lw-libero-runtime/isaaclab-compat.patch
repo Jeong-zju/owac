@@ -1,0 +1,315 @@
+diff --git a/source/isaaclab/isaaclab/assets/articulation/articulation.py b/source/isaaclab/isaaclab/assets/articulation/articulation.py
+index b67ded1..755b3cc 100644
+--- a/source/isaaclab/isaaclab/assets/articulation/articulation.py
++++ b/source/isaaclab/isaaclab/assets/articulation/articulation.py
+@@ -16,7 +16,7 @@ import torch
+ import warp as wp
+ from prettytable import PrettyTable
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ from pxr import PhysxSchema, UsdPhysics
+ 
+diff --git a/source/isaaclab/isaaclab/assets/articulation/articulation_data.py b/source/isaaclab/isaaclab/assets/articulation/articulation_data.py
+index 47902ed..59d7f34 100644
+--- a/source/isaaclab/isaaclab/assets/articulation/articulation_data.py
++++ b/source/isaaclab/isaaclab/assets/articulation/articulation_data.py
+@@ -1,3 +1,5 @@
++
++from __future__ import annotations
+ # Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+ # All rights reserved.
+ #
+@@ -8,7 +10,7 @@ import weakref
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ 
+ import isaaclab.utils.math as math_utils
+diff --git a/source/isaaclab/isaaclab/assets/deformable_object/deformable_object.py b/source/isaaclab/isaaclab/assets/deformable_object/deformable_object.py
+index 12ae6c5..096faf2 100644
+--- a/source/isaaclab/isaaclab/assets/deformable_object/deformable_object.py
++++ b/source/isaaclab/isaaclab/assets/deformable_object/deformable_object.py
+@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ from pxr import PhysxSchema, UsdShade
+ 
+diff --git a/source/isaaclab/isaaclab/assets/deformable_object/deformable_object_data.py b/source/isaaclab/isaaclab/assets/deformable_object/deformable_object_data.py
+index bb77143..80ce4be 100644
+--- a/source/isaaclab/isaaclab/assets/deformable_object/deformable_object_data.py
++++ b/source/isaaclab/isaaclab/assets/deformable_object/deformable_object_data.py
+@@ -1,3 +1,5 @@
++
++from __future__ import annotations
+ # Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+ # All rights reserved.
+ #
+@@ -7,7 +9,7 @@ import weakref
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ 
+ import isaaclab.utils.math as math_utils
+ from isaaclab.utils.buffers import TimestampedBuffer
+diff --git a/source/isaaclab/isaaclab/assets/rigid_object/rigid_object.py b/source/isaaclab/isaaclab/assets/rigid_object/rigid_object.py
+index 6d0ec98..5565591 100644
+--- a/source/isaaclab/isaaclab/assets/rigid_object/rigid_object.py
++++ b/source/isaaclab/isaaclab/assets/rigid_object/rigid_object.py
+@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
+ import torch
+ import warp as wp
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ from pxr import UsdPhysics
+ 
+diff --git a/source/isaaclab/isaaclab/assets/rigid_object/rigid_object_data.py b/source/isaaclab/isaaclab/assets/rigid_object/rigid_object_data.py
+index d1a94f1..327a3dd 100644
+--- a/source/isaaclab/isaaclab/assets/rigid_object/rigid_object_data.py
++++ b/source/isaaclab/isaaclab/assets/rigid_object/rigid_object_data.py
+@@ -1,3 +1,5 @@
++
++from __future__ import annotations
+ # Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+ # All rights reserved.
+ #
+@@ -7,7 +9,7 @@ import weakref
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ 
+ import isaaclab.utils.math as math_utils
+ from isaaclab.sim.utils.stage import get_current_stage_id
+diff --git a/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection.py b/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection.py
+index b458b15..8c62801 100644
+--- a/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection.py
++++ b/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection.py
+@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
+ import torch
+ import warp as wp
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ from pxr import UsdPhysics
+ 
+diff --git a/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection_data.py b/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection_data.py
+index 5156ef7..a5bddd8 100644
+--- a/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection_data.py
++++ b/source/isaaclab/isaaclab/assets/rigid_object_collection/rigid_object_collection_data.py
+@@ -1,3 +1,5 @@
++
++from __future__ import annotations
+ # Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+ # All rights reserved.
+ #
+@@ -7,7 +9,7 @@ import weakref
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ 
+ import isaaclab.utils.math as math_utils
+ from isaaclab.sim.utils.stage import get_current_stage_id
+diff --git a/source/isaaclab/isaaclab/envs/mdp/events.py b/source/isaaclab/isaaclab/envs/mdp/events.py
+index 484121f..96f1e63 100644
+--- a/source/isaaclab/isaaclab/envs/mdp/events.py
++++ b/source/isaaclab/isaaclab/envs/mdp/events.py
+@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Literal
+ import torch
+ 
+ import carb
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.utils.extensions import enable_extension
+ from pxr import Gf, Sdf, UsdGeom, Vt
+ 
+diff --git a/source/isaaclab/isaaclab/scene/interactive_scene.py b/source/isaaclab/isaaclab/scene/interactive_scene.py
+index 46e5895..13a5801 100644
+--- a/source/isaaclab/isaaclab/scene/interactive_scene.py
++++ b/source/isaaclab/isaaclab/scene/interactive_scene.py
+@@ -795,6 +795,9 @@ class InteractiveScene:
+                     )
+                 # store xform prim view corresponding to this asset
+                 # all prims in the scene are Xform prims (i.e. have a transform component)
++                for prim in sim_utils.find_matching_prims(asset_cfg.prim_path, stage=self.stage):
++                    if not sim_utils.validate_standard_xform_ops(prim):
++                        sim_utils.standardize_xform_ops(prim)
+                 self._extras[asset_name] = XformPrimView(asset_cfg.prim_path, device=self.device, stage=self.stage)
+             else:
+                 raise ValueError(f"Unknown asset config type for {asset_name}: {asset_cfg}")
+diff --git a/source/isaaclab/isaaclab/sensors/contact_sensor/contact_sensor.py b/source/isaaclab/isaaclab/sensors/contact_sensor/contact_sensor.py
+index 2a85a26..0c1c0bb 100644
+--- a/source/isaaclab/isaaclab/sensors/contact_sensor/contact_sensor.py
++++ b/source/isaaclab/isaaclab/sensors/contact_sensor/contact_sensor.py
+@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
+ import torch
+ 
+ import carb
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ from isaacsim.core.simulation_manager import SimulationManager
+ from pxr import PhysxSchema
+ 
+diff --git a/source/isaaclab/isaaclab/sensors/ray_caster/multi_mesh_ray_caster.py b/source/isaaclab/isaaclab/sensors/ray_caster/multi_mesh_ray_caster.py
+index 39be0d7..a312f8c 100644
+--- a/source/isaaclab/isaaclab/sensors/ray_caster/multi_mesh_ray_caster.py
++++ b/source/isaaclab/isaaclab/sensors/ray_caster/multi_mesh_ray_caster.py
+@@ -15,7 +15,7 @@ import torch
+ import trimesh
+ import warp as wp
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ 
+ import isaaclab.sim as sim_utils
+ from isaaclab.sim.views import XformPrimView
+diff --git a/source/isaaclab/isaaclab/sensors/ray_caster/ray_cast_utils.py b/source/isaaclab/isaaclab/sensors/ray_caster/ray_cast_utils.py
+index 543276e..bd3656f 100644
+--- a/source/isaaclab/isaaclab/sensors/ray_caster/ray_cast_utils.py
++++ b/source/isaaclab/isaaclab/sensors/ray_caster/ray_cast_utils.py
+@@ -9,7 +9,7 @@ from __future__ import annotations
+ 
+ import torch
+ 
+-import omni.physics.tensors.impl.api as physx
++import omni.physics.tensors.api as physx
+ 
+ from isaaclab.sim.views import XformPrimView
+ from isaaclab.utils.math import convert_quat
+diff --git a/source/isaaclab/isaaclab/sim/simulation_context.py b/source/isaaclab/isaaclab/sim/simulation_context.py
+index d022c2d..e25b029 100644
+--- a/source/isaaclab/isaaclab/sim/simulation_context.py
++++ b/source/isaaclab/isaaclab/sim/simulation_context.py
+@@ -222,7 +222,9 @@ class SimulationContext(_SimulationContext):
+             # disable the viewport if offscreen_render is enabled
+             from omni.kit.viewport.utility import get_active_viewport
+ 
+-            get_active_viewport().updates_enabled = False
++            viewport = get_active_viewport()
++            if viewport is not None:
++                viewport.updates_enabled = False
+ 
+         # override enable scene querying if rendering is enabled
+         # this is needed for some GUI features
+diff --git a/source/isaaclab/isaaclab/sim/utils/prims.py b/source/isaaclab/isaaclab/sim/utils/prims.py
+index 6fb7850..db96894 100644
+--- a/source/isaaclab/isaaclab/sim/utils/prims.py
++++ b/source/isaaclab/isaaclab/sim/utils/prims.py
+@@ -868,7 +868,8 @@ def bind_physics_material(
+     # check if prim has collision applied on it
+     has_physics_scene_api = prim.HasAPI(PhysxSchema.PhysxSceneAPI)
+     has_collider = prim.HasAPI(UsdPhysics.CollisionAPI)
+-    has_deformable_body = prim.HasAPI(PhysxSchema.PhysxDeformableBodyAPI)
++    has_deformable_body = (hasattr(PhysxSchema, "PhysxDeformableBodyAPI")
++                           and prim.HasAPI(PhysxSchema.PhysxDeformableBodyAPI))
+     has_particle_system = prim.IsA(PhysxSchema.PhysxParticleSystem)
+     if not (has_physics_scene_api or has_collider or has_deformable_body or has_particle_system):
+         logger.debug(
+diff --git a/source/isaaclab/isaaclab/sim/utils/transforms.py b/source/isaaclab/isaaclab/sim/utils/transforms.py
+index d7ae57a..f145b00 100644
+--- a/source/isaaclab/isaaclab/sim/utils/transforms.py
++++ b/source/isaaclab/isaaclab/sim/utils/transforms.py
+@@ -172,48 +172,46 @@ def standardize_xform_ops(
+     # Verify if xform stack is reset
+     has_reset = xformable.GetResetXformStack()
+     # Batch the operations
+-    with Sdf.ChangeBlock():
+-        # Clear the existing transform operation order
+-        for prop_name in prop_names:
+-            if prop_name in _INVALID_XFORM_OPS:
+-                prim.RemoveProperty(prop_name)
+-
+-        # Remove unitsResolve attribute if present (already handled in scale resolution above)
+-        if "xformOp:scale:unitsResolve" in prop_names:
+-            prim.RemoveProperty("xformOp:scale:unitsResolve")
+-
+-        # Set up or retrieve scale operation
+-        xform_op_scale = UsdGeom.XformOp(prim.GetAttribute("xformOp:scale"))
+-        if not xform_op_scale:
+-            xform_op_scale = xformable.AddXformOp(UsdGeom.XformOp.TypeScale, UsdGeom.XformOp.PrecisionDouble, "")
+-
+-        # Set up or retrieve translate operation
+-        xform_op_translate = UsdGeom.XformOp(prim.GetAttribute("xformOp:translate"))
+-        if not xform_op_translate:
+-            xform_op_translate = xformable.AddXformOp(
+-                UsdGeom.XformOp.TypeTranslate, UsdGeom.XformOp.PrecisionDouble, ""
+-            )
+-
+-        # Set up or retrieve orient (quaternion rotation) operation
+-        xform_op_orient = UsdGeom.XformOp(prim.GetAttribute("xformOp:orient"))
+-        if not xform_op_orient:
+-            xform_op_orient = xformable.AddXformOp(UsdGeom.XformOp.TypeOrient, UsdGeom.XformOp.PrecisionDouble, "")
+-
+-        # Handle different floating point precisions
+-        # Existing Xform operations might have floating or double precision.
+-        # We need to cast the data to the correct type to avoid setting the wrong type.
+-        xform_ops = [xform_op_translate, xform_op_orient, xform_op_scale]
+-        xform_values = [xform_pos, xform_quat, xform_scale]
+-        for xform_op, value in zip(xform_ops, xform_values):
+-            # Get current value to determine precision type
+-            current_value = xform_op.Get()
+-            # Cast to existing type to preserve precision (float/double)
+-            xform_op.Set(type(current_value)(value) if current_value is not None else value)
+-
+-        # Set the transform operation order: translate -> orient -> scale
+-        # This is the standard USD convention and ensures consistent behavior
+-        xformable.SetXformOpOrder([xform_op_translate, xform_op_orient, xform_op_scale], has_reset)
++    # Clear the existing transform operation order
++    for prop_name in prop_names:
++        if prop_name in _INVALID_XFORM_OPS:
++            prim.RemoveProperty(prop_name)
++
++    # Remove unitsResolve attribute if present (already handled in scale resolution above)
++    if "xformOp:scale:unitsResolve" in prop_names:
++        prim.RemoveProperty("xformOp:scale:unitsResolve")
++
++    # Set up or retrieve scale operation
++    xform_op_scale = UsdGeom.XformOp(prim.GetAttribute("xformOp:scale"))
++    if not xform_op_scale:
++        xform_op_scale = xformable.AddXformOp(UsdGeom.XformOp.TypeScale, UsdGeom.XformOp.PrecisionDouble, "")
++
++    # Set up or retrieve translate operation
++    xform_op_translate = UsdGeom.XformOp(prim.GetAttribute("xformOp:translate"))
++    if not xform_op_translate:
++        xform_op_translate = xformable.AddXformOp(
++            UsdGeom.XformOp.TypeTranslate, UsdGeom.XformOp.PrecisionDouble, ""
++        )
+ 
++    # Set up or retrieve orient (quaternion rotation) operation
++    xform_op_orient = UsdGeom.XformOp(prim.GetAttribute("xformOp:orient"))
++    if not xform_op_orient:
++        xform_op_orient = xformable.AddXformOp(UsdGeom.XformOp.TypeOrient, UsdGeom.XformOp.PrecisionDouble, "")
++
++    # Handle different floating point precisions
++    # Existing Xform operations might have floating or double precision.
++    # We need to cast the data to the correct type to avoid setting the wrong type.
++    xform_ops = [xform_op_translate, xform_op_orient, xform_op_scale]
++    xform_values = [xform_pos, xform_quat, xform_scale]
++    for xform_op, value in zip(xform_ops, xform_values):
++        # Get current value to determine precision type
++        current_value = xform_op.Get()
++        # Cast to existing type to preserve precision (float/double)
++        xform_op.Set(type(current_value)(value) if current_value is not None else value)
++
++    # Set the transform operation order: translate -> orient -> scale
++    # This is the standard USD convention and ensures consistent behavior
++    xformable.SetXformOpOrder([xform_op_translate, xform_op_orient, xform_op_scale], has_reset)
+     return True
+ 
+ 

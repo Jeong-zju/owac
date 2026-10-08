@@ -1,0 +1,53 @@
+--- a/setup.py
++++ b/setup.py
+@@ -1,15 +1,2 @@
+-from setuptools import setup
+-
+-setup(
+-    packages=[
+-        "lw_benchhub",
+-        "policy",
+-        "lw_benchhub_tasks",
+-        "lw_benchhub_rl"
+-    ],
+-    package_dir={
+-        "lw_benchhub": "lw_benchhub",
+-        "lw_benchhub_policy": "lw_benchhub_policy",
+-        "lw_benchhub_tasks": "lw_benchhub_tasks",
+-    }
+-)
++from setuptools import setup,find_namespace_packages
++setup(packages=find_namespace_packages(include=["lw_benchhub", "lw_benchhub.*", "lw_benchhub_tasks", "lw_benchhub_tasks.*"]))
+--- a/lw_benchhub/utils/monkey_patch.py
++++ b/lw_benchhub/utils/monkey_patch.py
+@@ -685,6 +685,7 @@
+ patch_step()
+ patch_yaml_load()
+ patch_reward_manager()
+-patch_create_teleop_device()
++if __import__("os").environ.get("OWAC_NO_TELEOP") != "1":
++    patch_create_teleop_device()
+ patch_isaaclab_tasks_mdp()
+ patch_termination_manager()
+--- a/lw_benchhub/core/tasks/base.py
++++ b/lw_benchhub/core/tasks/base.py
+@@ -22,7 +22,7 @@
+ import numpy as np
+ import torch
+ 
+-from lightwheel_sdk.loader import ENDPOINT
++from lightwheel_sdk.client import ENDPOINT
+ from isaaclab.managers import EventTermCfg as EventTerm
+ from isaaclab.managers import ObservationGroupCfg as ObsGroup
+ from isaaclab.managers import RewardTermCfg as RewTerm
+--- a/lw_benchhub/core/models/scenes/scene_parser.py
++++ b/lw_benchhub/core/models/scenes/scene_parser.py
+@@ -38,7 +38,7 @@
+         if info['type'] == "Wall_obj" or info['type'] == "Floor_obj":
+             continue
+         size_attr = info["prim"].GetAttribute("size").Get()
+-        if size_attr is None or np.fromstring(size_attr, sep=',').size == 0:
++        if size_attr is None or not str(size_attr).strip() or 'None' in str(size_attr):
+             continue
+         fixture_type = info["type"] if info["type"] in FIXTURES else "Accessory"
+         fixtures[info["name"]] = FIXTURES[fixture_type](info["name"], info["prim"], num_envs, seed=seed, device=device)
