@@ -1,6 +1,6 @@
 # OWAC
 
-OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。当前优先部署 π0.5 PyTorch 后端，为网络搭建与具身 RAW 验证建立实际起点；候选框架尚未实现或验证。
+OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署；当前先选定并验证仿真 benchmark、RGB 闭环和成像/数据协议，再开展 RAW 适配。候选框架尚未实现或验证。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
@@ -11,7 +11,8 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 - [当前 research roadmap v4](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
-- [π0.5 后端优先部署决议](docs/decisions/0003-pi05-backend-first.md)：用户分工、当前建设顺序与 F01—F12 共同分支起点。
+- [仿真 benchmark 优先决议](docs/decisions/0004-simulation-benchmark-first.md)、[选型调研](docs/simulation-benchmark-selection.md)：最新建设顺序、首选任务套件及待验证的版本/数据条件。
+- [π0.5 后端优先部署决议](docs/decisions/0003-pi05-backend-first.md)：用户分工、已完成的后端部署及其决策来源。
 - [π0.5 本地部署](docs/pi05-deployment.md)：独立 PyTorch 环境、权重转换、离线推理与 RAW 接入审计。
 - [开发说明](docs/development.md)、[架构边界](docs/architecture.md)：环境、目录职责和待验证的接口约定。
 - [候选索引与研究模板](research/README.md)：F01—F12 种子卡、实验和评审记录。

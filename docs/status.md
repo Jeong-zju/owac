@@ -29,14 +29,30 @@
 - [x] 预训练策略离线推理通过：输出 `[15, 8]`，有限值与固定输入重复性通过；3 次同步调用约 121—129 ms，PyTorch 分配峰值约 7.12 GiB。
 - [x] 官方 WebSocket 协议的本地健康检查、元数据握手与客户端推理通过；检查后停止测试服务。
 - [x] 审计官方 RGB 预处理、视觉前缀、π0.5 本体状态与动作专家边界。
-- [ ] 实现 RAW/外部特征独立入口，同时覆盖训练与推理并验证梯度和掩码。
-- [ ] 后端与首版接入接口验收后合入本地 `main`，创建 `owac-dev-v0.1.0` 共同起点标签。
+- [ ] 先验收仿真 benchmark、RGB 闭环及成像/数据协议，见下节。
+- [ ] 随后实现 RAW/外部特征独立入口，同时覆盖训练与推理并验证梯度和掩码。
+- [ ] 后端、选定任务/数据协议及必要首版接入接口验收后合入本地 `main`，创建 `owac-dev-v0.1.0` 共同起点标签。
 
 部署与 RAW 接入审计见 [π0.5 本地部署](pi05-deployment.md)。当前在 `codex/pi05-backend` 分支进行，正式基线标签尚未创建。DROID 配置只用于软件连通性检查，不代表正式本体选型。
 
 上述资源数据来自合成 RGB smoke，编译关闭、10 步 flow matching；未测量正式任务或闭环性能。`make check` 与 3 项 CPU 测试通过，数据加载器导入通过，训练尚未执行。
 
 最终代码 `b13efae869a34ffe655d0ea54307a95054f033e3` 在干净工作树下复现通过，动作与首次结果完全相同；证据保存于[部署验证记录](../research/experiments/2026-10-08_pi05_deployment.md)。
+
+## 当前优先：仿真 benchmark 选型与验收
+
+用户要求先依据所提供 Isaac Sim / RAW 调研报告选择合适的 benchmark，RAW 适配后置。[0004 决议](decisions/0004-simulation-benchmark-first.md)调整了 0003 的后续建设顺序；[选型调研](simulation-benchmark-selection.md)保存比较、来源和明确的未验证项。
+
+- [x] 阅读 13 页报告并核对 NVIDIA 相机管线文档，提取线性 HDR、传感器 gap 和任务/数据选型条件。
+- [x] 比较 Lightwheel-LIBERO、Arena DROID/厨房任务、原版 LIBERO/RoboCasa、BEHAVIOR 及其他操作平台；核查 RawVLA-Bench 的三通道 pseudo-RAW 边界及训练/测试协议。
+- [x] 核查固定提交的部分源码和依赖；记录 LW 的 Sim 5.0 约束、Arena 的 jointpos 权重差异及一个双杯任务的疑似错误成功分支。
+- [x] 将 Lightwheel-LIBERO 桌面子集列为主 benchmark 首选，Arena DROID 示例列为首个工程闭环；此为调研建议，未完成运行验收。
+- [ ] 验证固定仿真环境、资产获取、π0.5 PyTorch jointpos 参考路径及 RGB 闭环。
+- [ ] 验收首选套件的版本兼容、3 个任务的语言/成功判据、重置和演示重放。
+- [ ] 在所选任务相机中验证未色调映射的线性 HDR 出口、时间戳与可复现成像条件。
+- [ ] 冻结任务/数据协议后再实现 RAW 接入；真实相机与正式数据仍留空。
+
+本轮只完成文档/源码调研与顺序修订，没有安装候选仿真或运行 benchmark，也没有测得候选任务成功率/资源指标。来源及哈希见[调研清单](../research/reviews/2026-10-08_simulation_benchmark_sources.json)。
 
 ## 后续研究待办
 
