@@ -11,6 +11,7 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 - [当前 research roadmap v4](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
+- [共有开发基线 B0](docs/decisions/0002-common-development-baseline.md)：正式研究前的建设范围、验收条件与 F01—F12 共同分支起点。
 - [开发说明](docs/development.md)、[架构边界](docs/architecture.md)：环境、目录职责和待验证的接口约定。
 - [候选索引与研究模板](research/README.md)：F01—F12 种子卡、实验和评审记录。
 

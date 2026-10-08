@@ -23,24 +23,27 @@ uv run --locked python -c "import owac; print(owac.__file__)"
 
 1. 阅读根目录 `AGENTS.md`、当前状态及任务相关研究卡；检查工作树变更。
 2. 新候选复制研究卡模板，新实验复制实验模板到 `research/experiments/`；先写可证伪问题和比较条件。
-3. 日常功能可使用 `git switch -c <type>/<short-name>`。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
+3. 先完成 [B0 共有开发基线](decisions/0002-common-development-baseline.md)，再从冻结标签创建 F01—F12 首批开发分支。日常功能默认使用 `codex/<short-name>`；后续子任务可继续本家族已有分支。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
 4. 逻辑放在 `src/owac/`，运行参数放在 `configs/`，命令入口放在 `scripts/`。输出路径由配置控制，避免硬编码个人目录。
 5. 运行有意义的检查，记录命令和结果；更新受影响的研究卡与 `docs/status.md`。
 6. 审查 `git diff --check`、`git diff` 及暂存内容后提交。提交消息建议 `type(scope): summary`。
 
 ## 创建与管理 worktree
 
-在主仓库的初始提交完成后，可以按任务建立独立 checkout。例如以下命令会创建 `feat/raw-schema` 分支和对应工作目录（仅为使用示例，初始化时没有执行）：
+先在 `codex/b0-common-baseline` 建设分支完成共有工具与验收。B0 合入本地 `main` 后，以注释标签 `owac-dev-v0.1.0` 固定起点并记录 SHA；标签当前尚未创建。各候选首批分支使用该固定标签，避免开始日期不同导致公共代码不同。
+
+以下命令仅在 B0 冻结后执行，创建候选分支和对应 checkout：
 
 ```bash
 cd /home/jeong/zeno/owac/repo
-git worktree add -b feat/raw-schema ../worktrees/raw-schema main
-cd ../worktrees/raw-schema
+git worktree add -b codex/f01-mechanism ../worktrees/f01-mechanism owac-dev-v0.1.0
+cd ../worktrees/f01-mechanism
 uv sync --locked
 make check
+uv run --locked pytest
 ```
 
-各 worktree 有独立的 `.venv`、配置和输出目录；共享 Git 历史。大型数据通过配置引用统一存储，避免重复复制。用 `git worktree list` 检查已有 checkout，清理时先保存所需代码、未跟踪文件和被忽略的实验产物，再用 `git worktree remove`；不要直接删除仍有工作的目录。
+各 worktree 有独立的 `.venv`、配置和输出目录；共享 Git 历史。候选记录其基线标签与 SHA；公共修复经共享分支验证、合入 `main` 后另建版本标签，候选显式合并需要的更新并记录，不移动旧标签。大型数据通过配置引用统一存储，避免重复复制。用 `git worktree list` 检查已有 checkout，清理时先保存所需代码、未跟踪文件和被忽略的实验产物，再用 `git worktree remove`；不要直接删除仍有工作的目录。
 
 路径约束同样适用于 agent 和工具创建的 worktree；若某工具不能指定本工作空间内的位置，使用支持显式路径的 Git 命令。不要在 `/home/jeong/zeno/` 下平铺新的 OWAC checkout。
 
