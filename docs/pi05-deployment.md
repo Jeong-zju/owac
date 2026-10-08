@@ -102,6 +102,8 @@ uv run --locked --project configs/backends/pi05-runtime python -m owac.backends.
 
 ## 当前验收记录
 
+代码版本、完整复现条件、实测资源和失败记录见 [部署验证记录](../research/experiments/2026-10-08_pi05_deployment.md)。
+
 - 独立 runtime 安装完成，固定 Transformers 补丁和 RTX 5090 上 CUDA 矩阵运算通过。
 - 官方权重转换完成；推理输出 `[15, 8]`，有限值及固定输入/噪声的 3 次重复性检查通过。
 - 同步 `policy.infer` 调用为 125.84、120.64、128.87 ms；单次预热 533.21 ms；PyTorch 分配/保留显存峰值约 7.12 / 7.24 GiB。结果保存在 `outputs/pi05-smoke/report.json`。
