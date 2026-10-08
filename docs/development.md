@@ -17,22 +17,22 @@ uv run --locked python -c "import owac; print(owac.__file__)"
 
 新增依赖时修改 `pyproject.toml`，执行 `uv lock`、`uv sync --locked` 并审查锁文件。当前不需要 GPU、数据集或硬件驱动。
 
-有实际测试后使用 `uv run --locked pytest`，或运行受影响的具体测试。当前没有测试用例，直接调用 pytest 会报告无测试；不可把这一状态报告为测试通过。硬件/GPU 测试通过对应 marker 标注，同时在运行前显式检查资源和执行条件，marker 本身不会禁止运行。
+使用 `uv run --locked pytest`，或运行受影响的具体测试。当前核心环境有部署补丁隔离测试；π0.5 模型部署和 GPU 推理在独立 runtime 中显式运行，见[部署说明](pi05-deployment.md)。硬件/GPU 测试通过对应 marker 标注，同时在运行前显式检查资源和执行条件，marker 本身不会禁止运行。
 
 ## 工作流
 
 1. 阅读根目录 `AGENTS.md`、当前状态及任务相关研究卡；检查工作树变更。
 2. 新候选复制研究卡模板，新实验复制实验模板到 `research/experiments/`；先写可证伪问题和比较条件。
-3. 先完成 [B0 共有开发基线](decisions/0002-common-development-baseline.md)，再从冻结标签创建 F01—F12 首批开发分支。日常功能默认使用 `codex/<short-name>`；后续子任务可继续本家族已有分支。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
+3. 先按 [π0.5 后端优先部署决议](decisions/0003-pi05-backend-first.md)建立实际后端与首版 RAW/特征接口，再从冻结标签创建 F01—F12 首批开发分支。日常功能默认使用 `codex/<short-name>`；后续子任务可继续本家族已有分支。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
 4. 逻辑放在 `src/owac/`，运行参数放在 `configs/`，命令入口放在 `scripts/`。输出路径由配置控制，避免硬编码个人目录。
 5. 运行有意义的检查，记录命令和结果；更新受影响的研究卡与 `docs/status.md`。
 6. 审查 `git diff --check`、`git diff` 及暂存内容后提交。提交消息建议 `type(scope): summary`。
 
 ## 创建与管理 worktree
 
-先在 `codex/b0-common-baseline` 建设分支完成共有工具与验收。B0 合入本地 `main` 后，以注释标签 `owac-dev-v0.1.0` 固定起点并记录 SHA；标签当前尚未创建。各候选首批分支使用该固定标签，避免开始日期不同导致公共代码不同。
+当前在 `codex/pi05-backend` 分支部署后端。π0.5 部署与首版 RAW/特征接口验收后合入本地 `main`，以注释标签 `owac-dev-v0.1.0` 固定起点并记录 SHA；标签当前尚未创建。各候选首批分支使用该固定标签，避免开始日期不同导致公共代码不同。已失效的 0002 通用 B0 清单不再作为前置要求。
 
-以下命令仅在 B0 冻结后执行，创建候选分支和对应 checkout：
+以下命令仅在共有起点冻结后执行，创建候选分支和对应 checkout：
 
 ```bash
 cd /home/jeong/zeno/owac/repo

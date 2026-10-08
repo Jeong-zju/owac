@@ -1,6 +1,6 @@
 # OWAC
 
-OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。当前处于仓库初始化阶段：提供开发骨架、研究规则与记录模板，尚无已实现或验证的新架构。
+OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。当前优先部署 π0.5 PyTorch 后端，为网络搭建与具身 RAW 验证建立实际起点；候选框架尚未实现或验证。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
@@ -11,13 +11,14 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 - [当前 research roadmap v4](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
-- [共有开发基线 B0](docs/decisions/0002-common-development-baseline.md)：正式研究前的建设范围、验收条件与 F01—F12 共同分支起点。
+- [π0.5 后端优先部署决议](docs/decisions/0003-pi05-backend-first.md)：用户分工、当前建设顺序与 F01—F12 共同分支起点。
+- [π0.5 本地部署](docs/pi05-deployment.md)：独立 PyTorch 环境、权重转换、离线推理与 RAW 接入审计。
 - [开发说明](docs/development.md)、[架构边界](docs/architecture.md)：环境、目录职责和待验证的接口约定。
 - [候选索引与研究模板](research/README.md)：F01—F12 种子卡、实验和评审记录。
 
 ## 本地开始
 
-需要 Python 3.11+、Git、uv 和 Make。仓库使用轻量 Python 包作为共享工程入口；具体候选可以采用不同计算形式，当前没有深度学习或硬件运行依赖。
+核心开发环境需要 Python 3.11+、Git、uv 和 Make。仓库使用轻量 Python 包作为共享工程入口；具体候选可以采用不同计算形式。π0.5 使用独立的 Python 3.11 / CUDA 12.8 环境，安装与运行步骤见[部署说明](docs/pi05-deployment.md)。
 
 ```bash
 cd /home/jeong/zeno/owac/repo
@@ -26,7 +27,7 @@ make check
 uv run --locked python -c "import owac; print(owac.__file__)"
 ```
 
-`make check` 检查格式、静态问题和源码语法。当前没有算法实现和业务测试，这些检查不代表研究假设已得到验证。后续测试放入 `tests/`。
+`make check` 检查格式、静态问题和源码语法；`uv run --locked pytest` 运行部署补丁边界测试。π0.5 的 GPU 与推理检查在独立 runtime 中显式执行。这些检查不代表候选研究假设已得到验证。
 
 ## 工作空间与仓库目录
 

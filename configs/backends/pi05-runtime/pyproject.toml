@@ -1,0 +1,29 @@
+[project]
+name = "owac-pi05-runtime"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "owac",
+    "openpi",
+    "openpi-client",
+    "lerobot",
+    "torch==2.7.1+cu128",
+    "torchvision==0.22.1+cu128",
+]
+
+[tool.uv]
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+override-dependencies = ["jax==0.5.3", "ml-dtypes==0.4.1", "tensorstore==0.1.74"]
+
+[tool.uv.sources]
+owac = { path = "../../..", editable = true }
+openpi = { path = "../../../third_party/openpi", editable = true }
+openpi-client = { path = "../../../third_party/openpi/packages/openpi-client", editable = true }
+lerobot = { path = "../../../third_party/lerobot" }
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
