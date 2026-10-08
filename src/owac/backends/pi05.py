@@ -232,7 +232,7 @@ def smoke(checkpoint: Path, output: Path, seed: int, repeats: int) -> dict:
             status="passed",
             action_shape=list(reference.shape),
             finite_actions=True,
-            fixed_input_repeatability="passed",
+            fixed_input_repeatability="passed" if repeats > 1 else "not_tested",
             synchronized_policy_ms=durations,
             sample_p50_ms=float(np.percentile(durations, 50)),
             sample_p95_ms=float(np.percentile(durations, 95)),
