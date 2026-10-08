@@ -1,6 +1,6 @@
 # OWAC 本地开发
 
-所有开发从本仓库及其版本历史出发。主 checkout 为 `/home/jeong/zeno/owac/repo/`；工作空间父目录只容纳主仓库、入口指引与 `worktrees/`。当前为本地 Git 项目；远端和发布策略留待后续任务确定。
+所有开发从本仓库及其版本历史出发。主 checkout 为 `/home/jeong/zeno/owac/repo/`；工作空间父目录只容纳主仓库、入口指引与 `worktrees/`。GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)，`origin` 地址为 `https://github.com/Jeong-zju/owac.git`，主分支为 `main`。推送和发布遵循当前任务授权。
 
 ## 环境与检查
 
