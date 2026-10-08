@@ -36,7 +36,22 @@
 | CPU 检查 | `make check` 与 8 个数值/行为测试通过 | 5 个 RAW 边界测试、3 个 π0.5 部署补丁测试 |
 | 显存/资源 | report 保存 Torch allocator 数值 | 不包含原生 RTX/PhysX，不能作为完整 GPU 峰值 |
 
-最终提交后的运行及资源数据将在下节保存。命令入口见[部署说明](../../docs/raw-sim-bench-deployment.md)。
+命令入口见[部署说明](../../docs/raw-sim-bench-deployment.md)。
+
+## 固定代码的最终验收
+
+代码提交 `66117701129eadd95c92d422a3c5a34ad3e7aabb` 后执行：
+
+```bash
+cd /home/jeong/zeno/owac/repo
+/usr/bin/time -v -o outputs/sim-bench-deploy/acceptance-final-resource.txt \
+  bash scripts/run_raw_sim_bench.sh --output outputs/raw-sim-bench/acceptance-final --steps 32 \
+  > outputs/sim-bench-deploy/acceptance-final.log 2>&1
+```
+
+进程退出 0，`report.json` 为 passed。32 帧原生 ID 48—79，量化最大误差 0 DN，每帧至少 2109 个不同 CFA 值；采集步 p50/p95 为 49.84 / 128.15 ms。完整进程墙钟 17.35 s、CPU user/system 为 31.19 / 5.12 s，`time -v` 最大 RSS 8,361,740 KiB（约 7.97 GiB）。采集 p50/p95 不含初始化，完整墙钟包含它。
+
+独立离线复核全部 32 帧：保存 RAW 与同帧 native CFA 逐值相同，各 RAW/noise/state/mask 哈希正确，饱和掩码匹配，所有保存的状态字段有限，native ID 连续且仿真间隔为 0.02 s，单调时间戳递增。代码和 runtime 配置 SHA256 与运行报告一致，外部源码清单逐文件吻合；LW/Arena 的未改 Python 文件均与固定上游 Git blob SHA 一致，改动仅为登记补丁。详见[小型结果清单](2026-10-08_lw_libero_raw_deployment.json)。原始数据、预览及 native HDR 留在 `outputs/raw-sim-bench/acceptance-final/`，没有提交大数组。
 
 ## 失败与限制
 

@@ -10,7 +10,7 @@
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。
 3. 先检查 `git status --short --branch`，保留用户和其他 agent 的未提交变更。确认任务范围后直接推进已授权的可逆开发。
 4. 多 agent 并行时明确文件所有权；共享接口变更先同步，不能覆盖或回退他人的工作。
-5. π0.5 PyTorch 后端离线部署已完成。按用户最新要求及 `docs/decisions/0004-simulation-benchmark-first.md`，当前先选择并验证仿真 benchmark、RGB 闭环与成像/数据协议，再建设 RAW/特征入口。Lightwheel-LIBERO 是调研首选，尚未通过运行验收；不得把 Isaac 生态名称当成版本兼容证据。0002 的通用 B0 方案已被用户否定，不再作为开发前置条件。机器人实物、相机和正式数据尚未选定，相关配置留空。后端、选定任务/数据协议及必要首版接入接口验收后固定 `owac-dev-v0.1.0` 标签；F01—F12 首批分支统一从该标签创建，后续子任务保留本家族已有历史。当前标签尚未创建。
+5. π0.5 PyTorch 后端离线部署已完成。按用户最新要求及 `docs/decisions/0004-simulation-benchmark-first.md`，当前先选择并验证仿真 benchmark、RGB 闭环与成像/数据协议，再建设 RAW/特征入口。Lightwheel-LIBERO 单任务及原生合成 CFA 采集已通过运行验收，见 `docs/raw-sim-bench-deployment.md`；全套协议与 VLA 闭环尚未验证。不得把 Isaac 生态名称当成版本兼容证据。0002 的通用 B0 方案已被用户否定，不再作为开发前置条件。机器人实物、相机和正式数据尚未选定，相关配置留空。后端、选定任务/数据协议及必要首版接入接口验收后固定 `owac-dev-v0.1.0` 标签；F01—F12 首批分支统一从该标签创建，后续子任务保留本家族已有历史。当前标签尚未创建。
 
 ## 研究目标与候选管理
 

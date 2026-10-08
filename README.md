@@ -12,6 +12,7 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
 - [仿真 benchmark 优先决议](docs/decisions/0004-simulation-benchmark-first.md)、[选型调研](docs/simulation-benchmark-selection.md)：最新建设顺序、首选任务套件及待验证的版本/数据条件。
+- [可运行的 RAW 仿真 benchmark](docs/raw-sim-bench-deployment.md)：Lightwheel-LIBERO 单任务、独立 runtime、原生 CFA 数据及启动命令。
 - [π0.5 后端优先部署决议](docs/decisions/0003-pi05-backend-first.md)：用户分工、已完成的后端部署及其决策来源。
 - [π0.5 本地部署](docs/pi05-deployment.md)：独立 PyTorch 环境、权重转换、离线推理与 RAW 接入审计。
 - [开发说明](docs/development.md)、[架构边界](docs/architecture.md)：环境、目录职责和待验证的接口约定。

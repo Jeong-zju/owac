@@ -1,0 +1,114 @@
+{
+  "status": "passed",
+  "seed": 0,
+  "command": [
+    "/home/jeong/zeno/owac/repo/configs/simulation/lw-libero-runtime/.venv/bin/python",
+    "/home/jeong/zeno/owac/repo/src/owac/simulation/lw_libero.py",
+    "--output",
+    "outputs/raw-sim-bench/acceptance-final",
+    "--steps",
+    "32"
+  ],
+  "code_sha": "66117701129eadd95c92d422a3c5a34ad3e7aabb",
+  "source_sha256": {
+    "src/owac/simulation/__init__.py": "0cd128947de016b184446e213644ec32298b56db521ca89d07f263ea47079fcb",
+    "src/owac/simulation/lw_libero.py": "1bbb6b398e0b8a071ff9b6c5daf7fca35ffa38c64f06b833b1f1df1de5a36a90",
+    "src/owac/simulation/raw_camera.py": "fda73832757ff43245d74e2883f955715526f15b2770c8680b1dcc1922c691ec"
+  },
+  "runtime_config_sha256": {
+    "configs/simulation/lw-libero-runtime/arena-compat.patch": "492f171950a615741a28570e5158d0e287817d226ff9d0e4641347edb70f648d",
+    "configs/simulation/lw-libero-runtime/assets.json": "718bca8caaf39b43e156417780ca12393e7fe5d17fc692d3f0e0d22bdb94144a",
+    "configs/simulation/lw-libero-runtime/isaaclab-compat.patch": "5745e31cd81fc7d95648c2a8143b2e80840ddb92e47920e34b8d6b8a1e00bbdd",
+    "configs/simulation/lw-libero-runtime/lightwheel-compat.patch": "5c12fb1611d653984186db81ce177e3e6a864e2ffcafc3e5c5c0643370ba2943",
+    "configs/simulation/lw-libero-runtime/profile.json": "2e4bd51cfa2bbd3c23c9e2f3f0e304e27de4058d51da7f1a0ba1b6e9e3cef5d0",
+    "configs/simulation/lw-libero-runtime/requirements.freeze.txt": "db94d9687412852461a3a713eae23bd7837477514c7e9d5293bac2f9e635bfa0",
+    "configs/simulation/lw-libero-runtime/sources.json": "cae515d086cecf4de73f00830bb6b1759159274b2b9f20b767e84a1c0fee110a"
+  },
+  "packages": {
+    "isaacsim": "6.1.0.0",
+    "isaaclab": "0.54.2",
+    "isaaclab-arena": "1.0.0",
+    "lightwheel-sdk": "1.0.3",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.5.1"
+  },
+  "output": "/home/jeong/zeno/owac/repo/outputs/raw-sim-bench/acceptance-final",
+  "task": "L90L5PutTheRedMugOnTheLeftPlate",
+  "scene": "libero-1-1",
+  "robot": "Panda",
+  "controller": "hold initial TCP pose, absolute differential IK, gripper open",
+  "frames": 32,
+  "simulation_time_first": 0.03999999910593033,
+  "simulation_time_last": 0.6599999852478504,
+  "task_success_predicate": false,
+  "task_policy_evaluation": false,
+  "maximum_quantization_error_dn": 0,
+  "unique_cfa_values_minimum": 2109,
+  "collection_step_ms_p50": 49.844844004837796,
+  "collection_step_ms_p95": 128.15323100185185,
+  "torch_allocated_peak_bytes": 8667648,
+  "sensor": {
+    "width": 320,
+    "height": 240,
+    "bit_depth": 24,
+    "cfa": "GRBG",
+    "response_scale": 1.0,
+    "source": "Isaac native CameraCore ISP introspection, stage 2-cfa",
+    "signal_kind": "synthetic_sensor_cfa_noiseless",
+    "container_dtype": "uint32",
+    "byte_order": "little",
+    "black_level": 0,
+    "white_level": 16777215,
+    "cfa_origin_row_col": [
+      0,
+      0
+    ],
+    "pixel_coordinates": "full frame, row and column starting at zero; no resize/crop",
+    "exposure_seconds": null,
+    "physical_sensor_gain": null,
+    "physical_camera": null,
+    "hdr_source_dtype": "float16",
+    "effective_precision": "limited by renderer FP16 HDR; not 24 physical measurement bits",
+    "bad_pixel_mask": null,
+    "missing_pixels": "none; incomplete buffers fail capture",
+    "saturation_mask": "CFA equals white_level; separately saved per frame",
+    "native_isp_program_sha256": "88fdf3295b78c9933fc5c4a112513320888984aa23d9efd69f0a1ba1f957fa09",
+    "camera_eye_xyz": [
+      3.260353708267212,
+      -3.883271503448486,
+      2.508537840843201
+    ],
+    "camera_target_xyz": [
+      2.360353708267212,
+      -1.8832715034484864,
+      0.9585378408432007
+    ],
+    "usd_focal_length": 18.0,
+    "processing": [
+      "renderer linear HDR",
+      "identity color correction",
+      "native GRBG ADC"
+    ],
+    "noise_variant": "3-noise, separate file; native default uncalibrated noise"
+  },
+  "offline_validation": {
+    "lossless_native_equality": true,
+    "file_checksums": true,
+    "saturation_masks": true,
+    "all_state_fields_finite": true,
+    "consecutive_frame_ids": true,
+    "simulation_interval_seconds": 0.02,
+    "source_and_runtime_hashes": true,
+    "upstream_unmodified_files_verified": true
+  },
+  "process_resources": {
+    "wall_seconds": 17.35,
+    "cpu_user_seconds": 31.19,
+    "cpu_system_seconds": 5.12,
+    "maximum_rss_kib": 8361740,
+    "process_exit_status": 0,
+    "complete_gpu_peak": null
+  },
+  "log_sha256": "5e21387a9fa48034a5ab3738818abde34982081d31306f7723b7bca050d7c3b9",
+  "frames_manifest_sha256": "b7c502032fa9afc803d8c36bd944b66a1287e3d0000edf20d7b16fbf1de8d27e"
+}
