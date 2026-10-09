@@ -23,20 +23,20 @@ uv run --locked python -c "import owac; print(owac.__file__)"
 
 1. 阅读根目录 `AGENTS.md`、当前状态及任务相关研究卡；检查工作树变更。
 2. 新候选复制研究卡模板，新实验复制实验模板到 `research/experiments/`；先写可证伪问题和比较条件。
-3. π0.5 后端已离线部署；按 [仿真 benchmark 优先决议](decisions/0004-simulation-benchmark-first.md)先验收任务套件、RGB 闭环与成像/数据协议，再建立 RAW/特征接口，从冻结标签创建 F01—F12 首批开发分支。日常功能默认使用 `codex/<short-name>`；后续子任务可继续本家族已有分支。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
+3. π0.5 后端已离线部署；按 [仿真 benchmark 优先决议](decisions/0004-simulation-benchmark-first.md)先验收任务套件、RGB 闭环与成像/数据协议，再建立 RAW/特征接口，从冻结标签创建 F01—F12 首批开发分支。开发分支按 `<姓名缩写>/<任务信息>` 命名；当前用户为 `lzh`，日常功能使用 `lzh/<short-name>`，任务信息采用小写字母、数字与连字符。后续子任务可继续本家族已有分支。并行开发使用同一仓库的分支/worktree，明确文件所有权；worktree 一律放在工作空间的 `worktrees/` 下。
 4. 逻辑放在 `src/owac/`，运行参数放在 `configs/`，命令入口放在 `scripts/`。输出路径由配置控制，避免硬编码个人目录。
 5. 运行有意义的检查，记录命令和结果；更新受影响的研究卡与 `docs/status.md`。
 6. 审查 `git diff --check`、`git diff` 及暂存内容后提交。提交消息建议 `type(scope): summary`。
 
 ## 创建与管理 worktree
 
-当前在 `codex/pi05-backend` 分支保存后端部署及后续选型决策。后端、选定仿真任务/数据协议及必要首版接入接口验收后合入本地 `main`，以注释标签 `owac-dev-v0.1.0` 固定起点并记录 SHA；标签当前尚未创建。各候选首批分支使用该固定标签，避免开始日期不同导致公共代码不同。已失效的 0002 通用 B0 清单不再作为前置要求。
+后端部署及选型决策保存在 `lzh/pi05-backend`，当前仿真部署与视频开发在 `lzh/raw-sim-bench`。后端、选定仿真任务/数据协议及必要首版接入接口验收后合入本地 `main`，以注释标签 `owac-dev-v0.1.0` 固定起点并记录 SHA；标签当前尚未创建。各候选首批分支使用该固定标签，避免开始日期不同导致公共代码不同。已失效的 0002 通用 B0 清单不再作为前置要求；历史实验记录保留实际运行时的旧分支名。
 
 以下命令仅在共有起点冻结后执行，创建候选分支和对应 checkout：
 
 ```bash
 cd /home/jeong/zeno/owac/repo
-git worktree add -b codex/f01-mechanism ../worktrees/f01-mechanism owac-dev-v0.1.0
+git worktree add -b lzh/f01-mechanism ../worktrees/f01-mechanism owac-dev-v0.1.0
 cd ../worktrees/f01-mechanism
 uv sync --locked
 make check
