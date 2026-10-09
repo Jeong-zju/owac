@@ -23,7 +23,7 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def build_environment(seed: int):
+def build_environment(seed: int, *, demonstration: bool = False):
     """Use original scene, placement, robot, and success code with minimal registration."""
     import gymnasium as gym
     import lw_benchhub.utils.env as lw
@@ -59,9 +59,56 @@ def build_environment(seed: int):
         enable_cameras=False,
         headless_mode=True,
         seed=seed,
+        resample_robot_placement_on_reset=not demonstration,
     )
     cfg.seed = seed
+    if demonstration:
+        # Render the entire manipulation without an automatic success/time-out reset.
+        # The original task predicate is evaluated separately on every captured frame.
+        cfg.terminations.success = None
+        cfg.terminations.time_out = None
+        cfg.episode_length_s = 30.0
+        # The source robot is floor mounted below the kitchen counter. Use a
+        # documented fixed pedestal for this manipulation demonstration.
+        cfg.scene.robot.init_state.pos = tuple(
+            float(x) + (-0.24 if i == 0 else 0.4 if i == 2 else 0.0)
+            for i, x in enumerate(cfg.scene.robot.init_state.pos)
+        )
+        cfg.scene.robot.init_state.joint_pos.update(
+            {"panda_joint2": -0.785, "panda_joint4": -1.57, "panda_joint6": 0.785}
+        )
     return gym.make(cfg.isaaclab_arena_env.name, cfg=cfg).unwrapped
+
+
+def launch_simulator():
+    """Launch the pinned native-sensor experience; imports remain explicit."""
+    os.environ["OMNI_KIT_ACCEPT_EULA"] = "YES"
+    os.environ["PYNPUT_BACKEND"] = "dummy"
+    os.environ["OWAC_NO_TELEOP"] = "1"
+    os.environ["OWAC_FRANKA_ONLY"] = "1"
+    from isaaclab.app import AppLauncher
+
+    launcher = AppLauncher(
+        headless=True,
+        enable_cameras=True,
+        device="cuda:0",
+        experience=str(
+            importlib.metadata.distribution("isaacsim-app").locate_file(
+                "isaacsim/apps/isaacsim.exp.base.python.kit"
+            )
+        ),
+        kit_args=(
+            "--/rtx/spg/enabled=true --/rtx/hydra/supportMultiTickRate=true "
+            "--/rtx/rendering/perSensorTickTlas=true"
+        ),
+    )
+    import carb.settings
+
+    settings = carb.settings.get_settings()
+    asset_root = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1"
+    for name in ("default", "cloud", "nvidia"):
+        settings.set(f"/persistent/isaac/asset_root/{name}", asset_root)
+    return launcher
 
 
 def collect(env, output: Path, steps: int) -> dict:
@@ -228,33 +275,10 @@ def main():
     (output / "git-status.txt").write_bytes(
         subprocess.check_output(["git", "status", "--short"], cwd=root)
     )
-    from isaaclab.app import AppLauncher
-
-    launcher = AppLauncher(
-        headless=True,
-        enable_cameras=True,
-        device="cuda:0",
-        experience=str(
-            importlib.metadata.distribution("isaacsim-app").locate_file(
-                "isaacsim/apps/isaacsim.exp.base.python.kit"
-            )
-        ),
-        kit_args=(
-            "--/rtx/spg/enabled=true --/rtx/hydra/supportMultiTickRate=true "
-            "--/rtx/rendering/perSensorTickTlas=true"
-        ),
-    )
+    launcher = launch_simulator()
     env = None
     exit_code = 0
     try:
-        import carb.settings
-
-        settings = carb.settings.get_settings()
-        asset_root = (
-            "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1"
-        )
-        for name in ("default", "cloud", "nvidia"):
-            settings.set(f"/persistent/isaac/asset_root/{name}", asset_root)
         env = build_environment(args.seed)
         report.update(collect(env, output, args.steps))
         report["status"] = "passed"

@@ -18,6 +18,30 @@ bash scripts/run_raw_sim_bench.sh --steps 64 --seed 0 \
 
 默认控制保持 reset 后 TCP 位姿、张开夹爪。每个控制步包含两个 10 ms 物理步；额外渲染不推进物理。上限 300 步，避免越过原任务的 8 秒 episode。`build_environment()` 保留原有 Gym 环境、绝对位姿差分 IK、任务语言和成功判据，可用于后续控制器接入。
 
+## 完整任务 RAW / RGB 对比视频
+
+```bash
+cd /home/jeong/zeno/owac/repo
+bash scripts/render_raw_task_video.sh --output outputs/task-video/my-task-video
+```
+
+该入口连续执行接近、夹持、抬升、移动、放置、松手、退开和最终稳定，输出 `raw-rgb-comparison.mp4`。成功必须出现 `TASK_VIDEO_PASSED`；检查实际抬升超过 10 cm、原任务成功判据为真，以及杯体相对于盘的位置和高度。没有对物体写入瞬移位姿。一次视频是一次物理 episode，不能由视频帧数计算策略成功率。
+
+这是**使用物体真值的脚本演示**。为使源场景中原本较低的 Panda 安装位置可达台面，演示模式加 40 cm 固定底座，基座 x 偏移 −24 cm，并调整三个初始关节位置；关闭机器人重采样及成功/超时自动 reset。任务物体初始布局和原成功函数沿用上游。它不是原配置下的官方 benchmark 分数，也不是 π0.5 策略结果；默认 `run_raw_sim_bench.sh` 仍使用原配置。
+
+对比相机为 640×480；控制 50 Hz，每两个控制步采一帧，视频 25 fps、1280×768。录制时两次额外渲染均不推进物理，RAW 和 RGB 对应同一静止的物理状态；未标定内部曝光时钟或实际硬件同步。左侧 RGB 来自独立 annotator，右侧使用原生 `3-noise` CFA 进行**仅供显示**的固定映射：
+
+```text
+L = log1p(15 × clip(DN / 16777215, 0, 1)) / log(16)
+显示值 = round(255 × L)
+```
+
+主画面保留单通道采样结构，以灰度查看；下方在同一杯体区域放大 4 倍，用 GRBG 格点颜色标记原生通道，不插值、不去马赛克，也不逐帧自动调亮。RAW 是合成传感器测量，默认噪声未经真实相机标定；预览转换和 H.264 编码只作用于视频副本。
+
+原始 `frames/*.raw.npy` / `*.noise.npy` 仍是全分辨率 uint32 无损数据；RGB 逐帧保存为 PNG。`*.state.npz` 保存本体/物体/动作及饱和掩码，`frames.jsonl` 保存时刻、阶段、成功判据、native ID、原始 ROI 坐标和各文件 SHA256。`native/` 保留所采帧的 FP16 HDR、CFA 和 noise，删除未选中的预热帧及下游 ISP 调试缓冲。`source/` 保留运行源码快照；`report.json` 登记改动、显示公式、源码哈希及版本。视频编码需要 `ffmpeg`，中文字体使用本机 Noto Sans CJK。
+
+本轮运行结果与失败诊断见[视频实验记录](../research/experiments/2026-10-09_raw_rgb_task_video.md)。
+
 ## RAW 数据
 
 主数据来自 NVIDIA CameraCore 的 **线性 HDR → 原生 CFA ADC**，在去马赛克与 ISP 前读取 `2-cfa*.bin`，不是 RGB8 逆处理。配置为 320×240、GRBG、24 位 ADC 编码、uint32 无损存储，黑/白电平 0 / 16777215。HDR 来源是 FP16；整数容器位数不意味着 24 位独立物理测量精度。

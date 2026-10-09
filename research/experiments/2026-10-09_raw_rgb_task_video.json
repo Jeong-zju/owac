@@ -1,0 +1,420 @@
+{
+  "experiment_id": "lw-libero-raw-rgb-task-video-20261009",
+  "date_timezone": "2026-10-09 Asia/Shanghai",
+  "recording": {
+    "status": "passed",
+    "task": "L90L5PutTheRedMugOnTheLeftPlate",
+    "seed": 0,
+    "controller": "scripted privileged-state pose controller; no learned policy",
+    "demonstration_changes": {
+      "fixed_pedestal_height_m": 0.4,
+      "base_x_offset_m": -0.24,
+      "initial_joint_pos": {
+        "panda_joint2": -0.785,
+        "panda_joint4": -1.57,
+        "panda_joint6": 0.785
+      },
+      "robot_resampling": false,
+      "automatic_success_timeout_reset": false
+    },
+    "display_transform": {
+      "source": "native noisy CFA, stage 3-noise",
+      "black": 0,
+      "white": 16777215,
+      "mapping": "log1p(15*clip(DN/white,0,1))/log(16)",
+      "video_only_uint8_conversion": true,
+      "per_frame_auto_scale": false,
+      "demosaicing": false,
+      "zoom": "nearest neighbor; GRBG site colors only"
+    },
+    "code_sha": "a53967420320faca768ea974a6453f2d0c31e7c1",
+    "source_sha256": {
+      "src/owac/simulation/__init__.py": "0cd128947de016b184446e213644ec32298b56db521ca89d07f263ea47079fcb",
+      "src/owac/simulation/lw_libero.py": "31130108ab7b7bfd7d1efd284d602e66610b6b33be2b5301cd0ec2c0ef1b9265",
+      "src/owac/simulation/raw_camera.py": "fda73832757ff43245d74e2883f955715526f15b2770c8680b1dcc1922c691ec",
+      "src/owac/simulation/raw_preview.py": "1a5a43ddb0ac8c1c4f41f1cf7faa4e37f29cf9d652472e13d25013f040ba84d2",
+      "src/owac/simulation/task_video.py": "18dc641196b26953652c68abba34c78d5c769902ace841a7fc7a643bebab7b14"
+    },
+    "packages": {
+      "isaacsim": "6.1.0.0",
+      "isaaclab": "0.54.2",
+      "torch": "2.11.0+cu128",
+      "numpy": "2.5.1",
+      "pillow": "12.3.0"
+    },
+    "command": [
+      "/home/jeong/zeno/owac/repo/configs/simulation/lw-libero-runtime/.venv/bin/python",
+      "/home/jeong/zeno/owac/repo/src/owac/simulation/task_video.py",
+      "--output",
+      "outputs/task-video/full-task-04"
+    ],
+    "output": "/home/jeong/zeno/owac/repo/outputs/task-video/full-task-04",
+    "runtime_manifest_sha256": "cae515d086cecf4de73f00830bb6b1759159274b2b9f20b767e84a1c0fee110a",
+    "task_success": true,
+    "physical_lift_m": 0.1674695611000061,
+    "final_cup_plate_xy_distance_m": 0.0002785212709568441,
+    "final_cup_plate_root_height_m": 0.051725029945373535,
+    "frames": 515,
+    "video_fps": 25,
+    "video_duration_seconds": 20.6,
+    "phases": [
+      {
+        "phase": "初始化与稳定",
+        "first_frame": 0,
+        "last_frame": 39,
+        "tcp_position": [
+          2.47819447517395,
+          -1.7173343896865845,
+          1.1307886838912964
+        ],
+        "goal_position": [
+          2.478208541870117,
+          -1.717329740524292,
+          1.1307977437973022
+        ],
+        "tracking_error_m": 1.7365729945595376e-05,
+        "cup_position": [
+          2.2999792098999023,
+          -2.192092180252075,
+          0.8062226176261902
+        ],
+        "gripper_joints": [
+          0.04000000283122063,
+          0.04000000283122063
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "接近红杯",
+        "first_frame": 40,
+        "last_frame": 99,
+        "tcp_position": [
+          2.314998149871826,
+          -2.1879611015319824,
+          0.9923723936080933
+        ],
+        "goal_position": [
+          2.313960313796997,
+          -2.1913654804229736,
+          0.9962226176261901
+        ],
+        "tracking_error_m": 0.00524319791169218,
+        "cup_position": [
+          2.2999792098999023,
+          -2.1920924186706543,
+          0.8062226176261902
+        ],
+        "gripper_joints": [
+          0.03999989852309227,
+          0.03999999910593033
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "下降对准",
+        "first_frame": 100,
+        "last_frame": 149,
+        "tcp_position": [
+          2.3159265518188477,
+          -2.1902549266815186,
+          0.8220045566558838
+        ],
+        "goal_position": [
+          2.313960313796997,
+          -2.1913654804229736,
+          0.8062226176261902
+        ],
+        "tracking_error_m": 0.015942679718136787,
+        "cup_position": [
+          2.3001699447631836,
+          -2.1913557052612305,
+          0.8063175678253174
+        ],
+        "gripper_joints": [
+          0.04000000283122063,
+          0.039999786764383316
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "闭合夹爪",
+        "first_frame": 150,
+        "last_frame": 194,
+        "tcp_position": [
+          2.3161909580230713,
+          -2.1892356872558594,
+          0.822206437587738
+        ],
+        "goal_position": [
+          2.313960313796997,
+          -2.1913654804229736,
+          0.8062226176261902
+        ],
+        "tracking_error_m": 0.016278645023703575,
+        "cup_position": [
+          2.300455093383789,
+          -2.1900579929351807,
+          0.8062665462493896
+        ],
+        "gripper_joints": [
+          0.02775106579065323,
+          0.03003913164138794
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "抬升红杯",
+        "first_frame": 195,
+        "last_frame": 249,
+        "tcp_position": [
+          2.3151001930236816,
+          -2.1894357204437256,
+          0.9897345304489136
+        ],
+        "goal_position": [
+          2.313960313796997,
+          -2.1913654804229736,
+          0.9962226176261901
+        ],
+        "tracking_error_m": 0.006864297010537563,
+        "cup_position": [
+          2.299530267715454,
+          -2.190565824508667,
+          0.9736921787261963
+        ],
+        "gripper_joints": [
+          0.028440671041607857,
+          0.02963053621351719
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "移动至左盘",
+        "first_frame": 250,
+        "last_frame": 319,
+        "tcp_position": [
+          2.661100387573242,
+          -2.1968026161193848,
+          0.9764424562454224
+        ],
+        "goal_position": [
+          2.6662566661834717,
+          -2.214827537536621,
+          0.9962226176261901
+        ],
+        "tracking_error_m": 0.027253252749957605,
+        "cup_position": [
+          2.645507574081421,
+          -2.1979830265045166,
+          0.9604323506355286
+        ],
+        "gripper_joints": [
+          0.02847115695476532,
+          0.029588663950562477
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "下降放置",
+        "first_frame": 320,
+        "last_frame": 369,
+        "tcp_position": [
+          2.6669888496398926,
+          -2.215481758117676,
+          0.8393754959106445
+        ],
+        "goal_position": [
+          2.6662566661834717,
+          -2.214827537536621,
+          0.8423047065734863
+        ],
+        "tracking_error_m": 0.0030893967517685497,
+        "cup_position": [
+          2.6513798236846924,
+          -2.2166056632995605,
+          0.8233785033226013
+        ],
+        "gripper_joints": [
+          0.028460852801799774,
+          0.02960689179599285
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "松开夹爪",
+        "first_frame": 370,
+        "last_frame": 409,
+        "tcp_position": [
+          2.6662566661834717,
+          -2.2148244380950928,
+          0.8423019051551819
+        ],
+        "goal_position": [
+          2.6662566661834717,
+          -2.214827537536621,
+          0.8423047065734863
+        ],
+        "tracking_error_m": 4.177856185168041e-06,
+        "cup_position": [
+          2.6523549556732178,
+          -2.216097116470337,
+          0.8151291608810425
+        ],
+        "gripper_joints": [
+          0.03999992460012436,
+          0.03999978303909302
+        ],
+        "original_task_success": false
+      },
+      {
+        "phase": "机械臂退开",
+        "first_frame": 410,
+        "last_frame": 464,
+        "tcp_position": [
+          2.6391987800598145,
+          -2.1236047744750977,
+          1.0865017175674438
+        ],
+        "goal_position": [
+          2.6662566661834717,
+          -2.214827537536621,
+          1.0962226176261902
+        ],
+        "tracking_error_m": 0.09564631514079244,
+        "cup_position": [
+          2.6522867679595947,
+          -2.215829610824585,
+          0.8151296973228455
+        ],
+        "gripper_joints": [
+          0.04000663012266159,
+          0.03993307799100876
+        ],
+        "original_task_success": true
+      },
+      {
+        "phase": "任务完成与稳定",
+        "first_frame": 465,
+        "last_frame": 514,
+        "tcp_position": [
+          2.639190435409546,
+          -2.1235830783843994,
+          1.0864768028259277
+        ],
+        "goal_position": [
+          2.6391987800598145,
+          -2.1236047744750977,
+          1.0865017175674438
+        ],
+        "tracking_error_m": 3.4074884752044454e-05,
+        "cup_position": [
+          2.6522865295410156,
+          -2.215829372406006,
+          0.8151297569274902
+        ],
+        "gripper_joints": [
+          0.03999985754489899,
+          0.03999999910593033
+        ],
+        "original_task_success": true
+      }
+    ],
+    "maximum_cfa_quantization_error_dn": 0,
+    "last_25_frame_successes": 25,
+    "sensor": {
+      "width": 640,
+      "height": 480,
+      "bit_depth": 24,
+      "cfa": "GRBG",
+      "response_scale": 1.0,
+      "source": "Isaac native CameraCore ISP introspection, stage 2-cfa",
+      "signal_kind": "synthetic_sensor_cfa_noiseless",
+      "container_dtype": "uint32",
+      "byte_order": "little",
+      "black_level": 0,
+      "white_level": 16777215,
+      "cfa_origin_row_col": [
+        0,
+        0
+      ],
+      "pixel_coordinates": "full frame, row and column starting at zero; no resize/crop",
+      "exposure_seconds": null,
+      "physical_sensor_gain": null,
+      "physical_camera": null,
+      "hdr_source_dtype": "float16",
+      "effective_precision": "limited by renderer FP16 HDR; not 24 physical measurement bits",
+      "bad_pixel_mask": null,
+      "missing_pixels": "none; incomplete buffers fail capture",
+      "saturation_mask": "CFA equals white_level; separately saved per frame",
+      "native_isp_program_sha256": "88fdf3295b78c9933fc5c4a112513320888984aa23d9efd69f0a1ba1f957fa09",
+      "camera_eye_xyz": [
+        3.5936787128448486,
+        -3.208061933517456,
+        1.8010005354881287
+      ],
+      "camera_target_xyz": [
+        2.3436787128448486,
+        -2.008061933517456,
+        0.9510005354881287
+      ],
+      "usd_focal_length": 18.0,
+      "processing": [
+        "renderer linear HDR",
+        "identity color correction",
+        "native GRBG ADC"
+      ],
+      "noise_variant": "3-noise, separate file; native default uncalibrated noise"
+    },
+    "video_sha256": "71747141bee58a5489f5acfd3f3d5a55f937435916dc024d5735ca5aa8ab7428"
+  },
+  "offline_audit": {
+    "status": "passed",
+    "frames": 515,
+    "physical_timestamps": "strict 40 ms intervals",
+    "first_simulation_time_seconds": 0.05999999865889549,
+    "last_simulation_time_seconds": 20.619999539107084,
+    "minimum_interval_seconds": 0.03999999910593033,
+    "maximum_interval_seconds": 0.03999999910593033,
+    "maximum_quantization_error_dn": 0,
+    "native_noise_maximum_dn": 16808975,
+    "native_noise_above_white_pixels_total": 454,
+    "native_noise_above_white_pixels_maximum_per_frame": 4,
+    "native_cfa_noise_equal_saved_arrays": true,
+    "all_array_png_state_sha256_verified": true,
+    "all_states_finite": true,
+    "saturation_masks_match": true,
+    "last_25_successes": 25,
+    "source_snapshots_and_current_sources_match": true,
+    "video_sha256": "71747141bee58a5489f5acfd3f3d5a55f937435916dc024d5735ca5aa8ab7428",
+    "ffprobe": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 768,
+      "r_frame_rate": "25/1",
+      "duration": "20.600000",
+      "nb_read_frames": "515"
+    },
+    "output_storage_bytes": 4095694926
+  },
+  "resource": {
+    "wall_seconds": 122.02,
+    "cpu_user_seconds": 155.01,
+    "cpu_system_seconds": 21.21,
+    "maximum_rss_kib": 8304640,
+    "gpu_memory_peak": null,
+    "measurement": "/usr/bin/time -v"
+  },
+  "default_configuration_regression": {
+    "status": "passed",
+    "frames": 4,
+    "maximum_quantization_error_dn": 0,
+    "output": "/home/jeong/zeno/owac/repo/outputs/raw-sim-bench/video-regression"
+  },
+  "evidence_sha256": {
+    "outputs/task-video/full-task-04/report.json": "3f9d893901aefa92c770d4bce285d9ec73132ab629b8772f4911423861b721ad",
+    "outputs/task-video/full-task-04/audit.json": "4fec73311d2bdea1602ebcb22733d929c23b6c7ab1728bc5cc359445b6c48859",
+    "outputs/task-video/full-task-04-resource.txt": "aaccab387e69909ce7c0b02fce8eb00fd8a45572ce9da834a7275ad2c26426c4",
+    "outputs/task-video/audit_video.py": "b956f90e42ee2a0b8c4cc7bc2f3dac0b67d606118da916856c7b3aef1cdcd832"
+  },
+  "scope": "one scripted privileged-state physical simulation demonstration with disclosed mounting changes; no learned policy evaluation"
+}

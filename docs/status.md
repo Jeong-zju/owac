@@ -72,3 +72,9 @@
 - [ ] 建立最近机制基线以及 C0—C4 的系统比较配置和评测协议。
 
 主后端已选择 π0.5，网络开发采用 PyTorch。相机、机器人接入、正式数据、训练/后端适配容量及第二后端尚未确定；RSS 证据分支及其冻结版本待实际证据形成后建立。
+
+## 完整任务对比视频（2026-10-09）
+
+已连续录制单任务真实物理抓取、抬升、搬运、放置和退开，成片 20.6 s / 515 帧 / 25 fps。红杯抬升 16.75 cm，最终杯盘 XY 距离约 0.28 mm，最后 25 帧原任务判据均通过。逐帧原生 CFA/noise、RGB PNG、本体/物体/动作状态和哈希保存完整；同帧 HDR → CFA 最大量化误差 0 DN，时间间隔 40 ms 与无损数组检查通过。`make check`、10 项 CPU 测试及原默认配置 4 步 GPU 回归通过。
+
+入口为 `bash scripts/render_raw_task_video.sh --output outputs/task-video/<新目录>`。视频左侧 RGB，右侧固定 log 映射的 CFA 灰度与 GRBG 格点放大；原始 uint32 不受显示或视频压缩影响。演示使用当前物体真值控制，并明确加固定底座及调整机器人安装位置；不作为官方原配置分数或 π0.5 闭环结果。原入口仍保持原配置。详见[部署说明](raw-sim-bench-deployment.md)与[实验记录](../research/experiments/2026-10-09_raw_rgb_task_video.md)；大产物在 `outputs/task-video/full-task-04/`。正式基线标签仍未冻结。
