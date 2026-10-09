@@ -21,7 +21,7 @@
   </header>
   <div class="refresh-row">
     <span>最近云端检查 <strong id="checked-time" class="numbers">—</strong> <span id="check-age"></span> · 北京时间</span>
-    <div class="refresh-actions"><span>云端每小时检查</span><label><input type="checkbox" id="auto-refresh" checked>页面每分钟刷新</label><button id="refresh-button" type="button">刷新页面</button></div>
+    <div class="refresh-actions"><span id="monitor-frequency">云端每小时检查</span><label><input type="checkbox" id="auto-refresh" checked>页面每分钟刷新</label><button id="refresh-button" type="button">刷新页面</button></div>
   </div>
   <div id="alert" class="banner" role="status"></div>
   <nav class="stages" aria-label="实验阶段">
@@ -72,9 +72,9 @@
       <div class="test-key"><span><i class="key-dot"></i>待运行</span><span><i class="key-dot success"></i>成功</span><span><i class="key-dot failed"></i>失败</span><span><i class="key-dot error"></i>动作异常</span></div>
     </section>
     <section class="panel">
-      <div class="panel-header"><h2>最近检查记录</h2><span class="hint subtle">每小时一次</span></div>
+      <div class="panel-header"><h2>最近检查记录</h2><span class="hint subtle" id="history-frequency">每小时一次</span></div>
       <div id="check-history" class="checks"></div>
-      <p class="hint subtle" style="margin-top:10px">每次检查同步数字与曲线。页面刷新只读取本地快照，不触发云端训练或下载权重。</p>
+      <p class="hint subtle" id="history-note" style="margin-top:10px">每次检查同步数字与曲线。页面刷新只读取本地快照，不触发云端训练或下载权重。</p>
     </section>
   </div>
   <footer class="footer"><div class="footer-links"><a id="experiment-link">实验说明</a><a id="dataset-link">采集数字清单</a><a id="training-link">训练数值报告</a></div><span>工程单任务 · 检查点保留在云端</span></footer>
@@ -90,6 +90,8 @@
   const mse = value => value == null ? '未测量' : Number(value).toFixed(4);
   const clock = (value, full=false) => value ? new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',month:full?'2-digit':undefined,day:full?'2-digit':undefined,hour:'2-digit',minute:'2-digit',second:full?'2-digit':undefined,hour12:false}) : '尚未记录';
   const status = d.status.status;
+  const automaticChecks = d.automatic_checks_enabled !== false;
+  if(!automaticChecks){set('monitor-frequency','自动检查已关闭');set('history-frequency','手动同步');set('history-note','每小时检查任务已删除。此页保留最近一次手动同步的数字；刷新页面不会同步云端结果。');document.getElementById('auto-refresh').checked=false;}
   set('status-text',d.check_error?'检查异常':status==='failed'?'运行异常':status==='complete'?'已完成':stageNames[d.stage]+'中');
   if(d.check_error) document.getElementById('status-badge').classList.add('warning');
   if(status==='failed') document.getElementById('status-badge').classList.add('danger');
@@ -100,7 +102,7 @@
   set('collect-stage-note',stats.train.episodes+' / '+(d.protocol.train_episodes||90)+' 训练 · '+stats.validation.episodes+' / '+(d.protocol.validation_episodes||10)+' 开发');
   set('train-stage-note',d.step?fmt(d.step)+' 步'+(t.status==='complete'?' · 已停止':' · 进行中'):'等待开始');
   set('evaluate-stage-note',d.episodes.length?d.episodes.length+' / 100 已运行':'等待选模');
-  set('archive-stage-note',status==='complete'?'数字结果已回写':'检查点不下载 · 数字持续备份');
+  set('archive-stage-note',status==='complete'?'数字结果已回写':automaticChecks?'检查点不下载 · 数字持续备份':'自动检查已关闭 · 当前快照已保存');
   set('step-value',fmt(d.step));
   set('step-note','最少 '+fmt(r.minimum_steps||10000)+' 步 · 首轮上限 '+fmt(r.maximum_steps||30000));
   set('best-value',mse(t.best_validation_loss));
@@ -169,7 +171,7 @@
   document.getElementById('linear-scale').onclick=()=>{logarithmic=false;document.getElementById('linear-scale').setAttribute('aria-pressed','true');document.getElementById('log-scale').setAttribute('aria-pressed','false');drawChart();};
   drawChart();window.addEventListener('resize',drawChart);
   const alert=document.getElementById('alert');
-  function age(){const minutes=d.checked_at?Math.max(0,(Date.now()-Date.parse(d.checked_at))/60000):null;set('check-age',minutes==null?'':`（${Math.floor(minutes)} 分钟前）`);if(d.check_error){alert.style.display='block';alert.textContent='最近一次云端检查失败：'+d.check_error+'。数字保留自上次成功同步，云端运行状态待核实。';}else if(status==='failed'){alert.style.display='block';alert.classList.add('error');alert.textContent='最近检查发现运行异常：'+(d.status.error||'请查看实验记录');}else if(minutes>90&&status!=='complete'){alert.style.display='block';alert.textContent='本地快照已超过 90 分钟未更新。这里显示上次检查的数字，不表示云端任务已经停止。';}else{alert.style.display='none';}}
+  function age(){const minutes=d.checked_at?Math.max(0,(Date.now()-Date.parse(d.checked_at))/60000):null;set('check-age',minutes==null?'':`（${Math.floor(minutes)} 分钟前）`);if(d.check_error){alert.style.display='block';alert.textContent='最近一次云端检查失败：'+d.check_error+'。数字保留自上次成功同步，云端运行状态待核实。';}else if(status==='failed'){alert.style.display='block';alert.classList.add('error');alert.textContent='最近检查发现运行异常：'+(d.status.error||'请查看实验记录');}else if(!automaticChecks&&status!=='complete'){alert.style.display='block';alert.textContent='自动检查已关闭。本页是最近一次手动同步的快照；云端测试的后续结果需要再次同步。';}else if(minutes>90&&status!=='complete'){alert.style.display='block';alert.textContent='本地快照已超过 90 分钟未更新。这里显示上次检查的数字，不表示云端任务已经停止。';}else{alert.style.display='none';}}
   age();setInterval(age,10000);
   document.getElementById('refresh-button').onclick=()=>location.reload();
   setInterval(()=>{if(document.getElementById('auto-refresh').checked&&!document.hidden)location.reload();},60000);

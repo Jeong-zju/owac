@@ -68,6 +68,32 @@
       "/workspace/owac/runs/pi05-lw-mug-v1/data",
       "--output",
       "/workspace/owac/runs/pi05-lw-mug-v1/trained"
+    ],
+    [
+      "/workspace/owac/repo/configs/backends/pi05-runtime/.venv/bin/python",
+      "-u",
+      "-m",
+      "owac.training.pi05_sim",
+      "serve",
+      "--protocol",
+      "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+      "--weights",
+      "/workspace/owac/runs/pi05-lw-mug-v1/trained",
+      "--port",
+      "18080"
+    ],
+    [
+      "/workspace/owac/repo/configs/simulation/lw-libero-runtime/.venv/bin/python",
+      "-u",
+      "-m",
+      "owac.simulation.pi05_benchmark",
+      "evaluate",
+      "--protocol",
+      "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+      "--output",
+      "/workspace/owac/runs/pi05-lw-mug-v1/results/evaluation",
+      "--port",
+      "18080"
     ]
   ]
 }

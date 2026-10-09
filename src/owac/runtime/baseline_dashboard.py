@@ -68,6 +68,7 @@ def load_payload(directory):
     return {
         "checked_at": checked,
         "check_error": check.get("check_error") or monitor.get("last_check_error"),
+        "automatic_checks_enabled": monitor.get("automation_status") != "deleted",
         "generated_at": datetime.now(UTC).isoformat(),
         "status": status,
         "stage": status.get("stage", monitor.get("stage", "collect")),
