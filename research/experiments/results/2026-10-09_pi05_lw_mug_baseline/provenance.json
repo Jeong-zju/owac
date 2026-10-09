@@ -1,0 +1,58 @@
+{
+  "git_head": "54bad2df5ff2c76d2d49320417a4dc00a7fd5aed",
+  "source_sha256": {
+    "src/owac/__init__.py": "2a56280388df91b70245a9ad139fd3a52acc1f5c5d433aeb0197cfe94c53d457",
+    "src/owac/backends/__init__.py": "fc5b779c3710595231722e5a84effccffa40352ea4df658ce9409667246f6dfc",
+    "src/owac/backends/pi05.py": "f8fd080f87db683695cb7c6ffeab26a3fc621ac89e2286b576b2abe89b033250",
+    "src/owac/baselines/__init__.py": "75b1c33f7685f6fddef3ce5e9d920bb6286aab9de2a69b57b36b68c7ca2378cc",
+    "src/owac/core/__init__.py": "fac4f4c9fd7d7e53d224ac307052dcf110aa6573a79575c090c93855dc0bdbe1",
+    "src/owac/evaluation/__init__.py": "f690110f20f1bb5f2f6cf138da52637fe461dda433e50456d454e73dde602017",
+    "src/owac/evaluation/baseline_protocol.py": "3632879f0649a2c97ac37b311d8b1c01fe150989dcb299ac15c308194845f327",
+    "src/owac/frameworks/__init__.py": "d371c3b2ff1300686c52bd94197cc331f5ce83b9fee551d77df8c0479fa7423a",
+    "src/owac/raw/__init__.py": "2ac3aec1adac9fd40e417a16dbd4959a8179c14ab7cd93ae424846f194ef0a45",
+    "src/owac/runtime/__init__.py": "7e6ed5080238cf05e05cdbed1f1e91269c4a3b3def8019bb317c324c94f2685e",
+    "src/owac/runtime/baseline_archive.py": "83009469ee57e72fd80808e7bfbd45dd757b77224714336cf470cda840bef089",
+    "src/owac/runtime/cloud_baseline.py": "d2884c90120901d8bdb73eb515fe34c9eec6fcd436c2cdda70241d64c227758b",
+    "src/owac/simulation/__init__.py": "0cd128947de016b184446e213644ec32298b56db521ca89d07f263ea47079fcb",
+    "src/owac/simulation/lw_libero.py": "31130108ab7b7bfd7d1efd284d602e66610b6b33be2b5301cd0ec2c0ef1b9265",
+    "src/owac/simulation/pi05_benchmark.py": "8f8705e7bd7944d13dcfaa081d74b52b6c19a0f23bad4bac3c2c76d9b02fe278",
+    "src/owac/simulation/raw_camera.py": "fda73832757ff43245d74e2883f955715526f15b2770c8680b1dcc1922c691ec",
+    "src/owac/simulation/raw_preview.py": "1a5a43ddb0ac8c1c4f41f1cf7faa4e37f29cf9d652472e13d25013f040ba84d2",
+    "src/owac/simulation/task_video.py": "18dc641196b26953652c68abba34c78d5c769902ace841a7fc7a643bebab7b14",
+    "src/owac/training/__init__.py": "8aaec2c426e4abb042cf72ada6477dab3a7d3fc02621bbc45162345d87bb8021",
+    "src/owac/training/pi05_sim.py": "e65e998ecbbf90be003e689f712c8b5e783c380c6567bb56562d5eadc19be7b0",
+    "tests/test_baseline_protocol.py": "fecd7350675037f7bd9b8c0a42495163f195c98ce16d177fe9e2f851b65a9c06",
+    "tests/test_pi05_deployment.py": "6b1386d2a4ae7587ba0faa4a4797cebc833aaf4472861d322782a19c54eed78f",
+    "tests/test_raw_preview.py": "1f34e270ab99297b930280f7aa406ab4297248ff4f54381e2775abcce70798d7",
+    "tests/test_simulation_raw.py": "aadf3031df38f961408aa16de76caf19c94f6ad62b392af623c6aa9ab30ddebb",
+    "configs/baselines/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "configs/baselines/pi05-lw-mug-v1.json": "521c34db4fa9581c893ac362898c91e1edf74ff340c6785ee6fe0dd471058e68",
+    "configs/baselines/simulation-client-requirements.txt": "8664bedc6db5ed4ee13c686a6fa4c05fb202668192f335e31343c2b24684f88f",
+    "configs/backends/pi05-runtime/uv.lock": "6e1dfbbe9507c57f61d2e217b184e29942eb06550d3a9b87c72651f2e2031aa5",
+    "configs/simulation/lw-libero-runtime/requirements.freeze.txt": "db94d9687412852461a3a713eae23bd7837477514c7e9d5293bac2f9e635bfa0"
+  },
+  "protocol_sha256": "521c34db4fa9581c893ac362898c91e1edf74ff340c6785ee6fe0dd471058e68",
+  "host": "Linux b856252b722c 6.14.0-29-generic #29~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Aug 14 16:52:50 UTC 2 x86_64 x86_64 x86_64 GNU/Linux",
+  "gpu": "name, driver_version, memory.total [MiB]\nNVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 580.173.02, 97887 MiB",
+  "runtime_root": "/workspace/owac/repo",
+  "training_runtime": {
+    "torch": "2.7.1+cu128",
+    "transformers": "4.53.2",
+    "openpi": "0.1.0",
+    "numpy": "1.26.4",
+    "safetensors": "0.8.0"
+  },
+  "commands": [
+    [
+      "/workspace/owac/repo/configs/simulation/lw-libero-runtime/.venv/bin/python",
+      "-u",
+      "-m",
+      "owac.simulation.pi05_benchmark",
+      "collect",
+      "--protocol",
+      "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+      "--output",
+      "/workspace/owac/runs/pi05-lw-mug-v1/data"
+    ]
+  ]
+}

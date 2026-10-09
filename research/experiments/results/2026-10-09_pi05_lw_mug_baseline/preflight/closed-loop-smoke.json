@@ -1,0 +1,57 @@
+{
+  "status": "complete",
+  "policy_metadata": {
+    "protocol_id": "owac-lw-mug-rgb-v1",
+    "protocol_sha256": "f0575e1e3f846a2bd112ae744cf6b199d7201e6d9c0f83ea745f9f7c7442fc17",
+    "model_sha256": "d9bdf57a090ef25e116a442e80965fa149dba63aee372123c0c8c62a380d2a14",
+    "training": {
+      "status": "complete",
+      "protocol_sha256": "f0575e1e3f846a2bd112ae744cf6b199d7201e6d9c0f83ea745f9f7c7442fc17",
+      "dataset_manifest_sha256": "90cfc4f9ac57f1329aa83d48dcdca5cefc0eb099e6447537ae98250fef3263ce",
+      "initial_model_sha256": "4bcdb2aacab3e215211f9a5733c62d8701633e5aef757192cfc0bf7d85f5f47d",
+      "train_frames": 515,
+      "validation_frames": 515,
+      "trainable_parameters": 3616757520,
+      "total_parameters": 3616757520,
+      "device": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+      "torch": "2.7.1+cu128",
+      "training_precision": "FP32 parameters/optimizer/loss, BF16 autocast forward",
+      "ema": false,
+      "loss": "official action flow MSE, mean over seven actual action dimensions",
+      "validation": "no image augmentation, fixed 256 frames/noise/time, episode-disjoint",
+      "precision_check": {
+        "float32_loss": 1.8717906475067139,
+        "autocast_loss": 1.8745455741882324,
+        "relative_loss_difference": 0.0014718134665264017
+      },
+      "initial_validation_loss": 1.2075183605775237,
+      "best_step": 2,
+      "completed_steps": 2,
+      "best_validation_loss": 1.2077525053173304,
+      "latest_validation_loss": 1.2077525053173304,
+      "plateau_checks": 0,
+      "wall_seconds": 37.08496758714318,
+      "torch_allocated_peak_bytes": 60302412800,
+      "torch_reserved_peak_bytes": 63457722368,
+      "selected_model_sha256": "d9bdf57a090ef25e116a442e80965fa149dba63aee372123c0c8c62a380d2a14",
+      "stop_reason": "maximum prescribed steps",
+      "convergence_observed": false
+    },
+    "input": "two RGB views + current proprioception + fixed task prompt",
+    "privileged_state": false,
+    "flow_steps": 10
+  },
+  "episodes": 1,
+  "successes": 0,
+  "success_rate": 0.0,
+  "wilson_95": [
+    0.0,
+    0.7934506856227626
+  ],
+  "errors": 0,
+  "inference_ms_p50": 114.78963540866971,
+  "inference_ms_p95": 119.5463384501636,
+  "total_episode_wall_seconds": 52.18056501355022,
+  "protocol_sha256": "f583c9d8a519dcfeb35e715f76bb87411f4a163e5ef3d5d36b3a317f3f462507",
+  "episodes_sha256": "dd24aca3266c1267e20c1a0823da3501a1d0c581512d2635e8faf9de94486793"
+}
