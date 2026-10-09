@@ -53,6 +53,21 @@
       "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
       "--output",
       "/workspace/owac/runs/pi05-lw-mug-v1/data"
+    ],
+    [
+      "/workspace/owac/repo/configs/backends/pi05-runtime/.venv/bin/python",
+      "-u",
+      "-m",
+      "owac.training.pi05_sim",
+      "train",
+      "--protocol",
+      "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+      "--weights",
+      "/workspace/owac/checkpoints/pi05_libero_pytorch",
+      "--data",
+      "/workspace/owac/runs/pi05-lw-mug-v1/data",
+      "--output",
+      "/workspace/owac/runs/pi05-lw-mug-v1/trained"
     ]
   ]
 }

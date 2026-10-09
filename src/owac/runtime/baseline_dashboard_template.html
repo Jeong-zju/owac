@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>π0.5 实验进度 · OWAC</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f5f7;--panel:#fff;--text:#202a35;--muted:#667585;--border:#e2e7ed;--track:#e8edf2;--green:#0d8177;--green-soft:#e6f4f1;--blue:#526dbc;--orange:#a86616;--red:#bd403b;--shadow:0 3px 16px #1f293307}
+@media(prefers-color-scheme:dark){:root{--bg:#10171e;--panel:#17212b;--text:#e4edf5;--muted:#a1b2c2;--border:#2b3a48;--track:#2b3946;--green:#5cc9b6;--green-soft:#1a3e37;--blue:#94abf2;--orange:#edb35e;--red:#f6847c;--shadow:none}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC",sans-serif}main{max-width:1180px;margin:auto;padding:28px 30px 22px}h1,h2,p{margin:0}h1{font-size:28px;font-weight:650;letter-spacing:-.7px}h2{font-size:16px;font-weight:600}a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:4px}button{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 12px}.subtle{color:var(--muted)}.numbers{font-variant-numeric:tabular-nums}.eyebrow{font-size:11px;letter-spacing:2px;color:var(--muted);font-weight:600}.header{display:flex;justify-content:space-between;align-items:center;gap:20px}.header-right{text-align:right}.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:4px 11px;border-radius:20px;background:var(--green-soft);color:var(--green);font-weight:600}.dot{height:7px;width:7px;border-radius:50%;background:currentColor}.warning{color:var(--orange)}.danger{color:var(--red)}.hint{font-size:12px}.intro{margin-top:5px;color:var(--muted)}.refresh-row{margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.refresh-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.refresh-actions label{display:flex;gap:6px;align-items:center;cursor:pointer}input{accent-color:var(--green)}.banner{display:none;margin-top:16px;padding:12px 16px;background:var(--panel);border-left:3px solid var(--orange);color:var(--orange)}.banner.error{border-color:var(--red);color:var(--red)}.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:22px 0 18px}.stage{border-top:3px solid var(--track);padding-top:10px;color:var(--muted)}.stage.active,.stage.done{border-color:var(--green)}.stage strong{font-size:13px;font-weight:600;color:var(--text)}.stage-index{display:inline-block;font-size:11px;margin-right:8px;color:var(--muted)}.stage div{margin-left:23px;font-size:12px}.stage.active div{color:var(--green)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{background:var(--panel);padding:15px 18px;border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow)}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:28px;line-height:1.3;margin:5px 0 4px;font-weight:600;letter-spacing:-.6px}.stat-note{color:var(--muted);font-size:12px}.content{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(265px,1fr);gap:18px;margin-top:18px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:19px 20px;box-shadow:var(--shadow)}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.switch{display:flex}.switch button{border-radius:0;padding:3px 10px;font-size:12px}.switch button:first-child{border-radius:5px 0 0 5px}.switch button:last-child{border-radius:0 5px 5px 0}.switch button[aria-pressed=true]{background:var(--track);font-weight:600}.legend{display:flex;gap:20px;font-size:12px;color:var(--muted);margin-bottom:2px}.legend span:before{content:"";display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:6px;background:var(--blue)}.legend span:last-child:before{background:var(--green)}.chart{width:100%;height:260px;display:block;margin-top:6px}.chart text{fill:var(--muted);font:11px system-ui}.chart .grid{stroke:var(--border);stroke-width:1}.chart .train-line{stroke:var(--blue);stroke-width:2;fill:none}.chart .validation-line{stroke:var(--green);stroke-width:2.5;fill:none}.chart .point{fill:var(--green);stroke:var(--panel);stroke-width:2;cursor:help}.chart .best{fill:var(--panel);stroke:var(--green);stroke-width:3}.chart .label{fill:var(--text)}.chart-foot{font-size:12px;color:var(--muted);margin-top:6px}.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:11px 0;font-size:13px}.row span:first-child{color:var(--muted)}.row span:last-child{text-align:right}.bar{height:7px;background:var(--track);position:relative;border-radius:6px;margin:12px 0 9px}.bar-fill{height:100%;background:var(--green);border-radius:6px;width:0}.minimum-marker{position:absolute;top:-3px;height:13px;width:2px;background:var(--text)}.bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:18px}.divider{height:1px;background:var(--border);margin:15px 0}table{border-collapse:collapse;width:100%;font-size:12px}th,td{text-align:left;border-bottom:1px solid var(--border);padding:8px 4px}th{color:var(--muted);font-weight:500}td:last-child,th:last-child{text-align:right}tbody tr:last-child td{border-bottom:0}.best-tag{color:var(--green);font-size:11px;margin-left:7px}.lower{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(265px,1fr);gap:18px;margin-top:18px}.episode-grid{display:grid;grid-template-columns:repeat(20,1fr);gap:5px;margin:14px 0 10px}.episode{border-radius:4px;background:var(--track);color:var(--muted);text-align:center;padding:4px 0;font-size:11px;font-variant-numeric:tabular-nums;cursor:help}.episode.success{background:var(--green-soft);color:var(--green)}.episode.failed{background:color-mix(in srgb,var(--orange) 17%,var(--panel));color:var(--orange)}.episode.error{background:color-mix(in srgb,var(--red) 17%,var(--panel));color:var(--red)}.test-key{display:flex;gap:17px;color:var(--muted);font-size:11px}.key-dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:5px;background:var(--track)}.key-dot.success{background:var(--green)}.key-dot.failed{background:var(--orange)}.key-dot.error{background:var(--red)}.checks{margin-top:12px}.check{padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;font-size:12px}.check:last-child{border:0}.check-time{color:var(--muted)}.check-note{text-align:right}.footer{margin-top:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}.footer-links{display:flex;gap:20px}.empty{padding:60px 0;text-align:center;color:var(--muted)}
+@media(max-width:850px){main{padding:22px 18px}.stats{grid-template-columns:repeat(2,1fr)}.content,.lower{grid-template-columns:1fr}.header-right{min-width:120px}.episode-grid{grid-template-columns:repeat(20,1fr)}}
+@media(max-width:520px){main{padding:18px 14px}h1{font-size:23px}.intro{font-size:12px}.stages{gap:8px}.stage-index{display:none}.stage div{margin-left:0}.stat{padding:12px}.stat-value{font-size:24px}.panel{padding:16px 14px}.episode-grid{grid-template-columns:repeat(10,1fr)}.refresh-actions{gap:10px}.header{align-items:flex-start}.header-right{min-width:auto}.chart{height:260px}.legend{gap:12px;font-size:11px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">OWAC / CLOUD BASELINE</div>
+  <header class="header">
+    <div><h1>π0.5 训练与验证</h1><p class="intro">红杯放左盘 · 全参数微调 · 100 次独立随机测试</p></div>
+    <div class="header-right"><span class="badge" id="status-badge"><span class="dot"></span><span id="status-text">读取快照</span></span><div class="hint subtle" id="status-subtitle">检查时的云端状态</div></div>
+  </header>
+  <div class="refresh-row">
+    <span>最近云端检查 <strong id="checked-time" class="numbers">—</strong> <span id="check-age"></span> · 北京时间</span>
+    <div class="refresh-actions"><span>云端每小时检查</span><label><input type="checkbox" id="auto-refresh" checked>页面每分钟刷新</label><button id="refresh-button" type="button">刷新页面</button></div>
+  </div>
+  <div id="alert" class="banner" role="status"></div>
+  <nav class="stages" aria-label="实验阶段">
+    <div class="stage" data-stage="collect"><strong><span class="stage-index">01</span>演示采集</strong><div id="collect-stage-note">等待开始</div></div>
+    <div class="stage" data-stage="train"><strong><span class="stage-index">02</span>模型微调</strong><div id="train-stage-note">等待开始</div></div>
+    <div class="stage" data-stage="evaluate"><strong><span class="stage-index">03</span>随机闭环测试</strong><div id="evaluate-stage-note">等待选模</div></div>
+    <div class="stage" data-stage="archive"><strong><span class="stage-index">04</span>本地结果留档</strong><div id="archive-stage-note">持续备份数字</div></div>
+  </nav>
+  <section class="stats" aria-label="主要指标">
+    <div class="stat"><div class="stat-label">已完成训练步数</div><div class="stat-value numbers" id="step-value">—</div><div class="stat-note" id="step-note">最少训练步数待读取</div></div>
+    <div class="stat"><div class="stat-label">最优开发集动作损失</div><div class="stat-value numbers" id="best-value">—</div><div class="stat-note" id="best-note">固定 256 帧验证</div></div>
+    <div class="stat"><div class="stat-label">独立随机测试</div><div class="stat-value numbers" id="test-value">—</div><div class="stat-note" id="test-note">等待正式测试</div></div>
+    <div class="stat"><div class="stat-label">训练峰值显存 · torch 分配</div><div class="stat-value numbers" id="memory-value">—</div><div class="stat-note" id="memory-note">设备容量 96 GB</div></div>
+  </section>
+  <div class="content">
+    <section class="panel">
+      <div class="panel-header"><h2>训练与开发集损失</h2><div class="switch" aria-label="损失坐标尺度"><button type="button" id="log-scale" aria-pressed="true">对数</button><button type="button" id="linear-scale" aria-pressed="false">线性</button></div></div>
+      <div class="legend"><span>训练 MSE · 每 50 步均值</span><span>开发 MSE · 每 1000 步</span></div>
+      <svg id="loss-chart" class="chart" viewBox="0 0 700 260" role="img" aria-label="随训练步数变化的动作 flow MSE"></svg>
+      <p class="chart-foot" id="chart-caption">固定开发帧、噪声与时间种子；测试 episode 不参与选模。</p>
+      <table aria-label="开发集验证记录"><thead><tr><th>检查步数</th><th>开发 MSE</th><th>选模状态</th></tr></thead><tbody id="validation-table"></tbody></table>
+    </section>
+    <section class="panel">
+      <h2>运行与停止条件</h2>
+      <div class="row"><span>当前阶段</span><span id="stage-detail">—</span></div>
+      <div class="row"><span>训练累计耗时</span><span id="elapsed-detail" class="numbers">—</span></div>
+      <div class="bar" aria-label="相对首轮训练步数上限的进度"><div id="step-bar" class="bar-fill"></div><span id="minimum-marker" class="minimum-marker"></span></div>
+      <div class="bar-labels"><span>0 步</span><span id="minimum-label">最低步数</span><span id="maximum-label">首轮上限</span></div>
+      <p class="hint subtle">达到最低步数后，再依据开发集连续无显著改善的检查停止；上限并非必跑目标。</p>
+      <div class="row"><span>连续未显著改善</span><span id="plateau-detail" class="numbers">—</span></div>
+      <div class="row"><span>停止条件状态</span><span id="stop-detail">—</span></div>
+      <div class="divider"></div>
+      <div class="row"><span>成功训练演示</span><span id="train-data" class="numbers">—</span></div>
+      <div class="row"><span>成功开发演示</span><span id="validation-data" class="numbers">—</span></div>
+      <div class="row"><span>专家失败尝试</span><span id="expert-failures" class="numbers">—</span></div>
+      <p class="hint subtle">专家失败计入采集清单，和学习策略的测试失败分别统计。</p>
+      <div class="divider"></div>
+      <div class="row"><span>训练参数</span><span id="parameter-detail">—</span></div>
+      <div class="row"><span>有效批量 / 随机种子</span><span id="recipe-detail">—</span></div>
+      <div class="row"><span>FP32 / BF16 损失差</span><span id="precision-detail">—</span></div>
+    </section>
+  </div>
+  <div class="lower">
+    <section class="panel">
+      <div class="panel-header"><h2>100 次随机闭环测试</h2><span class="hint subtle" id="test-progress-label">等待选模</span></div>
+      <p class="hint subtle" id="test-summary">规定种子 3000 至 3099；保留失败，不替换 episode。</p>
+      <div class="episode-grid" id="episode-grid" aria-label="每个测试种子的状态"></div>
+      <div class="test-key"><span><i class="key-dot"></i>待运行</span><span><i class="key-dot success"></i>成功</span><span><i class="key-dot failed"></i>失败</span><span><i class="key-dot error"></i>动作异常</span></div>
+    </section>
+    <section class="panel">
+      <div class="panel-header"><h2>最近检查记录</h2><span class="hint subtle">每小时一次</span></div>
+      <div id="check-history" class="checks"></div>
+      <p class="hint subtle" style="margin-top:10px">每次检查同步数字与曲线。页面刷新只读取本地快照，不触发云端训练或下载权重。</p>
+    </section>
+  </div>
+  <footer class="footer"><div class="footer-links"><a id="experiment-link">实验说明</a><a id="dataset-link">采集数字清单</a><a id="training-link">训练数值报告</a></div><span>工程单任务 · 检查点保留在云端</span></footer>
+</main>
+<script type="application/json" id="snapshot-data">__PAYLOAD__</script>
+<script>
+(() => {
+  const d = JSON.parse(document.getElementById('snapshot-data').textContent);
+  const t = d.training, r = d.protocol.training || {}, stats = d.splits;
+  const stageNames = {collect:'演示采集', train:'全参数微调', evaluate:'随机闭环测试', archive:'结果留档'};
+  const fmt = value => Number(value).toLocaleString('zh-CN');
+  const set = (id, value) => { document.getElementById(id).textContent = value; };
+  const mse = value => value == null ? '未测量' : Number(value).toFixed(4);
+  const clock = (value, full=false) => value ? new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',month:full?'2-digit':undefined,day:full?'2-digit':undefined,hour:'2-digit',minute:'2-digit',second:full?'2-digit':undefined,hour12:false}) : '尚未记录';
+  const status = d.status.status;
+  set('status-text',d.check_error?'检查异常':status==='failed'?'运行异常':status==='complete'?'已完成':stageNames[d.stage]+'中');
+  if(d.check_error) document.getElementById('status-badge').classList.add('warning');
+  if(status==='failed') document.getElementById('status-badge').classList.add('danger');
+  set('checked-time',clock(d.checked_at,true));
+  const stages = ['collect','train','evaluate','archive'];
+  const index = status==='complete'?4:Math.max(0,stages.indexOf(d.stage));
+  document.querySelectorAll('.stage').forEach((item,i)=>item.classList.add(i<index?'done':i===index?'active':'pending'));
+  set('collect-stage-note',stats.train.episodes+' / '+(d.protocol.train_episodes||90)+' 训练 · '+stats.validation.episodes+' / '+(d.protocol.validation_episodes||10)+' 开发');
+  set('train-stage-note',d.step?fmt(d.step)+' 步'+(t.status==='complete'?' · 已停止':' · 进行中'):'等待开始');
+  set('evaluate-stage-note',d.episodes.length?d.episodes.length+' / 100 已运行':'等待选模');
+  set('archive-stage-note',status==='complete'?'数字结果已回写':'检查点不下载 · 数字持续备份');
+  set('step-value',fmt(d.step));
+  set('step-note','最少 '+fmt(r.minimum_steps||10000)+' 步 · 首轮上限 '+fmt(r.maximum_steps||30000));
+  set('best-value',mse(t.best_validation_loss));
+  set('best-note',t.best_step?'第 '+fmt(t.best_step)+' 步 · '+(t.status==='complete'?'最终选模':'当前最优'):'等待首次开发集检查');
+  set('test-value',d.episodes.length+' / 100');
+  set('test-note',d.success_rate==null?'成功率尚未测量':(status==='complete'?'最终':'当前')+'成功率 '+(d.success_rate*100).toFixed(1)+'%');
+  set('memory-value',t.torch_allocated_peak_bytes?(t.torch_allocated_peak_bytes/1024**3).toFixed(2)+' GiB':'未测量');
+  set('memory-note',t.completed_steps?'截至第 '+fmt(t.completed_steps)+' 步的分配峰值':'等待资源检查');
+  set('stage-detail',status==='complete'?'已完成 · 数字已留档':stageNames[d.stage]||d.stage);
+  const elapsed=d.last_step.elapsed_seconds||t.wall_seconds;
+  set('elapsed-detail',elapsed?(elapsed/3600).toFixed(2)+' 小时':'尚未开始');
+  document.getElementById('step-bar').style.width=Math.min(100,d.step/(r.maximum_steps||30000)*100)+'%';
+  document.getElementById('minimum-marker').style.left=((r.minimum_steps||10000)/(r.maximum_steps||30000)*100)+'%';
+  set('minimum-label','最低 '+fmt(r.minimum_steps||10000));set('maximum-label','上限 '+fmt(r.maximum_steps||30000));
+  set('plateau-detail',(t.plateau_checks||0)+' / '+(r.plateau_patience||5)+' 次');
+  set('stop-detail',t.status==='complete'?(t.convergence_observed?'无改善条件已满足':'待诊断'):d.step<(r.minimum_steps||10000)?'尚未达到最低训练步数':'按开发集检查继续判断');
+  set('train-data',stats.train.episodes+' 条 · '+fmt(stats.train.frames)+' 帧');
+  set('validation-data',stats.validation.episodes+' 条 · '+fmt(stats.validation.frames)+' 帧');
+  set('expert-failures',d.collection_failures+' / '+d.collection_attempts+' 次采集');
+  set('parameter-detail',t.trainable_parameters?(t.trainable_parameters/1e9).toFixed(3)+' B · 全参数':'待记录');
+  set('recipe-detail',(r.batch_size||4)*(r.gradient_accumulation||4)+' / '+(r.seed||42));
+  set('precision-detail',t.precision_check?(t.precision_check.relative_loss_difference*100).toFixed(3)+'%':'未测量');
+  const table=document.getElementById('validation-table');
+  d.chart.validation.slice(-6).forEach(([step,loss])=>{
+    const row=document.createElement('tr');
+    [step?fmt(step):'初始化',loss.toFixed(6),step===t.best_step?'当前最优':''].forEach((value,i)=>{const cell=document.createElement('td');cell.textContent=value;cell.className=i===2?'best-tag':'numbers';row.appendChild(cell);});table.appendChild(row);
+  });
+  if(!d.chart.validation.length){const row=document.createElement('tr');const cell=document.createElement('td');cell.colSpan=3;cell.textContent='等待第 1000 步开发集检查';row.appendChild(cell);table.appendChild(row);}
+  const seeds=d.protocol.test_seeds||Array.from({length:100},(_,i)=>3000+i);
+  const bySeed=new Map(d.episodes.map(row=>[row.seed,row]));
+  const grid=document.getElementById('episode-grid');
+  seeds.forEach(seed=>{const e=bySeed.get(seed),item=document.createElement('div');item.className='episode'+(!e?'':e.status==='error'?' error':e.success?' success':' failed');const label=!e?'待运行':e.status==='error'?'动作异常':e.success?'成功':'失败';item.textContent=String(seed).slice(-2);item.title='种子 '+seed+' · '+label+(e&&e.control_steps?' · '+e.control_steps+' 控制步':'');item.setAttribute('aria-label',item.title);grid.appendChild(item);});
+  set('test-progress-label',d.episodes.length?d.episodes.length+' / 100 已完成':'等待训练结束与选模');
+  if(d.evaluation.wilson_95){const latency=value=>value==null?'未测量':value.toFixed(1)+' ms';set('test-summary',`成功 ${d.evaluation.successes} / ${d.evaluation.episodes} · Wilson 95% 区间 ${(d.evaluation.wilson_95[0]*100).toFixed(1)}%–${(d.evaluation.wilson_95[1]*100).toFixed(1)}% · 推理 p50 / p95 ${latency(d.evaluation.inference_ms_p50)} / ${latency(d.evaluation.inference_ms_p95)}`);}
+  const history=document.getElementById('check-history');
+  d.history.slice(-6).reverse().forEach(row=>{const item=document.createElement('div');item.className='check';const time=document.createElement('span');time.className='check-time numbers';time.textContent=clock(row.checked_at);const note=document.createElement('span');note.className='check-note';note.textContent=row.status==='failed'?'运行异常':row.stage==='train'?'训练 '+fmt(row.step)+' 步':row.stage==='evaluate'?'测试 '+row.test_episodes+'/100':row.status==='complete'?'全部完成':'采集 '+row.train_episodes+' / '+row.validation_episodes;item.append(time,note);history.appendChild(item);});
+  [['experiment-link','experiment'],['dataset-link','data'],['training-link','training']].forEach(([id,key])=>document.getElementById(id).href=d.links[key]);
+  let logarithmic=true;
+  const svg=document.getElementById('loss-chart'),ns='http://www.w3.org/2000/svg';
+  function drawChart(){
+    svg.replaceChildren();
+    function add(tag,attrs,text){const node=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([key,value])=>node.setAttribute(key,value));if(text!=null)node.textContent=text;svg.appendChild(node);return node;}
+    const all=[...d.chart.train,...d.chart.validation].filter(p=>p[1]>0);
+    if(!all.length){add('text',{x:350,y:125,'text-anchor':'middle'},'等待训练曲线');return;}
+    const width=svg.getBoundingClientRect().width||700;
+    svg.setAttribute('viewBox',`0 0 ${width} 260`);
+    const left=49,right=width-12,top=16,bottom=226;
+    const xMax=Math.max(1000,Math.ceil(d.step/1000)*1000);
+    const values=all.map(p=>p[1]);
+    const yMin=logarithmic?10**Math.floor(Math.log10(Math.min(...values))):0;
+    const yMax=logarithmic?10**Math.ceil(Math.log10(Math.max(...values))):Math.max(...values)*1.08;
+    const x=step=>left+(right-left)*step/xMax;
+    const y=value=>bottom-(bottom-top)*(logarithmic?(Math.log10(value)-Math.log10(yMin))/(Math.log10(yMax)-Math.log10(yMin)||1):(value-yMin)/(yMax-yMin||1));
+    add('title',{},'动作 flow MSE 与训练步数');add('desc',{},'训练损失为每 50 步均值，开发集使用固定帧与噪声；开发损失用于选模。');
+    const ticks=logarithmic?Array.from({length:Math.round(Math.log10(yMax/yMin))+1},(_,i)=>yMin*10**i):Array.from({length:5},(_,i)=>yMax*i/4);
+    ticks.forEach(value=>{add('line',{x1:left,y1:y(value),x2:right,y2:y(value),class:'grid'});add('text',{x:left-9,y:y(value)+4,'text-anchor':'end'},value>=1?value.toFixed(logarithmic?0:1):value.toFixed(value<.01?3:2));});
+    const xTicks=width<400?3:5;
+    for(let i=0;i<=xTicks;i++){const value=xMax*i/xTicks;add('text',{x:x(value),y:bottom+20,'text-anchor':i===0?'start':i===xTicks?'end':'middle'},Math.round(value).toLocaleString('zh-CN'));}
+    add('text',{x:left,y:11},'MSE');add('text',{x:right,y:258,'text-anchor':'end'},'优化步数');
+    for(const [series,cls] of [[d.chart.train,'train-line'],[d.chart.validation,'validation-line']]){
+      const path=series.filter(p=>p[1]>0).map(([step,loss],i)=>(i?'L':'M')+x(step).toFixed(2)+','+y(loss).toFixed(2)).join(' ');add('path',{d:path,class:cls});
+    }
+    d.chart.validation.filter(p=>p[1]>0).forEach(([step,loss])=>{const point=add('circle',{cx:x(step),cy:y(loss),r:step===t.best_step?5:4,class:step===t.best_step?'point best':'point',tabindex:0});const title=document.createElementNS(ns,'title');title.textContent=(step?'第 '+step+' 步':'初始化')+' · 开发 MSE '+loss.toFixed(6)+(step===t.best_step?' · 最优':'');point.appendChild(title);});
+  }
+  document.getElementById('log-scale').onclick=()=>{logarithmic=true;document.getElementById('log-scale').setAttribute('aria-pressed','true');document.getElementById('linear-scale').setAttribute('aria-pressed','false');drawChart();};
+  document.getElementById('linear-scale').onclick=()=>{logarithmic=false;document.getElementById('linear-scale').setAttribute('aria-pressed','true');document.getElementById('log-scale').setAttribute('aria-pressed','false');drawChart();};
+  drawChart();window.addEventListener('resize',drawChart);
+  const alert=document.getElementById('alert');
+  function age(){const minutes=d.checked_at?Math.max(0,(Date.now()-Date.parse(d.checked_at))/60000):null;set('check-age',minutes==null?'':`（${Math.floor(minutes)} 分钟前）`);if(d.check_error){alert.style.display='block';alert.textContent='最近一次云端检查失败：'+d.check_error+'。数字保留自上次成功同步，云端运行状态待核实。';}else if(status==='failed'){alert.style.display='block';alert.classList.add('error');alert.textContent='最近检查发现运行异常：'+(d.status.error||'请查看实验记录');}else if(minutes>90&&status!=='complete'){alert.style.display='block';alert.textContent='本地快照已超过 90 分钟未更新。这里显示上次检查的数字，不表示云端任务已经停止。';}else{alert.style.display='none';}}
+  age();setInterval(age,10000);
+  document.getElementById('refresh-button').onclick=()=>location.reload();
+  setInterval(()=>{if(document.getElementById('auto-refresh').checked&&!document.hidden)location.reload();},60000);
+})();
+</script>
+</body>
+</html>
