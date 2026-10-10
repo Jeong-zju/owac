@@ -14,6 +14,10 @@
 </head>
 <body>
 <main>
+  <section id="replacement-panel" class="panel" hidden style="margin-bottom:18px;border-color:var(--green)">
+    <h2>当前基线已更换</h2><p id="replacement-description" class="hint"></p>
+    <a href="../official-libero-baseline/progress.html">打开官方 π0.5 / 原版 LIBERO RGB 结果页</a>
+  </section>
   <div class="eyebrow">OWAC / CLOUD BASELINE</div>
   <header class="header">
     <div><h1>π0.5 训练与验证</h1><p class="intro">红杯放左盘 · 全参数微调 · 100 次独立随机测试</p></div>
@@ -97,6 +101,7 @@
   const mse = value => value == null ? '未测量' : Number(value).toFixed(4);
   const clock = (value, full=false) => value ? new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',month:full?'2-digit':undefined,day:full?'2-digit':undefined,hour:'2-digit',minute:'2-digit',second:full?'2-digit':undefined,hour12:false}) : '尚未记录';
   const status = d.status.status;
+  if(d.replacement&&d.replacement.description){document.getElementById('replacement-panel').hidden=false;set('replacement-description',d.replacement.description);document.querySelector('h1').textContent='π0.5 红杯历史实验';document.querySelector('.intro').textContent='已退出主基线 · 原始微调与 100 次测试记录保留';}
   const automaticChecks = d.automatic_checks_enabled !== false;
   if(!automaticChecks){set('monitor-frequency','自动检查已关闭');set('history-frequency','手动同步');set('history-note','每小时检查任务已删除。此页保留最近一次手动同步的数字；刷新页面不会同步云端结果。');document.getElementById('auto-refresh').checked=false;}
   set('status-text',d.check_error?'检查异常':status==='failed'?'运行异常':status==='complete'?'已完成':stageNames[d.stage]+'中');

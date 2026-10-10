@@ -2,6 +2,8 @@
 
 日期：2026-10-08。状态：完成报告阅读与一手资料/部分源码核查；推荐进入兼容性验证，尚未部署或运行候选仿真。建设顺序见 [0004 决议](decisions/0004-simulation-benchmark-first.md)。
 
+**2026-10-10 更新：下述首选建议已被用户否定，由 [0007](decisions/0007-pretrained-benchmark-first.md) 取代。当前优先原版 LIBERO 与官方 `pi05_libero` 的直接 RGB 闭环，不继续修补 Lightwheel 红杯 backbone；RAW/CFA 暂不作为准入前提。以下保留为当时的选型依据，不作为当前执行推荐。**
+
 ## 选型结论
 
 **主 benchmark 首选：LW-BenchHub 的 Lightwheel-LIBERO 桌面操作子集。仿真底座优先采用支持报告所述相机管线的 Isaac Sim 6.x / Isaac Lab Arena 组合，但该组合与当前 LW-BenchHub 的兼容性尚未成立，必须先验证。**

@@ -6,6 +6,8 @@
 
 ## 开始工作
 
+2026-10-10 用户最新选型优先级见 `docs/decisions/0007-pretrained-benchmark-first.md`：先用原版 LIBERO 与官方预训练 `pi05_libero` 的 RGB 闭环，不继续 Lightwheel 红杯 backbone 微调；当前准入不要求原生 RAW/CFA。下文旧的 Lightwheel 首选与 RAW 前置安排按该决议调整，历史实验仍保留。
+
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。
 3. 先检查 `git status --short --branch`，保留用户和其他 agent 的未提交变更。确认任务范围后直接推进已授权的可逆开发。

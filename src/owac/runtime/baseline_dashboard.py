@@ -85,6 +85,7 @@ def load_payload(directory):
         "chart": {"train": training_points(rows), "validation": validations, "bin_steps": 50},
         "evaluation": evaluation,
         "diagnosis": read_json(directory / "diagnosis.json"),
+        "replacement": read_json(directory / "replacement.json"),
         "episodes": [
             {key: row.get(key) for key in ("seed", "success", "status", "control_steps", "error")}
             for row in episodes

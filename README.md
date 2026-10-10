@@ -2,6 +2,8 @@
 
 OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署；当前先选定并验证仿真 benchmark、RGB 闭环和成像/数据协议，再开展 RAW 适配。候选框架尚未实现或验证。
 
+当前用户要求优先直接可用的基线，允许先用原版 RGB：[0007 选型纠正](docs/decisions/0007-pretrained-benchmark-first.md)采用原版 LIBERO 与官方预训练 `pi05_libero`，额外训练 0 步；旧 Lightwheel 红杯实验归档。进度见[官方 RGB 参考验收](research/experiments/2026-10-10_pi05_official_libero_reference.md)和[本地新进度页](outputs/official-libero-baseline/progress.html)。
+
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
 GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)，主分支为 `main`。
