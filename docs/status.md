@@ -109,4 +109,12 @@
 
 第二阶段的[源码/数据核查](../research/reviews/2026-10-10_arena_droid_expert_replay.md)已完成：PolaRiS 确有公开仿真共同训练数据，固定 OpenPI 配置混合真实 DROID 与仿真数据，不能将来源全部描述为真实数据；配置不单独证明实际检查点完整训练历史。公开仿真 RLDS 缺少逐帧物体状态，未找到九组场景对应的原始专家状态文件。官方 `record_demos.py`、Mimic `generate_dataset.py`、`replay_demos.py` 和机器人/物体状态 recorder 已核查并留哈希，但当前 DROID `mimic_env=None`，默认 SE3 遥操作与八维 jointpos 动作未接通，没有核验到直接可用的自动专家生成器。GR1/G1 数据和 Franka 方块状态机不是当前 DROID 的现成替代。这些脚本仅完成静态适用性核查，尚未在当前 DROID 上进行专家采集 GPU 验收。
 
-按用户要求先报告缺口，再决定是否适配官方遥操作/Mimic，或新增 DROID 脚本/规划专家。当前未生成新专家或配对训练集，不将评测策略轨迹当原始专家，不追加训练。云端完整基准持续运行，聊天无需保持运行；定时任务关闭，实例、历史记录和权重保留。手动同步命令为 `uv run --locked python -m owac.runtime.arena_droid_benchmark archive`；只回写小型数字，页面生成时间不冒充云端成功检查时间，本地归档修改不覆盖冻结运行代码。
+按用户要求先报告缺口，再决定是否适配官方遥操作/Mimic，或新增 DROID 脚本/规划专家。上述来源核查阶段尚未生成新专家或配对训练集；本轮实际回放结果见下节。不将评测策略轨迹当原始专家，不追加训练。云端完整基准持续运行，聊天无需保持运行；定时任务关闭，实例、历史记录和权重保留。手动同步命令为 `uv run --locked python -m owac.runtime.arena_droid_benchmark archive`；只回写小型数字，页面生成时间不冒充云端成功检查时间，本地归档修改不覆盖冻结运行代码。
+
+## 原始专家动作回放试验完成（2026-10-10）
+
+用户最新要求实际尝试机器人状态/动作回放，以能采到成功专家数据为试验目标。已实读公开 PolaRiS 首分片十条演示，并选取 `pi_scene_v5/episode_14.npz` 的“把方块放入左箱”原动作，在 Isaac Sim 6.1 / Arena DROID Franka+Robotiq 上完成物理回放。结果为 **一条成功源专家演示、108 帧双视角 RGB/原生 CFA**：真实抬升 24.1509 cm、搬运 46.0431 cm、松手后稳定入箱；没有更改原动作，初始化后物体状态写入为零。这是依据抓取/释放位置重建的场景，原训练场景与相机映射未恢复，新配对 RGB/RAW 不冒充原训练 JPEG 的精确补采，也不是 π0.5 的评测成绩。
+
+216 个视角帧的 864 个 RGB/HDR/CFA/noise 文件已在云端逐文件重读，哈希不一致为零，原生 HDR→CFA 最大误差 0 DN；每帧计数与源动作时序匹配，腕部相机与同帧实际夹爪位置最大偏差 0.015673 mm。成功数据集含源动作/状态、实际完整机器人和方块状态、两路新 RGB/RAW、传感器、时间戳、哈希和重建 USD；云端入口为 `/workspace/owac/reference/polaris-replay-pilot-v1/successful-expert-index.json`。数据数组与图像留在云端，本地仅存[数字留档](../research/experiments/results/2026-10-10_polaris_expert_replay_pilot/)和[试验记录](../research/experiments/2026-10-10_polaris_expert_replay_pilot.md)，固定[进度页](../outputs/arena-droid-baseline/progress.html)已加入回放结果。
+
+前四次启动/接口异常完整保留；第 5 次物理回放与配对数据保存完成后发生 NumPy bool 的 JSON 序列化错误，已用独立 CPU 后处理源码修复数字结果，未重跑物理或重新采图。完整 π0.5 基准只暂停外层调度，当前子 episode 自然结束后才运行试验；调度器已恢复，冻结源码、种子和已完成结果没有修改。定时任务仍关闭，不追加训练。`make check` 与 40 项 CPU 测试通过。

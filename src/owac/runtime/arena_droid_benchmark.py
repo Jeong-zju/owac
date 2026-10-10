@@ -265,6 +265,8 @@ def render(directory, page):
     )
     check = json.loads((directory / "check.json").read_text())
     audit = json.loads((directory / "replay_audit.json").read_text())
+    pilot_path = directory / "replay_pilot.json"
+    pilot = json.loads(pilot_path.read_text()) if pilot_path.exists() else None
     esc = lambda x: html.escape(str(x))  # noqa: E731
     n = summary["episodes"]
     score = f"{summary['successes']}/{n}" if n else "未测量"
@@ -295,6 +297,40 @@ def render(directory, page):
         + "</tr>"
         for r in summary["per_variation"]
     )
+    replay_score = "尚未生成配对数据集"
+    replay_status = esc(audit["status"])
+    replay_detail = ""
+    if pilot:
+        successes = pilot["successful_unique_source_episodes"]
+        replay_score = (
+            f"重建回放成功专家：{successes} 条" if successes else "专家回放试验进行中 / 未成功"
+        )
+        replay_status = "原始专家动作 · 重建物体场景 · Isaac 原生 CFA"
+        replay_detail = (
+            '<div class="notice"><b>专家回放试验</b>'
+            f"<p>最后成功检查：{esc(pilot['checked_at_utc'])}。"
+            "原训练场景及相机映射尚未恢复；新 RGB/RAW 是重建场景中的配对观测，"
+            "原动作和源 episode 身份保留。该试验不计入 π0.5 基准分数。</p>"
+            f"<details><summary>回放指标与采集核验</summary><pre>"
+            f"{esc(json.dumps(pilot['results'], ensure_ascii=False, indent=2))}"
+            "</pre></details></div>"
+        )
+        successful_replays = [r for r in pilot["results"] if r["success"]]
+        if successful_replays:
+            trial = successful_replays[-1]
+            replay_status += f" · {trial['source_frames']} 帧 × 2 视角 · 原动作未修改"
+            replay_detail = (
+                '<div class="card"><b>最近成功回放的物理结果</b>'
+                f"<p>方块抬升 {trial['maximum_lift_m'] * 100:.2f} cm；"
+                f"搬运 {trial['transport_distance_m'] * 100:.2f} cm；"
+                f"最终箱中心 XY 误差 {trial['final_bin_xy_error_m'] * 100:.2f} cm。"
+                "已松手并稳定入箱。</p>"
+                f"<p>{trial['verified_file_count']} 个文件哈希全部通过；原生 HDR→CFA "
+                f"最大量化误差 {trial['native_capture']['maximum_quantization_error_dn']} DN。</p>"
+                "<p>这是一个成功源 episode 的功能验收，不作为独立成功率或完整基准。</p>"
+                f"<p>云端数据目录：<code>{esc(trial['remote_directory'])}</code></p></div>"
+                + replay_detail
+            )
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text(f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -314,8 +350,8 @@ pre{{white-space:pre-wrap;overflow-wrap:anywhere}}.notice{{padding:16px;backgrou
  · seed {esc(status.get("seed", "—"))}</p>
 <p>累计有效样本 Wilson 95%：{interval(summary["wilson_95"])}</p></div>
 <div class="card"><b>阶段 2：原始专家训练数据回放</b>
-<p class="score">尚未生成配对数据集</p>
-<p>{esc(audit["status"])}</p></div></div>
+<p class="score">{replay_score}</p>
+<p>{replay_status}</p></div></div>
 <p>固定官方九组对象/容器/HDR 配置，每组种子 0–99，共 900 个独立完整 episode。
 复用官方权重，额外训练 0 步；每次重新启动策略及仿真，保留全部正常失败。
 这是 OWAC 固定协议，不是整个 Arena 平台的官方总分。</p>
@@ -327,6 +363,7 @@ pre{{white-space:pre-wrap;overflow-wrap:anywhere}}.notice{{padding:16px;backgrou
 只在新 attempt 目录重试同一配置 / 种子，原因保留于下方状态记录。</p>
 <table><thead><tr><th>配置</th><th>有效完成</th><th>成功数</th><th>Wilson 95%</th></tr></thead>
 <tbody>{table}</tbody></table>
+{replay_detail}
 <div class="notice"><b>原始训练回放的缺口</b><p>{esc(audit["reason"])}</p>
 <p>仅采用 Isaac 原生 CameraCore 的 ISP 前 CFA；不采用 MuJoCo，
 不从 RGB 逆处理或重新马赛克，不把评测策略轨迹当成原始专家训练演示。</p></div>

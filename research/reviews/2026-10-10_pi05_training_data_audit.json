@@ -1,0 +1,196 @@
+{
+  "checked_at_utc": "2026-10-10T06:25:39.709022+00:00",
+  "scope": "Public training recipe, RLDS metadata, first TFRecord episode and sample-range manifest audit. No Isaac replay, expert generation or training executed.",
+  "deployed_policy_config": "pi05_droid_jointpos_polaris",
+  "deployed_weights": "gs://openpi-assets-simeval/pi05_droid_jointpos",
+  "training_recipe": {
+    "config_source": "https://github.com/Physical-Intelligence/openpi/blob/c23745b5ad24e98f66967ea795a07b2588ed6c79/src/openpi/training/misc/polaris_config.py",
+    "publisher_statement": "https://github.com/arhanjain/polaris/blob/129abc45f680559a7da62b9280fdb127b02b7275/README.md",
+    "datasets": [
+      {
+        "name": "droid",
+        "version": "1.0.1",
+        "weight": 0.9,
+        "domain": "real"
+      },
+      {
+        "name": "polaris_droid_cotrain_dataset",
+        "version": "1.0.0",
+        "weight": 0.1,
+        "domain": "simulation"
+      }
+    ],
+    "num_train_steps": 1000,
+    "batch_size": 128,
+    "action_space": "7 joint positions and 1 gripper position",
+    "limitation": "Published co-finetuning recipe and checkpoint description; not a complete audit of the deployed checkpoint's entire pretraining or exact training samples."
+  },
+  "dataset": {
+    "repo": "owhan/PolaRiS-datasets",
+    "revision": "dca86b8e186df63323eb375344a1977d92f508f7",
+    "dataset_info_source": "https://huggingface.co/datasets/owhan/PolaRiS-datasets/blob/dca86b8e186df63323eb375344a1977d92f508f7/polaris_droid_cotrain_dataset/1.0.0/dataset_info.json",
+    "dataset_info_sha256": "5a5b91a4911cc9445a08c96c64de9c7690ee994424452c5e6f690a7c9badfc02",
+    "features_sha256": "7b36373767b08bfacb8f7a47e1f373e7a676474024e0823b304e8249e895d03b",
+    "metadata_checked_at_utc": "2026-10-10T06:24:45.214039+00:00",
+    "version": "1.0.0",
+    "release_note": "OOD Dataset.",
+    "shards": 32,
+    "shard_lengths": [
+      10,
+      10,
+      10,
+      10,
+      9,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      9,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      9,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      9,
+      10,
+      10,
+      10,
+      10
+    ],
+    "published_episode_count_from_metadata": 316,
+    "num_bytes": 3099912379,
+    "paper_ood_table": {
+      "environments": 15,
+      "instructions": 18,
+      "trajectories": 326,
+      "timesteps": 56041
+    },
+    "count_note": "Published metadata reports 316 episodes, distinct from the paper's 326 OOD trajectories; do not assert complete or identical training coverage without reconciliation.",
+    "original_npz_files_in_public_repo": 0,
+    "full_object_state_in_rlds": false,
+    "native_raw_in_rlds": false
+  },
+  "first_episode": {
+    "checked_at_utc": "2026-10-10T06:23:45.285008+00:00",
+    "shard": "polaris_droid_cotrain_dataset-train.tfrecord-00000-of-00032",
+    "record_bytes": 17508046,
+    "record_sha256": "c7f09d40bb8f1a01a58c1857232055b2cc10b9802b8bd52f471a41fc28f1bf4d",
+    "inspection_method": "HTTP Range on cloud host; decode tensorflow.Example protobuf metadata using Python standard library. Payload remained in cloud memory and was discarded; no image/array payload copied locally.",
+    "observed_step_count": 310,
+    "observed_step_count_field": "steps/language_instruction",
+    "language_instruction": "put the marker in the mug",
+    "recording_folderpath": "success_/media/arhan/Secondary1/projects/real2simeval/demos/kanav_cloth_chairs/episode_14.npz",
+    "file_path": "success_/media/arhan/Secondary1/projects/real2simeval/demos/kanav_cloth_chairs/episode_14.npz",
+    "feature_keys": [
+      "episode_metadata/file_path",
+      "episode_metadata/recording_folderpath",
+      "steps/action",
+      "steps/action_dict/gripper_position",
+      "steps/action_dict/joint_position",
+      "steps/discount",
+      "steps/is_first",
+      "steps/is_last",
+      "steps/is_terminal",
+      "steps/language_instruction",
+      "steps/language_instruction_2",
+      "steps/language_instruction_3",
+      "steps/observation/exterior_image_1_left",
+      "steps/observation/exterior_image_2_left",
+      "steps/observation/gripper_position",
+      "steps/observation/joint_position",
+      "steps/observation/wrist_image_left",
+      "steps/reward"
+    ]
+  },
+  "sample_range_manifest": {
+    "url": "https://storage.googleapis.com/openpi-assets/droid/polaris_droid_cotrain_dataset_sample_ranges_v1_0_0.json",
+    "checked_at_utc": "2026-10-10T06:25:39.709022+00:00",
+    "sha256": "32287c3211206b751b879873694b3c592786e37bd7cc3daee2967ab5b3a109a1",
+    "bytes": 79946,
+    "entry_count": 406,
+    "scene_names": [
+      "ajay_setup_task3",
+      "cubes_right-g60_corner",
+      "env_07",
+      "envs_00",
+      "envs_04",
+      "envs_05",
+      "kanav_black_table",
+      "kanav_circle_table",
+      "kanav_cloth_chairs",
+      "kanav_geodude",
+      "kanav_maddox_table",
+      "lobby_desk",
+      "pi_scene_v5",
+      "serve_cup-g60_kitchen_table_zed",
+      "vention",
+      "workbench_zed",
+      "yellow_fruit_bussing-g60_stovetop_zed"
+    ],
+    "first_episode_exact_key_present": false,
+    "related_key": "success_/media/arhan/Secondary/projects/real2simeval/demos/kanav_cloth_chairs/episode_14.npz--success_/media/arhan/Secondary/projects/real2simeval/demos/kanav_cloth_chairs/episode_14.npz",
+    "related_range": [
+      [
+        0,
+        310
+      ]
+    ],
+    "Secondary1_key_count": 0,
+    "loader_source": "https://github.com/Physical-Intelligence/openpi/blob/c23745b5ad24e98f66967ea795a07b2588ed6c79/src/openpi/training/droid_rlds_dataset.py",
+    "loader_key_rule": "recording_folderpath + '--' + file_path + '--' + step index; default lookup False",
+    "limitation": "The inspected episode uses Secondary1 while the related filter key uses Secondary. This record would fail the pinned loader's literal key lookup with this manifest. Coverage of other episodes and the actual deployed checkpoint's training sample set are not verified."
+  },
+  "public_asset_catalogs": [
+    {
+      "repo": "owhan/PolaRiS-datasets",
+      "revision": "dca86b8e186df63323eb375344a1977d92f508f7",
+      "file_count": 36,
+      "npz_or_training_state_files_found": false
+    },
+    {
+      "repo": "owhan/DROID-sim-environments",
+      "revision": "5b815672a9a2e3ae596ae845188ae4be5c5d2f34",
+      "file_count": 10,
+      "usd_scenes": [
+        "scene1.usd",
+        "scene2.usd",
+        "scene3.usd"
+      ],
+      "mapping_to_first_episode_not_verified": true
+    },
+    {
+      "repo": "owhan/PolaRiS-Hub",
+      "revision": "8c7e4103e266ef83d8b1ad2e9a63116edd5f155b",
+      "file_count": 148,
+      "initial_condition_scenes": [
+        "block_stack_kitchen",
+        "food_bussing",
+        "move_latte_cup",
+        "organize_tools",
+        "pan_clean",
+        "tape_into_container"
+      ],
+      "source_training_scene_mapping_not_verified": true
+    }
+  ],
+  "replay_criterion": "Full per-frame object state is useful but not mandatory. A verified source scene, initial robot/object state, controller/physics settings and camera/time alignment can support action replay, provided source-reference deviations are measured.",
+  "current_gap": "Original training NPZ, training scene asset mapping and episode initial conditions are not recovered from the inspected public packages. Cannot yet append native RAW as verified source-episode pairs.",
+  "next_step": "Prioritize recovering original PolaRiS simulation co-finetuning scenes and episode initial conditions. Do not replace original training episodes with new expert demonstrations or benchmark policy rollouts.",
+  "simulator_replay_executed": false,
+  "new_expert_data_generated": false,
+  "new_policy_training_executed": false,
+  "cloud_benchmark_source_modified": false,
+  "large_artifacts_downloaded_to_local": false
+}

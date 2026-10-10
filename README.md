@@ -6,6 +6,8 @@ OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机�
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
+用户要求实际尝试专家回放后，[PolaRiS 原动作试验](research/experiments/2026-10-10_polaris_expert_replay_pilot.md)已取得一条成功抓放演示：108 帧、外部与腕部双视角新 RGB/原生 CFA，原动作未修改，物体依靠真实接触完成搬运。场景根据专家抓取/释放位置重建，原训练场景/相机尚未精确恢复；新配对数据与原 JPEG 分开。云端数据和本地数字入口见实验记录，[进度页](outputs/arena-droid-baseline/progress.html)显示结果；完整 900 条基准继续运行。
+
 GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)，主分支为 `main`。
 
 ## 先读这些文件

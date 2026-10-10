@@ -21,7 +21,7 @@ def opengl_pose_matrix(position, quaternion_xyzw):
 
 
 class ArenaRawCapture:
-    def __init__(self, env, output: Path):
+    def __init__(self, env, output: Path, *, profile: RawCameraProfile | None = None):
         import omni.usd
         from pxr import UsdGeom
 
@@ -32,7 +32,7 @@ class ArenaRawCapture:
         self.frames = 0
         self.maximum_quantization_error_dn = 0
         stage = omni.usd.get_context().get_stage()
-        profile = RawCameraProfile(width=1280, height=720)
+        profile = profile or RawCameraProfile(width=1280, height=720)
         for name in ("external_camera", "wrist_camera"):
             source = self.env.scene.sensors[name]
             # The compiled path may use env_[^/]+; use the camera's resolved USD handle.

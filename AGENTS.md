@@ -8,6 +8,8 @@
 
 2026-10-10 用户最新交付要求见 `docs/decisions/0009-baseline-then-training-replay.md`：固定 Isaac Sim / Arena DROID 与仿真器原生 CameraCore ISP 前 CFA，先完成现成官方 π0.5 的完整 RGB 基准，再按原始仿真专家演示保存的场景和状态回放，生成配对 RGB/RAW。MuJoCo 路径已被用户否定。第一阶段已冻结官方九配置各 100 个种子、共 900 条独立 episode，由云端 supervisor 运行；完整结果尚未取得。历史 RGB 3/3 与同步 RAW 2/3 仅是单任务部署验收。PolaRiS 确有公开仿真共同训练数据，但缺少完整物体状态；已找到官方通用采集、Mimic 扩增和回放脚本，当前 DROID 尚无现成 Mimic/遥操作适配或已核验的自动专家生成器。若无现成来源先报告并决定后续；不把测试策略轨迹当原训练专家，不追加 backbone 补救训练、不重建定时任务、不修改正在运行的冻结源码。0009 纠正 0008 的交付范围，全部历史证据保留。
 
+随后用户明确要求尝试机器人状态/原动作回放，以成功专家数据为本轮验收目标。`research/experiments/2026-10-10_polaris_expert_replay_pilot.md` 已记录一条成功的 PolaRiS 方块入左箱回放及 108 帧双视角原生 RGB/CFA 配对集。该试验重建物体场景，原训练场景/相机映射仍未知；不冒充原 JPEG 的精确 RAW 补采或 π0.5 分数。云端入口 `polaris-replay-pilot-v1/successful-expert-index.json`，大数组不下载。完整基准调度器已恢复；新试验与后处理使用独立版本，不修改冻结基准，不重复运行已完成尝试。定时任务保持关闭。
+
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。
 3. 先检查 `git status --short --branch`，保留用户和其他 agent 的未提交变更。确认任务范围后直接推进已授权的可逆开发。
