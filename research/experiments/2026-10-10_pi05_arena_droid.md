@@ -2,6 +2,8 @@
 
 ## 目的与边界
 
+2026-10-10 用户进一步明确两阶段交付，见 [0009](../../docs/decisions/0009-baseline-then-training-replay.md)：完整 RGB 基准与原始仿真专家训练演示的可验证回放。本记录只包含单任务部署验收；同步采得的 RAW 不是原始训练演示回放，完整基准和配对训练数据集均未完成。原始数字与核验记录保留。
+
 用户要求直接部署现成基线，并且同一仿真任务支持原生 CFA/RAW 采集。不训练或微调 backbone。本轮先验证官方魔方入碗任务，不报告整套 Arena 成绩。准入依据为 [0008](../../docs/decisions/0008-pretrained-and-native-cfa-required.md)。
 
 本地运行分支 `lzh/pi05-sim-baseline`，开始时 HEAD `4764b68`；运行时本任务代码尚未提交，云端各独立源码快照的逐文件 SHA256 保存在小型留档 `source_hashes.json`，包含每次实际 GPU 运行版本。用户原有研究文档变更不参与云端源码部署。
@@ -51,7 +53,7 @@
 
 ## 本地查看与复核
 
-离线页面：`outputs/arena-droid-baseline/progress.html`。手动检查并刷新数字与哈希清单：
+历史离线页面：`outputs/arena-droid-baseline/history.html`。当前完整九配置基准见[新记录](2026-10-10_pi05_arena_droid_benchmark.md)与固定 `progress.html`；下列命令仅刷新本历史验收数字及页面：
 
 ```bash
 uv run --locked python -m owac.runtime.arena_droid_archive

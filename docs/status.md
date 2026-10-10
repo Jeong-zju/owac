@@ -100,3 +100,13 @@
 用户明确原版 LIBERO 的第二次选型仍失败：开箱即用的基础上，仿真器必须支持原生 CFA/RAW。[0008 决议](decisions/0008-pretrained-and-native-cfa-required.md)撤回 0007 中 RAW 暂不准入的安排。LIBERO 10/10 保留为 RGB 参考，旧 Lightwheel 红杯保持归档；当前已建立同任务现成策略与原生 RAW 的可运行工程基线，正式主 benchmark 的扩展协议尚未冻结。
 
 本轮部署 Arena DROID 抓放与官方 `pi05_droid_jointpos_polaris` / `pi05_droid_jointpos` 专用权重。已核对官方成功示例与 Isaac CameraCore ISP 前 CFA/噪声输出，审计 Arena `2cc9e9766f1f62a500b85c92207192d8c60fcce5` 的固定源码、Lab gitlink、OpenPI 提交及哈希；[来源清单](../research/reviews/2026-10-10_pretrained_raw_benchmark_sources.json)保存证据。安装文档仍称 Sim 6.0.1，但固定源码 Docker 底座已是 6.1.0，部署必须按锁定源码核验，不能直接复用旧兼容子集。已在独立云端 runtime 完成 Arena 的策略 / RAW 联合实测：RGB **3/3**、同步 RAW **2/3**，额外训练 0 步。每个阶段完整运行预定种子 0/1/2；RAW seed 2 正常完成 1050 步超时，已抬升但未满足入碗判据，作为有效失败保留。两路各 1629 帧、共 3258 帧原生 HDR/CFA/noise，9,774 个保留缓冲已在云端逐文件重读并核对 SHA256，量化误差 0 DN；权重与大数组均留在云端，本地只存数字与校验清单。详见[联合实验记录](../research/experiments/2026-10-10_pi05_arena_droid.md)与[新离线结果页](../outputs/arena-droid-baseline/progress.html)。一次 SIGBUS 已在新目录恢复原 seed，完整旧记录复用而不重复计数；底层原因尚未确定。额外渲染改变了 RGB 观测序列，长期稳定性与统一采集对比时序尚待验证，不追加 backbone 训练。两个本地历史结果页已更新用途与准入提示，远端成功检查时间和所有原始分数保留；定时任务仍关闭。
+
+## 当前交付完整基准与训练演示回放（2026-10-10）
+
+用户确认 [0009 两阶段交付](decisions/0009-baseline-then-training-replay.md)，并明确固定 Isaac Sim / Arena DROID、仿真器原生 RAW，不采用 MuJoCo。第一阶段先取得完整 RGB 基准，第二阶段恢复专家演示的场景和状态，回放采集配对 RGB/RAW。历史 3/3 与 2/3 仅为单任务部署验收，3,258 个视角帧来自策略评测同步采集，不属于原训练演示回放。
+
+第一阶段已冻结[九组官方变化、每组种子 0–99、共 900 条](../configs/baselines/pi05-arena-droid-benchmark-v1.json)，复用官方 jointpos 权重，额外训练 0 步，官方相机/动作/成功判据不变，RAW 额外渲染不介入基准。2026-10-10 05:49:24 UTC 已由 `owac-arena-benchmark-v1` 启动；每条使用新策略和仿真进程，保留正常失败，基础设施故障只允许原身份新目录重试一次，再次故障停止。最初两条已完成成功，900 条尚未完成。实际最新检查时间与逐配置进度以[固定离线页面](../outputs/arena-droid-baseline/progress.html)和[小型数字留档](../research/experiments/results/2026-10-10_pi05_arena_droid_benchmark/)为准，历史页面移至 `history.html`。协议、冻结源码哈希、运行位置和成本口径见[完整基准记录](../research/experiments/2026-10-10_pi05_arena_droid_benchmark.md)。
+
+第二阶段的[源码/数据核查](../research/reviews/2026-10-10_arena_droid_expert_replay.md)已完成：PolaRiS 确有公开仿真共同训练数据，固定 OpenPI 配置混合真实 DROID 与仿真数据，不能将来源全部描述为真实数据；配置不单独证明实际检查点完整训练历史。公开仿真 RLDS 缺少逐帧物体状态，未找到九组场景对应的原始专家状态文件。官方 `record_demos.py`、Mimic `generate_dataset.py`、`replay_demos.py` 和机器人/物体状态 recorder 已核查并留哈希，但当前 DROID `mimic_env=None`，默认 SE3 遥操作与八维 jointpos 动作未接通，没有核验到直接可用的自动专家生成器。GR1/G1 数据和 Franka 方块状态机不是当前 DROID 的现成替代。这些脚本仅完成静态适用性核查，尚未在当前 DROID 上进行专家采集 GPU 验收。
+
+按用户要求先报告缺口，再决定是否适配官方遥操作/Mimic，或新增 DROID 脚本/规划专家。当前未生成新专家或配对训练集，不将评测策略轨迹当原始专家，不追加训练。云端完整基准持续运行，聊天无需保持运行；定时任务关闭，实例、历史记录和权重保留。手动同步命令为 `uv run --locked python -m owac.runtime.arena_droid_benchmark archive`；只回写小型数字，页面生成时间不冒充云端成功检查时间，本地归档修改不覆盖冻结运行代码。

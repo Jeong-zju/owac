@@ -35,7 +35,10 @@ def instrument(env, policy, original, *, num_steps, num_episodes):
     def infer(request):
         tick = time.monotonic()
         response = original_infer(request)
-        inference_times.append(time.monotonic() - tick)
+        elapsed = time.monotonic() - tick
+        inference_times.append(elapsed)
+        with (output / "inference.jsonl").open("a") as log:
+            log.write(json.dumps({"step": counts["control_steps"], "seconds": elapsed}) + "\n")
         counts["inference_calls"] += 1
         return response
 

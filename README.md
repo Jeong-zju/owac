@@ -2,7 +2,7 @@
 
 OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署；当前先选定并验证仿真 benchmark、RGB 闭环和成像/数据协议，再开展 RAW 适配。候选框架尚未实现或验证。
 
-当前用户要求基线开箱即用，同时仿真器支持原生 CFA/RAW 采集：[0008 准入纠正](docs/decisions/0008-pretrained-and-native-cfa-required.md)取代 0007 的 RGB 优先安排。正式主 benchmark 尚未选定；Isaac Lab Arena DROID 与官方 jointpos π0.5 已完成[单任务联合实测](research/experiments/2026-10-10_pi05_arena_droid.md)：无微调，RGB 3/3、同步原生 RAW 2/3；数字与故障记录见[新的离线结果页](outputs/arena-droid-baseline/progress.html)。正式扩展协议与长期稳定性仍待验证。原版 LIBERO 的 10/10 仅保留为[RGB 参考验收](research/experiments/2026-10-10_pi05_official_libero_reference.md)，[本地结果页](outputs/official-libero-baseline/progress.html)标记其 RAW 条件未通过；旧红杯实验归档。
+当前用户要求 [Isaac Sim / Arena DROID 两阶段交付](docs/decisions/0009-baseline-then-training-replay.md)：先取得官方 π0.5 完整 RGB 基准，再回放原始仿真专家训练演示，生成仿真器原生配对 RGB/RAW。[完整基准](research/experiments/2026-10-10_pi05_arena_droid_benchmark.md)已冻结官方九配置各 100 个种子、共 900 个独立 episode，云端 supervisor 正在运行，尚未完成。[固定离线页面](outputs/arena-droid-baseline/progress.html)显示手动同步进度；定时任务保持关闭。[专家来源核查](research/reviews/2026-10-10_arena_droid_expert_replay.md)找到官方通用采集、Mimic 扩增和状态回放脚本，但当前 DROID 接口仍需适配，未找到原训练物体状态或直接可用的自动专家生成器。历史 [RGB 3/3、同步 RAW 2/3](research/experiments/2026-10-10_pi05_arena_droid.md)仅为部署验收，不属于完整基准或原训练演示回放；[LIBERO RGB 参考](research/experiments/2026-10-10_pi05_official_libero_reference.md)及旧红杯实验保留，不追加 backbone 补救训练。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 

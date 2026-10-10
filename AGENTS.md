@@ -6,7 +6,7 @@
 
 ## 开始工作
 
-2026-10-10 用户最新选型要求见 `docs/decisions/0008-pretrained-and-native-cfa-required.md`：现成预训练策略与仿真器原生 CFA/RAW 采集必须同时满足，正式主 benchmark 尚未选定。原版 LIBERO 仅保留为 RGB 参考，Lightwheel 红杯不再追加 backbone 微调；Isaac Lab Arena DROID / 官方 jointpos π0.5 已完成单任务联合实测：RGB 3/3、同步原生 RAW 2/3，见 `research/experiments/2026-10-10_pi05_arena_droid.md`；额外渲染等价性、SIGBUS 长期稳定性与正式对比协议仍待验证。不能用分别通过的 RGB 与 RAW 实验代替同一任务的联合验收。0008 取代 0007 的 RAW 暂不准入安排，历史证据保留。
+2026-10-10 用户最新交付要求见 `docs/decisions/0009-baseline-then-training-replay.md`：固定 Isaac Sim / Arena DROID 与仿真器原生 CameraCore ISP 前 CFA，先完成现成官方 π0.5 的完整 RGB 基准，再按原始仿真专家演示保存的场景和状态回放，生成配对 RGB/RAW。MuJoCo 路径已被用户否定。第一阶段已冻结官方九配置各 100 个种子、共 900 条独立 episode，由云端 supervisor 运行；完整结果尚未取得。历史 RGB 3/3 与同步 RAW 2/3 仅是单任务部署验收。PolaRiS 确有公开仿真共同训练数据，但缺少完整物体状态；已找到官方通用采集、Mimic 扩增和回放脚本，当前 DROID 尚无现成 Mimic/遥操作适配或已核验的自动专家生成器。若无现成来源先报告并决定后续；不把测试策略轨迹当原训练专家，不追加 backbone 补救训练、不重建定时任务、不修改正在运行的冻结源码。0009 纠正 0008 的交付范围，全部历史证据保留。
 
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。

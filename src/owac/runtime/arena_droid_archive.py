@@ -114,6 +114,7 @@ def refresh(args):
             "local_generated_at_utc": datetime.now(UTC).isoformat(),
             "sha256": manifest,
             "html_sha256": sha256(args.page),
+            "html_path": str(args.page),
         },
     )
     for name, digest in manifest.items():
@@ -204,8 +205,9 @@ def render(directory, page):
         result = run_summaries[name]
         n = result["valid"]
         score = f"{result['successes']}/{n}" if n else "未测量"
+        label = "RGB 策略部署验收" if phase == "rgb" else "RGB 策略部署验收（同步采集 RAW）"
         cards.append(
-            f'<div class="card"><b>{phase.upper()} · {esc(name)}</b>'
+            f'<div class="card"><b>{label} · {esc(name)}</b>'
             f'<p class="score">成功 {score}</p><p>有效完成 {n}/3</p>'
             f"<p>完整 RAW 帧/视角：{result['raw_frames_per_view'] or '—'}</p></div>"
         )
@@ -238,11 +240,22 @@ a{{color:#8acaff}}
 .cards{{display:flex;gap:16px;flex-wrap:wrap}}
 .card{{background:#182432;padding:16px;flex:1;min-width:230px}}
 .score{{font-size:25px;margin:12px 0}}
+.notice{{border-left:4px solid #e2b76c;background:#29251e;padding:14px 18px;margin:20px 0}}
 </style>
 <h1>Isaac Lab Arena DROID · 官方 π0.5 jointpos</h1>
 <p>最后成功云端检查：{esc(check["checked_at_utc"])} · 手动检查，未建立定时任务</p>
 
-<p>当前：{esc(current)} · {esc(stage.get("stage"))} · {esc(stage.get("status", "complete"))}</p>
+<div class="notice"><b>当前交付未完成：完整基准与原始训练演示回放</b>
+<p>① 完整九配置 RGB 基准正在独立运行，见 <a href="progress.html">当前进度</a>；
+下方仅为单任务 3 种子的历史部署验收。</p>
+<p>② 原始仿真专家演示的可验证回放及配对 RGB/RAW 数据集尚未生成。
+现有 RAW 来自策略评测时的同步采集，不是原始训练演示回放；模型仍输入 RGB。</p>
+<p>用户确认继续使用 Isaac Sim / Arena DROID 和原生 CameraCore RAW。
+PolaRiS 公共仿真训练 RLDS 缺少完整物体状态；通用采集、Mimic 与回放脚本已找到，
+当前 DROID 仍需专家来源及控制 / Mimic 适配。</p></div>
+
+<p>历史部署运行：{esc(current)} · {esc(stage.get("stage"))}
+ · {esc(stage.get("status", "complete"))}</p>
 
 <p>任务：魔方入碗。预定环境种子 0、1、2；RGB 与原生 RAW 配对测试。使用官方预训练权重，无微调。</p>
 
@@ -281,7 +294,7 @@ def main():
         default=Path("research/experiments/results/2026-10-10_pi05_arena_droid"),
     )
     parser.add_argument(
-        "--page", type=Path, default=Path("outputs/arena-droid-baseline/progress.html")
+        "--page", type=Path, default=Path("outputs/arena-droid-baseline/history.html")
     )
     parser.add_argument(
         "--offline", action="store_true", help="Rebuild from existing local numbers"
