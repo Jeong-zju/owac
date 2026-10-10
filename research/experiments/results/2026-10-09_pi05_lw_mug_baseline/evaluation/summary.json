@@ -1,0 +1,59 @@
+{
+  "status": "complete",
+  "policy_metadata": {
+    "protocol_id": "owac-lw-mug-rgb-v1",
+    "protocol_sha256": "521c34db4fa9581c893ac362898c91e1edf74ff340c6785ee6fe0dd471058e68",
+    "model_sha256": "a84c1fd5c5e76058414624f511bd629d207d23ea46b5413e1c22b67f4bde806c",
+    "training": {
+      "status": "complete",
+      "smoke_test": false,
+      "protocol_sha256": "521c34db4fa9581c893ac362898c91e1edf74ff340c6785ee6fe0dd471058e68",
+      "dataset_manifest_sha256": "b22dc1d24f2c8288e7abb2ffb56727cb83d164b0adba37915ec3d21d56940102",
+      "initial_model_sha256": "4bcdb2aacab3e215211f9a5733c62d8701633e5aef757192cfc0bf7d85f5f47d",
+      "train_frames": 46350,
+      "validation_frames": 5150,
+      "trainable_parameters": 3616757520,
+      "total_parameters": 3616757520,
+      "device": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+      "torch": "2.7.1+cu128",
+      "training_precision": "FP32 parameters/optimizer/loss, BF16 autocast forward",
+      "ema": false,
+      "loss": "official action flow MSE, mean over seven actual action dimensions",
+      "validation": "no image augmentation, fixed 256 frames/noise/time, episode-disjoint",
+      "precision_check": {
+        "float32_loss": 1.9584143161773682,
+        "autocast_loss": 1.9570233821868896,
+        "relative_loss_difference": 0.0007102347950527046
+      },
+      "initial_validation_loss": 1.7296443982049823,
+      "first_step_action_projection_max_update": 4.470348358154297e-08,
+      "best_step": 1000,
+      "completed_steps": 10000,
+      "best_validation_loss": 0.1493486799445236,
+      "latest_validation_loss": 0.3833745911215374,
+      "plateau_checks": 9,
+      "wall_seconds": 33991.391808317974,
+      "torch_allocated_peak_bytes": 60313982976,
+      "torch_reserved_peak_bytes": 63457722368,
+      "stop_reason": "held-out loss plateau",
+      "selected_model_sha256": "a84c1fd5c5e76058414624f511bd629d207d23ea46b5413e1c22b67f4bde806c",
+      "convergence_observed": true
+    },
+    "input": "two RGB views + current proprioception + fixed task prompt",
+    "privileged_state": false,
+    "flow_steps": 10
+  },
+  "episodes": 100,
+  "successes": 0,
+  "success_rate": 0.0,
+  "wilson_95": [
+    3.469446951953614e-18,
+    0.03699349820698568
+  ],
+  "errors": 0,
+  "inference_ms_p50": 113.35521191358566,
+  "inference_ms_p95": 116.03859541937709,
+  "total_episode_wall_seconds": 4842.101456653327,
+  "protocol_sha256": "521c34db4fa9581c893ac362898c91e1edf74ff340c6785ee6fe0dd471058e68",
+  "episodes_sha256": "74c2359f16f5ecd22caa2165eb86113ab5c3c0691e9abd796853ad1db6b032b0"
+}
