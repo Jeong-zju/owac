@@ -84,6 +84,7 @@ def load_payload(directory):
         ),
         "chart": {"train": training_points(rows), "validation": validations, "bin_steps": 50},
         "evaluation": evaluation,
+        "diagnosis": read_json(directory / "diagnosis.json"),
         "episodes": [
             {key: row.get(key) for key in ("seed", "success", "status", "control_steps", "error")}
             for row in episodes
@@ -119,6 +120,9 @@ def render(directory, output):
     payload["links"] = {
         "experiment": os.path.relpath(
             directory.parents[1] / "2026-10-09_pi05_lw_mug_baseline.md", output.parent
+        ),
+        "diagnosis": os.path.relpath(
+            directory.parents[1] / "2026-10-10_pi05_failure_diagnosis.md", output.parent
         ),
         "data": os.path.relpath(directory / "dataset.json", output.parent),
         "training": os.path.relpath(

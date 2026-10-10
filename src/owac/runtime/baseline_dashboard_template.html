@@ -77,6 +77,13 @@
       <p class="hint subtle" id="history-note" style="margin-top:10px">每次检查同步数字与曲线。页面刷新只读取本地快照，不触发云端训练或下载权重。</p>
     </section>
   </div>
+  <section class="panel" id="diagnosis-panel" hidden style="margin-top:16px">
+    <div class="panel-header"><h2>失败原因诊断</h2><span class="hint subtle" id="diagnosis-time"></span></div>
+    <p id="diagnosis-conclusion" class="hint"></p>
+    <ul id="diagnosis-findings" class="hint"></ul>
+    <p class="hint subtle">以下为独立开发种子的诊断，不替换上方 100 次正式测试结果。</p>
+    <a id="diagnosis-report">查看完整诊断记录与数字证据</a>
+  </section>
   <footer class="footer"><div class="footer-links"><a id="experiment-link">实验说明</a><a id="dataset-link">采集数字清单</a><a id="training-link">训练数值报告</a></div><span>工程单任务 · 检查点保留在云端</span></footer>
 </main>
 <script type="application/json" id="snapshot-data">__PAYLOAD__</script>
@@ -140,6 +147,7 @@
   const history=document.getElementById('check-history');
   d.history.slice(-6).reverse().forEach(row=>{const item=document.createElement('div');item.className='check';const time=document.createElement('span');time.className='check-time numbers';time.textContent=clock(row.checked_at);const note=document.createElement('span');note.className='check-note';note.textContent=row.status==='failed'?'运行异常':row.stage==='train'?'训练 '+fmt(row.step)+' 步':row.stage==='evaluate'?'测试 '+row.test_episodes+'/100':row.status==='complete'?'全部完成':'采集 '+row.train_episodes+' / '+row.validation_episodes;item.append(time,note);history.appendChild(item);});
   [['experiment-link','experiment'],['dataset-link','data'],['training-link','training']].forEach(([id,key])=>document.getElementById(id).href=d.links[key]);
+  if(d.diagnosis&&d.diagnosis.conclusion){document.getElementById('diagnosis-panel').hidden=false;set('diagnosis-time',clock(d.diagnosis.diagnosed_at_utc,true));set('diagnosis-conclusion',d.diagnosis.conclusion);const list=document.getElementById('diagnosis-findings');(d.diagnosis.findings||[]).forEach(finding=>{const item=document.createElement('li');item.textContent=finding;list.appendChild(item);});document.getElementById('diagnosis-report').href=d.links.diagnosis;}
   let logarithmic=true;
   const svg=document.getElementById('loss-chart'),ns='http://www.w3.org/2000/svg';
   function drawChart(){

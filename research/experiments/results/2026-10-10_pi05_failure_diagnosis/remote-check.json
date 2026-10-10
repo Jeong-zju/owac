@@ -1,0 +1,51 @@
+{
+  "checked_at_utc": "2026-10-10T02:15:25.009957+00:00",
+  "run": {
+    "status": "complete",
+    "started_unix": 1791597937.5244622,
+    "baseline": "/workspace/owac/runs/pi05-lw-mug-v1",
+    "commands": [
+      [
+        "/workspace/owac/repo/configs/backends/pi05-runtime/.venv/bin/python",
+        "-u",
+        "-m",
+        "owac.evaluation.pi05_diagnostics",
+        "serve",
+        "--protocol",
+        "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+        "--weights",
+        "/workspace/owac/runs/pi05-lw-mug-v1/trained",
+        "--port",
+        "18081"
+      ],
+      [
+        "/workspace/owac/repo/configs/simulation/lw-libero-runtime/.venv/bin/python",
+        "-u",
+        "-m",
+        "owac.simulation.pi05_diagnostics",
+        "--protocol",
+        "/workspace/owac/repo/configs/baselines/pi05-lw-mug-v1.json",
+        "--data",
+        "/workspace/owac/runs/pi05-lw-mug-v1/data",
+        "--output",
+        "/workspace/owac/diagnostics/pi05-lw-mug-d1/closed-loop/rollouts",
+        "--port",
+        "18081"
+      ]
+    ],
+    "source_sha256": {
+      "src/owac/evaluation/pi05_diagnostics.py": "1b1fcfc950655b3d6a36e3260d85a91eb15711bc0bc65aa4a2ad0c4c87fcc54d",
+      "src/owac/simulation/pi05_diagnostics.py": "6d480de170f10e3e5d41055126f3b448a0f36b1e16ca8e51931f7cb89434038d",
+      "src/owac/runtime/pi05_diagnostics.py": "8c706ed9e5286b46c2ea7db67d04fd7bf39f96a083b5548b5a6db52096a3c3e7"
+    },
+    "frozen_baseline_source_matches": true,
+    "final_test_seeds_used": false,
+    "checkpoints_downloaded": false,
+    "stage": "development rollouts",
+    "finished_unix": 1791598482.5861547
+  },
+  "source_matches_frozen": true,
+  "summary_exists": true,
+  "infrastructure_error": false,
+  "supervisor": "owac-pi05-diagnostic-rollouts    EXITED    Oct 10 02:14 AM"
+}

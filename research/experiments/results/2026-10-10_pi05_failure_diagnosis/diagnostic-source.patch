@@ -1,0 +1,13 @@
+--- a/src/owac/evaluation/pi05_diagnostics.py
++++ b/src/owac/evaluation/pi05_diagnostics.py
+@@ -168,9 +168,7 @@
+         "protocol_sha256": file_sha256(args.protocol),
+         "dataset_manifest_sha256": file_sha256(args.data / "dataset.json"),
+         "seeds": sorted({r["seed"] for r in records}),
+-        "sample_selection": (
+-            "first/middle/last frame of each phase in first two episodes of each split"
+-        ),
++        "sample_selection": "first/middle/last frame of each phase in first two episodes of each split",
+         "wall_seconds": time.perf_counter() - started,
+         "metrics": {},
+     }
