@@ -2,7 +2,7 @@
 
 日期：2026-10-08。状态：完成报告阅读与一手资料/部分源码核查；推荐进入兼容性验证，尚未部署或运行候选仿真。建设顺序见 [0004 决议](decisions/0004-simulation-benchmark-first.md)。
 
-**2026-10-10 更新：下述首选建议已被用户否定，由 [0007](decisions/0007-pretrained-benchmark-first.md) 取代。当前优先原版 LIBERO 与官方 `pi05_libero` 的直接 RGB 闭环，不继续修补 Lightwheel 红杯 backbone；RAW/CFA 暂不作为准入前提。以下保留为当时的选型依据，不作为当前执行推荐。**
+**2026-10-10 更新：最新 [0008](decisions/0008-pretrained-and-native-cfa-required.md)要求现成策略与原生 CFA/RAW 同时通过。旧 Lightwheel 推荐和 0007 的 LIBERO 主 benchmark 安排均已撤回。正式 benchmark 尚未选定；Arena DROID / 官方 jointpos π0.5 为待联合验收候选，LIBERO 仅留 RGB 参考。以下保留历史调研依据，不作为当前执行推荐。**
 
 ## 选型结论
 

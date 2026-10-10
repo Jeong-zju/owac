@@ -1,0 +1,66 @@
+{
+  "checked_at_utc": "2026-10-10T03:04:29.602084+00:00",
+  "verification_scope": "official documentation and pinned source only; no Arena closed-loop or joint RAW acceptance performed",
+  "arena_commit": "2cc9e9766f1f62a500b85c92207192d8c60fcce5",
+  "isaaclab_gitlink": "91a0906f93802eb859192dcb0bca879f891e92d6",
+  "sources": [
+    {
+      "path": "docker/Dockerfile.isaaclab_arena",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/docker/Dockerfile.isaaclab_arena",
+      "git_blob_sha": "6227c4ef39539ff2a7c0d7ce85d846808aa6e6f0",
+      "sha256": "0ea5ec1a64308160c1d5bb4b8faf872fb4f2fa3521e6c9042f6f5a235829c62b",
+      "base_image": "nvcr.io/nvidia/isaac-sim:6.1.0"
+    },
+    {
+      "path": "isaaclab_arena_openpi/docker/OPENPI_COMMIT",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/isaaclab_arena_openpi/docker/OPENPI_COMMIT",
+      "git_blob_sha": "dedd58cb64b54f4c1c56e7410d0f165f88079609",
+      "sha256": "7c72767725d20715ada082ca533d7fcc2085e2bd4f4aa61823c7060c0f110d62",
+      "pinned_commit": "c23745b5ad24e98f66967ea795a07b2588ed6c79"
+    },
+    {
+      "path": "isaaclab_arena_openpi/docker/run_openpi_server.sh",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/isaaclab_arena_openpi/docker/run_openpi_server.sh",
+      "git_blob_sha": "c10b26c8e4e930cb059cbb36d00974b36508f99c",
+      "sha256": "2460ab467359e89f0462cab78cd1eb7c1e753d2457aa15534f6ad48bdd06cace",
+      "policy_config": "pi05_droid_jointpos_polaris",
+      "checkpoint": "gs://openpi-assets-simeval/pi05_droid_jointpos"
+    },
+    {
+      "path": "isaaclab_arena_environments/experiment_configs/droid_pnp_openpi_experiment.yaml",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/isaaclab_arena_environments/experiment_configs/droid_pnp_openpi_experiment.yaml",
+      "git_blob_sha": "1ef42cfe47b9636d24c569da9ffe153397de6cf7",
+      "sha256": "e604857f305353fb65dfda0cc41a66f2c67f9c5d9e785df7e3052c885f95e97d",
+      "environment": "pick_and_place_maple_table",
+      "embodiment": "droid_abs_joint_pos",
+      "object": "rubiks_cube_hot3d_robolab",
+      "destination": "bowl_ycb_robolab",
+      "episodes": 3
+    },
+    {
+      "path": ".gitmodules",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/.gitmodules",
+      "git_blob_sha": "645b0151adc403679bf3b945f52ce5f9ee726c1a",
+      "sha256": "8970bf016aaf0a9bfa6cc33a5754163aec99d56976ad131fc9af0bb39b2f80af"
+    }
+  ],
+  "documentation_version_conflict": {
+    "install_doc": "https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/installation.html",
+    "install_doc_sim": "6.0.1",
+    "pinned_docker_sim": "6.1.0",
+    "conclusion": "resolve native lockfile, pinned IsaacLab and CameraCore in one runtime before acceptance"
+  },
+  "sensor_documentation": "https://docs.isaacsim.omniverse.nvidia.com/6.0.1/sensors/isaacsim_sensors_camera.html#exposing-the-isp-camera-pipeline",
+  "policy_documentation": "https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/running_a_real_policy/openpi.html",
+  "official_policy_example_statistics": {
+    "runs": 9,
+    "episodes_per_run": 3,
+    "reported_all_success_runs": 8,
+    "sugar_box_successes": 0,
+    "sugar_box_episodes": 3,
+    "scope": "upstream example, not OWAC measurements; not proof of robust full benchmark"
+  },
+  "weights_downloaded_this_check": false,
+  "runs_started_this_check": false,
+  "sensor_documentation_current": "https://docs.isaacsim.omniverse.nvidia.com/6.1.0/sensors/isaacsim_sensors_camera.html#exposing-the-isp-camera-pipeline"
+}

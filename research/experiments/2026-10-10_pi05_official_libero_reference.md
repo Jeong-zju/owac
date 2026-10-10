@@ -1,5 +1,7 @@
 # 官方 π0.5 / 原版 LIBERO RGB 直接使用验收
 
+**后续用途纠正（2026-10-10）：用户要求开箱即用与仿真器原生 CFA/RAW 同时满足，见 [0008](../../docs/decisions/0008-pretrained-and-native-cfa-required.md)。本实验保留为有效 RGB 参考，未通过主 benchmark 的 RAW 准入条件；10/10 与原始运行记录不变。**
+
 目的：按用户最新要求更换失败的 benchmark/backbone 组合，确认已有官方策略可直接完成原版任务，避免继续自定义 backbone 的微调。决策见 [0007](../../docs/decisions/0007-pretrained-benchmark-first.md)。
 
 ## 固定身份

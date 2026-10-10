@@ -89,8 +89,14 @@
 
 已进行 [π0.5 失败诊断](../research/experiments/2026-10-10_pi05_failure_diagnosis.md)：开发种子专家动作重放成功；选中模型在开发专家观测上的位置平均误差约 3.64 cm，闭合阶段夹爪符号准确率 66.67%；全部演示发现停留/夹爪切换边界的近似观测歧义。原分数保留，但当前自定义适配尚不能作为已验收的强 π0.5 对照。修复与选模仍须使用开发数据，新协议版本化后重新冻结比较条件。
 
-## 当前选型：官方预训练 LIBERO RGB 参考（2026-10-10）
+## RGB 参考验收：官方预训练 LIBERO（2026-10-10，主 benchmark 地位已撤回）
 
 用户已否定 Lightwheel 红杯任务与自定义 π0.5 微调的组合，要求优先直接可用的 backbone/benchmark，并明确可以先用原版 RGB。[0007 决议](decisions/0007-pretrained-benchmark-first.md)取代 0004 的主 benchmark 推荐；旧红杯 0/100 与诊断保留为历史负结果，不再追加 backbone 训练或接口调参。
 
 已选择原版 LIBERO-Goal 全部 10 项任务与官方 `pi05_libero`，额外训练 0 步。独立 Python 3.8 模拟器已部署；复用官方原始权重、归一化和评测循环，保留官方相机、动作、初始状态与成功判据。2026-10-10 02:46:43 UTC 完成全部 10 项任务各 1 条验收，成功 **10/10**、基础设施异常 0；逐条任务/初始状态、计数和哈希均核验，确认直接可用，小样本不冒充官方完整评测。新协议、版本与兼容修复见[实验记录](../research/experiments/2026-10-10_pi05_official_libero_reference.md)，固定入口为[新 RGB 结果页](../outputs/official-libero-baseline/progress.html)。定时检查不重建，旧云端检查点不删除。本方案仅是 RGB 参考，不声称具备原生 CFA/RAW。
+
+## 当前准入：现成策略与原生 CFA/RAW 同时满足（2026-10-10）
+
+用户明确原版 LIBERO 的第二次选型仍失败：开箱即用的基础上，仿真器必须支持原生 CFA/RAW。[0008 决议](decisions/0008-pretrained-and-native-cfa-required.md)撤回 0007 中 RAW 暂不准入的安排。LIBERO 10/10 保留为 RGB 参考，旧 Lightwheel 红杯保持归档；当前没有已通过两项联合验收的正式主 benchmark。
+
+下一项验收候选是 Arena DROID 抓放与官方 `pi05_droid_jointpos_polaris` / `pi05_droid_jointpos` 专用权重。已核对官方成功示例与 Isaac CameraCore ISP 前 CFA/噪声输出，审计 Arena `2cc9e9766f1f62a500b85c92207192d8c60fcce5` 的固定源码、Lab gitlink、OpenPI 提交及哈希；[来源清单](../research/reviews/2026-10-10_pretrained_raw_benchmark_sources.json)保存证据。安装文档仍称 Sim 6.0.1，但固定源码 Docker 底座已是 6.1.0，部署必须按锁定源码核验，不能直接复用旧兼容子集。尚未部署或运行 Arena 的策略 / RAW 联合采集，不把上游示例当作 OWAC 实测，也不启动补救 backbone 训练。两个本地历史结果页已更新用途与准入提示，远端成功检查时间和所有原始分数保留；定时任务仍关闭。

@@ -233,17 +233,21 @@ def archive(args):
     error = html.escape(status.get("error", ""))
     page = f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>官方 π0.5 / LIBERO RGB 基线</title><style>
+<title>官方 π0.5 / LIBERO RGB 参考</title><style>
 body{{font:15px system-ui;background:#111827;color:#e5e7eb;margin:0}}
 main{{max-width:980px;margin:auto;padding:24px}}h1{{font-size:24px;margin:0 0 12px}}
 .cards{{display:flex;gap:12px;flex-wrap:wrap}}.card{{padding:18px;background:#1f2937;border-radius:8px;flex:1}}
 strong{{display:block;font-size:24px;margin:8px 0}}table{{width:100%;border-collapse:collapse}}
 td,th{{padding:10px;text-align:left;border-bottom:1px solid #374151}}a{{color:#93c5fd}}
 .muted{{color:#9ca3af}}.error{{color:#fca5a5;overflow-wrap:anywhere}}</style>
-<main><h1>官方 π0.5 / 原版 LIBERO RGB 基线</h1>
-<p>当前采用 LIBERO-Goal 全部 10 项任务与官方 pi05_libero 权重，额外训练 0 步。
-旧 Lightwheel 红杯实验已归档，不再作为主基线。</p><div class="cards">
-<div class="card">本次闭环<strong>{score}</strong>
+<main><h1>官方 π0.5 / 原版 LIBERO RGB 参考</h1>
+<p class="error"><b>主 benchmark 准入未通过：此模拟器不提供原生 CFA/RAW。</b>
+现成策略与原生采集必须同时满足。正式 benchmark 尚未选定；
+Isaac Lab Arena DROID / 官方 jointpos π0.5 是待联合验收候选。
+<a href="../../docs/decisions/0008-pretrained-and-native-cfa-required.md">当前选型要求</a></p>
+<p>下方保留 LIBERO-Goal 全部 10 项任务与官方 pi05_libero 的 RGB 参考结果，额外训练 0 步。</p>
+<div class="cards">
+<div class="card">RGB 参考闭环<strong>{score}</strong>
 {summary.get("episodes", 0)} / {summary.get("expected_episodes", 10)} 已完成</div>
 <div class="card">运行状态<strong>{html.escape(status["status"])}</strong>
 {html.escape(status["stage"])}</div>
