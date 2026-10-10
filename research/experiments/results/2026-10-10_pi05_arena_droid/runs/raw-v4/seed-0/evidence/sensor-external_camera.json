@@ -1,0 +1,53 @@
+{
+  "width": 1280,
+  "height": 720,
+  "bit_depth": 24,
+  "cfa": "GRBG",
+  "response_scale": 1.0,
+  "source": "Isaac native CameraCore ISP introspection, stage 2-cfa",
+  "signal_kind": "synthetic_sensor_cfa_noiseless",
+  "container_dtype": "uint32",
+  "byte_order": "little",
+  "black_level": 0,
+  "white_level": 16777215,
+  "cfa_origin_row_col": [
+    0,
+    0
+  ],
+  "pixel_coordinates": "full frame, row and column starting at zero; no resize/crop",
+  "exposure_seconds": null,
+  "physical_sensor_gain": null,
+  "physical_camera": null,
+  "hdr_source_dtype": "float16",
+  "effective_precision": "limited by renderer FP16 HDR; not 24 physical measurement bits",
+  "bad_pixel_mask": null,
+  "missing_pixels": "none; incomplete buffers fail capture",
+  "saturation_mask": "derive from stored CFA == white_level; no separate file",
+  "native_isp_program_sha256": "88fdf3295b78c9933fc5c4a112513320888984aa23d9efd69f0a1ba1f957fa09",
+  "camera_eye_xyz": null,
+  "camera_prim_path": "/World/OWACRaw_external_camera",
+  "camera_target_xyz": null,
+  "usd_focal_length": 2.0999999046325684,
+  "processing": [
+    "renderer linear HDR",
+    "identity color correction",
+    "native GRBG ADC"
+  ],
+  "noise_variant": "3-noise, separate file; native default uncalibrated noise",
+  "source_rgb_prim": "/World/envs/env_0/Robot/panda_link0/external_camera",
+  "optical_attributes": {
+    "focalLength": 2.0999999046325684,
+    "horizontalAperture": 5.375999927520752,
+    "verticalAperture": 3.0239999294281006,
+    "horizontalApertureOffset": 0.0,
+    "verticalApertureOffset": 0.0,
+    "clippingRange": [
+      0.009999999776482582,
+      1000000.0
+    ],
+    "focusDistance": 28.0,
+    "fStop": 0.0
+  },
+  "pose_source": "Camera Fabric view world poses (OpenGL xyzw), queried per step",
+  "sampling_phase": "pre-action; render without physics advance; last reset excluded"
+}

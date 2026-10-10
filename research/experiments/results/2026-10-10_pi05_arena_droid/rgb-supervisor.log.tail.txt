@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src/owac/runtime/arena_droid.py", line 431, in <module>
+    main()
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src/owac/runtime/arena_droid.py", line 427, in main
+    {"deploy": deploy, "convert": convert, "serve": serve, "run": run}[args.command](args)
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src/owac/runtime/arena_droid.py", line 129, in run
+    protocol = json.loads(args.protocol.read_text())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/owac/reference/pi05-arena-droid-v1/protocol.json'
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v2/owac/runtime/arena_droid.py", line 434, in <module>
+    main()
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v2/owac/runtime/arena_droid.py", line 430, in main
+    {"deploy": deploy, "convert": convert, "serve": serve, "run": run}[args.command](args)
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v2/owac/runtime/arena_droid.py", line 251, in run
+    subprocess.run(
+  File "/.uv/python_install/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/bin/python', '-u', '-m', 'owac.simulation.arena_droid_rollout', '--experiment_config', '/workspace/owac/reference/pi05-arena-droid-v1/runs/rgb-v2/seed-0/experiment.yaml', '--experiment_output_directory', '/workspace/owac/reference/pi05-arena-droid-v1/runs/rgb-v2/seed-0/official', '--headless', '--viz', 'kit', '--device', 'cuda:0', '--kit_args=--/rtx/spg/enabled=true --/rtx/hydra/supportMultiTickRate=true --/rtx/rendering/perSensorTickTlas=true']' returned non-zero exit status 2.

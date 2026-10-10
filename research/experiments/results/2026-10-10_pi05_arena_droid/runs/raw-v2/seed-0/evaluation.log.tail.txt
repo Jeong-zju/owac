@@ -1,0 +1,100 @@
++-----------------------------------+
+|      Active Termination Terms     |
++-------+----------------+----------+
+| Index | Name           | Time Out |
++-------+----------------+----------+
+|   0   | object_dropped |  False   |
+|   1   | time_out       |   True   |
+|   2   | success        |  False   |
++-------+----------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 0 active terms.
++-----------------------+
+|  Active Reward Terms  |
++-------+------+--------+
+| Index | Name | Weight |
++-------+------+--------+
++-------+------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+[Pi0RemotePolicy] Connecting to server at 127.0.0.1:18020 ...
+[Pi0RemotePolicy] Connected.
+2026-10-10T04:01:34Z [16,433ms] [Error] [omni.kit.app._impl] [py stderr]: 
+Episodes:   0%|          | 0/1 [00:00<?, ?episode/s]
+Episodes:   0%|          | 0/1 [00:00<?, ?episode/s]
+[INFO]: SimulationContext cleared
+Run 'droid_pnp_openpi' failed with error: Error rolling out policy: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+Traceback: Traceback (most recent call last):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 96, in rollout_policy
+    actions = policy.get_action(env, obs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 90, in get_action
+    capture = ArenaRawCapture(env, output)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_raw.py", line 42, in __init__
+    raise RuntimeError(f"Missing official RGB camera prim: {source_path}")
+RuntimeError: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+RuntimeError: Error rolling out policy: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+
+Closing simulation app
+Exception caught in SimulationAppContext: RuntimeError: Error rolling out policy: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+Traceback:
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 96, in rollout_policy
+    actions = policy.get_action(env, obs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 90, in get_action
+    capture = ArenaRawCapture(env, output)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_raw.py", line 42, in __init__
+    raise RuntimeError(f"Missing official RGB camera prim: {source_path}")
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]: 
+During handling of the above exception, another exception occurred:
+
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/experiment_runner.py", line 170, in main
+    run_results = execute_experiment(
+                  ^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v2/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+2026-10-10T04:01:35Z [18,235ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Error rolling out policy: Missing official RGB camera prim: /World/envs/env_[^/]+/Robot/panda_link0/external_camera
+Killing the process without cleaning up

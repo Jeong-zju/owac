@@ -1,0 +1,100 @@
+|    3     | gripper_pos            |   (1,)   |
+|    4     | eef_pos                |   (3,)   |
+|    5     | eef_quat               |   (4,)   |
++----------+------------------------+----------+
++----------------------------------------------------+
+|  Active Observation Terms in Group: 'camera_obs'   |
++--------+-------------------------+-----------------+
+| Index  | Name                    |      Shape      |
++--------+-------------------------+-----------------+
+|   0    | external_camera_rgb     |  (720, 1280, 3) |
+|   1    | external_camera_2_rgb   |  (720, 1280, 3) |
+|   2    | wrist_camera_rgb        |  (720, 1280, 3) |
++--------+-------------------------+-----------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 3 active terms.
++-----------------------------------+
+|      Active Termination Terms     |
++-------+----------------+----------+
+| Index | Name           | Time Out |
++-------+----------------+----------+
+|   0   | object_dropped |  False   |
+|   1   | time_out       |   True   |
+|   2   | success        |  False   |
++-------+----------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 0 active terms.
++-----------------------+
+|  Active Reward Terms  |
++-------+------+--------+
+| Index | Name | Weight |
++-------+------+--------+
++-------+------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+[Pi0RemotePolicy] Connecting to server at 127.0.0.1:18020 ...
+[Pi0RemotePolicy] Connected.
+OWAC_ARENA_CONTROL 0
+OWAC_ARENA_CONTROL 100
+OWAC_ARENA_CONTROL 200
+OWAC_ARENA_CONTROL 300
+Timeout (0:01:30)!
+Thread 0x000073f0df7fe6c0 (most recent call first):
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 359 in wait
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 655 in wait
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/tqdm/_monitor.py", line 60 in run
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x000073f0dffff6c0 (most recent call first):
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1169 in _wait_for_tstate_lock
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1153 in join
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/websockets/sync/connection.py", line 767 in keepalive
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012 in run
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x000073f0e4bc06c0 (most recent call first):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/websockets/sync/connection.py", line 824 in recv_events
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/websockets/sync/client.py", line 124 in recv_events
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012 in run
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x000073f1fd1f86c0 (most recent call first):
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/concurrent/futures/thread.py", line 90 in _worker
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1012 in run
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x000073f266b6f6c0 (most recent call first):
+  <no Python frame>
+
+Thread 0x0000740adc2c7740 (most recent call first):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/submodules/IsaacLab/source/isaaclab_physx/isaaclab_physx/physics/physx_manager.py", line 522 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/submodules/IsaacLab/source/isaaclab/isaaclab/sim/simulation_context.py", line 793 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/submodules/IsaacLab/source/isaaclab/isaaclab/envs/manager_based_rl_env.py", line 236 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/environments/isaaclab_arena_manager_based_env.py", line 187 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/gymnasium/core.py", line 327 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/.venv/lib/python3.12/site-packages/gymnasium/wrappers/common.py", line 393 in step
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 98 in rollout_policy
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v5/owac/simulation/arena_droid_rollout.py", line 98 in instrument
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v5/owac/simulation/arena_droid_rollout.py", line 134 in wrapped
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142 in build_and_run
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68 in execute_experiment
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/experiment_runner.py", line 170 in main
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v5/owac/simulation/arena_droid_rollout.py", line 137 in main
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-rgb-v5/owac/simulation/arena_droid_rollout.py", line 141 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+OWAC_ARENA_CONTROL 400
+OWAC_ARENA_CONTROL 500
+[129.305s] Simulation App Shutting Down

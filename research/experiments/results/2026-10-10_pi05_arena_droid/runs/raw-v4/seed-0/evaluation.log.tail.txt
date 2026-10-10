@@ -1,0 +1,100 @@
++-------+------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+[Pi0RemotePolicy] Connecting to server at 127.0.0.1:18020 ...
+[Pi0RemotePolicy] Connected.
+2026-10-10T04:05:08Z [16,591ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:08Z [16,591ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamTextureReadTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:08Z [16,604ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:08Z [16,604ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamIspSmodelTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:08Z [16,608ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:08Z [16,608ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamTextureReadTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:08Z [16,624ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:08Z [16,624ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamIspSmodelTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:08Z [17,120ms] [Error] [omni.kit.app._impl] [py stderr]: 
+Episodes:   0%|          | 0/1 [00:00<?, ?episode/s]
+Episodes:   0%|          | 0/1 [00:00<?, ?episode/s]
+2026-10-10T04:05:09Z [17,785ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:09Z [17,785ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamTextureReadTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:09Z [17,794ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:09Z [17,794ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamIspSmodelTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:09Z [17,797ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:09Z [17,797ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamTextureReadTask: using gpuFoundation 0 -> cudaDevice 0
+2026-10-10T04:05:09Z [17,805ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [carb::cudainterop::CudaInterop v0.21] (plugin: <default plugin>), by client: omni.sensors.nv.camera.cameraisp_generic.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T04:05:09Z [17,805ms] [Warning] [omni.sensors.nv.camera.cameraisp_generic.plugin] CamIspSmodelTask: using gpuFoundation 0 -> cudaDevice 0
+[INFO]: SimulationContext cleared
+Run 'droid_pnp_openpi' failed with error: Error rolling out policy: Native noise output exceeds the declared ADC white level
+Traceback: Traceback (most recent call last):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 96, in rollout_policy
+    actions = policy.get_action(env, obs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 91, in get_action
+    record["raw"] = capture.capture(step)
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_raw.py", line 124, in capture
+    raise ValueError("Native noise output exceeds the declared ADC white level")
+ValueError: Native noise output exceeds the declared ADC white level
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+RuntimeError: Error rolling out policy: Native noise output exceeds the declared ADC white level
+
+Closing simulation app
+Exception caught in SimulationAppContext: RuntimeError: Error rolling out policy: Native noise output exceeds the declared ADC white level
+Traceback:
+2026-10-10T04:05:11Z [19,317ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 96, in rollout_policy
+    actions = policy.get_action(env, obs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 91, in get_action
+    record["raw"] = capture.capture(step)
+                    ^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_raw.py", line 124, in capture
+    raise ValueError("Native noise output exceeds the declared ADC white level")
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]: ValueError: Native noise output exceeds the declared ADC white level
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]: 
+During handling of the above exception, another exception occurred:
+
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/experiment_runner.py", line 170, in main
+    run_results = execute_experiment(
+                  ^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v4/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+2026-10-10T04:05:11Z [19,318ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Error rolling out policy: Native noise output exceeds the declared ADC white level
+Killing the process without cleaning up

@@ -1,0 +1,100 @@
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_raw.py", line 77, in __init__
+    write_json(output / f"sensor-{name}.json", camera.metadata)
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/runtime/arena_droid.py", line 282, in write_json
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type Vec2f is not JSON serializable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+RuntimeError: Error rolling out policy: Object of type Vec2f is not JSON serializable
+
+Closing simulation app
+Exception caught in SimulationAppContext: RuntimeError: Error rolling out policy: Object of type Vec2f is not JSON serializable
+Traceback:
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 96, in rollout_policy
+    actions = policy.get_action(env, obs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_droid_rollout.py", line 90, in get_action
+    capture = ArenaRawCapture(env, output)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_raw.py", line 77, in __init__
+    write_json(output / f"sensor-{name}.json", camera.metadata)
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/runtime/arena_droid.py", line 282, in write_json
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+2026-10-10T04:03:26Z [22,512ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/.uv/python_install/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]: TypeError: Object of type Vec2f is not JSON serializable
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]: 
+During handling of the above exception, another exception occurred:
+
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]: Traceback (most recent call last):
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/experiment_runner.py", line 170, in main
+    run_results = execute_experiment(
+                  ^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 68, in execute_experiment
+    result = build_and_run(
+             ^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/run_execution.py", line 142, in build_and_run
+    metrics = rollout_policy(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_droid_rollout.py", line 148, in wrapped
+    return instrument(env, policy, original, num_steps=num_steps, num_episodes=num_episodes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/owac-src-raw-v3/owac/simulation/arena_droid_rollout.py", line 111, in instrument
+    result = original(env, policy, num_steps=num_steps, num_episodes=num_episodes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]:   File "/workspace/owac/reference/pi05-arena-droid-v1/Arena/isaaclab_arena/evaluation/policy_runner.py", line 129, in rollout_policy
+    raise RuntimeError(f"Error rolling out policy: {e}")
+2026-10-10T04:03:26Z [22,513ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Error rolling out policy: Object of type Vec2f is not JSON serializable
+Killing the process without cleaning up

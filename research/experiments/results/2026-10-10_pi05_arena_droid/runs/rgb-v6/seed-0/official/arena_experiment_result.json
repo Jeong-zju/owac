@@ -1,0 +1,82 @@
+{
+  "runs": {
+    "droid_pnp_openpi": {
+      "environment": {
+        "name": "pick_and_place_maple_table",
+        "definition": "pick_and_place_maple_table"
+      },
+      "policy_variant": "pi05",
+      "status": "completed",
+      "rebuilds": [
+        {
+          "index": 0,
+          "episodes": [
+            {
+              "job_name": "droid_pnp_openpi",
+              "env_id": 0,
+              "episode_in_env": 0,
+              "seed": 0,
+              "success": true,
+              "episode_length": 290,
+              "language_instruction": "Pick up the Rubik's cube and place it in the bowl.",
+              "timestamp": "2026-10-10T03:54:52.893144",
+              "progress": {
+                "overall_score": 1.0,
+                "all_complete": true,
+                "criteria_by_name": {
+                  "pick_and_place": {
+                    "score": 1.0,
+                    "is_complete": true,
+                    "completed_sequences": 1,
+                    "total_sequences": 1,
+                    "active_predicates": {
+                      "default_sequence": null
+                    }
+                  }
+                },
+                "events": [
+                  {
+                    "step": 1,
+                    "criteria_name": "pick_and_place",
+                    "sequence_name": "default_sequence",
+                    "predicate_index": 0,
+                    "predicate_name": "objects_settled",
+                    "score_delta": 0.3333333333333333
+                  },
+                  {
+                    "step": 209,
+                    "criteria_name": "pick_and_place",
+                    "sequence_name": "default_sequence",
+                    "predicate_index": 1,
+                    "predicate_name": "object_is_above_height(object_name='rubiks_cube_hot3d_robolab', use_settled_state=True)",
+                    "score_delta": 0.3333333333333333
+                  },
+                  {
+                    "step": 290,
+                    "criteria_name": "pick_and_place",
+                    "sequence_name": "default_sequence",
+                    "predicate_index": 2,
+                    "predicate_name": "TrueForConsecutiveStepsCfg(object_on_destination(force_threshold=0.1, velocity_threshold=0.003, support_cone_half_angle_rad=0.7853981633974483), required_steps=1)",
+                    "score_delta": 0.3333333333333333
+                  }
+                ],
+                "consecutive_step_summary": [
+                  {
+                    "criteria_name": "pick_and_place",
+                    "sequence_name": "default_sequence",
+                    "predicate_index": 2,
+                    "predicate_name": "TrueForConsecutiveStepsCfg(object_on_destination(force_threshold=0.1, velocity_threshold=0.003, support_cone_half_angle_rad=0.7853981633974483), required_steps=1)",
+                    "consecutive_steps": 1,
+                    "required_steps": 1,
+                    "status": "completed",
+                    "first_satisfied_step": 290
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

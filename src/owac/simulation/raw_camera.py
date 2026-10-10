@@ -76,7 +76,15 @@ def audit_cfa(hdr, cfa, profile: RawCameraProfile) -> dict:
 class NativeRawCamera:
     """Native renderer HDR -> CFA -> noise / companding, exported without an ISP decode."""
 
-    def __init__(self, directory: Path, profile: RawCameraProfile, eye, target):
+    def __init__(
+        self,
+        directory: Path,
+        profile: RawCameraProfile,
+        eye,
+        target,
+        *,
+        camera_path: str = "/World/OWACRawCamera",
+    ):
         import numpy as np
         import omni.kit.app
         from isaacsim.core.experimental.utils.app import enable_extension
@@ -132,7 +140,7 @@ class NativeRawCamera:
             .ExtractRotationQuat()
         )
         self.camera = RtxCamera(
-            "/World/OWACRawCamera",
+            camera_path,
             tick_rate=0,
             schemas=["OmniSensorGenericCameraCoreAPI"],
             attributes=attributes,
@@ -166,6 +174,7 @@ class NativeRawCamera:
             "saturation_mask": "CFA equals white_level; separately saved per frame",
             "native_isp_program_sha256": hashlib.sha256(program).hexdigest(),
             "camera_eye_xyz": list(eye),
+            "camera_prim_path": camera_path,
             "camera_target_xyz": list(target),
             "usd_focal_length": 18.0,
             "processing": ["renderer linear HDR", "identity color correction", "native GRBG ADC"],

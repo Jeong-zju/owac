@@ -6,7 +6,7 @@
 
 ## 开始工作
 
-2026-10-10 用户最新选型要求见 `docs/decisions/0008-pretrained-and-native-cfa-required.md`：现成预训练策略与仿真器原生 CFA/RAW 采集必须同时满足，正式主 benchmark 尚未选定。原版 LIBERO 仅保留为 RGB 参考，Lightwheel 红杯不再追加 backbone 微调；Isaac Lab Arena DROID / 官方 jointpos π0.5 是待联合验收候选。不能用分别通过的 RGB 与 RAW 实验代替同一任务的联合验收。0008 取代 0007 的 RAW 暂不准入安排，历史证据保留。
+2026-10-10 用户最新选型要求见 `docs/decisions/0008-pretrained-and-native-cfa-required.md`：现成预训练策略与仿真器原生 CFA/RAW 采集必须同时满足，正式主 benchmark 尚未选定。原版 LIBERO 仅保留为 RGB 参考，Lightwheel 红杯不再追加 backbone 微调；Isaac Lab Arena DROID / 官方 jointpos π0.5 已完成单任务联合实测：RGB 3/3、同步原生 RAW 2/3，见 `research/experiments/2026-10-10_pi05_arena_droid.md`；额外渲染等价性、SIGBUS 长期稳定性与正式对比协议仍待验证。不能用分别通过的 RGB 与 RAW 实验代替同一任务的联合验收。0008 取代 0007 的 RAW 暂不准入安排，历史证据保留。
 
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。

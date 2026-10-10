@@ -1,0 +1,108 @@
+[
+  {
+    "stage": "download_official_weights",
+    "argv": [
+      "rclone",
+      "copy",
+      "--gcs-anonymous",
+      "--transfers",
+      "8",
+      "--checkers",
+      "8",
+      "--stats",
+      "30s",
+      ":gcs:openpi-assets-simeval/pi05_droid_jointpos",
+      "/workspace/owac/reference/pi05-arena-droid-v1/checkpoints/pi05_droid_jointpos_orbax"
+    ]
+  },
+  {
+    "stage": "source_Arena",
+    "argv": [
+      "curl",
+      "-fL",
+      "--retry",
+      "4",
+      "--connect-timeout",
+      "20",
+      "--max-time",
+      "600",
+      "https://codeload.github.com/isaac-sim/IsaacLab-Arena/tar.gz/2cc9e9766f1f62a500b85c92207192d8c60fcce5",
+      "-o",
+      "/workspace/owac/reference/pi05-arena-droid-v1/Arena-2cc9e9766f1f62a500b85c92207192d8c60fcce5.tar.gz"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1"
+  },
+  {
+    "stage": "source_IsaacLab",
+    "argv": [
+      "curl",
+      "-fL",
+      "--retry",
+      "4",
+      "--connect-timeout",
+      "20",
+      "--max-time",
+      "600",
+      "https://codeload.github.com/isaac-sim/IsaacLab/tar.gz/91a0906f93802eb859192dcb0bca879f891e92d6",
+      "-o",
+      "/workspace/owac/reference/pi05-arena-droid-v1/IsaacLab-91a0906f93802eb859192dcb0bca879f891e92d6.tar.gz"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1"
+  },
+  {
+    "stage": "source_Isaac-GR00T",
+    "argv": [
+      "curl",
+      "-fL",
+      "--retry",
+      "4",
+      "--connect-timeout",
+      "20",
+      "--max-time",
+      "600",
+      "https://codeload.github.com/NVIDIA/Isaac-GR00T/tar.gz/e29d8fc50b0e4745120ae3fb72447986fe638aa6",
+      "-o",
+      "/workspace/owac/reference/pi05-arena-droid-v1/Isaac-GR00T-e29d8fc50b0e4745120ae3fb72447986fe638aa6.tar.gz"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1"
+  },
+  {
+    "stage": "source_openpi",
+    "argv": [
+      "curl",
+      "-fL",
+      "--retry",
+      "4",
+      "--connect-timeout",
+      "20",
+      "--max-time",
+      "600",
+      "https://codeload.github.com/Physical-Intelligence/openpi/tar.gz/c23745b5ad24e98f66967ea795a07b2588ed6c79",
+      "-o",
+      "/workspace/owac/reference/pi05-arena-droid-v1/openpi-c23745b5ad24e98f66967ea795a07b2588ed6c79.tar.gz"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1"
+  },
+  {
+    "stage": "install_arena",
+    "argv": [
+      "uv",
+      "sync",
+      "--frozen",
+      "--python",
+      "3.12"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1/Arena"
+  },
+  {
+    "stage": "install_openpi",
+    "argv": [
+      "uv",
+      "sync",
+      "--frozen",
+      "--python",
+      "3.11"
+    ],
+    "cwd": "/workspace/owac/reference/pi05-arena-droid-v1/openpi"
+  }
+]

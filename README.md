@@ -2,7 +2,7 @@
 
 OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署；当前先选定并验证仿真 benchmark、RGB 闭环和成像/数据协议，再开展 RAW 适配。候选框架尚未实现或验证。
 
-当前用户要求基线开箱即用，同时仿真器支持原生 CFA/RAW 采集：[0008 准入纠正](docs/decisions/0008-pretrained-and-native-cfa-required.md)取代 0007 的 RGB 优先安排。正式主 benchmark 尚未选定；Isaac Lab Arena DROID 与官方 jointpos π0.5 是待联合验收候选。原版 LIBERO 的 10/10 仅保留为[RGB 参考验收](research/experiments/2026-10-10_pi05_official_libero_reference.md)，[本地结果页](outputs/official-libero-baseline/progress.html)标记其 RAW 条件未通过；旧红杯实验归档。
+当前用户要求基线开箱即用，同时仿真器支持原生 CFA/RAW 采集：[0008 准入纠正](docs/decisions/0008-pretrained-and-native-cfa-required.md)取代 0007 的 RGB 优先安排。正式主 benchmark 尚未选定；Isaac Lab Arena DROID 与官方 jointpos π0.5 已完成[单任务联合实测](research/experiments/2026-10-10_pi05_arena_droid.md)：无微调，RGB 3/3、同步原生 RAW 2/3；数字与故障记录见[新的离线结果页](outputs/arena-droid-baseline/progress.html)。正式扩展协议与长期稳定性仍待验证。原版 LIBERO 的 10/10 仅保留为[RGB 参考验收](research/experiments/2026-10-10_pi05_official_libero_reference.md)，[本地结果页](outputs/official-libero-baseline/progress.html)标记其 RAW 条件未通过；旧红杯实验归档。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
