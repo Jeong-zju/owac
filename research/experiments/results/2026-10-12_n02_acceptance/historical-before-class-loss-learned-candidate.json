@@ -1,0 +1,3285 @@
+{
+  "checkpoint_sha256": "e61f8f881860c119341b0a1a38ac8d61d57886fbdd0862f4ed96b86a13e43981",
+  "checkpoint_step": 200,
+  "trained_arm": "candidate",
+  "evaluated_arm": "candidate",
+  "comparison_scope": "trained checkpoint",
+  "scope": "binary semantic proxy; no physical or closed-loop score",
+  "gate_definition": {
+    "correct": "final true semantic mass >= .7",
+    "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+    "missing": "final true semantic mass > .5",
+    "stale": "true mass >= .7 both before and after actual geometry change",
+    "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+  },
+  "all_gates_passed": false,
+  "gate_applicability": "declared slot-parity convention",
+  "gates": {
+    "correct": {
+      "passed": 1,
+      "total": 4
+    },
+    "misleading": {
+      "passed": 0,
+      "total": 4
+    },
+    "missing": {
+      "passed": 1,
+      "total": 4
+    },
+    "unidentifiable": {
+      "passed": 0,
+      "total": 4
+    },
+    "stale": {
+      "passed": 2,
+      "total": 4
+    }
+  },
+  "records": [
+    {
+      "seed": 100,
+      "condition": "correct",
+      "measurement_sha256": "1ced869e140fdb3354770f6cc97416c8cedff711c59c41a5a7ea2cb7b62edaef",
+      "declared_prior": [
+        [
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9212148785591125,
+            0.07878515869379044
+          ],
+          "truth_semantic_mass": 0.07878515869379044,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1573224663734436,
+            0.41206541657447815,
+            -0.04861518740653992,
+            0.28091931343078613
+          ],
+          "truth_proxy_nearest_error": 0.5879346132278442,
+          "measurement_nll": -1.23257577419281,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9997748136520386,
+            0.00022519598132930696
+          ],
+          "truth_semantic_mass": 0.00022519598132930696,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15218958258628845,
+            0.4118548035621643,
+            -0.0486273467540741,
+            0.28191444277763367
+          ],
+          "truth_proxy_nearest_error": 0.5881451964378357,
+          "measurement_nll": -1.904873251914978,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999985694885254,
+            1.4721022125741001e-06
+          ],
+          "truth_semantic_mass": 1.4721022125741001e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15399706363677979,
+            0.4116813540458679,
+            -0.04831776022911072,
+            0.2820228338241577
+          ],
+          "truth_proxy_nearest_error": 0.5883186459541321,
+          "measurement_nll": -1.1927376985549927,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            1.2417777028872479e-08
+          ],
+          "truth_semantic_mass": 1.2417777028872479e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1526831090450287,
+            0.4112921357154846,
+            -0.04814949631690979,
+            0.2820203900337219
+          ],
+          "truth_proxy_nearest_error": 0.5887078642845154,
+          "measurement_nll": -1.4015003442764282,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            1.273170735505147e-10
+          ],
+          "truth_semantic_mass": 1.273170735505147e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15291661024093628,
+            0.41118621826171875,
+            -0.048042863607406616,
+            0.28211188316345215
+          ],
+          "truth_proxy_nearest_error": 0.5888137817382812,
+          "measurement_nll": -1.1733245849609375,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.2419579253908353e-12
+          ],
+          "truth_semantic_mass": 1.2419579253908353e-12,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.153013676404953,
+            0.4108509421348572,
+            -0.04825204610824585,
+            0.28271523118019104
+          ],
+          "truth_proxy_nearest_error": 0.5891490578651428,
+          "measurement_nll": -1.2836647033691406,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            2.0039037703506457e-14
+          ],
+          "truth_semantic_mass": 2.0039037703506457e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15258261561393738,
+            0.4107244312763214,
+            -0.0481647253036499,
+            0.28227072954177856
+          ],
+          "truth_proxy_nearest_error": 0.589275598526001,
+          "measurement_nll": -0.8262130618095398,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.453247651340625e-14
+          ],
+          "truth_semantic_mass": 1.453247651340625e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15306472778320312,
+            0.41034406423568726,
+            -0.04814979434013367,
+            0.28238600492477417
+          ],
+          "truth_proxy_nearest_error": 0.5896559357643127,
+          "measurement_nll": -1.0292617082595825,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 2.78673162020307e-15,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 100,
+      "condition": "misleading",
+      "measurement_sha256": "1ced869e140fdb3354770f6cc97416c8cedff711c59c41a5a7ea2cb7b62edaef",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9996514916419983,
+            0.0003484679036773741
+          ],
+          "truth_semantic_mass": 0.0003484679036773741,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15556693077087402,
+            0.4117252826690674,
+            -0.0485520213842392,
+            0.28086793422698975
+          ],
+          "truth_proxy_nearest_error": 0.5882747173309326,
+          "measurement_nll": -1.239838719367981,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999985098838806,
+            1.5548771443718579e-06
+          ],
+          "truth_semantic_mass": 1.5548771443718579e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15088701248168945,
+            0.411388099193573,
+            -0.04848147928714752,
+            0.282102108001709
+          ],
+          "truth_proxy_nearest_error": 0.588611900806427,
+          "measurement_nll": -1.8925186395645142,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999999403953552,
+            1.0897204916204828e-08
+          ],
+          "truth_semantic_mass": 1.0897204916204828e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1519201397895813,
+            0.41128405928611755,
+            -0.048277467489242554,
+            0.28225475549697876
+          ],
+          "truth_proxy_nearest_error": 0.5887159109115601,
+          "measurement_nll": -1.5276871919631958,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            7.838001775395398e-11
+          ],
+          "truth_semantic_mass": 7.838001775395398e-11,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15157943964004517,
+            0.4107019901275635,
+            -0.04816350340843201,
+            0.28233402967453003
+          ],
+          "truth_proxy_nearest_error": 0.5892980098724365,
+          "measurement_nll": -1.6631428003311157,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            7.202482967677559e-13
+          ],
+          "truth_semantic_mass": 7.202482967677559e-13,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15134844183921814,
+            0.41057658195495605,
+            -0.048167526721954346,
+            0.28229475021362305
+          ],
+          "truth_proxy_nearest_error": 0.589423418045044,
+          "measurement_nll": -1.318053126335144,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            7.766057999317785e-15
+          ],
+          "truth_semantic_mass": 7.766057999317785e-15,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15159231424331665,
+            0.4102553129196167,
+            -0.04823140799999237,
+            0.28260084986686707
+          ],
+          "truth_proxy_nearest_error": 0.5897446870803833,
+          "measurement_nll": -1.5191354751586914,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            8.786553129774399e-15
+          ],
+          "truth_semantic_mass": 8.786553129774399e-15,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15176495909690857,
+            0.41033557057380676,
+            -0.04832637310028076,
+            0.28240686655044556
+          ],
+          "truth_proxy_nearest_error": 0.5896644592285156,
+          "measurement_nll": -1.5490437746047974,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.1997885425777104e-14
+          ],
+          "truth_semantic_mass": 1.1997885425777104e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15172874927520752,
+            0.41025638580322266,
+            -0.04821208119392395,
+            0.28226080536842346
+          ],
+          "truth_proxy_nearest_error": 0.5897436141967773,
+          "measurement_nll": -1.241729497909546,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 5.55909671458776e-15,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 100,
+      "condition": "missing",
+      "measurement_sha256": "1ced869e140fdb3354770f6cc97416c8cedff711c59c41a5a7ea2cb7b62edaef",
+      "declared_prior": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9976451992988586,
+            0.00235480023548007
+          ],
+          "truth_semantic_mass": 0.00235480023548007,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1529276967048645,
+            0.41199755668640137,
+            -0.04845130443572998,
+            0.28174370527267456
+          ],
+          "truth_proxy_nearest_error": 0.5880024433135986,
+          "measurement_nll": -2.1917965412139893,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999905824661255,
+            9.515017154626548e-06
+          ],
+          "truth_semantic_mass": 9.515017154626548e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15213945508003235,
+            0.41154956817626953,
+            -0.048561349511146545,
+            0.2818848788738251
+          ],
+          "truth_proxy_nearest_error": 0.5884504318237305,
+          "measurement_nll": -1.7506996393203735,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999998807907104,
+            7.638347909733056e-08
+          ],
+          "truth_semantic_mass": 7.638347909733056e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15172851085662842,
+            0.41092002391815186,
+            -0.04822671413421631,
+            0.28213024139404297
+          ],
+          "truth_proxy_nearest_error": 0.5890799760818481,
+          "measurement_nll": -1.31771981716156,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            6.361461912796074e-10
+          ],
+          "truth_semantic_mass": 6.361461912796074e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15154099464416504,
+            0.4107320308685303,
+            -0.04825478792190552,
+            0.28229257464408875
+          ],
+          "truth_proxy_nearest_error": 0.5892679691314697,
+          "measurement_nll": -1.5376321077346802,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            6.028578244249294e-12
+          ],
+          "truth_semantic_mass": 6.028578244249294e-12,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.151535302400589,
+            0.41089916229248047,
+            -0.04824917018413544,
+            0.2820931673049927
+          ],
+          "truth_proxy_nearest_error": 0.5891008377075195,
+          "measurement_nll": -1.5095906257629395,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            6.179779588446135e-14
+          ],
+          "truth_semantic_mass": 6.179779588446135e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15158644318580627,
+            0.4103543162345886,
+            -0.04809902608394623,
+            0.28213268518447876
+          ],
+          "truth_proxy_nearest_error": 0.5896456837654114,
+          "measurement_nll": -1.3290215730667114,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.1583092544473726e-14
+          ],
+          "truth_semantic_mass": 1.1583092544473726e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1517864465713501,
+            0.4103493094444275,
+            -0.048104122281074524,
+            0.2821594476699829
+          ],
+          "truth_proxy_nearest_error": 0.5896506905555725,
+          "measurement_nll": -1.1826876401901245,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.2296233299689645e-14
+          ],
+          "truth_semantic_mass": 1.2296233299689645e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15137064456939697,
+            0.4102012515068054,
+            -0.04819472134113312,
+            0.282389760017395
+          ],
+          "truth_proxy_nearest_error": 0.5897987484931946,
+          "measurement_nll": -1.002021074295044,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 4.624168005429828e-15,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 100,
+      "condition": "unidentifiable",
+      "measurement_sha256": "fecfdfa7765b1218d57a413ad29cdb173557d07bdd4e9742fe38745338549c56",
+      "declared_prior": [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9964513778686523,
+            0.0035486621782183647
+          ],
+          "truth_semantic_mass": 0.9964513778686523,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15674588084220886,
+            0.4119393229484558,
+            -0.04855144023895264,
+            0.28065750002861023
+          ],
+          "truth_proxy_nearest_error": 0.8432540893554688,
+          "measurement_nll": -1.1996794939041138,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999902844429016,
+            9.820607374422252e-06
+          ],
+          "truth_semantic_mass": 0.9999902844429016,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15152817964553833,
+            0.411733478307724,
+            -0.04847678542137146,
+            0.28229978680610657
+          ],
+          "truth_proxy_nearest_error": 0.8484718203544617,
+          "measurement_nll": -1.9933429956436157,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999998807907104,
+            6.757725401485004e-08
+          ],
+          "truth_semantic_mass": 0.9999998807907104,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15273123979568481,
+            0.4113646149635315,
+            -0.04824712872505188,
+            0.28208160400390625
+          ],
+          "truth_proxy_nearest_error": 0.8472687602043152,
+          "measurement_nll": -1.4216419458389282,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            4.727871427689934e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15241611003875732,
+            0.41114383935928345,
+            -0.048184677958488464,
+            0.2823345959186554
+          ],
+          "truth_proxy_nearest_error": 0.8475838899612427,
+          "measurement_nll": -1.3725694417953491,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            4.392939137454199e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15258169174194336,
+            0.4109314978122711,
+            -0.04805669188499451,
+            0.28212040662765503
+          ],
+          "truth_proxy_nearest_error": 0.8474183082580566,
+          "measurement_nll": -1.109864354133606,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            5.424134042310638e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15227431058883667,
+            0.41079646348953247,
+            -0.048111751675605774,
+            0.28226438164711
+          ],
+          "truth_proxy_nearest_error": 0.8477256894111633,
+          "measurement_nll": -1.0238232612609863,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            8.735536335361272e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15205815434455872,
+            0.4106799364089966,
+            -0.048122286796569824,
+            0.282501220703125
+          ],
+          "truth_proxy_nearest_error": 0.8479418754577637,
+          "measurement_nll": -1.2683573961257935,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            8.495123820975031e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15283691883087158,
+            0.4107081890106201,
+            -0.04809105396270752,
+            0.28236156702041626
+          ],
+          "truth_proxy_nearest_error": 0.8471630811691284,
+          "measurement_nll": -1.2607213258743286,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 2.1259078549743134e-15,
+      "last_ambiguous_prefix_frame": 7
+    },
+    {
+      "seed": 100,
+      "condition": "stale",
+      "measurement_sha256": "40225b6b43fb71bdd59b87d09271f163d369ba24a7d3671b9d49163105c88932",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9995161890983582,
+            0.0004838027816731483
+          ],
+          "truth_semantic_mass": 0.9995161890983582,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1553509533405304,
+            0.4115735590457916,
+            -0.0484887957572937,
+            0.28079754114151
+          ],
+          "truth_proxy_nearest_error": 0.844649076461792,
+          "measurement_nll": -1.1625250577926636,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999982714653015,
+            1.791771751413762e-06
+          ],
+          "truth_semantic_mass": 0.9999982714653015,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15030980110168457,
+            0.41162657737731934,
+            -0.048555418848991394,
+            0.2822387218475342
+          ],
+          "truth_proxy_nearest_error": 0.8496901988983154,
+          "measurement_nll": -2.023998498916626,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999999403953552,
+            1.3225711192887957e-08
+          ],
+          "truth_semantic_mass": 0.9999999403953552,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1516643464565277,
+            0.41130974888801575,
+            -0.04831632971763611,
+            0.28230565786361694
+          ],
+          "truth_proxy_nearest_error": 0.8483356237411499,
+          "measurement_nll": -1.3849543333053589,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            9.817751472906977e-11
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15183091163635254,
+            0.4107678532600403,
+            -0.048106491565704346,
+            0.2823322117328644
+          ],
+          "truth_proxy_nearest_error": 0.8481690883636475,
+          "measurement_nll": -1.5405408143997192,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            1.2661282612624891e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15215516090393066,
+            0.4106142818927765,
+            -0.0481414794921875,
+            0.28221720457077026
+          ],
+          "truth_proxy_nearest_error": 0.8478448390960693,
+          "measurement_nll": -1.1776989698410034,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.817653253117276e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15161293745040894,
+            0.4104366898536682,
+            -0.04803338646888733,
+            0.28228431940078735
+          ],
+          "truth_proxy_nearest_error": 0.8483870625495911,
+          "measurement_nll": -1.0319693088531494,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0242333409627314e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1516188383102417,
+            0.410369336605072,
+            -0.04814741015434265,
+            0.2822665572166443
+          ],
+          "truth_proxy_nearest_error": 0.8483811616897583,
+          "measurement_nll": -1.2609748840332031,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.1386192959620886e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15163275599479675,
+            0.4103882312774658,
+            -0.048059701919555664,
+            0.2823708653450012
+          ],
+          "truth_proxy_nearest_error": 0.8483672142028809,
+          "measurement_nll": -1.1448079347610474,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": true,
+      "duplicate_weight_delta": 3.0277082585321823e-15,
+      "last_ambiguous_prefix_frame": 3
+    },
+    {
+      "seed": 101,
+      "condition": "correct",
+      "measurement_sha256": "aea4cffdbf0698209f50f759af1aa06936c8cc0896821708d4946f17297b1553",
+      "declared_prior": [
+        [
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9116780757904053,
+            0.0883219912648201
+          ],
+          "truth_semantic_mass": 0.0883219912648201,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15782061219215393,
+            0.41224485635757446,
+            -0.04846492409706116,
+            0.2807554602622986
+          ],
+          "truth_proxy_nearest_error": 0.5877551436424255,
+          "measurement_nll": -1.0158593654632568,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9997624158859253,
+            0.00023751522530801594
+          ],
+          "truth_semantic_mass": 0.00023751522530801594,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1516764760017395,
+            0.4118970036506653,
+            -0.048532634973526,
+            0.281798779964447
+          ],
+          "truth_proxy_nearest_error": 0.5881029963493347,
+          "measurement_nll": -1.9779802560806274,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999986886978149,
+            1.321765239481465e-06
+          ],
+          "truth_semantic_mass": 1.321765239481465e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1535683572292328,
+            0.4116366505622864,
+            -0.04818761348724365,
+            0.28190237283706665
+          ],
+          "truth_proxy_nearest_error": 0.5883633494377136,
+          "measurement_nll": -1.5211066007614136,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            1.0616850509848064e-08
+          ],
+          "truth_semantic_mass": 1.0616850509848064e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15264415740966797,
+            0.4113858938217163,
+            -0.04831378161907196,
+            0.28214067220687866
+          ],
+          "truth_proxy_nearest_error": 0.5886141061782837,
+          "measurement_nll": -1.418430209159851,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            1.093571205812438e-10
+          ],
+          "truth_semantic_mass": 1.093571205812438e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15356627106666565,
+            0.4110304117202759,
+            -0.04792246222496033,
+            0.2822765111923218
+          ],
+          "truth_proxy_nearest_error": 0.5889695882797241,
+          "measurement_nll": -1.104068636894226,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.2650735493890952e-12
+          ],
+          "truth_semantic_mass": 1.2650735493890952e-12,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15291908383369446,
+            0.4107898771762848,
+            -0.048115074634552,
+            0.28223180770874023
+          ],
+          "truth_proxy_nearest_error": 0.5892101526260376,
+          "measurement_nll": -1.1417858600616455,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.4870368120461358e-14
+          ],
+          "truth_semantic_mass": 1.4870368120461358e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15373271703720093,
+            0.41071951389312744,
+            -0.04803606867790222,
+            0.2821371555328369
+          ],
+          "truth_proxy_nearest_error": 0.5892804861068726,
+          "measurement_nll": -0.8066201210021973,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.404309983999829e-14
+          ],
+          "truth_semantic_mass": 1.404309983999829e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15299764275550842,
+            0.4105333685874939,
+            -0.04814118146896362,
+            0.28237029910087585
+          ],
+          "truth_proxy_nearest_error": 0.5894666314125061,
+          "measurement_nll": -0.7761518359184265,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 4.64848293321371e-15,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 101,
+      "condition": "misleading",
+      "measurement_sha256": "aea4cffdbf0698209f50f759af1aa06936c8cc0896821708d4946f17297b1553",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9995522499084473,
+            0.00044774115667678416
+          ],
+          "truth_semantic_mass": 0.00044774115667678416,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15546825528144836,
+            0.4115704298019409,
+            -0.04835185408592224,
+            0.28079143166542053
+          ],
+          "truth_proxy_nearest_error": 0.5884295701980591,
+          "measurement_nll": -1.344827651977539,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999980926513672,
+            1.8759244539978681e-06
+          ],
+          "truth_semantic_mass": 1.8759244539978681e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15087339282035828,
+            0.4113786518573761,
+            -0.04855702817440033,
+            0.2823587954044342
+          ],
+          "truth_proxy_nearest_error": 0.5886213779449463,
+          "measurement_nll": -2.0524117946624756,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            1.0,
+            1.2796407489190642e-08
+          ],
+          "truth_semantic_mass": 1.2796407489190642e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1519593596458435,
+            0.4111354351043701,
+            -0.048299625515937805,
+            0.28235459327697754
+          ],
+          "truth_proxy_nearest_error": 0.5888645648956299,
+          "measurement_nll": -1.7059431076049805,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            8.643674664909895e-11
+          ],
+          "truth_semantic_mass": 8.643674664909895e-11,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1517370343208313,
+            0.4110310673713684,
+            -0.04822336137294769,
+            0.28277984261512756
+          ],
+          "truth_proxy_nearest_error": 0.5889689326286316,
+          "measurement_nll": -1.5145950317382812,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            8.346810113739334e-13
+          ],
+          "truth_semantic_mass": 8.346810113739334e-13,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15153971314430237,
+            0.4106183648109436,
+            -0.04831531643867493,
+            0.28261590003967285
+          ],
+          "truth_proxy_nearest_error": 0.5893816351890564,
+          "measurement_nll": -1.4536466598510742,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            8.615139919271493e-15
+          ],
+          "truth_semantic_mass": 8.615139919271493e-15,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15189790725708008,
+            0.41041266918182373,
+            -0.04812076687812805,
+            0.2825581431388855
+          ],
+          "truth_proxy_nearest_error": 0.5895873308181763,
+          "measurement_nll": -1.307818055152893,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            8.503177410237525e-15
+          ],
+          "truth_semantic_mass": 8.503177410237525e-15,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15148204565048218,
+            0.41046956181526184,
+            -0.04824995994567871,
+            0.282732754945755
+          ],
+          "truth_proxy_nearest_error": 0.5895304679870605,
+          "measurement_nll": -1.4313507080078125,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.0601176376632757e-14
+          ],
+          "truth_semantic_mass": 1.0601176376632757e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15202558040618896,
+            0.41038060188293457,
+            -0.04809197783470154,
+            0.2826121151447296
+          ],
+          "truth_proxy_nearest_error": 0.5896193981170654,
+          "measurement_nll": -1.4385944604873657,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 3.654576590487882e-15,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 101,
+      "condition": "missing",
+      "measurement_sha256": "aea4cffdbf0698209f50f759af1aa06936c8cc0896821708d4946f17297b1553",
+      "declared_prior": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9978719353675842,
+            0.002128065563738346
+          ],
+          "truth_semantic_mass": 0.002128065563738346,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15280577540397644,
+            0.41193172335624695,
+            -0.04835501313209534,
+            0.2817479074001312
+          ],
+          "truth_proxy_nearest_error": 0.5880682468414307,
+          "measurement_nll": -2.195009231567383,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999905824661255,
+            9.346479600935709e-06
+          ],
+          "truth_semantic_mass": 9.346479600935709e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15209466218948364,
+            0.41156667470932007,
+            -0.04839298129081726,
+            0.28189313411712646
+          ],
+          "truth_proxy_nearest_error": 0.5884333252906799,
+          "measurement_nll": -2.004695177078247,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            1.0,
+            5.442494099838768e-08
+          ],
+          "truth_semantic_mass": 5.442494099838768e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15174579620361328,
+            0.4111841917037964,
+            -0.04835081100463867,
+            0.2820562422275543
+          ],
+          "truth_proxy_nearest_error": 0.5888158082962036,
+          "measurement_nll": -1.7379556894302368,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            4.256419383619203e-10
+          ],
+          "truth_semantic_mass": 4.256419383619203e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15168821811676025,
+            0.4108588993549347,
+            -0.048234403133392334,
+            0.28206372261047363
+          ],
+          "truth_proxy_nearest_error": 0.5891411304473877,
+          "measurement_nll": -1.485634446144104,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            3.5729008727308775e-12
+          ],
+          "truth_semantic_mass": 3.5729008727308775e-12,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15157759189605713,
+            0.4105651378631592,
+            -0.04807676374912262,
+            0.28218814730644226
+          ],
+          "truth_proxy_nearest_error": 0.5894348621368408,
+          "measurement_nll": -1.4759279489517212,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            3.271830099601039e-14
+          ],
+          "truth_semantic_mass": 3.271830099601039e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1520748734474182,
+            0.4103589653968811,
+            -0.048205673694610596,
+            0.28221604228019714
+          ],
+          "truth_proxy_nearest_error": 0.5896410346031189,
+          "measurement_nll": -1.3855923414230347,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            9.843092053235525e-15
+          ],
+          "truth_semantic_mass": 9.843092053235525e-15,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1518305540084839,
+            0.41022631525993347,
+            -0.047849416732788086,
+            0.2823631167411804
+          ],
+          "truth_proxy_nearest_error": 0.5897736549377441,
+          "measurement_nll": -1.3167775869369507,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            8.59445960986428e-15
+          ],
+          "truth_semantic_mass": 8.59445960986428e-15,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1516563594341278,
+            0.4103783071041107,
+            -0.04802301526069641,
+            0.28234490752220154
+          ],
+          "truth_proxy_nearest_error": 0.5896216630935669,
+          "measurement_nll": -1.36772882938385,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 4.711840997668332e-16,
+      "last_ambiguous_prefix_frame": 5
+    },
+    {
+      "seed": 101,
+      "condition": "unidentifiable",
+      "measurement_sha256": "5570ae3529b1fa9351c331f1d7d5f9cd4be57f5fb11fc6e6df57137513681e50",
+      "declared_prior": [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9943946003913879,
+            0.005605451297014952
+          ],
+          "truth_semantic_mass": 0.005605451297014952,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15746226906776428,
+            0.41199949383735657,
+            -0.04858362674713135,
+            0.2805767357349396
+          ],
+          "truth_proxy_nearest_error": 0.5880005359649658,
+          "measurement_nll": -0.9479293823242188,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999794363975525,
+            2.0561810742947273e-05
+          ],
+          "truth_semantic_mass": 2.0561810742947273e-05,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15156757831573486,
+            0.4116198420524597,
+            -0.04850834608078003,
+            0.2820814847946167
+          ],
+          "truth_proxy_nearest_error": 0.5883801579475403,
+          "measurement_nll": -2.0030677318573,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999998807907104,
+            1.3899453676913254e-07
+          ],
+          "truth_semantic_mass": 1.3899453676913254e-07,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15251246094703674,
+            0.41151201725006104,
+            -0.04835674166679382,
+            0.28210753202438354
+          ],
+          "truth_proxy_nearest_error": 0.588487982749939,
+          "measurement_nll": -1.3664630651474,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            8.689164388009374e-10
+          ],
+          "truth_semantic_mass": 8.689164388009374e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1523120403289795,
+            0.41131263971328735,
+            -0.048145681619644165,
+            0.2823028564453125
+          ],
+          "truth_proxy_nearest_error": 0.5886873602867126,
+          "measurement_nll": -1.540915608406067,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            8.568369971873047e-12
+          ],
+          "truth_semantic_mass": 8.568369971873047e-12,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15270346403121948,
+            0.41114020347595215,
+            -0.04815027117729187,
+            0.28242647647857666
+          ],
+          "truth_proxy_nearest_error": 0.5888597965240479,
+          "measurement_nll": -1.2090381383895874,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            5.473584503397702e-14
+          ],
+          "truth_semantic_mass": 5.473584503397702e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.152213454246521,
+            0.41064298152923584,
+            -0.04804244637489319,
+            0.2823133170604706
+          ],
+          "truth_proxy_nearest_error": 0.5893570184707642,
+          "measurement_nll": -1.5392578840255737,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            8.781315925061525e-15
+          ],
+          "truth_semantic_mass": 8.781315925061525e-15,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1525086760520935,
+            0.41057801246643066,
+            -0.04825955629348755,
+            0.2823331654071808
+          ],
+          "truth_proxy_nearest_error": 0.5894219875335693,
+          "measurement_nll": -1.2155195474624634,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.1325871508282171e-14
+          ],
+          "truth_semantic_mass": 1.1325871508282171e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15248951315879822,
+            0.4104549288749695,
+            -0.04809698462486267,
+            0.282389760017395
+          ],
+          "truth_proxy_nearest_error": 0.5895450711250305,
+          "measurement_nll": -1.0949578285217285,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 2.348816433505544e-15,
+      "last_ambiguous_prefix_frame": 7
+    },
+    {
+      "seed": 101,
+      "condition": "stale",
+      "measurement_sha256": "4ec3b8c08e694a4bbdd5c1265c4b1edf49945665b01ac66b7cf41388cf736809",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9996085166931152,
+            0.00039144797483459115
+          ],
+          "truth_semantic_mass": 0.9996085166931152,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1550874412059784,
+            0.41150861978530884,
+            -0.048388004302978516,
+            0.2809649109840393
+          ],
+          "truth_proxy_nearest_error": 0.8449125289916992,
+          "measurement_nll": -1.5148369073867798,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999985098838806,
+            1.4629183624492725e-06
+          ],
+          "truth_semantic_mass": 0.9999985098838806,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15097761154174805,
+            0.41130077838897705,
+            -0.04854917526245117,
+            0.2823621928691864
+          ],
+          "truth_proxy_nearest_error": 0.849022388458252,
+          "measurement_nll": -2.0908451080322266,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            1.0,
+            9.643763121403026e-09
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15195253491401672,
+            0.4113504886627197,
+            -0.04823902249336243,
+            0.28219476342201233
+          ],
+          "truth_proxy_nearest_error": 0.8480474948883057,
+          "measurement_nll": -1.5278934240341187,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            7.351876052386075e-11
+          ],
+          "truth_semantic_mass": 7.351876052386075e-11,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15156292915344238,
+            0.4111291468143463,
+            -0.04820239543914795,
+            0.282331258058548
+          ],
+          "truth_proxy_nearest_error": 0.5888708829879761,
+          "measurement_nll": -1.421478271484375,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            7.779987591660653e-13
+          ],
+          "truth_semantic_mass": 7.779987591660653e-13,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15182018280029297,
+            0.4108310341835022,
+            -0.048135653138160706,
+            0.28241026401519775
+          ],
+          "truth_proxy_nearest_error": 0.5891689658164978,
+          "measurement_nll": -1.2135791778564453,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.0643942223106679e-14
+          ],
+          "truth_semantic_mass": 1.0643942223106679e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15198254585266113,
+            0.4105098247528076,
+            -0.0481572151184082,
+            0.28236424922943115
+          ],
+          "truth_proxy_nearest_error": 0.5894901752471924,
+          "measurement_nll": -1.301409125328064,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.2050702165203146e-14
+          ],
+          "truth_semantic_mass": 1.2050702165203146e-14,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1516994833946228,
+            0.4102954566478729,
+            -0.04826073348522186,
+            0.2823161780834198
+          ],
+          "truth_proxy_nearest_error": 0.5897045135498047,
+          "measurement_nll": -1.244977355003357,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            8.276615578604787e-15
+          ],
+          "truth_semantic_mass": 8.276615578604787e-15,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15201377868652344,
+            0.4104273319244385,
+            -0.04812335968017578,
+            0.2822180390357971
+          ],
+          "truth_proxy_nearest_error": 0.5895726680755615,
+          "measurement_nll": -1.4094014167785645,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 1.6728112967631485e-15,
+      "last_ambiguous_prefix_frame": 7
+    },
+    {
+      "seed": 102,
+      "condition": "correct",
+      "measurement_sha256": "6894efbf94ecb09cf345fcc35748e6864d3f5ab34b6f00c0293c6f6a0309713a",
+      "declared_prior": [
+        [
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9402996897697449,
+            0.059700340032577515
+          ],
+          "truth_semantic_mass": 0.059700340032577515,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15726768970489502,
+            0.41212230920791626,
+            -0.04845726490020752,
+            0.2808954119682312
+          ],
+          "truth_proxy_nearest_error": 0.5878776907920837,
+          "measurement_nll": -1.356209397315979,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9998334646224976,
+            0.00016661635891068727
+          ],
+          "truth_semantic_mass": 0.00016661635891068727,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.151888906955719,
+            0.41200271248817444,
+            -0.04841262102127075,
+            0.28196293115615845
+          ],
+          "truth_proxy_nearest_error": 0.587997317314148,
+          "measurement_nll": -1.8301578760147095,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999990463256836,
+            1.006727984531608e-06
+          ],
+          "truth_semantic_mass": 1.006727984531608e-06,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15359622240066528,
+            0.4115743041038513,
+            -0.04824981093406677,
+            0.2821672260761261
+          ],
+          "truth_proxy_nearest_error": 0.5884256958961487,
+          "measurement_nll": -1.4385086297988892,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            7.4467436661507236e-09
+          ],
+          "truth_semantic_mass": 7.4467436661507236e-09,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15344756841659546,
+            0.41132086515426636,
+            -0.04830554127693176,
+            0.2821289896965027
+          ],
+          "truth_proxy_nearest_error": 0.5886791348457336,
+          "measurement_nll": -1.3754373788833618,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            7.231329424151056e-11
+          ],
+          "truth_semantic_mass": 7.231329424151056e-11,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15374022722244263,
+            0.41114872694015503,
+            -0.04814481735229492,
+            0.2822869122028351
+          ],
+          "truth_proxy_nearest_error": 0.588851273059845,
+          "measurement_nll": -1.1083399057388306,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            5.830782363012987e-13
+          ],
+          "truth_semantic_mass": 5.830782363012987e-13,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1524539589881897,
+            0.4108074903488159,
+            -0.048215314745903015,
+            0.28256434202194214
+          ],
+          "truth_proxy_nearest_error": 0.5891925096511841,
+          "measurement_nll": -1.3964589834213257,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            7.246102589480996e-15
+          ],
+          "truth_semantic_mass": 7.246102589480996e-15,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1532142162322998,
+            0.41067859530448914,
+            -0.04822176694869995,
+            0.28256019949913025
+          ],
+          "truth_proxy_nearest_error": 0.5893213748931885,
+          "measurement_nll": -1.3144718408584595,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.5209030527498467e-14
+          ],
+          "truth_semantic_mass": 1.5209030527498467e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15354639291763306,
+            0.4106048345565796,
+            -0.048328131437301636,
+            0.28242558240890503
+          ],
+          "truth_proxy_nearest_error": 0.5893951654434204,
+          "measurement_nll": -0.6800680160522461,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 1.9097137066159675e-15,
+      "last_ambiguous_prefix_frame": 1
+    },
+    {
+      "seed": 102,
+      "condition": "misleading",
+      "measurement_sha256": "6894efbf94ecb09cf345fcc35748e6864d3f5ab34b6f00c0293c6f6a0309713a",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9996214509010315,
+            0.00037862127646803856
+          ],
+          "truth_semantic_mass": 0.00037862127646803856,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1556008756160736,
+            0.4117330312728882,
+            -0.048374682664871216,
+            0.2808264493942261
+          ],
+          "truth_proxy_nearest_error": 0.5882669687271118,
+          "measurement_nll": -1.1842271089553833,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999979734420776,
+            2.0374591258587316e-06
+          ],
+          "truth_semantic_mass": 2.0374591258587316e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15089690685272217,
+            0.41131651401519775,
+            -0.04837879538536072,
+            0.28225111961364746
+          ],
+          "truth_proxy_nearest_error": 0.5886834859848022,
+          "measurement_nll": -1.8800305128097534,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999999403953552,
+            1.2268896121270245e-08
+          ],
+          "truth_semantic_mass": 1.2268896121270245e-08,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15170052647590637,
+            0.41118717193603516,
+            -0.048273175954818726,
+            0.2822227478027344
+          ],
+          "truth_proxy_nearest_error": 0.5888128280639648,
+          "measurement_nll": -1.6854305267333984,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            9.249879334705113e-11
+          ],
+          "truth_semantic_mass": 9.249879334705113e-11,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15194296836853027,
+            0.41092178225517273,
+            -0.048160046339035034,
+            0.28223657608032227
+          ],
+          "truth_proxy_nearest_error": 0.5890781879425049,
+          "measurement_nll": -1.5645173788070679,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            7.149086010682648e-13
+          ],
+          "truth_semantic_mass": 7.149086010682648e-13,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15193098783493042,
+            0.410778671503067,
+            -0.047994792461395264,
+            0.2823697328567505
+          ],
+          "truth_proxy_nearest_error": 0.5892213582992554,
+          "measurement_nll": -1.4750031232833862,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.1837367600074731e-14
+          ],
+          "truth_semantic_mass": 1.1837367600074731e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15137982368469238,
+            0.41034790873527527,
+            -0.048157334327697754,
+            0.28235748410224915
+          ],
+          "truth_proxy_nearest_error": 0.5896520614624023,
+          "measurement_nll": -1.2102299928665161,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0819232303409167e-14
+          ],
+          "truth_semantic_mass": 1.0819232303409167e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15190446376800537,
+            0.41032400727272034,
+            -0.04815496504306793,
+            0.2826082408428192
+          ],
+          "truth_proxy_nearest_error": 0.589676022529602,
+          "measurement_nll": -1.3291198015213013,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.0241012885262545e-14
+          ],
+          "truth_semantic_mass": 1.0241012885262545e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15208160877227783,
+            0.41046270728111267,
+            -0.04835812747478485,
+            0.28260672092437744
+          ],
+          "truth_proxy_nearest_error": 0.5895372629165649,
+          "measurement_nll": -1.2444932460784912,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 3.0643288809737747e-15,
+      "last_ambiguous_prefix_frame": 1
+    },
+    {
+      "seed": 102,
+      "condition": "missing",
+      "measurement_sha256": "6894efbf94ecb09cf345fcc35748e6864d3f5ab34b6f00c0293c6f6a0309713a",
+      "declared_prior": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9972042441368103,
+            0.002795726992189884
+          ],
+          "truth_semantic_mass": 0.002795726992189884,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15290188789367676,
+            0.41168150305747986,
+            -0.048405855894088745,
+            0.28167957067489624
+          ],
+          "truth_proxy_nearest_error": 0.5883184671401978,
+          "measurement_nll": -2.180319309234619,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999883770942688,
+            1.1625189472397324e-05
+          ],
+          "truth_semantic_mass": 1.1625189472397324e-05,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15166616439819336,
+            0.41159379482269287,
+            -0.048443228006362915,
+            0.28184452652931213
+          ],
+          "truth_proxy_nearest_error": 0.5884062051773071,
+          "measurement_nll": -1.7535744905471802,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999999403953552,
+            6.486496317847923e-08
+          ],
+          "truth_semantic_mass": 6.486496317847923e-08,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15136680006980896,
+            0.4112035632133484,
+            -0.04822985827922821,
+            0.28208622336387634
+          ],
+          "truth_proxy_nearest_error": 0.5887964367866516,
+          "measurement_nll": -1.6709866523742676,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            5.286533988346775e-10
+          ],
+          "truth_semantic_mass": 5.286533988346775e-10,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15161478519439697,
+            0.41087162494659424,
+            -0.04808326065540314,
+            0.28205376863479614
+          ],
+          "truth_proxy_nearest_error": 0.5891283750534058,
+          "measurement_nll": -1.3960448503494263,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            4.519457291046747e-12
+          ],
+          "truth_semantic_mass": 4.519457291046747e-12,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15155333280563354,
+            0.41066598892211914,
+            -0.048095911741256714,
+            0.2821958065032959
+          ],
+          "truth_proxy_nearest_error": 0.5893340110778809,
+          "measurement_nll": -1.4022730588912964,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            4.0729193021699084e-14
+          ],
+          "truth_semantic_mass": 4.0729193021699084e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15150314569473267,
+            0.41038280725479126,
+            -0.04822024703025818,
+            0.28258419036865234
+          ],
+          "truth_proxy_nearest_error": 0.5896171927452087,
+          "measurement_nll": -1.3537492752075195,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0171445222271602e-14
+          ],
+          "truth_semantic_mass": 1.0171445222271602e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15172815322875977,
+            0.4103749990463257,
+            -0.0480915904045105,
+            0.28215572237968445
+          ],
+          "truth_proxy_nearest_error": 0.5896250009536743,
+          "measurement_nll": -1.2246145009994507,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.0766463844861119e-14
+          ],
+          "truth_semantic_mass": 1.0766463844861119e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15145862102508545,
+            0.4102783501148224,
+            -0.04816615581512451,
+            0.28241628408432007
+          ],
+          "truth_proxy_nearest_error": 0.5897216796875,
+          "measurement_nll": -1.3304543495178223,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 3.434505995846427e-15,
+      "last_ambiguous_prefix_frame": 1
+    },
+    {
+      "seed": 102,
+      "condition": "unidentifiable",
+      "measurement_sha256": "5b83607efd9e4913836fcfe761cb2e36ae57b67758ad1a00884ec3011c7c9c81",
+      "declared_prior": [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9970051646232605,
+            0.0029949424788355827
+          ],
+          "truth_semantic_mass": 0.9970051646232605,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15605852007865906,
+            0.41198763251304626,
+            -0.048501044511795044,
+            0.28064465522766113
+          ],
+          "truth_proxy_nearest_error": 0.8439414501190186,
+          "measurement_nll": -1.5027135610580444,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999909996986389,
+            9.112375664699357e-06
+          ],
+          "truth_semantic_mass": 0.9999909996986389,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15245205163955688,
+            0.4117042124271393,
+            -0.048381954431533813,
+            0.2820447087287903
+          ],
+          "truth_proxy_nearest_error": 0.8475479483604431,
+          "measurement_nll": -1.9326934814453125,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            1.0,
+            5.2958505136757594e-08
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15243715047836304,
+            0.4115026593208313,
+            -0.048494741320610046,
+            0.2821892499923706
+          ],
+          "truth_proxy_nearest_error": 0.847562849521637,
+          "measurement_nll": -1.528621792793274,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            4.055648872292039e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1525619924068451,
+            0.4112697243690491,
+            -0.04838725924491882,
+            0.2822408080101013
+          ],
+          "truth_proxy_nearest_error": 0.8474379777908325,
+          "measurement_nll": -1.4788726568222046,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            2.5354683630407493e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1526363492012024,
+            0.4109410345554352,
+            -0.048167601227760315,
+            0.28271833062171936
+          ],
+          "truth_proxy_nearest_error": 0.8473636507987976,
+          "measurement_nll": -1.6186283826828003,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.7381004269309205e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1520531177520752,
+            0.4106099307537079,
+            -0.04812440276145935,
+            0.2826825976371765
+          ],
+          "truth_proxy_nearest_error": 0.8479468822479248,
+          "measurement_nll": -1.6036924123764038,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            8.827167512562295e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15225565433502197,
+            0.41047126054763794,
+            -0.04829224944114685,
+            0.28269174695014954
+          ],
+          "truth_proxy_nearest_error": 0.847744345664978,
+          "measurement_nll": -1.4706610441207886,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            8.478292429280141e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1523945927619934,
+            0.410627543926239,
+            -0.048122406005859375,
+            0.28248530626296997
+          ],
+          "truth_proxy_nearest_error": 0.8476054072380066,
+          "measurement_nll": -1.4258579015731812,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 1.2513277022094087e-15,
+      "last_ambiguous_prefix_frame": 7
+    },
+    {
+      "seed": 102,
+      "condition": "stale",
+      "measurement_sha256": "f140b75115e2b287dcd55c45b4b2de0af3ed64d8191bb658da2c1403d264dd31",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.99965500831604,
+            0.0003450145304668695
+          ],
+          "truth_semantic_mass": 0.99965500831604,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15528187155723572,
+            0.4113560914993286,
+            -0.04849258065223694,
+            0.2808149456977844
+          ],
+          "truth_proxy_nearest_error": 0.8447180986404419,
+          "measurement_nll": -1.3823165893554688,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999983310699463,
+            1.6336513226633542e-06
+          ],
+          "truth_semantic_mass": 0.9999983310699463,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15077057480812073,
+            0.41122615337371826,
+            -0.048632100224494934,
+            0.2822537422180176
+          ],
+          "truth_proxy_nearest_error": 0.8492294549942017,
+          "measurement_nll": -1.9008365869522095,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            1.0,
+            1.2227308054946207e-08
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15187597274780273,
+            0.4112374186515808,
+            -0.04823523759841919,
+            0.28230729699134827
+          ],
+          "truth_proxy_nearest_error": 0.8481240272521973,
+          "measurement_nll": -1.4963374137878418,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            1.0019096663427263e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1519794762134552,
+            0.4109836518764496,
+            -0.04816266894340515,
+            0.2826325595378876
+          ],
+          "truth_proxy_nearest_error": 0.8480205535888672,
+          "measurement_nll": -1.415178656578064,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            7.219853512784036e-13
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1514807939529419,
+            0.41087430715560913,
+            -0.048178061842918396,
+            0.282317191362381
+          ],
+          "truth_proxy_nearest_error": 0.8485192060470581,
+          "measurement_nll": -1.4810601472854614,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            7.6031989745492e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15152370929718018,
+            0.41043052077293396,
+            -0.04820318520069122,
+            0.28279173374176025
+          ],
+          "truth_proxy_nearest_error": 0.8484762907028198,
+          "measurement_nll": -1.4668854475021362,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0282030455733334e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1513906717300415,
+            0.41025692224502563,
+            -0.0481744259595871,
+            0.2828157842159271
+          ],
+          "truth_proxy_nearest_error": 0.8486093282699585,
+          "measurement_nll": -1.33310067653656,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            8.442206284628266e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1517910361289978,
+            0.41037923097610474,
+            -0.0482170432806015,
+            0.2822566628456116
+          ],
+          "truth_proxy_nearest_error": 0.8482089638710022,
+          "measurement_nll": -1.4053531885147095,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": true,
+      "duplicate_weight_delta": 3.2699139416677604e-15,
+      "last_ambiguous_prefix_frame": 3
+    },
+    {
+      "seed": 103,
+      "condition": "correct",
+      "measurement_sha256": "9685c9fe77ee183b35669bd8bdf6f94fe550d278b4dbe5f2e42b62cf255901cf",
+      "declared_prior": [
+        [
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9996227025985718,
+            0.00037725764559581876
+          ],
+          "truth_semantic_mass": 0.9996227025985718,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15540772676467896,
+            0.4115578532218933,
+            -0.04845592379570007,
+            0.2807909846305847
+          ],
+          "truth_proxy_nearest_error": 0.844592273235321,
+          "measurement_nll": -1.307443618774414,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999983906745911,
+            1.5748621535749407e-06
+          ],
+          "truth_semantic_mass": 0.9999983906745911,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15069708228111267,
+            0.41132718324661255,
+            -0.04862171411514282,
+            0.28206127882003784
+          ],
+          "truth_proxy_nearest_error": 0.8493028879165649,
+          "measurement_nll": -1.997076392173767,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999999403953552,
+            1.4606992948529296e-08
+          ],
+          "truth_semantic_mass": 0.9999999403953552,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15199285745620728,
+            0.4110985994338989,
+            -0.0482519268989563,
+            0.28233933448791504
+          ],
+          "truth_proxy_nearest_error": 0.8480071425437927,
+          "measurement_nll": -1.4300647974014282,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            8.47152556437969e-11
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15164834260940552,
+            0.4107881784439087,
+            -0.04829426109790802,
+            0.2823859453201294
+          ],
+          "truth_proxy_nearest_error": 0.8483516573905945,
+          "measurement_nll": -1.6876102685928345,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            8.115851198552126e-13
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15216326713562012,
+            0.41063153743743896,
+            -0.048168450593948364,
+            0.28259173035621643
+          ],
+          "truth_proxy_nearest_error": 0.8478367328643799,
+          "measurement_nll": -1.467505931854248,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            8.836926179147612e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15154588222503662,
+            0.41042381525039673,
+            -0.048199981451034546,
+            0.2823825180530548
+          ],
+          "truth_proxy_nearest_error": 0.8484541177749634,
+          "measurement_nll": -1.4642748832702637,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            9.884273101065134e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15187853574752808,
+            0.4103904366493225,
+            -0.04834955930709839,
+            0.2822752892971039
+          ],
+          "truth_proxy_nearest_error": 0.8481214642524719,
+          "measurement_nll": -1.5756181478500366,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            9.053018683552287e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1519283652305603,
+            0.4102708697319031,
+            -0.04831667244434357,
+            0.282482385635376
+          ],
+          "truth_proxy_nearest_error": 0.8480716347694397,
+          "measurement_nll": -1.5188742876052856,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": true,
+      "duplicate_weight_delta": 2.865575140999395e-15,
+      "last_ambiguous_prefix_frame": 2
+    },
+    {
+      "seed": 103,
+      "condition": "misleading",
+      "measurement_sha256": "9685c9fe77ee183b35669bd8bdf6f94fe550d278b4dbe5f2e42b62cf255901cf",
+      "declared_prior": [
+        [
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.906103253364563,
+            0.09389669448137283
+          ],
+          "truth_semantic_mass": 0.906103253364563,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15763384103775024,
+            0.41205817461013794,
+            -0.04854385554790497,
+            0.28087395429611206
+          ],
+          "truth_proxy_nearest_error": 0.8423661589622498,
+          "measurement_nll": -1.0254642963409424,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9997321963310242,
+            0.0002677655720617622
+          ],
+          "truth_semantic_mass": 0.9997321963310242,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15193095803260803,
+            0.4117952883243561,
+            -0.04863941669464111,
+            0.28191518783569336
+          ],
+          "truth_proxy_nearest_error": 0.8480690717697144,
+          "measurement_nll": -1.9936141967773438,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999980330467224,
+            1.9144363250234164e-06
+          ],
+          "truth_semantic_mass": 0.9999980330467224,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15370547771453857,
+            0.41176462173461914,
+            -0.0483478307723999,
+            0.2818867266178131
+          ],
+          "truth_proxy_nearest_error": 0.8462945222854614,
+          "measurement_nll": -1.215347170829773,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            1.7085669767880063e-08
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15279656648635864,
+            0.4114946126937866,
+            -0.04830735921859741,
+            0.2821378707885742
+          ],
+          "truth_proxy_nearest_error": 0.8472034335136414,
+          "measurement_nll": -1.2408190965652466,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            1.9516198379587735e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15363258123397827,
+            0.41121038794517517,
+            -0.048062220215797424,
+            0.28223636746406555
+          ],
+          "truth_proxy_nearest_error": 0.8463674187660217,
+          "measurement_nll": -1.1085988283157349,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.7159789214571397e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15285494923591614,
+            0.41071265935897827,
+            -0.048095911741256714,
+            0.28244081139564514
+          ],
+          "truth_proxy_nearest_error": 0.8471450805664062,
+          "measurement_nll": -1.1340806484222412,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.4071537277136458e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15350928902626038,
+            0.4107060730457306,
+            -0.04800945520401001,
+            0.28221404552459717
+          ],
+          "truth_proxy_nearest_error": 0.846490740776062,
+          "measurement_nll": -1.07822847366333,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.0294616518296586e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15340527892112732,
+            0.41053006052970886,
+            -0.0481736958026886,
+            0.282443106174469
+          ],
+          "truth_proxy_nearest_error": 0.8465946912765503,
+          "measurement_nll": -0.9699041843414307,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 2.1242493644635894e-15,
+      "last_ambiguous_prefix_frame": 2
+    },
+    {
+      "seed": 103,
+      "condition": "missing",
+      "measurement_sha256": "9685c9fe77ee183b35669bd8bdf6f94fe550d278b4dbe5f2e42b62cf255901cf",
+      "declared_prior": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9976169466972351,
+            0.0023830863647162914
+          ],
+          "truth_semantic_mass": 0.9976169466972351,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15303558111190796,
+            0.4120479226112366,
+            -0.04861116409301758,
+            0.28159254789352417
+          ],
+          "truth_proxy_nearest_error": 0.846964418888092,
+          "measurement_nll": -2.1846423149108887,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999880194664001,
+            1.1930286746064667e-05
+          ],
+          "truth_semantic_mass": 0.9999880194664001,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1520988941192627,
+            0.41151905059814453,
+            -0.04869452118873596,
+            0.28191423416137695
+          ],
+          "truth_proxy_nearest_error": 0.8479011058807373,
+          "measurement_nll": -1.7347732782363892,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999998807907104,
+            6.931500706741645e-08
+          ],
+          "truth_semantic_mass": 0.9999998807907104,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15139496326446533,
+            0.4111875593662262,
+            -0.04813256859779358,
+            0.2821115255355835
+          ],
+          "truth_proxy_nearest_error": 0.8486050367355347,
+          "measurement_nll": -1.625606656074524,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            6.786654571655504e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1517820954322815,
+            0.41099783778190613,
+            -0.04818016290664673,
+            0.28223496675491333
+          ],
+          "truth_proxy_nearest_error": 0.8482179045677185,
+          "measurement_nll": -1.291783332824707,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            6.26570366771273e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15184414386749268,
+            0.410719633102417,
+            -0.04815328121185303,
+            0.2824306786060333
+          ],
+          "truth_proxy_nearest_error": 0.8481558561325073,
+          "measurement_nll": -1.441501259803772,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            6.158637646082668e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15191811323165894,
+            0.4104483127593994,
+            -0.04815104603767395,
+            0.28233668208122253
+          ],
+          "truth_proxy_nearest_error": 0.8480818867683411,
+          "measurement_nll": -1.3273857831954956,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0145616646610976e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.1516113579273224,
+            0.4104377031326294,
+            -0.04818648099899292,
+            0.2821654677391052
+          ],
+          "truth_proxy_nearest_error": 0.848388671875,
+          "measurement_nll": -1.4637913703918457,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            9.47488090183345e-15
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15159428119659424,
+            0.41061335802078247,
+            -0.04807928204536438,
+            0.2822491526603699
+          ],
+          "truth_proxy_nearest_error": 0.8484057188034058,
+          "measurement_nll": -1.2885910272598267,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": true,
+      "duplicate_weight_delta": 1.4675930013353239e-15,
+      "last_ambiguous_prefix_frame": 2
+    },
+    {
+      "seed": 103,
+      "condition": "unidentifiable",
+      "measurement_sha256": "a89dbd37d51320ac35e9c24769bf79b76078247e83ec7f07fcb4c359905988fb",
+      "declared_prior": [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9961935877799988,
+            0.003806355409324169
+          ],
+          "truth_semantic_mass": 0.9961935877799988,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1563030481338501,
+            0.41189491748809814,
+            -0.04859822988510132,
+            0.2806318402290344
+          ],
+          "truth_proxy_nearest_error": 0.8436969518661499,
+          "measurement_nll": -1.464798927307129,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.9999861717224121,
+            1.3774299986835103e-05
+          ],
+          "truth_semantic_mass": 0.9999861717224121,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15148097276687622,
+            0.41177302598953247,
+            -0.048510223627090454,
+            0.28220897912979126
+          ],
+          "truth_proxy_nearest_error": 0.8485190272331238,
+          "measurement_nll": -1.9875231981277466,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999998807907104,
+            1.0900962621462895e-07
+          ],
+          "truth_semantic_mass": 0.9999998807907104,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15252235531806946,
+            0.4113828241825104,
+            -0.048281580209732056,
+            0.28224703669548035
+          ],
+          "truth_proxy_nearest_error": 0.8474776744842529,
+          "measurement_nll": -1.4443618059158325,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            6.835971233520866e-10
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15186259150505066,
+            0.4113447666168213,
+            -0.04836288094520569,
+            0.28223341703414917
+          ],
+          "truth_proxy_nearest_error": 0.848137378692627,
+          "measurement_nll": -1.7462059259414673,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            6.075387155163314e-12
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15270352363586426,
+            0.410972535610199,
+            -0.04819104075431824,
+            0.28248894214630127
+          ],
+          "truth_proxy_nearest_error": 0.8472964763641357,
+          "measurement_nll": -1.4408621788024902,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            4.6435413429994285e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15180528163909912,
+            0.4105866551399231,
+            -0.04822438955307007,
+            0.2823241651058197
+          ],
+          "truth_proxy_nearest_error": 0.8481947183609009,
+          "measurement_nll": -1.623418927192688,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.0647845350927627e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15296199917793274,
+            0.4105965495109558,
+            -0.04813683032989502,
+            0.2823132276535034
+          ],
+          "truth_proxy_nearest_error": 0.8470380306243896,
+          "measurement_nll": -1.4546432495117188,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.165375203293368e-14
+          ],
+          "truth_semantic_mass": 1.0,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15278494358062744,
+            0.410503089427948,
+            -0.04811479151248932,
+            0.2825150787830353
+          ],
+          "truth_proxy_nearest_error": 0.8472150564193726,
+          "measurement_nll": -1.1942576169967651,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 2.4868802628091533e-15,
+      "last_ambiguous_prefix_frame": 7
+    },
+    {
+      "seed": 103,
+      "condition": "stale",
+      "measurement_sha256": "1642f710247f2ce094cde807653eabe0060853ffd6232f2663cf323d917d4017",
+      "declared_prior": [
+        [
+          0.02500000037252903,
+          0.4749999940395355,
+          0.02500000037252903,
+          0.4749999940395355
+        ]
+      ],
+      "steps": [
+        {
+          "frame": 0,
+          "semantic_mass": [
+            0.9240545034408569,
+            0.07594551146030426
+          ],
+          "truth_semantic_mass": 0.07594551146030426,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15751469135284424,
+            0.4120519757270813,
+            -0.04855570197105408,
+            0.2809092104434967
+          ],
+          "truth_proxy_nearest_error": 0.5879480242729187,
+          "measurement_nll": -1.303106427192688,
+          "state_bytes": 222721
+        },
+        {
+          "frame": 1,
+          "semantic_mass": [
+            0.999813973903656,
+            0.0001860366464825347
+          ],
+          "truth_semantic_mass": 0.0001860366464825347,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15198364853858948,
+            0.4119781255722046,
+            -0.04858317971229553,
+            0.28178995847702026
+          ],
+          "truth_proxy_nearest_error": 0.5880218744277954,
+          "measurement_nll": -1.8816323280334473,
+          "state_bytes": 231170
+        },
+        {
+          "frame": 2,
+          "semantic_mass": [
+            0.9999985098838806,
+            1.5294028798962245e-06
+          ],
+          "truth_semantic_mass": 1.5294028798962245e-06,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15370941162109375,
+            0.41163691878318787,
+            -0.048334360122680664,
+            0.2820388674736023
+          ],
+          "truth_proxy_nearest_error": 0.5883630514144897,
+          "measurement_nll": -1.1286548376083374,
+          "state_bytes": 239619
+        },
+        {
+          "frame": 3,
+          "semantic_mass": [
+            1.0,
+            1.2397552318077487e-08
+          ],
+          "truth_semantic_mass": 1.2397552318077487e-08,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.15271791815757751,
+            0.41133034229278564,
+            -0.0481950044631958,
+            0.2822619676589966
+          ],
+          "truth_proxy_nearest_error": 0.5886696577072144,
+          "measurement_nll": -1.1252723932266235,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 4,
+          "semantic_mass": [
+            1.0,
+            1.1103298142023377e-10
+          ],
+          "truth_semantic_mass": 1.1103298142023377e-10,
+          "cue_visible": false,
+          "geometry_proxy": [
+            -0.1531352996826172,
+            0.41104477643966675,
+            -0.048320621252059937,
+            0.28223830461502075
+          ],
+          "truth_proxy_nearest_error": 0.5889552235603333,
+          "measurement_nll": -1.2758818864822388,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 5,
+          "semantic_mass": [
+            1.0,
+            1.2513670655245335e-12
+          ],
+          "truth_semantic_mass": 1.2513670655245335e-12,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15370821952819824,
+            0.41083285212516785,
+            -0.04814019799232483,
+            0.2825867533683777
+          ],
+          "truth_proxy_nearest_error": 0.5891671180725098,
+          "measurement_nll": -0.9965713620185852,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 6,
+          "semantic_mass": [
+            1.0,
+            1.2119374514368841e-14
+          ],
+          "truth_semantic_mass": 1.2119374514368841e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15283843874931335,
+            0.41052573919296265,
+            -0.04827997088432312,
+            0.2822398543357849
+          ],
+          "truth_proxy_nearest_error": 0.5894742608070374,
+          "measurement_nll": -1.1048063039779663,
+          "state_bytes": 248068
+        },
+        {
+          "frame": 7,
+          "semantic_mass": [
+            1.0,
+            1.7268255713700185e-14
+          ],
+          "truth_semantic_mass": 1.7268255713700185e-14,
+          "cue_visible": true,
+          "geometry_proxy": [
+            -0.15362542867660522,
+            0.4104985296726227,
+            -0.04819747805595398,
+            0.28259554505348206
+          ],
+          "truth_proxy_nearest_error": 0.5895015001296997,
+          "measurement_nll": -0.7009884715080261,
+          "state_bytes": 248068
+        }
+      ],
+      "gate_passed": false,
+      "duplicate_weight_delta": 4.897416599049329e-15,
+      "last_ambiguous_prefix_frame": 4
+    }
+  ],
+  "encoder_ms": {
+    "p50": 16.44277549985418,
+    "p95": 18.53413025014561
+  }
+}

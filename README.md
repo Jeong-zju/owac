@@ -1,6 +1,6 @@
 # OWAC
 
-2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，具体编码器尚待实现。
+2026-10-12 编码器研究：N01、N02、N04 使用三个独立 worktree，完整实现提示词及分支路径见 [研究入口](docs/prompts/README.md)。本分支 N02 已完成工程修补与两平台真实 NPZ → π0.5 离线训练/推理检查，学习机制验收仍失败：强错误先验纠正 0/4、不可辨识歧义保持 0/4。详见 [独立验收](research/experiments/2026-10-12_n02_encoder.md#独立验收与修补)。
 
 发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 
@@ -8,7 +8,7 @@
 
 Arena DROID / PolaRiS 评测、场景重建和该衍生集的公开发布已按用户要求终止。旧源码、权重、数据与结果保留，部分结果不作为完整基准或全集交付。定时任务保持关闭。
 
-OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。候选框架尚未实现或验证。
+OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。N02 当前为可训练原型，其机制收益与机器人闭环能力尚未建立。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
@@ -50,7 +50,7 @@ uv run --locked python -c "import owac; print(owac.__file__)"
 └── worktrees/            # 后续并行 checkout 的统一位置
 ```
 
-从主仓库创建后续 worktree 的方法见[开发说明](docs/development.md)。当前只预留容器目录，尚未创建额外 worktree。
+从主仓库创建后续 worktree 的方法见[开发说明](docs/development.md)。现有研究 worktree 与分支见[研究入口](docs/prompts/README.md)。
 
 ```text
 .

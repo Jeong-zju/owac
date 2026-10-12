@@ -1,0 +1,45 @@
+{
+  "version": "n02-rawvla-split-v1",
+  "split_unit": "acquisition_source",
+  "seed": 1,
+  "val_fraction": 0.25,
+  "dataset_format": "robotwin",
+  "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw",
+  "train_sources": [
+    "grab_roller"
+  ],
+  "val_sources": [
+    "stack_bowls_two"
+  ],
+  "train_episodes": [
+    "grab_roller/episode_000000.npz"
+  ],
+  "val_episodes": [
+    "stack_bowls_two/episode_000000.npz"
+  ],
+  "episodes": [
+    {
+      "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000000.npz",
+      "relative_path": "grab_roller/episode_000000.npz",
+      "acquisition_source": "grab_roller",
+      "episode_group_id": "grab_roller/episode_000000",
+      "num_frames": 93,
+      "size_bytes": 257150606,
+      "sha256": "0d0c834f5d0c1b22207663eeae34f0b0c7564beacffa279166f6afc6957b3316"
+    },
+    {
+      "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/stack_bowls_two/episode_000000.npz",
+      "relative_path": "stack_bowls_two/episode_000000.npz",
+      "acquisition_source": "stack_bowls_two",
+      "episode_group_id": "stack_bowls_two/episode_000000",
+      "num_frames": 312,
+      "size_bytes": 862680800,
+      "sha256": "5323ef2e473b674d61e5e76c657cde875037322eba02b00db70fdea86ef2452c"
+    }
+  ],
+  "num_frames": {
+    "train": 93,
+    "validation": 312
+  },
+  "notes": "Split unit is the acquisition source (LIBERO suite directory / RoboTwin task directory). Adjacent frames are never separated and every derived variant of an episode stays on the same side. Formal closed-loop manifests are tracked separately and are not produced here."
+}

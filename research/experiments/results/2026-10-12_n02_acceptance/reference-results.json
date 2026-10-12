@@ -1,0 +1,2333 @@
+{
+  "suite": "mechanism",
+  "config": {
+    "name": "tiny",
+    "K": 4,
+    "D": 32,
+    "cycles": 4,
+    "history": 4,
+    "temperature": 1.0,
+    "beta_prior": 1.0,
+    "beta_relation": 0.0,
+    "beta_prior_bounds": [
+      0.05,
+      4.0
+    ],
+    "stem_width": 32,
+    "stem_layers": 2,
+    "cell_kind": "convgru",
+    "cell_kernel": 3,
+    "readout_mode": "map",
+    "tokens_per_camera": 256,
+    "token_dim": 2048,
+    "prior_mode": "learned",
+    "geometry_dim": 8,
+    "seed": 0,
+    "measurement": {
+      "input_mode": "rawvla_rgb3",
+      "cfa_pattern": "RGGB",
+      "cfa_planes": false,
+      "black_level": 0.0,
+      "white_level": 1.0,
+      "robust": "huber",
+      "huber_delta": 3.0,
+      "variance_floor": 1e-06,
+      "shot_scale": null,
+      "read_scale": null,
+      "scale_estimated": false,
+      "predict_variance": true,
+      "head_width": 32,
+      "head_depth": 2,
+      "geometry_dim": 8,
+      "saturation_is_observation": false
+    },
+    "revision": {
+      "contradiction_enabled": true,
+      "contradiction_threshold": 2.5,
+      "relative_margin": 1.5,
+      "strong_contradiction_threshold": 4.0,
+      "residual_ema": 0.5,
+      "propagation_enabled": true,
+      "propagation_hops": 1,
+      "propagation_decay": 0.5,
+      "propagate_priority": true,
+      "reset_contradicted": true,
+      "reset_fraction": 1.0,
+      "downweight_contradicted": 0.5,
+      "proposal_enabled": true,
+      "proposal_temperature": 1.0,
+      "update_scale": 1.0,
+      "cold_start_threshold": 0.25,
+      "tolerance": 0.0001,
+      "min_iterations": 1,
+      "write_dependency_edges": true
+    },
+    "loss_weights": {
+      "measurement": 1.0,
+      "geometry_set": 1.0,
+      "revision": 0.1,
+      "diversity": 0.01,
+      "mixture": 1.0,
+      "collapse_penalty": 0.0
+    }
+  },
+  "config_path": "configs/encoders/n02/tiny.json",
+  "preset": null,
+  "seed": 0,
+  "git_sha": "dfece066f2500da4779ed93955e70fd0b28e9afc",
+  "device": "cpu",
+  "torch_threads": 1,
+  "torch_version": "2.9.1+cpu",
+  "checkpoint": {
+    "path": "outputs/n02-audit-calibrated/checkpoint.pt",
+    "sha256": "e61f8f881860c119341b0a1a38ac8d61d57886fbdd0862f4ed96b86a13e43981",
+    "step": 200,
+    "trained_config_source": true
+  },
+  "wall_seconds": 0.8448964600002,
+  "limitations": [
+    "the learned encoder was not run over the required trajectories: checkpoint K=4 does not match the explicit two-hypothesis reference K=2; the reference trajectory above is the only measured trajectory for this run",
+    "the readout probe compares the selected candidate against the best *different* candidate; when two candidates are geometrically identical the interpolation is undefined and is reported as 0 instead of dividing by a clamped constant. The controlled input below uses untied weights (0.6, 0.4) so the comparison is well posed, and the exactly-tied case is exercised by the unit tests."
+  ],
+  "mechanism": {
+    "status": "ran",
+    "source": "owac.frameworks.n02.analytic (explicit two-hypothesis reference)",
+    "case_config": {
+      "name": "analytic",
+      "K": 2,
+      "D": 8,
+      "cycles": 4,
+      "history": 4,
+      "temperature": 1.0,
+      "beta_prior": 1.0,
+      "beta_relation": 0.0,
+      "beta_prior_bounds": [
+        0.05,
+        4.0
+      ],
+      "stem_width": 8,
+      "stem_layers": 2,
+      "cell_kind": "convgru",
+      "cell_kernel": 3,
+      "readout_mode": "map",
+      "tokens_per_camera": 256,
+      "token_dim": 2048,
+      "prior_mode": "learned",
+      "geometry_dim": 8,
+      "seed": 0,
+      "measurement": {
+        "input_mode": "rawvla_rgb3",
+        "cfa_pattern": "RGGB",
+        "cfa_planes": false,
+        "black_level": 0.0,
+        "white_level": 255.0,
+        "robust": "gaussian",
+        "huber_delta": 3.0,
+        "variance_floor": 1e-06,
+        "shot_scale": null,
+        "read_scale": null,
+        "scale_estimated": false,
+        "predict_variance": false,
+        "head_width": 32,
+        "head_depth": 2,
+        "geometry_dim": 8,
+        "saturation_is_observation": false
+      },
+      "revision": {
+        "contradiction_enabled": true,
+        "contradiction_threshold": 2.5,
+        "relative_margin": 1.5,
+        "strong_contradiction_threshold": 4.0,
+        "residual_ema": 0.5,
+        "propagation_enabled": true,
+        "propagation_hops": 1,
+        "propagation_decay": 0.5,
+        "propagate_priority": true,
+        "reset_contradicted": true,
+        "reset_fraction": 1.0,
+        "downweight_contradicted": 0.5,
+        "proposal_enabled": true,
+        "proposal_temperature": 1.0,
+        "update_scale": 1.0,
+        "cold_start_threshold": 0.25,
+        "tolerance": 0.0001,
+        "min_iterations": 1,
+        "write_dependency_edges": true
+      },
+      "loss_weights": {
+        "measurement": 1.0,
+        "geometry_set": 1.0,
+        "revision": 0.1,
+        "diversity": 0.01,
+        "mixture": 1.0,
+        "collapse_penalty": 0.0
+      }
+    },
+    "trajectories": {
+      "correct_prior": {
+        "scenario": "correct_prior",
+        "name": "delayed_evidence_opening_direction_seed0",
+        "variant": "controlled",
+        "declares_contradiction": false,
+        "prior_odds": [
+          0.9,
+          0.1
+        ],
+        "prior_probability": [
+          0.9,
+          0.1
+        ],
+        "prior_is_correct": true,
+        "true_hypothesis": 0,
+        "evidence_step": 3,
+        "observations": 8,
+        "steps": [
+          {
+            "observation_index": 0,
+            "weights": [
+              0.9,
+              0.1
+            ],
+            "exact_posterior": [
+              0.9,
+              0.1
+            ],
+            "float64_bayes_posterior": [
+              0.9,
+              0.1
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 1.3877787807814457e-17,
+            "measurement_energy": [
+              1.2784952127116547,
+              1.2784952127116547
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              -1.383855728369481,
+              -3.5810803057057
+            ],
+            "unique_evidence_count": 1,
+            "duplicates_skipped": 0,
+            "observations_used": 1,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.8999999999999999,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 1,
+            "weights": [
+              0.9,
+              0.1
+            ],
+            "exact_posterior": [
+              0.9,
+              0.1
+            ],
+            "float64_bayes_posterior": [
+              0.9,
+              0.1
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 1.3877787807814457e-17,
+            "measurement_energy": [
+              1.4127062533507866,
+              1.4127062533507866
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              -1.518066769008613,
+              -3.715291346344832
+            ],
+            "unique_evidence_count": 2,
+            "duplicates_skipped": 0,
+            "observations_used": 2,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.8999999999999999,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 2,
+            "weights": [
+              0.9,
+              0.1
+            ],
+            "exact_posterior": [
+              0.9,
+              0.1
+            ],
+            "float64_bayes_posterior": [
+              0.9,
+              0.1
+            ],
+            "max_abs_deviation_from_exact": 4.163336342344337e-17,
+            "max_abs_deviation_from_float64_bayes": 4.163336342344337e-17,
+            "measurement_energy": [
+              3.877428630585007,
+              3.877428630585007
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              -3.9827891462428333,
+              -6.180013723579052
+            ],
+            "unique_evidence_count": 3,
+            "duplicates_skipped": 0,
+            "observations_used": 3,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.8999999999999999,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 3,
+            "weights": [
+              0.96072969945,
+              0.03927030055
+            ],
+            "exact_posterior": [
+              0.96072969945,
+              0.03927030055
+            ],
+            "float64_bayes_posterior": [
+              0.96072969945,
+              0.03927030055
+            ],
+            "max_abs_deviation_from_exact": 1.1102230246251565e-16,
+            "max_abs_deviation_from_float64_bayes": 2.0816681711721685e-17,
+            "measurement_energy": [
+              1.921417127870934,
+              2.9214171278709347
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              -2.02677764352876,
+              -5.22400222086498
+            ],
+            "unique_evidence_count": 4,
+            "duplicates_skipped": 0,
+            "observations_used": 4,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.9607296994499495,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 4,
+            "weights": [
+              0.985185515469,
+              0.014814484531
+            ],
+            "exact_posterior": [
+              0.985185515469,
+              0.014814484531
+            ],
+            "float64_bayes_posterior": [
+              0.985185515469,
+              0.014814484531
+            ],
+            "max_abs_deviation_from_exact": 8.673617379884035e-18,
+            "max_abs_deviation_from_float64_bayes": 1.214306433183765e-17,
+            "measurement_energy": [
+              -0.034594374843138986,
+              1.9654056251568623
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              -0.0707661408146873,
+              -4.267990718150908
+            ],
+            "unique_evidence_count": 5,
+            "duplicates_skipped": 0,
+            "observations_used": 5,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.9851855154692623,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 5,
+            "weights": [
+              0.994498537038,
+              0.005501462962
+            ],
+            "exact_posterior": [
+              0.994498537038,
+              0.005501462962
+            ],
+            "float64_bayes_posterior": [
+              0.994498537038,
+              0.005501462962
+            ],
+            "max_abs_deviation_from_exact": 2.6020852139652106e-18,
+            "max_abs_deviation_from_float64_bayes": 4.336808689942018e-18,
+            "measurement_energy": [
+              -1.990605877557212,
+              1.00939412244279
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              1.8852453618993856,
+              -3.3119792154368355
+            ],
+            "unique_evidence_count": 6,
+            "duplicates_skipped": 0,
+            "observations_used": 6,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.9944985370383037,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 6,
+            "weights": [
+              0.997969062115,
+              0.002030937885
+            ],
+            "exact_posterior": [
+              0.997969062115,
+              0.002030937885
+            ],
+            "float64_bayes_posterior": [
+              0.997969062115,
+              0.002030937885
+            ],
+            "max_abs_deviation_from_exact": 3.469446951953614e-18,
+            "max_abs_deviation_from_float64_bayes": 3.469446951953614e-18,
+            "measurement_energy": [
+              -3.946617380271285,
+              0.05338261972871772
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              3.8412568646134586,
+              -2.355967712722763
+            ],
+            "unique_evidence_count": 7,
+            "duplicates_skipped": 0,
+            "observations_used": 7,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.99796906211513,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 7,
+            "weights": [
+              0.999251899296,
+              0.000748100704
+            ],
+            "exact_posterior": [
+              0.999251899296,
+              0.000748100704
+            ],
+            "float64_bayes_posterior": [
+              0.999251899296,
+              0.000748100704
+            ],
+            "max_abs_deviation_from_exact": 5.421010862427522e-19,
+            "max_abs_deviation_from_float64_bayes": 6.505213034913027e-19,
+            "measurement_energy": [
+              -5.902628882985358,
+              -0.9026288829853546
+            ],
+            "prior_probability": [
+              0.9,
+              0.1
+            ],
+            "prior_energy": [
+              0.10536051565782628,
+              2.3025850929940455
+            ],
+            "logits": [
+              5.797268367327532,
+              -1.3999562100086909
+            ],
+            "unique_evidence_count": 8,
+            "duplicates_skipped": 0,
+            "observations_used": 8,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.9992518992959788,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          }
+        ],
+        "final": {
+          "observation_index": 7,
+          "weights": [
+            0.999251899296,
+            0.000748100704
+          ],
+          "exact_posterior": [
+            0.999251899296,
+            0.000748100704
+          ],
+          "float64_bayes_posterior": [
+            0.999251899296,
+            0.000748100704
+          ],
+          "max_abs_deviation_from_exact": 5.421010862427522e-19,
+          "max_abs_deviation_from_float64_bayes": 6.505213034913027e-19,
+          "measurement_energy": [
+            -5.902628882985358,
+            -0.9026288829853546
+          ],
+          "prior_probability": [
+            0.9,
+            0.1
+          ],
+          "prior_energy": [
+            0.10536051565782628,
+            2.3025850929940455
+          ],
+          "logits": [
+            5.797268367327532,
+            -1.3999562100086909
+          ],
+          "unique_evidence_count": 8,
+          "duplicates_skipped": 0,
+          "observations_used": 8,
+          "contradiction_flags": [
+            false,
+            false
+          ],
+          "top_index": 0,
+          "top_weight": 0.9992518992959788,
+          "true_hypothesis": 0,
+          "is_correct_top": true
+        },
+        "final_is_true": true,
+        "final_top_weight": 0.9992518992959788,
+        "correction_observation_index": 0,
+        "already_correct_before_contradiction": true,
+        "contradicting_observations_to_correct": null,
+        "wrong_explanation_duration_steps": 0,
+        "wrong_explanation_area": 0.362365286632,
+        "post_contradiction_wrong_fraction": null,
+        "post_contradiction_steps": 0,
+        "true_retained_final": true,
+        "two_hypotheses_retained_final": false,
+        "ambiguity_final_entropy": 0.006132629444142015,
+        "implied_location_true": 1.0,
+        "implied_location_other": 0.0,
+        "wrong_location_offset_normalised": 0.0,
+        "measurement_residual_nats_per_observation": -0.7378286103731697,
+        "description": "correct prior (0.9 on the true explanation); 5 weak (1 nat each) supporting cues"
+      },
+      "misleading_prior_corrected": {
+        "scenario": "misleading_prior_corrected",
+        "name": "delayed_evidence_opening_direction_seed0",
+        "variant": "controlled",
+        "declares_contradiction": true,
+        "prior_odds": [
+          0.05,
+          0.95
+        ],
+        "prior_probability": [
+          0.05,
+          0.95
+        ],
+        "prior_is_correct": false,
+        "true_hypothesis": 0,
+        "evidence_step": 3,
+        "observations": 8,
+        "steps": [
+          {
+            "observation_index": 0,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 6.938893903907228e-18,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              1.2784952127116547,
+              1.2784952127116547
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -4.274227486265645,
+              -1.3297885070992053
+            ],
+            "unique_evidence_count": 1,
+            "duplicates_skipped": 0,
+            "observations_used": 1,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 1,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 2.0816681711721685e-17,
+            "max_abs_deviation_from_float64_bayes": 2.7755575615628914e-17,
+            "measurement_energy": [
+              1.4127062533507866,
+              1.4127062533507866
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -4.408438526904778,
+              -1.4639995477383372
+            ],
+            "unique_evidence_count": 2,
+            "duplicates_skipped": 0,
+            "observations_used": 2,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 2,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 3.469446951953614e-17,
+            "max_abs_deviation_from_float64_bayes": 2.0816681711721685e-17,
+            "measurement_energy": [
+              3.877428630585007,
+              3.877428630585007
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -6.873160904138998,
+              -3.9287219249725576
+            ],
+            "unique_evidence_count": 3,
+            "duplicates_skipped": 0,
+            "observations_used": 3,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 3,
+            "weights": [
+              0.125160997998,
+              0.874839002002
+            ],
+            "exact_posterior": [
+              0.125160997998,
+              0.874839002002
+            ],
+            "float64_bayes_posterior": [
+              0.125160997998,
+              0.874839002002
+            ],
+            "max_abs_deviation_from_exact": 2.220446049250313e-16,
+            "max_abs_deviation_from_float64_bayes": 2.220446049250313e-16,
+            "measurement_energy": [
+              1.921417127870934,
+              2.9214171278709347
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -4.917149401424925,
+              -2.9727104222584853
+            ],
+            "unique_evidence_count": 4,
+            "duplicates_skipped": 0,
+            "observations_used": 4,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.8748390020016644,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 4,
+            "weights": [
+              0.280004562165,
+              0.719995437835
+            ],
+            "exact_posterior": [
+              0.280004562165,
+              0.719995437835
+            ],
+            "float64_bayes_posterior": [
+              0.280004562165,
+              0.719995437835
+            ],
+            "max_abs_deviation_from_exact": 1.1102230246251565e-16,
+            "max_abs_deviation_from_float64_bayes": 1.1102230246251565e-16,
+            "measurement_energy": [
+              -0.034594374843138986,
+              1.9654056251568623
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -2.961137898710852,
+              -2.016698919544413
+            ],
+            "unique_evidence_count": 5,
+            "duplicates_skipped": 0,
+            "observations_used": 5,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.7199954378349258,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 5,
+            "weights": [
+              0.513886683012,
+              0.486113316988
+            ],
+            "exact_posterior": [
+              0.513886683012,
+              0.486113316988
+            ],
+            "float64_bayes_posterior": [
+              0.513886683012,
+              0.486113316988
+            ],
+            "max_abs_deviation_from_exact": 1.1102230246251565e-16,
+            "max_abs_deviation_from_float64_bayes": 1.1102230246251565e-16,
+            "measurement_energy": [
+              -1.990605877557212,
+              1.00939412244279
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -1.0051263959967789,
+              -1.0606874168303406
+            ],
+            "unique_evidence_count": 6,
+            "duplicates_skipped": 0,
+            "observations_used": 6,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.513886683011686,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 6,
+            "weights": [
+              0.741841337161,
+              0.258158662839
+            ],
+            "exact_posterior": [
+              0.741841337161,
+              0.258158662839
+            ],
+            "float64_bayes_posterior": [
+              0.741841337161,
+              0.258158662839
+            ],
+            "max_abs_deviation_from_exact": 1.1102230246251565e-16,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              -3.946617380271285,
+              0.05338261972871772
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              0.9508851067172941,
+              -0.1046759141162683
+            ],
+            "unique_evidence_count": 7,
+            "duplicates_skipped": 0,
+            "observations_used": 7,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.7418413371607372,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 7,
+            "weights": [
+              0.886508324066,
+              0.113491675934
+            ],
+            "exact_posterior": [
+              0.886508324066,
+              0.113491675934
+            ],
+            "float64_bayes_posterior": [
+              0.886508324066,
+              0.113491675934
+            ],
+            "max_abs_deviation_from_exact": 4.163336342344337e-17,
+            "max_abs_deviation_from_float64_bayes": 4.163336342344337e-17,
+            "measurement_energy": [
+              -5.902628882985358,
+              -0.9026288829853546
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              2.906896609431367,
+              0.851335588597804
+            ],
+            "unique_evidence_count": 8,
+            "duplicates_skipped": 0,
+            "observations_used": 8,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.8865083240657423,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          }
+        ],
+        "final": {
+          "observation_index": 7,
+          "weights": [
+            0.886508324066,
+            0.113491675934
+          ],
+          "exact_posterior": [
+            0.886508324066,
+            0.113491675934
+          ],
+          "float64_bayes_posterior": [
+            0.886508324066,
+            0.113491675934
+          ],
+          "max_abs_deviation_from_exact": 4.163336342344337e-17,
+          "max_abs_deviation_from_float64_bayes": 4.163336342344337e-17,
+          "measurement_energy": [
+            -5.902628882985358,
+            -0.9026288829853546
+          ],
+          "prior_probability": [
+            0.05,
+            0.95
+          ],
+          "prior_energy": [
+            2.995732273553991,
+            0.05129329438755058
+          ],
+          "logits": [
+            2.906896609431367,
+            0.851335588597804
+          ],
+          "unique_evidence_count": 8,
+          "duplicates_skipped": 0,
+          "observations_used": 8,
+          "contradiction_flags": [
+            false,
+            false
+          ],
+          "top_index": 0,
+          "top_weight": 0.8865083240657423,
+          "true_hypothesis": 0,
+          "is_correct_top": true
+        },
+        "final_is_true": true,
+        "final_top_weight": 0.8865083240657423,
+        "correction_observation_index": 5,
+        "already_correct_before_contradiction": false,
+        "contradicting_observations_to_correct": 3,
+        "wrong_explanation_duration_steps": 5,
+        "wrong_explanation_area": 5.302598095598,
+        "post_contradiction_wrong_fraction": 0.4,
+        "post_contradiction_steps": 5,
+        "true_retained_final": true,
+        "two_hypotheses_retained_final": false,
+        "ambiguity_final_entropy": 0.35375382894189145,
+        "implied_location_true": 1.0,
+        "implied_location_other": 0.0,
+        "wrong_location_offset_normalised": 0.0,
+        "measurement_residual_nats_per_observation": -0.7378286103731697,
+        "description": "strong wrong prior (0.95 on the false explanation, 2.94 nats of prior log-odds) corrected by 5 weak but valid contradicting cues (1 nat each): no single cue can flip it"
+      },
+      "unidentifiable_ambiguity": {
+        "scenario": "unidentifiable_ambiguity",
+        "name": "delayed_evidence_opening_direction_seed0",
+        "variant": "controlled",
+        "declares_contradiction": false,
+        "prior_odds": [
+          1.0,
+          1.0
+        ],
+        "prior_probability": [
+          0.5,
+          0.5
+        ],
+        "prior_is_correct": true,
+        "true_hypothesis": 0,
+        "evidence_step": 3,
+        "observations": 8,
+        "steps": [
+          {
+            "observation_index": 0,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              1.2784952127116547,
+              1.2784952127116547
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              -1.9716423932715998,
+              -1.9716423932715998
+            ],
+            "unique_evidence_count": 1,
+            "duplicates_skipped": 0,
+            "observations_used": 1,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 1,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              1.4127062533507866,
+              1.4127062533507866
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              -2.105853433910732,
+              -2.105853433910732
+            ],
+            "unique_evidence_count": 2,
+            "duplicates_skipped": 0,
+            "observations_used": 2,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 2,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              3.877428630585007,
+              3.877428630585007
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              -4.570575811144952,
+              -4.570575811144952
+            ],
+            "unique_evidence_count": 3,
+            "duplicates_skipped": 0,
+            "observations_used": 3,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 3,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              1.921417127870934,
+              1.921417127870934
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              -2.614564308430879,
+              -2.614564308430879
+            ],
+            "unique_evidence_count": 4,
+            "duplicates_skipped": 0,
+            "observations_used": 4,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 4,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              -0.034594374843138986,
+              -0.034594374843138986
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              -0.6585528057168063,
+              -0.6585528057168063
+            ],
+            "unique_evidence_count": 5,
+            "duplicates_skipped": 0,
+            "observations_used": 5,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 5,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              -1.990605877557212,
+              -1.990605877557212
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              1.2974586969972668,
+              1.2974586969972668
+            ],
+            "unique_evidence_count": 6,
+            "duplicates_skipped": 0,
+            "observations_used": 6,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 6,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              -3.946617380271285,
+              -3.946617380271285
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              3.2534701997113395,
+              3.2534701997113395
+            ],
+            "unique_evidence_count": 7,
+            "duplicates_skipped": 0,
+            "observations_used": 7,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          },
+          {
+            "observation_index": 7,
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "exact_posterior": [
+              0.5,
+              0.5
+            ],
+            "float64_bayes_posterior": [
+              0.5,
+              0.5
+            ],
+            "max_abs_deviation_from_exact": 0.0,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              -5.902628882985358,
+              -5.902628882985358
+            ],
+            "prior_probability": [
+              0.5,
+              0.5
+            ],
+            "prior_energy": [
+              0.6931471805599453,
+              0.6931471805599453
+            ],
+            "logits": [
+              5.209481702425412,
+              5.209481702425412
+            ],
+            "unique_evidence_count": 8,
+            "duplicates_skipped": 0,
+            "observations_used": 8,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 0,
+            "top_weight": 0.5,
+            "true_hypothesis": 0,
+            "is_correct_top": true
+          }
+        ],
+        "final": {
+          "observation_index": 7,
+          "weights": [
+            0.5,
+            0.5
+          ],
+          "exact_posterior": [
+            0.5,
+            0.5
+          ],
+          "float64_bayes_posterior": [
+            0.5,
+            0.5
+          ],
+          "max_abs_deviation_from_exact": 0.0,
+          "max_abs_deviation_from_float64_bayes": 0.0,
+          "measurement_energy": [
+            -5.902628882985358,
+            -5.902628882985358
+          ],
+          "prior_probability": [
+            0.5,
+            0.5
+          ],
+          "prior_energy": [
+            0.6931471805599453,
+            0.6931471805599453
+          ],
+          "logits": [
+            5.209481702425412,
+            5.209481702425412
+          ],
+          "unique_evidence_count": 8,
+          "duplicates_skipped": 0,
+          "observations_used": 8,
+          "contradiction_flags": [
+            false,
+            false
+          ],
+          "top_index": 0,
+          "top_weight": 0.5,
+          "true_hypothesis": 0,
+          "is_correct_top": true
+        },
+        "final_is_true": true,
+        "final_top_weight": 0.5,
+        "correction_observation_index": null,
+        "already_correct_before_contradiction": true,
+        "contradicting_observations_to_correct": null,
+        "wrong_explanation_duration_steps": 0,
+        "wrong_explanation_area": 4.0,
+        "post_contradiction_wrong_fraction": null,
+        "post_contradiction_steps": 0,
+        "true_retained_final": true,
+        "two_hypotheses_retained_final": true,
+        "ambiguity_final_entropy": 0.6931471805599453,
+        "implied_location_true": 1.0,
+        "implied_location_other": 0.0,
+        "wrong_location_offset_normalised": 0.0,
+        "measurement_residual_nats_per_observation": -0.7378286103731697,
+        "description": "uninformative prior (0.5/0.5); the cue sits where both hypotheses predict the same value, so the evidence cannot separate them and the ambiguity must survive every observation"
+      },
+      "misleading_prior_generator_noise": {
+        "scenario": "misleading_prior_generator_noise",
+        "name": "delayed_evidence_opening_direction_seed0",
+        "variant": "generator_default_noise",
+        "declares_contradiction": true,
+        "prior_odds": [
+          0.05,
+          0.95
+        ],
+        "prior_probability": [
+          0.05,
+          0.95
+        ],
+        "prior_is_correct": false,
+        "true_hypothesis": 0,
+        "evidence_step": 3,
+        "observations": 4,
+        "steps": [
+          {
+            "observation_index": 0,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 6.938893903907228e-18,
+            "max_abs_deviation_from_float64_bayes": 0.0,
+            "measurement_energy": [
+              1.2784952127116547,
+              1.2784952127116547
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -4.274227486265645,
+              -1.3297885070992053
+            ],
+            "unique_evidence_count": 1,
+            "duplicates_skipped": 0,
+            "observations_used": 1,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 1,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 2.0816681711721685e-17,
+            "max_abs_deviation_from_float64_bayes": 2.7755575615628914e-17,
+            "measurement_energy": [
+              1.4127062533507866,
+              1.4127062533507866
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -4.408438526904778,
+              -1.4639995477383372
+            ],
+            "unique_evidence_count": 2,
+            "duplicates_skipped": 0,
+            "observations_used": 2,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 2,
+            "weights": [
+              0.05,
+              0.95
+            ],
+            "exact_posterior": [
+              0.05,
+              0.95
+            ],
+            "float64_bayes_posterior": [
+              0.05,
+              0.95
+            ],
+            "max_abs_deviation_from_exact": 3.469446951953614e-17,
+            "max_abs_deviation_from_float64_bayes": 2.0816681711721685e-17,
+            "measurement_energy": [
+              3.877428630585007,
+              3.877428630585007
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -6.873160904138998,
+              -3.9287219249725576
+            ],
+            "unique_evidence_count": 3,
+            "duplicates_skipped": 0,
+            "observations_used": 3,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.9500000000000001,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          },
+          {
+            "observation_index": 3,
+            "weights": [
+              0.043256797283,
+              0.956743202717
+            ],
+            "exact_posterior": [
+              0.043256797283,
+              0.956743202717
+            ],
+            "float64_bayes_posterior": [
+              0.043256797283,
+              0.956743202717
+            ],
+            "max_abs_deviation_from_exact": 2.0816681711721685e-17,
+            "max_abs_deviation_from_float64_bayes": 1.3877787807814457e-17,
+            "measurement_energy": [
+              2.7761214039963815,
+              2.6241797470789847
+            ],
+            "prior_probability": [
+              0.05,
+              0.95
+            ],
+            "prior_energy": [
+              2.995732273553991,
+              0.05129329438755058
+            ],
+            "logits": [
+              -5.771853677550372,
+              -2.6754730414665353
+            ],
+            "unique_evidence_count": 4,
+            "duplicates_skipped": 0,
+            "observations_used": 4,
+            "contradiction_flags": [
+              false,
+              false
+            ],
+            "top_index": 1,
+            "top_weight": 0.956743202717005,
+            "true_hypothesis": 0,
+            "is_correct_top": false
+          }
+        ],
+        "final": {
+          "observation_index": 3,
+          "weights": [
+            0.043256797283,
+            0.956743202717
+          ],
+          "exact_posterior": [
+            0.043256797283,
+            0.956743202717
+          ],
+          "float64_bayes_posterior": [
+            0.043256797283,
+            0.956743202717
+          ],
+          "max_abs_deviation_from_exact": 2.0816681711721685e-17,
+          "max_abs_deviation_from_float64_bayes": 1.3877787807814457e-17,
+          "measurement_energy": [
+            2.7761214039963815,
+            2.6241797470789847
+          ],
+          "prior_probability": [
+            0.05,
+            0.95
+          ],
+          "prior_energy": [
+            2.995732273553991,
+            0.05129329438755058
+          ],
+          "logits": [
+            -5.771853677550372,
+            -2.6754730414665353
+          ],
+          "unique_evidence_count": 4,
+          "duplicates_skipped": 0,
+          "observations_used": 4,
+          "contradiction_flags": [
+            false,
+            false
+          ],
+          "top_index": 1,
+          "top_weight": 0.956743202717005,
+          "true_hypothesis": 0,
+          "is_correct_top": false
+        },
+        "final_is_true": false,
+        "final_top_weight": 0.956743202717005,
+        "correction_observation_index": null,
+        "already_correct_before_contradiction": true,
+        "contradicting_observations_to_correct": null,
+        "wrong_explanation_duration_steps": 4,
+        "wrong_explanation_area": 3.8067432027169996,
+        "post_contradiction_wrong_fraction": 1.0,
+        "post_contradiction_steps": 1,
+        "true_retained_final": false,
+        "two_hypotheses_retained_final": false,
+        "ambiguity_final_entropy": 0.17815976874264666,
+        "implied_location_true": 1.0,
+        "implied_location_other": 0.0,
+        "wrong_location_offset_normalised": 1.0,
+        "measurement_residual_nats_per_observation": 0.6560449367697462,
+        "description": "the generator's own noisy sequence (cue variance 0.08, one cue): kept as the honest default-noise reference, corrected or not"
+      }
+    },
+    "controls": {
+      "repeated_observation": {
+        "unique_evidence_single": 8,
+        "unique_evidence_duplicated": 8,
+        "unique_evidence_grew": false,
+        "duplicates_recorded": 1,
+        "posterior_identical": true,
+        "posterior_single": [
+          0.9992518992959788,
+          0.0007481007040213079
+        ],
+        "posterior_duplicated": [
+          0.9992518992959788,
+          0.0007481007040213079
+        ],
+        "measurement_energy_single": [
+          -5.902628882985358,
+          -0.9026288829853546
+        ],
+        "measurement_energy_duplicated": [
+          -5.902628882985358,
+          -0.9026288829853546
+        ],
+        "passed": true
+      },
+      "exact_static_case": {
+        "max": 2.220446049250313e-16,
+        "tolerance": 1e-06,
+        "passed": true,
+        "reference": "owac.frameworks.n02.analytic.AnalyticCase.exact_posterior",
+        "cause_of_loose_tolerance": "the framework reference rounds each per-hypothesis NLL through torch.tensor(float) (float32 default), which costs about 1e-8 in the weights; see float64_bayes_max_abs_deviation for the tight check"
+      },
+      "fork_from_same_old_state": {
+        "fork_point_observations": 3,
+        "true_hypothesis": 0,
+        "base_posterior": [
+          0.5,
+          0.5
+        ],
+        "supporting_posterior": [
+          0.5621764862150634,
+          0.4378235137849365
+        ],
+        "refuting_posterior": [
+          0.4378234917788347,
+          0.5621765082211654
+        ],
+        "uninformative_posterior": [
+          0.5,
+          0.5
+        ],
+        "supporting_moved_towards_truth": true,
+        "refuting_moved_away_from_truth": true,
+        "uninformative_posterior_delta": 0.0,
+        "uninformative_left_answer_unchanged": true,
+        "one_cycle_posterior_delta": 0.0,
+        "double_cycles_posterior_delta": 0.0,
+        "cycles_change_answer": false,
+        "no_drift_from_cycles": true,
+        "measurement_energy_base": [
+          3.877428630585007,
+          3.877428630585007
+        ],
+        "measurement_energy_uninformative": [
+          3.877428630585007,
+          3.877428630585007
+        ],
+        "measurement_energy_one_cycle": [
+          3.877428630585007,
+          3.877428630585007
+        ],
+        "measurement_energy_many_cycles": [
+          3.877428630585007,
+          3.877428630585007
+        ],
+        "note": "the exact scoring rule has no iterative refinement, so its answer is cycle-count independent by construction; the learned encoder is checked separately when a matching checkpoint is available"
+      }
+    },
+    "metrics": {
+      "wrong_completion_rate_post_contradiction": 0.7,
+      "wrong_explanation_duration_steps": {
+        "correct_prior": 0,
+        "misleading_prior_corrected": 5,
+        "unidentifiable_ambiguity": 0,
+        "misleading_prior_generator_noise": 4
+      },
+      "wrong_explanation_area": {
+        "correct_prior": 0.362365286632,
+        "misleading_prior_corrected": 5.302598095598,
+        "unidentifiable_ambiguity": 4.0,
+        "misleading_prior_generator_noise": 3.8067432027169996
+      },
+      "true_geometry_coverage": 0.75,
+      "true_geometry_coverage_definition": "share of scenarios whose final posterior keeps the true explanation at weight >= 0.25 (retained, not necessarily top-1)",
+      "contradicting_observations_to_correct": {
+        "correct_prior": null,
+        "misleading_prior_corrected": 3,
+        "unidentifiable_ambiguity": null,
+        "misleading_prior_generator_noise": null
+      },
+      "contradicting_observations_to_correct_definition": "number of post-contradiction observations consumed before the true explanation became the top answer with weight > 0.5; 0/None means it was already correct before the contradiction arrived",
+      "correction_observation_index": {
+        "correct_prior": 0,
+        "misleading_prior_corrected": 5,
+        "unidentifiable_ambiguity": null,
+        "misleading_prior_generator_noise": null
+      },
+      "wrong_location_offset_normalised": {
+        "correct_prior": 0.0,
+        "misleading_prior_corrected": 0.0,
+        "unidentifiable_ambiguity": 0.0,
+        "misleading_prior_generator_noise": 1.0
+      },
+      "wrong_location_offset_definition": "distance between the implied decisive location of the final top explanation and of the true explanation, in units of the geometry extent",
+      "measurement_residual_nats_per_observation": {
+        "correct_prior": -0.7378286103731697,
+        "misleading_prior_corrected": -0.7378286103731697,
+        "unidentifiable_ambiguity": -0.7378286103731697,
+        "misleading_prior_generator_noise": 0.6560449367697462
+      },
+      "ambiguity_retained_unidentifiable": {
+        "final_weights": [
+          0.5,
+          0.5
+        ],
+        "min_weight": 0.5,
+        "top_weight": 0.5,
+        "entropy": 0.6931471805599453,
+        "retained": true
+      },
+      "correct_prior_final": {
+        "final_weights": [
+          0.999251899296,
+          0.000748100704
+        ],
+        "top_weight": 0.9992518992959788,
+        "final_is_true": true
+      },
+      "misleading_prior_corrected": {
+        "final_weights": [
+          0.886508324066,
+          0.113491675934
+        ],
+        "final_is_true": true,
+        "correction_observation_index": 5,
+        "contradicting_observations_to_correct": 3
+      },
+      "generator_noise_reference": {
+        "final_weights": [
+          0.043256797283,
+          0.956743202717
+        ],
+        "final_is_true": false,
+        "keep_note": "the generator's own noisy single-cue sequence is kept as a negative or positive result exactly as measured; it is not a corrected trajectory"
+      },
+      "exact_static_case_max_abs_deviation": {
+        "max": 2.220446049250313e-16,
+        "tolerance": 1e-06,
+        "passed": true,
+        "reference": "owac.frameworks.n02.analytic.AnalyticCase.exact_posterior",
+        "cause_of_loose_tolerance": "the framework reference rounds each per-hypothesis NLL through torch.tensor(float) (float32 default), which costs about 1e-8 in the weights; see float64_bayes_max_abs_deviation for the tight check"
+      },
+      "float64_bayes_max_abs_deviation": {
+        "max": 2.220446049250313e-16,
+        "tolerance": 1e-12,
+        "passed": true,
+        "reference": "softmax(-(NLL_k - beta*log prior_k)/T) recomputed in float64"
+      },
+      "unaffected_answer_drift": {
+        "value": null,
+        "reason": "the analytic reference keeps no spatial state; the drift of the retained explanation is reported by the fork control instead"
+      },
+      "candidate_collapse_fraction": null,
+      "state_bytes": null,
+      "encoder_latency_ms": null,
+      "readout_latency_ms": {
+        "value": null,
+        "reason": "the readout suite reports readout latency"
+      },
+      "peak_rss_bytes": 234385408,
+      "probability_metrics": {
+        "basis": "analytic two-hypothesis posterior under the declared Gaussian measurement model; these weights are posterior probabilities by construction and are checked against the closed-form reference above",
+        "n_samples": 28,
+        "nll": 1.1241242849902284,
+        "brier": 0.35577583051591927,
+        "mean_top_confidence": 0.7868374535771565,
+        "top1_accuracy": 0.6785714285714286,
+        "calibration_bins": [
+          {
+            "bin": [
+              0.0,
+              0.2
+            ],
+            "count": 0,
+            "mean_confidence": null,
+            "empirical_accuracy": null,
+            "sufficient": false
+          },
+          {
+            "bin": [
+              0.2,
+              0.4
+            ],
+            "count": 0,
+            "mean_confidence": null,
+            "empirical_accuracy": null,
+            "sufficient": false
+          },
+          {
+            "bin": [
+              0.4,
+              0.6000000000000001
+            ],
+            "count": 9,
+            "mean_confidence": 0.5015429647790762,
+            "empirical_accuracy": 1.0,
+            "sufficient": true
+          },
+          {
+            "bin": [
+              0.6000000000000001,
+              0.8
+            ],
+            "count": 2,
+            "mean_confidence": 0.7309183874978316,
+            "empirical_accuracy": 0.5,
+            "sufficient": false
+          },
+          {
+            "bin": [
+              0.8,
+              1.0
+            ],
+            "count": 17,
+            "mean_confidence": 0.944454426009002,
+            "empirical_accuracy": 0.5294117647058824,
+            "sufficient": true
+          }
+        ],
+        "calibration_note": "bins with fewer than 5 samples are marked insufficient and are not read as calibration evidence"
+      }
+    },
+    "learned_encoder_trace": {
+      "status": "skipped",
+      "reason": "checkpoint K=4 does not match the explicit two-hypothesis reference K=2; the reference trajectory above is the only measured trajectory for this run"
+    },
+    "learned_encoder_trace_synthetic": {
+      "status": "ran",
+      "checkpoint_step": 200,
+      "checkpoint_sha256": "e61f8f881860c119341b0a1a38ac8d61d57886fbdd0862f4ed96b86a13e43981",
+      "weights_are_trained": true,
+      "scenarios": {
+        "correct_prior": {
+          "episode_id": "validation-handle_r3_w150-leftedge-right_half-opening_direction-correct-0001",
+          "identifiable": true,
+          "cue_strength_max": 0.7804976015863802,
+          "evidence_arrival_step": 1,
+          "steps": [
+            {
+              "frame_index": 0,
+              "weights": [
+                0.96639967,
+                0.02201228,
+                0.00896986,
+                0.00261829
+              ],
+              "top_weight": 0.9663996696472168,
+              "entropy": 0.17488093674182892,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 222721,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 1,
+              "weights": [
+                0.99991393,
+                6.595e-05,
+                1.93e-05,
+                8.1e-07
+              ],
+              "top_weight": 0.9999139308929443,
+              "entropy": 0.0009418630506843328,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 231170,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 2,
+              "weights": [
+                0.99999952,
+                4.1e-07,
+                1.1e-07,
+                0.0
+              ],
+              "top_weight": 0.9999995231628418,
+              "entropy": 8.333180630870629e-06,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 239619,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 3,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 7.274876878682335e-08,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 4,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 9.83017223177285e-10,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 5,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 8.289306047126743e-11,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            }
+          ],
+          "encoder_step_ms": {
+            "p50": 40.58364950014948,
+            "p95": 45.842657000321196,
+            "n": 6
+          },
+          "final_top_weight": 1.0,
+          "final_entropy": 8.289306047126743e-11,
+          "final_unresolved": false,
+          "candidate_mean_pairwise_distance": 0.0050825574435293674,
+          "candidate_collapse_fraction": 0.0
+        },
+        "misleading_prior": {
+          "episode_id": "validation-handle_r4_w120-leftedge-right_half-opening_direction-misleading-0001",
+          "identifiable": true,
+          "cue_strength_max": 0.5684342887481179,
+          "evidence_arrival_step": 1,
+          "steps": [
+            {
+              "frame_index": 0,
+              "weights": [
+                0.98142159,
+                0.00926339,
+                0.00734393,
+                0.00197097
+              ],
+              "top_weight": 0.9814215898513794,
+              "entropy": 0.11013782769441605,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 222721,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 1,
+              "weights": [
+                0.9999404,
+                3.491e-05,
+                2.383e-05,
+                7.8e-07
+              ],
+              "top_weight": 0.9999403953552246,
+              "entropy": 0.0006826008320786059,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 231170,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 2,
+              "weights": [
+                0.99999964,
+                2.4e-07,
+                1.5e-07,
+                0.0
+              ],
+              "top_weight": 0.9999996423721313,
+              "entropy": 6.438517630158458e-06,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 239619,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 3,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 5.804382752216952e-08,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 4,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 8.114464655761822e-10,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 5,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 8.289306047126743e-11,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            }
+          ],
+          "encoder_step_ms": {
+            "p50": 40.24576550045822,
+            "p95": 41.20909525067873,
+            "n": 6
+          },
+          "final_top_weight": 1.0,
+          "final_entropy": 8.289306047126743e-11,
+          "final_unresolved": false,
+          "candidate_mean_pairwise_distance": 0.004545430187135935,
+          "candidate_collapse_fraction": 0.0
+        },
+        "unidentifiable": {
+          "episode_id": "validation-handle_r4_w120-leftedge-right_half-opening_direction-uninformative-0001",
+          "identifiable": false,
+          "cue_strength_max": 0.0,
+          "evidence_arrival_step": 2,
+          "steps": [
+            {
+              "frame_index": 0,
+              "weights": [
+                0.98796427,
+                0.00424619,
+                0.00732923,
+                0.00046021
+              ],
+              "top_weight": 0.9879642724990845,
+              "entropy": 0.0747203528881073,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 222721,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 1,
+              "weights": [
+                0.99996793,
+                1.752e-05,
+                1.44e-05,
+                1.6e-07
+              ],
+              "top_weight": 0.9999679327011108,
+              "entropy": 0.0003869785869028419,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 231170,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 2,
+              "weights": [
+                0.99999976,
+                1.2e-07,
+                8e-08,
+                0.0
+              ],
+              "top_weight": 0.9999997615814209,
+              "entropy": 3.4368895285297185e-06,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 239619,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 3,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 2.3870272869430664e-08,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 4,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 2.671154963884703e-10,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            },
+            {
+              "frame_index": 5,
+              "weights": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "top_weight": 1.0,
+              "entropy": 8.289306047126743e-11,
+              "uniform_entropy": 1.3862943611198906,
+              "cycles_run": 4,
+              "state_bytes": 248068,
+              "solved": true,
+              "stop_reason": "max_iterations"
+            }
+          ],
+          "encoder_step_ms": {
+            "p50": 39.21731699983866,
+            "p95": 39.725466999698256,
+            "n": 6
+          },
+          "final_top_weight": 1.0,
+          "final_entropy": 8.289306047126743e-11,
+          "final_unresolved": false,
+          "candidate_mean_pairwise_distance": 0.005117753986269236,
+          "candidate_collapse_fraction": 0.0
+        }
+      },
+      "final_weight_separation": {
+        "correct_prior|misleading_prior": 0.0,
+        "correct_prior|unidentifiable": 0.0,
+        "misleading_prior|unidentifiable": 0.0
+      },
+      "final_weight_separation_note": "largest absolute weight difference between the scenario classes at the last frame; a small number means this checkpoint does not separate the classes on these episodes and is reported as such",
+      "note": "diagnostics only: candidate-to-latent-value anchoring is a training-time convention and is not established by this trace, so no accuracy metric is derived from it here. The analytic trajectory validates its own update law and cannot establish the learned encoder's mechanism claim."
+    }
+  },
+  "peak_rss_bytes": 260857856,
+  "peak_gpu_bytes": {
+    "value": null,
+    "reason": "no CUDA device is available on this host; nothing was measured"
+  }
+}

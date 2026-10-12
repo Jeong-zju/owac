@@ -1,0 +1,162 @@
+{
+  "command": "python -m owac.training.n02",
+  "config_path": "configs/encoders/n02/tiny.json",
+  "preset": null,
+  "config": {
+    "name": "tiny",
+    "K": 4,
+    "D": 32,
+    "cycles": 4,
+    "history": 4,
+    "temperature": 1.0,
+    "beta_prior": 1.0,
+    "beta_relation": 0.0,
+    "beta_prior_bounds": [
+      0.05,
+      4.0
+    ],
+    "stem_width": 32,
+    "stem_layers": 2,
+    "cell_kind": "convgru",
+    "cell_kernel": 3,
+    "readout_mode": "map",
+    "tokens_per_camera": 256,
+    "token_dim": 2048,
+    "prior_mode": "learned",
+    "geometry_dim": 8,
+    "seed": 0,
+    "measurement": {
+      "input_mode": "rawvla_rgb3",
+      "cfa_pattern": "RGGB",
+      "cfa_planes": false,
+      "black_level": 0.0,
+      "white_level": 1.0,
+      "robust": "huber",
+      "huber_delta": 3.0,
+      "variance_floor": 1e-06,
+      "shot_scale": null,
+      "read_scale": null,
+      "scale_estimated": false,
+      "predict_variance": true,
+      "head_width": 32,
+      "head_depth": 2,
+      "geometry_dim": 8,
+      "saturation_is_observation": false
+    },
+    "revision": {
+      "contradiction_enabled": true,
+      "contradiction_threshold": 2.5,
+      "relative_margin": 1.5,
+      "strong_contradiction_threshold": 4.0,
+      "residual_ema": 0.5,
+      "propagation_enabled": true,
+      "propagation_hops": 1,
+      "propagation_decay": 0.5,
+      "propagate_priority": true,
+      "reset_contradicted": true,
+      "reset_fraction": 1.0,
+      "downweight_contradicted": 0.5,
+      "proposal_enabled": true,
+      "proposal_temperature": 1.0,
+      "update_scale": 1.0,
+      "cold_start_threshold": 0.25,
+      "tolerance": 0.0001,
+      "min_iterations": 1,
+      "write_dependency_edges": true
+    },
+    "loss_weights": {
+      "measurement": 1.0,
+      "geometry_set": 1.0,
+      "revision": 0.1,
+      "diversity": 0.01,
+      "mixture": 1.0,
+      "collapse_penalty": 0.0
+    }
+  },
+  "seed": 0,
+  "git_sha": "dfece066f2500da4779ed93955e70fd0b28e9afc",
+  "source": "synthetic",
+  "arm": "particle_filter",
+  "resumed_from": null,
+  "first_step": 0,
+  "steps_run": 200,
+  "last_step": 200,
+  "steps": 200,
+  "batch_size": 2,
+  "sequence_length": 8,
+  "frame_size": 64,
+  "lr": 0.0003,
+  "grad_clip": 1.0,
+  "wall_seconds": 12.41318923200015,
+  "cpu_seconds": 12.412336817,
+  "steps_per_second": 16.11189487745961,
+  "cpu_seconds_per_step": 0.062061684085,
+  "fraction_of_wall_that_is_cpu": 0.999931329895628,
+  "load_average_start": [
+    2.98974609375,
+    3.5341796875,
+    15.396484375
+  ],
+  "load_average_end": [
+    2.68310546875,
+    3.4501953125,
+    15.24169921875
+  ],
+  "loss": {
+    "first": 489.85076904296875,
+    "last": 2.2757811546325684,
+    "best": -0.9524644613265991,
+    "mean_first_5": 271.94403381347655,
+    "mean_last_5": 1.3812600135803224,
+    "terms_last": {
+      "measurement": -1.7101465836167336,
+      "geometry_set": 0.6785255670547485,
+      "revision": 1.0019088685512543,
+      "diversity": 0.09999991208314896,
+      "mixture": 3.3064021468162537
+    }
+  },
+  "peak_rss_bytes": 338321408,
+  "parameters": {
+    "total": 55856,
+    "trainable": 55856
+  },
+  "latency_ms": {
+    "encoder_step_ms": {
+      "p50": 5.467214999953285,
+      "p95": 6.066861100134702,
+      "n": 1600
+    },
+    "readout_ms": {
+      "map": {
+        "p50": 1.289883000026748,
+        "p95": 1.8286144002559013,
+        "n": 5
+      },
+      "tokens": {
+        "p50": 1.1176280004292494,
+        "p95": 1.19726500051911,
+        "n": 5
+      },
+      "token_budget": 64
+    },
+    "single_hypothesis_baseline_ms": {
+      "p50": 10.311461000128475,
+      "p95": 10.317034700528893,
+      "n": 3
+    },
+    "analytic_reference_ms": {
+      "p50": 0.2824499997586827,
+      "p95": 0.3847093996228068,
+      "n": 5
+    }
+  },
+  "device": "cpu",
+  "torch_threads": 1,
+  "torch_version": "2.9.1+cpu",
+  "resumed_run_shape": false,
+  "notes": [
+    "measurement loss is nats per current likelihood; geometry is a binary proxy",
+    "the hidden geometry is used in the loss only and is never an encoder input"
+  ]
+}
