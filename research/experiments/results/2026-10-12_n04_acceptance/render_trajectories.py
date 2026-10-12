@@ -54,3 +54,5 @@ figure.suptitle(
 figure.tight_layout(rect=(0, 0, 1, 0.93))
 figure.savefig(root / "four-trajectories.png", dpi=140)
 figure.savefig(root / "four-trajectories.svg")
+svg = root / "four-trajectories.svg"
+svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
