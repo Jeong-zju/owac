@@ -1,5 +1,11 @@
 # OWAC 当前状态
 
+2026-10-12 N02 编码器实现（分支 `lzh/n02-measurement-completion`）：测量约束的循环补全已落地为可运行实现并完成机制层核验。交付 `owac.core.encoder_contract`（三方向共享 v0 契约）、`owac.frameworks.n02`（配置/状态/测量能量/假设/反证调度/编码器/读出/解析参照/合成生成器）、`owac.baselines.n02`（K=1、普通循环、dense 全局、粒子滤波与 4 项规则消融）、`owac.training.n02` / `owac.evaluation.n02`（机制、基线、读出三套评测）、`owac.raw.rawvla_sequence`（真实 NPZ 测量 loader）、`owac.backends.rawvla_features`（π0.5 特征桥）与 `configs/encoders/n02/{tiny,small,medium}.json`。
+
+实测：解析两假设例与闭式 Bayes 一致（修复尺度项后偏差 **2.2e-16**）；重复观测不增加 unique evidence 且后验不变；强错误先验（0.95）被 3 条弱反证观测纠正（0.050→0.514→0.887）；无可辨识序列全程保持 0.5/0.5；合成 smoke 200 步 185.3 s（1.079 steps/s，损失 -1.30→-2.81）；`pytest tests/encoders/n02` **220 passed, 4 skipped**；`make check` 通过。读出不把不相容候选平均（MAP/分组 interpolation 0.0，直接均值 0.4—0.77）。
+
+**重要负结果与边界**：200 步 smoke 的学习编码器**尚未**区分正确/误导/不可辨识三类场景（末步权重分离仅 2.3e-6—4.8e-6），机制证据目前主要由解析参考承载；“最近基线”对照的数字来自**未训练**模型，只能说明打分退化而不构成机制优劣。真实 NPZ、真实 π0.5 前反向与闭环均未在本机执行（缺 StarVLA/权重/数据，脚本诚实报告 `status: unavailable`）；π0.5 桥只完成契约级验证（26 项，含真实反传梯度贯通）。详见[实验记录](../research/experiments/2026-10-12_n02_encoder.md)与[候选卡 N02](../research/candidates/N02.md)。
+
 2026-10-12 编码器实现交接：按用户要求准备 N01 自适应时空证据积分、N02 测量约束的循环补全、N04 自运动预测与变化分离三个独立 worktree。共同起点为已固定 RawVLA 部署加最新研究文档快照；三份自包含 DeepSeek 提示词已展开到公式、文件职责、训练步骤、StarVLA 特征接口、参考实现及反证实验。见[工作树与使用入口](prompts/README.md)和[0013 决议](decisions/0013-encoder-research-worktrees.md)。本条表示研究开发环境与提示词准备，不表示编码器实现、训练或机制验收。
 
 2026-10-12 发布固定：本地提交及标签 `owac-rawvla-pi05-v0.1.0` 固定已跑通的 RawVLA-Bench / π0.5 部署和后续比较协议，见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。LIBERO 10,000 条完整成绩为 58.20%；RoboTwin 仍在运行、有基础设施缺口。该标签不表示两平台全量已齐或论文数值复现；旧 `owac-dev-v0.1.0` 的 RAW/特征接口门槛仍待验收。

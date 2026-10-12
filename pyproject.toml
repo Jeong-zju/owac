@@ -12,6 +12,20 @@ dependencies = []
 
 [project.optional-dependencies]
 simulation-data = ["numpy>=2.3,<3"]
+# CPU-capable encoder stack for the N01/N02/N04 mechanism prototypes. Kept out of
+# the core dependencies so `import owac` stays light; the RawVLA runtime (Python
+# 3.10) is separate and never installs this extra.
+encoder = ["numpy>=2.3,<3", "torch>=2.7.1,<2.10"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+# Mechanism prototypes run on CPU. This keeps ~5 GB of CUDA wheels out of the
+# lock; a GPU host can re-lock without this source override.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", extra = "encoder" }]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.11", "numpy>=2.3,<3"]
