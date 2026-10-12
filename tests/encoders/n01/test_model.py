@@ -221,3 +221,54 @@ def test_synthetic_cfa_mode_declares_one_measurement_per_site():
     # Only the plane that owns a site carries a measurement there.
     assert int((batch.valid.sum(dim=2) > 0).max().item()) == 1
     assert int((batch.valid.sum(dim=2) == 0).sum().item()) > 0
+
+
+def test_learned_selector_runs_and_receives_gradient():
+    """The learned variant must run and be trainable, not only instantiate."""
+    encoder = build_encoder(selection="learned")
+    assert encoder.selector.logit_head is not None
+    state = encoder.init_state(2, {"camera_ids": ["cam0"], "shape": (8, 8)})
+    values = torch.rand((2, 3, 8, 8), requires_grad=True)
+    output = encoder.step(frame_from(values), None, state)
+    output.representation.sum().backward()
+    logit_grad = sum(
+        0.0 if parameter.grad is None else float(parameter.grad.abs().sum())
+        for parameter in encoder.selector.logit_head.parameters()
+    )
+    assert logit_grad > 0.0, "the learned domain logits received no gradient"
+    # A hard argmax would make the support graph invisible to the loss; the mixing
+    # weights keep it differentiable, and the participation ratio is reported.
+    assert 1.0 <= output.diagnostics["mixture_participation"] <= encoder.config.candidate_count
+    # The learned variant must still be driven by the analytic cost at step one:
+    # its head is zero-initialised, so both variants select the same domains.
+    plain = build_encoder(selection="analytic")
+    plain.load_state_dict(
+        {k: v for k, v in encoder.state_dict().items() if not k.startswith("selector.logit_head")},
+        strict=False,
+    )
+    plain_state = plain.init_state(2, {"camera_ids": ["cam0"], "shape": (8, 8)})
+    plain_output = plain.step(frame_from(values.detach()), None, plain_state)
+    assert (
+        abs(
+            plain_output.diagnostics["selected_radius_mean"]
+            - output.diagnostics["selected_radius_mean"]
+        )
+        < 1e-6
+    )
+
+
+def test_four_plane_cfa_configuration_runs_end_to_end():
+    """The 2x2 CFA path (planes=4) must work through the whole encoder."""
+    encoder = build_encoder(planes=4, channels=4, cfa_pattern="RGGB", selection="learned")
+    state = encoder.init_state(2, {"camera_ids": ["cam0"], "shape": (8, 8)})
+    values = torch.rand((2, 4, 8, 8), requires_grad=True)
+    output = encoder.step(frame_from(values), None, state)
+    assert output.representation.shape == (2, encoder.config.width, 8, 8)
+    output.representation.sum().backward()
+    logit_grad = sum(
+        0.0 if parameter.grad is None else float(parameter.grad.abs().sum())
+        for parameter in encoder.selector.logit_head.parameters()
+    )
+    assert logit_grad > 0.0
+    tokens = encoder.readout(output, token_budget=16)
+    assert tokens.values.shape == (2, 16, encoder.config.readout_width)

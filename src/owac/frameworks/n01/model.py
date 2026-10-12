@@ -168,8 +168,11 @@ class SupportSelector(nn.Module):
         self.learned = config.selection == "learned" or config.selection_use_learned
         self.logit_head: nn.Module | None = None
         if self.learned:
+            # Seven stacked selector features (the six explicit statistics plus the
+            # candidate mean) per CFA plane, so the head's channel axis is
+            # statistics x planes and its batch axis is candidate x batch.
             self.logit_head = nn.Sequential(
-                nn.Conv2d(statistics_channels(config), config.width, 1),
+                nn.Conv2d((statistics_channels(config) + 1) * config.planes, config.width, 1),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(config.width, 1, 1),
             )
@@ -220,6 +223,8 @@ class SupportSelector(nn.Module):
             shape[1] = scale[key].numel()
             return tensor / scale[key].reshape(shape)
 
+        # Concatenate along the plane axis: the statistics are the head's channels
+        # and the batch axis stays the batch axis.
         return torch.cat(
             [
                 unit("variance_proxy"),
@@ -230,7 +235,7 @@ class SupportSelector(nn.Module):
                 statistics["weight_concentration"],
                 unit("mu"),
             ],
-            dim=1,
+            dim=2,
         )
 
     def forward(self, statistics, scale, budget_slice=None):
@@ -240,8 +245,15 @@ class SupportSelector(nn.Module):
         cost = self.cost(statistics, scale)[budget_slice]
         logits = -cost
         if self.logit_head is not None:
+            # Candidate tensors are [K, B, P, H, W]; a 2-D head needs the batch and
+            # plane axes folded into one, then unfolded again.
             features = self.normalised_features(statistics, scale)[budget_slice]
-            logits = logits + self.logit_head(features).squeeze(1)
+            candidates, batch, channels, height, width = features.shape
+            flat = features.reshape(candidates * batch, channels, height, width)
+            # One correction per (candidate, batch member), broadcast over the CFA
+            # planes of that candidate.
+            delta = self.logit_head(flat).reshape(candidates, batch, 1, height, width)
+            logits = logits + delta
         # A sharp softmax keeps the mixture close to the analytic choice while
         # staying differentiable; the participation ratio is reported so the
         # effective number of contributing domains is never implicit.

@@ -124,10 +124,13 @@ def init_state(
         raise ValueError("camera_spec must declare the measurement shape (H, W)")
     height, width = int(shape[0]), int(shape[1])
     need = 2 * int(max(config.spatial_radii)) + 1
-    if height < need or width < need:
+    if min(height, width) < 1 or max(height, width) < need:
         raise ValueError(
-            f"measurement shape {(height, width)} is smaller than the support window {need}"
+            f"measurement shape {(height, width)} cannot host the support window {need}"
         )
+    # A degenerate axis (height 1, used by the one-dimensional adapter) is legal:
+    # its direction simply contributes no support, which the zero padding of the
+    # path weight and of the unfold gather already expresses.
 
     slots = int(config.max_history)
     dtype = torch.float32

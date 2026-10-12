@@ -179,8 +179,14 @@ class N01Config:
 
     @property
     def candidate_count(self) -> int:
-        """Cartesian product size of spatial radius x time depth candidates."""
-        return len(self.spatial_radii) * len(self.time_depths)
+        """Size of the candidate set the integrator actually enumerates.
+
+        Spatial radius x time depth x spatial offset: each radius contributes
+        ``(2r + 1)^2`` window offsets, exactly as
+        ``SupportDomainIntegrator.domain_statistics`` enumerates them.
+        """
+        offsets = sum((2 * int(radius) + 1) ** 2 for radius in self.spatial_radii)
+        return offsets * len(self.time_depths)
 
     def domain_pixel_cap(self, radius: int) -> int:
         if self.max_domain_pixels:

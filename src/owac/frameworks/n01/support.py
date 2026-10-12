@@ -555,6 +555,10 @@ class SupportDomainIntegrator(nn.Module):
             for member_index, slots in enumerate(rank_to_slot):
                 if slots.numel():
                     slot[member_index] = slots[min(wanted, slots.numel() - 1)]
+            # The unfold output folds batch and plane into one axis (batch-major),
+            # so the per-batch slot index is repeated once per CFA plane.
+            if planes > 1:
+                slot = slot[:, None].expand(batch, planes).reshape(plane_count)
             # cumsum carries a leading zero, so the prefix through slot s is entry
             # s + 1, clamped to the deepest walked slot.
             slot = (slot + 1).clamp(max=slot_count - 1)
