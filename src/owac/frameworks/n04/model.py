@@ -293,6 +293,8 @@ class N04Encoder(nn.Module):
         )
         #: 变化 cell 的写入强度先验（可学习，初始 0.1，避免首步就把变化写满）。
         self.change_write = nn.Parameter(torch.tensor(0.1))
+        #: 变化 cell 的保留率 logit（可学习，初始 sigmoid(1.0)≈0.73）。
+        self.change_decay = nn.Parameter(torch.tensor(1.0))
         self._cache: dict[Any, StepOutput] = {}
 
     # -- 生命周期 -----------------------------------------------------------------
@@ -346,8 +348,10 @@ class N04Encoder(nn.Module):
         prev = state.stable
         had_history = state.history_valid
         result = self.propagator(prev, self.spec, context)
-        validity = result.validity
-        uncertainty = result.uncertainty
+        #: validity/uncertainty 是掩码与可靠性量，不参与梯度；detach 它们可以让
+        #: “第一帧无历史 ⇒ 无预测贡献”这一语义不切断传播参数的梯度路径。
+        validity = result.validity.detach()
+        uncertainty = result.uncertainty.detach()
         if torch.is_tensor(had_history):
             keep = had_history.reshape(-1, 1, 1, 1).to(validity.dtype)
             validity = validity * keep
@@ -389,19 +393,22 @@ class N04Encoder(nn.Module):
         innovation = self.decomposer(
             current=meas0,
             predicted=pred0,
-            validity=validity,
-            uncertainty=uncertainty,
-            saturation=saturation,
+            validity=validity.detach(),
+            uncertainty=uncertainty.detach(),
+            saturation=saturation.detach(),
         )
         #: 无测量时（new_measurement=False）只传播不更新。
         g_update = innovation.g_update * avail
         new_stable = (1.0 - g_update) * pred0 + g_update * meas0
         #: 变化 cell：只写“自运动解释不了、且空间连贯”的残余，且不被稳定分支抹平。
+        #: 另有 ``change_decay`` 衰减：没有持续证据支持的变化会退掉，否则一次瞬时
+        #: 残差会被永久保留，物体走后仍报“变化”。衰减与写入都由测量证据驱动。
         if self.config.model.change_branch:
             change_delta = innovation.gate_change * (meas0 - pred0)
             old_change = state.change if state.change is not None else torch.zeros_like(new_stable)
             old_change0 = old_change[0] if isinstance(old_change, list) else old_change
-            new_change0 = old_change0 + torch.tanh(self.change_write) * change_delta
+            decay = torch.sigmoid(self.change_decay)
+            new_change0 = decay * old_change0 + torch.tanh(self.change_write) * change_delta
         else:
             new_change0 = torch.zeros_like(new_stable)
         #: 没有历史的区域用**有效**当前测量直接初始化（不把 pred=0 当成历史证据）；

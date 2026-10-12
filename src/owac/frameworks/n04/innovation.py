@@ -63,22 +63,48 @@ def estimate_low_frequency_gain(
     low_frequency: bool = True,
     eps: float = 1e-6,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    """在可靠区域上估计全局/低频增益 ``g ≈ <current>/<predicted>``。
+    """在**可靠且曝光良好**的区域上估计全局/低频增益 ``g``：``current ≈ g · predicted``。
 
-    返回 ``(gain [B,1,H,W] 或 [B,1,1,1], delta = gain - 1)``。只在 ``weight`` 大的
-    区域参与统计；对有限增益做裁剪，避免除零放大。
+    输入不能是原始测量值：增益必须在线性光强域估计，因此本函数期望传入编码后的
+    特征（或线性强度）。实现要点：
+
+    * 只用 ``weight>0`` 且 ``|predicted|`` 足够大的像素参与最小二乘
+      ``g = Σ w·c·p / Σ w·p²``。全图幅值比会被大片暗背景（光照变化在那里不可观测）
+      拉偏，越暗越不可识别，因此暗像素必须排除而不是放大。
+    * 逐通道估计后取中位数并裁剪到 ``[0.2, 5.0]``，避免单个通道的病态解。
+    * ``low_frequency=True`` 时与预测场的局部均值比做平均，得到空间平滑的增益场；
+      ``False`` 时返回标量增益（逐像素广播）。
+
+    返回 ``(gain, delta)``，``delta = gain - 1``。它只用于把“亮度变化”从几何残差里
+    解释出来，**不修改测量特征本身**。
     """
-    w = weight.clamp_min(0.0)
-    num = (current.detach() * predicted.detach() * w).sum(dim=(-2, -1), keepdim=True)
-    den = (predicted.detach().square() * w).sum(dim=(-2, -1), keepdim=True)
-    gain_scalar = (num / (den + eps)).clamp(0.2, 5.0)
+    w = weight.detach().clamp_min(0.0)
+    cur = current.detach()
+    pred = predicted.detach()
+    if cur.shape != pred.shape:
+        raise ValueError("current 与 predicted 形状必须一致")
+    b = cur.shape[0]
+    #: 只在预测幅值足够大的位置估计增益：暗区里的比例没有信息。
+    expose = (pred.abs() > 1e-3).to(cur.dtype)
+    ww = w * expose
+    num = (ww * cur * pred).sum(dim=(-2, -1))  # [B,C]
+    den = (ww * pred * pred).sum(dim=(-2, -1))
+    per_channel = num / (den + eps)
+    floor = torch.full_like(per_channel, 0.2)
+    valid = (den > eps).to(torch.bool)
+    per_channel = torch.where(valid, per_channel.clamp(0.2, 5.0), floor)
+    gain_scalar = per_channel.median(dim=1).values.clamp(0.2, 5.0)  # [B]
+    gain_scalar = torch.where((den > eps).any(dim=1), gain_scalar, torch.ones_like(gain_scalar))
+    scalar = gain_scalar.reshape(b, 1, 1, 1)
     if not low_frequency:
-        return gain_scalar, gain_scalar - 1.0
-    #: 低频：把标量增益与预测场的局部平均能量结合，得到空间平滑的逐位置增益。
-    local = F.avg_pool2d(predicted.detach().abs(), kernel_size=5, stride=1, padding=2)
-    local_cur = F.avg_pool2d(current.detach().abs(), kernel_size=5, stride=1, padding=2)
+        return scalar.expand_as(cur), (scalar - 1.0).expand_as(cur)
+    #: 低频：标量增益与预测场的局部均值比平均，得到空间平滑的增益场。
+    local = F.avg_pool2d(pred.abs(), kernel_size=5, stride=1, padding=2)
+    local_cur = F.avg_pool2d(cur.abs(), kernel_size=5, stride=1, padding=2)
+    informative = (local > 1e-3).to(cur.dtype)
     smooth = (local_cur + eps) / (local + eps)
-    gain_field = (0.5 * gain_scalar + 0.5 * smooth).clamp(0.2, 5.0)
+    smooth = torch.where(informative > 0, smooth, scalar)
+    gain_field = (0.5 * scalar + 0.5 * smooth).clamp(0.2, 5.0)
     return gain_field, gain_field - 1.0
 
 
@@ -137,8 +163,9 @@ class InnovationDecomposer(nn.Module):
             raise ValueError("current 与 predicted 形状必须一致")
         b, c, h, w = current.shape
         innovation = current - predicted
-        #: 传播可靠性 sigmoid(-uncertainty)；``sigma_floor`` 避免在极低不确定度时饱和。
-        prop_reliability = torch.sigmoid(-(uncertainty.clamp_min(self.sigma_floor)))
+        #: 传播可靠性 = exp(-uncertainty)，映射到 (0,1]：uncertainty 为 0 表示完全可靠。
+        #: ``sigma_floor`` 给出可靠性的下界，避免极小不确定度把可靠性推到精确 1。
+        prop_reliability = torch.exp(-uncertainty.clamp_min(self.sigma_floor)).clamp(0.0, 1.0)
         if saturation is None:
             saturation = torch.zeros(b, 1, h, w, device=current.device, dtype=current.dtype)
         else:
@@ -170,18 +197,22 @@ class InnovationDecomposer(nn.Module):
             w_change = torch.zeros_like(w_change)
             unknown = (unknown + mix[:, 1:2]).clamp(max=1.0)
         w_ego = w_ego * validity
-        #: ``g_update``：观测可靠 + 传播误差小 ⇒ 更接受当前测量；
-        #: 明显传播失配或饱和 ⇒ 降低不可靠一方的权重。
+        #: ``g_update`` 首版是一个**可检查的解析先验**，训练后由分解头继续调整：
+        #:
+        #: * 传播越可靠（``prop_reliability`` 越大）越接受当前测量；
+        #: * 传播误差越大 → 残差更可能来自外部真实变化 → 更及时更新，
+        #:   而不是因为 residual 大就一律拒绝新测量；
+        #: * 饱和/曝光失效 → 降低当前测量的权重，等待下一帧修正，不把缺失测量
+        #:   强行分类成物体运动。
         mismatch = (innovation.abs().mean(dim=1, keepdim=True) * prop_reliability).clamp(0, 10)
-        mismatch_score = torch.exp(-mismatch)
-        base = 0.35 + 0.4 * (1.0 - prop_reliability) + 0.25 * (1.0 - mismatch_score)
+        change_score = 1.0 - torch.exp(-mismatch)
         exposure_reliability = 1.0 - saturation
+        base = (0.10 + 0.40 * prop_reliability + 0.25 * change_score).clamp(0.0, 1.0)
         gate = (base * (0.5 + 0.5 * w_change)).clamp(0.0, 1.0)
         gate = gate * (1.0 - self.exposure_gate * saturation)
         g_update = (gate * exposure_reliability + (1.0 - exposure_reliability) * 0.05).clamp(
             0.0, 1.0
         )
-        #: 稳定分支只在传播可靠且有效的位置保持历史。
         return Innovation(
             gate_ego=w_ego,
             gate_change=w_change,
