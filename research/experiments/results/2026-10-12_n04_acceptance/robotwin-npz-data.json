@@ -1,0 +1,53 @@
+{
+  "source": "rawvla_npz",
+  "npz_dir": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller",
+  "suite": "robotwin",
+  "split": "train",
+  "val_fraction": 0.0,
+  "limit": 1,
+  "sequences": [
+    {
+      "suite": "robotwin",
+      "episode_id": "robotwin:grab_roller:0",
+      "length": 93,
+      "cameras": [
+        "head",
+        "left",
+        "right"
+      ],
+      "proprio_dim": 14,
+      "executed_action_dim": null,
+      "supervised_action_dim": 14,
+      "time_unit": "frame",
+      "availability": {
+        "proprio": true,
+        "executed_action": false,
+        "timestamp": false,
+        "noise_model": true,
+        "exposure": true,
+        "intrinsics": false,
+        "pose": false
+      },
+      "value_range": {
+        "head": [
+          0.0,
+          0.009070017375051975
+        ],
+        "left": [
+          0.0,
+          0.005358699709177017
+        ],
+        "right": [
+          0.0,
+          0.004863249137997627
+        ]
+      },
+      "new_measurement_false": 0,
+      "split": "train",
+      "camera": "head"
+    }
+  ],
+  "measurement_scale": "robotwin:as-is",
+  "executed_action_available": false,
+  "note": "缓存没有已执行动作记录时动作上下文标为缺失；不改用未来监督动作"
+}
