@@ -1,5 +1,7 @@
 # OWAC 工程架构边界
 
+当前实现基准固定为 RawVLA-Bench 与对应 π0.5，标签 `owac-rawvla-pi05-v0.1.0`，见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。这是部署及比较协议边界；候选特征接口和 RAW encoder 尚未完成验收。
+
 本文件将 roadmap v4 的共享外部约定映射到代码目录。它是初始设计草案，尚未冻结 API。当前已建立 π0.5 PyTorch 部署工具与独立环境；候选算法、RAW/特征入口、训练器和驱动尚未实现。
 
 ## 数据流和模块职责

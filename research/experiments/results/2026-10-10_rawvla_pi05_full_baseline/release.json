@@ -1,0 +1,110 @@
+{
+  "tag": "owac-rawvla-pi05-v0.1.0",
+  "milestone": "RawVLA-Bench deployment verified; pi05 backbones and evaluation protocol fixed",
+  "date": "2026-10-12",
+  "base_commit": "0fc31025f2effeaa1b1fd49d6b175b84ef624265",
+  "branch": "lzh/pi05-sim-baseline",
+  "protocol_sha256": "3ac9626ef71eab4719be540393f51b66b767d7348dc4cac0ce5f5455f5b52e0e",
+  "audit_updated_at": "2026-10-12T02:27:45Z",
+  "evaluation_state": "running",
+  "libero": {
+    "state": "complete",
+    "completed": 10000,
+    "expected": 10000,
+    "success": 5820,
+    "final_success_rate_percent": 58.2
+  },
+  "robotwin": {
+    "state": "running",
+    "completed": 1750,
+    "expected": 3250,
+    "success": 355,
+    "pending_failed_case_ids": [
+      "robotwin-0190",
+      "robotwin-0191",
+      "robotwin-0192",
+      "robotwin-0193",
+      "robotwin-0194",
+      "robotwin-1115",
+      "robotwin-1116",
+      "robotwin-1117",
+      "robotwin-1118",
+      "robotwin-1119",
+      "robotwin-1161",
+      "robotwin-1180",
+      "robotwin-1181",
+      "robotwin-1182",
+      "robotwin-1183",
+      "robotwin-1184"
+    ]
+  },
+  "extra_632": {
+    "scope": "Additional 632 original-cache-condition rollouts; paper-table protocol inferred",
+    "state": "incomplete",
+    "expected": 632,
+    "completed": 627,
+    "success": 108,
+    "domains": {
+      "Low": {
+        "total": 126,
+        "success": 28
+      },
+      "Over": {
+        "total": 125,
+        "success": 27
+      },
+      "Normal": {
+        "total": 125,
+        "success": 39
+      },
+      "ExtremeOver": {
+        "total": 125,
+        "success": 10
+      },
+      "ExtremeLow": {
+        "total": 126,
+        "success": 4
+      }
+    },
+    "updated_at": "2026-10-11T06:38:48Z"
+  },
+  "weights_sha256": {
+    "libero": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "robotwin": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+    "robotwin_norm": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7"
+  },
+  "source_commit": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+  "local_source_sha256": {
+    "src/owac/backends/rawvla.py": "d254b4dbd2663bfb18c78e4cddc8ed18e9dc33fca79aa7b4b81742c168c74e9e",
+    "src/owac/runtime/rawvla_eval_audit.py": "1d776ef30c0ed2c3401620b465d56fba1a3f0e253392e27633634e888bdc18a7",
+    "src/owac/runtime/rawvla_full_eval.py": "1ab9c93ac2072037309c75654ea318bf0c0ee5eb00a0b8d65084f489de28db18",
+    "src/owac/runtime/rawvla_job_guard.py": "33f2cf6c42c60391c3de4830acffab51144bdc05c7aa20b7f6225eb1a34fa1e0",
+    "src/owac/runtime/rawvla_paper_eval.py": "20527e9f2340b5f46654b6eee042538f6b419839df7c325eb4503d112772d1bd",
+    "src/owac/runtime/rawvla_robotwin.py": "b976c1bcda71d9d7c8d99a1229cdb3fe8a65df4d80b65ae1c1e47d84e6b41a8f"
+  },
+  "validation": {
+    "state": "passed",
+    "checked_at": "2026-10-12T02:32:01.371269+00:00",
+    "clean_worktree": "/home/jeong/zeno/owac/worktrees/rawvla-pi05-freeze-check",
+    "python_version": "3.12.12",
+    "tested_candidate_tree_before_validation_metadata": "6d80b753b0131e3d064318c9f511ad26278a05c1",
+    "uv_sync_locked": "passed",
+    "make_check_clean_worktree": "passed; 111 Python files formatted",
+    "make_check_primary_checkout": "passed; 135 Python files formatted",
+    "pytest_rawvla": "17 passed in 3.29s",
+    "bash_syntax_run_smoke": "passed",
+    "manifest_identity_pairing_and_original_byte_hashes": "passed; LIBERO 10000 + RoboTwin 3250",
+    "evidence_checksums": "passed",
+    "new_rawvla_markdown_links": "passed",
+    "fresh_gpu_rerun_for_git_commit": false
+  },
+  "limitations": [
+    "OptiX replaces incompatible SAPIEN bundled OIDN on Blackwell",
+    "StarVLA image preprocessing; native LeRobot full numerical parity not established",
+    "Explicit per-episode action noise improves repeatability; published RNG sequence unknown",
+    "Full manifest coverage is not a claim to reproduce published numerical scores",
+    "Main simulation Default PI05 only; learned ISP methods and real robots excluded"
+  ],
+  "frozen_server_source_changed_for_release": false,
+  "new_full_evaluation_started_for_release": false
+}

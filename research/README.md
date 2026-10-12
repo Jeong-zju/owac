@@ -1,5 +1,7 @@
 # 研究记录
 
+当前实验参照为 RawVLA-Bench / π0.5，部署与协议标签 `owac-rawvla-pi05-v0.1.0`；见 [0012](../docs/decisions/0012-rawvla-pi05-protocol-freeze.md)及[全量基线](experiments/2026-10-10_rawvla_pi05_full_baseline.md)。完整 LIBERO 已取得，RoboTwin 尚未完成。
+
 研究依据：[OWAC roadmap v4](../docs/OWAC_research_roadmap_2026-10-08.md)。当前 12 张卡仅从路线图建立种子索引，尚未完成设计、实现或实验，所有负责人和评审安排待定；家族名称不代表已证明的创新。无默认主线，允许新增、拆分、合并和复活候选。
 
 | 候选 | 家族 | 状态 | 负责人 |

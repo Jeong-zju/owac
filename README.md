@@ -1,18 +1,21 @@
 # OWAC
 
-OWAC 探索可组合、可扩展的新计算框架，以 RAW 原生编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署；当前先选定并验证仿真 benchmark、RGB 闭环和成像/数据协议，再开展 RAW 适配。候选框架尚未实现或验证。
+发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 
-当前用户要求 [Isaac Sim / Arena DROID 两阶段交付](docs/decisions/0009-baseline-then-training-replay.md)：先取得官方 π0.5 完整 RGB 基准，再回放原始仿真专家训练演示，生成仿真器原生配对 RGB/RAW。[完整基准](research/experiments/2026-10-10_pi05_arena_droid_benchmark.md)已冻结官方九配置各 100 个种子、共 900 个独立 episode，云端 supervisor 正在运行，尚未完成。[固定离线页面](outputs/arena-droid-baseline/progress.html)显示手动同步进度；定时任务保持关闭。[专家来源核查](research/reviews/2026-10-10_arena_droid_expert_replay.md)找到官方通用采集、Mimic 扩增和状态回放脚本，但当前 DROID 接口仍需适配，未找到原训练物体状态或直接可用的自动专家生成器。历史 [RGB 3/3、同步 RAW 2/3](research/experiments/2026-10-10_pi05_arena_droid.md)仅为部署验收，不属于完整基准或原训练演示回放；[LIBERO RGB 参考](research/experiments/2026-10-10_pi05_official_libero_reference.md)及旧红杯实验保留，不追加 backbone 补救训练。
+当前和后续实验统一使用 **RAWVLA-bench**，见 [0011 路线决定](docs/decisions/0011-rawvla-bench-main-route.md)。[π0.5 全量基线](research/experiments/2026-10-10_rawvla_pi05_full_baseline.md)已在用户新服务器运行：作者 LIBERO 10,000 + RoboTwin 3,250 条完整清单，附加 632 条原采样条件单独核查；尚无最终成绩。沿用作者环境、数据与现成权重，后续算法按同一冻结协议比较。
+
+Arena DROID / PolaRiS 评测、场景重建和该衍生集的公开发布已按用户要求终止。旧源码、权重、数据与结果保留，部分结果不作为完整基准或全集交付。定时任务保持关闭。
+
+OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。候选框架尚未实现或验证。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
-
-用户要求实际尝试专家回放后，[PolaRiS 原动作试验](research/experiments/2026-10-10_polaris_expert_replay_pilot.md)已取得一条成功抓放演示：108 帧、外部与腕部双视角新 RGB/原生 CFA，原动作未修改，物体依靠真实接触完成搬运。场景根据专家抓取/释放位置重建，原训练场景/相机尚未精确恢复；新配对数据与原 JPEG 分开。云端数据和本地数字入口见实验记录，[进度页](outputs/arena-droid-baseline/progress.html)显示结果；完整 900 条基准继续运行。
 
 GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)，主分支为 `main`。
 
 ## 先读这些文件
 
 - [当前 research roadmap v4](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
+- [RawVLA-Bench 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)、[当前路线](docs/decisions/0011-rawvla-bench-main-route.md)：已跑通的部署、现成 π0.5 与固定评测协议。
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
 - [仿真 benchmark 优先决议](docs/decisions/0004-simulation-benchmark-first.md)、[选型调研](docs/simulation-benchmark-selection.md)：最新建设顺序、首选任务套件及待验证的版本/数据条件。

@@ -6,15 +6,19 @@
 
 ## 开始工作
 
-2026-10-10 用户最新交付要求见 `docs/decisions/0009-baseline-then-training-replay.md`：固定 Isaac Sim / Arena DROID 与仿真器原生 CameraCore ISP 前 CFA，先完成现成官方 π0.5 的完整 RGB 基准，再按原始仿真专家演示保存的场景和状态回放，生成配对 RGB/RAW。MuJoCo 路径已被用户否定。第一阶段已冻结官方九配置各 100 个种子、共 900 条独立 episode，由云端 supervisor 运行；完整结果尚未取得。历史 RGB 3/3 与同步 RAW 2/3 仅是单任务部署验收。PolaRiS 确有公开仿真共同训练数据，但缺少完整物体状态；已找到官方通用采集、Mimic 扩增和回放脚本，当前 DROID 尚无现成 Mimic/遥操作适配或已核验的自动专家生成器。若无现成来源先报告并决定后续；不把测试策略轨迹当原训练专家，不追加 backbone 补救训练、不重建定时任务、不修改正在运行的冻结源码。0009 纠正 0008 的交付范围，全部历史证据保留。
+2026-10-12 用户要求提交 RawVLA-Bench 修改并打标签；固定部署/协议标签为 `owac-rawvla-pi05-v0.1.0`，范围见 `docs/decisions/0012-rawvla-pi05-protocol-freeze.md`。两平台推理已跑通，LIBERO 全量完成；RoboTwin 成绩尚未齐全，后续不能把此标签当作论文数值复现或 RAW/特征接口验收。
 
-随后用户明确要求尝试机器人状态/原动作回放，以成功专家数据为本轮验收目标。`research/experiments/2026-10-10_polaris_expert_replay_pilot.md` 已记录一条成功的 PolaRiS 方块入左箱回放及 108 帧双视角原生 RGB/CFA 配对集。该试验重建物体场景，原训练场景/相机映射仍未知；不冒充原 JPEG 的精确 RAW 补采或 π0.5 分数。云端入口 `polaris-replay-pilot-v1/successful-expert-index.json`，大数组不下载。完整基准调度器已恢复；新试验与后处理使用独立版本，不修改冻结基准，不重复运行已完成尝试。定时任务保持关闭。
+2026-10-11 用户最新决定：**后续路线全部使用 RAWVLA-bench**。见 `docs/decisions/0011-rawvla-bench-main-route.md`。Arena DROID / PolaRiS 的基准、场景重建、抓取约束诊断及该衍生集的公开发布均已终止；保留历史源码、数据、权重、结果及失败版本，不因历史授权自动恢复旧任务。0008—0010 的旧 benchmark 选择与重建交付要求由 0011 取代，不再作为后续实现前置。
+
+当前基线为 `research/experiments/2026-10-10_rawvla_pi05_full_baseline.md` 中已启动的 RAWVLA-bench π0.5 全量评测：LIBERO 10,000 + RoboTwin 3,250，另有 632 条原条件核查独立计分。继续沿用作者环境、数据、现成权重及冻结比较协议，保留失败和基础设施缺口。先检查已有 supervisor 与清单，不能启动重复评测，不修改正在运行的冻结源码；定时任务保持关闭。该 benchmark 的现成 RAW 为作者三通道 HDR-derived / pseudo-RAW，名称和处理历史按实际来源记录，不能冒称原始 Bayer CFA。后续方法仍须披露实际输入、预算、训练和独立闭环证据。
+
+旧 Arena/PolaRiS 仅为历史证据：完整 RGB 基准在完成前由用户终止；PolaRiS 审计覆盖 316 条、52,914 帧，少量重建通过真实训练加载，未完成全集，也未公开上传。最终停止快照及旧离线页面见各实验记录；不把部分覆盖或用户终止记成最终基准失败。
 
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
 2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v4）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。
 3. 先检查 `git status --short --branch`，保留用户和其他 agent 的未提交变更。确认任务范围后直接推进已授权的可逆开发。
 4. 多 agent 并行时明确文件所有权；共享接口变更先同步，不能覆盖或回退他人的工作。
-5. π0.5 PyTorch 后端离线部署已完成。按用户最新要求及 `docs/decisions/0004-simulation-benchmark-first.md`，当前先选择并验证仿真 benchmark、RGB 闭环与成像/数据协议，再建设 RAW/特征入口。Lightwheel-LIBERO 单任务及原生合成 CFA 采集已通过运行验收，见 `docs/raw-sim-bench-deployment.md`；全套协议与 VLA 闭环尚未验证。不得把 Isaac 生态名称当成版本兼容证据。0002 的通用 B0 方案已被用户否定，不再作为开发前置条件。机器人实物、相机和正式数据尚未选定，相关配置留空。后端、选定任务/数据协议及必要首版接入接口验收后固定 `owac-dev-v0.1.0` 标签；F01—F12 首批分支统一从该标签创建，后续子任务保留本家族已有历史。当前标签尚未创建。
+5. π0.5 PyTorch 后端离线部署已完成。按用户最新要求及 `docs/decisions/0004-simulation-benchmark-first.md`，当前使用 RawVLA-Bench 与对应 π0.5，沿用 0012 的固定部署及比较协议，再建设 RAW/特征入口。Lightwheel-LIBERO 单任务及原生合成 CFA 采集已通过运行验收，见 `docs/raw-sim-bench-deployment.md`；全套协议与 VLA 闭环尚未验证。不得把 Isaac 生态名称当成版本兼容证据。0002 的通用 B0 方案已被用户否定，不再作为开发前置条件。机器人实物、相机和正式数据尚未选定，相关配置留空。后端、选定任务/数据协议及必要首版接入接口验收后固定 `owac-dev-v0.1.0` 标签；F01—F12 首批分支统一从该标签创建，后续子任务保留本家族已有历史。当前标签尚未创建。
 
 ## 研究目标与候选管理
 

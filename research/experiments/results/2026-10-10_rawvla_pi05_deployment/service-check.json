@@ -1,0 +1,55 @@
+{
+  "checked_utc": "2026-10-10T09:19:05Z",
+  "root": "/workspace/owac/rawvla",
+  "rawvla_sha": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+  "dataset_revision": "8586c594fff9ce38580e29745f074e82e96e74f7",
+  "services": [
+    {
+      "suite": "libero",
+      "port": 18000,
+      "bind": "127.0.0.1",
+      "ping_ok": true,
+      "metadata": {
+        "env": "starvla_openpi_server",
+        "model": "PI05",
+        "checkpoint": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+        "precision": "bfloat16",
+        "model_source": "openpi",
+        "action_horizon": 10,
+        "action_dim": 32,
+        "norm": "quantile",
+        "config_override_keys": [],
+        "raw_frontend": "none",
+        "raw_frontend_source_key": "image",
+        "raw_frontend_burst_frames": 1,
+        "raw_frontend_rnn_frames": 1
+      }
+    },
+    {
+      "suite": "robotwin",
+      "port": 18005,
+      "bind": "127.0.0.1",
+      "ping_ok": true,
+      "metadata": {
+        "model": "PI05",
+        "action_chunk_size": 50,
+        "state_dim": 14,
+        "norm": "MEAN_STD"
+      }
+    }
+  ],
+  "supervisor": "owac-rawvla-libero-policy        RUNNING   pid 47080, uptime 0:01:51\nowac-rawvla-robotwin-policy      RUNNING   pid 47002, uptime 0:01:54\n",
+  "module_sha256": {
+    "rawvla.py": "d254b4dbd2663bfb18c78e4cddc8ed18e9dc33fca79aa7b4b81742c168c74e9e",
+    "rawvla_robotwin.py": "e720f71dd46599222df11f7a4e0cc82a313015aeed80cc1ddc1e77c3f4e1c363",
+    "run-smoke.sh": "2c6b08eda0e12c4d5e96d4c160465f26d7a3e818c119e78d8ab10d1399b6c533"
+  },
+  "robotwin_forward_after_restart": {
+    "shape": [
+      50,
+      14
+    ],
+    "finite": true,
+    "input": "/workspace/owac/rawvla/records/robotwin-policy-v2/input_00026.npz"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "version": "owac-pi05-full-v1",
+  "total_episodes": 13250,
+  "manifests": {
+    "libero": {
+      "source": "/workspace/owac/rawvla/source/experiments/simulation/libero/manifests/libero_manifest_50_init_states_10000_rollouts.json",
+      "sha256": "e3a054f43060912d668e57d35873b573a289c6d3c941fec9c029569c82971168",
+      "episodes": 10000
+    },
+    "robotwin": {
+      "source": "/workspace/owac/rawvla/source/experiments/simulation/robotwin/manifests/robotwin2_test_manifest_50_seeds_3250_rollouts.json",
+      "sha256": "632b8360836595a868affffd24f9ecf1262d68a52a505ef5ffe801598d8317e5",
+      "episodes": 3250
+    }
+  },
+  "libero": {
+    "image": "author rawvla_bench default_isp",
+    "action_horizon": 10,
+    "replan_steps": 5,
+    "seed": 7,
+    "port": 18010
+  },
+  "robotwin": {
+    "image": "render_rgb (SAPIEN Color, paper Table 2 Default)",
+    "action_horizon": 50,
+    "action_dim": 14,
+    "normalization": "MEAN_STD",
+    "state_padding": 0.0,
+    "denoiser": "OptiX",
+    "port": 18015,
+    "expert_check": "language/scene eligibility only; no expert actions into policy",
+    "fixed_seed": true,
+    "episode_timeout_seconds": 900
+  },
+  "flow_rng": "SHA256(platform, task, initial state) first 32 bits; independent per episode; paired across lighting domains",
+  "language_rng": "paired episode seed, independent of prior rollout length",
+  "policy_failure": "task not solved by author max step count; included in denominator",
+  "infrastructure_failure": "retain both bounded attempts for same entry; unresolved stays incomplete",
+  "extra_training_steps": 0,
+  "limitations": [
+    "OptiX replaces incompatible SAPIEN bundled OIDN on Blackwell",
+    "StarVLA image preprocessing; native LeRobot full numerical parity not established",
+    "Explicit per-episode action noise improves repeatability; published RNG sequence unknown",
+    "Full manifest coverage is not a claim to reproduce published numerical scores",
+    "Main simulation Default PI05 only; learned ISP methods and real robots excluded"
+  ],
+  "code_sha256": {
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/runtime/libero_client.py": "57f799194a45e235b6a8443b75bb2f7b403bbe104171970873e0936d3d103721",
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/runtime/robotwin_eval.py": "fddea3bbd226e75a38aa6de31094a6e631137ab7da0fc717d88aeee89197e90e",
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/runtime/robotwin_deploy.yml": "2d5eaa2b6309abc98c0dad01f83bc6f69e56076292a8fbbfd47bdbda7d2165e0",
+    "/workspace/owac/rawvla/owac/src/owac/runtime/rawvla_full_eval.py": "b2d15990d4e02ebd5de4c180563175c0dd0a03dc6acc455a8edf99ad46bd69d4",
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/frozen/src/owac/runtime/rawvla_robotwin.py": "cf653b61decebd53d6d530f901d0d28cf4ec24f6d228b289079f4d2206881d0e",
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/frozen/src/owac/backends/rawvla.py": "d254b4dbd2663bfb18c78e4cddc8ed18e9dc33fca79aa7b4b81742c168c74e9e",
+    "/workspace/owac/rawvla/records/pi05-full-20261010-v2/frozen/src/owac/runtime/rawvla_full_eval.py": "b2d15990d4e02ebd5de4c180563175c0dd0a03dc6acc455a8edf99ad46bd69d4",
+    "/workspace/owac/rawvla/source/third_party/RoboTwin/task_config/owac_rawvla_clean.yml": "ef7aff419660fc5a69392c5635b89d8edcb1be9adb654991f72d026813f4bb5e"
+  },
+  "weights_sha256": {
+    "libero": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "robotwin": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+    "robotwin_norm": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7"
+  },
+  "source_commit": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+  "frozen_at": "2026-10-10T09:50:59Z"
+}

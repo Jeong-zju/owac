@@ -1,5 +1,27 @@
 # OWAC 当前状态
 
+2026-10-12 发布固定：本地提交及标签 `owac-rawvla-pi05-v0.1.0` 固定已跑通的 RawVLA-Bench / π0.5 部署和后续比较协议，见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。LIBERO 10,000 条完整成绩为 58.20%；RoboTwin 仍在运行、有基础设施缺口。该标签不表示两平台全量已齐或论文数值复现；旧 `owac-dev-v0.1.0` 的 RAW/特征接口门槛仍待验收。
+
+2026-10-12 10:21:11（北京时间）RawVLA 进度核查：LIBERO 10,000/10,000 完成，成功 5,820、完整成功率 58.20%，身份审计通过。主清单累计 11,745/13,250；RoboTwin 1,745/3,250，仍运行，16 个异常身份未完成；附加原条件 627/632、5 个异常未补齐，状态 incomplete。整套基线尚未完成；见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
+
+2026-10-11 20:16:17（北京时间）RawVLA 进度核查：主清单完成 9,053/13,250；LIBERO 7,950/10,000，RoboTwin 1,103/3,250，两套主评测与审计仍运行。附加原条件 627/632、状态 incomplete；主 RoboTwin 与附加各 5、5 个异常案例待补齐，保留原分母；尚无完整基线成绩。见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
+
+2026-10-11 15:15:48（北京时间）RawVLA 进度核查：主清单完成 7,299/13,250；LIBERO 6,461/10,000，RoboTwin 838/3,250，两套主评测与审计仍运行。附加原条件核查已结束调度，627/632 有效完成、5 条异常未补齐，状态 incomplete；主 RoboTwin 另有 5 条异常未完成。均保留原分母，尚无完整基线成绩。见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
+
+2026-10-11 13:37:33（北京时间）RawVLA 进度核查：主清单完成 6,707/13,250；LIBERO 5,934/10,000，RoboTwin 773/3,250，附加原条件 609/632。三套评测与审计仍运行；主 RoboTwin 5 个、附加 5 个案例异常未完成，保留原分母；尚无完整基线成绩。见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
+
+2026-10-11 用户决定：**后续全部使用 RAWVLA-bench**，见 [0011](decisions/0011-rawvla-bench-main-route.md)。Arena DROID 的 RGB 评测、PolaRiS 重建及其公开发布已终止，旧数据与权重保留，旧页面标注历史状态。RAWVLA 既有全量评测继续运行；不重复启动，不创建定时任务。 停止后最后归档：Arena 290/900（211 成功、79 正常失败）；PolaRiS 配对覆盖 35/316、物理检查通过 19 条，其中约束辅助 1 条，训练加载验证仍为 18 条。全部为未完成路线的历史结果，两个旧页面与文件哈希已核验。
+
+2026-10-11 01:50:48（北京时间）RawVLA 进度核查：主清单完成 3,031/13,250；LIBERO 2,683/10,000，RoboTwin 348/3,250，附加原条件 316/632。三套评测与审计后台仍运行；主 RoboTwin 5 个、附加 3 个案例在作者专家规划阶段异常、无策略动作，未删分母，完整成绩仍待有效补齐。详见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
+
+2026-10-10 最新：用户要求 π0.5 论文全量评测作为后续算法参照；[RawVLA-Bench 全量基线](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md)已在新服务器由独立 supervisor 启动，固定作者 LIBERO 10,000 与 RoboTwin 3,250 条原始测试清单，共 13,250 条。重新运行，不复用部署成绩；RoboTwin 按论文 Table 2 Default 改用 SAPIEN `render_rgb`，照明/噪声清单 3,250 条核对无差异。首批实际 π0.5 成功、达到步数上限失败与基础设施异常均保留，固定每初态配对随机流；独立审计检查身份、重复分母和配对语言。当前 v3 补齐 Python/NumPy 指令种子；旧 RoboTwin 结果转诊断，全套重新执行。LIBERO 13 个重复身份均移出计分后重跑，原始记录与恢复哈希保留；进程退出控制已修复。另追加 632 条原缓存照明条件，核查论文 Table 2 与 3,250 manifest 的分母/曝光差异，两种结果分别报告。**仍在运行，尚无全量成绩或论文表格复现结论**；OptiX/Blackwell 与 StarVLA/原 LeRobot 数值边界详见记录。旧 Arena/PolaRiS 任务已停止，历史证据保留，未创建定时任务。
+
+2026-10-10 新增：[RawVLA 作者环境 / π0.5 独立部署验收](../research/experiments/2026-10-10_rawvla_pi05_deployment.md)已在用户新服务器完成。RawVLA-Bench 全集 713.69 GB、4,810 个文件下载完成，1,771 对 LIBERO 与 632 对 RoboTwin RAW/RGB 清单无缺失。官方 `pi05_libero` 与作者指定 `SidneyXie/pi05_robotwin` 已部署，额外训练 0 步；LIBERO 四套各一条 RGB 成功 4/4，Spatial 首任务五照明域七初态 Default ISP 成功 19/35，RoboTwin 作者 HDR / Normal / Default ISP 的 `grab_roller` seed 0 在 81 步成功。模型实际输入、完整正常失败、动作与观测对齐和哈希已留档；仅为部署验收，完整论文协议与原 LeRobot 数值对照未完成。Blackwell 上显式采用 OptiX 替代异常的 OIDN，兼容改动详见记录。现成三通道 RAW 可用于 encoder 原型，不冒充原始 Bayer CFA；原 Arena 冻结基准与其他任务记录保留。
+
+## 本次固定以前的历史状态
+
+以下为旧版本状态快照；涉及 Arena/PolaRiS 的“继续运行”及旧 benchmark 选择已被 0011/0012 取代。
+
 更新时间：2026-10-08。研究依据为 roadmap v4。本页区分仓库基础设施与尚未开始的研究工作。
 
 ## 仓库初始化
