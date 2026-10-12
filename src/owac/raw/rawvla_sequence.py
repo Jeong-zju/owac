@@ -1379,6 +1379,7 @@ class RawVLAWindowDataset:
         split: str = "train",
         max_episodes: int | None = None,
         hash_episodes: bool = False,
+        episode_paths: list[str] | None = None,
     ) -> None:
         if dataset_format not in FORMAT_SPECS:
             raise ValueError(f"unknown dataset_format: {dataset_format!r}")
@@ -1410,6 +1411,10 @@ class RawVLAWindowDataset:
         if samples_per_episode < 1:
             raise ValueError("samples_per_episode must be positive")
         paths, self.search_pattern = discover_npz_files(self.cache_root, dataset_format)
+        if episode_paths is not None:
+            if not set(episode_paths).issubset(paths):
+                raise ValueError("episode_paths must be real files discovered inside cache_root")
+            paths = sorted(set(episode_paths))
         if max_episodes is not None:
             paths = paths[:max_episodes]
         self._paths = paths

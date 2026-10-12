@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
+from numbers import Integral
 from typing import Any
 
 import torch
@@ -40,6 +41,8 @@ class MeasurementEntry:
     timestamp: float | None
     time_unit: str
     metadata: dict = field(default_factory=dict)
+    batch_identities: tuple = ()
+    new_mask: torch.Tensor | None = None
 
     @property
     def identity(self) -> tuple[str, int, int | None]:
@@ -103,6 +106,44 @@ class MeasurementBuffer:
         self._seen: set[tuple[str, int, int | None]] = set()
         self.duplicate_count = 0
         self.rejected_count = 0
+        self.last_added: torch.Tensor | None = None
+        self._latest: dict = {}
+
+    def copy(self) -> MeasurementBuffer:
+        result = MeasurementBuffer(
+            self.max_history, mask_history=self.mask_history, device=self.device
+        )
+        result._frames = list(self._frames)
+        result._seen = set(self._seen)
+        result.duplicate_count = self.duplicate_count
+        result.rejected_count = self.rejected_count
+        result.last_added = self.last_added
+        result._latest = dict(self._latest)
+        return result
+
+    def clear_batch(self, mask: torch.Tensor) -> MeasurementBuffer:
+        result = self.copy()
+        if bool(mask.all()):
+            result.reset()
+            result.last_added = torch.zeros_like(mask)
+            return result
+        result._seen = {key for key in result._seen if not bool(mask[key[0]])}
+        result._latest = {
+            key: value for key, value in result._latest.items() if not bool(mask[key])
+        }
+        result._frames = [
+            dataclasses.replace(
+                entry,
+                valid_mask=(
+                    torch.ones_like(entry.values, dtype=torch.bool)
+                    if entry.valid_mask is None
+                    else entry.valid_mask
+                )
+                & ~mask.reshape(-1, 1, 1, 1),
+            )
+            for entry in result._frames
+        ]
+        return result
 
     def __len__(self) -> int:
         return len(self._frames)
@@ -125,6 +166,8 @@ class MeasurementBuffer:
         self._seen.clear()
         self.duplicate_count = 0
         self.rejected_count = 0
+        self._latest.clear()
+        self.last_added = None
 
     def add(self, entry: MeasurementEntry) -> bool:
         """Append one observation. Returns ``True`` when it is new evidence.
@@ -133,14 +176,57 @@ class MeasurementBuffer:
         contributes no energy, so re-running inference on one frame cannot
         inflate confidence.
         """
-        if entry.identity in self._seen:
-            self.duplicate_count += 1
+        identities = entry.batch_identities or (entry.identity,) * entry.values.shape[0]
+        keys = [(index, *identity) for index, identity in enumerate(identities)]
+        accepted = torch.tensor(
+            [
+                key not in self._seen
+                and not (
+                    isinstance(identity[1], Integral)
+                    and index in self._latest
+                    and self._latest[index][0] == identity[0]
+                    and self._latest[index][2] == identity[2]
+                    and identity[1] <= self._latest[index][1]
+                )
+                for index, (key, identity) in enumerate(zip(keys, identities, strict=False))
+            ],
+            device=entry.values.device,
+        )
+        if entry.new_mask is not None:
+            accepted = accepted & entry.new_mask
+        self.last_added = accepted
+        self.duplicate_count += int((~accepted).sum())
+        if not bool(accepted.any()):
             return False
-        self._seen.add(entry.identity)
-        self._frames.append(entry)
+        self._seen.update(key for key, keep in zip(keys, accepted.tolist(), strict=False) if keep)
+        self._latest.update(
+            {
+                index: identity
+                for index, (identity, keep) in enumerate(
+                    zip(identities, accepted.tolist(), strict=False)
+                )
+                if keep and isinstance(identity[1], Integral)
+            }
+        )
+        valid = (
+            torch.ones_like(entry.values, dtype=torch.bool)
+            if entry.valid_mask is None
+            else entry.valid_mask
+        )
+        self._frames.append(
+            dataclasses.replace(entry, valid_mask=valid & accepted.reshape(-1, 1, 1, 1))
+        )
         if self.mask_history and len(self._frames) > self.max_history:
             dropped = self._frames.pop(0)
-            self._seen.discard(dropped.identity)
+            dropped_ids = dropped.batch_identities or (dropped.identity,) * dropped.values.shape[0]
+            self._seen.difference_update(
+                (index, *identity)
+                for index, identity in enumerate(dropped_ids)
+                if isinstance(identity[1], Integral)
+            )
+            # Integer frame indices use a high watermark. Opaque identities
+            # have no ordering, so retain their small ID ledger until reset;
+            # never reject a fresh UUID because of lexicographic order.
         return True
 
     def mask_for(

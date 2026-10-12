@@ -65,7 +65,7 @@ from owac.frameworks.n02.measurement import (
     MeasurementModel,
     compute_measurement_energy,
 )
-from owac.frameworks.n02.model import N02Encoder
+from owac.frameworks.n02.model import N02Encoder, _masked_grid_measurement
 from owac.frameworks.n02.readout import StructuredRepresentation
 from owac.frameworks.n02.revision import RevisionController
 from owac.frameworks.n02.state import (
@@ -377,6 +377,7 @@ class _StandaloneBaseline(nn.Module):
         head_config = (
             config if head_K in (None, config.K) else dataclasses.replace(config, K=head_K)
         )
+        head_config = dataclasses.replace(head_config, D=self.field_width)
         self.measurement = MeasurementModel(head_config)
         self._position_cache: dict[tuple[int, int, str], torch.Tensor] = {}
 
@@ -415,19 +416,28 @@ class _StandaloneBaseline(nn.Module):
         if buffer is None or buffer.max_history != history:
             buffer = MeasurementBuffer(history, mask_history=True, device=device)
             state.diagnostics["_buffer"] = buffer
-        return buffer
+        return buffer.copy()
 
     def _prepare(
         self, frame: MeasurementFrame, state: HypothesisState, budget: ComputeBudget
     ) -> _Prepared:
-        values, valid, saturated = _frame_tensors(
-            frame, device=state.h.device, out_channels=self.measurement.out_channels
-        )
+        values, valid, bad, saturated = N02Encoder._frame_tensors(self, frame, state)
         grid = state.h.shape[-2:]
-        if values.shape[-2:] != grid:
-            values = F.interpolate(values, size=grid, mode="area")
-            valid = F.interpolate(valid.float(), size=grid, mode="nearest") > 0.5
-            saturated = F.interpolate(saturated.float(), size=grid, mode="nearest") > 0.5
+        supplied = None
+        if frame.metadata_available.get("variance", False) and "variance" in frame.metadata:
+            supplied = torch.as_tensor(
+                frame.metadata["variance"], device=values.device, dtype=torch.float32
+            )
+            if supplied.numel() == values.shape[0]:
+                supplied = supplied.reshape(-1, 1, 1, 1)
+            supplied = supplied.expand_as(values)
+            if not bool((torch.isfinite(supplied) & (supplied > 0)).all()):
+                raise ValueError("declared sensor variance must be finite and positive")
+        observed = valid & ~bad
+        if not self.config.measurement.saturation_is_observation:
+            observed = observed & ~saturated
+        values, valid, supplied = _masked_grid_measurement(values, observed, supplied, grid)
+        saturated = ~valid & (F.adaptive_max_pool2d(saturated.float(), grid) > 0)
         variance, calibrated = estimate_variance(
             values,
             shot_scale=self.config.measurement.shot_scale,
@@ -444,6 +454,15 @@ class _StandaloneBaseline(nn.Module):
             episode_id=self._episode_id(frame),
             timestamp=None if frame.timestamp is None else float(frame.timestamp),
         )
+        entry.valid_mask = valid
+        entry.saturated_mask = saturated
+        entry.bad_mask = torch.zeros_like(valid)
+        if supplied is not None:
+            entry.variance = supplied.clamp_min(self.config.measurement.variance_floor)
+            entry.metadata["variance_is_estimate"] = bool(
+                frame.metadata.get("variance_is_estimate", False)
+            )
+            calibrated = not entry.metadata["variance_is_estimate"]
         buffer = self._buffer_for(state, budget, values.device)
         if frame.is_new_measurement:
             added = buffer.add(entry)
@@ -460,7 +479,13 @@ class _StandaloneBaseline(nn.Module):
                 mask_latest = _bool_mask(last_mask, latest, latest.shape[1])
         bad_latest = torch.zeros_like(latest, dtype=torch.bool)
         sat_latest = torch.zeros_like(latest, dtype=torch.bool)
-        features = self.measurement(latest, mask_latest, bad_latest, sat_latest, None)
+        features = self.measurement(
+            latest,
+            mask_latest,
+            bad_latest,
+            sat_latest,
+            N02Encoder._sampling_metadata(self, frame, latest),
+        )
         return _Prepared(
             features=features,
             valid=valid,
@@ -476,6 +501,8 @@ class _StandaloneBaseline(nn.Module):
         """Score the field with the shared head and the shared energy function."""
         mean, log_variance, geometry = self.measurement.predict(field)
         prediction = _Prediction(mean, torch.exp(log_variance), geometry)
+        buffer = buffer.copy()
+        buffer._frames = buffer.frames[-1:]
         result = compute_measurement_energy(
             prediction, buffer, self.config.measurement, view_index=0
         )
@@ -498,7 +525,7 @@ class _StandaloneBaseline(nn.Module):
     @staticmethod
     def _frame_id(frame: MeasurementFrame) -> int:
         if frame.frame_ids:
-            return int(frame.frame_ids[0])
+            return frame.frame_ids[0]
         if "frame_id" in frame.metadata:
             return int(frame.metadata["frame_id"])
         return -1
@@ -506,7 +533,7 @@ class _StandaloneBaseline(nn.Module):
     @staticmethod
     def _episode_id(frame: MeasurementFrame) -> int | None:
         if frame.episode_ids:
-            return int(frame.episode_ids[0])
+            return frame.episode_ids[0]
         return None
 
     def _output(
@@ -575,7 +602,7 @@ class _StandaloneBaseline(nn.Module):
             history_len=len(buffer),
             hypotheses=K,
             updated_fraction=updated_fraction,
-            state_bytes=new_state.state_bytes() + state_tensor_bytes(buffer),
+            state_bytes=new_state.state_bytes() + state_tensor_bytes(buffer.frames),
             notes={
                 "views": int(views),
                 "grid": [int(field.shape[-2]), int(field.shape[-1])],
@@ -662,17 +689,33 @@ class PlainRecurrentEncoder(_StandaloneBaseline):
     dependency edges, no proposal and no revision scheduling: every cycle updates
     the whole field through one shared ConvGRU.
 
-    The field width follows the measurement head's width (``config.stem_width``)
-    because the shared head must be applied to it; the candidate's ``D`` also sizes
-    its per-hypothesis codes, which this arm does not have.
+    The stem remains unchanged. The recurrent field is widened to match the
+    candidate's useful trainable capacity as closely as integer widths allow;
+    actual parameter counts are reported, including its declared-prior input.
     """
 
-    def __init__(self, config: N02Config) -> None:
-        width = int(config.stem_width)
+    def __init__(self, config: N02Config, *, width: int | None = None) -> None:
+        if width is None:
+            # Match useful trainable capacity by widening the actual recurrent
+            # field, rather than attaching unused parameters to the control.
+            with torch.random.fork_rng(devices=[]):
+                reference = N02Encoder(config)
+                sample = torch.empty(1, 3 * config.D + 6, 1, 1)
+                reference.reviser.cell.input.initialize_parameters(sample)
+                reference.reviser.cell.hidden.initialize_parameters(sample)
+                target = sum(p.numel() for p in reference.parameters())
+                candidates = []
+                for trial in range(max(8, config.stem_width // 2), 3 * config.D + 1):
+                    control = PlainRecurrentEncoder(config, width=trial)
+                    count = sum(p.numel() for p in control.parameters())
+                    candidates.append((abs(count - target), trial))
+                width = min(candidates)[1]
+            self.parameter_match_target = target
+        width = int(width)
         super().__init__(config, width=width, head_K=1)
         self._representation_K = 1
-        self.initializer = HypothesisInitializer(width, 1, context_dim=0, code_scale=0.5)
-        self.evidence_channels = width + 1 + 4  # stem features + residual + position code
+        self.initializer = HypothesisInitializer(width, 1, context_dim=2, code_scale=0.5)
+        self.evidence_channels = width + 1 + 4 + 2  # features, residual, position, declared prior
         self.cell = _PlainConvGRUCell(width, self.evidence_channels, kernel=config.cell_kernel)
 
     @property
@@ -686,14 +729,28 @@ class PlainRecurrentEncoder(_StandaloneBaseline):
         state: HypothesisState,
         budget: ComputeBudget,
     ) -> EncoderOutput:
-        del context
         config = self.config
         prepared = self._prepare(frame, state, budget)
-        field = self._ensure_field(state, prepared.features)
+        prior = prepared.features.new_zeros(prepared.features.shape[0], 2)
+        if context.hypothesis_prior is not None:
+            mass, available = N02Encoder._declared_prior(
+                self, context, prior.shape[0], prior.device
+            )
+            parity_mass = torch.stack([mass[:, ::2].sum(-1), mass[:, 1::2].sum(-1)], -1)
+            prior[:, 0] = (
+                parity_mass[:, 0].clamp_min(1e-12).log() - parity_mass[:, 1].clamp_min(1e-12).log()
+            ) * available
+            prior[:, 1] = available
+        field = self._ensure_field(state, prepared.features, prior)
         views = field.shape[1]
         position = self._positions(field).expand(field.shape[0], views, -1, -1, -1)
         evidence_base = torch.cat(
-            [prepared.features.unsqueeze(1).expand(-1, views, -1, -1, -1), position], dim=2
+            [
+                prepared.features.unsqueeze(1).expand(-1, views, -1, -1, -1),
+                position,
+                prior[:, None, :, None, None].expand(-1, views, -1, *field.shape[-2:]),
+            ],
+            dim=2,
         )
         max_cycles = self._cycles(budget)
         tolerance = config.revision.tolerance
@@ -743,18 +800,21 @@ class PlainRecurrentEncoder(_StandaloneBaseline):
             },
         )
 
-    def _ensure_field(self, state: HypothesisState, features: torch.Tensor) -> torch.Tensor:
-        if float(state.h.abs().sum().item()) > 0.0:
+    def _ensure_field(
+        self, state: HypothesisState, features: torch.Tensor, prior=None
+    ) -> torch.Tensor:
+        cold = state.h.abs().flatten(1).sum(-1) == 0
+        if not bool(cold.any()):
             return state.h
-        initialised = self.initializer(features)  # [B,1,width,h,w]
-        return initialised.unsqueeze(1)
+        initialised = self.initializer(features, context=prior)  # [B,1,width,h,w]
+        return torch.where(cold[:, None, None, None, None, None], initialised.unsqueeze(1), state.h)
 
 
 class ParticleFilterEncoder(_StandaloneBaseline):
     """Differentiable particle / multi-hypothesis filter, DPF rewritten minimally.
 
     Each of the ``K`` particles is one candidate *field*, scored by the shared
-    measurement head and the shared energy function over the frozen buffer. Kept
+    measurement head and the shared current-frame energy function. Kept
     from ``third_party/reference-inspect/dpf.py``: the multi-hypothesis particle
     set, the proposal branch with an iteration-decayed ``propose_ratio``, the
     systematic resampler (``linspace`` markers plus a uniform offset compared
@@ -768,11 +828,10 @@ class ParticleFilterEncoder(_StandaloneBaseline):
     clamp (the shared Gaussian NLL replaces it so the likelihood is identical to
     N02's), the DPF training curriculum, and the TensorFlow/sonnet graph.
 
-    One deliberate deviation from DPF: the weights are the softmax of the energy of
-    the *frozen* buffer each cycle instead of a running product of per-frame
-    likelihoods. DPF's running product is sequential importance sampling; here it
-    would count a retained frame once per later step, which the shared contract
-    forbids. The resampling itself is unchanged.
+    Weights use the current frame only in each cycle; retained particle fields
+    carry history through the transition. Re-scoring the whole buffer as fresh
+    evidence would count retained frames repeatedly. Declared prior context is
+    available to both initialization and proposals, as in the other arms.
     """
 
     def __init__(
@@ -791,8 +850,12 @@ class ParticleFilterEncoder(_StandaloneBaseline):
         self.propose_ratio = float(propose_ratio)
         self.stop_resample_gradient = bool(stop_resample_gradient)
         self.resample_jitter = bool(resample_jitter)
-        self.initializer = HypothesisInitializer(width, config.K, context_dim=0, code_scale=0.5)
-        self.proposer = HypothesisInitializer(width, config.K, context_dim=0, code_scale=0.5)
+        self.initializer = HypothesisInitializer(
+            width, config.K, context_dim=config.K + 1, code_scale=0.5
+        )
+        self.proposer = HypothesisInitializer(
+            width, config.K, context_dim=config.K + 1, code_scale=0.5
+        )
         self._generator = torch.Generator(device="cpu").manual_seed(int(config.seed))
 
     @property
@@ -806,13 +869,14 @@ class ParticleFilterEncoder(_StandaloneBaseline):
         state: HypothesisState,
         budget: ComputeBudget,
     ) -> EncoderOutput:
-        del context
         config = self.config
         K = self._representation_K
         prepared = self._prepare(frame, state, budget)
         features = prepared.features
         basis = features.reshape(features.shape[0], 1, *features.shape[1:])
-        field = self._ensure_particles(state, basis)
+        mass, available = N02Encoder._declared_prior(self, context, basis.shape[0], basis.device)
+        prior = torch.cat([mass, available[:, None].to(mass.dtype)], -1)
+        field = self._ensure_particles(state, basis, prior)
         views = field.shape[1]
         max_cycles = self._cycles(budget)
         proposal_counts: list[int] = []
@@ -835,7 +899,7 @@ class ParticleFilterEncoder(_StandaloneBaseline):
                 resampled = torch.gather(field, 2, gather)
                 pieces.append(resampled.detach() if self.stop_resample_gradient else resampled)
             if n_proposed > 0:
-                proposed = self._propose(basis, field.shape[0], views)
+                proposed = self._propose(basis, field.shape[0], views, prior)
                 pieces.append(proposed[:, :, :n_proposed])
             field = torch.cat(pieces, dim=2) if len(pieces) > 1 else pieces[0]
             if n_proposed:
@@ -873,19 +937,25 @@ class ParticleFilterEncoder(_StandaloneBaseline):
         )
 
     # ------------------------------------------------------------------ particles
-    def _ensure_particles(self, state: HypothesisState, basis: torch.Tensor) -> torch.Tensor:
-        if float(state.h.abs().sum().item()) > 0.0:
+    def _ensure_particles(
+        self, state: HypothesisState, basis: torch.Tensor, context: torch.Tensor | None = None
+    ) -> torch.Tensor:
+        cold = state.h.abs().flatten(1).sum(-1) == 0
+        if not bool(cold.any()):
             return state.h
         batch, views = basis.shape[:2]
         flat = basis.reshape(batch * views, *basis.shape[2:])
-        particles = self.initializer(flat)
-        return particles.reshape(
+        particles = self.initializer(flat, context=context)
+        initialised = particles.reshape(
             batch, views, self._representation_K, self.field_width, *basis.shape[-2:]
         )
+        return torch.where(cold[:, None, None, None, None, None], initialised, state.h)
 
-    def _propose(self, basis: torch.Tensor, batch: int, views: int) -> torch.Tensor:
+    def _propose(
+        self, basis: torch.Tensor, batch: int, views: int, context: torch.Tensor | None = None
+    ) -> torch.Tensor:
         flat = basis.reshape(batch * views, *basis.shape[2:])
-        proposed = self.proposer(flat)
+        proposed = self.proposer(flat, context=context)
         return proposed.reshape(
             batch, views, self._representation_K, self.field_width, *basis.shape[-2:]
         )
@@ -931,11 +1001,10 @@ class _GlobalSelectionRevision(RevisionController):
 
     The location gate is still constructed, so this arm has exactly N02's
     parameterisation, but its output is ignored: ``location_mask`` returns an
-    all-ones *blend*, so ``updated = 1.0 * candidate + 0.0 * h`` in every cell.
+    all-ones selection, so every cell receives its candidate update.
     Contradiction localisation, dependency propagation, reset and the proposal
-    branch are otherwise untouched. A float all-ones tensor is returned rather than
-    a boolean mask because the controller treats the selection as a convex blend
-    (and a non-zero tensor still selects everywhere if a hard mask is used).
+    branch are otherwise untouched. A float all-ones tensor is compatible with
+    the controller's hard forward selection and straight-through gradient.
     """
 
     def location_mask(
@@ -1033,6 +1102,11 @@ class FixedPriorEncoder(N02Encoder):
         state: HypothesisState,
         budget: ComputeBudget,
     ) -> EncoderOutput:
+        context = dataclasses.replace(
+            context,
+            hypothesis_prior=torch.softmax(-self.prior_offset, dim=-1).expand(state.h.shape[0], -1),
+            hypothesis_prior_available=True,
+        )
         output = super().step(frame, context, state, budget)
         representation = output.representation
         if isinstance(representation, StructuredRepresentation):

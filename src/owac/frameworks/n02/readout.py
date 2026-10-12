@@ -10,9 +10,9 @@ Two readouts are required because they answer different questions.
   keep the ambiguity instead of averaging it away.
 
 Neither function may average incompatible candidates into a middle geometry.
-That failure mode is measured by the probes in :func:`two_candidate_probe`,
-which compares a direct mean readout against MAP and grouped readouts on a task
-where the two candidates imply different actions.
+The geometry-only :func:`two_candidate_probe` diagnoses the shortcut readout.
+``owac.evaluation.n02_token_probe`` separately consumes actual tokens with a
+fitted localization decoder. Neither probe establishes PI05 ambiguity handling.
 """
 
 from __future__ import annotations
@@ -180,12 +180,10 @@ class TokenReadout(nn.Module):
 
         position = self._position_features(keep_h, keep_w, h)
         camera = self._camera_features(views, keep_h, keep_w, h, camera_ids)
-        hypothesis_code = self.hypothesis_embedding(
-            torch.arange(K if mode == "tokens" else 1, device=h.device).clamp_max(self.K - 1)
-        )
         if mode == "map":
-            hypothesis_code = hypothesis_code.view(1, 1, 1, -1, 1, 1)
+            hypothesis_code = self.hypothesis_embedding(index).view(batch, views, 1, -1, 1, 1)
         else:
+            hypothesis_code = self.hypothesis_embedding(torch.arange(K, device=h.device))
             hypothesis_code = hypothesis_code.view(1, 1, K, -1, 1, 1)
         # Two explicit reliability channels per emitted token group: the group's
         # own weight and the best competing weight. Both are real consumable
@@ -212,12 +210,8 @@ class TokenReadout(nn.Module):
         else:
             best_group = weights
             top_two = weights.topk(min(2, K), dim=-1).values
-            runner_group = (
-                top_two[..., 1:2].expand(-1, -1, K)
-                if top_two.shape[-1] > 1
-                else torch.zeros_like(weights)
-            )
-        reliability = torch.cat([best_group, runner_group], dim=-1)  # [B,V,G,2]
+            runner_group = torch.where(weights >= top_two[..., :1], runner_scalar, best_scalar)
+        reliability = torch.stack([best_group, runner_group], dim=-1)  # [B,V,G,2]
         weight_feature = reliability.view(batch, views, -1, 2, 1, 1).expand(
             -1, -1, -1, -1, keep_h, keep_w
         )
@@ -260,7 +254,9 @@ class TokenReadout(nn.Module):
         if token_valid is not None:
             mask = token_valid.reshape(batch, -1)
         if positions is None:
-            token_positions = self._grid_positions(keep_h, keep_w, views, h)
+            grid_positions = self._grid_positions(keep_h, keep_w, views, h)[:, 0]
+            token_positions = grid_positions[:tokens_per_group].repeat(views * groups, 1)
+            token_positions = token_positions.unsqueeze(0).expand(batch, -1, -1)
         else:
             token_positions = positions
         camera_ids_out = camera_ids or tuple(f"camera_{index}" for index in range(views))
@@ -323,8 +319,29 @@ class TokenReadout(nn.Module):
     def _camera_features(
         self, views: int, rows: int, cols: int, like: torch.Tensor, camera_ids: tuple
     ) -> torch.Tensor:
-        del camera_ids
-        index = torch.arange(views, device=like.device).clamp_max(self.num_views_max - 1)
+        known = {
+            "agentview": 0,
+            "wrist": 1,
+            "head_camera": 0,
+            "left_camera": 1,
+            "right_camera": 2,
+            "agentview_raw_uint8": 0,
+            "wrist_raw_uint8": 1,
+            "libero_agentview": 0,
+            "libero_wrist": 1,
+            "robotwin_head": 0,
+            "robotwin_left": 1,
+            "robotwin_right": 2,
+        }
+        index = (
+            torch.tensor(
+                [known.get(str(name), i) for i, name in enumerate(camera_ids)], device=like.device
+            )
+            if camera_ids
+            else torch.arange(views, device=like.device)
+        )
+        if index.numel() != views or bool((index >= self.num_views_max).any()):
+            raise ValueError("readout camera IDs do not fit the configured camera embedding")
         embedding = self.camera_embedding(index)  # [V, W]
         return (
             embedding.view(1, views, 1, self.width, 1, 1)
@@ -365,12 +382,12 @@ class TokenReadout(nn.Module):
                 support.to(torch.float32).reshape(-1, 1, *support.shape[-2:]), (rows, cols)
             )
             spatial = (reduced > 0).reshape(batch, views, support.shape[2], rows, cols)
-            spatial = spatial.any(dim=2, keepdim=True)
         if groups == 1:
-            spatial = spatial[:, :, :1]
-        if spatial.shape[1] != groups:
-            sample = spatial if spatial.shape[1] == 1 else spatial[:, :1]
-            spatial = sample.expand(-1, groups, -1, -1, -1)
+            index = representation.map_indices().reshape(batch, views, 1, 1, 1)
+            if spatial.shape[2] > 1:
+                spatial = spatial.gather(2, index.expand(-1, -1, 1, rows, cols))
+        elif spatial.shape[2] == 1:
+            spatial = spatial.expand(-1, -1, groups, -1, -1)
         combined = camera.view(batch, views, 1, 1, 1) & spatial
         combined = combined.expand(-1, -1, -1, rows, cols).reshape(
             batch, views, groups, rows * cols
@@ -387,6 +404,24 @@ class TokenReadout(nn.Module):
             [row_index.expand(rows, cols, 1), col_index.expand(rows, cols, 1)], dim=-1
         ).reshape(rows * cols, 2)
         return grid.unsqueeze(1).expand(-1, views, -1)  # [L, V, 2]
+
+
+class N02Readout(nn.Module):
+    """Shared-contract adapter: EncoderOutput + budget -> consumable VisualTokens."""
+
+    def __init__(self, config: Any) -> None:
+        super().__init__()
+        self.mode = config.readout_mode
+        self.tokens = TokenReadout(config.D, config.K, token_dim=config.token_dim)
+
+    def forward(self, output: EncoderOutput, token_budget: int) -> VisualTokens:
+        camera_id = output.representation.diagnostics.get("camera_id", "camera_0")
+        return self.tokens(
+            output.representation,
+            token_budget=token_budget,
+            mode=self.mode,
+            camera_ids=(camera_id,),
+        ).tokens
 
 
 def map_hypothesis(

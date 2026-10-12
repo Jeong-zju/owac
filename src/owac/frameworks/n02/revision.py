@@ -20,7 +20,7 @@ setting ``beta_prior`` to zero.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import torch
@@ -107,6 +107,7 @@ class RevisionController(nn.Module):
             self.width,
             kernel=config.cell_kernel,
             kind=config.cell_kind,
+            context_dim=self.width,
         )
         self.proposal = ProposalHead(self.width, config.K, kernel=config.cell_kernel)
         # Gate inputs: mean residual (1), prior level (1), position code (1).
@@ -185,7 +186,7 @@ class RevisionController(nn.Module):
 
     # ----------------------------------------------------------- propagation
     def compatibility(self, dependency_edge: torch.Tensor) -> torch.Tensor:
-        """Row-normalised ``[B,V,h,w,4,K,K]`` compatibility used for messages."""
+        """Nonnegative ``[B,V,h,w,4,K,K]`` compatibility; rows normalise at use."""
         weight = dependency_edge.clamp_min(0.0)
         return weight
 
@@ -203,9 +204,9 @@ class RevisionController(nn.Module):
         over ``l`` so a location with more recorded edges does not automatically
         receive a larger message, and off-grid neighbours are zeroed.
 
-        ``transpose=True`` reverses the dependency direction, which is what the
-        contradiction propagation needs: if ``u`` depends on its neighbour and the
-        neighbour is refuted, ``u`` must be revised.
+        Both messages and refutation read edge[k,l] at the target u: candidate k
+        depends on source l at its recorded neighbour. Transposing candidate
+        axes does not reverse the spatial edge and is not used for propagation.
         """
         weight = dependency_edge.clamp_min(0.0)
         if transpose:
@@ -214,20 +215,17 @@ class RevisionController(nn.Module):
         valid = _validity_for(
             dependency_valid, batch, views, height, width_px, neighbours, weight.dtype
         )
-        # Normalisation uses the fixed candidate count, NOT the row sum over the
-        # learnable edge. Dividing by ``sum_l edge[k, l]`` would cancel the edge
-        # algebraically (an identity table and a uniform table would give the same
-        # message), so the learnable compatibility would receive exactly zero
-        # gradient. The row sums are reported instead of being normalised away.
-        weight = (weight / float(K)) * valid.view(batch, views, height, width_px, neighbours, 1, 1)
+        # Row normalisation preserves relative compatibility with different
+        # neighbour candidates; sum over source l, then average valid directions.
+        weight = weight / weight.sum(dim=-1, keepdim=True).clamp_min(1.0e-8)
+        weight = weight * valid.view(batch, views, height, width_px, neighbours, 1, 1)
         assert weight.shape == (batch, views, height, width_px, neighbours, K, K), weight.shape
         return weight
 
     def edge_row_sums(self, dependency_edge: torch.Tensor) -> torch.Tensor:
         """``[B,V,h,w,4,K]`` sum of each dependency row, for the diagnostics.
 
-        Reported rather than normalised: the scale of the dependency strength is
-        part of what the model learns.
+        These are pre-normalisation diagnostics; messages use relative row weights.
         """
         return dependency_edge.clamp_min(0.0).sum(dim=-1)
 
@@ -274,7 +272,9 @@ class RevisionController(nn.Module):
         # [B,V,K,W,h,w,4] -> [B,V,h,w,4,K(l),W]
         stacked = neighbours.permute(0, 1, 4, 5, 6, 2, 3).contiguous()
         contribution = weight.unsqueeze(-1) * stacked.unsqueeze(5)  # [..,4,K(k),K(l),W]
-        message = contribution.sum(dim=4).mean(dim=4)  # [B,V,h,w,K,W]
+        message = contribution.sum(dim=5).sum(dim=4)  # [B,V,h,w,K,W]
+        degree = dependency_valid.sum(dim=-1).clamp_min(1).unsqueeze(-1).unsqueeze(-1)
+        message = message / degree
         return message.permute(0, 1, 4, 5, 2, 3).contiguous()
 
     def propagate(
@@ -294,7 +294,7 @@ class RevisionController(nn.Module):
         if not cfg.propagation_enabled or cfg.propagation_hops == 0:
             return contradiction.clone(), contradiction.to(torch.float32)
         batch, views, K, height, width_px = contradiction.shape
-        weight = self._edge_weights(dependency_edge, dependency_valid, transpose=True)
+        weight = self._edge_weights(dependency_edge, dependency_valid, transpose=False)
         assert weight.shape == (batch, views, height, width_px, 4, K, K), weight.shape
         mask = _validity_for(
             dependency_valid, batch, views, height, width_px, 4, contradiction.dtype
@@ -309,9 +309,8 @@ class RevisionController(nn.Module):
             # The vote for candidate k must therefore multiply the *same* k axis:
             # the candidate axis becomes the weight's row axis, not the last data
             # axis, otherwise the dependency table pairs unrelated slots.
-            target = shifted.movedim(2, 5).unsqueeze(5)  # [B,V,h,w,4,K(k),1]
-            summed = (weight * target).sum(dim=4)  # [B,V,h,w,K(k),K(l)]
-            vote = summed.permute(0, 1, 4, 2, 3, 5).mean(dim=-1)  # [B,V,K,h,w]
+            target = shifted.movedim(2, 5).unsqueeze(5)  # [B,V,h,w,4,1,K(l)]
+            vote = (weight * target).sum(dim=-1).sum(dim=4).permute(0, 1, 4, 2, 3)
             vote = vote * (cfg.propagation_decay**hop)
             priority = priority + vote
             # ``>=`` and not ``>``: a single refuted cell sends exactly
@@ -339,9 +338,8 @@ class RevisionController(nn.Module):
         rewrite, and its firing rate is reported in the cycle trace as
         ``updated_fraction``.
 
-        A hard 0/1 threshold is deliberately not used: it would send exactly zero
-        gradient to the gate and, when nothing is selected, to the cell as well,
-        which would make "the revision rule is learnable" false.
+        A straight-through hard threshold preserves unselected cells exactly while
+        allowing gradients into the selection gate during training.
         """
         batch, views = residual_feature.shape[0], residual_feature.shape[1]
         height, width = residual_feature.shape[-2:]
@@ -363,14 +361,21 @@ class RevisionController(nn.Module):
         # [B*V,1,h,w] -> [B,V,1,h,w]: the singleton hypothesis axis must be
         # explicit, otherwise the (K,h,w) tail would broadcast against the map.
         probability = probability.reshape(batch, views, 1, height, width)
-        blend = torch.where(contradiction, torch.ones_like(probability), probability)  # [B,V,1,h,w]
+        # Straight-through selection learns the gate while leaving unselected
+        # cells exactly unchanged in the forward computation.
+        hard = (probability >= 0.5).to(probability.dtype)
+        selected = hard + probability - probability.detach()
+        blend = torch.where(contradiction, torch.ones_like(probability), selected)
         blend = blend.expand(-1, -1, self.config.K, -1, -1)
         if blend.shape != contradiction.shape:
             raise ValueError(
                 f"location blend {tuple(blend.shape)} does not match "
                 f"contradiction {tuple(contradiction.shape)}"
             )
-        return blend
+        cold = torch.as_tensor(cold_start, device=blend.device).bool()
+        if cold.ndim:
+            cold = cold.reshape(batch, 1, 1, 1, 1)
+        return torch.where(cold, torch.ones_like(blend), blend)
 
     def step(
         self,
@@ -383,12 +388,16 @@ class RevisionController(nn.Module):
         dependency_valid: torch.Tensor | None = None,
         iteration: int = 0,
         cold_start: bool = False,
+        measurement_feature: torch.Tensor | None = None,
     ) -> RevisionOutput:
         """Run one revision cycle and return the new field plus its audit trail."""
         cfg = self.revision
-        revision = state.revision
+        revision = replace(state.revision)
+        cold = torch.as_tensor(cold_start, device=state.h.device).bool()
+        if cold.ndim == 0:
+            cold = cold.expand(state.h.shape[0])
         contradiction = self.contradiction_map(
-            normalized_residual, update_ema=not cold_start, revision=revision
+            normalized_residual, update_ema=not bool(cold.all()), revision=revision
         )
         if not cfg.contradiction_enabled:
             contradiction = torch.zeros_like(contradiction)
@@ -415,6 +424,7 @@ class RevisionController(nn.Module):
             residual_feature,
             prior_feature,
             location_code,
+            context=None if measurement_feature is None else measurement_feature.unsqueeze(2),
         )
         if candidate.shape != state.h.shape or update_mask.shape[:3] != state.h.shape[:3]:
             raise ValueError(
@@ -424,19 +434,21 @@ class RevisionController(nn.Module):
             )
         # ``blend`` is spatial: the same (candidate, location) decision applies to
         # every channel of that cell, hence the explicit singleton axis. The blend
-        # is a convex combination, so a cell that is *not* selected still carries
-        # gradient into the cell and the dependency table instead of freezing them.
+        # is hard in the forward pass: unselected cells retain their exact value.
         blend = update_mask.unsqueeze(3)
+        candidate = state.h + cfg.update_scale * (candidate - state.h)
         updated = blend * candidate + (1.0 - blend) * state.h
 
         reset = torch.zeros_like(selection)
-        if cfg.reset_contradicted and not cold_start:
-            reset = self.select_reset(contradiction, selection)
+        if cfg.reset_contradicted:
+            reset = self.select_reset(contradiction, selection) & ~cold[:, None, None, None, None]
             reset_mask = (reset & selection).unsqueeze(3)
             if cfg.proposal_enabled:
                 # Rebuild the refuted cells from the current measurement evidence.
                 proposed = self.proposal(
-                    updated,
+                    updated
+                    if measurement_feature is None
+                    else updated + measurement_feature.unsqueeze(2),
                     residual_feature,
                     selection.to(state.h.dtype),
                     location_code,

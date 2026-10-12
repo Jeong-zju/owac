@@ -103,7 +103,7 @@ class RAWStem(nn.Module):
         if saturated.shape[1] != channels:
             saturated = saturated.expand(-1, channels, -1, -1)
         pieces = [
-            values * valid,
+            torch.where(valid, values, torch.zeros_like(values)),
             valid.float(),
             bad.float() + saturated.float(),
         ]
@@ -262,9 +262,8 @@ def gaussian_nll(
     else:
         rho = 0.5 * normalized**2
     # Gaussian NLL: 0.5 * r^2 / sigma^2 + log(sigma). With log_variance = log(sigma^2),
-    # log(sigma) = 0.5 * log_variance. (An earlier version added 0.5*log_variance
-    # here, i.e. 0.25*log(sigma^2), which under-weighted the scale term; the exact
-    # analytic reference in owac.frameworks.n02.analytic now pins this.)
+    # log(sigma) = 0.5 * log_variance. The exact analytic reference
+    # in owac.frameworks.n02.analytic independently pins this scale convention.
     return rho + 0.5 * log_variance
 
 
@@ -281,6 +280,7 @@ class EnergyResult:
     effective_samples: float = 0.0
     unresolved: bool = False
     diagnostics: dict = field(default_factory=dict)
+    support_mask: torch.Tensor | None = None
 
 
 def compute_measurement_energy(
@@ -305,6 +305,7 @@ def compute_measurement_energy(
     residual_map = torch.zeros(batch, K, height, width, device=device, dtype=mean.dtype)
     per_observation: list[torch.Tensor] = []
     effective = 0.0
+    support_mask = torch.zeros(batch, K, height, width, device=device, dtype=torch.bool)
     frames = buffer.frames
     for frame in frames:
         values = frame.values
@@ -346,19 +347,29 @@ def compute_measurement_energy(
             if bad.shape[-2:] != (height, width):
                 bad = F.interpolate(bad.float(), size=(height, width), mode="nearest") > 0.5
             observed = observed & ~bad
-        log_variance = torch.log(variance.clamp_min(config.variance_floor))
-        residual = values.unsqueeze(1) - mean  # [B, K, C, h, w]
+        use_sensor_variance = not frame.metadata.get(
+            "variance_is_estimate", config.shot_scale is None and config.read_scale is None
+        )
+        scoring_variance = variance
+        if use_sensor_variance:
+            sensor_variance = frame.variance.to(device=device, dtype=torch.float32)
+            if sensor_variance.shape[-2:] != (height, width):
+                sensor_variance = F.interpolate(sensor_variance, size=(height, width), mode="area")
+            scoring_variance = sensor_variance.unsqueeze(1).expand_as(mean)
+        log_variance = torch.log(scoring_variance.clamp_min(config.variance_floor))
+        residual = torch.where(observed.unsqueeze(1), values.unsqueeze(1) - mean, 0.0)
         nll = gaussian_nll(
             residual, log_variance, robust=config.robust, huber_delta=config.huber_delta
         )
         weights = observed.unsqueeze(1).to(nll.dtype)  # [B, 1, C, h, w]
+        support_mask = support_mask | observed.any(dim=1).unsqueeze(1)
         count = weights.sum(dim=(2, 3, 4)).clamp_min(1.0)  # [B, 1]
         per_frame = (nll * weights).sum(dim=(2, 3, 4)) / count  # [B, K]
         energy = energy + per_frame
         per_observation.append(per_frame.detach())
-        effective += float(count.mean().item())
+        effective += float(weights.sum(dim=(2, 3, 4)).mean().item())
         with torch.no_grad():
-            normalize = torch.sqrt(variance.clamp_min(config.variance_floor))
+            normalize = torch.sqrt(scoring_variance.clamp_min(config.variance_floor))
             normalized = (residual / normalize).abs()  # [B, K, C, h, w]
             pooled = (normalized * weights).sum(dim=2) / weights.sum(dim=2).clamp_min(1.0)
             residual_map = residual_map + pooled.detach()
@@ -375,6 +386,7 @@ def compute_measurement_energy(
         observations_used=len(frames),
         duplicates_skipped=duplicate_count,
         effective_samples=effective,
+        support_mask=support_mask,
         diagnostics={
             "observations": len(frames),
             "duplicates_skipped": duplicate_count,
@@ -396,17 +408,24 @@ class MeasurementModel(nn.Module):
         self.config = config
         measurement = config.measurement
         self.input_mode = measurement.input_mode
-        self.out_channels = 1 if self.input_mode == "bayer_cfa" else 3
+        self.cfa_planes = self.input_mode == "bayer_cfa" and measurement.cfa_planes
+        self.out_channels = (4 if self.cfa_planes else 1) if self.input_mode == "bayer_cfa" else 3
         width = config.stem_width
         self.stem = RAWStem(
-            in_channels=self.out_channels,
+            in_channels=1 if self.cfa_planes else self.out_channels,
             width=width,
             layers=config.stem_layers,
             kernel=config.cell_kernel,
             metadata_channels=4,
         )
+        projection_width = width * 4 if self.cfa_planes else width
+        self.field_projection = (
+            nn.Identity()
+            if projection_width == config.D
+            else nn.Conv2d(projection_width, config.D, 1)
+        )
         self.head = MeasurementHead(
-            width=width,
+            width=config.D,
             K=config.K,
             out_channels=self.out_channels,
             predict_variance=measurement.predict_variance,
@@ -423,7 +442,19 @@ class MeasurementModel(nn.Module):
         saturated: torch.Tensor,
         metadata: torch.Tensor | None,
     ) -> torch.Tensor:
-        return self.stem(values, valid, bad, saturated, metadata)
+        if self.cfa_planes:
+            batch, channels, height, width = values.shape
+            if metadata is None:
+                raise ValueError("physical CFA planes require explicit sampling metadata")
+            pieces = [
+                item.expand_as(values).reshape(batch * channels, 1, height, width)
+                for item in (values, valid, bad, saturated)
+            ]
+            phase = metadata.reshape(batch * channels, 4, 1, 1).expand(-1, -1, height, width)
+            features = self.stem(*pieces, phase).reshape(batch, -1, height, width)
+        else:
+            features = self.stem(values, valid, bad, saturated, metadata)
+        return self.field_projection(features)
 
     def predict(self, features: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """``features`` ``[B, V, K, D, h, w]`` -> mean/log-variance/geometry."""

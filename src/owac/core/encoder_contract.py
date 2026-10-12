@@ -133,6 +133,8 @@ class EmbodimentContext:
     camera_transform_available: Any = None
     task_tokens: Any = None
     task_mask: Any = None
+    hypothesis_prior: Any = None  # optional declared intervention, [B,K] nonnegative mass
+    hypothesis_prior_available: Any = None  # [B] bool; never inferred from evaluator truth
 
     @property
     def has_proprio(self) -> bool:

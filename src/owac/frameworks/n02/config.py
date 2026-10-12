@@ -20,6 +20,7 @@ class MeasurementConfig:
 
     input_mode: str = "rawvla_rgb3"
     cfa_pattern: str = "RGGB"
+    cfa_planes: bool = False  # True: physical 2x2 CFA planes; False: scalar analytic probe
     black_level: float = 0.0
     white_level: float = 255.0
     robust: str = "huber"  # huber | gaussian
@@ -90,7 +91,7 @@ class LossWeights:
     geometry_set: float = 1.0
     revision: float = 0.1
     diversity: float = 0.01
-    mixture: float = 0.0
+    mixture: float = 1.0
     collapse_penalty: float = 0.0
 
     def as_dict(self) -> dict[str, float]:

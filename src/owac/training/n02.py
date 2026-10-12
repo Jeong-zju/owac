@@ -13,7 +13,8 @@ calls the *same* :meth:`N02Encoder.step` used at inference, frame by frame, with
 the state detached at every boundary (the framework keeps a fresh graph per step,
 so no truncated-BPTT horizon has to be configured). The loss is
 
-``L = w_m * L_measurement + w_g * L_geometry_set + w_r * L_revision + w_d * L_diversity``
+``L = w_m*L_measurement + w_g*L_geometry_set + w_r*L_revision
+       + w_d*L_diversity + w_mix*L_mixture``
 
 with ``w_*`` read from ``config.loss_weights``. Every term is reported separately
 (unweighted and weighted) together with its effective sample count.
@@ -21,12 +22,11 @@ with ``w_*`` read from ``config.loss_weights``. Every term is reported separatel
 Normalisation, stated once and used for every term
 --------------------------------------------------
 * ``E_k`` is the encoder's own ``representation.measurement_energy`` for
-  candidate ``k``: the robust NLL summed over the *frozen* measurement set, where
-  each frame already contributes a mean over its valid samples. ``E_k`` therefore
-  grows with the number of retained observations, so every energy-based term is
-  divided by ``N_obs`` -- the number of unique observations currently in the
-  buffer, reported by the encoder as ``observation_history`` -- and is thus
-  **nats per retained observation**.
+  candidate ``k``: the robust NLL of the *frozen* current measurement, reduced
+  over its valid samples. Every energy-based term is divided by ``N_obs`` --
+  the number of likelihood observations scored in this step, reported as
+  ``likelihood_observations``. The causal dynamic path uses one current
+  likelihood and carries earlier evidence once through the frozen prior.
 * Each term is then a mean over the batch elements that are *valid* for it, and
   the batch-level term is the mean over the steps in which it was active. A term
   with no valid sample in a step is skipped for that step and the reason is
@@ -41,17 +41,19 @@ The four terms
     analytic: the generating hypothesis index). The hidden geometry enters the
     loss only -- it is never placed in the encoder input.
 ``L_geometry_set``
-    Set/mixture loss that requires *at least one* candidate to explain the
-    measurement: ``mean_b -logsumexp_k(-E_k / N_obs)``, the negative log evidence
-    of a uniform mixture over the K candidates (a soft min over candidates, so a
-    single good candidate is sufficient). It never forces a unique answer to
-    split: it only asks that some candidate be close.
+    Supervised binary geometry proxy: slots of even/odd parity predict -1/+1
+    through the geometry head. A single-hypothesis model predicts the current
+    truth proxy. This is a declared semantic surrogate, not full physical geometry.
+``L_mixture``
+    Measurement-only cross entropy: uniform before a distinguishing cue and on
+    unidentifiable episodes, otherwise mass on the true semantic slot parity.
+    Kept separate from geometry supervision.
 ``L_revision``
     Active only on the post-contradiction steps of independently declared
     sequences (a cue that refutes a misleading prior, or a declared scene
     change). It has two named parts, both means over the valid samples:
     ``wrong_weight = mean w_wrong`` (the refuted explanation must lose weight) and
-    ``wrong_energy_gap = mean relu(E_wrong - E_right) / N_obs`` (the refuted
+    ``wrong_energy_gap = mean relu(E_right - E_wrong) / N_obs`` (the refuted
     explanation must fit the measurements worse than the true one).
     ``L_revision = wrong_weight + wrong_energy_gap``.
 ``L_diversity``
@@ -59,8 +61,8 @@ The four terms
     penalises *collapse* of the K candidates (see
     :func:`owac.frameworks.n02.hypotheses.diversity_penalty`), so it does not push
     a single-explanation answer apart. It is active only when the multi-solution
-    condition holds: ``K`` exceeds the number of declared task values (2 here), or
-    the batch declares genuinely unidentifiable episodes.
+    condition holds: the current measurements remain ambiguous; visible distinguishing cues
+    disable this penalty even when K exceeds two.
 
 Sources
 -------
@@ -172,6 +174,9 @@ class StepBatch:
     source: str
     multi_solution: bool = False
     notes: dict[str, Any] = field(default_factory=dict)
+    contexts: list[EmbodimentContext] = field(default_factory=list)
+    identifiable_now: torch.Tensor | None = None  # evaluator/loss only, [T,B]
+    sample_xy: Any = None  # declared sampling descriptor
 
     @property
     def num_steps(self) -> int:
@@ -180,6 +185,24 @@ class StepBatch:
     @property
     def batch_size(self) -> int:
         return int(self.anchor.shape[1])
+
+
+def episode_prior_context(episodes: list[Any], K: int) -> EmbodimentContext:
+    """Only the declared prior enters the model; condition/truth stay in the loss."""
+    from owac.frameworks.n02.synthetic import values_for_task
+
+    mass = torch.ones(len(episodes), K)
+    available = torch.tensor([episode.prior.available for episode in episodes])
+    for index, episode in enumerate(episodes):
+        if not episode.prior.available or K == 1:
+            continue
+        value_index = values_for_task(episode.task).index(episode.prior.value)
+        p = 1.0 / (1.0 + math.exp(-episode.prior.log_odds))
+        for value in range(2):
+            slots = torch.arange(K) % 2 == value
+            if bool(slots.any()):
+                mass[index, slots] = (p if value == value_index else 1.0 - p) / int(slots.sum())
+    return EmbodimentContext(hypothesis_prior=mass, hypothesis_prior_available=available)
 
 
 # ----------------------------------------------------------------------------- data
@@ -266,7 +289,8 @@ def synthetic_batch(
         height=frame_size,
         width=frame_size,
         channels=3,
-        input_mode="rawvla_rgb3",
+        input_mode=config.measurement.input_mode,
+        cfa_pattern=config.measurement.cfa_pattern,
         noise_sigma=0.01,
         occlusion_schedule="linear",
         identifiability=0.8,
@@ -280,6 +304,7 @@ def synthetic_batch(
     identifiable_flags: list[bool] = []
     contradiction_steps: list[int] = []
     episodes = []
+    identifiable_now = torch.zeros(num_frames, batch_size, dtype=torch.bool)
     for index in range(batch_size):
         condition = PRIOR_CONDITIONS[int(rng.integers(0, len(PRIOR_CONDITIONS)))]
         episode_index = int(rng.integers(0, 1_000_000))
@@ -295,6 +320,7 @@ def synthetic_batch(
         episodes.append(episode)
         conditions.append(condition)
         identifiable_flags.append(bool(episode.identifiable))
+        identifiable_now[:, index] = torch.from_numpy(episode.cue_strength > 0.0)
         for step in range(num_frames):
             anchor = values_by_task.index(episode.value_over_time[step])
             anchors[step, index] = anchor
@@ -310,7 +336,7 @@ def synthetic_batch(
             start = -1
         contradiction_steps.append(start)
         if start >= 0:
-            post[start:, index] = True
+            post[start:, index] = identifiable_now[start:, index]
     values = [
         torch.from_numpy(
             np.stack([episodes[index].frames[step] for index in range(batch_size)])
@@ -319,10 +345,11 @@ def synthetic_batch(
     ]
     camera = CameraSpec(
         camera_id="synthetic_measurement",
-        height=frame_size,
-        width=frame_size,
-        channels=3,
-        input_mode="rawvla_rgb3",
+        height=values[0].shape[-2],
+        width=values[0].shape[-1],
+        channels=values[0].shape[1],
+        input_mode=config.measurement.input_mode,
+        cfa_pattern=config.measurement.cfa_pattern,
     )
     return StepBatch(
         values=values,
@@ -332,7 +359,10 @@ def synthetic_batch(
         post_contradiction=post,
         camera=camera,
         source="synthetic",
-        multi_solution=config.K > K_ANCHOR or not all(identifiable_flags),
+        multi_solution=not all(identifiable_flags),
+        contexts=[episode_prior_context(episodes, config.K)] * num_frames,
+        identifiable_now=identifiable_now,
+        sample_xy=torch.from_numpy(episodes[0].sample_xy),
         notes={
             "task": task,
             "prior_conditions": conditions,
@@ -453,6 +483,15 @@ def analytic_batch(
         post_contradiction=post,
         camera=camera,
         source="analytic",
+        contexts=[
+            EmbodimentContext(
+                hypothesis_prior=torch.tensor(
+                    [[odds[slot % 2] for slot in range(config.K)] for odds in priors]
+                )
+            )
+        ]
+        * num_frames,
+        identifiable_now=torch.arange(num_frames)[:, None].expand(-1, batch_size) >= delay,
         multi_solution=config.K > K_ANCHOR,
         notes={
             "geometry": "opening_direction (exact two-hypothesis reference)",
@@ -528,6 +567,7 @@ def step_terms(
     observations: int,
     diversity_active: bool,
     diversity_margin: float = DIVERSITY_MARGIN,
+    identifiable_now: torch.Tensor | None = None,
 ) -> dict[str, Any]:
     """All four loss terms for one encoder step, each with its valid-sample mask.
 
@@ -542,12 +582,19 @@ def step_terms(
     batch, num_candidates = weights.shape
     per_observation = max(1, int(observations))
     scaled = energy / float(per_observation)
-    index = torch.arange(batch)
+    index = torch.arange(batch, device=energy.device)
+    anchor, wrong, post_contradiction = (
+        anchor.to(energy.device),
+        wrong.to(energy.device),
+        post_contradiction.to(energy.device),
+    )
     result: dict[str, Any] = {"counts": {}, "skipped": {}, "observations": per_observation}
 
     valid_anchor = (anchor >= 0) & (anchor < num_candidates)
+    if num_candidates == 1:
+        valid_anchor = anchor >= 0
     if valid_anchor.any():
-        selected = scaled[index[valid_anchor], anchor[valid_anchor]]
+        selected = scaled[index[valid_anchor], anchor[valid_anchor].clamp_max(num_candidates - 1)]
         result["measurement"] = selected.mean()
         result["counts"]["measurement"] = int(valid_anchor.sum())
     else:
@@ -555,17 +602,33 @@ def step_terms(
         result["counts"]["measurement"] = 0
         result["skipped"]["measurement"] = "no batch element carries a declared anchor"
 
-    result["geometry_set"] = -torch.logsumexp(-scaled, dim=-1).mean()
+    # Binary geometry is a declared mechanism proxy (opening/handle side), not
+    # an alias for measurement reconstruction. Slots alternate the two possible
+    # geometries, including redundant particles when K>2.
+    slot_geometry = (torch.arange(num_candidates, device=energy.device) % 2) * 2.0 - 1.0
+    geometry_target = slot_geometry.expand_as(representation.geometry[..., 0])
+    if num_candidates == 1:
+        geometry_target = (anchor * 2.0 - 1.0)[:, None, None].expand_as(geometry_target)
+    result["geometry_set"] = F.mse_loss(representation.geometry[..., 0], geometry_target)
     result["counts"]["geometry_set"] = batch
     result["hard_min_energy"] = scaled.min(dim=-1).values.mean()
 
     valid_wrong = post_contradiction & (wrong >= 0) & (wrong < num_candidates) & valid_anchor
+    if num_candidates == 1:
+        valid_wrong = torch.zeros_like(valid_wrong)
     if valid_wrong.any():
-        wrong_weight = weights[index[valid_wrong], wrong[valid_wrong]]
-        gap = F.relu(
-            scaled[index[valid_wrong], wrong[valid_wrong]]
-            - scaled[index[valid_wrong], anchor[valid_wrong]]
-        )
+        slots = torch.arange(num_candidates, device=energy.device) % 2
+        wrong_set = slots[None, :] == wrong[:, None]
+        true_set = slots[None, :] == anchor[:, None]
+        wrong_weight = (weights * wrong_set).sum(-1)[valid_wrong]
+
+        def class_energy(selected):
+            return (
+                -torch.logsumexp((-scaled).masked_fill(~selected, -torch.inf), -1)
+                + selected.sum(-1).clamp_min(1).log()
+            )
+
+        gap = F.relu(class_energy(true_set) - class_energy(wrong_set))[valid_wrong]
         result["revision_wrong_weight"] = wrong_weight.mean()
         result["revision_energy_gap"] = gap.mean()
         result["revision"] = result["revision_wrong_weight"] + result["revision_energy_gap"]
@@ -578,6 +641,25 @@ def step_terms(
         result["skipped"]["revision"] = (
             "no post-contradiction sample with a declared competing candidate"
         )
+
+    evidence_logp = F.log_softmax(-scaled, dim=-1)
+    if identifiable_now is None:
+        identifiable_now = post_contradiction
+    identifiable_now = identifiable_now.to(energy.device)
+    slots = torch.arange(num_candidates, device=energy.device) % 2
+    target = (slots[None, :] == anchor[:, None]).to(energy.dtype)
+    if num_candidates == 1:
+        target = torch.ones_like(target)
+    target = target / target.sum(-1, keepdim=True).clamp_min(1)
+    target = torch.where(
+        identifiable_now[:, None], target, torch.full_like(target, 1.0 / num_candidates)
+    )
+    result["mixture"] = (
+        -(target[valid_anchor] * evidence_logp[valid_anchor]).sum(-1).mean()
+        if valid_anchor.any()
+        else None
+    )
+    result["counts"]["mixture"] = int(valid_anchor.sum())
 
     if diversity_active:
         distance, collapsed = diversity_penalty(representation.h)
@@ -607,6 +689,11 @@ def _frame(batch: StepBatch, step: int) -> MeasurementFrame:
         frame_ids=(step,),
         episode_ids=(0,),
         camera_id=batch.camera.camera_id,
+        sample_xy=batch.sample_xy,
+        metadata={"variance": 0.01**2, "variance_is_estimate": False}
+        if batch.source == "synthetic"
+        else {},
+        metadata_available={"variance": batch.source == "synthetic"},
     )
 
 
@@ -678,7 +765,7 @@ def _restore_rng(state: dict[str, Any], rng: np.random.Generator) -> None:
 
 def readout_latency(config: N02Config, representation: Any) -> dict[str, Any]:
     """Latency of the declared readouts on a real representation (measured, not modelled)."""
-    readout = TokenReadout(config.D, config.K, token_dim=config.token_dim)
+    readout = TokenReadout(representation.h.shape[3], representation.K, token_dim=config.token_dim)
     budget = min(config.tokens_per_camera, config.K * 16)
     budget -= budget % max(config.K, 1)
     budget = max(budget, config.K)
@@ -779,16 +866,28 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
 
-    model = build_encoder(config).to(device)
+    from owac.baselines.n02 import build_baseline
+
+    arm = (
+        checkpoint_payload.get("arm", "candidate")
+        if checkpoint_payload
+        else getattr(args, "arm", "candidate")
+    )
+    model = (build_encoder(config) if arm == "candidate" else build_baseline(arm, config)).to(
+        device
+    )
+    config = model.config
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(args.lr))
     weights = config.loss_weights
     if checkpoint_payload is not None:
         model.load_state_dict(checkpoint_payload["model"])
         optimizer.load_state_dict(checkpoint_payload["optimizer"])
         _restore_rng(checkpoint_payload["rng"], rng)
+        if "particle_rng" in checkpoint_payload:
+            model._generator.set_state(checkpoint_payload["particle_rng"])
 
     budget = ComputeBudget(max_updates=config.cycles, max_history=config.history)
-    diversity_active = bool(config.K > K_ANCHOR)
+    diversity_active = False
     step = started_at_step
     losses: list[float] = []
     terms_log: dict[str, list[float]] = {}
@@ -817,7 +916,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             optimizer.zero_grad(set_to_none=True)
             accumulators = {
                 name: TermAccumulator()
-                for name in ("measurement", "geometry_set", "revision", "diversity")
+                for name in ("measurement", "geometry_set", "revision", "diversity", "mixture")
             }
             step_tensors: dict[str, list[torch.Tensor]] = {name: [] for name in accumulators}
             state = model.init_state(batch.batch_size, batch.camera, device)
@@ -827,7 +926,8 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             for index in range(batch.num_steps):
                 frame = _frame(batch, index)
                 forward_start = time.perf_counter()
-                step_output = model.step(frame, EmbodimentContext(), state, budget)
+                context = batch.contexts[index] if batch.contexts else EmbodimentContext()
+                step_output = model.step(frame, context, state, budget)
                 encoder_times.append((time.perf_counter() - forward_start) * 1000.0)
                 state = model.detach_state(step_output.state)
                 representation = representation_from_output(step_output)
@@ -836,9 +936,14 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                     anchor=batch.anchor[index],
                     wrong=batch.wrong[index],
                     post_contradiction=batch.post_contradiction[index],
-                    observations=int(step_output.diagnostics["observation_history"]),
-                    diversity_active=diversity,
+                    observations=int(step_output.diagnostics.get("likelihood_observations", 1)),
+                    diversity_active=diversity
+                    if batch.identifiable_now is None
+                    else not bool(batch.identifiable_now[index].all()),
                     diversity_margin=float(args.diversity_margin),
+                    identifiable_now=None
+                    if batch.identifiable_now is None
+                    else batch.identifiable_now[index],
                 )
                 for name, accumulator in accumulators.items():
                     value = terms[name]
@@ -884,7 +989,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                 "observation_history": int(last_output.diagnostics["observation_history"]),
                 "cycles_run": int(last_output.diagnostics["cycles_run"]),
                 "state_bytes": int(last_output.cost.state_bytes or 0),
-                "top_weight": float(last_output.diagnostics["current_top_weight"]),
+                "top_weight": float(last_output.representation.weights.detach().max()),
                 "stop_reason": str(last_output.representation.diagnostics["stop_reason"]),
             }
             for name, accumulator in accumulators.items():
@@ -902,6 +1007,12 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                     "seed": seed,
                     "step": step,
                     "source": source,
+                    "arm": arm,
+                    **(
+                        {"particle_rng": model._generator.get_state()}
+                        if hasattr(model, "_generator")
+                        else {}
+                    ),
                     "rng": _rng_state(rng),
                     "torch_version": torch.__version__,
                     "run": {
@@ -948,6 +1059,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "seed": seed,
         "git_sha": _git_sha(),
         "source": source,
+        "arm": arm,
         "resumed_from": None if args.resume is None else str(Path(args.resume)),
         "first_step": started_at_step,
         "steps_run": len(losses),
@@ -982,7 +1094,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "resumed_run_shape": resumed_shape,
         "notes": notes
         + [
-            "loss terms are nats per retained observation, then per-valid-sample mean",
+            "measurement loss is nats per current likelihood; geometry is a binary proxy",
             "the hidden geometry is used in the loss only and is never an encoder input",
         ],
     }
@@ -1006,6 +1118,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="measurement source; 'auto' prefers the synthetic generator",
     )
     parser.add_argument("--steps", type=int, default=200, help="absolute total step count")
+    parser.add_argument(
+        "--arm",
+        default="candidate",
+        choices=(
+            "candidate",
+            "single_hypothesis",
+            "plain_recurrent",
+            "particle_filter",
+            "dense_global_recurrent",
+            "no_dependency_propagation",
+            "no_contradiction_reset",
+        ),
+    )
     parser.add_argument("--output", type=Path, default=Path("outputs/n02-smoke"))
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=2)

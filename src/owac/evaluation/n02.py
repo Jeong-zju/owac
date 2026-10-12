@@ -770,6 +770,8 @@ def _learned_synthetic_trace(
     model = checkpoint.model
     budget = ComputeBudget(max_updates=config.cycles, max_history=config.history)
     traces: dict[str, Any] = {}
+    from owac.training.n02 import episode_prior_context
+
     for name, keywords in scenarios.items():
         episode = generator.generate(num_frames=6, episode_index=1, seed=seed, **keywords)
         state = model.init_state(1, camera, device)
@@ -782,9 +784,13 @@ def _learned_synthetic_trace(
                     frame_ids=(index,),
                     episode_ids=(0,),
                     camera_id=camera.camera_id,
+                    metadata={"variance": generator.options.noise_sigma**2},
+                    metadata_available={"variance": True},
                 )
                 start = time.perf_counter()
-                output = model.step(frame, EmbodimentContext(), state, budget)
+                output = model.step(
+                    frame, episode_prior_context([episode], config.K), state, budget
+                )
                 latencies.append((time.perf_counter() - start) * 1000.0)
                 state = model.detach_state(output.state)
                 weights = output.representation.weights.mean(dim=1)[0]
@@ -840,8 +846,8 @@ def _learned_synthetic_trace(
         "note": (
             "diagnostics only: candidate-to-latent-value anchoring is a training-time "
             "convention and is not established by this trace, so no accuracy metric is "
-            "derived from it here. The exact reference trajectory above carries the "
-            "mechanism claim."
+            "derived from it here. The analytic trajectory validates its own update "
+            "law and cannot establish the learned encoder's mechanism claim."
         ),
     }
 

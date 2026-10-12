@@ -128,6 +128,8 @@ def recompute_energy(
     mean, log_variance, geometry = encoder.measurement.predict(representation.h.detach())
     prediction = _Prediction(mean, torch.exp(log_variance), geometry)
     buffer = output.state.diagnostics["_buffer"]
+    buffer = buffer.copy()
+    buffer._frames = buffer.frames[-1:]
     result = compute_measurement_energy(prediction, buffer, config.measurement, view_index=0)
     return result.energy
 
@@ -646,7 +648,7 @@ def test_fixed_prior_direction_is_analytic_when_the_field_cannot_move():
     The declared prior must move the score by ``-beta_prior * offset / temperature``
     and by nothing else; any leak into the measurement term would break this.
     """
-    config = ablation_config(tiny_config(cycles=1), contradiction_enabled=False)
+    config = ablation_config(tiny_config(cycles=1), contradiction_enabled=False, update_scale=0.0)
     torch.manual_seed(0)
     correct = build_baseline("fixed_correct_prior", config, level=1.0, favoured_index=0)
     torch.manual_seed(0)

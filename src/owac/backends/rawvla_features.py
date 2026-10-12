@@ -377,11 +377,13 @@ def _module_records(module: Any, prefix: str, *, trainable_only: bool = False) -
     for name, param in module.named_parameters():
         if trainable_only and not param.requires_grad:
             continue
+        pending = isinstance(param, torch.nn.parameter.UninitializedParameter)
         records.append(
             {
                 "name": f"{prefix}.{name}" if prefix else name,
-                "parameters": int(param.numel()),
-                "shape": list(param.shape),
+                "parameters": 0 if pending else int(param.numel()),
+                "shape": None if pending else list(param.shape),
+                "initialized": not pending,
                 "dtype": str(param.dtype),
                 "requires_grad": bool(param.requires_grad),
             }
@@ -864,6 +866,10 @@ class RawVLAFeaturePolicy:
                 "tensors": len(source_records),
                 "parameters": sum(record["parameters"] for record in source_records),
                 "names": [record["name"] for record in source_records],
+                "count_complete": all(record["initialized"] for record in source_records),
+                "uninitialized_names": [
+                    record["name"] for record in source_records if not record["initialized"]
+                ],
             },
             "frozen_backend_parameters": sum(record["parameters"] for record in frozen_records),
             "frozen_backend_tensors": len(frozen_records),
@@ -1196,6 +1202,7 @@ class RawVLAFeaturePolicy:
         time: Any,
         return_debug: bool,
         expect_encoder_call: bool,
+        action_mask: Any = None,
     ) -> dict:
         prefix = self.embed_prefix_from_visual_tokens(tokens, lang_tokens, lang_masks)
         state_tensor = self._prepare_state(state)
@@ -1222,7 +1229,17 @@ class RawVLAFeaturePolicy:
             adarms_cond=adarms_cond,
         )
         v_t = self.base.action_head.decode_action_velocity(suffix_out)
-        loss = torch.nn.functional.mse_loss(u_t, v_t, reduction="none").mean()
+        element_loss = torch.nn.functional.mse_loss(u_t, v_t, reduction="none")
+        if action_mask is None:
+            loss = element_loss.mean()
+        else:
+            valid = torch.as_tensor(action_mask, device=v_t.device, dtype=torch.bool)
+            if tuple(valid.shape) != tuple(v_t.shape[:2]) or not bool(valid.any()):
+                raise ValueError(
+                    f"action_mask must be nonempty [B,H]={tuple(v_t.shape[:2])}; "
+                    f"got shape={tuple(valid.shape)}, valid={int(valid.sum())}"
+                )
+            loss = (element_loss * valid.unsqueeze(-1)).sum() / (valid.sum() * v_t.shape[-1])
         out = {
             "v_t": v_t,
             "action_loss": loss,
@@ -1246,6 +1263,7 @@ class RawVLAFeaturePolicy:
         noise: Any = None,
         time: Any = None,
         return_debug: bool = False,
+        action_mask: Any = None,
     ) -> dict:
         """Training forward over an OWAC visual prefix (no ``no_grad`` anywhere)."""
         self._begin_run()
@@ -1259,6 +1277,7 @@ class RawVLAFeaturePolicy:
             time=time,
             return_debug=return_debug,
             expect_encoder_call=False,
+            action_mask=action_mask,
         )
 
     def forward(
@@ -1272,6 +1291,7 @@ class RawVLAFeaturePolicy:
         noise: Any = None,
         time: Any = None,
         return_debug: bool = False,
+        action_mask: Any = None,
     ) -> dict:
         """Training forward that runs the encoder hook once for this observation."""
         self._begin_run()
@@ -1286,6 +1306,7 @@ class RawVLAFeaturePolicy:
             time=time,
             return_debug=return_debug,
             expect_encoder_call=True,
+            action_mask=action_mask,
         )
 
     # -- inference forward ------------------------------------------------ #

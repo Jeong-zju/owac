@@ -104,7 +104,7 @@ def test_config_round_trip(name: str, tmp_path: Path) -> None:
         "geometry_set": 1.0,
         "revision": 0.1,
         "diversity": 0.01,
-        "mixture": 0.0,
+        "mixture": 1.0,
         "collapse_penalty": 0.0,
     }
     assert config.K > K_ANCHOR  # the shipped presets declare the multi-solution condition

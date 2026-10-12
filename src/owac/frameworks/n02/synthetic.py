@@ -1181,7 +1181,8 @@ class SyntheticGenerator:
         if prior_value is None:
             prior_value = value
         changed = bool(latent_rng.random() < self.options.staleness)
-        true_value = truth_value(task, prior_value, prior_condition, changed)
+        # A stale prior describes the scene BEFORE the change, not its inverse.
+        true_value = value
         geometry_before = self.sample_latent(
             task, true_value, side, seed=seed, episode_index=episode_index
         )
@@ -1371,7 +1372,18 @@ class SyntheticGenerator:
             "geometry_changed": change >= 0,
             "geometry_change_step": change,
             "prior_value": prior_value,
-            "prior_is_correct": prior_value == (value_over_time[-1]),
+            "prior_is_correct": (
+                None
+                if not prior.available or prior.log_odds == 0
+                else (
+                    prior_value
+                    if prior.log_odds > 0
+                    else values_for_task(task_spec.name)[
+                        1 - values_for_task(task_spec.name).index(prior_value)
+                    ]
+                )
+                == value_over_time[-1]
+            ),
             "prior_log_odds": prior.log_odds,
             "cue_angle_per_step": cue_angle.tolist(),
             "cue_angle_true": cue_angle_for_value(task_spec.name, geometry_before.value),

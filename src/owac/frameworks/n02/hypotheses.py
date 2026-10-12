@@ -51,7 +51,7 @@ NEIGHBOURHOOD: tuple[tuple[int, int], ...] = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 def neighbour_stack(value: torch.Tensor) -> torch.Tensor:
     """Stack the four 4-neighbourhood shifts of ``[..., h, w]`` as ``[..., h, w, 4]``."""
-    return torch.stack([shift(value, dy, dx) for dy, dx in NEIGHBOURHOOD], dim=-1)
+    return torch.stack([shift(value, -dy, -dx) for dy, dx in NEIGHBOURHOOD], dim=-1)
 
 
 def neighbour_validity(height: int, width: int, device: torch.device) -> torch.Tensor:

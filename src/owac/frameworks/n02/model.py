@@ -23,7 +23,7 @@ and runs:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import torch
@@ -69,9 +69,13 @@ def _as_bool_mask(mask: Any, like: torch.Tensor, channels: int) -> torch.Tensor:
     mask = mask.to(like.device)
     if mask.dtype != torch.bool:
         mask = mask > 0.5
-    if mask.shape[1] != channels:
-        mask = mask.expand(-1, channels, -1, -1)
-    return mask
+    if mask.ndim == 2:
+        mask = mask[None, None]
+    elif mask.ndim == 3:
+        mask = mask[:, None] if mask.shape[0] == like.shape[0] else mask[None]
+    if mask.ndim != 4:
+        raise ValueError("measurement masks must be [H,W], [B,H,W] or [B,C,H,W]")
+    return mask.expand_as(like)
 
 
 def _resample_mask(mask: torch.Tensor | None, grid: tuple[int, int]) -> torch.Tensor | None:
@@ -81,6 +85,30 @@ def _resample_mask(mask: torch.Tensor | None, grid: tuple[int, int]) -> torch.Te
     if mask.shape[-2:] == grid:
         return mask
     return F.interpolate(mask.float(), size=grid, mode="nearest") > 0.5
+
+
+def _masked_grid_measurement(values, observed, variance, grid):
+    """Average available samples only; propagate independent variance of the mean.
+
+    The exact adaptive-pooling bin size accounts for partial boundary bins. CFA
+    planes are pooled independently, without mixing filter responses.
+    """
+    safe = torch.where(observed, values, 0.0)
+    if values.shape[-2:] == grid:
+        return safe, observed, variance
+    height, width = values.shape[-2:]
+    rows = torch.arange(grid[0], device=values.device, dtype=torch.float32)
+    cols = torch.arange(grid[1], device=values.device, dtype=torch.float32)
+    row_size = torch.ceil((rows + 1) * height / grid[0]) - torch.floor(rows * height / grid[0])
+    col_size = torch.ceil((cols + 1) * width / grid[1]) - torch.floor(cols * width / grid[1])
+    area = row_size[:, None] * col_size[None, :]
+    fraction = F.adaptive_avg_pool2d(observed.float(), grid)
+    pooled = F.adaptive_avg_pool2d(safe, grid) / fraction.clamp_min(1e-12)
+    pooled_variance = None
+    if variance is not None:
+        pooled_variance = F.adaptive_avg_pool2d(torch.where(observed, variance, 0.0), grid)
+        pooled_variance = pooled_variance / (area * fraction.square()).clamp_min(1e-12)
+    return pooled, fraction > 0, pooled_variance
 
 
 @dataclass(slots=True)
@@ -123,7 +151,7 @@ class N02Encoder(nn.Module):
         self.initializer = HypothesisInitializer(
             config.D,
             config.K,
-            context_dim=0,
+            context_dim=config.K + 1,
             code_scale=0.5,
         )
         self.reviser = RevisionController(config, width=config.D)
@@ -177,6 +205,8 @@ class N02Encoder(nn.Module):
         second axis happens to have the same size as the batch can never be
         broadcast into a wrong shape.
         """
+        if batch_mask is None:
+            batch_mask = torch.ones(state.h.shape[0], device=state.h.device, dtype=torch.bool)
         if not torch.is_tensor(batch_mask):
             batch_mask = torch.as_tensor(batch_mask, device=state.h.device)
         batch_mask = batch_mask.to(state.h.device, torch.bool).view(-1)
@@ -199,7 +229,7 @@ class N02Encoder(nn.Module):
             return torch.where(view, tensor, default)
 
         zeros = torch.zeros_like(state.measurement_energy)
-        return HypothesisState(
+        result = HypothesisState(
             h=keep(state.h, torch.zeros_like(state.h)),
             measurement_energy=keep(state.measurement_energy, zeros),
             weights=keep(state.weights, torch.full_like(state.weights, 1.0 / self.config.K)),
@@ -210,11 +240,35 @@ class N02Encoder(nn.Module):
             geometry=keep(state.geometry, torch.zeros_like(state.geometry)),
             age=keep(state.age, zeros),
             times_reset=keep(state.times_reset, zeros),
-            support=None,
+            support=None
+            if state.support is None
+            else keep(state.support, torch.zeros_like(state.support)),
             dependency_edge=state.dependency_edge,
             dependency_valid=state.dependency_valid,
-            step_index=0,
+            step_index=0 if bool(batch_mask.all()) else state.step_index,
         )
+        result.diagnostics = dict(state.diagnostics)
+        if "_buffer" in result.diagnostics:
+            result.diagnostics["_buffer"] = result.diagnostics["_buffer"].clear_batch(batch_mask)
+        for key in ("_initial_prior",):
+            if key in result.diagnostics:
+                value = result.diagnostics[key]
+                result.diagnostics[key] = torch.where(
+                    batch_mask[:, None, None], torch.zeros_like(value), value
+                )
+        result.revision = replace(state.revision)
+        for name in (
+            "residual_ema",
+            "contradiction",
+            "contradiction_prev",
+            "propagated",
+            "priority",
+            "last_reset",
+        ):
+            value = getattr(result.revision, name)
+            if value is not None:
+                setattr(result.revision, name, keep(value, torch.zeros_like(value)))
+        return result
 
     def detach_state(self, state: HypothesisState) -> HypothesisState:
         return state.detach()
@@ -224,24 +278,54 @@ class N02Encoder(nn.Module):
         self,
         frame: MeasurementFrame,
         context: EmbodimentContext,
-        state: HypothesisState,
+        state: HypothesisState | None,
         budget: ComputeBudget,
     ) -> EncoderOutput:
         """Consume one frame and return the revised field."""
+        if state is None:
+            source = torch.as_tensor(frame.values)
+            state = self.init_state(
+                source.shape[0] if source.ndim == 4 else 1,
+                CameraSpec(
+                    camera_id=frame.camera_id,
+                    height=source.shape[-2],
+                    width=source.shape[-1],
+                    channels=source.shape[-3] if source.ndim >= 3 else 1,
+                    input_mode=self.config.measurement.input_mode,
+                    cfa_pattern=self.config.measurement.cfa_pattern,
+                ),
+                next(self.parameters()).device,
+            )
+        state = replace(
+            state,
+            diagnostics=dict(state.diagnostics),
+            revision=replace(state.revision),
+            dependency_edge=None,
+        )
         values, valid, bad, saturated = self._frame_tensors(frame, state)
         # The mechanism operates on the grid fixed by the camera spec at
         # ``init_state``, not on the sensor resolution: the field, the dependency
         # graph and the position codes all live on that grid, and the buffer
         # stores the same grid so every later energy pass sees one resolution.
         grid = state.h.shape[-2:]
-        if values.shape[-2:] != grid:
-            values = F.interpolate(values, size=grid, mode="area")
-        # Every mask that will be compared against a grid-resolution tensor must be
-        # moved to the grid as well. Fixing only the channel count left the spatial
-        # axes at sensor resolution and crashed on the first energy pass.
-        valid = _resample_mask(valid, grid)
-        bad = _resample_mask(bad, grid)
-        saturated = _resample_mask(saturated, grid)
+        supplied = None
+        if frame.metadata_available.get("variance", False) and "variance" in frame.metadata:
+            supplied = torch.as_tensor(
+                frame.metadata["variance"], device=values.device, dtype=torch.float32
+            )
+            if supplied.numel() == values.shape[0]:
+                supplied = supplied.reshape(-1, 1, 1, 1)
+            supplied = supplied.expand_as(values)
+            if not bool((torch.isfinite(supplied) & (supplied > 0)).all()):
+                raise ValueError("declared sensor variance must be finite and positive")
+        observed = valid & ~bad
+        if not self.config.measurement.saturation_is_observation:
+            observed = observed & ~saturated
+        values, valid, supplied = _masked_grid_measurement(values, observed, supplied, grid)
+        # A partially observed bin remains valid. Bad/saturated samples have
+        # already been excluded from its mean and cannot invalidate its support.
+        bad = ~valid & (F.adaptive_max_pool2d(bad.float(), grid) > 0)
+        saturated = ~valid & (F.adaptive_max_pool2d(saturated.float(), grid) > 0)
         variance, calibrated = estimate_variance(
             values,
             shot_scale=self.config.measurement.shot_scale,
@@ -259,14 +343,48 @@ class N02Encoder(nn.Module):
             episode_id=self._episode_id(frame),
             timestamp=None if frame.timestamp is None else float(frame.timestamp),
         )
+        entry.valid_mask, entry.bad_mask, entry.saturated_mask = valid, bad, saturated
+        entry.batch_identities = tuple(
+            (
+                frame.camera_id,
+                frame.frame_ids[min(index, len(frame.frame_ids) - 1)] if frame.frame_ids else -1,
+                frame.episode_ids[min(index, len(frame.episode_ids) - 1)]
+                if frame.episode_ids
+                else None,
+            )
+            for index in range(values.shape[0])
+        )
+        if supplied is not None:
+            entry.variance = supplied.clamp_min(self.config.measurement.variance_floor)
+            entry.metadata["variance_is_estimate"] = bool(
+                frame.metadata.get("variance_is_estimate", False)
+            )
+            calibrated = not entry.metadata["variance_is_estimate"]
         buffer = self._buffer(state, budget, values.device)
-        is_new = frame.is_new_measurement
+        entry.new_mask = (
+            torch.ones(values.shape[0], device=values.device, dtype=torch.bool)
+            if frame.new_measurement is None
+            else torch.as_tensor(
+                frame.new_measurement, device=values.device, dtype=torch.bool
+            ).expand(values.shape[0])
+        )
+        is_new = bool(entry.new_mask.any())
         added = buffer.add(entry) if is_new else False
         if not is_new:
             buffer.rejected_count += 1
 
-        return self._solve(
-            buffer,
+        # Dynamic v1 uses only the current likelihood; retained history is an
+        # audit buffer, not a second copy of evidence already carried by the prior.
+        active = buffer.copy()
+        if active.frames:
+            active._frames = active.frames[-1:]
+        else:
+            # Window padding can precede the first fresh frame. It contributes
+            # no likelihood, but still supplies a shape for the solver.
+            entry.valid_mask = torch.zeros_like(values, dtype=torch.bool)
+            active._frames = [entry]
+        result = self._solve(
+            active,
             state,
             context,
             values=values,
@@ -277,7 +395,17 @@ class N02Encoder(nn.Module):
             calibrated=calibrated,
             added=added,
             is_new=is_new,
+            sampling_metadata=self._sampling_metadata(frame, values),
         )
+        result.state.diagnostics["_buffer"] = buffer
+        result.representation.diagnostics["camera_id"] = frame.camera_id
+        result.diagnostics["observation_history"] = len(buffer)
+        result.diagnostics["likelihood_observations"] = int(
+            bool(active.frames) and bool(active.frames[-1].valid_mask.any())
+        )
+        result.cost.history_len = len(buffer)
+        result.cost.state_bytes = result.state.state_bytes() + state_tensor_bytes(buffer.frames)
+        return result
 
     def _buffer(
         self, state: HypothesisState, budget: ComputeBudget, device: torch.device
@@ -287,7 +415,7 @@ class N02Encoder(nn.Module):
         if buffer is None or buffer.max_history != history:
             buffer = MeasurementBuffer(history, mask_history=True, device=device)
             state.diagnostics["_buffer"] = buffer
-        return buffer
+        return buffer.copy()
 
     def _frame_tensors(
         self, frame: MeasurementFrame, state: HypothesisState
@@ -312,12 +440,15 @@ class N02Encoder(nn.Module):
             valid = torch.ones_like(values, dtype=torch.bool)
         bad = _as_bool_mask(frame.bad_mask, values, channels)
         saturated = _as_bool_mask(frame.saturated_mask, values, channels)
+        finite = torch.isfinite(values)
+        valid = valid & finite
+        bad = bad | ~finite
         return values, valid, bad, saturated
 
     @staticmethod
     def _frame_id(frame: MeasurementFrame) -> int:
         if frame.frame_ids:
-            return int(frame.frame_ids[0])
+            return frame.frame_ids[0]
         if "frame_id" in frame.metadata:
             return int(frame.metadata["frame_id"])
         return -1
@@ -325,7 +456,7 @@ class N02Encoder(nn.Module):
     @staticmethod
     def _episode_id(frame: MeasurementFrame) -> int | None:
         if frame.episode_ids:
-            return int(frame.episode_ids[0])
+            return frame.episode_ids[0]
         return None
 
     # ----------------------------------------------------------------- solver
@@ -343,6 +474,7 @@ class N02Encoder(nn.Module):
         calibrated: bool,
         added: bool,
         is_new: bool,
+        sampling_metadata: torch.Tensor | None = None,
     ) -> EncoderOutput:
         config = self.config
         diagnostics = StepDiagnostics()
@@ -358,26 +490,54 @@ class N02Encoder(nn.Module):
             if last_mask is not None and torch.is_tensor(last_mask):
                 mask_latest = _as_bool_mask(last_mask, latest, latest.shape[1])
                 mask_latest = _resample_mask(mask_latest, latest.shape[-2:])
-        bad_latest = torch.zeros_like(latest, dtype=torch.bool)
-        sat_latest = torch.zeros_like(latest, dtype=torch.bool)
-        features = self.measurement(latest, mask_latest, bad_latest, sat_latest, None)
+        bad_latest, sat_latest = bad, saturated
+        features = self.measurement(latest, mask_latest, bad_latest, sat_latest, sampling_metadata)
         basis = features.reshape(batch, 1, *features.shape[1:])
         if state.h.shape[0] != batch:
             raise ValueError(
                 f"state batch {state.h.shape[0]} does not match frame batch {batch}; "
                 "call reset for finished episodes instead of resizing"
             )
-        field = self._ensure_field(state, basis)
+        prior_mass, available = self._declared_prior(context, batch, values.device)
+        prior_context = torch.cat([prior_mass, available[:, None].to(values.dtype)], dim=-1)
+        if config.prior_mode == "fixed_odds":
+            prior_context = torch.cat(
+                [
+                    torch.full_like(prior_mass, 1.0 / config.K),
+                    torch.zeros_like(available[:, None], dtype=values.dtype),
+                ],
+                dim=-1,
+            )
+        field = self._ensure_field(state, basis, prior_context)
+        # A single causal transition incorporates the new measurement features.
+        # Internal cycles and repeated IDs do not execute this transition again.
+        if added and config.revision.update_scale != 0:
+            fresh = self.initializer(basis[:, 0], context=prior_context).unsqueeze(1)
+            cold = (state.age.sum(dim=-1) == 0).reshape(batch, 1, 1, 1, 1, 1)
+            accepted = (
+                buffer.last_added
+                if buffer.last_added is not None
+                else torch.ones(batch, device=values.device, dtype=torch.bool)
+            )
+            transitioned = torch.where(cold, fresh, 0.5 * field + 0.5 * fresh)
+            field = torch.where(accepted.reshape(batch, 1, 1, 1, 1, 1), transitioned, field)
         # The field is pinned to the grid declared at ``init_state``. A candidate
         # whose shape drifts may not silently resize the dependency graph or the
         # measurement comparison, so it is brought back explicitly.
         field = self._pin_grid(field, grid)
         dependency_valid = self._ensure_dependency(state, field)
-        cold_start = (
-            state.step_index == 0
-            or not torch.is_tensor(state.h)
-            or float(state.h.abs().sum().item()) == 0.0
-        )
+        cold_start = state.age.sum(dim=(1, 2)) == 0
+        beta_prior = self._bounded_beta_prior()
+        first = state.age.sum(dim=-1, keepdim=True) == 0
+        declared_energy = -config.temperature * prior_mass.clamp_min(1e-12).log().unsqueeze(1)
+        if added:
+            previous = -config.temperature * state.weights.clamp_min(1e-12).log() / beta_prior
+            frozen_prior = torch.where(first, declared_energy, previous)
+            if buffer.last_added is not None:
+                frozen_prior = torch.where(buffer.last_added[:, None, None], frozen_prior, previous)
+        else:
+            frozen_prior = state.prior_energy.detach()
+        state = replace(state, prior_energy=frozen_prior)
         max_cycles = max(1, min(int(budget.max_updates), int(config.cycles)))
         previous_energy = None
         stop_reason = "max_iterations"
@@ -392,7 +552,7 @@ class N02Encoder(nn.Module):
                 prediction, buffer, config.measurement, view_index=0
             )
             measurement_scalar = self._as_view_scalar(energy_result.energy, field.shape[1])
-            prior_energy = self._prior_energy(state, cold_start=cold_start)
+            prior_energy = frozen_prior
             relation_energy = self._relation_energy(field)
             beta_prior = self._bounded_beta_prior()
             total = (
@@ -416,7 +576,8 @@ class N02Encoder(nn.Module):
                 location_code=self._position_code(field),
                 dependency_valid=dependency_valid,
                 iteration=iteration,
-                cold_start=cold_start and iteration == 0,
+                cold_start=cold_start if iteration == 0 else torch.zeros_like(cold_start),
+                measurement_feature=basis,
             )
             diagnostics.contradiction_trace.append(revision.contradicted_fraction)
             diagnostics.revision_trace.append(dict(revision.trace))
@@ -448,7 +609,7 @@ class N02Encoder(nn.Module):
         energy_result = compute_measurement_energy(
             prediction, buffer, config.measurement, view_index=0
         )
-        prior_energy = self._prior_energy(state, cold_start=cold_start)
+        prior_energy = frozen_prior
         relation_energy = self._relation_energy(field)
         beta_prior = self._bounded_beta_prior()
         measurement_scalar = self._as_view_scalar(energy_result.energy, field.shape[1])
@@ -470,7 +631,14 @@ class N02Encoder(nn.Module):
             total_energy=total.detach(),
             logits=logits.detach(),
             geometry=geometry.detach(),
-            age=(state.age + 1.0).detach(),
+            age=(
+                state.age
+                + (
+                    buffer.last_added
+                    if added and buffer.last_added is not None
+                    else torch.zeros(batch, device=values.device)
+                ).reshape(batch, 1, 1)
+            ).detach(),
             times_reset=(
                 state.times_reset + revision.last_reset.to(torch.float32).sum(dim=(-1, -2))
                 if revision.last_reset is not None
@@ -515,9 +683,10 @@ class N02Encoder(nn.Module):
                 "diversity": float(diversity.item()),
                 "collapsed_fraction": float(collapsed.item()),
                 "deterministic_stop": stop_reason,
+                "history_scheme": "current_likelihood_recursive_prior",
             },
         )
-        state_bytes = new_state.state_bytes() + state_tensor_bytes(buffer)
+        state_bytes = new_state.state_bytes() + state_tensor_bytes(buffer.frames)
         cost = CostRecord(
             updates=cycles_run,
             history_len=len(buffer),
@@ -551,14 +720,60 @@ class N02Encoder(nn.Module):
         )
 
     # -------------------------------------------------------------- internals
-    def _ensure_field(self, state: HypothesisState, basis: torch.Tensor) -> torch.Tensor:
+    def _sampling_metadata(self, frame: MeasurementFrame, values: torch.Tensor):
+        if not self.measurement.cfa_planes:
+            return None
+        if frame.sample_xy is None:
+            raise ValueError("CFA planes require sample_xy; four channels are not co-sited colours")
+        xy = torch.as_tensor(frame.sample_xy, device=values.device, dtype=torch.float32)
+        if xy.shape in {(4, 2, 2), (4, 3, 2)}:  # origin, step, optional reference
+            if not bool(torch.all(xy[:, 1] == 2)):
+                raise ValueError("CFA v0 expects declared plane sampling step (2,2)")
+            xy = xy[:, 0].unsqueeze(0)
+        elif xy.shape == (4, 2):
+            xy = xy.unsqueeze(0)
+        if xy.shape[-2:] != (4, 2):
+            raise ValueError("CFA sample_xy must provide four plane origins")
+        # Both adapters reorder to (R,G1,G2,B); phase lives in actual origins.
+        response = torch.tensor([0.0, 1.0, 1.0, 2.0], device=values.device)
+        metadata = torch.zeros(values.shape[0], 4, 4, device=values.device)
+        metadata[..., :2] = xy.expand(values.shape[0], -1, -1)
+        metadata[..., 2] = response
+        metadata[..., 3] = 1
+        return metadata
+
+    def _declared_prior(self, context: EmbodimentContext, batch: int, device: Any):
+        uniform = torch.full((batch, self.config.K), 1.0 / self.config.K, device=device)
+        if context.hypothesis_prior is None:
+            return uniform, torch.zeros(batch, device=device, dtype=torch.bool)
+        prior = torch.as_tensor(context.hypothesis_prior, device=device, dtype=torch.float32)
+        if (
+            prior.shape != uniform.shape
+            or not bool(torch.isfinite(prior).all())
+            or bool((prior < 0).any())
+            or bool((prior.sum(-1) <= 0).any())
+        ):
+            raise ValueError("declared hypothesis_prior must be finite nonnegative [B,K] mass")
+        available = (
+            torch.ones(batch, device=device, dtype=torch.bool)
+            if context.hypothesis_prior_available is None
+            else torch.as_tensor(
+                context.hypothesis_prior_available, device=device, dtype=torch.bool
+            ).expand(batch)
+        )
+        prior = prior / prior.sum(-1, keepdim=True)
+        return torch.where(available[:, None], prior, uniform), available
+
+    def _ensure_field(
+        self, state: HypothesisState, basis: torch.Tensor, context: torch.Tensor | None = None
+    ) -> torch.Tensor:
         if state.h.shape[0] != basis.shape[0]:
             raise ValueError("field batch mismatch")
-        if float(state.h.abs().sum().item()) > 0.0:
-            return state.h
         flat = basis.reshape(basis.shape[0] * basis.shape[1], *basis.shape[2:])
-        initialised = self.initializer(flat)
-        return initialised.reshape(basis.shape[0], basis.shape[1], *initialised.shape[1:])
+        initialised = self.initializer(flat, context=context)
+        initialised = initialised.reshape(basis.shape[0], basis.shape[1], *initialised.shape[1:])
+        cold = (state.age.sum(dim=-1) == 0).reshape(basis.shape[0], 1, 1, 1, 1, 1)
+        return torch.where(cold, initialised, state.h)
 
     @staticmethod
     def _pin_grid(field: torch.Tensor, grid: tuple[int, int]) -> torch.Tensor:
@@ -678,10 +893,9 @@ class N02Encoder(nn.Module):
         from owac.frameworks.n02.hypotheses import neighbour_stack
 
         neighbours = neighbour_stack(field)  # [B,V,K,h,w,4,W] after move
-        neighbours = neighbours.movedim(-1, -2)  # [B,V,K,h,w,W,4]
         mean_neighbour = neighbours.mean(dim=-1)
-        difference = (field - mean_neighbour).pow(2).mean(dim=(-1, -2, -3, -4))
-        return difference.unsqueeze(1)
+        difference = (field - mean_neighbour).pow(2).mean(dim=(-1, -2, -3))
+        return difference
 
     def _residual_feature(self, energy_result: EnergyResult, field: torch.Tensor) -> torch.Tensor:
         """``[B,V,K,h,w]`` normalised residual evidence for the revision cell.
@@ -755,6 +969,8 @@ class N02Encoder(nn.Module):
 
     @staticmethod
     def _support_map(energy_result: EnergyResult, field: torch.Tensor) -> torch.Tensor:
+        if energy_result.support_mask is not None:
+            return energy_result.support_mask.unsqueeze(1).to(field.dtype)
         residual = energy_result.normalized_residual
         if residual.dim() == 3:
             residual = residual.unsqueeze(1)
@@ -776,8 +992,7 @@ class _Prediction:
 
 def _with_h(state: HypothesisState, field: torch.Tensor) -> HypothesisState:
     """Return the same bookkeeping state with a new field tensor attached."""
-    state.h = field
-    return state
+    return replace(state, h=field)
 
 
 def build_encoder(config: N02Config) -> N02Encoder:
