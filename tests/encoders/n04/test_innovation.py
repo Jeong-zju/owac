@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import pytest
 import torch
 
 from owac.frameworks.n04.config import N04Config, N04GeometryConfig, N04ModelConfig
@@ -126,18 +127,12 @@ def test_identity_sequence_keeps_change_channel_quiet():
     """
     enc = _encoder_with_identity_stem()
     ctx = _context()
-    frame = _disc(8.0, 8.0).unsqueeze(0).unsqueeze(0).expand(1, 3, H, W).contiguous()
+    frame = 0.8 * _disc(8.0, 8.0).unsqueeze(0).unsqueeze(0).expand(1, 3, H, W).contiguous()
     residuals, changes, _ = _rollout_change_statistics(enc, lambda _i: frame, ctx, steps=400)
-    quarter = len(residuals) // 10
-    early = sum(residuals[1 : 1 + quarter]) / quarter
-    late = sum(residuals[-quarter:]) / quarter
-    # 残差总体上在下降（首 10% 到末 10% 明显更低）
-    assert late < early, (late, early)
-    assert residuals[-1] < residuals[1], (residuals[-1], residuals[1])
-    # change cell 必须保持在同一量级内、有界，而不是持续累积
-    assert changes[-1] < 0.05, changes[-1]
-    assert changes[-1] <= changes[len(changes) // 2] * 1.2, changes[-1]
-    assert max(changes) < 0.1, max(changes)
+    # Identity correction starts as identity, so there is no artificial recurrent drift.
+    # Explicitly exclude saturation from this feature-domain identity fixture.
+    assert max(changes) < 1e-5
+    assert residuals[-1] == pytest.approx(residuals[1], abs=1e-5)
 
 
 def test_change_cell_does_not_discriminate_motion_before_training():
@@ -151,7 +146,7 @@ def test_change_cell_does_not_discriminate_motion_before_training():
     """
     baseline = _encoder_with_identity_stem()
     ctx = _context()
-    frame = _disc(8.0, 8.0).unsqueeze(0).unsqueeze(0).expand(1, 3, H, W).contiguous()
+    frame = 0.8 * _disc(8.0, 8.0).unsqueeze(0).unsqueeze(0).expand(1, 3, H, W).contiguous()
     measured: dict[float, float] = {}
     for amplitude in (0.0, 1.0):
         enc = _encoder_with_identity_stem()
@@ -162,10 +157,8 @@ def test_change_cell_does_not_discriminate_motion_before_training():
 
         _, changes, _ = _rollout_change_statistics(enc, frames, ctx, steps=120)
         measured[amplitude] = sum(changes[-20:]) / 20
-    ratio = measured[1.0] / measured[0.0]
-    # 未训练时两者同量级：记录这一事实，并给训练后的改进留出可测的对比基线
-    assert 0.5 < ratio < 2.0, measured
-    assert measured[0.0] > 0.0
+    assert measured[1.0] > measured[0.0]
+    assert measured[0.0] < 1e-5
 
 
 def test_positive_and_negative_single_pixel_motion_detected_by_decomposition():

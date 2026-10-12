@@ -23,6 +23,7 @@ RoboTwin
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -152,6 +153,33 @@ def _to_chw(array: np.ndarray) -> torch.Tensor:
     return tensor.to(torch.float32)
 
 
+def npz_metadata(npz):
+    if "metadata_json" not in npz.files:
+        return {}
+    raw = npz["metadata_json"].item()
+    return json.loads(raw.decode() if isinstance(raw, bytes) else str(raw))
+
+
+def source_identity(path, metadata=None):
+    """Group all photometric/RGB/RAW variants of one source before splitting."""
+    path = Path(path)
+    if not path.exists():
+        return path.stem
+    if metadata is None:
+        with np.load(path, allow_pickle=False) as npz:
+            metadata = npz_metadata(npz)
+    if metadata.get("dataset_name") and metadata.get("demo_key") and metadata.get("task_name"):
+        return ":".join(str(metadata[k]) for k in ("dataset_name", "task_name", "demo_key"))
+    if metadata.get("task_name") and "dataset_seed" in metadata:
+        return f"robotwin:{metadata['task_name']}:{metadata['dataset_seed']}"
+    if metadata.get("source_episode_id"):
+        return str(metadata["source_episode_id"])
+    # Conservative fallback for fixture layouts; variants share their episode directory.
+    if path.parent.name.startswith("episode_"):
+        return f"{path.parent.parent.name}:{path.parent.name}"
+    return path.stem
+
+
 class RawVLASequenceLoader:
     """把 RawVLA-Bench NPZ 读成 `RawVLASequence`。
 
@@ -175,6 +203,8 @@ class RawVLASequenceLoader:
         if not path.exists():
             raise FileNotFoundError(f"找不到 NPZ 文件：{path}")
         with np.load(path, allow_pickle=False) as npz:
+            if self.require_executed_action:
+                raise ValueError("该缓存没有可靠的已执行动作记录；不能使用未来监督动作")
             if self.suite == "libero":
                 return self._load_libero(npz, path, episode_id)
             return self._load_robotwin(npz, path, episode_id)
@@ -186,11 +216,15 @@ class RawVLASequenceLoader:
         measurements = {
             name: _to_chw(npz[key]) for name, key in LIBERO_CAMERA_KEYS.items() if key in npz.files
         }
-        length = min(m.shape[0] for m in measurements.values())
+        length = next(iter(measurements.values())).shape[0]
+        if any(m.shape[0] != length for m in measurements.values()):
+            raise ValueError("camera frame counts do not align")
+        metadata = npz_metadata(npz)
         _require(npz, ("robot_states", "actions"), where="LIBERO")
         proprio = torch.as_tensor(np.asarray(npz["robot_states"], dtype=np.float32))
-        if proprio.shape[0] != length:
-            proprio = proprio[:length]
+        if proprio.shape[0] < length:
+            raise ValueError("proprio frames shorter than measurements")
+        proprio = proprio[:length]
         if proprio.shape[-1] != LIBERO_STATE_DIM:
             raise ValueError(
                 f"LIBERO robot_states 期望 {LIBERO_STATE_DIM} 维，实际 {proprio.shape[-1]}"
@@ -208,8 +242,8 @@ class RawVLASequenceLoader:
             proprio=True,
             executed_action=False,
             timestamp=False,
-            noise_model=False,
-            exposure=False,
+            noise_model="raw_sensor_shot_noise" in metadata,
+            exposure="lighting_ev" in metadata,
             intrinsics=False,
             pose=False,
         )
@@ -221,13 +255,14 @@ class RawVLASequenceLoader:
             supervised_action=supervised,
             supervised_action_mask=mask,
             frame_ids=torch.arange(length),
-            episode_id=episode_id or path.stem,
+            episode_id=episode_id or source_identity(path, metadata),
             camera_ids=tuple(measurements.keys()),
             new_measurement=torch.ones(length, dtype=torch.bool),
             time_unit="frame",
             availability=availability,
             value_range=value_range,
             metadata={
+                **metadata,
                 "source": str(path),
                 "raw_dtype": "uint8",
                 "note": "三通道 uint8 pseudo-RAW（RGB 逆处理），不是原始 Bayer CFA",
@@ -245,10 +280,15 @@ class RawVLASequenceLoader:
             for name, key in ROBOTWIN_CAMERA_KEYS.items()
             if key in npz.files
         }
-        length = min(m.shape[0] for m in measurements.values())
+        length = next(iter(measurements.values())).shape[0]
+        if any(m.shape[0] != length for m in measurements.values()):
+            raise ValueError("camera frame counts do not align")
+        metadata = npz_metadata(npz)
         _require(npz, ("actions",), where="RoboTwin")
         actions_all = torch.as_tensor(np.asarray(npz["actions"], dtype=np.float32))
         #: 作者缓存协议：``actions[t]`` 是**当前** 14 维关节状态，监督从 ``actions[t+1]`` 起。
+        if actions_all.shape[0] < length:
+            raise ValueError("current joint state frames shorter than measurements")
         proprio = actions_all[:length]
         if proprio.shape[-1] != ROBOTWIN_JOINT_DIM:
             raise ValueError(
@@ -266,8 +306,8 @@ class RawVLASequenceLoader:
             #: 缓存状态映射只用于复用作者数据协议：这里没有“已执行控制输入”的记录。
             executed_action=False,
             timestamp=False,
-            noise_model=False,
-            exposure=False,
+            noise_model="raw_sensor_shot_noise" in metadata,
+            exposure="lighting_ev" in metadata,
             intrinsics=False,
             pose=False,
         )
@@ -281,13 +321,14 @@ class RawVLASequenceLoader:
             supervised_action=supervised,
             supervised_action_mask=mask,
             frame_ids=torch.arange(length),
-            episode_id=episode_id or path.stem,
+            episode_id=episode_id or source_identity(path, metadata),
             camera_ids=tuple(measurements.keys()),
             new_measurement=torch.ones(length, dtype=torch.bool),
             time_unit="frame",
             availability=availability,
             value_range=value_range,
             metadata={
+                **metadata,
                 "source": str(path),
                 "raw_dtype": "float32",
                 "note": "三通道 float32 HDR-derived RAW；范围依作者元数据，不无条件除以 255",
@@ -326,9 +367,8 @@ class RawVLASequenceLoader:
             index = torch.arange(start, end)
             new_measurement = torch.ones(end - start, dtype=torch.bool)
             frame_ids = sequence.frame_ids[index]
-            if start == 0 and burn_in > 0:
-                #: 前 ``burn_in`` 帧只用于建立状态：标记为“不是新测量”。
-                new_measurement[: min(burn_in, end - start)] = False
+            # Burn-in contains real measurements. Loss exclusion is independent.
+            loss_mask = torch.arange(end - start) >= burn_in
             yield {
                 "start": start,
                 "index": index,
@@ -343,9 +383,11 @@ class RawVLASequenceLoader:
                 "supervised_action_mask": sequence.supervised_action_mask[index],
                 "frame_ids": frame_ids,
                 "new_measurement": new_measurement,
+                "loss_mask": loss_mask,
                 "time_unit": sequence.time_unit,
                 "availability": sequence.availability,
                 "episode_id": sequence.episode_id,
+                "metadata": sequence.metadata,
             }
 
 

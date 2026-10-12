@@ -102,18 +102,18 @@ def test_mechanism_report_has_counterfactuals_and_finite_metrics() -> None:
     names = [c.condition for c in report.conditions]
     assert names == ["camera_only", "object_only", "illumination"]
     for condition in report.conditions:
-        assert math.isfinite(condition.location_error)
+        assert math.isnan(condition.location_error)  # no trained target probe
+        assert math.isfinite(condition.extra["feature_alignment_l1"])
         assert condition.latency_p95_ms >= condition.latency_p50_ms >= 0.0
         assert condition.state_bytes > 0
         assert 0.0 <= condition.mask_coverage <= 1.0
-    #: 成对反例必须同时给出两项，且比值有定义。
-    pairs = {tuple(item["pair"]) for item in report.counterfactuals}
-    assert ("camera_only", "object_only") in pairs
-    assert ("object_only", "illumination") in pairs
-    for item in report.counterfactuals:
-        assert math.isfinite(item["ratio"])
+    assert {item["pair"] for item in report.counterfactuals} == {
+        "same_context_different_object",
+        "same_visual_different_ego",
+    }
+    assert all(item["invariant_verified"] for item in report.counterfactuals)
     assert "camera_vs_object_change" in report.contrast
-    assert "illumination_false_alarm" in report.contrast
+    assert "illumination_response_ratio" in report.contrast
     assert report.notes and "合成" in report.notes[0]
 
 

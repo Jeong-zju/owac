@@ -92,171 +92,251 @@ class FeatureEncoderCallCounter:
         self.observations = []
 
 
+class _FeatureBackendView:
+    """Call pinned PI0 methods with an external prefix, without patching a shared model."""
+
+    def __init__(self, backend, prefix):
+        self.backend, self.prefix = backend, prefix
+
+    def __getattr__(self, name):
+        return getattr(self.backend, name)
+
+    def embed_prefix(self, images, img_masks, lang_tokens, lang_masks):
+        return self.prefix["prefix"], self.prefix["prefix_mask"], self.prefix["attention_blocks"]
+
+    @staticmethod
+    def _preprocess_observation(observation):
+        return (
+            (),
+            (),
+            observation.tokenized_prompt,
+            observation.tokenized_prompt_mask,
+            observation.state,
+        )
+
+
+def tokenize_backend_task(backend, text, normalized_state):
+    """Match PI0._prepare_batch: pad state BEFORE discrete-state tokenization."""
+    import torch
+
+    state = torch.as_tensor(normalized_state, dtype=torch.float32).reshape(-1)
+    if state.numel() > backend.max_state_dim:
+        raise ValueError("current state exceeds backend max_state_dim")
+    fill = float(getattr(backend, "state_pad_value", 0.0))
+    state = torch.nn.functional.pad(state, (0, backend.max_state_dim - state.numel()), value=fill)
+    return backend.tokenizer.tokenize(
+        text, state.cpu().numpy() if backend.discrete_state_input else None
+    )
+
+
 class RawVLAFeaturePolicy:
-    """把 OWAC 编码器的 ``VisualTokens`` 接到 StarVLA/PI0 特征入口。
+    """Use the actual pinned PI0 training and cached denoise methods.
 
-    通过明确的 wrapper 接入，不直接改正在评测的冻结目录。``backend`` 需要提供以下接口
-    （StarVLA 的 ``PI0``/``PI05`` 子类具备）：
-
-    * ``vlm.embed_language(task_tokens, task_mask)`` -> 语言嵌入 ``[B, L_lang, D]``
-    * ``vlm.language_embedding_scale``：语言嵌入缩放系数（原代码约定）
-    * ``action_head.prepare_flow_targets(actions, ...)``
-    * ``embed_action_suffix(actions)`` -> 动作后缀嵌入
-    * ``forward_with_action_expert(prefix, suffix, attention_mask=None)``
-    * ``sample_flow(prefix, attention_mask=None, steps=...)``
+    Language scaling, flow targets, adaRMS time conditioning and velocity decoding
+    are inherited from the backend. No RGB preprocessing or visual tower is called.
+    Backend state and actions must already use the frozen protocol's normalization.
     """
 
-    def __init__(
-        self,
-        encoder: Any,
-        backend: Any,
-        config: FeatureBridgeConfig | None = None,
-    ) -> None:
-        self.encoder = encoder
-        self.backend = backend
+    def __init__(self, encoder, backend, config=None):
+        self.encoder, self.backend = encoder, backend
         self.config = config or FeatureBridgeConfig()
         self.counter = FeatureEncoderCallCounter()
-        #: 视觉投影已被新读出替代：记录新增参数，便于报告。
         self.readout_parameters = _count_parameters(getattr(encoder, "readout", None))
+        for name in ("forward_from_observation", "sample_actions"):
+            if not callable(getattr(type(backend), name, None)):
+                raise TypeError(f"pinned StarVLA backend missing {name}")
 
-    # -- 前缀 ---------------------------------------------------------------------
+    def embed_prefix_from_visual_tokens(self, visual_tokens, task_tokens, task_mask):
+        import math
 
-    def embed_prefix_from_visual_tokens(
-        self,
-        visual_tokens: Any,
-        task_tokens: Any,
-        task_mask: Any,
-    ) -> dict[str, Any]:
-        """用 OWAC 的 tokens/mask 构造 prefix，语义与 ``embed_prefix`` 保持一致。
+        import torch
 
-        保留原代码的三条约定：语言嵌入缩放、prefix attention mask、位置编号。
-        """
-        language = self.backend.vlm.embed_language(task_tokens, task_mask)
-        scale = getattr(self.backend.vlm, "language_embedding_scale", 1.0)
-        language = language * scale
-        values = visual_tokens.values
-        mask = visual_tokens.mask
-        if _shape(mask, 0) != _shape(values, 0):
-            raise ValueError("视觉 token mask 与 values 的 batch 不一致")
-        if _shape(values, 1) % self.config.tokens_per_camera != 0:
-            raise ValueError(
-                "视觉 token 数必须是每相机 token 数的整数倍；"
-                f"实际 L={_shape(values, 1)}，每相机 {self.config.tokens_per_camera}"
-            )
-        prefix = _concat((values, language), dim=1)
-        visual_mask = mask
-        language_mask = _ones_like(task_mask)
-        prefix_mask = _concat((visual_mask, language_mask), dim=1)
-        positions = _arange(_shape(prefix, 1))
+        language = self.backend.vlm.embed_language_tokens(task_tokens)
+        scale = math.sqrt(language.shape[-1])
+        values = visual_tokens.values.to(language)
+        mask = visual_tokens.mask.to(device=language.device, dtype=torch.bool)
+        if mask.shape != values.shape[:2] or values.shape[-1] != language.shape[-1]:
+            raise ValueError("visual values/mask/language width mismatch")
+        if values.shape[1] % self.config.tokens_per_camera:
+            raise ValueError("visual token count is not a camera budget multiple")
+        prefix = torch.cat((values, language * scale), 1)
+        pad = torch.cat((mask, task_mask.to(device=mask.device, dtype=torch.bool)), 1)
         return {
             "prefix": prefix,
-            "prefix_mask": prefix_mask,
-            "positions": positions,
+            "prefix_mask": pad,
+            "attention_blocks": torch.zeros_like(pad),
+            "positions": pad.long().cumsum(1) - 1,
             "embedding_scale": scale,
-            "num_visual_tokens": _shape(values, 1),
-            "num_language_tokens": _shape(language, 1),
+            "num_visual_tokens": values.shape[1],
+            "num_language_tokens": language.shape[1],
         }
 
-    # -- 一个观测只跑一次 encoder --------------------------------------------------
+    def encode_observation(self, frame, context, state):
+        import torch
 
-    def encode_observation(self, frame: Any, context: Any, state: Any) -> tuple[Any, Any]:
-        """跑一次编码器并记录调用次数。返回 ``(visual_tokens, new_state)``。
-
-        接受 `owac.core.encoder_contract.MeasurementFrame`，也接受直接的测量张量：
-        契约帧会在这里被适配成编码器所需的张量，测量数值与掩码原样传递；相机身份等
-        帧侧元数据并入运动上下文（不覆盖调用方已有字段）。
-        """
-        measured, extra_context = _adapt_measurement(frame)
+        camera = getattr(frame, "camera_id", getattr(context, "camera_id", None))
+        if hasattr(frame, "values"):
+            values = frame.values
+            valid = getattr(frame, "valid_mask", None)
+            bad = getattr(frame, "bad_mask", None)
+            if bad is not None:
+                valid = (torch.ones_like(bad) if valid is None else valid) * (1 - bad.to(values))
+            ids = getattr(frame, "frame_ids", None)
+            episodes = getattr(frame, "episode_ids", ())
+            key = None if ids is None else (tuple(episodes), tuple(int(v) for v in ids))
+            kwargs = dict(
+                camera_id=camera,
+                frame_key=key,
+                measurement_valid=valid,
+                saturation=getattr(frame, "saturated_mask", None),
+                new_measurement=getattr(frame, "new_measurement", True),
+            )
+        else:
+            values, kwargs = frame, dict(camera_id=camera)
         self.counter.record(_observation_key(frame))
-        merged = _merge_context(context, extra_context)
-        output = self.encoder.step(measured, merged, state)
-        #: 契约的 ``readout(output, token_budget) -> VisualTokens``；命名一致的读出对象。
+        output = self.encoder.step(values, context, state, **kwargs)
         tokens = self.encoder.readout_tokens(output, self.config.tokens_per_camera)
         return tokens, output.state
 
+    def _observation(self, context, task_tokens, task_mask, backend_state):
+        from types import SimpleNamespace
+
+        import torch
+
+        if backend_state is None:
+            backend_state = getattr(context, "proprio", None)
+        if backend_state is None:
+            raise ValueError("provide normalized current backend_state; proprio delta is not state")
+        backend_state = torch.as_tensor(
+            backend_state, device=task_tokens.device, dtype=torch.float32
+        )
+        if backend_state.ndim == 2:
+            backend_state = backend_state[:, None]
+        dim = self.backend.max_state_dim
+        if backend_state.shape[-1] > dim:
+            raise ValueError("backend state exceeds max_state_dim")
+        backend_state = torch.nn.functional.pad(backend_state, (0, dim - backend_state.shape[-1]))
+        return SimpleNamespace(
+            images={},
+            image_masks={},
+            tokenized_prompt=task_tokens,
+            tokenized_prompt_mask=task_mask,
+            state=backend_state,
+        )
+
+    def _view(self, frame, context, state, task_tokens, task_mask, backend_state):
+        visual, new_state = self.encode_observation(frame, context, state)
+        prefix = self.embed_prefix_from_visual_tokens(visual, task_tokens, task_mask)
+        observation = self._observation(context, task_tokens, task_mask, backend_state)
+        return _FeatureBackendView(self.backend, prefix), observation, visual, new_state
+
     def forward_from_observation(
         self,
-        frame: Any,
-        context: Any,
-        state: Any,
-        actions: Any,
-        task_tokens: Any,
-        task_mask: Any,
-        **kwargs: Any,
-    ) -> dict[str, Any]:
-        """训练前向：测量直接走 OWAC loader/encoder，语言/状态/动作处理沿用原路径。
+        frame,
+        context,
+        state,
+        actions,
+        task_tokens,
+        task_mask,
+        *,
+        backend_state=None,
+        action_mask=None,
+        noise=None,
+        time=None,
+    ):
+        import torch
 
-        函数体内**不出现** ``torch.no_grad()``：动作损失必须能回传到新编码器。
-        """
-        visual_tokens, new_state = self.encode_observation(frame, context, state)
-        prefix = self.embed_prefix_from_visual_tokens(visual_tokens, task_tokens, task_mask)
-        targets = self.backend.action_head.prepare_flow_targets(
-            actions, control_dim=self.config.control_dim
+        view, observation, visual, new_state = self._view(
+            frame, context, state, task_tokens, task_mask, backend_state
         )
-        suffix = self.backend.embed_action_suffix(targets["actions"])
-        loss = self.backend.forward_with_action_expert(
-            prefix["prefix"],
-            suffix,
-            attention_mask=prefix["prefix_mask"],
-            **kwargs,
+        if (
+            actions.shape[-1] != self.config.control_dim
+            or actions.shape[1] != self.config.action_horizon
+        ):
+            raise ValueError("control_dim/action_horizon mismatch")
+        actions = torch.nn.functional.pad(
+            actions, (0, self.config.action_dim - self.config.control_dim)
         )
-        return {
-            "loss": loss,
-            "state": new_state,
-            "visual_tokens": visual_tokens,
-            "num_visual_tokens": prefix["num_visual_tokens"],
-            "num_language_tokens": prefix["num_language_tokens"],
-            "encoder_calls": self.counter.calls,
-        }
+        result = type(self.backend).forward_from_observation(
+            view, observation, actions, noise=noise, time=time, return_debug=True
+        )
+        # Exclude tail padding and padded control dimensions from supervision.
+        errors = (
+            result["v_t"][..., : self.config.control_dim]
+            - result["u_t"][..., : self.config.control_dim]
+        ).square()
+        mask = torch.ones_like(errors[..., 0]) if action_mask is None else action_mask.to(errors)
+        result["loss"] = (errors * mask[..., None]).sum() / (
+            mask.sum() * self.config.control_dim
+        ).clamp_min(1)
+        result.update(
+            state=new_state,
+            visual_tokens=visual,
+            encoder_calls=1,
+            num_visual_tokens=visual.values.shape[1],
+            num_language_tokens=task_tokens.shape[1],
+        )
+        return result
 
     def sample_actions(
         self,
-        frame: Any,
-        context: Any,
-        state: Any,
-        task_tokens: Any,
-        task_mask: Any,
+        frame,
+        context,
+        state,
+        task_tokens,
+        task_mask,
         *,
-        num_denoise_steps: int | None = None,
-        **kwargs: Any,
-    ) -> dict[str, Any]:
-        """推理前向：一次 encoder + N 次去噪迭代，复用同一视觉前缀。
-
-        推理使用 inference mode；这与训练前向保留 autograd 图形成明确分工。
-        """
-        import torch  # 延迟导入：本模块在无 torch 环境下也要能 import
+        backend_state=None,
+        num_denoise_steps=None,
+        noise=None,
+    ):
+        import torch
 
         steps = self.config.num_denoise_steps if num_denoise_steps is None else num_denoise_steps
-        before = self.counter.calls
-        #: 编码与状态更新在 inference_mode 之外完成：这样返回的新状态仍是普通张量，
-        #: 可以进入后续的训练/推理流程；只有去噪求解本身在 inference mode 内运行。
-        visual_tokens, new_state = self.encode_observation(frame, context, state)
-        prefix = self.embed_prefix_from_visual_tokens(visual_tokens, task_tokens, task_mask)
-        with torch.inference_mode():
-            actions = self.backend.sample_flow(
-                prefix["prefix"], attention_mask=prefix["prefix_mask"], steps=steps, **kwargs
+        if steps < 1:
+            raise ValueError("denoise steps must be positive")
+        with torch.no_grad():
+            view, observation, visual, new_state = self._view(
+                frame, context, state, task_tokens, task_mask, backend_state
             )
-        encoder_calls = self.counter.calls - before
-        if encoder_calls != 1:
-            raise AssertionError(f"一次采样应当只运行一次 encoder，实际 {encoder_calls} 次")
+            actions = type(self.backend).sample_actions(
+                view, observation, noise=noise, num_steps=steps
+            )
         return {
             "actions": actions,
+            "control_actions": actions[..., : self.config.control_dim],
             "state": new_state,
-            "encoder_calls": encoder_calls,
+            "encoder_calls": 1,
             "num_denoise_steps": steps,
         }
 
-    def predict_action(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        """``sample_actions`` 的别名，保留原后端命名。"""
+    def predict_action(self, *args, **kwargs):
         return self.sample_actions(*args, **kwargs)
+
+    def reset(self, states, batch_mask):
+        return self.encoder.reset(states, batch_mask)
 
     @contextlib.contextmanager
     def inference_mode(self):
-        """显式推理上下文，便于调用方在边界处使用。"""
         import torch
 
-        with torch.inference_mode():
+        with torch.no_grad():
             yield
+
+
+def load_feature_audited(model, state):
+    """Replace only the vision tower/projector; audit all language/action tensors."""
+    from .rawvla import load_audited
+
+    prefixes = ("vlm.model.model.vision_tower.", "vlm.model.model.multi_modal_projector.")
+    normalized = model._normalize_state_dict(state)
+    removed = sorted(k for k in normalized if k.startswith(prefixes))
+    core = model.vlm.model.model
+    core.vision_tower = None
+    core.multi_modal_projector = None
+    audit = load_audited(model, {k: v for k, v in normalized.items() if not k.startswith(prefixes)})
+    audit["replaced_visual_keys"] = removed
+    return audit
 
 
 # --------------------------------------------------------------------------------------

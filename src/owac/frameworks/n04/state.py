@@ -165,8 +165,8 @@ class N04State:
             change=s(self.change),
             prediction=s(self.prediction),
             warp_validity=s(self.warp_validity),
-            history_valid=self.history_valid,
-            available=self.available,
+            history_valid=s(self.history_valid),
+            available=s(self.available),
             uncertainty=s(self.uncertainty),
             decomposition={k: s(v) for k, v in self.decomposition.items()},
             illumination=s(self.illumination),
@@ -213,7 +213,7 @@ class N04State:
         self.forward_flow = blank(self.forward_flow)
         self.decomposition = {k: blank(v) for k, v in self.decomposition.items()}
         self.history_valid = (
-            torch.zeros_like(batch_mask) if torch.is_tensor(self.history_valid) else False
+            self.history_valid & (~batch_mask) if torch.is_tensor(self.history_valid) else False
         )
         self.available = torch.ones_like(batch_mask)
         if self.age is not None:

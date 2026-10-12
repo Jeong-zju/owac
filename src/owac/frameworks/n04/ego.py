@@ -230,33 +230,34 @@ class EgoMotionContext:
         names: list[str] = []
         shapes: dict[str, int] = {}
 
-        def add(value: torch.Tensor | None, available: bool, name: str, width: int) -> None:
+        def add(value: torch.Tensor | None, available: torch.Tensor | bool, name: str) -> None:
             if value is None:
                 #: 该字段本帧完全缺失：用零占位并保留固定宽度，形状不随帧变化。
                 parts.append(torch.zeros(0))
                 shapes[name] = 0
                 return
             v = value if value.dim() >= 2 else value.unsqueeze(0)
-            parts.append(v)
+            present = torch.as_tensor(available, device=v.device, dtype=v.dtype)
+            if present.ndim:
+                present = present.reshape(v.shape[0], -1)
+            parts.append(v * present)
             shapes[name] = int(v.shape[-1])
-            mask.extend([1.0 if available else 0.0] * int(v.shape[-1]))
+            mask.extend([float(present.any())] * int(v.shape[-1]))
             names.extend([name] * int(v.shape[-1]))
 
         add(
             self.proprio_delta,
-            bool(self._bool_any(self.proprio_delta_available)),
+            self.proprio_delta_available,
             "proprio_delta",
-            0,
         )
         add(
             self.executed_action,
-            bool(self._bool_any(self.executed_action_available)),
+            self.executed_action_available,
             "executed_action",
-            0,
         )
         if self.dt is not None:
             dt = self.dt if self.dt.dim() >= 2 else self.dt.unsqueeze(-1)
-            parts.append(dt)
+            parts.append(dt if self.dt_available else torch.zeros_like(dt))
             mask.append(1.0 if self.dt_available else 0.0)
             names.append("dt")
         real = [p for p in parts if p.numel() > 0]
@@ -444,7 +445,7 @@ class _BaseLearnedPropagator(nn.Module):
 
     def _make_motion_encoder(self, motion_dim: int) -> nn.Sequential:
         return nn.Sequential(
-            nn.Linear(motion_dim + 1 + self.camera_embedding, self.hidden),
+            nn.Linear(motion_dim + 3 + self.camera_embedding, self.hidden),
             nn.GELU(),
             nn.Linear(self.hidden, self.hidden),
             nn.GELU(),
@@ -460,7 +461,7 @@ class _BaseLearnedPropagator(nn.Module):
         motion_dim = int(motion_dim)
         if self.motion_encoder is None:
             self.motion_dim = motion_dim
-            self.motion_encoder = self._make_motion_encoder(motion_dim)
+            self.motion_encoder = self._make_motion_encoder(motion_dim).to(self.camera_embed.weight)
             return
         if motion_dim != int(self.motion_dim):
             raise ValueError(
@@ -491,16 +492,27 @@ class _BaseLearnedPropagator(nn.Module):
         elif cam_idx.dim() == 0:
             cam_idx = cam_idx.unsqueeze(0).expand(b)
         cam_emb = self.camera_embed(cam_idx.clamp(0, 63))
-        dt_present = torch.full(
-            (b, 1),
-            0.0 if not context.dt_available else 1.0,
-            device=vector.device,
-            dtype=vector.dtype,
+        presence = torch.stack(
+            [
+                torch.as_tensor(flag, device=vector.device, dtype=vector.dtype)
+                .reshape(-1)
+                .expand(b)
+                for flag in (
+                    context.proprio_delta_available,
+                    context.executed_action_available,
+                    context.dt_available,
+                )
+            ],
+            -1,
         )
         assert self.motion_encoder is not None
-        encoded = self.motion_encoder(torch.cat((vector, dt_present, cam_emb), dim=-1))
+        encoded = self.motion_encoder(torch.cat((vector, presence, cam_emb), dim=-1))
         info["camera_embedding_used"] = True
         return encoded, info
+
+    @staticmethod
+    def _bool(value):
+        return bool(value.any()) if torch.is_tensor(value) else bool(value)
 
     def forward(
         self,
@@ -526,7 +538,10 @@ class _BaseLearnedPropagator(nn.Module):
         dx, dy, log_sigma = raw[:, 0:1], raw[:, 1:2], raw[:, 2:3]
         #: 位移幅度限制，避免零初始化后首步跳变。用 tanh 软裁剪（两端都有非零梯度），
         #: 而不是硬 clamp，否则被裁剪的像素会失去对 ego 监督的梯度。
-        scale = self.max_flow / float(max(coarse.shape[-2], coarse.shape[-1]))
+        # Head values and emitted flow are in FEATURE pixels. Coarse resolution
+        # changes sampling density, not units; dividing here silently capped
+        # a nominal 8px flow at 0.5px on the tiny model's 16x16 coarse grid.
+        scale = self.max_flow
         dx = torch.tanh(dx / scale) * scale
         dy = torch.tanh(dy / scale) * scale
 

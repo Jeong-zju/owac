@@ -386,7 +386,7 @@ def test_partial_batch_reset_clears_only_marked_samples():
     assert bool(out.state.history_valid.all())
     mask = torch.tensor([True, False, False])
     reset = enc.reset({"head": out.state}, mask)
-    assert not bool(reset["head"].history_valid.any())
+    assert reset["head"].history_valid.tolist() == [False, True, True]
     assert float(reset["head"].stable[0].abs().sum()) == 0.0
     assert float(reset["head"].stable[1].abs().sum()) > 0.0
     assert float(reset["head"].stable[2].abs().sum()) > 0.0
@@ -422,8 +422,12 @@ def test_new_measurement_false_propagates_without_updating():
     stem_blank = enc.encode_measurement(blank)
     assert out2.state.decomposition["g_update"].abs().max().item() == 0.0
     assert not torch.allclose(out2.state.stable, stem_blank, atol=1e-3)
-    # 该帧仍被编码并作为 measured 提供给 readout（不丢失测量特征）
-    assert out2.state.measured is not None
+    # 无新测量时，读出也不能绕过 correction 偷读任意当前图像。
+    other = enc.step(blank + 10, ctx, out.state, camera_id="head", new_measurement=False)
+    assert torch.equal(out2.representation, other.representation)
+    assert not out2.updated and not out2.state.available.any()
+    assert out2.state.updates == out.state.updates
+    assert torch.equal(out2.state.age, out.state.age)
 
 
 def test_detach_state_breaks_graph_but_keeps_values():

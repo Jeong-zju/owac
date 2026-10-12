@@ -1,0 +1,82 @@
+{
+  "name": "n04-tiny",
+  "comment": "真实单轨迹 NPZ 20步 smoke；无独立验证或任务成功证据。保留原采样，无 resize。",
+  "input_mode": "rawvla_rgb3",
+  "measurement_size": [
+    256,
+    256
+  ],
+  "channels": 3,
+  "camera_ids": [
+    "agentview",
+    "wrist"
+  ],
+  "seed": 0,
+  "geometry": {
+    "feature_size": [
+      64,
+      64
+    ],
+    "pixel_stride": 4,
+    "max_flow": 8.0
+  },
+  "model": {
+    "name": "n04-tiny",
+    "width": 32,
+    "blocks": 2,
+    "scales": 2,
+    "scale_strides": [
+      1,
+      2
+    ],
+    "coarse_stride": 4,
+    "hidden": 64,
+    "camera_embedding": 8,
+    "readout_tokens": 256,
+    "readout_dim": 2048,
+    "predictor": "learned_proprio",
+    "use_previous_features": true,
+    "illumination_branch": true,
+    "change_branch": true,
+    "loss_weights": {
+      "location": 1.0,
+      "future_measurement": 0.5,
+      "change": 0.1,
+      "ego_warp": 0.1
+    }
+  },
+  "train": {
+    "sequence_length": 8,
+    "tbptt": 8,
+    "batch_size": 1,
+    "steps": 20,
+    "lr": 0.0003,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "log_every": 5,
+    "seed": 0,
+    "device": "cuda",
+    "synthetic": {
+      "camera_translation": [
+        1.2,
+        1.2
+      ],
+      "camera_rotation": [
+        0.0,
+        0.4
+      ],
+      "object_velocity": [
+        0.8,
+        1.2
+      ],
+      "illumination": [
+        0.7,
+        1.3
+      ],
+      "noise_sigma": 0.01,
+      "action_delay": 2,
+      "calibration_scale": 1.08
+    },
+    "threads": 4
+  }
+}

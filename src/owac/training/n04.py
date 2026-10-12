@@ -39,7 +39,7 @@ from ..frameworks.n04.ego import EgoMotionContext
 from ..frameworks.n04.model import N04Encoder
 from ..frameworks.n04.proprio import layout_for_suite, proprio_delta
 from ..frameworks.n04.synthetic import SceneConfig, SyntheticFrame, SyntheticSequenceGenerator
-from ..raw.rawvla_sequence import RawVLASequence, RawVLASequenceLoader
+from ..raw.rawvla_sequence import RawVLASequence, RawVLASequenceLoader, source_identity
 
 __all__ = [
     "RawVLAFrame",
@@ -324,14 +324,14 @@ def split_npz_paths(
         raise ValueError("val_fraction 必须在 [0, 1) 内")
     train, val = [], []
     for path in paths:
-        digest = hashlib.sha1(f"{seed}:{path.stem}".encode()).hexdigest()
+        digest = hashlib.sha1(f"{seed}:{source_identity(path)}".encode()).hexdigest()
         bucket = int(digest[:8], 16) % 1000
         (val if bucket < int(val_fraction * 1000) else train).append(path)
     if not val:
         #: 数据太少时不能造出空验证集：如实返回空列表，由调用方决定如何处理。
         return train, val
     if not train:
-        return paths[: max(1, len(paths) - 1)], paths[max(1, len(paths) - 1) :]
+        return train, val
     return train, val
 
 
@@ -427,7 +427,9 @@ def make_rawvla_batches(
             ).to(device)
             proprio = torch.stack([w["proprio"][t] for w in picks]).to(device)
             if all(w["executed_action"] is None for w in picks):
-                action = torch.zeros(proprio.shape[0], 1, device=device)
+                action = torch.zeros(
+                    proprio.shape[0], 7 if suite == "libero" else 14, device=device
+                )
                 action_available = False
             else:
                 action = torch.stack(
@@ -445,7 +447,19 @@ def make_rawvla_batches(
                     valid_mask=torch.ones(
                         measured.shape[0], 1, *measured.shape[-2:], device=device
                     ),
-                    saturated_mask=_saturation_mask(measured, suite),
+                    saturated_mask=torch.stack(
+                        [
+                            (
+                                measured[i : i + 1]
+                                >= float(w["metadata"].get("raw_white_level", 1.0))
+                            )
+                            .any(dim=1, keepdim=True)
+                            .float()[0]
+                            if suite == "libero" or "raw_white_level" in w["metadata"]
+                            else torch.zeros_like(measured[i, :1])
+                            for i, w in enumerate(picks)
+                        ]
+                    ),
                     proprio=proprio,
                     action=action,
                     metadata={
@@ -494,17 +508,10 @@ def build_encoder(cfg: N04Config, *, baseline: str | None = None) -> nn.Module:
     * ``baseline=None``：N04 候选本体。
     * ``baseline="n04_*"``：N04 的机制消融（无 ego / 无变化分支 / 全部残差当噪声 /
       上下文错位）。它们与候选共享 ``step`` 接口，因此在**同一训练预算**下可比；
-      ``single_frame`` / ``convgru`` / 滤波器等外部最近基线不走这条入口（它们的接口与
-      损失不同），其数字必须标注为未训练随机初始化，不能与候选直接并列。
+      五个最近基线及固定 RAW patch 对照也使用该入口、相同序列与定位/预测监督。
     """
     if baseline is None:
         return N04Encoder(cfg)
-    if not baseline.startswith("n04_"):
-        raise ValueError(
-            f"{baseline!r} 不是 N04 消融；只有共享 step 接口的 n04_* 消融能在本入口同预算训练。"
-            " single_frame/convgru/motion_compensation/predict_update_filter/"
-            "action_conditioned_recurrent 目前只在评测中作为未训练对照。"
-        )
     from ..baselines.n04 import build_baseline
 
     return build_baseline(baseline, cfg)
@@ -529,38 +536,54 @@ def train(
     device = torch.device(train_cfg.device)
     encoder = build_encoder(cfg, baseline=baseline).to(device)
     weights = dict(cfg.model.loss_weights)
-    optimizer = torch.optim.AdamW(
-        [p for p in encoder.parameters() if p.requires_grad],
-        lr=train_cfg.lr,
-        weight_decay=train_cfg.weight_decay,
-    )
-    #: 测量预测头：从状态与上下文预测下一帧测量。它属于编码器的可训练部分，
-    #: 只在 loss 计算时使用（预测方向是 t-1 -> t，目标 t 不进入 predict 输入）。
-    predictor_head = nn.Conv2d(cfg.model.width, cfg.channels, 3, padding=1).to(device)
-    start_step = 0
-    history: list[dict[str, float]] = []
-    if resume is not None:
-        payload = load_checkpoint(
-            resume, encoder=encoder, optimizer=optimizer, predictor_head=predictor_head
-        )
-        start_step = int(payload.get("step", 0))
-        history = list(payload.get("history", []))
-    if train_cfg.freeze_propagation:
-        propagator = getattr(encoder, "propagator", None)
-        if propagator is None:
-            raise ValueError(
-                "freeze_propagation 只支持 N04 候选本体；消融的传播设置由它自己的配置决定"
-            )
-        for p in propagator.parameters():
-            p.requires_grad_(False)
-    trainable, total = _count_parameters(encoder)
     if batches is None:
         batches = make_synthetic_batches(
             cfg=cfg, train_cfg=train_cfg, steps=train_cfg.steps, seed=train_cfg.seed, device=device
         )
-    for p in predictor_head.parameters():
-        p.requires_grad_(True)
-    head_optimizer = torch.optim.AdamW(predictor_head.parameters(), lr=train_cfg.lr)
+    if not batches:
+        raise ValueError("empty training batches")
+    camera_key = cfg.camera_ids[0]
+    # Materialize every lazy parameter BEFORE constructing the optimizer.
+    first = _to_device(batches[0][0], device)
+    with torch.no_grad():
+        encoder.step(
+            first.measured,
+            build_context(first, None),
+            encoder.init_state(first.measured.shape[0], device=device)[camera_key],
+            camera_id=camera_key,
+            saturation=first.saturated_mask,
+            measurement_valid=first.valid_mask,
+        )
+    predictor_head = nn.Conv2d(cfg.model.width, cfg.channels, 3, padding=1).to(device)
+    location_head = nn.Conv2d(cfg.model.width, 1, 1).to(device)
+    if train_cfg.freeze_propagation:
+        core = encoder.encoder if baseline and baseline.startswith("n04_") else encoder
+        propagator = getattr(core, "propagator", None)
+        if propagator is None:
+            raise ValueError("model has no propagation module to freeze")
+        for parameter in propagator.parameters():
+            parameter.requires_grad_(False)
+    parameters = [
+        p
+        for module in (encoder, predictor_head, location_head)
+        for p in module.parameters()
+        if p.requires_grad
+    ]
+    optimizer = torch.optim.AdamW(parameters, lr=train_cfg.lr, weight_decay=train_cfg.weight_decay)
+    start_step = 0
+    history = []
+    if resume is not None:
+        payload = load_checkpoint(
+            resume, encoder=encoder, optimizer=optimizer, predictor_head=predictor_head
+        )
+        if payload.get("schema_version") != 2:
+            raise ValueError("old checkpoint omits trained lazy parameters / probe optimizer")
+        location_head.load_state_dict(payload["location_head"])
+        start_step = int(payload["step"])
+        history = list(payload["history"])
+        torch.set_rng_state(payload["rng_state"])
+    encoder.location_probe = location_head  # retained by evaluation; already in optimizer
+    trainable, total = _count_parameters(encoder)
     started = time.time()
     step = start_step
     iterator = batches[start_step:] if start_step < len(batches) else []
@@ -569,7 +592,6 @@ def train(
     for sequence in iterator:
         step += 1
         optimizer.zero_grad(set_to_none=True)
-        head_optimizer.zero_grad(set_to_none=True)
         #: batch 维以实际帧为准：真实 NPZ 的窗口数可能与配置名义值不同。
         states = encoder.init_state(sequence[0].measured.shape[0], device=device)
         previous: SyntheticFrame | RawVLAFrame | None = None
@@ -587,17 +609,28 @@ def train(
                 #: 测量侧的饱和与遮挡必须显式传入：不传等于把被遮挡像素当成新证据。
                 saturation=frame.saturated_mask,
                 measurement_valid=frame.valid_mask,
+                new_measurement=frame.metadata.get("new_measurement", True),
             )
             measured = encoder.encode_measurement(frame.measured)
             if t >= train_cfg.burn_in:
                 #: 只在物理时间推进、且 burn-in 之后计算 loss，避免用状态初始化阶段
                 #: 的瞬态主导梯度。
-                totals["location"] += _location_loss(out.state.stable, measured)
-                totals["change"] += _change_loss(out.state.change, frame)
+                probe_loss = location_probe_loss(location_head, out.state.stable, frame)
+                if frame.object_mask is None:
+                    probe_loss = _masked_feature_loss(out.state.stable, measured.detach(), frame)
+                totals["location"] += probe_loss
+                if out.innovation is not None and bool(out.innovation.gate_change.detach().any()):
+                    totals["change"] += _change_loss(out.state.change, frame)
+                    totals["change"] += change_gate_loss(out.innovation.gate_change, frame)
                 totals["ego_warp"] += _ego_warp_loss(out.state.forward_flow, frame, cfg)
                 assert previous is not None
                 totals["future_measurement"] += _future_loss(
-                    predictor_head, state_before.stable, previous, frame
+                    predictor_head,
+                    out.state.prediction
+                    if out.state.prediction is not None
+                    else state_before.stable,
+                    previous,
+                    frame,
                 )
                 valid_samples += 1
             if (t + 1) % train_cfg.tbptt == 0:
@@ -617,11 +650,10 @@ def train(
         loss.backward()
         if train_cfg.grad_clip > 0:
             torch.nn.utils.clip_grad_norm_(
-                list(encoder.parameters()) + list(predictor_head.parameters()),
+                parameters,
                 train_cfg.grad_clip,
             )
         optimizer.step()
-        head_optimizer.step()
         #: 记录前 detach：带梯度的张量转标量会触发警告，且这里只需要数值。
         record = {
             k: float(v.detach() if torch.is_tensor(v) else v) / valid_samples
@@ -694,30 +726,66 @@ def _location_loss(
     return F.l1_loss(value, target)
 
 
-def _change_loss(
-    change: torch.Tensor | list[torch.Tensor] | None, frame: SyntheticFrame | RawVLAFrame
-) -> torch.Tensor:
-    """只在合成可识别标签上监督变化分支：目标掩码 × 目标是否真的在动。"""
+def _first(value):
+    from ..frameworks.n04.model import fuse_scales
+
+    return fuse_scales(value)
+
+
+def _masked_feature_loss(stable, measured, frame):
+    value = _first(stable)
+    valid = F.adaptive_avg_pool2d(frame.valid_mask * (1 - frame.saturated_mask), value.shape[-2:])
+    return ((value - measured).abs() * valid).sum() / (valid.sum() * value.shape[1]).clamp_min(1)
+
+
+def location_probe_loss(head, stable, frame):
+    """A learned target mask probe, supervised only with synthetic oracle masks."""
+    value = _first(stable)
+    if frame.object_mask is None:
+        return value.sum() * 0
+    logits = head(value)
+    target = F.adaptive_avg_pool2d(frame.object_mask, logits.shape[-2:])
+    valid = F.adaptive_avg_pool2d(frame.valid_mask * (1 - frame.saturated_mask), logits.shape[-2:])
+    loss = F.binary_cross_entropy_with_logits(
+        logits, target, reduction="none", pos_weight=logits.new_tensor(8.0)
+    )
+    return (loss * valid).sum() / valid.sum().clamp_min(1)
+
+
+def _change_target(frame, size):
+    if frame.object_mask is None or frame.true_object_translation is None:
+        return None
+    if frame.condition == "same_direction":
+        return None  # do not force a label for near-unobservable relative motion
+    moving = frame.metadata.get("object_moving", frame.true_object_translation.abs().sum(-1) > 1e-6)
+    moving = torch.as_tensor(moving, device=frame.measured.device).reshape(-1, 1, 1, 1)
+    target = F.adaptive_avg_pool2d(frame.object_mask, size) * moving
+    valid = F.adaptive_avg_pool2d(frame.valid_mask * (1 - frame.saturated_mask), size)
+    return target, valid
+
+
+def change_gate_loss(gate, frame):
+    item = _change_target(frame, gate.shape[-2:])
+    if item is None:
+        return gate.sum() * 0
+    target, valid = item
+    weight = valid * (1 + 7 * target)
+    loss = F.binary_cross_entropy(gate.clamp(1e-6, 1 - 1e-6), target, reduction="none")
+    return (loss * weight).sum() / weight.sum().clamp_min(1)
+
+
+def _change_loss(change, frame):
     if change is None:
-        return torch.zeros((), device=frame.measured.device)
-    if frame.true_object_translation is None or frame.object_mask is None:
-        #: 真实数据没有“目标是否在动”的标签：该分支不参与监督，而不是拿代理当真值。
-        return torch.zeros((), device=frame.measured.device)
-    value = change[0] if isinstance(change, list) else change
-    moving = (frame.true_object_translation.abs().sum(dim=-1, keepdim=True) > 1e-6).to(value.dtype)
-    mask = frame.object_mask
-    if mask.shape[-2:] != value.shape[-2:]:
-        mask = F.adaptive_avg_pool2d(mask, value.shape[-2:])
-    target = mask * moving.reshape(-1, 1, 1, 1)
-    #: 变化格只有相对幅值有意义（GroupNorm 会统一绝对尺度），因此比较**归一化后**的
-    #: 空间分布：目标位置相对非目标位置应当有更高的变化能量。
-    magnitude = value.abs().mean(dim=1, keepdim=True)
-    scale = magnitude.mean().detach().clamp_min(1e-6)
-    normalised = magnitude / scale
-    target_scale = target.mean().detach().clamp_min(1e-6)
-    if float(target_scale) < 1e-3:  # 该帧没有可识别标签（例如只有相机运动）
-        return torch.zeros((), device=value.device, dtype=value.dtype)
-    return F.l1_loss(normalised, target / target_scale)
+        return frame.measured.sum() * 0
+    value = _first(change)
+    item = _change_target(frame, value.shape[-2:])
+    if item is None:
+        return value.sum() * 0
+    target, valid = item
+    # Absolute amplitude supervision prevents arbitrary collapse of the cell.
+    magnitude = value.square().mean(dim=1, keepdim=True).add(1e-8).sqrt()
+    weight = valid * (1 + 7 * target)
+    return ((magnitude - target).abs() * weight).sum() / weight.sum().clamp_min(1)
 
 
 def _ego_warp_loss(
@@ -752,7 +820,7 @@ def _future_loss(
     ``current.measured`` **只在 loss 处读取**，绝不进入 predict 输入。
     遮挡与饱和位置通过 ``target_valid`` 排除，不鼓励抹掉移动目标。
     """
-    value = stable[0] if isinstance(stable, list) else stable
+    value = _first(stable)
     prediction = head(value)
     target = current.measured
     if prediction.shape[-2:] != target.shape[-2:]:
@@ -805,7 +873,12 @@ def save_checkpoint(
     history: list[dict[str, float]],
 ) -> None:
     payload = {
-        "encoder": encoder.state_dict(),
+        "schema_version": 2,
+        "location_head": encoder.location_probe.state_dict(),
+        "rng_state": torch.get_rng_state(),
+        "encoder": {
+            k: v for k, v in encoder.state_dict().items() if not k.startswith("location_probe.")
+        },
         "predictor_head": predictor_head.state_dict(),
         "optimizer": optimizer.state_dict(),
         "model_config": cfg.model.as_dict(),
@@ -851,7 +924,14 @@ def load_checkpoint(
                     for k, v in state.items()
                 }
             )
+        if hasattr(encoder, "location_probe"):
+            current = {f"location_probe.{k}": v for k, v in payload["location_head"].items()}
+            state = {**state, **current}
         encoder.load_state_dict(state)
+        if "location_head" in payload and not hasattr(encoder, "location_probe"):
+            width = payload["location_head"]["weight"].shape[1]
+            encoder.location_probe = nn.Conv2d(width, 1, 1).to(next(encoder.parameters()))
+            encoder.location_probe.load_state_dict(payload["location_head"])
     if optimizer is not None and "optimizer" in payload:
         optimizer.load_state_dict(payload["optimizer"])
     if predictor_head is not None and "predictor_head" in payload:
@@ -931,8 +1011,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--baseline",
         default=None,
-        help="在同一预算下训练 N04 机制消融（n04_no_ego / n04_no_change_branch / "
-        "n04_all_residual_noise / n04_time_shifted_context）",
+        help="同预算训练五个最近基线或四个 N04 消融；名称见 baselines.n04.BASELINE_NAMES",
     )
     parser.add_argument(
         "--measurement-size",

@@ -76,6 +76,7 @@ class SceneConfig:
     #: 背景结构：低频纹理，避免全黑背景下增益不可识别。
     background_level: float = 0.15
     seed: int = 0
+    stop_after: int | None = None
 
     def __post_init__(self) -> None:
         if self.height % 2 or self.width % 2:
@@ -180,14 +181,15 @@ class SyntheticSequenceGenerator:
 
     def _crop(self, canvas: torch.Tensor, top: torch.Tensor, left: torch.Tensor) -> torch.Tensor:
         """按（可微的）整数裁剪取视野。"""
-        b, c = canvas.shape[0], canvas.shape[1]
         h, w = self.config.height, self.config.width
-        out = torch.zeros(b, c, h, w, dtype=canvas.dtype, device=canvas.device)
-        for bi in range(b):
-            top_i = int(top[bi].item())
-            left_i = int(left[bi].item())
-            out[bi] = canvas[bi, :, top_i : top_i + h, left_i : left_i + w]
-        return out
+        ys, xs = torch.meshgrid(
+            torch.arange(h, dtype=canvas.dtype), torch.arange(w, dtype=canvas.dtype), indexing="ij"
+        )
+        gx = 2 * (xs[None] + left[:, None, None] + 0.5) / canvas.shape[-1] - 1
+        gy = 2 * (ys[None] + top[:, None, None] + 0.5) / canvas.shape[-2] - 1
+        return torch.nn.functional.grid_sample(
+            canvas, torch.stack((gx, gy), -1), align_corners=False, padding_mode="zeros"
+        )
 
     def _rotate_batch(self, image: torch.Tensor, degrees: torch.Tensor) -> torch.Tensor:
         """绕图像中心旋转（用于相机 roll）。"""
@@ -203,11 +205,11 @@ class SyntheticSequenceGenerator:
         #: 逆变换采样：目标坐标 -> 源坐标
         src_x = cos.reshape(b, 1, 1) * gx + sin.reshape(b, 1, 1) * gy
         src_y = -sin.reshape(b, 1, 1) * gx + cos.reshape(b, 1, 1) * gy
-        norm_x = (src_x + (w - 1) / 2.0) / (w - 1) * 2 - 1
-        norm_y = (src_y + (h - 1) / 2.0) / (h - 1) * 2 - 1
+        norm_x = 2 * (src_x + w / 2.0) / w - 1
+        norm_y = 2 * (src_y + h / 2.0) / h - 1
         grid = torch.stack((norm_x, norm_y), dim=-1)
         return torch.nn.functional.grid_sample(
-            image, grid, mode="bilinear", padding_mode="zeros", align_corners=True
+            image, grid, mode="bilinear", padding_mode="zeros", align_corners=False
         )
 
     def _sample_cfa(self, rgb: torch.Tensor) -> torch.Tensor:
@@ -237,6 +239,7 @@ class SyntheticSequenceGenerator:
         occlusion: torch.Tensor | None = None,
         generator: torch.Generator | None = None,
         camera_step: torch.Tensor | None = None,
+        previous_rotation: torch.Tensor | None = None,
     ) -> SyntheticFrame:
         """生成一个 batch 的观测与真值。
 
@@ -250,8 +253,8 @@ class SyntheticSequenceGenerator:
         margin = cfg.canvas_margin
         centers = base_object_centers + object_translation
         canvas = self._paint_objects(centers)
-        top = (margin + base_camera_offset[:, 1] + camera_translation[:, 1]).round().long()
-        left = (margin + base_camera_offset[:, 0] + camera_translation[:, 0]).round().long()
+        top = margin + base_camera_offset[:, 1] + camera_translation[:, 1]
+        left = margin + base_camera_offset[:, 0] + camera_translation[:, 0]
         top = top.clamp(0, self.canvas_h - cfg.height)
         left = left.clamp(0, self.canvas_w - cfg.width)
         view = self._crop(canvas, top, left)
@@ -268,21 +271,38 @@ class SyntheticSequenceGenerator:
             measured = self._sample_cfa(noisy)
         else:
             measured = noisy
-        saturated = (noisy >= 0.999).to(noisy.dtype)[:, :1]
+        saturated = (measured >= 0.999).any(dim=1, keepdim=True).to(noisy.dtype)
         valid = torch.ones(b, 1, cfg.height, cfg.width, dtype=noisy.dtype)
         if occlusion is not None:
             #: 遮挡区域没有测量支持：validity=0，而不是靠补零伪造内容。
             valid = valid * (1.0 - occlusion.reshape(b, 1, cfg.height, cfg.width))
+            measured = (
+                measured * valid
+            )  # hidden target pixels cannot leak through stem normalization
         #: 目标掩码必须换算到**视野坐标**：画布坐标减去实际裁剪原点。
         view_centers = centers.clone()
         view_centers[:, :, 0] = view_centers[:, :, 0] - left.reshape(b, 1).to(centers.dtype)
         view_centers[:, :, 1] = view_centers[:, :, 1] - top.reshape(b, 1).to(centers.dtype)
-        object_mask = self._object_mask(view_centers, cfg.height, cfg.width).clone()
+        object_mask = self._rotate_batch(
+            self._object_mask(view_centers, cfg.height, cfg.width), camera_rotation
+        )
         #: 真值单步 ego flow：相机本帧位移的负方向（内容在图像中向相反方向移动）。
         step = camera_translation if camera_step is None else camera_step
-        flow = torch.zeros(b, cfg.height, cfg.width, 2, dtype=noisy.dtype)
-        flow[..., 0] = -step[:, 0].reshape(b, 1, 1)
-        flow[..., 1] = -step[:, 1].reshape(b, 1, 1)
+        previous_rotation = (
+            torch.zeros_like(camera_rotation) if previous_rotation is None else previous_rotation
+        )
+        ys, xs = torch.meshgrid(torch.arange(cfg.height), torch.arange(cfg.width), indexing="ij")
+        xy = torch.stack((xs - (cfg.width - 1) / 2, ys - (cfg.height - 1) / 2), -1).float()
+
+        def rotation(angle):
+            theta = angle * torch.pi / 180
+            c, sn = torch.cos(theta), torch.sin(theta)
+            return torch.stack((c, -sn, sn, c), -1).reshape(b, 2, 2)
+
+        relative = rotation(camera_rotation - previous_rotation)
+        current_rotation = rotation(camera_rotation)
+        flow = torch.einsum("bij,hwj->bhwi", relative, xy) - xy[None]
+        flow = flow - torch.einsum("bij,bj->bi", current_rotation, step)[:, None, None]
         proprio = torch.cat(
             (
                 camera_translation,
@@ -385,16 +405,25 @@ class SyntheticSequenceGenerator:
         illumination_on = condition == "illumination"
         frames: list[SyntheticFrame] = []
         previous_cam_t = torch.zeros(batch, 2)
+        previous_rotation = torch.zeros(batch)
+        previous_reported = torch.zeros(batch, 3)
+        previous_object = torch.zeros(batch, 2)
         for t in range(length):
             step = float(t)
+            object_step = float(min(t, cfg.stop_after)) if cfg.stop_after is not None else step
             cam_t = (
                 cam_dir * cam_rate.reshape(batch, 1) * step if camera_on else torch.zeros(batch, 2)
             )
             cam_r = rotation_sign * rot_rate * step if camera_on else torch.zeros(batch)
             if condition == "same_direction":
-                obj_t = cam_dir * obj_rate.reshape(batch, 1) * step * 0.95
+                obj_t = cam_dir * cam_rate.reshape(batch, 1) * object_step * 0.98
             elif object_on:
-                obj_t = obj_dir * obj_rate.reshape(batch, 1) * step * object_sign.reshape(batch, 1)
+                obj_t = (
+                    obj_dir
+                    * obj_rate.reshape(batch, 1)
+                    * object_step
+                    * object_sign.reshape(batch, 1)
+                )
             else:
                 obj_t = torch.zeros(batch, 2)
             illum = torch.ones(batch)
@@ -409,8 +438,8 @@ class SyntheticSequenceGenerator:
                 cam_reported = cam_t * cfg.calibration_scale + torch.tensor(cfg.calibration_offset)
                 rot_reported = cam_r * cfg.calibration_scale
             if condition == "action_delay" and cfg.action_delay > 0:
-                cam_reported = cam_t - cam_dir * cam_rate.reshape(batch, 1) * cfg.action_delay
-                rot_reported = cam_r - rotation_sign * rot_rate * cfg.action_delay
+                cam_reported = cam_dir * cam_rate.reshape(batch, 1) * max(0, t - cfg.action_delay)
+                rot_reported = rotation_sign * rot_rate * max(0, t - cfg.action_delay)
             occlusion = None
             if condition == "occlusion":
                 occlusion = torch.zeros(batch, cfg.height, cfg.width)
@@ -426,12 +455,16 @@ class SyntheticSequenceGenerator:
                 occlusion=occlusion,
                 generator=gen,
                 camera_step=cam_t - previous_cam_t,
+                previous_rotation=previous_rotation,
             )
             #: 本体与已执行动作都只含**自身运动**（相机平移+旋转）。此前 proprio 的最后一维
             #: 放的是物体位移，等于把外部运动泄漏进 ego 预测输入：模型可以走捷径而不是
             #: 从影像估计自运动，直接破坏“自运动 vs 外部变化”的可识别性。
             frame.proprio = torch.cat((cam_reported, rot_reported.reshape(batch, 1)), dim=-1)
-            frame.action = torch.cat((cam_reported, rot_reported.reshape(batch, 1)), dim=-1)
+            frame.action = frame.proprio - previous_reported
+            frame.metadata["object_moving"] = (
+                (obj_t - previous_object).abs().sum(-1) > 1e-6
+            ).tolist()
             frame.condition = condition
             #: ``metadata`` 保持 JSON 可序列化：运动量以嵌套 list 记录，便于写出清单。
             frame.metadata.update(
@@ -444,6 +477,9 @@ class SyntheticSequenceGenerator:
             )
             frames.append(frame)
             previous_cam_t = cam_t
+            previous_rotation = cam_r
+            previous_reported = frame.proprio
+            previous_object = obj_t
         return frames
 
 

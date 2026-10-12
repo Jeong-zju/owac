@@ -91,7 +91,7 @@ class MeasurementStem(nn.Module):
             #: 每个 CFA 相位一个可学习平面嵌入；共享同一 3x3 局部算子。
             self.plane_embed = nn.Parameter(torch.zeros(4, width))
             nn.init.normal_(self.plane_embed, std=0.02)
-            self.conv = nn.Conv2d(4, width, 3, padding=1)
+            self.conv = nn.Conv2d(1, width, 3, padding=1)
             self.phase_offset = self._phase_offsets(cfa_pattern)
         else:
             stride = max(1, int(round(pixel_stride)))
@@ -132,7 +132,7 @@ class MeasurementStem(nn.Module):
             raise ValueError("bayer_cfa 输入必须是单测量面 [B,1,H,W]")
         if h % 2 or w % 2:
             raise ValueError("CFA 测量网格的边长必须是偶数")
-        planes = torch.stack(
+        planes = torch.cat(
             (
                 values[:, :, 0::2, 0::2],
                 values[:, :, 0::2, 1::2],
@@ -143,14 +143,21 @@ class MeasurementStem(nn.Module):
         )  # [B,4,h/2,w/2]
         #: 每个平面单独卷积，再按平面嵌入混合；通道维混合发生在平面内部，
         #: 因此不会把四个不同采样位置的测量当成共址颜色。
-        plane_feat = self.conv(planes)  # [B,width,h/2,w/2]
-        plane_feat = plane_feat + self.plane_embed.t().reshape(1, self.width, 4, 1, 1).mean(dim=2)
+        plane_feat = self.conv(planes.reshape(b * 4, 1, h // 2, w // 2))
+        plane_feat = plane_feat.reshape(b, 4, self.width, h // 2, w // 2)
+        semantics = {
+            "RGGB": (0, 1, 2, 3),
+            "BGGR": (3, 2, 1, 0),
+            "GRBG": (1, 0, 3, 2),
+            "GBRG": (2, 3, 0, 1),
+        }[self.cfa_pattern]
+        plane_feat = plane_feat + self.plane_embed[list(semantics)][None, :, :, None, None]
         #: 放回 2x2 相位网格：像素 (2i+r, 2j+c) 只携带来自平面 (r,c) 的测量。
         feat = values.new_zeros(b, self.width, h, w)
-        feat[:, :, 0::2, 0::2] = plane_feat
-        feat[:, :, 0::2, 1::2] = plane_feat
-        feat[:, :, 1::2, 0::2] = plane_feat
-        feat[:, :, 1::2, 1::2] = plane_feat
+        feat[:, :, 0::2, 0::2] = plane_feat[:, 0]
+        feat[:, :, 0::2, 1::2] = plane_feat[:, 1]
+        feat[:, :, 1::2, 0::2] = plane_feat[:, 2]
+        feat[:, :, 1::2, 1::2] = plane_feat[:, 3]
         return self.norm(feat)
 
 
@@ -175,11 +182,14 @@ class N04Block(nn.Module):
             nn.Conv2d(hidden, width, 1),
         )
         self.norm = nn.GroupNorm(1, width)
+        nn.init.zeros_(self.mix[-1].weight)
+        nn.init.zeros_(self.mix[-1].bias)
 
     def forward(
         self, stable: torch.Tensor, change: torch.Tensor, measured: torch.Tensor
     ) -> torch.Tensor:
-        return self.norm(stable + self.mix(torch.cat((stable, change, measured), dim=1)))
+        correction = self.mix(torch.cat((measured - stable, change, measured), dim=1))
+        return stable + 0.1 * torch.tanh(correction)
 
 
 # --------------------------------------------------------------------------------------
@@ -310,11 +320,12 @@ class N04Encoder(nn.Module):
     def ensure_motion_dim_from_state_dict(self, state_dict: Mapping[str, Any]) -> None:
         """按 checkpoint 的参数形状预先建出懒初始化层。
 
-        两处懒建：
+        运动层需要恢复宽度；分解层构造时已预建：
 
-        * ``learned_proprio`` 的运动编码器输入宽度 = ``motion_dim + 1(dt) + camera_embedding``，
+        * ``learned_proprio`` 输入宽度 =
+          ``motion_dim + 3(availability) + camera_embedding``，
           而 ``motion_dim`` 默认由数据侧在首次 ``step`` 时确定；
-        * 分解器输入宽度取决于是否启用饱和/照明通道，首次 ``forward`` 时才确定。
+        * 分解器输入宽度固定为 4*C+3，恢复时显式检查兼容性。
 
         恢复 checkpoint 时还没跑过任何一步，必须先按 checkpoint 记录的真实宽度建层，
         否则 ``load_state_dict`` 会把训练好的参数判为 unexpected keys。
@@ -323,7 +334,7 @@ class N04Encoder(nn.Module):
         if weight is not None:
             ensure = getattr(self.propagator, "ensure_motion_dim", None)
             if ensure is not None:
-                ensure(int(weight.shape[1]) - 1 - int(self.config.model.camera_embedding))
+                ensure(int(weight.shape[1]) - 3 - int(self.config.model.camera_embedding))
         trunk = state_dict.get("decomposer.trunk.0.weight")
         if trunk is not None:
             ensure_decomposer = getattr(self.decomposer, "ensure_in_channels", None)
@@ -341,6 +352,7 @@ class N04Encoder(nn.Module):
     ) -> dict[str, N04State]:
         """每个相机一份独立状态。"""
         cameras = tuple(camera_ids) if camera_ids is not None else self.config.camera_ids
+        self._cache.clear()
         h, w = self.config.geometry.feature_size
         return {
             cam: new_state(
@@ -384,6 +396,17 @@ class N04Encoder(nn.Module):
         #: validity/uncertainty 是掩码与可靠性量，不参与梯度；detach 它们可以让
         #: “第一帧无历史 ⇒ 无预测贡献”这一语义不切断传播参数的梯度路径。
         validity = result.validity.detach()
+        if state.warp_validity is not None and getattr(result, "backward_grid", None) is not None:
+            validity = (
+                validity
+                * F.grid_sample(
+                    state.warp_validity,
+                    result.backward_grid,
+                    mode="bilinear",
+                    padding_mode="zeros",
+                    align_corners=False,
+                ).detach()
+            )
         uncertainty = result.uncertainty.detach()
         if torch.is_tensor(had_history):
             keep = had_history.reshape(-1, 1, 1, 1).to(validity.dtype)
@@ -431,6 +454,7 @@ class N04Encoder(nn.Module):
             saturation = torch.zeros(b, 1, h, w, device=meas0.device, dtype=meas0.dtype)
         else:
             saturation = saturation.reshape(b, 1, h, w)
+        avail = avail * (1.0 - saturation).clamp(0, 1)
         innovation = self.decomposer(
             current=meas0,
             predicted=pred0,
@@ -473,16 +497,21 @@ class N04Encoder(nn.Module):
         #: 组合 block：多尺度特征在同一套规则下混合，不改变 predict/correct 语义。
         #: 送进 block 的测量必须按可用性（含遮挡）屏蔽：否则被遮挡像素的内容会绕过
         #: 更新门控直接从 block 泄漏进状态。
-        block_measurement = meas0 * avail if measurement_valid is not None else meas0
+        block_measurement = meas0 * avail
         for block in self.blocks:
-            fields[0] = block(fields[0], changes[0], block_measurement)
+            mixed = block(fields[0], changes[0], block_measurement)
+            fields[0] = torch.where(avail > 0, mixed, fields[0])
+        for i in range(1, len(fields)):
+            fields[i] = self.downsample[i - 1](fields[i - 1])
+            changes[i] = F.adaptive_avg_pool2d(changes[0], fields[i].shape[-2:])
+        support = torch.maximum(validity, avail)
         new_state = N04State(
             stable=fields if isinstance(state.stable, list) else fields[0],
             change=changes if isinstance(state.stable, list) else changes[0],
             prediction=predicted,
-            warp_validity=validity,
-            history_valid=torch.ones(b, dtype=torch.bool, device=meas0.device),
-            available=torch.ones(b, dtype=torch.bool, device=meas0.device),
+            warp_validity=support,
+            history_valid=support.flatten(1).any(-1),
+            available=torch.as_tensor(availability, device=meas0.device).bool().expand(b),
             uncertainty=uncertainty,
             decomposition={
                 "gate_ego": innovation.gate_ego,
@@ -499,8 +528,8 @@ class N04Encoder(nn.Module):
             step_index=state.step_index,
             timestamp=state.timestamp,
             time_unit=state.time_unit,
-            age=(state.age + 1) if state.age is not None else None,
-            updates=state.updates + 1,
+            age=(state.age + avail.flatten(1).any(-1).long()) if state.age is not None else None,
+            updates=state.updates + int(bool(avail.any())),
             observed_frame=state.observed_frame,
             extra=dict(state.extra),
         )
@@ -534,7 +563,7 @@ class N04Encoder(nn.Module):
         缺失）。不传时饱和由测量值推断、有效性视为全 1：调用方若确实知道遮挡，必须传进来，
         否则被遮挡像素会被当成新证据（此前合成遮挡条件就是这样被静默忽略的）。
         """
-        key = frame_key if frame_key is not None else None
+        key = (camera_id or state.camera_id, frame_key) if frame_key is not None else None
         if key is not None and key in self._cache:
             cached = self._cache[key]
             return StepOutput(
@@ -544,10 +573,16 @@ class N04Encoder(nn.Module):
                 innovation=cached.innovation,
                 diagnostics={**cached.diagnostics, "cache_hit": True},
                 updated=False,
-                cache_key=key,
+                cache_key=frame_key,
             )
         if cached_only:
             raise KeyError(f"缓存中没有帧 {key!r}")
+        if measurement_valid is not None:
+            values = values * measurement_valid.to(values)
+        if saturation is not None:
+            values = values * (1.0 - saturation.to(values))
+        available = torch.as_tensor(new_measurement, device=values.device).expand(values.shape[0])
+        values = values * available.reshape(-1, 1, 1, 1).to(values)
         measured = self.stem(values)
         pred, validity, uncertainty, propagation = self.predict_before_observe(state, context)
         state = N04State(
@@ -556,9 +591,9 @@ class N04Encoder(nn.Module):
             prediction=state.prediction,
             warp_validity=state.warp_validity,
             history_valid=state.history_valid,
-            available=torch.full(
-                (measured.shape[0],), new_measurement, dtype=torch.bool, device=measured.device
-            ),
+            available=torch.as_tensor(new_measurement, device=measured.device)
+            .bool()
+            .expand(measured.shape[0]),
             uncertainty=state.uncertainty,
             decomposition=state.decomposition,
             illumination=state.illumination,
@@ -575,6 +610,10 @@ class N04Encoder(nn.Module):
             extra=state.extra,
         )
         sat = saturation if saturation is not None else measurement_saturation(values)
+        if sat.shape[-2:] != measured.shape[-2:]:
+            sat = F.adaptive_max_pool2d(sat, measured.shape[-2:])
+        if measurement_valid is not None and measurement_valid.shape[-2:] != measured.shape[-2:]:
+            measurement_valid = F.adaptive_avg_pool2d(measurement_valid, measured.shape[-2:])
         new_state, innovation = self.correct_after_observe(
             state,
             pred,
@@ -592,11 +631,11 @@ class N04Encoder(nn.Module):
                 _first(new_state.change)
                 if new_state.change is not None
                 else torch.zeros_like(_first(new_state.stable)),
-                measured,
+                measured * new_state.warp_validity * available.reshape(-1, 1, 1, 1),
             ),
             dim=1,
         )
-        validity_full = validity
+        validity_full = new_state.warp_validity
         out = StepOutput(
             representation=representation,
             state=new_state,
@@ -609,10 +648,11 @@ class N04Encoder(nn.Module):
                 **({} if innovation is None else innovation.diagnostics),
                 "cache_hit": False,
             },
-            updated=True,
+            updated=bool(available.any()),
             cache_key=key,
         )
         if key is not None:
+            self._cache = {k: v for k, v in self._cache.items() if k[0] != key[0]}
             self._cache[key] = out
         return out
 
@@ -630,7 +670,20 @@ class N04Encoder(nn.Module):
 
 
 def _first(value: torch.Tensor | list[torch.Tensor]) -> torch.Tensor:
-    return value[0] if isinstance(value, list) else value
+    return fuse_scales(value)
+
+
+def fuse_scales(value: torch.Tensor | list[torch.Tensor]) -> torch.Tensor:
+    """Expose lower-scale fields to losses and readout, rather than storing unused tensors."""
+    if not isinstance(value, list):
+        return value
+    top = value[0]
+    if len(value) == 1:
+        return top
+    return top + 0.25 * sum(
+        F.interpolate(field, size=top.shape[-2:], mode="bilinear", align_corners=False)
+        for field in value[1:]
+    ) / (len(value) - 1)
 
 
 def _motion_dim(config: N04Config) -> int | None:

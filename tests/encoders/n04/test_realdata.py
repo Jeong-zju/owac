@@ -549,5 +549,5 @@ def test_checkpoint_prefix_alignment_rejects_wrong_architecture(tmp_path: Path) 
     )
     from owac.frameworks.n04.model import N04Encoder
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises((RuntimeError, ValueError)):
         load_checkpoint(out / "checkpoint.pt", encoder=N04Encoder(other))

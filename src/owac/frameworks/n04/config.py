@@ -26,7 +26,7 @@ class N04GeometryConfig:
     #: 特征网格尺寸 (H, W)；`grid_sample` 的采样坐标定义在该网格上。
     feature_size: tuple[int, int] = (32, 32)
     #: `torch.nn.functional.grid_sample` 的 align_corners。默认 False：
-    #: 归一化坐标 -1 对应像素中心 0，+1 对应像素中心 W-1。
+    #: 归一化坐标 -1/+1 对应图像边界，首末像素中心分别为 -1+1/W 与 1-1/W。
     align_corners: bool = False
     #: `grid_sample` 的 padding_mode。越界处必须为 "zeros"：用 border 复制会向前一
     #: 特征场边界外“借”未观测值，等于伪造历史证据。validity 另由 mask 显式给出。

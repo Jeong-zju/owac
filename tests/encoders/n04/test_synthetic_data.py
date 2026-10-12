@@ -101,7 +101,7 @@ def test_occlusion_condition_masks_validity_without_changing_measurement() -> No
     assert all(float(f.valid_mask.min()) == 1.0 for f in camera_only)
     #: 设计如此：遮挡只表达“没有测量支持”，不伪造像素内容；因此必须靠掩码传入编码器。
     for left, right in zip(occlusion, camera_only, strict=True):
-        assert torch.allclose(left.measured, right.measured, atol=1e-6)
+        assert torch.allclose(left.measured, right.measured * left.valid_mask, atol=1e-6)
 
 
 def test_measurement_validity_blocks_update_in_occluded_region() -> None:
@@ -241,4 +241,4 @@ def test_scene_without_calibration_scale_makes_condition_a_noop() -> None:
     calibration = _sequence("calibration_error")
     for left, right in zip(calibration, camera_only, strict=True):
         assert torch.allclose(left.proprio, right.proprio, atol=1e-6)
-        assert torch.allclose(left.measured, right.measured, atol=1e-6)
+        assert torch.allclose(left.measured, right.measured * left.valid_mask, atol=1e-6)

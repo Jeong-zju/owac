@@ -136,6 +136,8 @@ class InnovationDecomposer(nn.Module):
         #:        + saturation(1) + illumination_delta(1)
         self.trunk: nn.Sequential | None = None
         self.head: nn.Conv2d | None = None
+        # The feature width is known. Register these parameters before any optimizer.
+        self._build(4 * feature_channels + 3, torch.device("cpu"), torch.float32)
 
     def _build(self, in_ch: int, device: torch.device, dtype: torch.dtype) -> None:
         self.trunk = nn.Sequential(
@@ -145,7 +147,7 @@ class InnovationDecomposer(nn.Module):
             nn.GELU(),
         ).to(device, dtype)
         #: 三个分支 + unknown + stability，共 5 个 logit 通道；零初始化使首步门控为
-        #: “三分支各 1/3、unknown 1/3、stability=0.5”，训练自行调整。
+        #: “三分支各 1/4、unknown 1/4、stability=0.5”，训练自行调整。
         self.head = nn.Conv2d(self.hidden, 5, 1).to(device, dtype)
         nn.init.zeros_(self.head.weight)
         nn.init.zeros_(self.head.bias)
@@ -153,8 +155,7 @@ class InnovationDecomposer(nn.Module):
     def ensure_in_channels(self, in_channels: int) -> None:
         """在加载 checkpoint 前按已知输入宽度建层。
 
-        输入宽度取决于是否启用饱和/照明等通道，首次 ``forward`` 时才确定；从 checkpoint
-        恢复时若不先建层，``load_state_dict`` 会把训练好的分解器判为 unexpected keys。
+        输入宽度固定为 4*C+3，构造时已注册；恢复时检查旧配置的宽度，拒绝静默丢参数。
         """
         in_channels = int(in_channels)
         if self.trunk is None:
@@ -195,7 +196,7 @@ class InnovationDecomposer(nn.Module):
             gain_weight = validity.clamp(0, 1) * prop_reliability
             gain, gain_delta = estimate_low_frequency_gain(current, predicted, gain_weight)
         else:
-            gain = torch.ones(b, 1, h, w, device=current.device, dtype=current.dtype)
+            gain = torch.ones_like(current)
             gain_delta = torch.zeros_like(gain)
         #: 照明分支不修改 current：只把增益偏差作为“成像不可靠”的线索送入门控。
         features = torch.cat(
@@ -206,7 +207,7 @@ class InnovationDecomposer(nn.Module):
             self._build(features.shape[1], features.device, features.dtype)
         assert self.trunk is not None and self.head is not None
         logits = self.head(self.trunk(features))
-        mix = torch.softmax(logits, dim=1)
+        mix = torch.softmax(logits[:, :4], dim=1)
         w_ego = mix[:, 0:1]
         w_change = mix[:, 1:2]
         w_uncertain = mix[:, 2:3]
@@ -214,7 +215,6 @@ class InnovationDecomposer(nn.Module):
         stability = torch.sigmoid(logits[:, 4:5])
         if not self.use_change_branch:
             #: 消融“无外部变化分支”：变化权重并入 unknown，不再单独承载外部变化。
-            w_ego = w_ego + w_change
             w_change = torch.zeros_like(w_change)
             unknown = (unknown + mix[:, 1:2]).clamp(max=1.0)
         w_ego = w_ego * validity
@@ -229,7 +229,7 @@ class InnovationDecomposer(nn.Module):
         change_score = 1.0 - torch.exp(-mismatch)
         exposure_reliability = 1.0 - saturation
         base = (0.10 + 0.40 * prop_reliability + 0.25 * change_score).clamp(0.0, 1.0)
-        gate = (base * (0.5 + 0.5 * w_change)).clamp(0.0, 1.0)
+        gate = (base * (0.5 + 0.5 * w_change) * (1.0 - 0.5 * w_uncertain)).clamp(0.0, 1.0)
         gate = gate * (1.0 - self.exposure_gate * saturation)
         g_update = (gate * exposure_reliability + (1.0 - exposure_reliability) * 0.05).clamp(
             0.0, 1.0
