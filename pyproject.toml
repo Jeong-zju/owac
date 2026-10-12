@@ -12,6 +12,10 @@ dependencies = []
 
 [project.optional-dependencies]
 simulation-data = ["numpy>=2.3,<3"]
+# Optional encoder-research runtime (N01/N02/N04).  Core `import owac` stays
+# dependency-free: this extra is only needed by the encoder prototypes, their
+# training/evaluation CLIs and tests.
+encoder = ["numpy>=2.3,<3", "torch>=2.7,<3"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.11", "numpy>=2.3,<3"]
