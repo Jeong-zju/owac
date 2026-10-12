@@ -160,7 +160,15 @@ def evaluate_condition(
     for t, frame in enumerate(sequence):
         context = build_context(frame, previous)
         started = time.perf_counter()
-        out = encoder.step(frame.measured, context, states["head"], camera_id="head")
+        out = encoder.step(
+            frame.measured,
+            context,
+            states["head"],
+            camera_id="head",
+            #: 遮挡/饱和必须进入编码器；否则被遮挡像素会被当成新证据。
+            saturation=frame.saturated_mask,
+            measurement_valid=frame.valid_mask,
+        )
         latencies.append((time.perf_counter() - started) * 1000.0)
         states = {"head": out.state}
         if t < warmup:
@@ -276,7 +284,12 @@ def _recovery_frames(
     previous = None
     for frame in moving:
         out = encoder.step(
-            frame.measured, build_context(frame, previous), states["head"], camera_id="head"
+            frame.measured,
+            build_context(frame, previous),
+            states["head"],
+            camera_id="head",
+            saturation=frame.saturated_mask,
+            measurement_valid=frame.valid_mask,
         )
         states = {"head": out.state}
         previous = frame
@@ -284,7 +297,12 @@ def _recovery_frames(
     baseline = None
     for t, frame in enumerate(stopped):
         out = encoder.step(
-            frame.measured, build_context(frame, previous), states["head"], camera_id="head"
+            frame.measured,
+            build_context(frame, previous),
+            states["head"],
+            camera_id="head",
+            saturation=frame.saturated_mask,
+            measurement_valid=frame.valid_mask,
         )
         states = {"head": out.state}
         previous = frame
@@ -427,6 +445,11 @@ def main(argv: list[str] | None = None) -> int:
         object_velocity=(0.8, 1.2),
         illumination=(0.7, 1.3),
         noise_sigma=0.01,
+        #: 条件参数必须显式注入：此前 `calibration_error` 与 `action_delay` 的 scale/delay
+        #: 走了 SceneConfig 默认值（1.0 / 0），两个条件实际退化成 camera_only，
+        #: 机制矩阵里出现了整行逐位相同的数字。
+        calibration_scale=1.08,
+        action_delay=2,
         seed=args.seed,
     )
     with torch.no_grad():

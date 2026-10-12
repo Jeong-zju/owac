@@ -479,3 +479,75 @@ def test_robotwin_batches_keep_float32_scale(tmp_path: Path) -> None:
     assert float(frame.saturated_mask.sum()) == 0.0
     layout = ROBOTWIN_JOINT_LAYOUT
     assert frame.proprio.shape[-1] == layout[-1].stop
+
+
+def test_checkpoint_prefix_alignment_for_ablations(tmp_path: Path) -> None:
+    """消融训练保存的 checkpoint 带 ``encoder.`` 前缀，两种目标都必须能装进去。
+
+    此前评测加载消融 checkpoint 直接 RuntimeError（unexpected/missing keys），
+    “候选 vs 消融”的同预算对照因此完全跑不出来。
+    """
+    from owac.baselines.n04 import build_baseline
+    from owac.frameworks.n04.model import N04Encoder
+
+    _libero_npz(tmp_path / "ep0.npz", seed=0)
+    _libero_npz(tmp_path / "ep1.npz", seed=1)
+    cfg = _config()
+    train_cfg = _train_config(steps=1)
+    batches = make_rawvla_batches(
+        cfg=cfg,
+        train_cfg=train_cfg,
+        npz_dir=tmp_path,
+        suite="libero",
+        length=6,
+        batch=2,
+        steps=1,
+        val_fraction=0.0,
+    )
+    out = tmp_path / "ablation"
+    #: 用只改上下文、不改结构的消融：内层 N04Encoder 才能与 checkpoint 架构一致。
+    train(cfg, train_cfg, batches=batches, output_dir=out, baseline="n04_time_shifted_context")
+    state = load_checkpoint(out / "checkpoint.pt")["encoder"]
+    assert any(key.startswith("encoder.") for key in state), "消融 checkpoint 应带 wrapper 前缀"
+
+    wrapper = build_baseline("n04_time_shifted_context", cfg)
+    load_checkpoint(out / "checkpoint.pt", encoder=wrapper)
+
+    inner = N04Encoder(cfg)
+    load_checkpoint(out / "checkpoint.pt", encoder=inner)
+    expected = {
+        key[len("encoder.") :]: value for key, value in state.items() if key.startswith("encoder.")
+    }
+    for key, value in expected.items():
+        assert torch.allclose(inner.state_dict()[key], value)
+
+
+def test_checkpoint_prefix_alignment_rejects_wrong_architecture(tmp_path: Path) -> None:
+    _libero_npz(tmp_path / "ep0.npz", seed=0)
+    cfg = _config()
+    train_cfg = _train_config(steps=1)
+    batches = make_rawvla_batches(
+        cfg=cfg,
+        train_cfg=train_cfg,
+        npz_dir=tmp_path,
+        suite="libero",
+        length=6,
+        batch=1,
+        steps=1,
+        val_fraction=0.0,
+    )
+    out = tmp_path / "run"
+    train(cfg, train_cfg, batches=batches, output_dir=out)
+    other = _config()
+    other = N04Config(
+        input_mode=other.input_mode,
+        measurement_size=other.measurement_size,
+        channels=other.channels,
+        camera_ids=other.camera_ids,
+        geometry=other.geometry,
+        model=other.model.without(width=16, blocks=2),
+    )
+    from owac.frameworks.n04.model import N04Encoder
+
+    with pytest.raises(RuntimeError):
+        load_checkpoint(out / "checkpoint.pt", encoder=N04Encoder(other))

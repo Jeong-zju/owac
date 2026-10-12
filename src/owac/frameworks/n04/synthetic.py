@@ -287,7 +287,6 @@ class SyntheticSequenceGenerator:
             (
                 camera_translation,
                 camera_rotation.reshape(b, 1),
-                object_translation[:, 0].reshape(b, 1),
             ),
             dim=-1,
         )
@@ -428,9 +427,10 @@ class SyntheticSequenceGenerator:
                 generator=gen,
                 camera_step=cam_t - previous_cam_t,
             )
-            frame.proprio = torch.cat(
-                (cam_reported, rot_reported.reshape(batch, 1), frame.proprio[:, 3:4]), dim=-1
-            )
+            #: 本体与已执行动作都只含**自身运动**（相机平移+旋转）。此前 proprio 的最后一维
+            #: 放的是物体位移，等于把外部运动泄漏进 ego 预测输入：模型可以走捷径而不是
+            #: 从影像估计自运动，直接破坏“自运动 vs 外部变化”的可识别性。
+            frame.proprio = torch.cat((cam_reported, rot_reported.reshape(batch, 1)), dim=-1)
             frame.action = torch.cat((cam_reported, rot_reported.reshape(batch, 1)), dim=-1)
             frame.condition = condition
             #: ``metadata`` 保持 JSON 可序列化：运动量以嵌套 list 记录，便于写出清单。

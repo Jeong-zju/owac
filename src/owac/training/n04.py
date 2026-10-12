@@ -579,7 +579,15 @@ def train(
             frame = _to_device(frame, device)
             context = build_context(frame, previous, dt=1.0)
             state_before = states[camera_key]
-            out = encoder.step(frame.measured, context, state_before, camera_id=camera_key)
+            out = encoder.step(
+                frame.measured,
+                context,
+                state_before,
+                camera_id=camera_key,
+                #: 测量侧的饱和与遮挡必须显式传入：不传等于把被遮挡像素当成新证据。
+                saturation=frame.saturated_mask,
+                measurement_valid=frame.valid_mask,
+            )
             measured = encoder.encode_measurement(frame.measured)
             if t >= train_cfg.burn_in:
                 #: 只在物理时间推进、且 burn-in 之后计算 loss，避免用状态初始化阶段
@@ -614,7 +622,11 @@ def train(
             )
         optimizer.step()
         head_optimizer.step()
-        record = {k: float(v) / valid_samples for k, v in totals.items()}
+        #: 记录前 detach：带梯度的张量转标量会触发警告，且这里只需要数值。
+        record = {
+            k: float(v.detach() if torch.is_tensor(v) else v) / valid_samples
+            for k, v in totals.items()
+        }
         record["total"] = float(loss.detach())
         record["valid_samples"] = float(valid_samples)
         record["step"] = float(step)
@@ -758,6 +770,29 @@ def _future_loss(
     return future_measurement_loss(prediction, target, valid)
 
 
+def _align_state_dict(
+    state_dict: dict[str, torch.Tensor], module: nn.Module
+) -> dict[str, torch.Tensor]:
+    """把 checkpoint 的 key 前缀对齐到目标模块。
+
+    训练 N04 消融时被训练的模块是 ``N04Ablation``，它把真正的编码器放在 ``encoder.`` 子模块
+    下；candidate 的 checkpoint 则没有这层前缀。两种 checkpoint 都要能装进两种目标，
+    因此按**与目标 key 的重合数**选择变体，而不是靠 try/except 猜。
+    ``load_state_dict(strict=True)`` 仍然负责最终校验：真正不匹配时照旧报错。
+    """
+    target = set(module.state_dict().keys())
+    candidates: dict[str, dict[str, torch.Tensor]] = {"as-is": state_dict}
+    stripped = {k[len("encoder.") :]: v for k, v in state_dict.items() if k.startswith("encoder.")}
+    if stripped:
+        candidates["stripped"] = stripped
+    prefixed = {f"encoder.{k}": v for k, v in state_dict.items()}
+    candidates["prefixed"] = prefixed
+    name, best = max(candidates.items(), key=lambda item: len(target & set(item[1])))
+    if len(target & set(best)) == 0 and name != "as-is":
+        return state_dict
+    return best
+
+
 def save_checkpoint(
     path: Path,
     *,
@@ -800,11 +835,23 @@ def load_checkpoint(
 ) -> dict[str, Any]:
     payload = torch.load(Path(path), map_location="cpu", weights_only=False)
     if encoder is not None:
+        state = _align_state_dict(payload["encoder"], encoder)
         #: 懒建的运动编码器要按 checkpoint 记录的实际宽度先建好，否则恢复会丢参数。
+        #: 目标是消融 wrapper 时，真正持有编码器的是它的 ``encoder`` 子模块。
         prepare = getattr(encoder, "ensure_motion_dim_from_state_dict", None)
-        if prepare is not None and "encoder" in payload:
-            prepare(payload["encoder"])
-        encoder.load_state_dict(payload["encoder"])
+        if prepare is None:
+            prepare = getattr(
+                getattr(encoder, "encoder", None), "ensure_motion_dim_from_state_dict", None
+            )
+        if prepare is not None:
+            #: 推理接口统一按不带前缀的 key 读取形状。
+            prepare(
+                {
+                    (k[len("encoder.") :] if k.startswith("encoder.") else k): v
+                    for k, v in state.items()
+                }
+            )
+        encoder.load_state_dict(state)
     if optimizer is not None and "optimizer" in payload:
         optimizer.load_state_dict(payload["optimizer"])
     if predictor_head is not None and "predictor_head" in payload:

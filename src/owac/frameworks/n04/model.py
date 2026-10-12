@@ -402,11 +402,16 @@ class N04Encoder(nn.Module):
         *,
         saturation: torch.Tensor | None = None,
         availability: torch.Tensor | bool = True,
+        measurement_valid: torch.Tensor | None = None,
     ) -> tuple[N04State, Innovation | None]:
         """以新测量修正状态。
 
         首版规则：``stable = (1 - g_update) * pred + g_update * f_t``，并维护独立 change
         cell。无历史区域直接用有效当前测量初始化。
+
+        ``measurement_valid`` 是**测量侧**的有效性（遮挡/缺失像素为 0）：没有测量支持的
+        像素既不能推动更新，也不能被当成新证据初始化，只能保留传播预测。与 ``validity``
+        区分：后者是传播（warp）的越界/遮挡有效性。
         """
         pred_list = predicted if isinstance(predicted, list) else [predicted]
         meas_list = measured if isinstance(measured, list) else [measured]
@@ -419,6 +424,9 @@ class N04Encoder(nn.Module):
             avail = torch.full(
                 (b, 1, 1, 1), 1.0 if avail else 0.0, device=meas0.device, dtype=meas0.dtype
             )
+        if measurement_valid is not None:
+            mask = measurement_valid.reshape(b, 1, h, w).to(meas0.dtype)
+            avail = avail * (mask > 0.5).to(meas0.dtype)
         if saturation is None:
             saturation = torch.zeros(b, 1, h, w, device=meas0.device, dtype=meas0.dtype)
         else:
@@ -440,7 +448,9 @@ class N04Encoder(nn.Module):
         #: 引用它（此前只在 change_branch=True 分支里赋值，导致消融配置直接崩）。
         old_change = state.change if state.change is not None else torch.zeros_like(new_stable)
         if self.config.model.change_branch:
-            change_delta = innovation.gate_change * (meas0 - pred0)
+            #: 变化写入同样只能来自有测量支持的区域：否则被遮挡像素的残差会被写进
+            #: change cell，等于用不存在的内容制造“外部变化”。
+            change_delta = innovation.gate_change * (meas0 - pred0) * avail
             old_change0 = old_change[0] if isinstance(old_change, list) else old_change
             decay = torch.sigmoid(self.change_decay)
             new_change0 = decay * old_change0 + torch.tanh(self.change_write) * change_delta
@@ -461,8 +471,11 @@ class N04Encoder(nn.Module):
                 else torch.zeros_like(pred_list[i])
             )
         #: 组合 block：多尺度特征在同一套规则下混合，不改变 predict/correct 语义。
+        #: 送进 block 的测量必须按可用性（含遮挡）屏蔽：否则被遮挡像素的内容会绕过
+        #: 更新门控直接从 block 泄漏进状态。
+        block_measurement = meas0 * avail if measurement_valid is not None else meas0
         for block in self.blocks:
-            fields[0] = block(fields[0], changes[0], meas0)
+            fields[0] = block(fields[0], changes[0], block_measurement)
         new_state = N04State(
             stable=fields if isinstance(state.stable, list) else fields[0],
             change=changes if isinstance(state.stable, list) else changes[0],
@@ -509,12 +522,17 @@ class N04Encoder(nn.Module):
         frame_key: Any = None,
         new_measurement: bool = True,
         saturation: torch.Tensor | None = None,
+        measurement_valid: torch.Tensor | None = None,
         cached_only: bool = False,
     ) -> StepOutput:
         """逐帧调用，与在线执行完全一致。
 
         ``frame_key`` 非空时同一次调用被去重：同一帧的多次调用（例如 10 次去噪迭代
         反复读 prefix）只更新一次状态并复用缓存输出。
+
+        ``saturation`` / ``measurement_valid`` 是**测量侧**的逐像素标记（饱和、遮挡、
+        缺失）。不传时饱和由测量值推断、有效性视为全 1：调用方若确实知道遮挡，必须传进来，
+        否则被遮挡像素会被当成新证据（此前合成遮挡条件就是这样被静默忽略的）。
         """
         key = frame_key if frame_key is not None else None
         if key is not None and key in self._cache:
@@ -565,6 +583,7 @@ class N04Encoder(nn.Module):
             uncertainty,
             saturation=sat,
             availability=new_measurement,
+            measurement_valid=measurement_valid,
         )
         new_state.forward_flow = getattr(propagation, "forward_flow", None)
         representation = torch.cat(
