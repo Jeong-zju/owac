@@ -12,6 +12,9 @@ dependencies = []
 
 [project.optional-dependencies]
 simulation-data = ["numpy>=2.3,<3"]
+# Pure encoder research stack; the core package stays importable without it.
+# The deployed RawVLA runtime is Python 3.10 and is not covered by this extra.
+encoder = ["numpy>=2.3,<3", "torch>=2.9,<3"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.11", "numpy>=2.3,<3"]

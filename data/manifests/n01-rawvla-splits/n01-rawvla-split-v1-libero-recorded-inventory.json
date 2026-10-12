@@ -1,0 +1,47 @@
+{
+  "counts": {
+    "files": 2,
+    "groups": 1,
+    "train_files": 2,
+    "train_groups": 1,
+    "validation_files": 0,
+    "validation_groups": 0
+  },
+  "dataset_format": "libero",
+  "identity_fields": {
+    "metadata": [
+      "source_group",
+      "capture_session",
+      "session_id",
+      "acquisition_id"
+    ],
+    "path": "data/<format>/{raw,rgb}/ prefix dropped, variant_NN/lighting suffixes stripped"
+  },
+  "notes": [
+    "rule: sha256(split_version + '|' + source_group) -> u64/2**64 < train_fraction",
+    "paired RGB/RAW files and lighting variants of one source share a group by construction",
+    "official RawVLA closed-loop manifests are kept separate and never mixed into this split",
+    "warning: one side is empty for this inventory; adjust train_fraction or split_version before using it for model selection"
+  ],
+  "sides": {
+    "train": [
+      "data/libero/raw/libero_spatial_no_noops_1.0.0_lerobot/episode_000018/variant_00.npz",
+      "data/libero/rgb/libero_spatial_no_noops_1.0.0_lerobot/episode_000018/variant_00.npz"
+    ],
+    "validation": []
+  },
+  "source_groups": [
+    {
+      "files": [
+        "data/libero/raw/libero_spatial_no_noops_1.0.0_lerobot/episode_000018/variant_00.npz",
+        "data/libero/rgb/libero_spatial_no_noops_1.0.0_lerobot/episode_000018/variant_00.npz"
+      ],
+      "group": "libero_spatial_no_noops_1.0.0_lerobot/episode_000018",
+      "identity_field": "relative_path",
+      "lighting_domains": [],
+      "side": "train"
+    }
+  ],
+  "split_version": "n01-rawvla-split-v1",
+  "train_fraction": 0.8
+}

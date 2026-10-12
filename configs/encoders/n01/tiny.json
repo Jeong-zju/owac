@@ -1,0 +1,31 @@
+{
+  "preset": "tiny",
+  "input_mode": "rawvla_rgb3",
+  "channels": 3,
+  "planes": 1,
+  "width": 32,
+  "num_blocks": 2,
+  "max_history": 8,
+  "spatial_radii": [0, 1, 2],
+  "time_depths": [1, 4, 8],
+  "neighbourhood_radius": 2,
+  "merge_threshold": 0.55,
+  "split_threshold": 0.35,
+  "edge_temperature": 0.1,
+  "alignment": "none",
+  "selection": "analytic",
+  "budget_conditioning": false,
+  "trainable_support": false,
+  "aux_measurement_prediction": true,
+  "readout_tokens": 256,
+  "readout_width": 2048,
+  "require_unique_frames": true,
+  "loss_weights": {
+    "location": 1.0,
+    "measurement_prediction": 0.1,
+    "budget": 0.0
+  },
+  "noise_shot": 0.0,
+  "noise_read": 0.0,
+  "deadline_ms": null
+}
