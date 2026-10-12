@@ -2,9 +2,9 @@
 
 - checkpoint: `outputs/n01-smoke/checkpoint.pt`
 - config fingerprint: `f93a9d2ba0e25638`
-- git sha (evaluation run): `ef647d9e8cb11b75b4f932ae5f3383341edfd157
+- git sha (evaluation run): `6fc354fff103dc77a19c68bca59b9769e7e5e8cd
 --untracked-files=no`
-- checkpoint git sha: `ef647d9e8cb11b75b4f932ae5f3383341edfd157
+- checkpoint git sha: `6fc354fff103dc77a19c68bca59b9769e7e5e8cd
 --untracked-files=no`
 - git sha matches: `True`
 - config fingerprint matches: `True`
@@ -40,15 +40,15 @@
 
 | method | params | pos err (px) | over tol | first stable | step p50/p95 (ms) | train loss (first -> last) |
 | --- | --- | --- | --- | --- | --- | --- |
-| single_frame_raw_cnn | 10496 | 4.748 | 0.909 | per-condition | 4.99/5.42 | 3.07971 -> 3.44972 |
-| fixed_average | 10496 | 4.680 | 0.920 | per-condition | 13.05/14.08 | 2.94359 -> 3.39531 |
-| ema | 10496 | 4.722 | 0.909 | per-condition | 12.14/13.41 | 2.98936 -> 3.43750 |
-| kalman | 10496 | 4.665 | 0.909 | per-condition | 12.69/14.34 | 3.06986 -> 3.42482 |
-| motion_compensated | 10496 | 4.317 | 0.875 | per-condition | 66.26/68.95 | 3.10678 -> 3.15441 |
-| conv_gru | 75168 | 4.812 | 0.920 | per-condition | 55.57/56.15 | 2.99737 -> 3.45717 |
-| n01 | 116430 | 3.687 | 0.830 | per-condition | 1396.40/2415.42 | 3.24142 -> 2.55862 |
-| n01_no_merge | 116430 | 3.307 | 0.670 | per-condition | 2034.28/163908.71 | 3.18475 -> 2.42890 |
-| n01_fixed_horizon | 116430 | 3.458 | 0.807 | per-condition | 444.40/852.55 | 3.66230 -> 2.70668 |
+| single_frame_raw_cnn | 10496 | 4.748 | 0.909 | per-condition | 4.04/8.46 | 3.07971 -> 3.44972 |
+| fixed_average | 10496 | 4.680 | 0.920 | per-condition | 9.81/12.11 | 2.94359 -> 3.39531 |
+| ema | 10496 | 4.722 | 0.909 | per-condition | 8.72/10.11 | 2.98936 -> 3.43750 |
+| kalman | 10496 | 4.665 | 0.909 | per-condition | 9.51/10.59 | 3.06986 -> 3.42482 |
+| motion_compensated | 10496 | 4.317 | 0.875 | per-condition | 32.84/35.07 | 3.10678 -> 3.15441 |
+| conv_gru | 75168 | 4.812 | 0.920 | per-condition | 50.92/123.56 | 2.99737 -> 3.45717 |
+| n01 | 116430 | 3.687 | 0.830 | per-condition | 1627.03/2787.80 | 3.24142 -> 2.55862 |
+| n01_no_merge | 116430 | 3.307 | 0.670 | per-condition | 1562.49/2655.03 | 3.18475 -> 2.42890 |
+| n01_fixed_horizon | 116430 | 3.458 | 0.807 | per-condition | 457.89/41026.99 | 3.66230 -> 2.70668 |
 
 ## Units
 
