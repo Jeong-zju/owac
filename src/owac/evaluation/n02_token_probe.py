@@ -57,9 +57,9 @@ def run(seed=0):
         with torch.no_grad():
             # Both candidate identities carry each sign during calibration.
             # The sign cannot be recovered from hypothesis ID or weight alone.
-            labels = torch.tensor([-1.0, 1.0]).repeat(16)
+            labels = torch.tensor([-1.0, 1.0]).repeat_interleave(2).repeat(8)
             labels = labels[:, None].expand(-1, 2)
-            disturbance = torch.linspace(-0.6, 0.6, 32)
+            disturbance = torch.linspace(-0.6, 0.6, 8).repeat_interleave(4)
             weights = torch.tensor([[0.6, 0.4], [0.4, 0.6]]).repeat(16, 1)
             calibration = representation(labels, disturbance, weights)
             grouped = consume(calibration, "tokens").reshape(-1, 2048)
