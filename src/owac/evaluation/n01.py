@@ -346,7 +346,8 @@ def condition_metrics(
         "support_width_mean_px": (
             2.0 * float(support_radius) + 1.0 if support_radius is not None else None
         ),
-        "support_count_mean": diagnostics.get("mean_support_width"),
+        "support_count_mean": diagnostics.get("mean_support_samples", 0.0)
+        / max(diagnostics.get("mean_unique_frames", 1.0), 1e-6),
         "history_age_mean_frames": diagnostics.get("mean_age"),
         "observed_frames_mean": float(observed_frames),
         "merge_count": diagnostics.get("merge_count"),
@@ -399,10 +400,11 @@ def mechanism_matrix(
             tbptt=0,
             grad_enabled=False,
             device=device,
+            holdout=False,
         )
         state = result.state
-        observed = float(state.observed[0].float().mean()) if state is not None else float("nan")
         diagnostics = dict(result.last_output.diagnostics) if result.last_output is not None else {}
+        observed = diagnostics.get("mean_unique_frames", float("nan"))
         diagnostics_rows.append({"condition": condition.name, **diagnostics})
         evaluated = condition_metrics(
             result,
@@ -505,10 +507,16 @@ def falsification_report(
         return float(np.mean(finite)) if finite else None
 
     fast = mean(
-        [row["position_error_px"] for row in _slice(rows, motion="fast", tolerance="narrow")]
+        [
+            row["position_error_px"]
+            for row in _slice(rows, motion="fast", tolerance="narrow", snr="high")
+        ]
     )
     still = mean(
-        [row["position_error_px"] for row in _slice(rows, motion="still", tolerance="narrow")]
+        [
+            row["position_error_px"]
+            for row in _slice(rows, motion="still", tolerance="narrow", snr="high")
+        ]
     )
     history = mean([row["observed_frames_mean"] for row in rows])
     support_count = mean([row["support_count_mean"] for row in rows])
@@ -516,12 +524,15 @@ def falsification_report(
     merges = sum(float(row["merge_count"] or 0.0) for row in rows)
     splits = sum(float(row["split_count"] or 0.0) for row in rows)
     max_history = int(config.max_history)
-    candidate_fast = mean([row["position_error_px"] for row in _slice(rows, motion="fast")])
+    candidate_rows = (comparison or {}).get("methods", {}).get("n01", {}).get("conditions", rows)
+    candidate_fast = mean(
+        [row["position_error_px"] for row in _slice(candidate_rows, motion="fast")]
+    )
     static_names = ("fixed_average", "ema", "single_frame_raw_cnn")
     best_static = None
     if comparison:
         for name in static_names:
-            entry = comparison.get(name)
+            entry = comparison.get("methods", comparison).get(name)
             if not entry:
                 continue
             value = mean(
@@ -624,6 +635,18 @@ def train_baseline(
     device: str,
 ) -> dict[str, Any]:
     """Train one baseline probe with the identical head, optimiser and steps."""
+    if hasattr(probe, "encoder"):
+        probe.encoder.calibrating = True
+        with torch.no_grad():
+            sample = batches[0]
+            probe.encode(
+                sample.values.to(device),
+                sample.valid.to(device),
+                sample.variance.to(device),
+                sample.timestamps.to(device),
+            )
+        probe.encoder.calibrating = False
+        probe.reset_state()
     parameters = [p for p in probe.parameters() if p.requires_grad] + [
         p for p in heads.parameters() if p.requires_grad
     ]
@@ -697,6 +720,7 @@ def comparison_suite(
     )
     results: dict[str, Any] = {}
     for name, factory in registry.items():
+        torch.manual_seed(seed)
         started = time.perf_counter()
         try:
             method = factory(config) if callable(factory) else factory
@@ -704,6 +728,7 @@ def comparison_suite(
             results[name] = {"error": f"{type(exc).__name__}: {exc}"}
             continue
         method = method.to(device)
+        torch.manual_seed(seed + 100_003)
         heads = probe_heads_for(method, config, image_size=image_size, device=device)
         training = train_baseline(
             method,
@@ -1097,6 +1122,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.comparison_tuned:
+        raise SystemExit("--comparison-tuned requires actual per-method tuning; not implemented")
     config_module = _require("owac.frameworks.n01.config", "config loading")
     model_module = _require("owac.frameworks.n01.model", "the N01 encoder")
     config = config_module.load_config(args.config)

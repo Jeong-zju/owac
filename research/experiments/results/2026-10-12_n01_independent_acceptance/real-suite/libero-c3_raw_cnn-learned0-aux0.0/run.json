@@ -1,0 +1,829 @@
+{
+  "suite": "libero",
+  "method": "c3_raw_cnn",
+  "config": {
+    "input_mode": "rawvla_rgb3",
+    "channels": 3,
+    "planes": 1,
+    "cfa_pattern": "RGGB",
+    "width": 32,
+    "num_blocks": 2,
+    "neighbourhood_radius": 2,
+    "spatial_radii": [
+      0,
+      1,
+      2
+    ],
+    "time_depths": [
+      1,
+      4,
+      8
+    ],
+    "max_history": 8,
+    "support_power": 2.0,
+    "support_floor": 0.05,
+    "merge_threshold": 0.55,
+    "split_threshold": 0.35,
+    "edge_temperature": 0.1,
+    "edge_alpha": 0.35,
+    "edge_beta": 0.35,
+    "edge_forget": 0.1,
+    "learnable_gate": false,
+    "gate_hidden": 8,
+    "alignment": "none",
+    "correspondence_window": 3,
+    "correspondence_width": 16,
+    "fractional_alignment": false,
+    "soft_argmax": true,
+    "soft_argmax_temperature": 0.05,
+    "selection": "analytic",
+    "selection_use_learned": false,
+    "selector_temperature": 0.1,
+    "cost_weights": {
+      "noise": 2.0,
+      "edge": 0.5,
+      "age": 0.15,
+      "motion": 0.5
+    },
+    "budget_conditioning": false,
+    "trainable_support": false,
+    "aux_measurement_prediction": false,
+    "readout_tokens": 256,
+    "readout_width": 2048,
+    "require_unique_frames": true,
+    "max_domain_pixels": 0,
+    "loss_weights": {
+      "location": 1.0,
+      "measurement_prediction": 0.1,
+      "budget": 0.0
+    },
+    "noise_shot": 0.0,
+    "noise_read": 0.001,
+    "deadline_ms": null,
+    "task_precision": null
+  },
+  "git_sha": "unknown",
+  "source_manifest": "/workspace/owac/rawvla/research/n01-graph-acceptance-20261012/source-manifest.json",
+  "source_manifest_sha256": "1f46476f97fd658ba725148200319b60f0196f7b73b8f56524766ab6982e171f",
+  "input_hashes": {
+    "npz": "9dd7479f290841d04809889c2024323fcf0ad895e5471113e6f2e2bc28af23e7",
+    "statistics": "7e596e50c00c5407daed5809f6cc55b57877903bbadcd39ac30f13bb821411a9",
+    "tokenizer": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+  },
+  "rows": [
+    {
+      "step": 1,
+      "action_loss": 0.8271567225456238,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 78.89363637924384,
+        "readout": 37.43071746826172,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 406.8865217268467,
+      "frames": [
+        [
+          11,
+          16,
+          21,
+          26
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 2,
+      "action_loss": 0.3860126733779907,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 9.67951263762626,
+        "readout": 4.946129560470581,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 104.05777208507061,
+      "frames": [
+        [
+          30,
+          35,
+          40,
+          45
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 3,
+      "action_loss": 0.15634632110595703,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 5.047227822652459,
+        "readout": 2.1851034313440323,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 113.1342463195324,
+      "frames": [
+        [
+          225,
+          230,
+          235,
+          240
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 4,
+      "action_loss": 0.13997423648834229,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 5.945303624377569,
+        "readout": 2.7315631210803986,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 117.8895989432931,
+      "frames": [
+        [
+          109,
+          114,
+          119,
+          124
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 5,
+      "action_loss": 0.32701244950294495,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 4.085112841137356,
+        "readout": 2.0739013850688934,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 120.4120758920908,
+      "frames": [
+        [
+          22,
+          27,
+          32,
+          37
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 6,
+      "action_loss": 0.16425268352031708,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 2.7715760366358353,
+        "readout": 1.6189785599708557,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 121.04227673262358,
+      "frames": [
+        [
+          0,
+          4,
+          9,
+          14
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 7,
+      "action_loss": 0.05424846336245537,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 0.4417850545010653,
+        "readout": 0.2728419341146946,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 114.29461929947138,
+      "frames": [
+        [
+          166,
+          171,
+          176,
+          181
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 8,
+      "action_loss": 0.06830985844135284,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 2.272883879184029,
+        "readout": 1.792436420917511,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 110.8712712302804,
+      "frames": [
+        [
+          151,
+          156,
+          161,
+          166
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 9,
+      "action_loss": 0.1610623449087143,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 3.658526255410834,
+        "readout": 1.666560173034668,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 117.41079855710268,
+      "frames": [
+        [
+          59,
+          64,
+          69,
+          74
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 10,
+      "action_loss": 0.1102554053068161,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 2.7868034386424476,
+        "readout": 0.9917334467172623,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 115.57852197438478,
+      "frames": [
+        [
+          130,
+          135,
+          140,
+          145
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 11,
+      "action_loss": 0.1963880956172943,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 1.1304533861868773,
+        "readout": 0.4356411099433899,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 114.05043955892324,
+      "frames": [
+        [
+          259,
+          264,
+          269,
+          274
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 12,
+      "action_loss": 0.08491493761539459,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 1.5624492541077313,
+        "readout": 0.5277108773589134,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 116.03581346571445,
+      "frames": [
+        [
+          144,
+          149,
+          154,
+          159
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 13,
+      "action_loss": 0.03943552076816559,
+      "aux_loss": -0.0,
+      "valid_actions": 5,
+      "gradient_norms": {
+        "stem": 1.1010283147772872,
+        "readout": 0.24985835887491703,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 113.61830774694681,
+      "frames": [
+        [
+          273,
+          278,
+          283,
+          288
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 14,
+      "action_loss": 0.23487699031829834,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 1.5683728886338457,
+        "readout": 0.3958725221455097,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 116.99926666915417,
+      "frames": [
+        [
+          265,
+          270,
+          275,
+          280
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 15,
+      "action_loss": 0.11437773704528809,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 5.295473030930964,
+        "readout": 1.3804059475660324,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 115.56294187903404,
+      "frames": [
+        [
+          94,
+          99,
+          104,
+          109
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 16,
+      "action_loss": 0.14298196136951447,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 2.1177307526865725,
+        "readout": 0.6424135118722916,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 115.30511174350977,
+      "frames": [
+        [
+          219,
+          224,
+          229,
+          234
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 17,
+      "action_loss": 0.10743597894906998,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 1.3805916056758534,
+        "readout": 0.45030154287815094,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 114.6459300071001,
+      "frames": [
+        [
+          159,
+          164,
+          169,
+          174
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 18,
+      "action_loss": 0.1511479616165161,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 4.465136287519989,
+        "readout": 1.8457884192466736,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 114.1460994258523,
+      "frames": [
+        [
+          10,
+          15,
+          20,
+          25
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 19,
+      "action_loss": 0.08379341661930084,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 2.334377126008352,
+        "readout": 0.9931766092777252,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 114.41317945718765,
+      "frames": [
+        [
+          53,
+          58,
+          63,
+          68
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    },
+    {
+      "step": 20,
+      "action_loss": 0.026682842522859573,
+      "aux_loss": -0.0,
+      "valid_actions": 10,
+      "gradient_norms": {
+        "stem": 0.4978757916936116,
+        "readout": 0.26271056570112705,
+        "gate": 0.0,
+        "selector": 0.0
+      },
+      "wall_ms": 112.81338427215815,
+      "frames": [
+        [
+          15,
+          20,
+          25,
+          30
+        ]
+      ],
+      "episodes": [
+        "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+      ]
+    }
+  ],
+  "inference": {
+    "shape": [
+      1,
+      10,
+      32
+    ],
+    "finite": true,
+    "repeat_max_abs": 0.0,
+    "encoder_calls_during_denoising": 0,
+    "actual_denoise_steps_two_calls": 20,
+    "denoising_steps": 10,
+    "physical_control_executed": false
+  },
+  "load_audit": {
+    "loaded_keys": 376,
+    "model_keys": 376,
+    "inactive_keys": [],
+    "active_missing": [],
+    "unexpected": [],
+    "shape_mismatch": [],
+    "replaced_vision_keys": 437,
+    "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+    "replaced_vision_key_sample": [
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+    ],
+    "parameter_groups": {
+      "language_model": {
+        "prefixes": [
+          "vlm.model.model.language_model.",
+          "vlm.model.language_model."
+        ],
+        "model_tensors": 164,
+        "checked_tensors": 164,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 2508531712
+      },
+      "language_projection": {
+        "prefixes": [
+          "vlm.model.lm_head.",
+          "vlm.model.model.embed_tokens.",
+          "vlm.lm_head."
+        ],
+        "model_tensors": 1,
+        "checked_tensors": 1,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 526647296
+      },
+      "action_expert": {
+        "prefixes": [
+          "action_head."
+        ],
+        "model_tensors": 209,
+        "checked_tensors": 209,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 693422112
+      }
+    },
+    "vision_release": {
+      "vision_tower_detected": true,
+      "vision_param_bytes_before": 826831584,
+      "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+      "verified_removed": true,
+      "cuda_cache_cleared": false,
+      "detached_reference_kept": false,
+      "release_path": "vlm.model.model.vision_tower",
+      "vision_param_bytes_after": 0,
+      "bytes_freed": 826831584
+    },
+    "notes": [
+      "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+      "language/action parameters were checked item by item before loading"
+    ]
+  },
+  "input_provenance": "author three-channel pseudo-RAW NPZ, no Bayer claim",
+  "noise_provenance": "assumed constant variance, not calibrated sensor noise",
+  "crop": 32,
+  "data_spec": {
+    "loader": "owac.raw.rawvla_sequence.RawVLASequenceDataset",
+    "dataset_format": "libero",
+    "root": "/workspace/owac/rawvla",
+    "raw_cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw",
+    "rgb_cache_root": "/workspace/owac/rawvla/data/libero/rgb",
+    "stats_path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+    "stats_available": true,
+    "statistics": {
+      "normalization": "pi05_quantile",
+      "stats_path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+      "action_stats_key": "action",
+      "state_stats_key": "state",
+      "available": {
+        "action": true,
+        "state": true
+      },
+      "fields": {
+        "action": [
+          "mean",
+          "q01",
+          "q99",
+          "std"
+        ],
+        "state": [
+          "mean",
+          "q01",
+          "q99",
+          "std"
+        ]
+      },
+      "source": {
+        "stats_key": "openpi_pi05_libero_franka",
+        "selection": "author _load_stats rules",
+        "file": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json"
+      }
+    },
+    "normalization": "pi05_quantile",
+    "camera_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ],
+    "camera_ids": [
+      "agentview",
+      "wrist"
+    ],
+    "camera_dtype": "uint8",
+    "raw_value_policy": {
+      "mode": "uint8_to_float32_over_255",
+      "unit": "pseudo_raw_linear_view_uint8_over_255",
+      "evidence": "author chain rawvla_bench/raw.py: rgb8 -> exposed raw10 -> noise in the normalised [0,1] domain -> round(raw10*255/1023) uint8 view, so uint8 stores a linear RAW10 view and /255 reproduces the author's own burst scaling (the author loader divides only when the stored dtype is uint8). Recorded sample data/libero/raw/libero_spatial_no_noops_1.0.0_lerobot/episode_000018/variant_00.npz (RawVLA-Bench 8586c59, dataset-check.json): uint8 min 0 max 8 -> x in [0, 0.0314].",
+      "forbidden": [
+        "dividing RoboTwin float32 RAW by 255",
+        "per-frame max normalisation of any RAW array",
+        "renaming three-channel pseudo-RAW as Bayer CFA"
+      ]
+    },
+    "channels_per_camera": 3,
+    "sampling_geometry": "per_pixel_trichromatic_collocated",
+    "supported_input_modes": {
+      "rawvla_rgb3": "this loader: co-located three-channel measurement windows",
+      "bayer_cfa": "owac.raw.cfa plane stacks wrapped by measurement_window_from_cfa; the RawVLA NPZ cache itself is three-channel and is never called Bayer",
+      "sequence1d": "owned by the one-dimensional adapter, not by this loader"
+    },
+    "state_source_key": "robot_states",
+    "state_dim": 8,
+    "state_kind": "measured_proprio",
+    "state_note": "robot_states[t] is the 8-dim proprio field. The 92-dim 'states' array is simulator state and is never used as a policy input.",
+    "proprio_available": true,
+    "executed_action_available": false,
+    "executed_action_note": "the cache holds commands and future supervision; no measured executed action is recorded, so the flag is False and executed_action stays None",
+    "action_dim": 7,
+    "action_offset": 0,
+    "action_horizon": 10,
+    "window": 4,
+    "observation_stride": 5,
+    "observation_stride_verified": true,
+    "time_unit_observed": {
+      "frame": 21
+    },
+    "timestamp_keys_checked": [
+      "timestamps",
+      "timestamps_seconds",
+      "timestamp",
+      "time_stamps",
+      "observation_timestamps",
+      "time"
+    ],
+    "time_unit_policy": "seconds when the episode declares a finite, monotone timestamp array, otherwise 'frame' with the frame index in the timestamp field; seconds are never invented and no nominal frame rate is assumed",
+    "noise_model": null,
+    "episodes": 1771,
+    "episodes_in_split": 1447,
+    "split": {
+      "split_version": "n01-rawvla-split-v1",
+      "requested": "train",
+      "counts": {
+        "files": 1771,
+        "groups": 1771,
+        "train_files": 1447,
+        "validation_files": 324,
+        "train_groups": 1447,
+        "validation_groups": 324
+      },
+      "rule": [
+        "rule: sha256(split_version + '|' + source_group) -> u64/2**64 < train_fraction",
+        "paired RGB/RAW files and lighting variants of one source share a group by construction",
+        "official RawVLA closed-loop manifests are kept separate and never mixed into this split"
+      ],
+      "manifest_path": null,
+      "source_groups": 1771
+    },
+    "identity_fields": {
+      "path": "data/<format>/{raw,rgb}/ prefix dropped, variant_NN/lighting suffixes stripped",
+      "metadata": [
+        "source_group",
+        "capture_session",
+        "session_id",
+        "acquisition_id"
+      ]
+    },
+    "identity_fields_observed": {
+      "lighting_domain": [],
+      "source_group": [],
+      "capture_session": [],
+      "session_id": [],
+      "acquisition_id": []
+    },
+    "identity_fields_available": {
+      "relative_path": true,
+      "source_group": false,
+      "capture_session": false,
+      "session_id": false,
+      "acquisition_id": false,
+      "lighting_domain": false
+    },
+    "official_closed_loop_manifest": {
+      "used": false,
+      "note": "the official RawVLA closed-loop manifest is kept separate and never mixed into this loader's split"
+    },
+    "data_present": true,
+    "real_data_available": null,
+    "real_data_available_note": "True means the provenance scan covered every episode and found no synthetic declaration; None means the scan has not covered the inventory on this machine, so availability is unverified rather than claimed",
+    "synthetic_fixture_episodes": [],
+    "provenance_scanned_episodes": 1,
+    "fixture_provenance": "real",
+    "range_evidence": null,
+    "missing_assets": [
+      {
+        "kind": "root",
+        "path": "/workspace/owac/rawvla",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "RawVLA server snapshot root holding the RawVLA-Bench download"
+      },
+      {
+        "kind": "raw_cache",
+        "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "libero raw NPZ cache; expected author keys agentview_raw_uint8, wrist_raw_uint8"
+      },
+      {
+        "kind": "stats",
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "author normalisation statistics (pi05_quantile)"
+      },
+      {
+        "kind": "rgb_cache",
+        "path": "/workspace/owac/rawvla/data/libero/rgb",
+        "required": false,
+        "satisfied": false,
+        "env_var": null,
+        "note": "author paired RGB chroma cache; OWAC never loads it because the main path produces no RGB target"
+      }
+    ]
+  },
+  "encoder_parameter_update": 4.735947906970978,
+  "backend_gradients": 0,
+  "torch": "2.7.1+cu128",
+  "python_runtime": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+  "peak_gpu_bytes": 8891743744
+}

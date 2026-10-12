@@ -1,0 +1,831 @@
+{
+  "suite": "robotwin2",
+  "method": "n01",
+  "config": {
+    "input_mode": "rawvla_rgb3",
+    "channels": 3,
+    "planes": 1,
+    "cfa_pattern": "RGGB",
+    "width": 32,
+    "num_blocks": 2,
+    "neighbourhood_radius": 2,
+    "spatial_radii": [
+      0,
+      1,
+      2
+    ],
+    "time_depths": [
+      1,
+      4,
+      8
+    ],
+    "max_history": 8,
+    "support_power": 2.0,
+    "support_floor": 0.05,
+    "merge_threshold": 0.55,
+    "split_threshold": 0.35,
+    "edge_temperature": 0.1,
+    "edge_alpha": 0.35,
+    "edge_beta": 0.35,
+    "edge_forget": 0.1,
+    "learnable_gate": true,
+    "gate_hidden": 8,
+    "alignment": "none",
+    "correspondence_window": 3,
+    "correspondence_width": 16,
+    "fractional_alignment": false,
+    "soft_argmax": true,
+    "soft_argmax_temperature": 0.05,
+    "selection": "learned",
+    "selection_use_learned": false,
+    "selector_temperature": 0.1,
+    "cost_weights": {
+      "noise": 2.0,
+      "edge": 0.5,
+      "age": 0.15,
+      "motion": 0.5
+    },
+    "budget_conditioning": false,
+    "trainable_support": true,
+    "aux_measurement_prediction": true,
+    "readout_tokens": 256,
+    "readout_width": 2048,
+    "require_unique_frames": true,
+    "max_domain_pixels": 0,
+    "loss_weights": {
+      "location": 1.0,
+      "measurement_prediction": 0.1,
+      "budget": 0.0
+    },
+    "noise_shot": 0.0,
+    "noise_read": 0.001,
+    "deadline_ms": null,
+    "task_precision": null
+  },
+  "git_sha": "unknown",
+  "source_manifest": "/workspace/owac/rawvla/research/n01-graph-acceptance-20261012/source-manifest.json",
+  "source_manifest_sha256": "1f46476f97fd658ba725148200319b60f0196f7b73b8f56524766ab6982e171f",
+  "input_hashes": {
+    "npz": "0d0c834f5d0c1b22207663eeae34f0b0c7564beacffa279166f6afc6957b3316",
+    "statistics": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+    "tokenizer": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+  },
+  "rows": [
+    {
+      "step": 1,
+      "action_loss": 1.2229018211364746,
+      "aux_loss": 1.4736359119415283,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 20.506705636928075,
+        "readout": 7.315863072872162,
+        "gate": 0.489329993724823,
+        "selector": 1.0220568958502885e-14
+      },
+      "wall_ms": 1065.7529346644878,
+      "frames": [
+        [
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 2,
+      "action_loss": 2.102731227874756,
+      "aux_loss": 1.3354213237762451,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 11.001317601454815,
+        "readout": 4.408920407295227,
+        "gate": 0.18490934582769114,
+        "selector": 1.0813068121370738e-12
+      },
+      "wall_ms": 816.7548310011625,
+      "frames": [
+        [
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 3,
+      "action_loss": 1.6054408550262451,
+      "aux_loss": 1.1859697103500366,
+      "valid_actions": 16,
+      "gradient_norms": {
+        "stem": 23.969616580186823,
+        "readout": 6.674244165420532,
+        "gate": 0.59849089209456,
+        "selector": 7.095853869954549e-13
+      },
+      "wall_ms": 838.9400104060769,
+      "frames": [
+        [
+          73,
+          74,
+          75,
+          76
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 4,
+      "action_loss": 1.7320051193237305,
+      "aux_loss": 1.0767641067504883,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 40.629362679828176,
+        "readout": 10.332354545593262,
+        "gate": 1.0531688769115135,
+        "selector": 3.733024742959405e-12
+      },
+      "wall_ms": 892.1281658113003,
+      "frames": [
+        [
+          36,
+          37,
+          38,
+          39
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 5,
+      "action_loss": 1.674424171447754,
+      "aux_loss": 0.9812261462211609,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 30.618183886998196,
+        "readout": 8.786496996879578,
+        "gate": 0.45805171206029627,
+        "selector": 1.5941803017495045e-12
+      },
+      "wall_ms": 903.7626460194588,
+      "frames": [
+        [
+          8,
+          9,
+          10,
+          11
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 6,
+      "action_loss": 1.0548863410949707,
+      "aux_loss": 0.8916680812835693,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 11.232350157945817,
+        "readout": 2.914671838283539,
+        "gate": 0.6962978379233391,
+        "selector": 1.1597047122491348e-12
+      },
+      "wall_ms": 857.0105191320181,
+      "frames": [
+        [
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 7,
+      "action_loss": 1.2583483457565308,
+      "aux_loss": 0.8076473474502563,
+      "valid_actions": 35,
+      "gradient_norms": {
+        "stem": 27.360950755696365,
+        "readout": 9.189055323600769,
+        "gate": 1.4990271313581616,
+        "selector": 6.912559190291266e-13
+      },
+      "wall_ms": 862.2524440288544,
+      "frames": [
+        [
+          54,
+          55,
+          56,
+          57
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 8,
+      "action_loss": 0.9761258959770203,
+      "aux_loss": 0.7378177642822266,
+      "valid_actions": 40,
+      "gradient_norms": {
+        "stem": 24.72518429804552,
+        "readout": 7.320000648498535,
+        "gate": 0.682954075447924,
+        "selector": 6.151450892947467e-13
+      },
+      "wall_ms": 804.8739386722445,
+      "frames": [
+        [
+          49,
+          50,
+          51,
+          52
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 9,
+      "action_loss": 0.9864190816879272,
+      "aux_loss": 0.6675876975059509,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 17.095345504123472,
+        "readout": 4.603094696998596,
+        "gate": 1.3110661526297918,
+        "selector": 6.452063840309939e-13
+      },
+      "wall_ms": 760.1798372343183,
+      "frames": [
+        [
+          20,
+          21,
+          22,
+          23
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 10,
+      "action_loss": 0.9014967083930969,
+      "aux_loss": 0.6021778583526611,
+      "valid_actions": 46,
+      "gradient_norms": {
+        "stem": 10.640622077700783,
+        "readout": 4.575510799884796,
+        "gate": 0.1869671181193553,
+        "selector": 3.0145404013353193e-13
+      },
+      "wall_ms": 764.9267800152302,
+      "frames": [
+        [
+          43,
+          44,
+          45,
+          46
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 11,
+      "action_loss": 3.1124558448791504,
+      "aux_loss": 0.5293964147567749,
+      "valid_actions": 5,
+      "gradient_norms": {
+        "stem": 61.406622066741704,
+        "readout": 23.226264715194702,
+        "gate": 0.7797324406710686,
+        "selector": 1.487786354534172e-12
+      },
+      "wall_ms": 870.5899268388748,
+      "frames": [
+        [
+          84,
+          85,
+          86,
+          87
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 12,
+      "action_loss": 0.5976389646530151,
+      "aux_loss": 0.46369171142578125,
+      "valid_actions": 42,
+      "gradient_norms": {
+        "stem": 11.617327227436576,
+        "readout": 4.023300588130951,
+        "gate": 0.5303950489324052,
+        "selector": 1.4627695822800563e-12
+      },
+      "wall_ms": 907.016335055232,
+      "frames": [
+        [
+          47,
+          48,
+          49,
+          50
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 13,
+      "action_loss": 0.8316559791564941,
+      "aux_loss": 0.3891329765319824,
+      "valid_actions": 1,
+      "gradient_norms": {
+        "stem": 18.39947349203652,
+        "readout": 5.345181107521057,
+        "gate": 0.7005784682551166,
+        "selector": 1.547714654342999e-12
+      },
+      "wall_ms": 883.8506918400526,
+      "frames": [
+        [
+          88,
+          89,
+          90,
+          91
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 14,
+      "action_loss": 1.7055878639221191,
+      "aux_loss": 0.3257318139076233,
+      "valid_actions": 4,
+      "gradient_norms": {
+        "stem": 149.5415082225968,
+        "readout": 39.6430389881134,
+        "gate": 4.291515866294503,
+        "selector": 3.244169822065304e-13
+      },
+      "wall_ms": 775.0447476282716,
+      "frames": [
+        [
+          85,
+          86,
+          87,
+          88
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 15,
+      "action_loss": 0.7539416551589966,
+      "aux_loss": 0.2957584261894226,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 12.870326631960808,
+        "readout": 3.35207399725914,
+        "gate": 0.41116264216179843,
+        "selector": 7.097503438181074e-15
+      },
+      "wall_ms": 769.4353135302663,
+      "frames": [
+        [
+          31,
+          32,
+          33,
+          34
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 16,
+      "action_loss": 0.8248968720436096,
+      "aux_loss": 0.25314950942993164,
+      "valid_actions": 18,
+      "gradient_norms": {
+        "stem": 19.563009655391937,
+        "readout": 4.756575584411621,
+        "gate": 0.4094619342504302,
+        "selector": 5.0244509322627e-13
+      },
+      "wall_ms": 746.3982999324799,
+      "frames": [
+        [
+          71,
+          72,
+          73,
+          74
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 17,
+      "action_loss": 0.7939130663871765,
+      "aux_loss": 0.2382536381483078,
+      "valid_actions": 37,
+      "gradient_norms": {
+        "stem": 12.693904381184012,
+        "readout": 3.9584789872169495,
+        "gate": 0.08978931337060203,
+        "selector": 2.9522632834392725e-13
+      },
+      "wall_ms": 822.3395654931664,
+      "frames": [
+        [
+          52,
+          53,
+          54,
+          55
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 18,
+      "action_loss": 0.6113187074661255,
+      "aux_loss": 0.22173133492469788,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 11.566647171642039,
+        "readout": 3.0890869349241257,
+        "gate": 0.31280731031438336,
+        "selector": 1.7076143705707295e-13
+      },
+      "wall_ms": 966.7013268917799,
+      "frames": [
+        [
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 19,
+      "action_loss": 0.6359226107597351,
+      "aux_loss": 0.22022102773189545,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 44.484555677011286,
+        "readout": 7.439019054174423,
+        "gate": 0.7841982900863513,
+        "selector": 2.04517610189275e-12
+      },
+      "wall_ms": 888.0243422463536,
+      "frames": [
+        [
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 20,
+      "action_loss": 0.6087667346000671,
+      "aux_loss": 0.21878574788570404,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 12.072080317219566,
+        "readout": 2.7274740040302277,
+        "gate": 0.2604426880279789,
+        "selector": 5.708209973419418e-14
+      },
+      "wall_ms": 856.347887776792,
+      "frames": [
+        [
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    }
+  ],
+  "inference": {
+    "shape": [
+      1,
+      50,
+      32
+    ],
+    "finite": true,
+    "repeat_max_abs": 0.0,
+    "encoder_calls_during_denoising": 0,
+    "actual_denoise_steps_two_calls": 20,
+    "denoising_steps": 10,
+    "physical_control_executed": false
+  },
+  "load_audit": {
+    "loaded_keys": 376,
+    "model_keys": 376,
+    "inactive_keys": [],
+    "active_missing": [],
+    "unexpected": [],
+    "shape_mismatch": [],
+    "replaced_vision_keys": 437,
+    "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+    "replaced_vision_key_sample": [
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+    ],
+    "parameter_groups": {
+      "language_model": {
+        "prefixes": [
+          "vlm.model.model.language_model.",
+          "vlm.model.language_model."
+        ],
+        "model_tensors": 164,
+        "checked_tensors": 164,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 2508531712
+      },
+      "language_projection": {
+        "prefixes": [
+          "vlm.model.lm_head.",
+          "vlm.model.model.embed_tokens.",
+          "vlm.lm_head."
+        ],
+        "model_tensors": 1,
+        "checked_tensors": 1,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 526647296
+      },
+      "action_expert": {
+        "prefixes": [
+          "action_head."
+        ],
+        "model_tensors": 209,
+        "checked_tensors": 209,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 693422112
+      }
+    },
+    "vision_release": {
+      "vision_tower_detected": true,
+      "vision_param_bytes_before": 826831584,
+      "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+      "verified_removed": true,
+      "cuda_cache_cleared": false,
+      "detached_reference_kept": false,
+      "release_path": "vlm.model.model.vision_tower",
+      "vision_param_bytes_after": 0,
+      "bytes_freed": 826831584
+    },
+    "notes": [
+      "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+      "language/action parameters were checked item by item before loading"
+    ]
+  },
+  "input_provenance": "author three-channel pseudo-RAW NPZ, no Bayer claim",
+  "noise_provenance": "assumed constant variance, not calibrated sensor noise",
+  "crop": 32,
+  "data_spec": {
+    "loader": "owac.raw.rawvla_sequence.RawVLASequenceDataset",
+    "dataset_format": "robotwin2",
+    "root": "/workspace/owac/rawvla",
+    "raw_cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw",
+    "rgb_cache_root": "/workspace/owac/rawvla/data/robotwin2/rgb",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+    "stats_available": true,
+    "statistics": {
+      "normalization": "zscore",
+      "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "action_stats_key": "actions",
+      "state_stats_key": "state",
+      "available": {
+        "action": true,
+        "state": true
+      },
+      "fields": {
+        "action": [
+          "max",
+          "mean",
+          "min",
+          "std"
+        ],
+        "state": [
+          "max",
+          "mean",
+          "min",
+          "std"
+        ]
+      },
+      "source": {
+        "stats_key": "",
+        "selection": "author _load_stats rules",
+        "file": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+      }
+    },
+    "normalization": "zscore",
+    "camera_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "head_camera",
+      "left_camera",
+      "right_camera"
+    ],
+    "camera_dtype": "floating",
+    "raw_value_policy": {
+      "mode": "author_float32_passthrough",
+      "unit": "hdr_derived_raw_float32_author_units",
+      "evidence": "author cache stores head/left/right_camera_raw_float32 as HDR-derived RAW float32 in its own units; the author loader divides only uint8 bursts and never rescales float32. Recorded sample data/robotwin2/raw/grab_roller/episode_000018.npz (RawVLA-Bench 8586c59, dataset-check.json): head max 0.4332, left max 0.3744, right max 0.3738, min 0.0 (right min 2.6e-4). Dividing by 255 would push the whole scene below 1.7e-3, and a per-frame max scaling would destroy the lighting-domain information, so OWAC passes these arrays through and applies only a calibration declared in the metadata.",
+      "forbidden": [
+        "dividing RoboTwin float32 RAW by 255",
+        "per-frame max normalisation of any RAW array",
+        "renaming three-channel pseudo-RAW as Bayer CFA"
+      ]
+    },
+    "channels_per_camera": 3,
+    "sampling_geometry": "per_pixel_trichromatic_collocated",
+    "supported_input_modes": {
+      "rawvla_rgb3": "this loader: co-located three-channel measurement windows",
+      "bayer_cfa": "owac.raw.cfa plane stacks wrapped by measurement_window_from_cfa; the RawVLA NPZ cache itself is three-channel and is never called Bayer",
+      "sequence1d": "owned by the one-dimensional adapter, not by this loader"
+    },
+    "state_source_key": "actions",
+    "state_dim": 14,
+    "state_kind": "cached_joint_target_channel",
+    "state_note": "actions[t][:14] is the cached 14-dim joint target channel that the author reuses as the current state; the 16-dim robot_states is an end-pose representation and is never used as the joint state. The cache records commands, not measured executed actions.",
+    "proprio_available": false,
+    "executed_action_available": false,
+    "executed_action_note": "the cache holds commands and future supervision; no measured executed action is recorded, so the flag is False and executed_action stays None",
+    "action_dim": 14,
+    "action_offset": 1,
+    "action_horizon": 50,
+    "window": 4,
+    "observation_stride": 1,
+    "observation_stride_verified": false,
+    "time_unit_observed": {
+      "frame": 21
+    },
+    "timestamp_keys_checked": [
+      "timestamps",
+      "timestamps_seconds",
+      "timestamp",
+      "time_stamps",
+      "observation_timestamps",
+      "time"
+    ],
+    "time_unit_policy": "seconds when the episode declares a finite, monotone timestamp array, otherwise 'frame' with the frame index in the timestamp field; seconds are never invented and no nominal frame rate is assumed",
+    "noise_model": null,
+    "episodes": 632,
+    "episodes_in_split": 508,
+    "split": {
+      "split_version": "n01-rawvla-split-v1",
+      "requested": "train",
+      "counts": {
+        "files": 632,
+        "groups": 632,
+        "train_files": 508,
+        "validation_files": 124,
+        "train_groups": 508,
+        "validation_groups": 124
+      },
+      "rule": [
+        "rule: sha256(split_version + '|' + source_group) -> u64/2**64 < train_fraction",
+        "paired RGB/RAW files and lighting variants of one source share a group by construction",
+        "official RawVLA closed-loop manifests are kept separate and never mixed into this split"
+      ],
+      "manifest_path": null,
+      "source_groups": 632
+    },
+    "identity_fields": {
+      "path": "data/<format>/{raw,rgb}/ prefix dropped, variant_NN/lighting suffixes stripped",
+      "metadata": [
+        "source_group",
+        "capture_session",
+        "session_id",
+        "acquisition_id"
+      ]
+    },
+    "identity_fields_observed": {
+      "lighting_domain": [],
+      "source_group": [],
+      "capture_session": [],
+      "session_id": [],
+      "acquisition_id": []
+    },
+    "identity_fields_available": {
+      "relative_path": true,
+      "source_group": false,
+      "capture_session": false,
+      "session_id": false,
+      "acquisition_id": false,
+      "lighting_domain": false
+    },
+    "official_closed_loop_manifest": {
+      "used": false,
+      "note": "the official RawVLA closed-loop manifest is kept separate and never mixed into this loader's split"
+    },
+    "data_present": true,
+    "real_data_available": null,
+    "real_data_available_note": "True means the provenance scan covered every episode and found no synthetic declaration; None means the scan has not covered the inventory on this machine, so availability is unverified rather than claimed",
+    "synthetic_fixture_episodes": [],
+    "provenance_scanned_episodes": 1,
+    "fixture_provenance": "real",
+    "range_evidence": null,
+    "missing_assets": [
+      {
+        "kind": "root",
+        "path": "/workspace/owac/rawvla",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "RawVLA server snapshot root holding the RawVLA-Bench download"
+      },
+      {
+        "kind": "raw_cache",
+        "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "robotwin2 raw NPZ cache; expected author keys head_camera_raw_float32, left_camera_raw_float32, right_camera_raw_float32"
+      },
+      {
+        "kind": "stats",
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "author normalisation statistics (zscore)"
+      },
+      {
+        "kind": "rgb_cache",
+        "path": "/workspace/owac/rawvla/data/robotwin2/rgb",
+        "required": false,
+        "satisfied": false,
+        "env_var": null,
+        "note": "author paired RGB chroma cache; OWAC never loads it because the main path produces no RGB target"
+      }
+    ]
+  },
+  "encoder_parameter_update": 4.6162583589321,
+  "backend_gradients": 0,
+  "torch": "2.7.1+cu128",
+  "python_runtime": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+  "peak_gpu_bytes": 10308631040
+}

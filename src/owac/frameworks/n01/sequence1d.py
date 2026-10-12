@@ -242,7 +242,14 @@ class Sequence1DEvidenceBlock(nn.Module):
         self.norm = nn.GroupNorm(_groups(width), width)
 
     def forward(self, features, statistics, graph):
-        mixed = features + self.exchange(features) * graph
+        batch, channels, length = features.shape
+        groups = self.exchange.groups
+        patches = F.pad(features, (1, 1)).unfold(-1, 3, 1).permute(0, 1, 3, 2)
+        patches = patches.reshape(batch, groups, channels // groups, 3, length)
+        kernel = self.exchange.weight.reshape(groups, channels // groups, channels // groups, 3)
+        exchanged = torch.einsum("goik,bgikl->bgol", kernel, patches * graph[:, None, None])
+        exchanged = exchanged.reshape(batch, channels, length) + self.exchange.bias[None, :, None]
+        mixed = features + exchanged
         retain = self.gate(torch.cat([mixed, statistics], dim=1))
         proposal = self.update(mixed)
         return F.relu(mixed + self.norm(retain * proposal + (1.0 - retain) * mixed))
@@ -297,12 +304,30 @@ class N01Sequence1DEncoder(nn.Module):
         budget = budget or ComputeBudget(max_history=self.config.max_history)
         previous = state
         shifted = push_fn(previous, frame)
+        fresh = (shifted.filled > previous.filled) | (shifted.frame_ids[0] != previous.frame_ids[0])
+        if not bool(fresh.any()) or budget.max_updates <= 0:
+            if previous.last_representation is None:
+                raise ValueError("no prior representation to reuse")
+            return EncoderOutput(
+                previous.last_representation,
+                shifted,
+                previous.valid[0].any(1),
+                {"reused_representation": True},
+                {"updates": 0},
+            )
         measured_edges, edge_info = self.integrator.edge_field(frame, shifted)
         plane = shifted.plane_support("sequence")
         measured = shifted.valid[0].any(dim=1)
         edges, support_age, merges, splits = self.integrator.update_edges(
-            plane.edges, plane.support_age, measured_edges, measured
+            plane.edges, plane.support_age, measured_edges, measured, plane.open_edges
         )
+        mask = fresh[:, None, None, None, None]
+        edges = torch.where(mask, edges, plane.edges)
+        self.integrator.last_open_edges = torch.where(
+            mask, self.integrator.last_open_edges, plane.open_edges
+        )
+        support_age = torch.where(mask, support_age, plane.support_age)
+        merges, splits = merges * fresh, splits * fresh
         # Write every support field back, exactly as the 2-D encoder does: the
         # cumulative merge/split counters and `seen`/`last_seen` are part of the
         # state, not only of this step's diagnostics.
@@ -310,15 +335,21 @@ class N01Sequence1DEncoder(nn.Module):
         shifted.support["sequence"] = replace(
             plane,
             edges=edges,
-            seen=plane.seen | measured[:, None, None, None],
+            open_edges=self.integrator.last_open_edges,
+            seen=plane.seen | measured[:, None, None],
             support_age=support_age,
-            last_seen=torch.where(measured[:, None, None], now, plane.last_seen),
+            last_seen=torch.where(measured, now, plane.last_seen),
             merge_count=plane.merge_count + merges,
             split_count=plane.split_count + splits,
         )
-        statistics, connectivity = self.integrator.domain_statistics(shifted, edges)
+        statistics, connectivity = self.integrator.domain_statistics(
+            shifted, torch.where(self.integrator.last_open_edges, edges, torch.zeros_like(edges))
+        )
         weights = self._selection_weights(statistics, connectivity)
         features = self._encode(shifted, statistics, connectivity, weights)
+        if previous.last_representation is not None:
+            features = torch.where(fresh[:, None, None], features, previous.last_representation)
+        shifted.last_representation = features
         self.last_statistics = statistics
         self.last_connectivity = connectivity
         support = shifted.support["sequence"]
@@ -329,7 +360,9 @@ class N01Sequence1DEncoder(nn.Module):
             "merge_count": float(support.merge_count.float().mean().detach()),
             "split_count": float(support.split_count.float().mean().detach()),
             "mixture_participation": float(
-                (1.0 / (weights**2).sum(dim=0).clamp_min(1e-9)).mean().detach()
+                torch.where(weights.sum(0) > 0, 1.0 / weights.square().sum(0).clamp_min(1e-9), 0.0)
+                .mean()
+                .detach()
             ),
         }
         self.last_diagnostics = diagnostics
@@ -391,7 +424,15 @@ class N01Sequence1DEncoder(nn.Module):
                 f"1-D statistics block has {statistics_tensor.shape[1]} channels, blocks "
                 f"were built for {self.statistics_channels}"
             )
-        graph = (weights * connectivity).sum(dim=0).reshape(weights.shape[1], 1, -1)
+        support = state.plane_support("sequence")
+        strength = torch.where(support.open_edges, support.edges, torch.zeros_like(support.edges))
+        graph = torch.stack(
+            [
+                self.integrator._edge_coefficient(strength, 0, dx, 1)[0][:, 0, 0]
+                for dx in (-1, 0, 1)
+            ],
+            1,
+        )
         for index in range(config.num_blocks):
             features = self.blocks[index](features, statistics_tensor, graph)
         return self.readout(features)

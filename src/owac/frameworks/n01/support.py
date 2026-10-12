@@ -6,12 +6,13 @@ Definitions (all causal; only the current and past frames are used)
 ------------------------------------------------------------------
 * A **support domain** for target position ``p`` is the Cartesian product of a
   spatial radius ``r`` in ``spatial_radii``, a temporal length ``D`` in
-  ``time_depths`` and one spatial offset inside the ``(2r+1) x (2r+1)`` window.
-  Candidates are enumerated row-major, radius outer, depth middle, offset inner.
+  ``time_depths``. All connected offsets inside the radius contribute samples
+  to that one domain. Tiny has nine domains, not 105 single-offset candidates.
 * The same-plane one-hop support graph uses the (left, up) neighbour pairs at
   their true sampling positions.  ``merge_threshold > split_threshold`` is the
   hysteresis band: an edge opens only after sustained compatibility, and a new
-  significant refutation, motion inconsistency or occlusion closes it at once.
+  significant measured refutation closes it at once. Missing evidence decays
+  slowly; the explicit open bit remembers the hysteresis band.
 * Per-sample coefficient ``w_i = m_i * c_i / (v_i + eps)`` with
   ``S = sum w_i x_i``, ``W = sum w_i``, ``mu = S/(W+eps)``,
   ``V_diag = sum w_i^2 v_i / (W^2+eps)`` and ``age = sum w_i (t - t_i)/(W+eps)``.
@@ -19,8 +20,8 @@ Definitions (all causal; only the current and past frames are used)
   weights along the local path inside the window, evaluated by separability from
   the target position.  It decays with the number of hops and stays bounded by
   the window, so no arbitrary transitive connection is pulled in.
-  ``reference_domains`` replaces it with the hard one-hop connectivity
-  indicator of the same component; both use the identical statistic formulas and
+  ``reference_domains`` independently walks the same original sources with
+  those coefficients; both use the identical statistic formulas and
   are compared numerically in ``tests/encoders/n01/test_support.py``.
 
 ``V_diag`` is a variance estimate only under the corresponding independent-noise
@@ -259,8 +260,9 @@ class SupportDomainIntegrator(nn.Module):
         if decay <= 0:
             gate = 1.0
         else:
-            separation = spacing * math.sqrt(2.0)
-            gate = math.exp(-(separation**2) / (2.0 * float(decay) ** 2))
+            separation = spacing
+            physical_radius = spacing * float(decay)
+            gate = math.exp(-(separation**2) / (2.0 * physical_radius**2))
         gate = max(min(gate, 1.0), 0.0)
         return torch.full(
             (batch, planes, 2, height, width), gate, device=current.device, dtype=current.dtype
@@ -294,7 +296,7 @@ class SupportDomainIntegrator(nn.Module):
         refined = (flat * (1.0 + scale * residual)).clamp(0.0, 1.0)
         return refined.reshape(batch, planes, 2, height, width)
 
-    def update_edges(self, previous_edges, support_age, new_edges, valid):
+    def update_edges(self, previous_edges, support_age, new_edges, valid, previous_open=None):
         """Hysteresis update; returns edges, per-pair age and merge/split counts.
 
         ``merge_threshold`` is the barrier an edge must cross to become open, and
@@ -303,8 +305,8 @@ class SupportDomainIntegrator(nn.Module):
         * compatible evidence (``new_edges >= merge_threshold``): the edge rises
           towards the measured compatibility by ``edge_alpha``, so it needs
           sustained agreement before it opens;
-        * measured refutation (``new_edges < split_threshold``): the edge falls
-          immediately by ``edge_forget`` instead of waiting for the slow path;
+        * measured refutation (``new_edges < split_threshold``): replace the
+          strength by the new incompatibility and close immediately;
         * occlusion (no measurement for the pair): the edge only decays by
           ``edge_forget``, so a short occlusion does not destroy the support.
 
@@ -335,13 +337,19 @@ class SupportDomainIntegrator(nn.Module):
         seen = measured > 0.5
         compatible = seen & (new_edges >= config.merge_threshold)
         refuted = seen & (new_edges < config.split_threshold)
-        rising = previous_edges + (new_edges - previous_edges) * config.edge_alpha
-        falling = previous_edges * (1.0 - config.edge_forget)
-        edges = torch.where(compatible, rising, torch.where(refuted, falling, falling))
+        rising = previous_edges.abs() + (new_edges - previous_edges.abs()) * config.edge_alpha
+        falling = previous_edges.abs() * (1.0 - config.edge_forget)
+        if previous_open is None:
+            previous_open = previous_edges >= config.merge_threshold
+        candidate = torch.where(compatible, rising, torch.where(refuted, new_edges, falling))
+        next_open = torch.where(
+            previous_open, candidate >= config.split_threshold, candidate >= config.merge_threshold
+        )
+        edges = candidate
         edges = edges.clamp(0.0, 1.0)
-        previous_open = previous_edges >= config.merge_threshold
-        next_open = edges >= config.merge_threshold
-        age = torch.where(seen, support_age + 1.0, support_age)
+        next_open = next_open & (edges >= config.split_threshold)
+        self.last_open_edges = next_open
+        age = torch.where(seen, support_age + 1.0, torch.zeros_like(support_age))
         merges = (next_open & ~previous_open).sum(dim=(1, 2, 3, 4))
         splits = (~next_open & previous_open).sum(dim=(1, 2, 3, 4))
         return edges, age, merges, splits
@@ -436,10 +444,10 @@ class SupportDomainIntegrator(nn.Module):
                 coefficient = coefficient * shifted(left, row, delta)
         if row > 0:
             for delta in range(row, 0, -1):
-                coefficient = coefficient * shifted(up, delta, col)
+                coefficient = coefficient * shifted(up, delta, 0)
         elif row < 0:
             for delta in range(row + 1, 1):
-                coefficient = coefficient * shifted(up, delta, col)
+                coefficient = coefficient * shifted(up, delta, 0)
         return coefficient
 
     def _unfold_time(self, tensor: torch.Tensor, window: int) -> torch.Tensor:
@@ -453,83 +461,26 @@ class SupportDomainIntegrator(nn.Module):
         return self._unfold_time(tensor, window).cumsum(dim=0)
 
     def domain_statistics(self, state, edges, motion=None, estimator=None, depths=None):
-        """Vectorised statistics of every candidate domain (the fast path).
+        """Integrate each bounded radius x time domain, once per source sample.
 
-        ``x`` is the plane-collapsed calibrated measurement, ``v`` the noise
-        variance, ``c`` the support coefficient and ``score = 1/(v+eps)``; the
-        documented update ``w = m * c * score`` is applied once per candidate
-        domain.  Depth ``D`` covers the last ``D`` slots that actually hold a
-        unique measurement, so a repeated frame shrinks the window instead of
-        silently counting a duplicate as evidence.
+        Offsets are samples within a domain, not separate domains. Coefficients
+        enter W/S linearly and variance/squared-weight sums quadratically.
+        Counts are unweighted integers and exclude invalid or disconnected data.
         """
-        config = self.config
+        if motion is not None and self.config.fractional_alignment:
+            return self.fractional_statistics(
+                state, edges, motion, tuple(self.config.time_depths if depths is None else depths)
+            )
         values, variance, valid = self.aligned_slots(state, motion, estimator)
-        steps, batch = values.shape[0], values.shape[1]
-        height, width = state.shape
-        planes = config.planes
-        plane_values = self._split_planes(values, steps, batch, (height, width))
-        plane_variance = self._split_planes(variance, steps, batch, (height, width))
-        plane_valid = self._split_valid(valid, steps, batch, (height, width)).float()
-
-        depths = tuple(int(item) for item in (config.time_depths if depths is None else depths))
-        # Every slot is walked: a slot without a measurement contributes nothing
-        # (its coverage mask is zero), and walking all of them keeps the depth
-        # arithmetic independent of where the repeated frames happen to sit.  The
-        # buffer holds at most ``max_history`` slots, so this stays bounded.
-        observed = state.observed
-        # The rank table below is built over these slots; a depth beyond the deepest
-        # available observation is clamped when the depth is resolved.
-        max_depth = min(int(max(depths)), steps)
-        window = self.window
-        area = height * width
-        kernel = window * window
-
-        coverage = torch.stack(
-            [self._coverage(state, slot).float() for slot in range(max_depth)], dim=0
-        )
-        age = measurement_age(state)[:max_depth]
-        age = torch.nan_to_num(age, nan=0.0, posinf=0.0)
-        age = age[:, :, None, None, None].expand(-1, -1, planes, -1, -1)
-
-        active = plane_valid[:max_depth] * coverage
-        score = active / (plane_variance[:max_depth] + _EPS)
-        x = plane_values[:max_depth]
-
-        # The cumulative tensors carry a leading zero, so index D is the prefix
-        # over the first D walked slots.
-        leading = torch.zeros_like(score[:1])
-        num = self._cumulative_time(torch.cat([leading, score * x], dim=0), window)
-        square_variance = self._cumulative_time(
-            torch.cat([leading, (score**2) * plane_variance[:max_depth]], dim=0), window
-        )
-        age_mass = self._cumulative_time(torch.cat([leading, score * age], dim=0), window)
-        square = self._cumulative_time(torch.cat([leading, score**2], dim=0), window)
-        mass = self._cumulative_time(torch.cat([leading, score], dim=0), window)
-        samples = self._cumulative_time(torch.cat([leading, (score > 0).float()], dim=0), window)
-        frames = self._cumulative_time(torch.cat([leading, active], dim=0), window)
-
-        # Depth D maps onto the D-th slot that actually holds a unique
-        # measurement, whether or not slot 0 holds one.  ``rank_to_slot[r]`` is the
-        # slot index of the r-th observation, so a depth is resolved by the rank of
-        # the last observation it covers.
-        observed_prefix = observed[:max_depth].cpu().numpy().astype("int64")
-        rank_source = observed_prefix.cumsum(axis=0)
-        rank = torch.as_tensor(rank_source - 1, device=values.device, dtype=torch.int64)
-        rank = torch.where(
-            torch.as_tensor(observed_prefix > 0, device=values.device, dtype=torch.bool),
-            rank,
-            torch.zeros_like(rank),
-        )
-        ranks = rank.max(dim=1).values  # walked slots per batch member
-        observed_mask = observed[:max_depth]
-        rank_to_slot = []
-        for member_index in range(batch):
-            column = observed_mask[:, member_index]
-            slots = torch.nonzero(column, as_tuple=False).squeeze(1)
-            rank_to_slot.append(slots)
-        max_rank = int(ranks.max().item()) if ranks.numel() else 0
-
-        statistics = {
+        n, batch, _, height, width = values.shape
+        planes = self.config.planes
+        x = self._split_planes(values, n, batch, (height, width))
+        v = self._split_planes(variance, n, batch, (height, width))
+        m = self._split_valid(valid, n, batch, (height, width))
+        m = m & state.observed[:, :, None, None, None]
+        ages = torch.nan_to_num(measurement_age(state), nan=0.0, posinf=0.0)
+        depths = tuple(self.config.time_depths if depths is None else depths)
+        chips = {
             key: []
             for key in (
                 "mu",
@@ -541,95 +492,56 @@ class SupportDomainIntegrator(nn.Module):
                 "weight_concentration",
             )
         }
-        connectivity, radius_index, depth_index, offset_index = [], [], [], []
-        plane_count = batch * planes
-        pixel = torch.arange(area, device=values.device)
+        connections, radii, depth_ids = [], [], []
+        window = self.window
 
-        slot_count = max_depth + 1  # the leading zero makes the first axis D+1
+        # Unfold preserves the original source identity (slot, plane, coordinate).
+        def patches(tensor):
+            flat = tensor.reshape(n * batch * planes, 1, height, width).float()
+            return F.unfold(flat, window, padding=self.radius).reshape(
+                n, batch, planes, window * window, height, width
+            )
 
-        def patch(cumulative, rank_index, flat_index, coefficient):
-            """Prefix through the ``rank_index``-th walked slot for one offset."""
-            # Resolve the depth rank to the slot of the last observation covered.
-            wanted = min(int(rank_index), max_rank)
-            slot = torch.zeros((batch,), dtype=torch.int64, device=values.device)
-            for member_index, slots in enumerate(rank_to_slot):
-                if slots.numel():
-                    slot[member_index] = slots[min(wanted, slots.numel() - 1)]
-            # The unfold output folds batch and plane into one axis (batch-major),
-            # so the per-batch slot index is repeated once per CFA plane.
-            if planes > 1:
-                slot = slot[:, None].expand(batch, planes).reshape(plane_count)
-            # cumsum carries a leading zero, so the prefix through slot s is entry
-            # s + 1, clamped to the deepest walked slot.
-            slot = (slot + 1).clamp(max=slot_count - 1)
-            # ``cumulative`` is the ordinary unfold output [T, B*P, H*W*K] with a
-            # leading zero, so entry ``slot`` already is the prefix through walked
-            # slot ``slot - 1`` for every batch-plane member.
-            flat = cumulative.reshape(cumulative.shape[0], plane_count, area * kernel)
-            slot_index = slot.reshape(1, plane_count, 1).expand(1, plane_count, area * kernel)
-            selected = torch.gather(flat, 0, slot_index)[0]
-            base = flat_index * area
-            offset_index = (base + pixel)[None, :].expand(plane_count, area)
-            return torch.gather(selected, 1, offset_index) * coefficient
-
-        def reshape(tensor: torch.Tensor) -> torch.Tensor:
-            return tensor.reshape(batch, planes, height, width)
-
-        for radius in config.spatial_radii:
+        xp, vp, mp = patches(x), patches(v), patches(m)
+        for radius in self.config.spatial_radii:
             offsets = candidate_offsets(radius)
+            indices = [(dy + self.radius) * window + dx + self.radius for dy, dx in offsets]
+            coefficients = torch.stack(
+                [self._edge_coefficient(edges, dy, dx, radius)[0] for dy, dx in offsets], dim=2
+            )
             for depth in depths:
-                clipped = min(int(depth), steps)
-                for local_offset, (row, col) in enumerate(offsets):
-                    flat_index = (row + self.radius) * window + (col + self.radius)
-                    support, connected = self._edge_coefficient(edges, row, col, radius)
-                    coefficient = support.reshape(plane_count, area)
-                    count = patch(mass, clipped - 1, flat_index, coefficient)
-                    denominator_mass = count.clamp_min(_EPS)
-                    mu = patch(num, clipped - 1, flat_index, coefficient) / denominator_mass
-                    variance_proxy = patch(
-                        square_variance, clipped - 1, flat_index, coefficient
-                    ) / (denominator_mass**2 + _EPS)
-                    mean_age = (
-                        patch(age_mass, clipped - 1, flat_index, coefficient) / denominator_mass
-                    )
-                    concentration = count**2 / (
-                        patch(square, clipped - 1, flat_index, coefficient) + _EPS
-                    )
-                    statistics["mu"].append(reshape(mu))
-                    statistics["variance_proxy"].append(reshape(variance_proxy))
-                    statistics["age"].append(reshape(mean_age))
-                    statistics["support_count"].append(reshape(count))
-                    statistics["unique_frames"].append(
-                        reshape(patch(frames, clipped - 1, flat_index, coefficient))
-                    )
-                    statistics["unique_samples"].append(
-                        reshape(patch(samples, clipped - 1, flat_index, coefficient))
-                    )
-                    statistics["weight_concentration"].append(reshape(concentration))
-                    connectivity.append(connected.reshape(batch, planes, height, width).float())
-                    radius_index.append(radius)
-                    depth_index.append(int(depth))
-                    offset_index.append(local_offset)
+                allowed = (state.observed.long().cumsum(0) <= int(depth)) & state.observed
+                usable = (mp[:, :, :, indices] > 0.5) & allowed[:, :, None, None, None, None]
+                c = coefficients[None] * usable
+                w = c / (vp[:, :, :, indices] + _EPS)
+                total = w.sum(dim=(0, 3))
+                denom = total.clamp_min(_EPS)
+                chips["mu"].append((w * xp[:, :, :, indices]).sum(dim=(0, 3)) / denom)
+                chips["variance_proxy"].append(
+                    (w.square() * vp[:, :, :, indices]).sum(dim=(0, 3)) / (denom.square() + _EPS)
+                )
+                chips["age"].append(
+                    (w * ages[:, :, None, None, None, None]).sum(dim=(0, 3)) / denom
+                )
+                actual = c > 0
+                chips["support_count"].append(total)
+                chips["unique_samples"].append(actual.sum(dim=(0, 3)).float())
+                chips["unique_frames"].append(actual.any(dim=3).sum(0).float())
+                chips["weight_concentration"].append(
+                    total.square() / (w.square().sum(dim=(0, 3)) + _EPS)
+                )
+                connections.append((coefficients > 0).float().mean(dim=2))
+                radii.append(radius)
+                depth_ids.append(int(depth))
         device = values.device
-        return (
-            DomainStatistics(
-                mu=torch.stack(statistics["mu"], dim=0),
-                variance_proxy=torch.stack(statistics["variance_proxy"], dim=0),
-                age=torch.stack(statistics["age"], dim=0),
-                support_count=torch.stack(statistics["support_count"], dim=0),
-                unique_frames=torch.stack(statistics["unique_frames"], dim=0),
-                unique_samples=torch.stack(statistics["unique_samples"], dim=0),
-                weight_concentration=torch.stack(statistics["weight_concentration"], dim=0),
-                radius_index=torch.tensor(radius_index, device=device, dtype=torch.int64),
-                depth_index=torch.tensor(depth_index, device=device, dtype=torch.int64),
-                offset_index=torch.tensor(offset_index, device=device, dtype=torch.int64),
-                offsets=[
-                    item for radius in config.spatial_radii for item in candidate_offsets(radius)
-                ],
-                depths=depths,
-            ),
-            torch.stack(connectivity, dim=0),
-        )
+        return DomainStatistics(
+            **{key: torch.stack(value) for key, value in chips.items()},
+            radius_index=torch.tensor(radii, device=device),
+            depth_index=torch.tensor(depth_ids, device=device),
+            offset_index=torch.zeros(len(radii), dtype=torch.long, device=device),
+            offsets=[(0, 0)] * len(radii),
+            depths=depths,
+        ), torch.stack(connections)
 
     # -- forward ------------------------------------------------------------
     def forward(self, frame, state, motion=None, estimator=None, edges=None):
@@ -651,43 +563,19 @@ class SupportDomainIntegrator(nn.Module):
         return statistics, connectivity, edges, diagnostics
 
     # -- reference implementation ------------------------------------------
-    def reference_domains(self, state, edges, depths=None, motion=None, estimator=None):
-        """Per-source Python reference solution for the same candidate domains.
+    def fractional_statistics(self, state, edges, motion, depths):
+        """Combine interpolation paths by ORIGINAL source ID before squaring.
 
-        Deliberately explicit and slow: each candidate domain is rebuilt from the
-        unique observation buffer by walking its source samples with the identical
-        ``w = m * c / (v + eps)`` formula and the identical supported path weight
-        of ``domain_statistics``.  The two implementations are compared
-        numerically in ``tests/encoders/n01/test_support.py``; this one is the
-        definition of record for small, hand-checkable inputs.
+        Adjacent interpolated samples share source pixels. Squaring each path
+        separately would invent independent evidence and understate variance.
         """
-        config = self.config
-        if motion is not None and estimator is not None and config.alignment != "none":
-            raise NotImplementedError("the reference solution integrates unaligned frames only")
-        values = state.values
-        variance = state.variance
-        valid = state.valid
-        slots, batch = values.shape[0], values.shape[1]
-        height, width = state.shape
-        planes = config.planes
-        age_source = torch.nan_to_num(measurement_age(state), nan=0.0, posinf=0.0)
-        observed = state.observed
-        steps = max(1, min(slots, int(state.filled.max().item()) or 1))
-        depths = tuple(int(item) for item in (config.time_depths if depths is None else depths))
-
-        def sample(slot, index, plane, row, col):
-            if planes == 1:
-                return (
-                    float(values[slot, index, :, row, col].mean()),
-                    float(variance[slot, index, :, row, col].mean()),
-                    bool((valid[slot, index, :, row, col] > 0.5).all()),
-                )
-            return (
-                float(values[slot, index, plane, row, col]),
-                float(variance[slot, index, plane, row, col]),
-                bool(valid[slot, index, plane, row, col] > 0.5),
-            )
-
+        values, variance, valid = state.values, state.variance, state.valid
+        n, batch, _, h, w = values.shape
+        planes = self.config.planes
+        x = self._split_planes(values, n, batch, (h, w))
+        v = self._split_planes(variance, n, batch, (h, w))
+        m = self._split_valid(valid, n, batch, (h, w))
+        ages = torch.nan_to_num(measurement_age(state), nan=0.0, posinf=0.0)
         chips = {
             key: []
             for key in (
@@ -700,114 +588,175 @@ class SupportDomainIntegrator(nn.Module):
                 "weight_concentration",
             )
         }
-        radius_index, depth_index, offset_index = [], [], []
-        for plane in range(planes):
-            for radius in config.spatial_radii:
-                offsets = candidate_offsets(radius)
-                for depth in depths:
-                    clipped = min(int(depth), steps)
-                    for offset_index_local, (row, col) in enumerate(offsets):
-                        chip = {
-                            key: torch.zeros((batch, height, width), dtype=values.dtype)
-                            for key in chips
-                        }
-                        for index in range(batch):
-                            for inner_row in range(height):
-                                for inner_col in range(width):
-                                    target_row = inner_row + row
-                                    target_col = inner_col + col
-                                    if not (0 <= target_row < height and 0 <= target_col < width):
-                                        continue
-                                    # The support relation is indexed by the
-                                    # *target* position: it is the weight of the
-                                    # path from the offset sample to that target.
-                                    coefficient = float(
-                                        self.path_weight(edges, row, col)[
-                                            index, plane, target_row, target_col
-                                        ]
-                                    )
-                                    if coefficient <= 0.0:
-                                        continue
-                                    if not bool(
-                                        self.open_path(edges, row, col)[
-                                            index, plane, target_row, target_col
-                                        ]
-                                    ):
-                                        continue
-                                    coefficient = max(
-                                        coefficient**config.support_power, config.support_floor
-                                    )
-                                    numerator = 0.0
-                                    denominator = 0.0
-                                    square_mass = 0.0
-                                    variance_mass = 0.0
-                                    age_mass = 0.0
-                                    unique_frames = 0
-                                    unique_samples = 0
-                                    # Depth D covers the last D slots that hold a
-                                    # unique measurement, so a repeated frame
-                                    # shrinks the window instead of adding evidence.
-                                    used = 0
-                                    for slot in range(slots):
-                                        if used >= clipped:
-                                            break
-                                        if not bool(observed[slot, index]):
-                                            continue
-                                        used += 1
-                                        value, variance_value, usable = sample(
-                                            slot, index, plane, inner_row, inner_col
-                                        )
-                                        if not usable:
-                                            continue
-                                        weight = coefficient / (variance_value + _EPS)
-                                        numerator += weight * value
-                                        denominator += weight
-                                        variance_mass += (weight**2) * variance_value
-                                        square_mass += weight**2
-                                        age_mass += weight * float(age_source[slot, index])
-                                        unique_samples += 1
-                                        unique_frames += 1
-                                    if denominator <= 0.0:
-                                        continue
-                                    chip["mu"][index, target_row, target_col] = (
-                                        numerator / denominator
-                                    )
-                                    chip["variance_proxy"][index, target_row, target_col] = (
-                                        variance_mass / (denominator**2 + _EPS)
-                                    )
-                                    chip["age"][index, target_row, target_col] = (
-                                        age_mass / denominator
-                                    )
-                                    chip["support_count"][index, target_row, target_col] = (
-                                        denominator
-                                    )
-                                    chip["weight_concentration"][index, target_row, target_col] = (
-                                        denominator** 2 / (square_mass + _EPS)
-                                    )
-                                    chip["unique_frames"][index, target_row, target_col] = float(
-                                        unique_frames
-                                    )
-                                    chip["unique_samples"][index, target_row, target_col] = float(
-                                        unique_samples
-                                    )
-                        for key in chips:
-                            chips[key].append(chip[key])
-                        radius_index.append(radius)
-                        depth_index.append(int(depth))
-                        offset_index.append(offset_index_local)
-        device = values.device
+        connections, radii, depth_ids = [], [], []
+        rows = torch.arange(h, device=values.device)[None, :, None]
+        cols = torch.arange(w, device=values.device)[None, None, :]
+        for radius in self.config.spatial_radii:
+            offsets = candidate_offsets(radius)
+            path = {offset: self._edge_coefficient(edges, *offset, radius)[0] for offset in offsets}
+            for depth in depths:
+                template = torch.zeros(batch, planes, h, w, device=values.device)
+                W, S, Q, A, W2, samples, frames = [template.clone() for _ in range(7)]
+                rank = state.observed.long().cumsum(0)
+                for slot in range(n):
+                    if not bool(((rank[slot] <= int(depth)) & state.observed[slot]).any()):
+                        continue
+                    field = motion[slot]
+                    fine = field.shift + (field.fractional if field.fractional is not None else 0.0)
+                    base = fine.floor().long()
+                    frac = fine - base
+                    # The key is the offset from the member's floored warp. Two
+                    # paths with the same key point at the same original sample.
+                    coefficients = {}
+                    for dy, dx in offsets:
+                        for cy in (0, 1):
+                            for cx in (0, 1):
+                                alpha = frac[:, 0] if cy else 1 - frac[:, 0]
+                                beta = frac[:, 1] if cx else 1 - frac[:, 1]
+                                key = (dy + cy, dx + cx)
+                                c = path[(dy, dx)] * (alpha * beta)[:, None, None, None]
+                                coefficients[key] = coefficients.get(key, 0.0) + c
+                    used_frame = torch.zeros_like(template, dtype=torch.bool)
+                    for (dy, dx), c in coefficients.items():
+                        rr, cc = (
+                            rows + base[:, 0, None, None] + dy,
+                            cols + base[:, 1, None, None] + dx,
+                        )
+                        inside = (rr >= 0) & (rr < h) & (cc >= 0) & (cc < w)
+                        flat = (rr.clamp(0, h - 1) * w + cc.clamp(0, w - 1)).expand(batch, h, w)
+                        index = flat.reshape(batch, 1, -1).expand(batch, planes, -1)
+
+                        def gather(tensor, slot=slot, index=index):
+                            return (
+                                tensor[slot]
+                                .reshape(batch, planes, -1)
+                                .gather(2, index)
+                                .reshape(batch, planes, h, w)
+                            )
+
+                        usable = gather(m) & inside[:, None] & field.valid[:, None, None, None]
+                        usable &= ((rank[slot] <= int(depth)) & state.observed[slot])[
+                            :, None, None, None
+                        ]
+                        c = c * usable
+                        vv = gather(v)
+                        weight = c / (vv + _EPS)
+                        actual = c > 0
+                        W = W + weight
+                        S = S + weight * gather(x)
+                        Q = Q + weight.square() * vv
+                        W2 = W2 + weight.square()
+                        A = A + weight * ages[slot, :, None, None, None]
+                        samples = samples + actual
+                        used_frame |= actual
+                    frames = frames + used_frame
+                denominator = W.clamp_min(_EPS)
+                for key, value in (
+                    ("mu", S / denominator),
+                    ("variance_proxy", Q / (denominator.square() + _EPS)),
+                    ("age", A / denominator),
+                    ("support_count", W),
+                    ("unique_frames", frames),
+                    ("unique_samples", samples),
+                    ("weight_concentration", W.square() / (W2 + _EPS)),
+                ):
+                    chips[key].append(value)
+                connections.append(torch.stack([c > 0 for c in path.values()]).float().mean(0))
+                radii.append(radius)
+                depth_ids.append(int(depth))
         return DomainStatistics(
-            mu=torch.stack(chips["mu"], dim=0),
-            variance_proxy=torch.stack(chips["variance_proxy"], dim=0),
-            age=torch.stack(chips["age"], dim=0),
-            support_count=torch.stack(chips["support_count"], dim=0),
-            unique_frames=torch.stack(chips["unique_frames"], dim=0),
-            unique_samples=torch.stack(chips["unique_samples"], dim=0),
-            weight_concentration=torch.stack(chips["weight_concentration"], dim=0),
-            radius_index=torch.tensor(radius_index, device=device, dtype=torch.int64),
-            depth_index=torch.tensor(depth_index, device=device, dtype=torch.int64),
-            offset_index=torch.tensor(offset_index, device=device, dtype=torch.int64),
-            offsets=[item for radius in config.spatial_radii for item in candidate_offsets(radius)],
+            **{key: torch.stack(value) for key, value in chips.items()},
+            radius_index=torch.tensor(radii, device=values.device),
+            depth_index=torch.tensor(depth_ids, device=values.device),
+            offset_index=torch.zeros(len(radii), dtype=torch.long, device=values.device),
+            offsets=[(0, 0)] * len(radii),
+            depths=tuple(depths),
+        ), torch.stack(connections)
+
+    def reference_domains(self, state, edges, depths=None, motion=None, estimator=None):
+        """Independent scalar source walk, including integer-warped observations."""
+        values, variance, valid = self.aligned_slots(state, motion, estimator)
+        n, batch, _, height, width = values.shape
+        planes = self.config.planes
+        x = self._split_planes(values, n, batch, (height, width))
+        v = self._split_planes(variance, n, batch, (height, width))
+        m = self._split_valid(valid, n, batch, (height, width))
+        ages = measurement_age(state)
+        depths = tuple(self.config.time_depths if depths is None else depths)
+        chips = {
+            key: []
+            for key in (
+                "mu",
+                "variance_proxy",
+                "age",
+                "support_count",
+                "unique_frames",
+                "unique_samples",
+                "weight_concentration",
+            )
+        }
+        radii, depth_ids = [], []
+        for radius in self.config.spatial_radii:
+            offsets = candidate_offsets(radius)
+            coefficients = {
+                offset: self._edge_coefficient(edges, *offset, radius)[0] for offset in offsets
+            }
+            for depth in depths:
+                chip = {
+                    key: torch.zeros(batch, planes, height, width, device=values.device)
+                    for key in chips
+                }
+                for b in range(batch):
+                    slots = state.observed[:, b].nonzero().flatten().tolist()[: int(depth)]
+                    for plane in range(planes):
+                        for row in range(height):
+                            for col in range(width):
+                                samples = []
+                                used_frames = set()
+                                for slot in slots:
+                                    for dy, dx in offsets:
+                                        rr, cc = row + dy, col + dx
+                                        if not (0 <= rr < height and 0 <= cc < width):
+                                            continue
+                                        c = float(coefficients[(dy, dx)][b, plane, row, col])
+                                        if c <= 0 or not bool(m[slot, b, plane, rr, cc]):
+                                            continue
+                                        vv = float(v[slot, b, plane, rr, cc])
+                                        w = c / (vv + _EPS)
+                                        samples.append(
+                                            (
+                                                w,
+                                                float(x[slot, b, plane, rr, cc]),
+                                                vv,
+                                                float(ages[slot, b]),
+                                            )
+                                        )
+                                        used_frames.add(slot)
+                                W = sum(a[0] for a in samples)
+                                if not W:
+                                    continue
+                                index = (b, plane, row, col)
+                                chip["mu"][index] = sum(w * xx for w, xx, vv, age in samples) / W
+                                chip["variance_proxy"][index] = sum(
+                                    w * w * vv for w, xx, vv, age in samples
+                                ) / (W * W + _EPS)
+                                chip["age"][index] = sum(w * age for w, xx, vv, age in samples) / W
+                                chip["support_count"][index] = W
+                                chip["unique_samples"][index] = len(samples)
+                                chip["unique_frames"][index] = len(used_frames)
+                                chip["weight_concentration"][index] = (
+                                    W * W / (sum(w * w for w, xx, vv, age in samples) + _EPS)
+                                )
+                for key in chips:
+                    chips[key].append(chip[key])
+                radii.append(radius)
+                depth_ids.append(int(depth))
+        return DomainStatistics(
+            **{key: torch.stack(value) for key, value in chips.items()},
+            radius_index=torch.tensor(radii, device=values.device),
+            depth_index=torch.tensor(depth_ids, device=values.device),
+            offset_index=torch.zeros(len(radii), dtype=torch.long, device=values.device),
+            offsets=[(0, 0)] * len(radii),
             depths=depths,
         )
 
@@ -879,9 +828,9 @@ def edge_field_reference(values, variance, valid, config: N01Config) -> torch.Te
     channels, height, width = values.shape
     planes = config.planes
     if planes == 1:
-        plane_values = values.mean(dim=0)
-        plane_variance = variance.mean(dim=0)
-        plane_valid = (valid > 0.5).all(dim=0)
+        plane_values = values.mean(dim=0, keepdim=True)
+        plane_variance = variance.mean(dim=0, keepdim=True)
+        plane_valid = (valid > 0.5).all(dim=0, keepdim=True)
     else:
         plane_values = values
         plane_variance = variance
@@ -895,13 +844,15 @@ def edge_field_reference(values, variance, valid, config: N01Config) -> torch.Te
                     inner_col = col + offset_col
                     if not (0 <= inner_row < height and 0 <= inner_col < width):
                         continue
-                    if not (plane_valid[row, col] and plane_valid[inner_row, inner_col]):
+                    if not (
+                        plane_valid[plane, row, col] and plane_valid[plane, inner_row, inner_col]
+                    ):
                         continue
-                    centre = float(plane_values[row, col])
-                    neighbour = float(plane_values[inner_row, inner_col])
+                    centre = float(plane_values[plane, row, col])
+                    neighbour = float(plane_values[plane, inner_row, inner_col])
                     sigma = (
-                        float(plane_variance[row, col])
-                        + float(plane_variance[inner_row, inner_col])
+                        float(plane_variance[plane, row, col])
+                        + float(plane_variance[plane, inner_row, inner_col])
                         + _EPS
                     ) ** 0.5
                     innovation = abs(centre - neighbour) / sigma
@@ -915,4 +866,5 @@ def edge_field_reference(values, variance, valid, config: N01Config) -> torch.Te
                             )
                         )
                     )
-    return edges
+    radius = max(config.spatial_radii)
+    return edges * (math.exp(-1 / (2 * radius**2)) if radius else 1.0)

@@ -25,7 +25,6 @@ from owac.frameworks.n01.motion import AlignmentMode, CausalCorrespondence
 from owac.frameworks.n01.state import detach, init_state, measurement_age, push, reset, state_bytes
 from owac.frameworks.n01.support import (
     SupportDomainIntegrator,
-    candidate_offsets,
     edge_field_reference,
 )
 
@@ -201,9 +200,9 @@ def test_measurement_age_tracks_real_time_intervals_and_duplicates():
     age = measurement_age(state)
     assert float(state.now.item()) == pytest.approx(5.0)
     # Slot 0 is the duplicate (no measurement), slot 1 is the 4.0 s observation.
-    assert not bool(state.observed[0, 0])
+    assert bool(state.observed[0, 0])
     assert bool(state.observed[1, 0])
-    assert float(age[1, 0].item()) == pytest.approx(1.0)
+    assert float(age[0, 0].item()) == pytest.approx(1.0)
 
 
 # ---------------------------------------------------------------------------
@@ -235,22 +234,10 @@ def test_refutation_closes_an_open_edge_immediately():
     refuted = torch.full((1, 1, 2, 4, 4), 0.05)  # a strong new contradiction
     measured = torch.ones((1, 4, 4), dtype=torch.bool)
     edges, _, merges, _ = integrator.update_edges(previous, support_age, refuted, measured)
-    # The contradiction uses the immediate closing step, not the slow exhaustion.
-    assert float(edges.mean().item()) == pytest.approx(0.8 * (1.0 - 0.1), abs=1e-6)
-    assert float(merges.sum().item()) == 0.0
-    chain = [edges]
-    splits_seen = 0
-    for step in range(1, 6):
-        next_edges, _, _, step_splits = integrator.update_edges(
-            chain[-1], support_age, refuted, measured
-        )
-        expected = float(chain[-1].mean().item()) * 0.9
-        assert float(next_edges.mean().item()) == pytest.approx(expected, abs=1e-6)
-        chain.append(next_edges)
-        if step_splits.sum().item() > 0:
-            splits_seen = step
-            break
-    assert splits_seen == 3, splits_seen
+    assert float(edges.mean()) == pytest.approx(0.05)
+    assert not bool(integrator.last_open_edges.any())
+    assert float(merges.sum()) == 0
+    assert float(integrator.update_edges(previous, support_age, refuted, measured)[3].sum()) == 32
 
 
 def test_occlusion_without_measurement_forgets_slowly():
@@ -290,25 +277,22 @@ def test_vectorised_domains_match_per_source_reference():
     edges, _ = integrator.edge_field(None, state)
     fast, _ = integrator.domain_statistics(state, edges)
     reference = integrator.reference_domains(state, edges)
-    assert reference.mu.shape == (fast.candidate_count, 1, 5, 5)
-    assert fast.mu.shape == (fast.candidate_count, 1, 1, 5, 5)
-    fast_mu = fast.mu[:, :, 0]
-    reference_mu = reference.mu
-    # Both implementations apply the identical supported path weight; only the
-    # FP32 accumulation order differs, so they must agree to a small tolerance
-    # wherever the reference actually has support.
-    # Positions whose reference support is below 5% of one sample carry no
-    # decision; every position where a support domain actually exists must agree.
-    supported = reference_mu.abs() > 0.05
-    assert int(supported.sum().item()) > 20, int(supported.sum().item())
-    relative = (fast_mu[supported] - reference_mu[supported]).abs() / reference_mu[supported].abs()
-    assert float(relative.max().item()) < 0.25, float(relative.max().item())
+    assert reference.mu.shape == fast.mu.shape == (4, 1, 1, 5, 5)
+    for key in (
+        "mu",
+        "variance_proxy",
+        "age",
+        "support_count",
+        "unique_frames",
+        "unique_samples",
+        "weight_concentration",
+    ):
+        torch.testing.assert_close(
+            getattr(fast, key), getattr(reference, key), rtol=2e-5, atol=2e-6
+        )
     torch.testing.assert_close(fast.radius_index, reference.radius_index)
     torch.testing.assert_close(fast.depth_index, reference.depth_index)
-    torch.testing.assert_close(fast.offset_index, reference.offset_index)
-    # Candidate count is the documented Cartesian product: two spatial radii
-    # (1 + 9 offsets), two time depths.
-    assert fast.candidate_count == (1 + 9) * 2
+    assert fast.candidate_count == 2 * 2
 
 
 def test_reference_solution_reproduces_two_frame_weighting():
@@ -340,50 +324,18 @@ def test_single_frame_statistics_are_exact_for_every_radius():
     integrator = SupportDomainIntegrator(config)
     edges, _ = integrator.edge_field(None, state)
     statistics, _ = integrator.domain_statistics(state, edges)
-    supported = statistics.support_count > 0
-    assert statistics.candidate_count == 1 * (1 + 9 + 25)
-    # Any candidate that reaches outside the frame has a partial support window,
-    # so only the interior positions (where the full window is inside) recover the
-    # exact noise-weighted single-frame statistics.
-    assert float(statistics.mu[supported].max().item()) == 0.25
-    assert float(statistics.mu[supported].min().item()) > 0.249999
-    assert float(statistics.support_count[supported].min().item()) > 0.0
-    interior_supported = supported[..., 2:-2, 2:-2]
-    interior = statistics.mu[..., 2:-2, 2:-2]
-    assert int(interior_supported.sum().item()) > 0
+    assert statistics.candidate_count == 3
     torch.testing.assert_close(
-        interior[interior_supported],
-        torch.full_like(interior[interior_supported], 0.25),
-        rtol=1e-5,
-        atol=1e-6,
+        statistics.mu, torch.full_like(statistics.mu, 0.25), rtol=2e-5, atol=1e-6
     )
-    # On a constant field every domain has the same mean, but a neighbour domain
-    # averages samples, so its `V = sum w^2 v / W^2` can only be larger than the
-    # single-sample variance.
-    interior_variance = statistics.variance_proxy[..., 2:-2, 2:-2]
-    interior_values = interior_variance[interior_supported]
-    assert float(interior_values.min().item()) >= 0.02 - 1e-6
-    assert float(interior_values.max().item()) > 0.02
-    # A truncated window has a strictly larger variance proxy than a full one.
-    border = statistics.variance_proxy[..., 0, 0]
-    assert float(border.max().item()) > 0.02
-    # The identity offset keeps the full single-sample weight, so its variance
-    # proxy is exactly the declared variance and it is the minimum over all
-    # candidates; a neighbour offset averages samples and its
-    # `V = sum w^2 v / W^2` is strictly larger.
-    assert float(statistics.variance_proxy[supported].min().item()) == pytest.approx(0.02, rel=1e-4)
-    assert float(statistics.variance_proxy[supported].max().item()) > 0.02
-    assert candidate_offsets(1) == [
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-        (0, -1),
-        (0, 0),
-        (0, 1),
-        (1, -1),
-        (1, 0),
-        (1, 1),
-    ]
+    # Summing independent spatial evidence must REDUCE variance.
+    assert float(statistics.variance_proxy[2, ..., 3, 3]) < 0.02
+    assert float(statistics.variance_proxy[0, ..., 3, 3]) == pytest.approx(0.02, rel=1e-4)
+    assert float(statistics.unique_samples[2, ..., 3, 3]) == 25
+    assert float(statistics.unique_frames[2, ..., 3, 3]) == 1
+    assert float(statistics.variance_proxy[2, ..., 0, 0]) > float(
+        statistics.variance_proxy[2, ..., 3, 3]
+    )
 
 
 def test_split_removes_the_old_mixed_mean_at_a_strong_edge():
@@ -410,19 +362,9 @@ def test_split_removes_the_old_mixed_mean_at_a_strong_edge():
     assert values_seen.numel() > 0
     assert float(values_seen.min().item()) > 0.099, float(values_seen.min().item())
     assert float(values_seen.max().item()) < 0.901, float(values_seen.max().item())
-    # A domain that would have to cross the boundary has no support left, so its
-    # statistics are empty rather than a mixture of both sides.
-    crossing = statistics.mu[:, 0, 0][~supported]
-    assert float(crossing.abs().max().item()) == 0.0
-    # Candidate 5 is the offset (0, +1): its sample sits one column to the right
-    # of the target, so a dark target at column 3 would have to pull in the bright
-    # column 4.  The left edge across the discontinuity is closed, so that domain
-    # has no support.  (The identity offset is its own domain by definition.)
-    assert float(supported[5, 3, 3].item()) == 0.0
-    assert float(supported[5, 3, 5].item()) > 0.0
-    # Both sides keep supported domains of their own.
-    assert float(supported[..., 1, 1].float().sum().item()) > 0.0
-    assert float(supported[..., 1, 5].float().sum().item()) > 0.0
+    assert float(statistics.mu[0, 0, 0, 3, 3]) == pytest.approx(0.1, rel=1e-5)
+    assert float(statistics.mu[0, 0, 0, 3, 4]) == pytest.approx(0.9, rel=1e-5)
+    assert not bool(integrator.open_path(edges, 0, 1)[0, 0, 3, 3])
 
 
 # ---------------------------------------------------------------------------
@@ -471,14 +413,15 @@ def test_partial_batch_reset_keeps_other_episodes():
 
 def test_camera_state_isolation():
     config = N01Config.tiny(spatial_radii=(0,), time_depths=(1,), neighbourhood_radius=0)
-    state = init_state(config, 1, {"camera_ids": ["left", "right"], "shape": (4, 4)})
-    state = push(state, make_frame(torch.full((1, 3, 4, 4), 0.3), camera="left"))
-    left = state.plane_support("left")
-    right = state.plane_support("right")
-    assert left.edges.data_ptr() != right.edges.data_ptr()
-    assert state.camera_ids == ["left", "right"]
-    # Pushing one camera never writes into another camera's buffer slots.
-    assert int(state.filled[0].item()) == 1
+    with pytest.raises(ValueError, match="one camera"):
+        init_state(config, 1, {"camera_ids": ["left", "right"], "shape": (4, 4)})
+    left = init_state(config, 1, {"camera_ids": ["left"], "shape": (4, 4)})
+    right = init_state(config, 1, {"camera_ids": ["right"], "shape": (4, 4)})
+    left = push(left, make_frame(torch.full((1, 3, 4, 4), 0.3), camera="left"))
+    assert not bool(right.observed.any())
+    assert float(right.values.sum()) == 0
+    with pytest.raises(ValueError, match="camera mismatch"):
+        push(left, make_frame(torch.full((1, 3, 4, 4), 0.9), camera="right"))
 
 
 def test_detach_state_breaks_the_graph_without_changing_values():

@@ -99,11 +99,22 @@ class MeasurementStem(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-    def forward(self, values: torch.Tensor, valid: torch.Tensor, variance: torch.Tensor):
+        self.geometry = nn.Conv2d(2 * config.channels, config.width, 1, bias=False)
+        self.quality = (
+            nn.Conv2d(2 * config.channels, config.width, 1, bias=False)
+            if config.planes == 4
+            else None
+        )
+
+    def forward(
+        self, values: torch.Tensor, valid: torch.Tensor, variance: torch.Tensor, sample_xy=None
+    ):
         if values.shape[1] != self.config.channels:
             raise ValueError(
                 f"measurement stem expects {self.config.channels} channels, got {values.shape[1]}"
             )
+        values = values.masked_fill(~valid.bool(), 0.0)
+        variance = variance.masked_fill(~valid.bool(), 0.0)
         inputs = [values]
         if self.config.planes == 1:
             # The measurement grid shares one plane, so the noise level and the
@@ -117,7 +128,22 @@ class MeasurementStem(nn.Module):
                 f"measurement stem received {stacked.shape[1]} channels, "
                 f"expected {self.in_channels}"
             )
-        return self.body(stacked)
+        if sample_xy is None:
+            sample_xy = (
+                [(0, 0), (0, 1), (1, 0), (1, 1)]
+                if self.config.planes == 4
+                else [(0, 0)] * self.config.channels
+            )
+        coordinates = torch.as_tensor(sample_xy, device=values.device, dtype=values.dtype)
+        if coordinates.ndim == 2:
+            coordinates = coordinates[None].expand(values.shape[0], -1, -1)
+        if coordinates.shape != (values.shape[0], self.config.channels, 2):
+            raise ValueError("sample_xy must be [C,2] or [B,C,2]")
+        coordinates = coordinates.flatten(1)[:, :, None, None].expand(-1, -1, *values.shape[-2:])
+        output = self.body(stacked) + self.geometry(coordinates)
+        if self.quality is not None:
+            output = output + self.quality(torch.cat([torch.log1p(variance), valid.float()], 1))
+        return output
 
 
 class EvidenceBlock(nn.Module):
@@ -144,8 +170,17 @@ class EvidenceBlock(nn.Module):
         """``features`` [B,W,H,W]; ``statistics`` [B,S,H,W]; ``connectivity`` [B,K,H,W]."""
         graph = connectivity
         if graph is not None and graph.numel():
-            weight = graph.mean(dim=1, keepdim=True)
-            exchanged = self.exchange(features) * weight
+            batch, channels, height, width = features.shape
+            groups = self.exchange.groups
+            patches = F.unfold(features, 3, padding=1).reshape(
+                batch, groups, channels // groups, 9, height * width
+            )
+            mask = graph.reshape(batch, 1, 1, 9, height * width)
+            kernel = self.exchange.weight.reshape(groups, channels // groups, channels // groups, 9)
+            exchanged = torch.einsum("goik,bgikh->bgoh", kernel, patches * mask)
+            exchanged = exchanged.reshape(batch, channels, height, width)
+            if self.exchange.bias is not None:
+                exchanged = exchanged + self.exchange.bias[None, :, None, None]
             mixed = features + exchanged
         else:
             mixed = features
@@ -257,7 +292,10 @@ class SupportSelector(nn.Module):
         # A sharp softmax keeps the mixture close to the analytic choice while
         # staying differentiable; the participation ratio is reported so the
         # effective number of contributing domains is never implicit.
-        weights = torch.softmax(logits / self.config.selector_temperature, dim=0)
+        available = statistics["support_count"][budget_slice] > 0
+        logits = logits.masked_fill(~available, -1e6)
+        weights = torch.softmax(logits / self.config.selector_temperature, dim=0) * available
+        weights = weights / weights.sum(0, keepdim=True).clamp_min(1e-12)
         index = logits.argmax(dim=0)
         return weights, index, cost
 
@@ -349,7 +387,8 @@ class N01Encoder(nn.Module):
         if config.alignment != AlignmentMode.NONE.value:
             self.correspondence = CausalCorrespondence(config)
         self.chain = MotionChain(self.correspondence)
-        self.register_buffer("_cost_scale", torch.tensor([1.0, 1.0, 1.0]), persistent=False)
+        self.register_buffer("normalization_scales", torch.ones(6))
+        self.register_buffer("calibration_count", torch.tensor(0))
         self.last_diagnostics: dict = {}
         # The candidate statistics of the most recent step, kept for diagnostics
         # and for the trajectory explorer.  Never part of the recurrent state.
@@ -384,7 +423,9 @@ class N01Encoder(nn.Module):
             raise ValueError("N01Encoder.step requires a state from init_state")
         if frame.camera_id and frame.camera_id not in state.camera_ids:
             raise ValueError(f"unknown camera {frame.camera_id!r}; state has {state.camera_ids}")
-        budget = budget or ComputeBudget(max_history=self.config.max_history)
+        budget = budget or ComputeBudget(
+            max_updates=self.config.num_blocks, max_history=self.config.max_history
+        )
         if budget.max_history > state.num_slots:
             raise ValueError("budget.max_history exceeds the state capacity")
         plan = self._budget_plan(budget)
@@ -396,6 +437,23 @@ class N01Encoder(nn.Module):
             metadata.setdefault("saturated_fraction", None)
         previous = state
         shifted = push_fn(previous, frame)
+        fresh = shifted.filled > previous.filled
+        # A full ring does not increase filled; compare the latest measurement ID.
+        fresh = fresh | (shifted.frame_ids[0] != previous.frame_ids[0])
+        if budget.max_updates <= 0 or not bool(fresh.any()):
+            if previous.last_representation is None:
+                raise ValueError("no previous valid representation for a zero-update request")
+            return EncoderOutput(
+                previous.last_representation,
+                shifted,
+                previous.valid[0].any(1),
+                {"reused_representation": True},
+                {
+                    "updates": 0,
+                    "candidate_statistics_computed": 0,
+                    "state_bytes": state_bytes(shifted),
+                },
+            )
 
         camera = frame.camera_id or shifted.camera_ids[0]
         motion = self._estimate_motion(previous, frame)
@@ -403,19 +461,35 @@ class N01Encoder(nn.Module):
             frame, shifted, motion=motion, estimator=self.correspondence
         )
         plane = shifted.plane_support(camera)
-        measured = shifted.valid[0].any(dim=1)
+        current_valid = self.integrator._split_valid(
+            shifted.valid, shifted.num_slots, shifted.batch_size, shifted.shape
+        )[0]
+        measured = torch.stack(
+            [
+                current_valid & F.pad(current_valid[..., :, :-1], (1, 0)),
+                current_valid & F.pad(current_valid[..., :-1, :], (0, 0, 1, 0)),
+            ],
+            2,
+        )
+        pixel_measured = shifted.valid[0].any(dim=1)
         # Hysteresis: an edge opens after sustained compatibility and closes at
         # once on refutation, motion inconsistency or occlusion.  The support age
         # counts consecutive measured updates of that edge.
         edges, support_age, merges, splits = self.integrator.update_edges(
-            plane.edges, plane.support_age, measured_edges, measured
+            plane.edges, plane.support_age, measured_edges, measured, plane.open_edges
         )
-        seen_now = plane.seen | measured[:, None, None, None]
+        member_mask = fresh[:, None, None, None, None]
+        edges = torch.where(member_mask, edges, plane.edges)
+        open_edges = torch.where(member_mask, self.integrator.last_open_edges, plane.open_edges)
+        support_age = torch.where(member_mask, support_age, plane.support_age)
+        merges, splits = merges * fresh, splits * fresh
+        seen_now = plane.seen | measured
         now = shifted.now[:, None, None].expand_as(plane.last_seen)
-        last_seen = torch.where(measured[:, None, None], now, plane.last_seen)
+        last_seen = torch.where(pixel_measured & fresh[:, None, None], now, plane.last_seen)
         shifted.support[camera] = replace(
             plane,
             edges=edges,
+            open_edges=open_edges,
             seen=seen_now,
             support_age=support_age,
             last_seen=last_seen,
@@ -424,13 +498,21 @@ class N01Encoder(nn.Module):
         )
 
         statistics, connectivity = self.integrator.domain_statistics(
-            shifted, edges, motion=motion, estimator=self.correspondence
+            shifted,
+            torch.where(open_edges, edges, torch.zeros_like(edges)),
+            motion=motion,
+            estimator=self.correspondence,
         )
-        selection = self._select(statistics, connectivity, motion, plan)
+        selection = self._select(statistics, connectivity, motion, plan, shifted)
         features = self._encode(frame, shifted, statistics, connectivity, selection, plan)
 
+        if previous.last_representation is not None:
+            features = torch.where(
+                fresh[:, None, None, None], features, previous.last_representation
+            )
+        shifted.last_representation = features
         cost = {
-            "updates": int(plan["updates"]),
+            "updates": int(plan.get("blocks", self.config.num_blocks)),
             "candidate_domains": int(statistics.candidate_count),
             "radius_levels": int(plan["radii"]),
             "depth_levels": int(plan["depths"]),
@@ -453,9 +535,34 @@ class N01Encoder(nn.Module):
                 (plane.split_count.float().mean() + splits.float().mean()).detach()
             ),
             "support_age_mean": float(support_age.mean().detach()),
-            "mean_age": float(statistics.age.mean().detach()),
+            "mean_age": float(
+                (selection["weights"] * statistics.age[selection["slice"]]).sum(0).mean().detach()
+            ),
             "mean_variance_proxy": float(statistics.variance_proxy.mean().detach()),
-            "mean_support_width": float(statistics.support_count.mean().detach()),
+            "mean_support_width": float(
+                (
+                    2
+                    * statistics.radius_index[selection["slice"]].float()[:, None, None, None, None]
+                    + 1
+                )
+                .mul(selection["weights"])
+                .sum(0)
+                .mean()
+                .detach()
+            ),
+            "mean_support_samples": float(
+                (selection["weights"] * statistics.unique_samples[selection["slice"]])
+                .sum(0)
+                .mean()
+                .detach()
+            ),
+            "mean_unique_frames": float(
+                (selection["weights"] * statistics.unique_frames[selection["slice"]])
+                .sum(0)
+                .mean()
+                .detach()
+            ),
+            "mean_weight_mass": float(statistics.support_count.mean().detach()),
         }
         self.last_diagnostics = diagnostics
         self.last_statistics = statistics
@@ -473,10 +580,12 @@ class N01Encoder(nn.Module):
     def _budget_plan(self, budget: ComputeBudget) -> dict:
         config = self.config
         plan = {
-            "updates": max(int(budget.max_updates), 1),
+            "updates": max(int(budget.max_updates), 0),
+            "max_history": int(budget.max_history),
             "radii": len(config.spatial_radii),
             "depths": len(config.time_depths),
         }
+        plan["blocks"] = min(plan["updates"], config.num_blocks)
         if not config.budget_conditioning:
             return plan
         # Low budget: smaller candidate radius, shorter time depth, fewer blocks.
@@ -527,7 +636,15 @@ class N01Encoder(nn.Module):
             reference_values = previous.values[slot]
             reference_valid = previous.valid[slot] > 0.5
         cumulative = self.chain.cumulative(relative, informative)
-        fields: list[MotionField] = []
+        batch = values.shape[0]
+        fields: list[MotionField] = [
+            MotionField(
+                shift=torch.zeros((batch, 2), device=device),
+                residual=torch.zeros(batch, device=device),
+                overlap=torch.ones(batch, device=device),
+                valid=torch.ones(batch, dtype=torch.bool, device=device),
+            )
+        ]
         cursor = 0
         for slot in range(previous.values.shape[0]):
             if slot in observed_slots:
@@ -545,25 +662,44 @@ class N01Encoder(nn.Module):
                 )
         if self.config.alignment == AlignmentMode.NONE.value:
             return None
-        return fields
+        return fields[: previous.num_slots]
 
-    def _select(self, statistics, connectivity, motion, plan):
+    def _select(self, statistics, connectivity, motion, plan, state=None):
         """Choose a support domain per position; records the real cost of doing so."""
         config = self.config
         device = statistics.mu.device
         payload = self._statistics_payload(statistics, connectivity, motion)
+        if state is not None:
+            x, v, m = self.integrator.aligned_slots(state, motion, self.correspondence)
+            overlap = (m > 0.5) & state.valid[0][None] & state.observed[:, :, None, None, None]
+            innovation = (x - state.values[0][None]).square() / (v + state.variance[0][None] + 1e-6)
+            # Three-sigma excess is refutation, not another noisy correlation score.
+            excess = (innovation - 9.0).clamp_min(0.0).mean(2, keepdim=True)
+            supported = overlap.all(2, keepdim=True)
+            costs = []
+            rank = state.observed.long().cumsum(0)
+            for depth in statistics.depth_index:
+                use = supported & (rank <= depth)[:, :, None, None, None]
+                # Include the cumulative excess of carried older measurements.
+                costs.append((excess * use).sum(0).expand(-1, self.config.planes, -1, -1))
+            payload["motion_error"] = torch.stack(costs).detach()
         order = torch.argsort(statistics.radius_index * 1000 + statistics.depth_index)
         del order
-        depth_limit = int(config.time_depths[min(plan["depths"], len(config.time_depths)) - 1])
-        keep = statistics.radius_index < int(plan["radii"])
-        if config.budget_conditioning:
-            keep = keep & (statistics.depth_index <= depth_limit)
+        depth_limit = min(
+            int(plan["max_history"]),
+            int(config.time_depths[min(plan["depths"], len(config.time_depths)) - 1]),
+        )
+        radius_limit = config.spatial_radii[int(plan["radii"]) - 1]
+        keep = statistics.radius_index <= radius_limit
+        keep = keep & (statistics.depth_index <= depth_limit)
         budget_slice = keep.nonzero(as_tuple=False).squeeze(1)
         if budget_slice.numel() == 0:
             budget_slice = torch.arange(statistics.candidate_count, device=device)
         scale = self._statistics_scale(payload, budget_slice)
         weights, index, cost = self.selector(payload, scale, budget_slice=budget_slice)
         selected = budget_slice[index]
+        self.last_selection_weights = weights
+        self.last_selection_slice = budget_slice
         self.last_diagnostics = {
             "selection_entropy": float(
                 -(weights.clamp_min(1e-9) * weights.clamp_min(1e-9).log())
@@ -575,7 +711,10 @@ class N01Encoder(nn.Module):
             # mixed statistics field.  Reported so a mixture is never read as one
             # independent observation.
             "mixture_participation": float(
-                (1.0 / (weights**2).sum(dim=0).clamp_min(1e-9)).mean().detach()
+                torch.where(weights.sum(0) > 0, 1.0 / weights.square().sum(0).clamp_min(1e-9), 0.0)
+                .sum()
+                .div((weights.sum(0) > 0).sum().clamp_min(1))
+                .detach()
             ),
             "selected_radius_mean": float(
                 statistics.radius_index[selected].float().mean().detach()
@@ -624,32 +763,27 @@ class N01Encoder(nn.Module):
         They are reported in the diagnostics so a training-set calibration can be
         substituted on validation without changing the mechanism.
         """
-        # The scale is reduced per batch member (never across the batch), so a
-        # reset or a differently sized episode cannot change another episode's
-        # selection.  Spatial positions inside one member are pooled.
-        subset = {key: value[budget_slice] for key, value in payload.items()}
-
-        def reduce(key: str, absolute: bool = False) -> torch.Tensor:
-            tensor = subset[key]
-            if absolute:
-                tensor = tensor.abs()
-            return tensor.mean(dim=(0, 2, 3, 4)).detach().clamp_min(1e-6)
-
-        return {
-            "variance_proxy": reduce("variance_proxy"),
-            "age": reduce("age"),
-            "support_count": reduce("support_count"),
-            "unique_frames": reduce("unique_frames"),
-            "motion_error": reduce("motion_error"),
-            "mu": reduce("mu", absolute=True),
-        }
+        keys = ("variance_proxy", "age", "support_count", "unique_frames", "motion_error", "mu")
+        # Fit only during training, then retain the scales across validation,
+        # inference and checkpoint restore. Never renormalize on a test frame.
+        if getattr(self, "calibrating", False) and int(self.calibration_count) < 64:
+            estimates = torch.stack(
+                [payload[key][budget_slice].detach().abs().mean() for key in keys]
+            ).clamp_min(1e-6)
+            with torch.no_grad():
+                count = int(self.calibration_count)
+                self.normalization_scales.copy_(
+                    (self.normalization_scales * count + estimates) / (count + 1)
+                )
+                self.calibration_count.add_(1)
+        return {key: self.normalization_scales[i].detach().clone() for i, key in enumerate(keys)}
 
     def _encode(self, frame, state, statistics, connectivity, selection, plan):
         config = self.config
         values = state.values[0]
         valid = state.valid[0]
         variance = state.variance[0]
-        features = self.stem(values, valid, variance)
+        features = self.stem(values, valid, variance, frame.sample_xy)
         # The selector returns [K, B, P, H, W] weights over the budgeted candidates.
         weights = selection["weights"]
         candidate_slice = selection["slice"]
@@ -701,7 +835,17 @@ class N01Encoder(nn.Module):
                 f"statistics block has {statistics_tensor.shape[1]} channels, the blocks "
                 f"were built for {statistics_channels(config)}"
             )
-        graph = _graph_channels(select(connectivity), 1)
+        support = state.plane_support(frame.camera_id or state.camera_ids[0])
+        open_strength = torch.where(
+            support.open_edges, support.edges, torch.zeros_like(support.edges)
+        )
+        graph = torch.stack(
+            [
+                self.integrator._edge_coefficient(open_strength, dy, dx, 1)[0].mean(1)
+                for dy, dx in candidate_offsets(1)
+            ],
+            1,
+        )
         blocks = int(plan.get("blocks", config.num_blocks))
         update_mask = torch.ones((features.shape[0],), device=features.device, dtype=torch.bool)
         for block in range(config.num_blocks):

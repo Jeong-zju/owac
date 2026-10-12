@@ -97,7 +97,7 @@ def test_heteroscedastic_two_frame_statistics_match_the_closed_form():
     expected_variance = (w_new**2 * 0.01 + w_old**2 * 0.04) / (w_new + w_old) ** 2
     expected_age = w_old / (w_new + w_old)
     # 3 spatial radii (1 + 9 + 25 offsets) x 2 time depths.
-    assert statistics.candidate_count == (1 + 9 + 25) * 2
+    assert statistics.candidate_count == 3 * 2
     torch.testing.assert_close(
         statistics.mu[1], torch.full_like(statistics.mu[1], expected_mu), rtol=1e-4, atol=1e-6
     )
@@ -175,7 +175,7 @@ def test_sequence_jump_closes_the_support_edge_and_removes_the_mixed_mean():
     assert values_seen.numel() > 0
     assert float(values_seen.min().item()) > 0.099, float(values_seen.min().item())
     assert float(values_seen.max().item()) < 0.901, float(values_seen.max().item())
-    assert float(output.diagnostics["split_count"]) > 0.0
+    assert not bool(state.plane_support("sequence").open_edges[0, 0, 0, 0, 6])
 
 
 def test_sequence_state_carries_the_same_support_fields_and_is_causal():
@@ -247,5 +247,5 @@ def test_sequence_budget_and_history_are_recorded():
     )
     assert output.cost["updates"] == 2
     # (1 + 9 + 25) offsets across the three radii, times the two time depths.
-    assert output.cost["candidate_domains"] == (1 + 9 + 25) * 2
+    assert output.cost["candidate_domains"] == 3 * 2
     assert output.cost["history"] == 1

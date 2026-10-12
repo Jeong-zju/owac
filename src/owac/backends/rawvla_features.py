@@ -1270,9 +1270,8 @@ class RawVLAFeaturePolicy:
             if module is None or not hasattr(module, "parameters"):
                 continue
             for param in module.parameters():
-                if not param.requires_grad:
-                    param.requires_grad_(True)
-                unfrozen += 1
+                # Respect caller-owned frozen projections and support ablations.
+                unfrozen += int(param.requires_grad)
         return {
             "frozen_backend_tensors": frozen,
             "trainable_encoder_tensors": unfrozen,

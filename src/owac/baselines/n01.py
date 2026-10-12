@@ -867,7 +867,7 @@ class N01Probe(MechanismProbe):
         """Aggregate one step's encoder diagnostics into the probe's measured record."""
         for key in ("merge_count", "split_count"):
             if key in diagnostics:
-                self._totals[key] = self._totals.get(key, 0.0) + float(diagnostics[key])
+                self._totals[key] = float(diagnostics[key])
         depths = tuple(int(item) for item in _config_value(self.config, "time_depths", ()))
         for key in ("edge_mean", "mean_support_width", "mean_variance_proxy", "support_age_mean"):
             if key in diagnostics:

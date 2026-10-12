@@ -96,7 +96,7 @@ class TrajectoryResult:
             "mean_measurement_age_frames": _mean(column("mean_age")),
             "mean_support_width": _mean(column("mean_support_count")),
             "selected_radius_mean": _mean(column("selected_radius_mean")),
-            "selected_depth_index_mean": _mean(column("selected_depth_mean")),
+            "selected_history_frames_mean": _mean(column("selected_depth_mean")),
             "merge_count_total": float(self.diagnostics[-1]["merge_count"]),
             "split_count_total": float(self.diagnostics[-1]["split_count"]),
             "edge_on_fraction_mean": _mean(column("edge_mean")),
@@ -170,15 +170,23 @@ def run_trajectory(
             statistics = encoder.last_statistics
             measurement = batch.values[0, index].mean(dim=0)
             panels["measurement"].append(measurement.cpu())
-            support = statistics.support_count[0, 0, 0]
+            weights = encoder.last_selection_weights
+            support = (weights * statistics.unique_samples[encoder.last_selection_slice]).sum(0)[
+                0, 0
+            ]
             panels["support_weight"].append(support.cpu())
-            panels["integrated_mu"].append(statistics.mu[0, 0, 0].cpu())
-            panels["connectivity"].append(encoder.last_connectivity[0, 0, 0].float().cpu())
+            panels["integrated_mu"].append(
+                (weights * statistics.mu[encoder.last_selection_slice]).sum(0)[0, 0].cpu()
+            )
+            # Radius-zero connectivity is always identity; display the real open edges.
+            panels["connectivity"].append(
+                state.plane_support("camera").open_edges[0].float().mean((0, 1)).cpu()
+            )
             record = {key: value for key, value in output.diagnostics.items()}
             record.update(
                 {
                     "frame": index,
-                    "mean_support_count": float(statistics.support_count.mean()),
+                    "mean_support_count": output.diagnostics["mean_support_samples"],
                     "mean_variance_proxy": float(statistics.variance_proxy.mean()),
                     "measurement_mean": float(measurement.mean()),
                     "target_row": float(batch.target_xy[0, index, 0]),

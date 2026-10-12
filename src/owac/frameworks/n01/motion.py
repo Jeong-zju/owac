@@ -21,7 +21,7 @@ support-domain restructuring can consume the per-frame matching quality.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 
 import torch
 import torch.nn as nn
@@ -32,7 +32,7 @@ from .config import N01Config
 __all__ = ["AlignmentMode", "MotionField", "CausalCorrespondence", "MotionChain"]
 
 
-class AlignmentMode(StrEnum):
+class AlignmentMode(str, Enum):  # noqa: UP042 - deployed StarVLA runs Python 3.10
     NONE = "none"
     FIXED = "fixed"
     CANDIDATE = "candidate"
@@ -428,6 +428,7 @@ class MotionChain:
         batch = relative[0].shift.shape[0]
         device = relative[0].shift.device
         running = torch.zeros((batch, 2), device=device)
+        fractional = torch.zeros((batch, 2), device=device)
         residual = torch.zeros((batch,), device=device)
         overlap = torch.ones((batch,), device=device)
         valid = torch.ones((batch,), dtype=torch.bool, device=device)
@@ -436,6 +437,8 @@ class MotionChain:
             informative = newer_observed[index]
             delta = field.select(informative)
             running = running + delta.shift
+            if delta.fractional is not None:
+                fractional = fractional + delta.fractional
             residual = residual + delta.residual
             overlap = overlap * delta.overlap
             valid = valid & delta.valid
@@ -444,6 +447,6 @@ class MotionChain:
                 residual=residual.clone(),
                 overlap=overlap.clone(),
                 valid=valid.clone(),
-                fractional=None if delta.fractional is None else delta.fractional.clone(),
+                fractional=None if delta.fractional is None else fractional.clone(),
             )
         return out  # type: ignore[return-value]

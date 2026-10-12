@@ -104,14 +104,14 @@ def test_budget_conditioning_reduces_candidates_and_records_updates():
     frame = frame_from(torch.full((1, 3, 8, 8), 0.4))
     full = encoder.step(frame, None, state, ComputeBudget(max_updates=4, max_history=4))
     low = encoder.step(frame, None, state, ComputeBudget(max_updates=1, max_history=2))
-    assert full.cost["candidate_domains"] == (1 + 9) * 2
+    assert full.cost["candidate_domains"] == 2 * 2
     assert low.cost["candidate_domains"] <= full.cost["candidate_domains"]
-    assert low.cost["updates"] == 1 and full.cost["updates"] == 4
+    assert low.cost["updates"] == 1 and full.cost["updates"] == encoder.config.num_blocks
     assert low.diagnostics["selected_radius"] <= full.diagnostics["selected_radius"]
     assert low.diagnostics["selected_depth"] <= full.diagnostics["selected_depth"]
     assert low.cost["radius_levels"] <= full.cost["radius_levels"]
     assert low.cost["depth_levels"] <= full.cost["depth_levels"]
-    assert full.cost["updates"] == 4 and low.cost["updates"] == 1
+    assert full.cost["updates"] == encoder.config.num_blocks and low.cost["updates"] == 1
     assert low.cost["state_bytes"] > 0
 
 

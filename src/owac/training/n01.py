@@ -196,21 +196,18 @@ def peak_gpu_bytes() -> int | None:
 
 def git_sha(repo_root: Path | None = None) -> str:
     cwd = str(repo_root) if repo_root is not None else None
-    for extra in (["--untracked-files=no"], []):
-        try:
-            out = subprocess.run(
-                ["git", "rev-parse", "HEAD", *extra],
-                cwd=cwd,
-                capture_output=True,
-                text=True,
-                timeout=10,
-                check=False,
-            )
-        except (OSError, subprocess.SubprocessError):  # pragma: no cover
-            continue
-        if out.returncode == 0 and out.stdout.strip():
-            return out.stdout.strip()
-    return "unknown"
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        return out.stdout.strip() if out.returncode == 0 else "unknown"
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
 
 
 def file_sha256(path: Path) -> str:
@@ -599,7 +596,12 @@ class SyntheticSource:
                 )
 
     def train_batch(self, batch_size: int, length: int) -> Any:
-        return self.train_task.sample(batch_size, length)
+        index = getattr(self, "sample_index", 0)
+        self.sample_index = index + 1
+        return self.train_task.sample(batch_size, length, seed=self.train_seed + index)
+
+    def calibration_batch(self, batch_size: int, length: int) -> Any:
+        return self.train_task.sample(batch_size, length, seed=self.train_seed + 500_000)
 
     def validation_combinations(self) -> list[str]:
         return list(self.val_tasks)
@@ -707,7 +709,9 @@ def sequence_step(
         state = encoder.reset(state, torch.ones(batch_size, dtype=torch.bool, device=values.device))
 
     # The holdout offsets for this step are applied per frame by holdout_mask().
-    budget = budget or ComputeBudget(max_updates=1, max_history=1)
+    budget = budget or ComputeBudget(
+        max_updates=encoder.config.num_blocks, max_history=encoder.config.max_history
+    )
     context = torch.enable_grad() if grad_enabled else torch.no_grad()
     logits: list[Any] = []
     measurement_predictions: list[Any] = []
@@ -727,15 +731,14 @@ def sequence_step(
             frame_values = values[:, index].to(device)
             frame_valid = valid[:, index].to(device).bool()
             frame_variance = variance[:, index].to(device)
-            if index >= 1 and holdout:
+            if holdout:
                 # Hold out the target block from the input: replace it by a local
                 # neighbourhood mean and mark it invalid, so no input pixel is its
                 # own measurement-prediction target.  ``holdout=False`` leaves the
                 # measurements untouched, which is what an online/replay path does
                 # and what the frame-by-frame consistency check needs.
                 mask = holdout_mask(size[0], size[1], step, device, frame_values.dtype)
-                replacement = _mean_filter(frame_values, radius=1)
-                frame_values = torch.where(mask.bool().view(1, 1, *size), replacement, frame_values)
+                frame_values = frame_values.masked_fill(mask.bool().view(1, 1, *size), 0.0)
                 frame_valid = frame_valid & ~mask.bool().view(1, 1, *size)
             frame = MeasurementFrame(
                 values=frame_values,
@@ -752,7 +755,11 @@ def sequence_step(
             state = output.state
             # Algorithmic lag (how old the measurements behind this estimate are),
             # kept separate from the wall-clock processing time in ``timings``.
-            sample_ages.append(state.age_steps[0].to(torch.float32).detach())
+            sample_ages.append(
+                torch.full(
+                    (batch_size,), output.diagnostics.get("mean_age", 0.0), device=values.device
+                )
+            )
             feature = to_feature_map(output.representation)
             heads.build(int(feature.shape[1]), int(values.shape[2]))
             frame_logits, frame_measurement = heads(feature)
@@ -1150,6 +1157,7 @@ def train(
         history = [dict(row) for row in resume.get("history", [])]
         start_step = int(resume.get("step", 0))
         restore_rng_state(resume.get("rng_state", {}))
+        source.sample_index = int(resume.get("source_sample_index", start_step))
         print(
             json.dumps(
                 {
@@ -1163,6 +1171,19 @@ def train(
             file=log_stream,
             flush=True,
         )
+    if int(encoder.calibration_count) == 0:
+        encoder.calibrating = True
+        sequence_step(
+            encoder,
+            heads,
+            source.calibration_batch(settings.batch_size, settings.length),
+            step=0,
+            tbptt=0,
+            grad_enabled=False,
+            device=settings.device,
+            holdout=False,
+        )
+        encoder.calibrating = False
     step_times: list[float] = []
     baseline_rss = peak_rss_bytes()
     started = time.perf_counter()
@@ -1237,6 +1258,7 @@ def train(
         config_payload={**config_payload, "loss_mode": settings.location_mode},
         repo_root=repo_root,
     )
+    payload["source_sample_index"] = getattr(source, "sample_index", 0)
     save_checkpoint(checkpoint_path, payload)
     sorted_times = sorted(step_times) or [0.0]
     run: dict[str, Any] = {
@@ -1362,6 +1384,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--device", default="cpu", help="CPU/FP32 by default, as the protocol fixes"
     )
+    parser.add_argument(
+        "--weights", type=Path, help="pinned pi0.5 safetensors for real NPZ training"
+    )
+    parser.add_argument(
+        "--tokenizer", type=Path, help="pinned PaliGemma tokenizer for NPZ training"
+    )
+    parser.add_argument("--suite", choices=("libero", "robotwin2"), default="libero")
     parser.add_argument("--resume", type=Path, default=None, help="continue from checkpoint.pt")
     return parser
 
@@ -1381,7 +1410,7 @@ def _npz_source(args: argparse.Namespace, config: Any) -> Any:
     if not Path(args.npz_config).is_file():
         raise SystemExit(f"NPZ config not found: {args.npz_config}")
     payload = json.loads(Path(args.npz_config).read_text())
-    return module.RawVLASequenceDataset(config, root=args.npz_root, **payload)
+    return module.RawVLASequenceDataset(root=args.npz_root, **payload)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1389,6 +1418,42 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.steps < 0:
         raise SystemExit("--steps must be non-negative")
+    if not args.synthetic:
+        if args.weights is None or args.tokenizer is None or args.npz_config is None:
+            raise SystemExit(
+                "real NPZ training requires --weights, --tokenizer and --npz-config; "
+                "it uses native pi0.5 actions, not a synthetic location target"
+            )
+        action = _require("owac.training.n01_action", "real NPZ native-action training")
+        command = [
+            "--config",
+            args.config,
+            "--root",
+            str(args.npz_root),
+            "--suite",
+            args.suite,
+            "--weights",
+            str(args.weights),
+            "--tokenizer",
+            str(args.tokenizer),
+            "--dataset-config",
+            str(args.npz_config),
+            "--output",
+            str(args.output),
+            "--steps",
+            str(args.steps),
+            "--batch-size",
+            str(args.batch_size),
+            "--window",
+            str(args.length),
+            "--device",
+            args.device,
+            "--lr",
+            str(args.lr),
+        ]
+        if args.resume:
+            command.extend(["--resume", str(args.resume)])
+        return action.main(command)
     config_module = _require("owac.frameworks.n01.config", "config loading")
     model_module = _require("owac.frameworks.n01.model", "the N01 encoder")
     config = config_module.load_config(args.config)

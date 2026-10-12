@@ -8,9 +8,9 @@ write back into this buffer.
 
 Layout: slot 0 is always the newest unique frame, so temporal depth ``D`` reads
 slots ``0..min(D-1, filled-1)``.  A repeated frame (``new_measurement=False``)
-advances the clock, updates the age of existing slots and its own measurement,
-but never occupies a new unique slot, so it cannot be counted as independent
-evidence.
+advances the clock while preserving every original slot, so it cannot evict
+unique observations or be counted as independent evidence. Each state belongs
+to exactly one camera; callers hold a dictionary of states for multiple views.
 """
 
 from __future__ import annotations
@@ -35,6 +35,7 @@ class PlaneSupport:
     """
 
     edges: Any
+    open_edges: Any
     seen: Any  # [B, P, 2, H, W] bool: the edge was measured at least once
     support_age: Any  # [B, P, 2, H, W] FP32: consecutive measured updates of the pair
     last_seen: Any  # [B, H, W] FP32: timestamp of the last valid measurement
@@ -62,6 +63,7 @@ class N01State:
     support: dict[str, PlaneSupport] = field(default_factory=dict)
     time_unit: str = "frame"
     shape: tuple[int, int] = (0, 0)
+    last_representation: Any = None
 
     # -- derived ------------------------------------------------------------
     @property
@@ -118,6 +120,8 @@ def init_state(
     else:
         camera_ids = list(camera_spec)
         shape = None
+    if len(camera_ids) > 1:
+        raise ValueError("one N01State holds one camera; create independent states per camera")
     if not camera_ids:
         raise ValueError("camera_spec must name at least one camera")
     if shape is None:
@@ -159,8 +163,14 @@ def init_state(
     )
     for camera_id in camera_ids:
         state.support[camera_id] = PlaneSupport(
-            edges=torch.ones(
+            edges=torch.zeros(
                 (batch_size, config.planes, 2, height, width), dtype=dtype, device=device
+            ),
+            open_edges=torch.full(
+                (batch_size, config.planes, 2, height, width),
+                config.merge_threshold <= 0,
+                dtype=torch.bool,
+                device=device,
             ),
             seen=torch.zeros(
                 (batch_size, config.planes, 2, height, width), dtype=torch.bool, device=device
@@ -219,6 +229,8 @@ def push(state: N01State, frame: Any) -> N01State:
     # The measurement itself is carried with its graph: the encoder must be
     # trainable end to end from the raw measurement through the buffer.  Only
     # ``detach`` at a TBPTT boundary cuts it.
+    if frame.camera_id and frame.camera_id not in state.camera_ids:
+        raise ValueError("camera mismatch: use an independent state per camera")
     new_values = values.to(device=device, dtype=torch.float32)
     valid = frame.valid_mask
     if valid is None:
@@ -252,6 +264,8 @@ def push(state: N01State, frame: Any) -> N01State:
         variance = variance.unsqueeze(0).expand(batch_size, -1, -1, -1)
     elif variance.ndim == 1:
         variance = variance.reshape(batch_size, 1, 1, 1).expand_as(new_values)
+    if variance.ndim == 0:
+        variance = variance.expand_as(new_values)
     if variance.shape != new_values.shape:
         if variance.shape[0] != batch_size:
             raise ValueError(
@@ -276,6 +290,14 @@ def push(state: N01State, frame: Any) -> N01State:
     elif frame_time_unit == "frame":
         timestamps = torch.round(timestamps)
 
+    # A repeated ID is a repeated measurement even if the caller omits the flag.
+    if frame_ids is not None:
+        duplicate = (
+            (state.frame_ids == frame_ids[None]) & state.observed & (frame_ids[None] >= 0)
+        ).any(0)
+        new_measurement = new_measurement & ~duplicate
+    if bool(((timestamps < state.now) & state.any_observed).any()):
+        raise ValueError("measurement timestamps must be causal and non-decreasing")
     history_values = state.values
     history_variance = state.variance
     history_valid = state.valid
@@ -312,6 +334,18 @@ def push(state: N01State, frame: Any) -> N01State:
         state.filled.reshape(-1) + write.reshape(-1).to(torch.int64), max=state.num_slots
     )
 
+    # Only new members shift; repeated requests never evict unique measurements.
+    def choose(updated, original):
+        mask = new_measurement.reshape(1, batch_size, *([1] * (updated.ndim - 2)))
+        return torch.where(mask, updated, original)
+
+    next_values = choose(next_values, history_values)
+    next_variance = choose(next_variance, history_variance)
+    next_valid = choose(next_valid, history_valid)
+    next_observed = choose(next_observed, history_observed)
+    next_frame_ids = choose(next_frame_ids, history_frame_ids)
+    next_timestamps = choose(next_timestamps, history_timestamps)
+    next_age = choose(next_age, aged)
     return N01State(
         config=config,
         camera_ids=list(state.camera_ids),
@@ -329,12 +363,14 @@ def push(state: N01State, frame: Any) -> N01State:
         support={key: _copy_support(value) for key, value in state.support.items()},
         time_unit=state.time_unit,
         shape=state.shape,
+        last_representation=state.last_representation,
     )
 
 
 def _copy_support(support: PlaneSupport) -> PlaneSupport:
     return PlaneSupport(
         edges=support.edges,
+        open_edges=support.open_edges,
         seen=support.seen,
         support_age=support.support_age,
         last_seen=support.last_seen,
@@ -365,15 +401,8 @@ def reset(state: N01State, batch_mask: Any) -> N01State:
         raise ValueError(f"batch_mask must have length {state.batch_size}")
     keep = ~mask
 
-    def wipe(tensor, fill=0.0):
-        # Buffer tensors are [slot, batch, ...] while the per-camera support
-        # tensors are [batch, ...].  The batch axis is the first axis whose size
-        # equals the batch size; every other axis is broadcast.
-        batch_dim = 0
-        for axis, size in enumerate(tensor.shape):
-            if size == keep.numel():
-                batch_dim = axis
-                break
+    def wipe(tensor, fill=0.0, batch_dim=0):
+        # Axes are declared, not guessed from sizes (batch may equal history).
         shape = [1] * tensor.ndim
         shape[batch_dim] = keep.numel()
         selector = keep.reshape(shape)
@@ -389,17 +418,18 @@ def reset(state: N01State, batch_mask: Any) -> N01State:
             selector.expand(tuple(tensor.shape)), tensor, torch.full_like(tensor, fill)
         )
 
-    values = wipe(state.values)
-    variance = wipe(state.variance, 1.0)
-    valid = wipe(state.valid, 0.0).to(torch.bool)
-    observed = wipe(state.observed, 0.0).to(torch.bool)
-    frame_ids = wipe(state.frame_ids, -1.0).to(torch.int64)
-    timestamps = wipe(state.timestamps)
-    age_steps = wipe(state.age_steps.to(torch.float32), 0.0).to(torch.int64)
+    values = wipe(state.values, batch_dim=1)
+    variance = wipe(state.variance, 1.0, batch_dim=1)
+    valid = wipe(state.valid, 0.0, batch_dim=1).to(torch.bool)
+    observed = wipe(state.observed, 0.0, batch_dim=1).to(torch.bool)
+    frame_ids = wipe(state.frame_ids, -1.0, batch_dim=1).to(torch.int64)
+    timestamps = wipe(state.timestamps, batch_dim=1)
+    age_steps = wipe(state.age_steps.to(torch.float32), 0.0, batch_dim=1).to(torch.int64)
     support = {}
     for key, plane in state.support.items():
         support[key] = PlaneSupport(
-            edges=wipe(plane.edges, 1.0),
+            edges=wipe(plane.edges, 0.0),
+            open_edges=wipe(plane.open_edges, float(state.config.merge_threshold <= 0)).bool(),
             seen=wipe(plane.seen, 0.0).to(torch.bool),
             support_age=wipe(plane.support_age),
             last_seen=wipe(plane.last_seen, float("nan")),
@@ -423,6 +453,9 @@ def reset(state: N01State, batch_mask: Any) -> N01State:
         support=support,
         time_unit=state.time_unit,
         shape=state.shape,
+        last_representation=None
+        if state.last_representation is None
+        else wipe(state.last_representation),
     )
 
 
@@ -449,6 +482,7 @@ def detach(state: N01State) -> N01State:
         support={
             key: PlaneSupport(
                 edges=strip(plane.edges),
+                open_edges=strip(plane.open_edges),
                 seen=strip(plane.seen),
                 support_age=strip(plane.support_age),
                 last_seen=strip(plane.last_seen),
@@ -459,6 +493,7 @@ def detach(state: N01State) -> N01State:
         },
         time_unit=state.time_unit,
         shape=state.shape,
+        last_representation=strip(state.last_representation),
     )
 
 
@@ -480,10 +515,13 @@ def state_bytes(state: N01State) -> int:
     ):
         tensor = getattr(state, name)
         total += int(tensor.numel()) * int(tensor.element_size())
+    if state.last_representation is not None:
+        total += state.last_representation.numel() * state.last_representation.element_size()
     seen: set[int] = set()
     for plane in state.support.values():
         for tensor in (
             plane.edges,
+            plane.open_edges,
             plane.seen,
             plane.support_age,
             plane.last_seen,

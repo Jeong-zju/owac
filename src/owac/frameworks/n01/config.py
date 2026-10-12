@@ -181,12 +181,10 @@ class N01Config:
     def candidate_count(self) -> int:
         """Size of the candidate set the integrator actually enumerates.
 
-        Spatial radius x time depth x spatial offset: each radius contributes
-        ``(2r + 1)^2`` window offsets, exactly as
-        ``SupportDomainIntegrator.domain_statistics`` enumerates them.
+        One domain per spatial radius and time depth. Offsets are original
+        samples inside a domain, never additional candidate domains.
         """
-        offsets = sum((2 * int(radius) + 1) ** 2 for radius in self.spatial_radii)
-        return offsets * len(self.time_depths)
+        return len(self.spatial_radii) * len(self.time_depths)
 
     def domain_pixel_cap(self, radius: int) -> int:
         if self.max_domain_pixels:

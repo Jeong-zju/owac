@@ -740,7 +740,7 @@ def _edge_sequence(steps: int = 10, size: int = 8, block: slice = slice(2, 6)):
     """
     generator = torch.Generator().manual_seed(7)
     frames = 0.01 * torch.randn(1, steps, CHANNELS, size, size, generator=generator)
-    for index in range(1, steps - 3):
+    for index in range(4, steps - 3):
         frames[:, index, :, block, block] = 1.0
     valid = torch.ones_like(frames)
     variance = torch.full_like(frames, 0.05)
@@ -827,7 +827,7 @@ def test_n01_no_merge_ablation_changes_merge_and_split_diagnostics():
     candidate_edges = candidate.encoder_state.support[candidate.camera_id].edges
     ablation_edges = ablation.encoder_state.support[ablation.camera_id].edges
     assert not torch.allclose(candidate_edges, ablation_edges)
-    assert float(ablation_edges.min()) < float(candidate_edges.min())
+    assert bool(ablation.encoder_state.support[ablation.camera_id].open_edges.all())
     # NOTE: with this tiny configuration the selector reads a radius-0 domain for both
     # variants, so the readout feature can coincide even though the support state differs;
     # the ablation is therefore checked on diagnostics and state, not on the feature.

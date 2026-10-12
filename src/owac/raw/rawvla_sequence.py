@@ -1619,6 +1619,13 @@ class RawVLASequenceDataset(Dataset):
                 )
             stored = np.asarray(arrays[camera_key])
             values, saturated = self._camera_values(stored, camera_key, calibration)
+            if (
+                self.protocol.camera_dtype != "uint8"
+                and calibration is None
+                and metadata.get("representation") == "three_channel_linear_float32"
+                and metadata.get("raw_white_level") is not None
+            ):
+                saturated = stored >= float(metadata["raw_white_level"])
             values = np.ascontiguousarray(values[frame_indices].transpose(0, 3, 1, 2))
             saturated = np.ascontiguousarray(saturated[frame_indices].transpose(0, 3, 1, 2))
             values_tensor = torch.from_numpy(values)
@@ -1843,6 +1850,10 @@ class RawVLASequenceDataset(Dataset):
         """Only an explicitly declared black/white pair may rescale float32 RAW."""
         black = metadata.get("raw_black_level")
         white = metadata.get("raw_white_level")
+        # The released RoboTwin linear-float cache declares a clipping ceiling,
+        # not a black/white sensor calibration. Preserve its author numeric unit.
+        if black is None and metadata.get("representation") == "three_channel_linear_float32":
+            return None
         if black is None and white is None:
             return None
         if black is None or white is None:
