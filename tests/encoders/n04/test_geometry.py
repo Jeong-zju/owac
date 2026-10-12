@@ -354,3 +354,40 @@ def test_forward_projection_out_of_view_flagged_not_filled():
     T_curr[0, 2, 3] = 10.0  # 相机前移越过平面，所有点到相机后方
     uv, in_front = forward_project_points(xy, depth, K, K, T_prev, T_curr)
     assert not bool(in_front.any())
+
+
+# -- 逐样本平移（基线路径回归）--------------------------------------------------------
+
+
+def test_backward_grid_from_translation_accepts_per_sample_shift():
+    """基线把**逐样本**位移传进来：几何层必须支持，而不是只接受 Python 标量。
+
+    此前 motion_compensation / predict_update_filter 两条基线因此在评测中直接崩溃。
+    """
+    h, w, b = 4, 4, 3
+    spec = GridSpec(h, w, pixel_stride=1.0)
+    dx = torch.tensor([0.0, 1.0, -2.0])
+    dy = torch.tensor([0.0, -1.0, 0.5])
+    grid = backward_grid_from_translation(spec, dx, dy, batch=b)
+    assert grid.shape == (b, h, w, 2)
+    #: 采样位置必须是 `p_cur - (dx, dy)`：与逐样本标量调用逐项一致。
+    for index in range(b):
+        single = backward_grid_from_translation(spec, float(dx[index]), float(dy[index]), batch=1)
+        assert torch.allclose(grid[index : index + 1], single, atol=1e-6)
+
+
+def test_backward_grid_from_translation_rejects_inconsistent_batch():
+    spec = GridSpec(4, 4, pixel_stride=1.0)
+    with pytest.raises(ValueError, match="batch=3"):
+        backward_grid_from_translation(
+            spec, torch.tensor([1.0, 2.0]), torch.tensor([0.0, 0.0]), batch=3
+        )
+    with pytest.raises(ValueError, match="样本数不一致"):
+        backward_grid_from_translation(spec, torch.tensor([1.0, 2.0]), torch.tensor([0.0]), batch=2)
+
+
+def test_backward_grid_from_translation_broadcasts_single_sample_tensor():
+    spec = GridSpec(4, 4, pixel_stride=1.0)
+    grid = backward_grid_from_translation(spec, torch.tensor([1.5]), torch.tensor([-0.5]), batch=2)
+    assert grid.shape == (2, 4, 4, 2)
+    assert torch.allclose(grid[0], grid[1], atol=1e-6)

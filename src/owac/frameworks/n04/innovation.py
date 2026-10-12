@@ -150,6 +150,27 @@ class InnovationDecomposer(nn.Module):
         nn.init.zeros_(self.head.weight)
         nn.init.zeros_(self.head.bias)
 
+    def ensure_in_channels(self, in_channels: int) -> None:
+        """在加载 checkpoint 前按已知输入宽度建层。
+
+        输入宽度取决于是否启用饱和/照明等通道，首次 ``forward`` 时才确定；从 checkpoint
+        恢复时若不先建层，``load_state_dict`` 会把训练好的分解器判为 unexpected keys。
+        """
+        in_channels = int(in_channels)
+        if self.trunk is None:
+            weight = next(iter(self.parameters()), None)
+            device = weight.device if weight is not None else torch.device("cpu")
+            dtype = weight.dtype if weight is not None else torch.float32
+            self._build(in_channels, device, dtype)
+        else:
+            first = self.trunk[0]
+            assert isinstance(first, nn.Conv2d)
+            if int(first.in_channels) != in_channels:
+                raise ValueError(
+                    f"checkpoint 的分解器输入宽度 {in_channels} 与当前配置 "
+                    f"{int(first.in_channels)} 不一致"
+                )
+
     def forward(
         self,
         *,
@@ -225,10 +246,11 @@ class InnovationDecomposer(nn.Module):
             illumination_delta=gain_delta,
             residual=innovation,
             diagnostics={
-                "prop_reliability_mean": float(prop_reliability.mean()),
-                "gate_mean": float(g_update.mean()),
-                "change_gate_mean": float(w_change.mean()),
-                "unknown_mean": float(unknown.mean()),
+                #: 诊断量只用于记录/评测：显式 detach，避免把带梯度的张量转成标量。
+                "prop_reliability_mean": float(prop_reliability.detach().mean()),
+                "gate_mean": float(g_update.detach().mean()),
+                "change_gate_mean": float(w_change.detach().mean()),
+                "unknown_mean": float(unknown.detach().mean()),
                 "illumination_branch": self.use_illumination_branch,
                 "change_branch": self.use_change_branch,
             },

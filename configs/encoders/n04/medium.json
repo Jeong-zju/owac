@@ -1,0 +1,62 @@
+{
+  "name": "n04-medium",
+  "comment": "N04 中尺寸配置：宽度 128、4 层、多尺度 4。CPU 上只用于小步数烟测。",
+  "input_mode": "rawvla_rgb3",
+  "measurement_size": [
+    64,
+    64
+  ],
+  "channels": 3,
+  "camera_ids": [
+    "head"
+  ],
+  "seed": 0,
+  "geometry": {
+    "feature_size": [
+      64,
+      64
+    ],
+    "pixel_stride": 1.0,
+    "max_flow": 8.0
+  },
+  "model": {
+    "name": "n04-medium",
+    "width": 128,
+    "blocks": 4,
+    "scales": 4,
+    "scale_strides": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "coarse_stride": 4,
+    "hidden": 256,
+    "camera_embedding": 8,
+    "readout_tokens": 256,
+    "readout_dim": 512,
+    "predictor": "learned_proprio",
+    "use_previous_features": true,
+    "illumination_branch": true,
+    "change_branch": true,
+    "loss_weights": {
+      "location": 1.0,
+      "future_measurement": 0.5,
+      "change": 0.1,
+      "ego_warp": 0.1
+    }
+  },
+  "train": {
+    "sequence_length": 16,
+    "tbptt": 16,
+    "batch_size": 2,
+    "steps": 100,
+    "lr": 0.0001,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "log_every": 20,
+    "seed": 0,
+    "device": "cpu",
+    "threads": 4
+  }
+}

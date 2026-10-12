@@ -212,40 +212,71 @@ class EgoMotionContext:
     depth_prev: torch.Tensor | None = None
     plane_normal_prev: torch.Tensor | None = None
     plane_distance: torch.Tensor | float | None = None
+    #: 运动上下文向量的固定宽度。首次调用后由调用方（`N04Encoder`）写成实际宽度，
+    #: 使缺失字段可以用零占位而不是改变向量长度。
+    expected_width: int | None = None
     #: 语义/可用性记录。
     info: dict[str, Any] = field(default_factory=dict)
 
     def motion_vector(self) -> tuple[torch.Tensor, dict[str, Any]]:
-        """把可用运动信息拼成 `learned_proprio` 的输入向量与掩码。"""
+        """把可用运动信息拼成 `learned_proprio` 的输入向量与可用性掩码。
+
+        向量长度在同一相机内**恒定**：缺失的字段用零占位，同时把可用性作为显式的
+        mask 通道一并给网络（``info["motion_mask"]`` 也记录下来）。零占位绝不能
+        被解释成“测量到的零运动”；第一帧没有 ``proprio_delta`` 时正是这种情况。
+        """
         parts: list[torch.Tensor] = []
         mask: list[float] = []
         names: list[str] = []
+        shapes: dict[str, int] = {}
 
-        def add(value: torch.Tensor | None, available: bool, name: str) -> None:
+        def add(value: torch.Tensor | None, available: bool, name: str, width: int) -> None:
             if value is None:
+                #: 该字段本帧完全缺失：用零占位并保留固定宽度，形状不随帧变化。
+                parts.append(torch.zeros(0))
+                shapes[name] = 0
                 return
             v = value if value.dim() >= 2 else value.unsqueeze(0)
             parts.append(v)
-            mask.extend([1.0 if available else 0.0] * v.shape[-1])
-            names.extend([name] * v.shape[-1])
+            shapes[name] = int(v.shape[-1])
+            mask.extend([1.0 if available else 0.0] * int(v.shape[-1]))
+            names.extend([name] * int(v.shape[-1]))
 
-        add(self.proprio_delta, bool(self._bool_any(self.proprio_delta_available)), "proprio_delta")
+        add(
+            self.proprio_delta,
+            bool(self._bool_any(self.proprio_delta_available)),
+            "proprio_delta",
+            0,
+        )
         add(
             self.executed_action,
             bool(self._bool_any(self.executed_action_available)),
             "executed_action",
+            0,
         )
         if self.dt is not None:
-            dt = self.dt
-            if dt.dim() == 1:
-                dt = dt.unsqueeze(-1)
+            dt = self.dt if self.dt.dim() >= 2 else self.dt.unsqueeze(-1)
             parts.append(dt)
             mask.append(1.0 if self.dt_available else 0.0)
             names.append("dt")
-        if not parts:
+        real = [p for p in parts if p.numel() > 0]
+        if not real:
             raise ValueError("没有任何可用的运动信息；不应在无运动上下文时调用 learned_proprio")
-        vector = torch.cat(parts, dim=-1)
-        return vector, {"motion_mask": mask, "motion_names": names, "time_unit": self.time_unit}
+        vector = torch.cat(real, dim=-1)
+        #: 缺失字段的零占位必须补上，保证向量长度不随帧变化。
+        filled = self.expected_width or vector.shape[-1]
+        if vector.shape[-1] < filled:
+            pad = torch.zeros(
+                vector.shape[0], filled - vector.shape[-1], device=vector.device, dtype=vector.dtype
+            )
+            vector = torch.cat((vector, pad), dim=-1)
+        return vector, {
+            "motion_mask": mask,
+            "motion_names": names,
+            "shapes": shapes,
+            "expected_width": filled,
+            "time_unit": self.time_unit,
+        }
 
     @staticmethod
     def _bool_any(value: torch.Tensor | bool) -> bool:
@@ -310,6 +341,20 @@ class Propagator(Protocol):
 # --------------------------------------------------------------------------------------
 # identity / proprio-only
 # --------------------------------------------------------------------------------------
+
+
+def _scale_grid(grid_main: torch.Tensor, sub_spec: GridSpec, main_spec: GridSpec) -> torch.Tensor:
+    """把主分辨率的采样网格换算到另一个尺度网格。
+
+    ``grid_main`` 位于 ``main_spec`` 坐标系；先把它整体缩放到 ``sub_spec``，再在
+    ``sub_spec`` 的坐标面上重新归一化。逐点换算（而不是对网格做插值）保证两个尺度
+    使用**同一个**几何变换，不引入额外的重采样误差。
+    """
+    if sub_spec.pixel_stride == main_spec.pixel_stride:
+        return grid_main
+    xy_main = main_spec.xy_from_normalized(grid_main)
+    factor = main_spec.pixel_stride / sub_spec.pixel_stride
+    return sub_spec.normalized_from_xy(xy_main * factor)
 
 
 class IdentityPropagator(nn.Module):
@@ -405,6 +450,23 @@ class _BaseLearnedPropagator(nn.Module):
             nn.GELU(),
         )
 
+    def ensure_motion_dim(self, motion_dim: int) -> None:
+        """在加载 checkpoint 前用已知宽度建好运动编码器。
+
+        运动向量宽度由数据侧在首次 ``step`` 时确定；从 checkpoint 恢复时还没有跑过任何
+        一步，必须先用 checkpoint 记录的实际宽度建出同样的层，否则 ``load_state_dict``
+        会把这些已训练参数当成 unexpected keys（或者静默丢弃）。
+        """
+        motion_dim = int(motion_dim)
+        if self.motion_encoder is None:
+            self.motion_dim = motion_dim
+            self.motion_encoder = self._make_motion_encoder(motion_dim)
+            return
+        if motion_dim != int(self.motion_dim):
+            raise ValueError(
+                f"checkpoint 的运动上下文维度 {motion_dim} 与当前配置 {self.motion_dim} 不一致"
+            )
+
     def _motion_encoding(
         self, coarse: torch.Tensor, context: EgoMotionContext, b: int
     ) -> tuple[torch.Tensor, dict[str, Any]]:
@@ -462,7 +524,8 @@ class _BaseLearnedPropagator(nn.Module):
             info["previous_features_used"] = True
         raw = self.head(feat_field)
         dx, dy, log_sigma = raw[:, 0:1], raw[:, 1:2], raw[:, 2:3]
-        #: 位移幅度限制，避免零初始化后首步跳变。
+        #: 位移幅度限制，避免零初始化后首步跳变。用 tanh 软裁剪（两端都有非零梯度），
+        #: 而不是硬 clamp，否则被裁剪的像素会失去对 ego 监督的梯度。
         scale = self.max_flow / float(max(coarse.shape[-2], coarse.shape[-1]))
         dx = torch.tanh(dx / scale) * scale
         dy = torch.tanh(dy / scale) * scale
@@ -489,20 +552,14 @@ class _BaseLearnedPropagator(nn.Module):
                 validity = res.validity.unsqueeze(1)
                 warped.append(res.values)
             else:
-                #: 低分辨率尺度用同一 flow，按尺度换算到该尺度的像素坐标。
+                #: 低分辨率尺度复用同一次几何变换：把主网格整体缩放到该尺度。
                 scale_h = scale_field.shape[-2] / h
-                scale_w = scale_field.shape[-1] / w
                 sub_spec = GridSpec(
                     scale_field.shape[-2],
                     scale_field.shape[-1],
                     pixel_stride=spec.pixel_stride / scale_h,
                 )
-                sub_flow = forward_flow.clone()
-                sub_flow[..., 0] = sub_flow[..., 0] * scale_w
-                sub_flow[..., 1] = sub_flow[..., 1] * scale_h
-                sub_grid = sub_spec.normalized_from_xy(
-                    sub_spec.identity_xy(b, scale_field.device, scale_field.dtype) - sub_flow
-                )
+                sub_grid = _scale_grid(grid, sub_spec, spec)
                 sub_res = warp_feature_field(scale_field, sub_grid, sub_spec)
                 warped.append(sub_res.values)
         assert validity is not None
@@ -565,23 +622,18 @@ class CalibratedGeometryPropagator(nn.Module):
     ) -> list[torch.Tensor]:
         """把同一 flow 应用到多尺度场（低分辨率尺度按尺度换算）。"""
         b, _, h, w = fields[0].shape
-        out = []
+        out: list[torch.Tensor] = []
         for i, scale_field in enumerate(fields):
             if i == 0:
                 out.append(warp_feature_field(scale_field, grid_main, spec).values)
                 continue
             scale_h = scale_field.shape[-2] / h
-            scale_w = scale_field.shape[-1] / w
             sub_spec = GridSpec(
                 scale_field.shape[-2],
                 scale_field.shape[-1],
                 pixel_stride=spec.pixel_stride / scale_h,
             )
-            sub_flow = forward_flow.clone()
-            sub_flow[..., 0] = sub_flow[..., 0] * scale_w
-            sub_flow[..., 1] = sub_flow[..., 1] * scale_h
-            sub_xy = sub_spec.identity_xy(b, scale_field.device, scale_field.dtype) - sub_flow
-            sub_grid = sub_spec.normalized_from_xy(sub_xy)
+            sub_grid = _scale_grid(grid_main, sub_spec, spec)
             out.append(warp_feature_field(scale_field, sub_grid, sub_spec).values)
         return out
 
@@ -691,8 +743,10 @@ class CalibratedGeometryPropagator(nn.Module):
                 context,
             )
         if self.max_flow < float("inf"):
+            #: 软裁剪：幅值超过上限时按 ``tanh`` 压缩，保留对显式几何真值的梯度。
             mag = forward_flow.norm(dim=-1, keepdim=True)
-            forward_flow = forward_flow * (self.max_flow / mag.clamp_min(1e-6)).clamp(max=1.0)
+            scaled = self.max_flow * torch.tanh(mag / self.max_flow)
+            forward_flow = forward_flow * (scaled / mag.clamp_min(1e-6))
         warped = self._warp_scales(fields, spec, grid, forward_flow)
         warped[0] = res.values * hard_validity.unsqueeze(1)
         validity = hard_validity.unsqueeze(1)

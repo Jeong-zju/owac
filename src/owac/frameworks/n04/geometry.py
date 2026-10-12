@@ -253,10 +253,38 @@ def invert_rigid_2d(theta: float, tx: float, ty: float) -> tuple[float, float, f
     return -theta, -(c * tx + s * ty), -(-s * tx + c * ty)
 
 
+def _translation_shift(
+    dx: float | torch.Tensor,
+    dy: float | torch.Tensor,
+    batch: int,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    """把 ``(dx, dy)`` 规范成可与 ``[B,H,W,2]`` 广播的位移张量。
+
+    支持标量（全体共享同一平移）与逐样本张量 ``[B]``/``[B,1]``（每个 batch 项各自的
+    平移，例如基线里由本体状态换算出来的位移）。混用两种形状会显式报错，不静默广播。
+    """
+    dx_tensor = torch.as_tensor(dx, device=device, dtype=dtype)
+    dy_tensor = torch.as_tensor(dy, device=device, dtype=dtype)
+    if dx_tensor.dim() == 0 and dy_tensor.dim() == 0:
+        return torch.stack([dx_tensor, dy_tensor]).reshape(1, 1, 1, 2)
+    dx_flat = dx_tensor.reshape(-1)
+    dy_flat = dy_tensor.reshape(-1)
+    if dx_flat.shape[0] != dy_flat.shape[0]:
+        raise ValueError(f"dx/dy 的样本数不一致：{dx_flat.shape[0]} vs {dy_flat.shape[0]}")
+    if dx_flat.shape[0] == 1:
+        dx_flat = dx_flat.expand(batch)
+        dy_flat = dy_flat.expand(batch)
+    if dx_flat.shape[0] != batch:
+        raise ValueError(f"逐样本位移的样本数 {dx_flat.shape[0]} 与 batch={batch} 不一致")
+    return torch.stack([dx_flat, dy_flat], dim=-1).reshape(batch, 1, 1, 2)
+
+
 def backward_grid_from_translation(
     spec: GridSpec,
-    dx: float,
-    dy: float,
+    dx: float | torch.Tensor,
+    dy: float | torch.Tensor,
     *,
     batch: int = 1,
     device: torch.device | None = None,
@@ -267,9 +295,11 @@ def backward_grid_from_translation(
     内容在上一帧位于 ``p_prev``、当前帧位于 ``p_prev + (dx, dy)``；要在当前帧取值，采样
     位置必须是 ``p_prev = p_cur - (dx, dy)``。函数内部完成这一次取负，返回 ``[B,H,W,2]``
     的 (nx, ny)。调用方**不得**先取负再传入，也不得把返回的网格当作 flow。
+
+    ``dx``/``dy`` 可以是标量，也可以是逐样本张量 ``[B]``。
     """
     xy = spec.identity_xy(batch, device or torch.device("cpu"), dtype)
-    prev_xy = xy - torch.tensor([dx, dy], device=xy.device, dtype=dtype)
+    prev_xy = xy - _translation_shift(dx, dy, xy.shape[0], xy.device, xy.dtype)
     return spec.normalized_from_xy(prev_xy)
 
 

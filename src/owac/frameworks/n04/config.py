@@ -203,5 +203,8 @@ class N04TrainConfig:
     log_every: int = 20
     checkpoint_every: int = 100
     seed: int = 0
+    #: 本机线程数。多 agent 共享同一台机器时，默认线程池会互相抢占，使同一配置的耗时
+    #: 相差两个数量级；固定一个较小值让时延报告与结果都可复现。
+    threads: int = 4
     synthetic: dict[str, Any] = field(default_factory=dict)
     output: str = "outputs/n04"

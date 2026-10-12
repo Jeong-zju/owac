@@ -17,8 +17,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, NamedTuple
 
 import torch
 import torch.nn as nn
@@ -35,8 +36,17 @@ __all__ = [
     "N04Encoder",
     "N04Readout",
     "StepOutput",
+    "TokenReadout",
     "measurement_saturation",
 ]
+
+
+class TokenReadout(NamedTuple):
+    """读出结果。字段名与 `owac.core.encoder_contract.VisualTokens` 一致，
+    便于在不引入重依赖的情况下互换使用。"""
+
+    values: torch.Tensor
+    mask: torch.Tensor
 
 
 # --------------------------------------------------------------------------------------
@@ -297,6 +307,29 @@ class N04Encoder(nn.Module):
         self.change_decay = nn.Parameter(torch.tensor(1.0))
         self._cache: dict[Any, StepOutput] = {}
 
+    def ensure_motion_dim_from_state_dict(self, state_dict: Mapping[str, Any]) -> None:
+        """按 checkpoint 的参数形状预先建出懒初始化层。
+
+        两处懒建：
+
+        * ``learned_proprio`` 的运动编码器输入宽度 = ``motion_dim + 1(dt) + camera_embedding``，
+          而 ``motion_dim`` 默认由数据侧在首次 ``step`` 时确定；
+        * 分解器输入宽度取决于是否启用饱和/照明通道，首次 ``forward`` 时才确定。
+
+        恢复 checkpoint 时还没跑过任何一步，必须先按 checkpoint 记录的真实宽度建层，
+        否则 ``load_state_dict`` 会把训练好的参数判为 unexpected keys。
+        """
+        weight = state_dict.get("propagator.motion_encoder.0.weight")
+        if weight is not None:
+            ensure = getattr(self.propagator, "ensure_motion_dim", None)
+            if ensure is not None:
+                ensure(int(weight.shape[1]) - 1 - int(self.config.model.camera_embedding))
+        trunk = state_dict.get("decomposer.trunk.0.weight")
+        if trunk is not None:
+            ensure_decomposer = getattr(self.decomposer, "ensure_in_channels", None)
+            if ensure_decomposer is not None:
+                ensure_decomposer(int(trunk.shape[1]))
+
     # -- 生命周期 -----------------------------------------------------------------
 
     def init_state(
@@ -403,9 +436,11 @@ class N04Encoder(nn.Module):
         #: 变化 cell：只写“自运动解释不了、且空间连贯”的残余，且不被稳定分支抹平。
         #: 另有 ``change_decay`` 衰减：没有持续证据支持的变化会退掉，否则一次瞬时
         #: 残差会被永久保留，物体走后仍报“变化”。衰减与写入都由测量证据驱动。
+        #: 上一状态的变化 cell：**无条件**取出。关闭变化分支时下面的多尺度循环仍要
+        #: 引用它（此前只在 change_branch=True 分支里赋值，导致消融配置直接崩）。
+        old_change = state.change if state.change is not None else torch.zeros_like(new_stable)
         if self.config.model.change_branch:
             change_delta = innovation.gate_change * (meas0 - pred0)
-            old_change = state.change if state.change is not None else torch.zeros_like(new_stable)
             old_change0 = old_change[0] if isinstance(old_change, list) else old_change
             decay = torch.sigmoid(self.change_decay)
             new_change0 = decay * old_change0 + torch.tanh(self.change_write) * change_delta
@@ -566,13 +601,13 @@ class N04Encoder(nn.Module):
         self,
         output: StepOutput,
         token_budget: int | None = None,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        """把表示读成 π0.5 视觉前缀形状的 token。"""
+    ) -> TokenReadout:
+        """把表示读成 π0.5 视觉前缀形状的 token（``values`` / ``mask`` 两个命名域）。"""
         tokens, mask = self.readout(output.representation, output.validity)
         if token_budget is not None and token_budget < tokens.shape[1]:
             tokens = tokens[:, :token_budget]
             mask = mask[:, :token_budget]
-        return tokens, mask
+        return TokenReadout(values=tokens, mask=mask)
 
 
 def _first(value: torch.Tensor | list[torch.Tensor]) -> torch.Tensor:

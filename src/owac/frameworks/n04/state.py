@@ -135,7 +135,8 @@ class N04State:
             if isinstance(x, list):
                 return [d(v) for v in x]
             if torch.is_tensor(x):
-                return x.detach()
+                #: inference tensor 没有 grad_fn，detach 会报错；此时直接返回。
+                return x.detach() if x.requires_grad else x
             return x
 
         self.stable = d(self.stable)
