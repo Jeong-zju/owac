@@ -1,0 +1,37 @@
+{
+  "protocol": "n01-dbsr-spatial-support-frozen-probe-v1",
+  "seeds": [
+    61,
+    73,
+    89
+  ],
+  "required_baselines": [
+    "dbsr_reference",
+    "mean_capacity",
+    "current"
+  ],
+  "probe_seed_offset": 1000,
+  "device": "cuda:0",
+  "gpu_memory_fraction": 0.12,
+  "threads": 2,
+  "freeze_frame": 8,
+  "encode_chunk": 16,
+  "batch_size": 2,
+  "evaluation_batch_size": 24,
+  "size": 16,
+  "length": 24,
+  "burn_in": 8,
+  "contrast": 0.08,
+  "noise_sigma": 0.08,
+  "heatmap_sigma": 0.8,
+  "recovery_tolerance_px": 0.75,
+  "recovery_consecutive": 3,
+  "event_window": 6,
+  "support_variants": {
+    "stock": {},
+    "noise_calibrated": {
+      "edge_temperature": 3.9740435495127926,
+      "edge_beta": 8.0
+    }
+  }
+}
