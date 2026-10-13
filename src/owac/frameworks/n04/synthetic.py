@@ -251,8 +251,15 @@ class SyntheticSequenceGenerator:
         cfg = self.config
         b = camera_translation.shape[0]
         margin = cfg.canvas_margin
-        centers = base_object_centers + object_translation
+        if object_translation.shape != (b, 2):
+            raise ValueError("object_translation must have shape [batch, xy]")
+        if base_object_centers.ndim != 3 or base_object_centers.shape[::2] != (b, 2):
+            raise ValueError("base_object_centers must have shape [batch, objects, xy]")
+        if base_object_centers.shape[1] > len(cfg.object_colors):
+            raise ValueError("every labeled object must have a rendered color")
+        centers = base_object_centers + object_translation[:, None, :]
         canvas = self._paint_objects(centers)
+        object_canvas = self._object_mask(centers, self.canvas_h, self.canvas_w)
         top = margin + base_camera_offset[:, 1] + camera_translation[:, 1]
         left = margin + base_camera_offset[:, 0] + camera_translation[:, 0]
         top = top.clamp(0, self.canvas_h - cfg.height)
@@ -279,12 +286,10 @@ class SyntheticSequenceGenerator:
             measured = (
                 measured * valid
             )  # hidden target pixels cannot leak through stem normalization
-        #: 目标掩码必须换算到**视野坐标**：画布坐标减去实际裁剪原点。
-        view_centers = centers.clone()
-        view_centers[:, :, 0] = view_centers[:, :, 0] - left.reshape(b, 1).to(centers.dtype)
-        view_centers[:, :, 1] = view_centers[:, :, 1] - top.reshape(b, 1).to(centers.dtype)
+        # Labels undergo exactly the same sampling as the painted sensor scene.
+        # Redrawing a disk after a fractional crop disagrees with bilinear measurements.
         object_mask = self._rotate_batch(
-            self._object_mask(view_centers, cfg.height, cfg.width), camera_rotation
+            self._crop(object_canvas, top, left), camera_rotation
         )
         #: 真值单步 ego flow：相机本帧位移的负方向（内容在图像中向相反方向移动）。
         step = camera_translation if camera_step is None else camera_step
@@ -328,6 +333,7 @@ class SyntheticSequenceGenerator:
                 "input_mode": cfg.input_mode,
                 "cfa_pattern": cfg.cfa_pattern,
                 "oracle_flow_is_per_step": camera_step is not None,
+                "scene_revision": "sample-independent-render-label-v1",
             },
         )
 
