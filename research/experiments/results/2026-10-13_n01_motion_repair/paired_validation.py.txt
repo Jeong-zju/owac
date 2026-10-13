@@ -1,0 +1,46 @@
+import json
+import os
+import runpy
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+CHECKOUT = ROOT.parent.parent
+rows = []
+for alignment in ("none", "candidate"):
+    for seed in (8000, 9000, 10000):
+        pair = {}
+        for side in ("before", "after"):
+            destination = ROOT / f"{side}-{alignment}-{seed}.json"
+            args = ["--output", str(destination), "--batch-size", "24", "--seed", str(seed), "--alignment", alignment]
+            env = dict(os.environ, OMP_NUM_THREADS="4", MKL_NUM_THREADS="4")
+            if side == "before":
+                env["PYTHONPATH"] = str(ROOT / "before/src")
+            else:
+                env["PYTHONPATH"] = str(CHECKOUT / "src")
+            code = "import runpy; m=runpy.run_path('src/owac/evaluation/n01_temporal.py',run_name='owac.evaluation.n01_temporal'); m['main'](" + repr(args) + ")"
+            process = subprocess.run([sys.executable, "-c", code], cwd=CHECKOUT, env=env, text=True, capture_output=True)
+            (ROOT / f"{side}-{alignment}-{seed}.log").write_text(process.stdout + process.stderr)
+            if process.returncode:
+                raise RuntimeError(process.stderr)
+            result = json.loads(destination.read_text())
+            if side == "before":
+                assert str(ROOT / "before") in result["encoder_source"]
+            else:
+                assert str(ROOT / "before") not in result["encoder_source"]
+            pair[side] = result
+            print(side, alignment, seed, result["still_history"], result["fast_history"], result["fast_stop_history"], result["original_weak_edge"]["summary"], flush=True)
+        hashes = {}
+        for case in ("still", "subpixel", "fast"):
+            old = pair["before"]["cases"][case][0]["input_sha256"]
+            new = pair["after"]["cases"][case][0]["input_sha256"]
+            assert old == new
+            hashes["gaussian-"+case] = old
+        for case in ("still", "slow", "fast"):
+            old = pair["before"]["original_weak_edge"]["cases"][case][0]["input_sha256"]
+            new = pair["after"]["original_weak_edge"]["cases"][case][0]["input_sha256"]
+            assert old == new
+            hashes["poisson-"+case] = old
+        rows.append({"alignment": alignment, "seed": seed, "input_hashes": hashes, "before": {k:v for k,v in pair["before"].items() if k not in ("cases","original_weak_edge")}, "after": {k:v for k,v in pair["after"].items() if k not in ("cases","original_weak_edge")}, "original_weak_edge": {side:result["original_weak_edge"]["summary"] for side,result in pair.items()}})
+(ROOT / "paired-summary.json").write_text(json.dumps({"baseline_commit": "ce3f0d9", "rows": rows},indent=2)+"\n")

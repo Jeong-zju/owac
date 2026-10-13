@@ -18,7 +18,7 @@ The selector chooses a support domain per position.  Its analytic cost is::
     J(domain) = lambda_noise * uncertainty_proxy
               + lambda_edge  * boundary_mixing_proxy
               + lambda_age   * mean_measurement_age
-              + lambda_motion * correspondence_error
+              + lambda_motion * temporal_measurement_inconsistency
 
 Only information available at the current time enters the cost.  Task precision
 or a reaction deadline participate only when they are genuinely provided as a
@@ -53,6 +53,7 @@ from .state import init_state as init_state_fn
 from .state import push as push_fn
 from .state import reset as reset_fn
 from .support import SupportDomainIntegrator, candidate_offsets
+from .temporal import temporal_innovation_cost
 
 __all__ = ["N01Encoder", "EvidenceBlock", "SupportSelector", "MeasurementStem", "SpatialReadout"]
 
@@ -431,6 +432,8 @@ class N01Encoder(nn.Module):
         self.register_buffer("calibration_count", torch.tensor(0))
         # Reject weights trained on raw gate units rather than reinterpret them.
         self.register_buffer("evidence_encoding_version", torch.tensor(1, dtype=torch.long))
+        # Motion units changed: old selector weights/scales need recalibration.
+        self.register_buffer("temporal_cost_version", torch.tensor(1, dtype=torch.long))
         self.last_diagnostics: dict = {}
         # The candidate statistics of the most recent step, kept for diagnostics
         # and for the trajectory explorer.  Never part of the recurrent state.
@@ -712,19 +715,16 @@ class N01Encoder(nn.Module):
         device = statistics.mu.device
         payload = self._statistics_payload(statistics, connectivity, motion)
         if state is not None:
-            x, v, m = self.integrator.aligned_slots(state, motion, self.correspondence)
-            overlap = (m > 0.5) & state.valid[0][None] & state.observed[:, :, None, None, None]
-            innovation = (x - state.values[0][None]).square() / (v + state.variance[0][None] + 1e-6)
-            # Three-sigma excess is refutation, not another noisy correlation score.
-            excess = (innovation - 9.0).clamp_min(0.0).mean(2, keepdim=True)
-            supported = overlap.all(2, keepdim=True)
-            costs = []
-            rank = state.observed.long().cumsum(0)
-            for depth in statistics.depth_index:
-                use = supported & (rank <= depth)[:, :, None, None, None]
-                # Include the cumulative excess of carried older measurements.
-                costs.append((excess * use).sum(0).expand(-1, self.config.planes, -1, -1))
-            payload["motion_error"] = torch.stack(costs).detach()
+            aligned = self.integrator.aligned_slots(state, motion, self.correspondence)
+            payload["motion_error"] = temporal_innovation_cost(
+                state,
+                aligned,
+                statistics.depth_index,
+                planes=config.planes,
+                # Use the existing correspondence neighbourhood for motion
+                # evidence; integration domains keep their original radii.
+                radius=max(config.neighbourhood_radius, config.correspondence_window),
+            )
         order = torch.argsort(statistics.radius_index * 1000 + statistics.depth_index)
         del order
         depth_limit = min(
@@ -743,6 +743,8 @@ class N01Encoder(nn.Module):
         self.last_selection_weights = weights
         self.last_selection_slice = budget_slice
         self.last_diagnostics = {
+            "motion_cost_mean": float(payload["motion_error"].mean()),
+            "motion_refuted_fraction": float((payload["motion_error"] > 0).float().mean()),
             "selection_entropy": float(
                 -(weights.clamp_min(1e-9) * weights.clamp_min(1e-9).log())
                 .sum(dim=0)
@@ -800,10 +802,10 @@ class N01Encoder(nn.Module):
         }
 
     def _statistics_scale(self, payload, budget_slice):
-        """Normalisation scales taken from the candidate statistics at this step.
+        """Fit training-only units; retain them on validation and checkpoint restore.
 
-        They are reported in the diagnostics so a training-set calibration can be
-        substituted on validation without changing the mechanism.
+        Motion excess has a minimum scale of one squared noise unit so an
+        absence of training refutations cannot magnify test noise tails.
         """
         keys = ("variance_proxy", "age", "support_count", "unique_frames", "motion_error", "mu")
         # Fit only during training, then retain the scales across validation,
@@ -812,6 +814,9 @@ class N01Encoder(nn.Module):
             estimates = torch.stack(
                 [payload[key][budget_slice].detach().abs().mean() for key in keys]
             ).clamp_min(1e-6)
+            # A three-sigma excess already has noise units. Near-zero training
+            # refutations must not turn an ordinary noise tail into huge cost.
+            estimates[4] = estimates[4].clamp_min(1.0)
             with torch.no_grad():
                 count = int(self.calibration_count)
                 self.normalization_scales.copy_(

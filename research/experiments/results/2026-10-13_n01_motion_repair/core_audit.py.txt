@@ -1,0 +1,36 @@
+import ast
+import hashlib
+import json
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+checkout = root.parent.parent
+before = root / "before"
+
+def tree(path):
+    return ast.parse(path.read_text())
+
+def node(module, name):
+    found = next(item for item in module.body if getattr(item, "name", None) == name.split(".")[0])
+    if "." in name:
+        found = next(item for item in found.body if getattr(item, "name", None) == name.split(".")[1])
+    return ast.dump(found, include_attributes=False)
+
+model = Path("src/owac/frameworks/n01/model.py")
+old, new = tree(before / model), tree(checkout / model)
+checks = []
+for name in ("SupportSelector", "EvidenceBlock", "MeasurementStem", "SpatialReadout", "N01Encoder.step", "N01Encoder._encode", "N01Encoder._estimate_motion", "N01Encoder._budget_plan", "N01Encoder._statistics_payload"):
+    checks.append({"name": name, "kind": "AST", "unchanged": node(old,name) == node(new,name)})
+for relative in ("src/owac/frameworks/n01/support.py", "src/owac/frameworks/n01/state.py", "src/owac/frameworks/n01/config.py", "src/owac/frameworks/n01/motion.py", "src/owac/frameworks/n01/sequence1d.py", "src/owac/frameworks/n01/synthetic.py", "src/owac/baselines/n01.py", "src/owac/backends/rawvla_features.py", "src/owac/raw/rawvla_sequence.py"):
+    old_bytes, new_bytes = (before/relative).read_bytes(), (checkout/relative).read_bytes()
+    checks.append({"name": relative, "kind": "SHA256", "unchanged": old_bytes == new_bytes, "sha256": hashlib.sha256(new_bytes).hexdigest()})
+assert all(row["unchanged"] for row in checks)
+import torch
+from owac.frameworks.n01.config import N01Config
+from owac.frameworks.n01.model import N01Encoder
+encoder = N01Encoder(N01Config.tiny())
+parameters = sum(p.numel() for p in encoder.parameters())
+assert parameters == 116622
+result = {"baseline_commit": "ce3f0d9", "checks": checks, "all_unchanged": True, "trainable_parameters": parameters, "only_core_adjacent_change": "motion_error measurement estimator and its training normalization floor; cost form/weights, integral and graph unchanged"}
+(root / "core-preservation-audit.json").write_text(json.dumps(result,indent=2)+"\n")
+print(len(checks), "checks unchanged; parameters", parameters)

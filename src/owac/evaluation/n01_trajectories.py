@@ -97,6 +97,10 @@ class TrajectoryResult:
             "mean_support_width": _mean(column("mean_support_count")),
             "selected_radius_mean": _mean(column("selected_radius_mean")),
             "selected_history_frames_mean": _mean(column("selected_depth_mean")),
+            "selected_history_metric": "configured depth level, not actual observed history",
+            "actual_history_frames_mean": _mean(column("mean_unique_frames")),
+            "target_region_history_frames_mean": _mean(column("target_region_history_frames")),
+            "target_peak_history_frames_mean": _mean(column("target_peak_history_frames")),
             "merge_count_total": float(self.diagnostics[-1]["merge_count"]),
             "split_count_total": float(self.diagnostics[-1]["split_count"]),
             "edge_on_fraction_mean": _mean(column("edge_mean")),
@@ -189,6 +193,14 @@ def run_trajectory(
             support = (weights * statistics.unique_samples[encoder.last_selection_slice]).sum(0)[
                 0, 0
             ]
+            actual_history = (
+                (weights * statistics.unique_frames[encoder.last_selection_slice]).sum(0)[0].mean(0)
+            )
+            centre = batch.target_xy[0, index, 1] * (actual_history.shape[-1] - 1)
+            roi = (
+                torch.arange(actual_history.shape[-1], device=device) - centre.to(device)
+            ).abs() <= 2
+            peak = int(centre.round())
             panels["support_weight"].append(support.cpu())
             panels["integrated_mu"].append(
                 (weights * statistics.mu[encoder.last_selection_slice]).sum(0)[0, 0].cpu()
@@ -207,6 +219,9 @@ def run_trajectory(
                     "target_row": float(batch.target_xy[0, index, 0]),
                     "target_col": float(batch.target_xy[0, index, 1]),
                     "visible": bool(batch.target_visible[0, index]),
+                    # Geometry masks are reporting-only, evaluated after step().
+                    "target_region_history_frames": float(actual_history[:, roi].mean()),
+                    "target_peak_history_frames": float(actual_history[:, peak].mean()),
                 }
             )
             diagnostics.append(_jsonable(record))

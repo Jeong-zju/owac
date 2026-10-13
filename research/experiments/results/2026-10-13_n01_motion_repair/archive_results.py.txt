@@ -1,0 +1,52 @@
+import datetime
+import hashlib
+import json
+import platform
+import shutil
+from pathlib import Path
+import torch
+
+root=Path(__file__).resolve().parent
+checkout=root.parent.parent
+dest=checkout/'research/experiments/results/2026-10-13_n01_motion_repair'
+dest.mkdir(parents=True,exist_ok=True)
+payload=json.loads((root/'paired-summary.json').read_text())
+summary={"created_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),"baseline_commit":"ce3f0d9","environment":{"python":platform.python_version(),"torch":torch.__version__,"device":"cpu","threads":4},"seeds":[8000,9000,10000],"batch_size":24,"matched_input_hash_pairs":36,"conditions":{},"no_gradient_training":True}
+traces=[]
+for mode in ('none','candidate'):
+    group=[r for r in payload['rows'] if r['alignment']==mode]
+    summary['conditions'][mode]={}
+    for side in ('before','after'):
+        values={key:sum(r[side][key] for r in group)/3 for key in ('still_history','fast_history','subpixel_history','fast_stop_history','still_peak_history','fast_peak_history','paired_history_reduction')}
+        values['positive_members']=sum(r[side]['paired_positive_members'] for r in group)
+        values['poisson']={motion:{key:sum(r['original_weak_edge'][side][motion][key] for r in group)/3 for key in ('roi_history','peak_history','global_history')} for motion in ('still','slow','fast')}
+        stop=0
+        for seed in (8000,9000,10000):
+            result=json.loads((root/f'{side}-{mode}-{seed}.json').read_text())
+            stop+=sum(row['peak_history'] for row in result['cases']['fast'][22:24])/2
+            compact={"alignment":mode,"side":side,"seed":seed,"cases":{}}
+            for case,rows in result['cases'].items():
+                compact['cases'][case]=[{k:v for k,v in row.items() if k not in ('roi_history_per_member','peak_history_per_member')} for row in rows]
+            compact['original_weak_edge']={case:[{k:v for k,v in row.items() if k not in ('roi_history_per_member','peak_history_per_member')} for row in rows] for case,rows in result['original_weak_edge']['cases'].items()}
+            traces.append(compact)
+        values['fast_stop_peak_history']=stop/3
+        summary['conditions'][mode][side]=values
+assert summary['conditions']['none']['after']['positive_members']==72
+assert summary['conditions']['candidate']['after']['positive_members']==72
+for mode in ('none','candidate'):
+    r=summary['conditions'][mode]['after']
+    assert r['fast_peak_history'] < r['still_peak_history'] - 2
+    assert r['fast_stop_peak_history'] > r['fast_peak_history'] + 2
+    assert r['poisson']['fast']['roi_history'] < r['poisson']['still']['roi_history']
+summary['acceptance_checks_passed']=True
+(dest/'metrics.json').write_text(json.dumps(summary,indent=2)+'\n')
+(dest/'trajectories.json').write_text(json.dumps(traces,indent=2)+'\n')
+for name in ('paired-summary.json','core-preservation-audit.json','pytest-final.log','check.log'):
+    shutil.copyfile(root/name,dest/name)
+for name in ('paired_validation.py','core_audit.py','archive_results.py'):
+    shutil.copyfile(root/name,dest/(name+'.txt'))
+files=['src/owac/frameworks/n01/model.py','src/owac/frameworks/n01/temporal.py','src/owac/evaluation/n01_temporal.py','src/owac/evaluation/n01_trajectories.py','tests/encoders/n01/test_temporal.py']
+(dest/'source-manifest.json').write_text(json.dumps({"baseline_commit":"ce3f0d9","source_files":{name:hashlib.sha256((checkout/name).read_bytes()).hexdigest() for name in files}},indent=2)+'\n')
+receipts={path.name:hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(dest.iterdir()) if path.is_file() and path.name!='receipt-checksums.json'}
+(dest/'receipt-checksums.json').write_text(json.dumps(receipts,indent=2)+'\n')
+print(json.dumps(summary,indent=2))
