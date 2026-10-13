@@ -58,6 +58,9 @@ class N01Config:
     # gate_only preserves the original statistics-conditioned update exactly.
     # current_control matches integrated's extra capacity with current RAW only.
     content_mode: str = "gate_only"
+    # Experimental source-wise innovation risk, disabled for existing checkpoints.
+    source_reliability: str = "none"
+    source_reliability_floor: float = 0.01
     selection_use_learned: bool = False
     selector_temperature: float = 0.1
     cost_weights: dict[str, float] = field(
@@ -125,6 +128,12 @@ class N01Config:
             raise ValueError(f"Unknown selection {self.selection!r}")
         if self.content_mode not in {"gate_only", "integrated", "current_control"}:
             raise ValueError(f"Unknown content_mode {self.content_mode!r}")
+        if self.source_reliability not in {"none", "innovation_risk"}:
+            raise ValueError(f"Unknown source_reliability {self.source_reliability!r}")
+        if not 0 <= self.source_reliability_floor < 1:
+            raise ValueError("source_reliability_floor must lie in [0, 1)")
+        if self.input_mode == "sequence1d" and self.source_reliability != "none":
+            raise ValueError("sequence1d does not yet support source_reliability")
         if self.input_mode == "sequence1d" and self.content_mode != "gate_only":
             raise ValueError("sequence1d currently supports only content_mode='gate_only'")
         if self.planes == 4 and self.cfa_pattern not in {"RGGB", "BGGR", "GRBG", "GBRG"}:
@@ -223,6 +232,8 @@ class N01Config:
         # are distinct mechanisms and always carry their explicit identity.
         if self.content_mode != "gate_only":
             keys.append("content_mode")
+        if self.source_reliability != "none":
+            keys.extend(["source_reliability", "source_reliability_floor"])
         data = self.to_dict()
         return {key: data[key] for key in keys}
 

@@ -268,6 +268,8 @@ class N01Sequence1DEncoder(nn.Module):
         config.validate()
         if config.content_mode != "gate_only":
             raise ValueError("the 1-D adapter currently supports only content_mode='gate_only'")
+        if config.source_reliability != "none":
+            raise ValueError("the 1-D adapter does not yet support source_reliability")
         if config.channels != 1:
             raise ValueError("the 1-D adapter expects config.channels == 1")
         self.config = config

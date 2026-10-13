@@ -470,6 +470,10 @@ class SupportDomainIntegrator(nn.Module):
         enter W/S linearly and variance/squared-weight sums quadratically.
         Counts are unweighted integers and exclude invalid or disconnected data.
         """
+        if self.config.source_reliability != "none":
+            from .reliability import reliable_statistics
+
+            return reliable_statistics(self, state, edges, motion=motion, depths=depths)
         if motion is not None and self.config.fractional_alignment:
             return self.fractional_statistics(
                 state, edges, motion, tuple(self.config.time_depths if depths is None else depths)
@@ -678,6 +682,8 @@ class SupportDomainIntegrator(nn.Module):
 
     def reference_domains(self, state, edges, depths=None, motion=None, estimator=None):
         """Independent scalar source walk, including integer-warped observations."""
+        if self.config.source_reliability != "none":
+            raise NotImplementedError("legacy reference_domains excludes source reliability")
         values, variance, valid = self.aligned_slots(state, motion, estimator)
         n, batch, _, height, width = values.shape
         planes = self.config.planes

@@ -472,6 +472,11 @@ class N01Encoder(nn.Module):
                 self.content_integrator = SupportDomainIntegrator(
                     config.replace(channels=1, planes=1, learnable_gate=False)
                 )
+        if config.source_reliability != "none":
+            self.register_buffer(
+                "source_reliability_version",
+                torch.tensor([1.0, config.source_reliability_floor]),
+            )
         self.last_diagnostics: dict = {}
         # The candidate statistics of the most recent step, kept for diagnostics
         # and for the trajectory explorer.  Never part of the recurrent state.
@@ -497,6 +502,19 @@ class N01Encoder(nn.Module):
                 f"content_mode_version mismatch for {self.config.content_mode!r}; "
                 "use matching architecture checkpoints or explicitly copy shared parameters. "
                 "Pre-content checkpoints are compatible only with gate_only."
+            )
+        key = prefix + "source_reliability_version"
+        incoming = state_dict.get(key)
+        expected = getattr(self, "source_reliability_version", None)
+        if (incoming is None) != (expected is None) or (
+            incoming is not None
+            and (
+                incoming.shape != expected.shape or not torch.equal(incoming.cpu(), expected.cpu())
+            )
+        ):
+            raise RuntimeError(
+                "source_reliability_version mismatch; use matching checkpoints "
+                "or explicitly copy shared parameters for an intervention."
             )
         super()._load_from_state_dict(
             state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
