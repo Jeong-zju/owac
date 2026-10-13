@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "document": "research/experiments/2026-10-13_n02_joint_controls.md",
+  "document_sha256_at_review": "4e9dec8894d380c83a0fb89ba5a227d603ec685f50769799a7e1a5d0be5e57c5",
+  "review_scope": [
+    "Geometry-only weighted mixture versus geometry_set projection; not all shared-parameter or all-loss conflict resolution.",
+    "A fixed variance distinguished from B learned variance; lambda may change variance calibration target.",
+    "A cue-only difference NMSE distinguished from B all-frame calibration-set difference NMSE.",
+    "Calibration data not equated with optimized training batches.",
+    "A fixed-geometry likelihood readout distinguished from B live solver posterior.",
+    "Local geometry MSE improvement not claimed as overall mechanism acceptance.",
+    "Cumulative400 diagnostic checkpoints distinguished from original200 training checkpoints.",
+    "All four recipes fail frozen dev and new-seed holdout continuation gates.",
+    "A all-trainable-head gradient equivalence and current-round independent audit coverage described accurately."
+  ],
+  "amendments_verified": [
+    "Removed implication that calibration-set failure independently establishes failure on actual optimized training batches.",
+    "Specified A head-parameter gradient scope and removed claim of newly rechecking score-difference identity in this round."
+  ],
+  "evidence_receipts": [
+    "audit_head.json",
+    "audit_b_prepared.json",
+    "audit_b_final.json",
+    "audit_b_forward.json"
+  ],
+  "limits": [
+    "Document interpretation review; not an additional training experiment or a rerun of all models.",
+    "Hash covers the report version read for this scope review; later formatting/link edits need not alter the substantive conclusion."
+  ]
+}

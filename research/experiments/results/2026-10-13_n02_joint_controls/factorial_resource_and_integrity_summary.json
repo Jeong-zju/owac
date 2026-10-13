@@ -1,0 +1,37 @@
+{
+  "parent_wall_seconds_including_holdout": 1615.3433448629949,
+  "training_and_dev_worker_cpu_seconds": 4228.266438134,
+  "training_and_dev_worker_wall_seconds": [
+    1444.6987632090022,
+    1351.0231934309995,
+    1437.8212922039966
+  ],
+  "holdout_cpu_seconds": null,
+  "holdout_cpu_note": "Not separately measured; no estimate substituted.",
+  "training_step_wall_seconds_sum": 2987.861423137205,
+  "training_step_cpu_seconds_sum": 2984.330862914998,
+  "formal_update_count": 2400,
+  "disposable_clip_control_count": 6,
+  "source_unchanged": true,
+  "original_checkpoints_unchanged": true,
+  "all_recorded_training_input_hashes_match": true,
+  "commands": [
+    "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 uv run --locked python -m owac.evaluation.n02_joint_training --phase prepare --output outputs/n02-joint-controls-20261013/factorial",
+    "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 uv run --locked python -m owac.evaluation.n02_joint_training --phase run --output outputs/n02-joint-controls-20261013/factorial"
+  ],
+  "final_diagnostic_checkpoint_sha256": {
+    "seed0/baseline": "27ed1ebe23a542bee0ca57e571ff2582dc57806805becb35eec0241131aafb95",
+    "seed0/balanced_cf": "1180a37c2dcd13977d887116dc85fb7e4877261fdcf39c9ece86fdf8d37edc26",
+    "seed0/projected_geometry": "63ca5933ac4db3349e037a272686a6ea43d06110bcee5e30ffbd51505db93628",
+    "seed0/both": "b7d0d6576f35176fd244d988e57b7b51234d332031bb5ee950b7c1e66367ce4a",
+    "seed1/baseline": "f6122f29ad491c240caa948d9db6f65d7c2cdba119647f8c3d2f9f6e6e94c3a5",
+    "seed1/balanced_cf": "41d2141937d73a6dfff91927da536ac0aecbd2a7f10baa70c6502ead1c51749c",
+    "seed1/projected_geometry": "f0683e11f462b4d37500236d0103892998a3fbf7fde882ea459112ffde7e3ced",
+    "seed1/both": "076db471b64c4e74b17ac1643043d417c096d82ef193044ebaa4863122b1c2c2",
+    "seed2/baseline": "cc9c3349ffaae03ba9e0dd405f88ce85f83d26f95216fb3cd7548896afa3f26a",
+    "seed2/balanced_cf": "cb1705eafe254677de7bf4434b1ef01ed76d0ecf0e781a58fcdc1d53478d68eb",
+    "seed2/projected_geometry": "3a575d0fc769c85d401789db310b4a4eb11232ffb934be3c7b4b899d9b87bc8e",
+    "seed2/both": "d1d77954eff59b55ea3ce2efc97b59a228fa6ddd6a2b4a3f47aee7efca4823b4"
+  },
+  "wall_scope": "--phase run only: all 2400 diagnostic updates, development evaluation and final holdout. Preparation, calibration, preflight tests and independent smoke excluded."
+}

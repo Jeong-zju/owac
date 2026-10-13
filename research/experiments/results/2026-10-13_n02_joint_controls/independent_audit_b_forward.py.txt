@@ -1,0 +1,66 @@
+"""Preselected saved seed0/both/400 forward recheck on new holdout seed760."""
+import hashlib,json,math
+from dataclasses import replace
+from pathlib import Path
+import numpy as np
+import torch
+from owac.core.encoder_contract import MeasurementFrame,ComputeBudget
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.model import N02Encoder
+from owac.frameworks.n02.synthetic import SyntheticGenerator,SyntheticOptions,values_for_task
+from owac.training.n02 import episode_prior_context
+ROOT=Path('outputs/n02-joint-controls-20261013/factorial');OUT=ROOT.parent/'independent';SEED=760
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+@torch.no_grad()
+def trajectory(model,episode,generator):
+ config=model.config;context=episode_prior_context([episode],config.K);state=None;result=[]
+ for i,raw in enumerate(episode.frames):
+  frame=MeasurementFrame(values=torch.from_numpy(raw).unsqueeze(0),frame_ids=(i,),episode_ids=(episode.episode_id,),camera_id='synthetic_measurement',metadata={'variance':generator.options.noise_sigma**2},metadata_available={'variance':True})
+  output=model.step(frame,context,state,ComputeBudget(config.cycles,config.history));state=model.detach_state(output.state)
+  weights=output.representation.weights[0,0]
+  semantic=[float(weights[::2].sum()),float(weights[1::2].sum())]
+  truth=values_for_task(episode.task).index(episode.value_over_time[i])
+  result.append({'frame':i,'semantic_mass':semantic,'truth_semantic_mass':semantic[truth]})
+ return result
+
+def main():
+ torch.set_num_threads(1)
+ path=ROOT/'seed0/both/diagnostic_step200.pt';payload=torch.load(path,weights_only=False)
+ original=torch.load('outputs/n02-contracts-20261013/seed0/checkpoint200.pt',weights_only=False)
+ assert payload['step']==payload['total_seen']==400 and payload['diagnostic_step']==200 and payload['diagnostic_arm']=='both'
+ config=N02Config.from_dict(payload['config']);model=N02Encoder(config).eval();model.load_state_dict(payload['model'])
+ assert all(torch.equal(v,model.state_dict()[k]) for k,v in payload['model'].items())
+ changed=sum(not torch.equal(v,original['model'][k]) for k,v in payload['model'].items());assert changed>0
+ options=SyntheticOptions(height=64,width=64,channels=3);generator=SyntheticGenerator(options,seed=SEED,split='validation')
+ observed=generator.generate(seed=SEED,num_frames=8,prior_condition='correct',identifiable=True)
+ observed=replace(observed,prior=replace(observed.prior,log_odds=math.log(19)))
+ stale=SyntheticGenerator(replace(options,staleness=1.),seed=SEED,split='validation').generate(seed=SEED,num_frames=8,prior_condition='stale',identifiable=True)
+ episodes={'correct':observed,'misleading':replace(observed,prior=replace(observed.prior,condition='misleading',log_odds=-math.log(19))),
+  'missing':replace(observed,prior=replace(observed.prior,condition='missing')),
+  'unidentifiable':generator.generate(seed=SEED,num_frames=8,prior_condition='uninformative',identifiable=False),
+  'stale':replace(stale,prior=replace(stale.prior,log_odds=math.log(19)))}
+ saved=json.loads((ROOT/'seed0/both/holdout_step200.json').read_text());assert saved['checkpoint_sha256']==sha(path)
+ rows=[];maximum_error=0.
+ for condition,episode in episodes.items():
+  calculated=trajectory(model,episode,generator);record=next(x for x in saved['records'] if x['seed']==SEED and x['condition']==condition)
+  assert hashlib.sha256(episode.frames.tobytes()).hexdigest()==record['measurement_sha256']
+  error=float(np.max(np.abs(np.array([x['semantic_mass'] for x in calculated])-np.array([x['semantic_mass'] for x in record['steps']]))));maximum_error=max(error,maximum_error);assert error<1e-7
+  quality=generator.measurement_quality(episode);prefix=[x for x in calculated if not quality['identifiable_now'][x['frame']]]
+  gate={'correct':calculated[-1]['truth_semantic_mass']>=.7,'misleading':bool(prefix) and prefix[-1]['truth_semantic_mass']<=.25 and calculated[-1]['truth_semantic_mass']>=.7,'missing':calculated[-1]['truth_semantic_mass']>.5,'unidentifiable':all(abs(x['semantic_mass'][0]-.5)<=.15 for x in calculated),'stale':calculated[max(0,episode.geometry_change_step-1)]['truth_semantic_mass']>=.7 and calculated[-1]['truth_semantic_mass']>=.7}[condition]
+  assert gate==record['gate_passed'];rows.append({'condition':condition,'gate':gate,'steps':calculated})
+ templates=np.stack([generator.measurement_templates(episodes['missing'],i) for i in range(8)])
+ pair=[];record=next(x for x in saved['counterfactual']['records'] if x['seed']==SEED)
+ for truth,value in enumerate(values_for_task(episodes['missing'].task)):
+  base=episodes['missing'];episode=replace(base,frames=(templates[:,truth]+base.noise).astype(np.float32),value=value,value_over_time=(value,)*8)
+  assert hashlib.sha256(episode.frames.tobytes()).hexdigest()==record[f'measurement_sha256_{truth}']
+  calculated=trajectory(model,episode,generator);p1=calculated[-1]['semantic_mass'][1]
+  assert abs(p1-record[f'p1_when_{truth}'])<1e-7;pair.append(p1)
+ # Confirm the loaded 400-step inference differs from original200 on the same missing-prior sequence.
+ initial_model=N02Encoder(config).eval();initial_model.load_state_dict(original['model'])
+ initial=trajectory(initial_model,episodes['missing'],generator)
+ current=next(x['steps'] for x in rows if x['condition']=='missing')
+ original_output_delta=float(np.max(np.abs(np.array([x['semantic_mass'] for x in initial])-np.array([x['semantic_mass'] for x in current]))))
+ assert original_output_delta>0
+ receipt={'passed':True,'checkpoint':str(path),'checkpoint_sha256':sha(path),'checkpoint_step':400,'diagnostic_step':200,'original_step':200,'new_holdout_seed':SEED,'changed_state_tensors_vs_200':changed,'evaluated_current_model_frames':56,'evaluated_original_control_frames':8,'trajectory_max_abs_difference_vs_saved':maximum_error,'semantic_max_abs_difference_vs_original200':original_output_delta,'behavior':rows,'paired_p1_when_0':pair[0],'paired_p1_when_1':pair[1],'paired_both':pair[0]<.5 and pair[1]>.5,'limits':['One preselected model and one holdout seed, not all12 saved-model evaluations.','Uses production causal step and synthetic generator; no diagnostic assessment, pair_probe or gate helper.','These are live solver semantic posteriors; distinct from A fixed-geometry equal-variance likelihood readout.','No optimizer updates or additional training.']}
+ (OUT/'audit_b_forward.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps({k:v for k,v in receipt.items() if k!='behavior'},indent=2))
+if __name__=='__main__':main()

@@ -1,0 +1,135 @@
+"""Independent saved-output A audit; imports no experimental evaluation helpers."""
+import hashlib
+import json
+import math
+from pathlib import Path
+import numpy as np
+import torch
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.model import N02Encoder
+
+BASE=Path('outputs/n02-joint-controls-20261013/head/formal')
+OUT=Path('outputs/n02-joint-controls-20261013/independent')
+def load(p): return json.loads(Path(p).read_text())
+def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def predict(head,fields):
+    out=[]
+    with torch.no_grad():
+        for f in fields.split(16):
+            n,k,d,h,w=f.shape
+            x=head.trunk(f.reshape(n,k*d,h,w)); width=x.shape[1]//k
+            c=head.value(x).reshape(n,k,head.out_channels,h,w).mean(1)
+            d=head.contrast(x.reshape(n,k,width,h,w).mean(1))
+            out.append(torch.stack([c-d,c+d],1))
+    return torch.cat(out).numpy()
+def stats(mu,cache,scale):
+    t=cache['templates'].numpy(); v=cache['total_variance'].numpy().astype(np.float64)
+    c=mu.mean(1).astype(np.float64); ct=t.mean(1).astype(np.float64)
+    d=((mu[:,1]-mu[:,0])/2).astype(np.float64); dt=((t[:,1]-t[:,0])/2).astype(np.float64)
+    power=(dt*dt).sum((1,2,3)); cue=power>1e-20
+    a,b=d[cue].ravel(),dt[cue].ravel()
+    common_mse=float(np.mean((c-ct)**2/v)); dweighted=float(np.mean((d-dt)**2/v))
+    physical={'common':0.5*common_mse,'contrast':0.5*dweighted,'log_variance':float(np.log(v).mean()/2)}
+    cosine=float(np.dot(a,b)/max(math.sqrt(np.dot(a,a)*np.dot(b,b)),1e-30))
+    rmse=float(np.mean((mu.astype(np.float64)-t.astype(np.float64))**2)**.5)
+    y=cache['observed'].numpy().astype(np.float64)
+    cost=np.sum((mu.astype(np.float64)-y[:,None])**2/(2*v[:,None]),axis=(2,3,4))
+    gaps=cost[:,1]-cost[:,0]
+    oracle_mu=np.stack([(ct-d).astype(np.float32), (ct+d).astype(np.float32)], axis=1).astype(np.float64)
+    oracle_cost=np.sum((oracle_mu-y[:,None])**2/(2*v[:,None]),axis=(2,3,4))
+    oracle_gaps=oracle_cost[:,1]-oracle_cost[:,0]
+    pairs={}; noseq={}; oracle_pairs={}; oracle_noseq={}
+    for i,x in enumerate(cache['identities']):
+        if x.get('world') in ('0','1'): pairs.setdefault(x['seed'],[0.,0.])[int(x['world'])]+=float(gaps[i])
+        if x.get('world') in ('0','1'): oracle_pairs.setdefault(x['seed'],[0.,0.])[int(x['world'])]+=float(oracle_gaps[i])
+        if x.get('world')=='no_cue':
+            noseq[x['seed']]=noseq.get(x['seed'],0.)+float(gaps[i])
+            oracle_noseq[x['seed']]=oracle_noseq.get(x['seed'],0.)+float(oracle_gaps[i])
+    return {'components':physical,'common_weighted_rmse':math.sqrt(common_mse),
+        'contrast_nmse':float(np.dot(a-b,a-b)/np.dot(b,b)), 'cosine':cosine,
+        'projection_gain':float(np.dot(a,b)/np.dot(b,b)),
+        'no_cue_false_contrast_ratio':float(np.mean(d[~cue]**2)/scale),
+        'both_correct':sum(x>0 and y<0 for x,y in pairs.values()),'pair_count':len(pairs),
+        'no_cue_frame_mean_abs_log_bayes':float(np.abs(gaps[~cue]).mean()),
+        'no_cue_sequence_false_confidence_ge_0_95':sum(abs(x)>=math.log(19) for x in noseq.values()),
+        'oracle_common_both_correct':sum(x>0 and y<0 for x,y in oracle_pairs.values()),
+        'oracle_common_no_cue_false95':sum(abs(x)>=math.log(19) for x in oracle_noseq.values()),
+        'template_rmse':rmse}
+
+torch.set_num_threads(1)
+m=load(BASE/'manifest_before_optimization.json'); r=load(BASE/'results.json'); summary=load(BASE/'summary.json')
+assert sha(BASE/'manifest_before_optimization.json')==summary['manifest_before_optimization_sha256']
+assert sha(BASE/'protocol.json')==m['protocol_sha256']
+assert sha(BASE/'schedule.json')==m['schedule_sha256']
+for p,h in m['source_sha256'].items(): assert sha(p)==h,p
+schedule=load(BASE/'schedule.json'); assert schedule==np.random.default_rng(910).integers(0,64,size=200).tolist()
+rows=[]; shared={}; total_updates=0
+for seed in range(3):
+    s=m['seeds'][str(seed)]
+    assert sha(s['checkpoint'])==s['checkpoint_sha256']
+    assert sha(s['previous_cache'])==s['previous_cache_sha256']
+    fit=torch.load(s['previous_cache'],weights_only=False)['train']
+    assert sha(BASE/f'heldout_seed{seed}.pt')==s['evaluation_file_sha256']
+    ev=torch.load(BASE/f'heldout_seed{seed}.pt',weights_only=False)
+    assert not set(fit['raw_sha256'])&set(ev['raw_sha256'])
+    worlds={}
+    for identity, raw in zip(ev['identities'],ev['raw_sha256']):
+        worlds.setdefault((identity['seed'],identity['world']), []).append((identity['frame'], raw))
+    assert len(worlds)==48
+    for frames in worlds.values():
+        assert sorted(f for f,h in frames)==list(range(8))
+        assert len(set(h for f,h in frames))==8
+    for split,cache in [('train',fit),('evaluation',ev)]:
+        x=(cache['raw_sha256'],cache['prior_sha256'],cache['full_template_sha256'])
+        if seed: assert x==shared[split]
+        else: shared[split]=x
+    payload=torch.load(s['checkpoint'],weights_only=False)
+    model=N02Encoder(N02Config.from_dict(payload['config']))
+    model.load_state_dict(payload['model']); head=model.measurement.head
+    source={k:v.detach().clone() for k,v in head.state_dict().items()}
+    # Independent initial calibration: all128 fields, positive quadratics only.
+    initial_pred=predict(head,fit['fields']); initial=stats(initial_pred,fit,s['signal_scale'])
+    # Calibration itself uses float32 reductions; independent fp64 consistency tolerance.
+    expected_lambda=initial['components']['common']/initial['components']['contrast']
+    assert math.isclose(expected_lambda,s['joint_coefficient'],rel_tol=3e-6)
+    stages={}
+    for arm in ('paired_nll','joint_balanced'):
+        logs=load(BASE/f'seed{seed}_{arm}_optimization.json')
+        assert len(logs)==200
+        assert [x['cache_batch_frame'] for x in logs]==schedule
+        assert [x['step'] for x in logs]==list(range(1,201))
+        coefficient=1. if arm=='paired_nll' else s['joint_coefficient']
+        assert all(x['coefficient']==coefficient for x in logs)
+        total_updates+=len(logs)
+        stages[arm]={}
+        for step in (0,100,200):
+            sd=torch.load(BASE/f'seed{seed}_{arm}_step{step}.pt',weights_only=False)
+            sd={k.removeprefix('head.'):v for k,v in sd.items()}
+            for key,v in source.items():
+                if key.startswith(('geometry.','log_variance.')) or step==0: assert torch.equal(v,sd[key])
+            head.load_state_dict(sd)
+            recomputed={}
+            for split,cache in [('train',fit),('evaluation',ev)]:
+                calculated=stats(predict(head,cache['fields']),cache,s['signal_scale'])
+                expected=r[str(seed)]['arms'][arm][str(step)][split]
+                for key in ('common_weighted_rmse','contrast_nmse','cosine','projection_gain','no_cue_false_contrast_ratio'):
+                    assert math.isclose(calculated[key],expected[key],rel_tol=3e-6,abs_tol=3e-7),(seed,arm,step,split,key)
+                for key,v in calculated['components'].items(): assert math.isclose(v,expected['components'][key],rel_tol=3e-6,abs_tol=3e-7)
+                assert calculated['both_correct']==expected['actual_head_choices']['both_correct']
+                assert calculated['oracle_common_both_correct']==expected['oracle_common_choices']['both_correct']
+                assert calculated['oracle_common_no_cue_false95']==expected['oracle_common_false_score']['sequence_false_confidence_ge_0_95']
+                false=expected['actual_common_false_score']
+                assert math.isclose(calculated['no_cue_frame_mean_abs_log_bayes'],false['frame_mean_abs_log_bayes'],rel_tol=3e-6,abs_tol=3e-7)
+                assert calculated['no_cue_sequence_false_confidence_ge_0_95']==false['sequence_false_confidence_ge_0_95']
+                recomputed[split]=calculated
+            stages[arm][step]=recomputed
+            if step:
+                evm=recomputed['evaluation']; initial_step=stages[arm][0]
+                gates=[evm['contrast_nmse']<=.5,evm['cosine']>=.5,evm['both_correct']>=12 and evm['pair_count']==16,evm['no_cue_false_contrast_ratio']<=.1]
+                gates.extend(recomputed[split]['common_weighted_rmse']<=initial_step[split]['common_weighted_rmse']+1e-12 for split in ('train','evaluation'))
+                assert all(gates)==r[str(seed)]['arms'][arm][str(step)]['all_criteria_pass']
+    rows.append({'seed':seed,'frozen_lambda':s['joint_coefficient'],'independent_lambda_float64':expected_lambda,'train_eval_overlap':0,'initial_and_frozen_parameters_match_source':True,'stages':stages})
+assert total_updates==1200==summary['head_only_updates']
+report={'passed':True,'optimizer_updates_verified_from_logs':total_updates,'same_schedule_all_6_arms':True,'same_raw_targets_priors_across_3_seeds':True,'snapshot_split_assessments_independently_recomputed':36,'lambda_frozen_once_on_train_only':True,'all_source_checkpoint_cache_protocol_hashes_verified':True,'results':rows,'limits':['No independent rerun of optimizer trajectories.','Shared-trunk Lc/Ld gradient probes not rederived from saved stages; preflight lambda1 all-head-gradient equivalence independently checked.','Actual and oracle-common scores use cached equal variance and eight unique held-out frames per sequence; these are readout controls, not solver posteriors.']}
+(OUT/'audit_head.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps({'passed':True,'assessments':36,'head_updates':total_updates,'final':{str(x['seed']):{a:x['stages'][a][200]['evaluation'] for a in x['stages']} for x in rows}},indent=2))

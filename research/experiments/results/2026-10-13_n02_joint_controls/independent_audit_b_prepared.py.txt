@@ -1,0 +1,76 @@
+"""Independent B input/calibration audit, no experimental objective imports."""
+import hashlib,json,math
+from pathlib import Path
+import numpy as np
+import torch
+from owac.core.encoder_contract import ComputeBudget
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.model import N02Encoder
+from owac.training.n02 import _frame,synthetic_batch
+ROOT=Path('outputs/n02-joint-controls-20261013/factorial')
+OUT=ROOT.parent/'independent'
+def load(p):return json.loads(Path(p).read_text())
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def digest(x):
+ h=hashlib.sha256()
+ def visit(v):
+  if torch.is_tensor(v):
+   t=v.detach().cpu().contiguous();h.update(str((str(t.dtype),tuple(t.shape))).encode());h.update(t.numpy().tobytes())
+  elif isinstance(v,dict):
+   for k in sorted(v,key=str):h.update(str(k).encode());visit(v[k])
+  elif isinstance(v,(tuple,list)):
+   for a in v:visit(a)
+  else:h.update(repr(v).encode())
+ visit(x);return h.hexdigest()
+def batchhash(b):
+ return digest(dict(values=b.values,masks=b.masks,anchor=b.anchor,wrong=b.wrong,post=b.post_contradiction,identifiable=b.identifiable_now,templates=b.counterfactual_templates,sample_xy=b.sample_xy,priors=[x.hypothesis_prior for x in b.contexts],prior_available=[x.hypothesis_prior_available for x in b.contexts]))
+@torch.no_grad()
+def components(model,b):
+ config=model.config;s=model.init_state(b.batch_size,b.camera,'cpu');a=[]
+ for i in range(b.num_steps):
+  o=model.step(_frame(b,i),b.contexts[i],s,ComputeBudget(config.cycles,config.history));s=model.detach_state(o.state)
+  mu,lv,g=model.measurement.predict(o.representation.h)
+  B,V,K,C,H,W=mu.shape
+  t=torch.nn.functional.adaptive_avg_pool2d(b.counterfactual_templates[i].reshape(B*2,C,64,64),(H,W)).reshape(B,2,C,H,W)
+  c=(mu[:,:,::2]+mu[:,:,1::2])/2;d=(mu[:,:,1::2]-mu[:,:,::2])/2
+  ct=((t[:,0]+t[:,1])/2)[:,None,None];dt=((t[:,1]-t[:,0])/2)[:,None,None]
+  sensor=s.diagnostics['_buffer'].frames[-1].variance
+  v=(lv.exp()+sensor[:,None,None])[:,:,::2]
+  a.append([float(((c.double()-ct.double()).square()/v.double()).mean()/2),float(((d.double()-dt.double()).square()/v.double()).mean()/2)])
+ return np.mean(a,axis=0)
+torch.set_num_threads(1)
+m=load(ROOT/'manifest.json');cal=load(ROOT/'calibration.json');historical=load('research/experiments/results/2026-10-13_n02_contracts/training.json')
+for p,h in m['source_sha256'].items():assert sha(p)==h,p
+for p,h in m['checkpoint_sha256'].items():assert sha(p)==h,p
+assert sha(ROOT/'preflight.json')==m['preflight_sha256'];assert sha(ROOT/'protocol.json')==m['protocol_sha256']
+assert load(ROOT/'preflight.json')['passed']
+config=N02Config.from_dict(m['config'])
+for i in range(200):
+ b=torch.load(ROOT/f'cache/train{i}.pt',weights_only=False)
+ assert batchhash(b)==m['train_input_sha256'][str(i)]
+ if i in (0,199):
+  regenerated=synthetic_batch(config,np.random.default_rng(920+i),batch_size=2,num_frames=8,frame_size=64,seed=920,split='train')
+  assert batchhash(b)==batchhash(regenerated)
+calibration=torch.load(ROOT/'cache/calibration.pt',weights_only=False)
+for i,b in enumerate(calibration):
+ assert batchhash(b)==m['calibration_input_sha256'][i]
+ if i in (0,7):
+  regenerated=synthetic_batch(config,np.random.default_rng(930+i),batch_size=2,num_frames=8,frame_size=64,seed=930,split='train')
+  assert batchhash(b)==batchhash(regenerated)
+rows=[];maxrel=0.
+for seed in range(3):
+ path=Path(m['checkpoint_root'])/f'seed{seed}/checkpoint200.pt';p=torch.load(path,weights_only=False)
+ assert sha(path)==[x['checkpoint_sha256'] for x in historical[seed]['checkpoints'] if x['step']==200][0]
+ assert p['step']==200
+ model=N02Encoder(N02Config.from_dict(p['config']));model.load_state_dict(p['model']);model.eval()
+ for i,b in enumerate(calibration):
+  c,d=components(model,b);expected=cal['records'][8*seed+i]
+  assert expected['seed']==seed and expected['rng_seed']==930+i
+  for v,k in ((c,'common'),(d,'difference')):
+   rel=abs(v-expected[k])/abs(expected[k]);maxrel=max(maxrel,rel);assert rel<3e-6
+  rows.append({'seed':seed,'rng_seed':930+i,'common':c,'difference':d})
+c=np.mean([x['common'] for x in rows]);d=np.mean([x['difference'] for x in rows]);coefficient=c/d
+assert math.isclose(coefficient,m['lambda'],rel_tol=3e-6)
+receipt={'passed':True,'training_cache_hashes':200,'calibration_cache_hashes':8,'independently_regenerated_inputs':4,'original_checkpoint_historical_hashes':3,'frozen_source_hashes':len(m['source_sha256']),'calibration_components_independently_recomputed':24,'component_max_relative_error':maxrel,'global_lambda_independent_float64':coefficient,'global_lambda_recorded':m['lambda'],'original_step':200,'limits':['No training or optimizer update performed.','Uses production model step and production synthetic generator; independent loss formulas and reductions, no experimental objective or assessment helper.']}
+(OUT/'audit_b_prepared.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps(receipt,indent=2))
