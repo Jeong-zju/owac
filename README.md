@@ -1,6 +1,6 @@
 # OWAC
 
-2026-10-13 N01 内容通路与六组配对实验完成：18 个正式运行核验通过，C 比同容量当前内容控制 E 改善 0.05575 packed px，D 比 C 差约 0.00686 px；改善较小，全部最优检查点在预算末端，尚未排除训练不足。工程检查 291 passed。逐来源可靠性作为默认关闭的探索分支继续，未更新冻结基线或机器人任务。见[本轮记录](research/experiments/2026-10-13_n01_content_integration.md)。
+2026-10-13 N01 内容通路与六组配对实验完成：18 个正式运行核验通过，C 比同容量当前内容控制 E 改善 0.05575 packed px，D 比 C 差约 0.00686 px；改善较小，全部最优检查点在预算末端，尚未排除训练不足。工程检查 291 passed。逐来源可靠性探索已完成：同权重新留出实验平均退化 0.01446 px，未采纳为正式算法；全仓 314 passed，新规则关闭时 554 张量逐位一致，62 项核心源码检查通过。完整记录见[逐来源实验](research/experiments/2026-10-13_n01_source_reliability.md)，未更新冻结基线或机器人任务。见[本轮记录](research/experiments/2026-10-13_n01_content_integration.md)。
 
 2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照。N01 已完成七组源码修复及快速运动下历史响应修复，见[最新验收记录](research/experiments/2026-10-13_n01_motion_repair.md)；可观察运动时缩短历史、停止后恢复积累的行为已验证，自动调度相对固定历史的任务收益留待后续研究。N02/N04 进度以各自工作树为准。
 

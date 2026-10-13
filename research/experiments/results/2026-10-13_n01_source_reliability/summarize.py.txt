@@ -1,0 +1,64 @@
+"""Aggregate fresh frozen-weight probe; never tune or mutate source/checkpoints."""
+import json
+from pathlib import Path
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+base=Path(__file__).resolve().parent
+r=json.loads((base/'fresh-evaluation/metrics.json').read_text())
+records=r['records']; modes=r['protocol']['methods'];conditions=list(records[0]['runs'][modes[0]])
+labels=['Static weak signal','Exact alignment (oracle control)','Occlusion release','Local change / stale history']
+rows=[]
+for condition in conditions:
+ row={'condition':condition,'arms':{}}
+ for mode in modes:
+  cases=[seed['runs'][mode][condition] for seed in records]; event=cases[0]['event_frame']
+  ds=[case['source_diagnostics_per_frame'][event:event+6] for case in cases]
+  row['arms'][mode]={
+   'early_error_px':float(np.mean([c['early_error_px'] for c in cases])),
+   'stable_error_px':float(np.mean([c['stable_error_px'] for c in cases])),
+   'roi_history_mass':float(np.mean([[x['roi_history_mass_mean'] for x in d] for d in ds])),
+   'roi_age':float(np.mean([[x['roi_weighted_age_mean'] for x in d] for d in ds])),
+   'source_rejected_fraction':float(np.mean([[x['old_source_rejected_fraction'] for x in d] for d in ds])),
+   'censored_count':sum(c['recovery']['censored_count'] for c in cases) if cases[0]['recovery'] else None,
+   'capped_delay_score':float(np.mean([c['recovery']['capped_delay_score'] for c in cases])) if cases[0]['recovery'] else None,
+  }
+ row['early_difference_per_seed']=[seed['differences_risk_minus_original'][condition]['early_error_px'] for seed in records]
+ rows.append(row)
+summary={'raw_and_graph_audit':r['paired_raw_and_graph_audit'],'main_early_difference_per_seed':[s['main_early_difference_px'] for s in records],'main_early_difference':float(np.mean([s['main_early_difference_px'] for s in records])),'conditions':rows}
+(base/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+md=['# 逐测量可靠性探索：冻结 C 权重、新留出序列','', '普通三条件早期误差：新规则减原规则 = '+str(summary['main_early_difference'])+' packed px；正数为退化。三个配对种子均为正。', '', '| 条件 | 原 C 早期误差 | 新规则早期误差 | 原/新稳定误差 | 原/新历史占比 | 原/新加权年龄 | 原/新未恢复数 |', '| --- | ---: | ---: | ---: | ---: | ---: | --- |']
+for row in rows:
+ a,b=[row['arms'][m] for m in modes]
+ md.append(f"| {row['condition']} | {a['early_error_px']:.5f} | {b['early_error_px']:.5f} | {a['stable_error_px']:.5f}/{b['stable_error_px']:.5f} | {a['roi_history_mass']:.4f}/{b['roi_history_mass']:.4f} | {a['roi_age']:.4f}/{b['roi_age']:.4f} | {a['censored_count']}/{b['censored_count']} |")
+md+=['','历史占比和年龄取目标 ROI 早期六帧；目标仅用于事后统计。事件条件每组分母 72；恢复定义沿用连续 3 帧 ≤0.75 packed px。准确对齐单列，不进入主均值。','','全部输入/监督夹具、参数配对一致，288 个 batch 时刻的原始测量缓冲和支持图哈希一致。源码运行前后相同。没有在此数据上调参或重训；不能把冻结权重干预当作新规则经充分训练的最终表现。硬剔除在本轮弱信号数据中发生率为 0。']
+(base/'summary.md').write_text('\n'.join(md)+'\n')
+plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False,'svg.fonttype':'none'})
+for kind in ['errors','history_mass']:
+ fig,axes=plt.subplots(2,2,figsize=(12,8),sharex=True,layout='constrained')
+ for condition,label,ax in zip(conditions,labels,axes.flat,strict=True):
+  for mode,color,name in zip(modes,['#15803d','#c2410c'],['C: fixed history','C weights + source risk'],strict=True):
+   curves=[]
+   for seed in records:
+    case=seed['runs'][mode][condition]
+    if kind=='errors':
+     arr=np.array(case['error_per_member_per_frame']); valid=np.array(case['supervised_visible_per_member_per_frame']);count=valid.sum(0)
+     curve=np.divide((arr*valid).sum(0),count,out=np.full(count.shape,np.nan),where=count>0)
+    else:curve=np.array([d['roi_history_mass_mean'] for d in case['source_diagnostics_per_frame']])
+    curves.append(curve)
+   a=np.stack(curves);mask=np.isfinite(a).all(0);x=np.arange(a.shape[1])
+   mean,lo,hi=[np.full(a.shape[1],np.nan) for _ in range(3)]
+   mean[mask]=a[:,mask].mean(0);lo[mask]=a[:,mask].min(0);hi[mask]=a[:,mask].max(0)
+   ax.plot(x,mean,label=name,color=color)
+   ax.fill_between(x,lo,hi,where=mask,alpha=.12,color=color)
+  event=case['event_frame'];ax.axvline(event,color='#444',ls=':',lw=1);ax.axvspan(event,event+5,color='#ddd',alpha=.25)
+  ax.set(title=label,xlabel='Frame index (zero-based)',ylabel='Localization error (packed px)' if kind=='errors' else 'History weight in target ROI')
+  ax.set_xlim(0,23);ax.set_xticks(sorted(set([0,4,8,event,16,20,23])))
+  ax.grid(alpha=.15)
+  if kind=='history_mass':ax.set_ylim(0,1)
+  ax.legend(fontsize=8)
+ fig.suptitle('Frozen-weight intervention; fresh data; mean and seed range (3 seeds)',fontsize=13)
+ for ext in ['png','svg']:fig.savefig(base/f'{kind}.{ext}',dpi=170)
+ plt.close(fig)
+print(json.dumps(summary,indent=2))

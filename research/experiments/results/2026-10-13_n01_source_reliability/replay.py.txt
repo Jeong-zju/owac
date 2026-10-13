@@ -1,0 +1,63 @@
+"""Replay fixed measurements on archived and current gate-only implementations."""
+import json
+import sys
+from pathlib import Path
+
+import torch
+
+from owac.core.encoder_contract import MeasurementFrame
+from owac.frameworks.n01.config import N01Config
+from owac.frameworks.n01.model import N01Encoder
+
+torch.set_num_threads(1)
+output = {}
+for channels, planes in ((3, 1), (4, 4)):
+    for alignment in ("none", "fixed"):
+        torch.manual_seed(1901)
+        cfg = N01Config(
+            channels=channels, planes=planes, content_mode=sys.argv[2],
+            input_mode="bayer_cfa" if planes == 4 else "rawvla_rgb3",
+            width=8, num_blocks=1, max_history=4, time_depths=(1, 4),
+            spatial_radii=(0, 1), neighbourhood_radius=1,
+            alignment=alignment, fractional_alignment=alignment == "fixed",
+            correspondence_window=1, readout_tokens=8, readout_width=16,
+        )
+        encoder = N01Encoder(cfg).eval()
+        key = f"c{channels}-{alignment}"
+        state = encoder.init_state(2, {"camera_ids": ["camera"], "shape": (6, 6)}, "cpu")
+        generator = torch.Generator().manual_seed(892)
+        cases = []
+        encoder.calibrating = True
+        with torch.no_grad():
+            for index in range(4):
+                values = torch.rand((2, channels, 6, 6), generator=generator)
+                valid = torch.rand((2, channels, 6, 6), generator=generator) > 0.05
+                frame = MeasurementFrame(
+                    values=values, valid_mask=valid,
+                    timestamp=torch.full((2,), float(index)),
+                    frame_ids=torch.full((2,), index), camera_id="camera",
+                    metadata={"variance": torch.full_like(values, 0.02)},
+                )
+                result = encoder.step(frame, state=state)
+                state = result.state
+                cases.append(result.representation.clone())
+            encoder.calibrating = False
+            duplicate = encoder.step(frame, state=state)
+            state = encoder.reset(state, torch.tensor([False, True]))
+            frame.frame_ids = torch.full((2,), 4)
+            frame.timestamp = torch.full((2,), 4.0)
+            result = encoder.step(frame, state=state)
+        output[key] = {
+            "frames": torch.stack(cases),
+            "duplicate": duplicate.representation,
+            "partial_reset": result.representation,
+            "tokens": encoder.readout(result).values,
+            "values": result.state.values,
+            "frame_ids": result.state.frame_ids,
+            "edges": result.state.support["camera"].edges,
+            "open_edges": result.state.support["camera"].open_edges,
+            "scales": encoder.normalization_scales,
+            "parameters": {name: value.detach().clone() for name, value in encoder.named_parameters()},
+        }
+torch.save(output, Path(__file__).with_name(f"legacy-{sys.argv[1]}-{sys.argv[2]}.pt"))
+print(json.dumps({"label": sys.argv[1], "cases": list(output)}))
