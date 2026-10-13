@@ -233,6 +233,10 @@ def make_synthetic_batches(
     )
     batches: list[list[SyntheticFrame]] = []
     scene = train_cfg.synthetic
+    if "conditions" in scene:
+        conditions = tuple(scene["conditions"])
+        if not conditions or any(not isinstance(c, str) for c in conditions):
+            raise ValueError("synthetic conditions must be a nonempty sequence of names")
     for i in range(steps):
         condition = conditions[i % len(conditions)]
         scene_cfg = SceneConfig(

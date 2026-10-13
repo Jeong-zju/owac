@@ -359,7 +359,26 @@ class SyntheticSequenceGenerator:
         ``calibration_error`` 相机运动，但上报的标定被故意错报
         ``action_delay`` 相机运动，但上报的动作滞后若干帧
         ``exposure_step`` 相机运动 + 中途曝光突变与饱和
+        ``static`` 无运动/增益变化
+        ``camera_illumination/object_illumination/both_illumination`` 对应运动与增益共存
         """
+        allowed = {
+            "static",
+            "camera_only",
+            "object_only",
+            "both",
+            "illumination",
+            "same_direction",
+            "occlusion",
+            "calibration_error",
+            "action_delay",
+            "exposure_step",
+            "camera_illumination",
+            "object_illumination",
+            "both_illumination",
+        }
+        if condition not in allowed:
+            raise ValueError(f"unknown synthetic condition: {condition}")
         cfg = self.config
         gen = torch.Generator().manual_seed(cfg.seed if seed is None else seed)
         rng = torch.Generator().manual_seed((cfg.seed if seed is None else seed) + 1)
@@ -404,9 +423,22 @@ class SyntheticSequenceGenerator:
             "action_delay",
             "exposure_step",
             "same_direction",
+            "camera_illumination",
+            "both_illumination",
         }
-        object_on = condition in {"object_only", "both", "same_direction"}
-        illumination_on = condition == "illumination"
+        object_on = condition in {
+            "object_only",
+            "both",
+            "same_direction",
+            "object_illumination",
+            "both_illumination",
+        }
+        illumination_on = condition in {
+            "illumination",
+            "camera_illumination",
+            "object_illumination",
+            "both_illumination",
+        }
         frames: list[SyntheticFrame] = []
         previous_cam_t = torch.zeros(batch, 2)
         previous_rotation = torch.zeros(batch)
