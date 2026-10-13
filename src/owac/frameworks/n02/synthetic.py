@@ -623,6 +623,9 @@ class SyntheticOptions:
     arrival_lo: float = 0.20
     arrival_hi: float = 0.92
     staleness: float = 0.5
+    prior_log_odds_min: float = 0.6
+    prior_log_odds_max: float = math.log(99.0)
+    strong_prior_probability: float = 0.25
     point_sampling: bool = True
     #: Angle grid step (radians) used by the measurement-only cue estimator.
     cue_angle_grid_step: float = math.radians(2.0)
@@ -644,6 +647,10 @@ class SyntheticOptions:
             raise ValueError("identifiability must lie in [0, 1]")
         if not 0.0 <= self.staleness <= 1.0:
             raise ValueError("staleness must lie in [0, 1]")
+        if not 0 < self.prior_log_odds_min <= self.prior_log_odds_max < math.inf:
+            raise ValueError("prior log odds bounds must be finite and positive")
+        if not 0 <= self.strong_prior_probability <= 1:
+            raise ValueError("strong_prior_probability must lie in [0, 1]")
         if not 0.0 < self.arrival_lo < self.arrival_hi < 1.0:
             raise ValueError("arrival_lo/arrival_hi must satisfy 0 < lo < hi < 1")
         if self.occlusion_schedule not in {"none", "linear", "quadratic", "step"}:
@@ -1193,12 +1200,27 @@ class SyntheticGenerator:
             if geometry_change_step >= 0
             else geometry_before
         )
+        # A separate stream keeps RAW bytes invariant under prior-strength changes.
+        prior_rng = np.random.default_rng(
+            self._mix(seed, "prior_strength", task, episode_index, side, num_frames)
+        )
+        strength = float(
+            prior_rng.uniform(self.options.prior_log_odds_min, self.options.prior_log_odds_max)
+        )
+        if (
+            prior_rng.random() < self.options.strong_prior_probability
+            and self.options.prior_log_odds_min <= math.log(19) <= self.options.prior_log_odds_max
+        ):
+            strength = math.log(19)
+        # Retain the old schedule stream's three draws for reproducible geometry,
+        # cue schedules and noise, irrespective of the prior distribution.
+        rng.uniform(0.6, 1.6, size=3)
         prior_log_odds = {
-            "correct": float(rng.uniform(0.6, 1.6)),
-            "misleading": -float(rng.uniform(0.6, 1.6)),
+            "correct": strength,
+            "misleading": -strength,
             "uninformative": 0.0,
             "missing": MISSING_PRIOR_LOG_ODDS,
-            "stale": float(rng.uniform(0.6, 1.6)),
+            "stale": strength,
         }[prior_condition]
         prior = PriorSpec(condition=prior_condition, value=prior_value, log_odds=prior_log_odds)
 
@@ -1260,9 +1282,9 @@ class SyntheticGenerator:
                 scene, step, float(cue_strength[step]), coordinates
             )
             attenuation = (
-                np.full((self.options.height, self.options.width), float(transmission[step]))
+                np.ones((self.options.height, self.options.width))
                 if occluder_mask is None
-                else occluder_mask * transmission[step]
+                else 1.0 - occluder_mask * (1.0 - transmission[step])
             )
             # ``attenuation`` is [H, W] and ``clean`` is [C, H, W]; the explicit
             # leading axis is required, because numpy would otherwise treat
@@ -1275,7 +1297,9 @@ class SyntheticGenerator:
                 # CFA mode: read the occluder at each plane's own photosites.
                 per_channel = cfa_sample(attenuation, self.options.cfa_pattern)[0]
             broadcast = per_channel.astype(np.float64)
-            applied_noise[step] = broadcast * (self.options.noise_sigma * unit_noise[step])
+            # Read noise is added at the sensor, after optical attenuation.
+            # Its declared variance is sigma² at every observed photosite.
+            applied_noise[step] = self.options.noise_sigma * unit_noise[step]
             frames[step] = broadcast * clean + applied_noise[step]
         return self._assemble(
             task=task,
@@ -1406,7 +1430,14 @@ class SyntheticGenerator:
             "noise_variance": float(options.noise_sigma**2),
             "noise_model_declared": True,
             "variance_expression": "variance = noise_sigma**2 (additive Gaussian, same units)",
-            "measurement_law": "frames = attenuation * clean + noise",
+            "measurement_law": (
+                "frames = (1 - covered_mask * (1 - transmission)) * clean + sensor_noise"
+            ),
+            "prior_sampling": {
+                "min_log_odds": options.prior_log_odds_min,
+                "max_log_odds": options.prior_log_odds_max,
+                "probability_exact_95_percent": options.strong_prior_probability,
+            },
             "occluder_mask_available": occluder_mask is not None,
             "point_sampling": options.point_sampling,
             "occlusion_schedule": options.occlusion_schedule,
@@ -1481,70 +1512,96 @@ class SyntheticGenerator:
             )
         return np.stack(steps, axis=0)
 
+    def sensor_attenuation(self, episode: SyntheticEpisode, step: int) -> np.ndarray:
+        """Optical throughput at each actual photosite: mask 1 means covered."""
+        attenuation = np.ones((self.options.height, self.options.width))
+        if episode.occluder_mask is not None:
+            attenuation -= episode.occluder_mask * (1.0 - episode.transmission[step])
+        if self.options.input_mode == "bayer_cfa":
+            return cfa_sample(attenuation, self.options.cfa_pattern)[0]
+        return attenuation[None]
+
+    def measurement_templates(self, episode: SyntheticEpisode, step: int) -> np.ndarray:
+        """Two physical templates for evaluator use only; never encoder inputs."""
+        coordinates, _ = sample_coordinates(self.options.height, self.options.width)
+        scene = episode.scene_at(step)
+        return np.stack(
+            [
+                self.sensor_attenuation(episode, step)
+                * self._channel_frames_for_step(
+                    scene.with_value(value), step, float(episode.cue_strength[step]), coordinates
+                )
+                for value in values_for_task(scene.task)
+            ]
+        )
+
+    def measurement_quality(self, episode: SyntheticEpisode) -> dict[str, Any]:
+        """Check final sensor data and discrimination, separately from model gates.
+
+        Expected Gaussian log Bayes factor (KL) must exceed log(19) before a
+        frame is labelled identifiable. This checks the sampled, attenuated
+        templates, not just a pre-render cue flag. Hidden scene parameters are
+        evaluator-only; oracle evidence is not a learned-model score.
+        """
+        expected, observed, valid = [], [], []
+        sigma2 = self.options.noise_sigma**2
+        for step in range(episode.num_frames):
+            templates = self.measurement_templates(episode, step)
+            truth = values_for_task(episode.task).index(episode.value_over_time[step])
+            signal = templates[truth]
+            actual = episode.frames[step].astype(np.float64) - episode.noise[step]
+            # Float32 storage is allowed; a broken renderer is rejected.
+            if not np.allclose(actual, signal, atol=2e-7, rtol=2e-6):
+                raise ValueError("final RAW differs from the physical sensor template")
+            separation = float(np.square(templates[0] - templates[1]).sum())
+            kl = separation / (2 * sigma2) if sigma2 else (math.inf if separation else 0.0)
+            error = np.square(episode.frames[step] - templates).sum(axis=(1, 2, 3))
+            logbf = float((error[1 - truth] - error[truth]) / (2 * max(sigma2, 1e-12)))
+            expected.append(kl)
+            observed.append(logbf)
+            valid.append(bool(kl >= math.log(19)))
+        return {
+            "identifiable_now": valid,
+            "expected_log_bayes_factor": expected,
+            "oracle_log_bayes_factor": observed,
+            "threshold": math.log(19),
+            "scope": "sensor quality oracle; hidden geometry is evaluator only",
+        }
+
     def hypothesis_fit(
         self, episode: SyntheticEpisode, step: int | None = None
     ) -> dict[str, dict[str, float]]:
-        """Fit each hypothesis's declared measurement template to the frame.
-
-        The template is the *complete* forward operator for that hypothesis - the
-        ambiguous arc plus the cue marker at that hypothesis's declared cue angle,
-        at the frame's own cue strength, through the frame's own occluder - so the
-        reported residual is a real prediction error and not a proxy.
-
-        Returns per hypothesis the mean squared residual, the correlation and the
-        decisive residual restricted to the other hypothesis's marker disk. The
-        decisive residual is the readable one: an incorrect hypothesis predicts a
-        marker where the frame is empty, so it pays for it there and nowhere else.
-        The latent value is never consulted.
-        """
-        scene = episode.geometry_before
+        """Fit both complete physical templates at actual CFA/RGB3 photosites."""
         step = int(np.argmax(episode.cue_strength)) if step is None else int(step)
-        strength = float(episode.cue_strength[step])
-        if strength <= 0.0:
+        if episode.cue_strength[step] <= 0:
             raise ValueError("selected frame carries no cue; the episode is unidentifiable")
-        frame = np.asarray(episode.frames[step], dtype=np.float64).mean(axis=0)
-        attenuation = (
-            episode.transmission[step]
-            if episode.occluder_mask is None
-            else episode.occluder_mask * episode.transmission[step]
+        scene = episode.scene_at(step)
+        templates = self.measurement_templates(episode, step)
+        h, w = episode.frames.shape[-2:]
+        rows, cols = np.indices((h, w))
+        xy = episode.sample_xy
+        coords = np.stack(
+            [
+                rows[None] * xy[:, 1, 0, None, None] + xy[:, 0, 0, None, None],
+                cols[None] * xy[:, 1, 1, None, None] + xy[:, 0, 1, None, None],
+            ],
+            axis=-1,
         )
-        coordinates, grid = sample_coordinates(
-            self.options.height,
-            self.options.width,
-            cfa_pattern=self.options.cfa_pattern if self.options.input_mode == "bayer_cfa" else "",
-            point_sampling=self.options.point_sampling,
-        )
+        reports = {}
         values = values_for_task(scene.task)
-        flat_frame = frame.ravel()
-        reports: dict[str, dict[str, float]] = {}
-        for value in values:
+        for index, value in enumerate(values):
             angle = cue_angle_for_value(scene.task, value)
-            _, _, clean = measurement_field(
-                coordinates, scene, cue_strength=strength, cue_angle=angle
-            )
-            prediction = (attenuation * clean.reshape(grid.shape[:-1])).ravel()
-            residual = flat_frame - prediction
             marker = marker_xy(scene, angle)
-            disk = np.hypot(coordinates[:, 0] - marker[0], coordinates[:, 1] - marker[1]) <= 3.0 * (
-                scene.cue_sigma
-            )
-            other = marker_xy(
-                scene, cue_angle_for_value(scene.task, values[1 - values.index(value)])
-            )
-            other_disk = (
-                np.hypot(coordinates[:, 0] - other[0], coordinates[:, 1] - other[1])
-                <= 3.0 * scene.cue_sigma
-            )
+            other = marker_xy(scene, cue_angle_for_value(scene.task, values[1 - index]))
+            disk = np.linalg.norm(coords - marker, axis=-1) <= 3 * scene.cue_sigma
+            other_disk = np.linalg.norm(coords - other, axis=-1) <= 3 * scene.cue_sigma
+            residual = episode.frames[step] - templates[index]
             reports[value] = {
-                "mean_squared_residual": float(np.mean(residual**2)),
-                "decisive_residual": float(np.mean(residual[other_disk] ** 2))
-                if other_disk.any()
-                else float("nan"),
-                "own_marker_residual": float(np.mean(residual[disk] ** 2))
-                if disk.any()
-                else float("nan"),
+                "mean_squared_residual": float(np.square(residual).mean()),
+                "decisive_residual": float(np.square(residual[other_disk]).mean()),
+                "own_marker_residual": float(np.square(residual[disk]).mean()),
                 "cue_angle": angle,
-                "marker_yx": [float(marker[0]), float(marker[1])],
+                "marker_yx": marker.tolist(),
             }
         return reports
 
@@ -1575,33 +1632,30 @@ class SyntheticGenerator:
         show the larger excess, and for a noiseless frame the false one must show
         none. This uses only measurements and declared geometry facts.
         """
-        scene = episode.geometry_before
         step = int(np.argmax(episode.cue_strength)) if step is None else int(step)
+        scene = episode.scene_at(step)
         strength = float(episode.cue_strength[step])
         if strength <= 0.0:
             raise ValueError("selected frame carries no cue; the episode is unidentifiable")
-        frame = np.asarray(episode.frames[step], dtype=np.float64).mean(axis=0)
-        attenuation = (
-            episode.transmission[step]
-            if episode.occluder_mask is None
-            else episode.occluder_mask * episode.transmission[step]
+        coordinates, _ = sample_coordinates(self.options.height, self.options.width)
+        baseline = self.sensor_attenuation(episode, step) * self._channel_frames_for_step(
+            scene, step, 0.0, coordinates
         )
-        coordinates, grid = sample_coordinates(
-            self.options.height,
-            self.options.width,
-            cfa_pattern=self.options.cfa_pattern if self.options.input_mode == "bayer_cfa" else "",
-            point_sampling=self.options.point_sampling,
+        excess = episode.frames[step] - baseline
+        h, w = excess.shape[-2:]
+        rows, cols = np.indices((h, w))
+        xy = episode.sample_xy
+        coords = np.stack(
+            [
+                rows[None] * xy[:, 1, 0, None, None] + xy[:, 0, 0, None, None],
+                cols[None] * xy[:, 1, 1, None, None] + xy[:, 0, 1, None, None],
+            ],
+            axis=-1,
         )
-        arc_only = measurement_field(coordinates, scene, cue_strength=0.0)[0].reshape(
-            grid.shape[:-1]
-        )
-        excess = (frame - attenuation * arc_only).ravel()
         report: dict[str, Any] = {"strength": strength, "excess": {}}
         for value in values_for_task(scene.task):
             marker = marker_xy(scene, cue_angle_for_value(scene.task, value))
-            disk = np.hypot(coordinates[:, 0] - marker[0], coordinates[:, 1] - marker[1]) <= (
-                3.0 * scene.cue_sigma
-            )
+            disk = np.linalg.norm(coords - marker, axis=-1) <= 3 * scene.cue_sigma
             report["excess"][value] = float(np.mean(excess[disk])) if disk.any() else float("nan")
         report["true_value"] = scene.value
         report["argmax_excess"] = max(report["excess"], key=lambda key: report["excess"][key])

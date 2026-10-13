@@ -54,6 +54,7 @@ class RevisionConfig:
     propagation_enabled: bool = True
     propagation_hops: int = 1
     propagation_decay: float = 0.5
+    propagation_threshold: float = 0.01
     propagate_priority: bool = True
     reset_contradicted: bool = True
     reset_fraction: float = 1.0
@@ -67,6 +68,10 @@ class RevisionConfig:
     write_dependency_edges: bool = True
 
     def __post_init__(self) -> None:
+        if not 0 < self.propagation_threshold <= 1:
+            raise ValueError("propagation_threshold must lie in (0, 1]")
+        if self.strong_contradiction_threshold <= self.contradiction_threshold:
+            raise ValueError("strong contradiction threshold must exceed contradiction threshold")
         if self.propagation_hops < 0:
             raise ValueError("propagation_hops must be >= 0")
         if not 0.0 < self.propagation_decay <= 1.0:

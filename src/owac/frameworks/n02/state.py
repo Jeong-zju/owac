@@ -393,6 +393,7 @@ class HypothesisState:
     revision: RevisionState = field(default_factory=RevisionState)
     diagnostics: dict = field(default_factory=dict)
     step_index: int = 0
+    revision_energy: torch.Tensor | None = None  # [B,V,K], once per unique frame
 
     @property
     def K(self) -> int:
@@ -425,6 +426,7 @@ class HypothesisState:
             geometry=take(self.geometry),
             age=take(self.age),
             times_reset=take(self.times_reset),
+            revision_energy=take(self.revision_energy),
             support=take(self.support),
             dependency_edge=take(self.dependency_edge),
             dependency_valid=take(self.dependency_valid),
@@ -453,6 +455,7 @@ class HypothesisState:
             geometry=det(self.geometry),
             age=det(self.age),
             times_reset=det(self.times_reset),
+            revision_energy=det(self.revision_energy),
             support=det(self.support),
             dependency_edge=det(self.dependency_edge),
             dependency_valid=det(self.dependency_valid),

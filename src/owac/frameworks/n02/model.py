@@ -240,6 +240,7 @@ class N02Encoder(nn.Module):
             geometry=keep(state.geometry, torch.zeros_like(state.geometry)),
             age=keep(state.age, zeros),
             times_reset=keep(state.times_reset, zeros),
+            revision_energy=keep(state.revision_energy, zeros),
             support=None
             if state.support is None
             else keep(state.support, torch.zeros_like(state.support)),
@@ -538,6 +539,11 @@ class N02Encoder(nn.Module):
         else:
             frozen_prior = state.prior_energy.detach()
         state = replace(state, prior_energy=frozen_prior)
+        frozen_revision = (
+            torch.zeros_like(frozen_prior)
+            if state.revision_energy is None
+            else state.revision_energy.detach()
+        )
         max_cycles = max(1, min(int(budget.max_updates), int(config.cycles)))
         previous_energy = None
         stop_reason = "max_iterations"
@@ -552,6 +558,26 @@ class N02Encoder(nn.Module):
                 prediction, buffer, config.measurement, view_index=0
             )
             measurement_scalar = self._as_view_scalar(energy_result.energy, field.shape[1])
+            if iteration == 0 and added:
+                # Compute withdrawal once from the pre-revision predictions and
+                # actual measurement support. New evidence alone refreshes it.
+                observed_withdrawal = self.reviser.withdrawal_energy(
+                    energy_result.normalized_residual.unsqueeze(1),
+                    self._support_map(energy_result, field),
+                    temperature=config.temperature,
+                ).detach()
+                accepted = (~cold_start) & (
+                    buffer.last_added
+                    if buffer.last_added is not None
+                    else torch.ones_like(cold_start)
+                )
+                # Rejected slots have zero current likelihood. Their prior is
+                # already the old posterior, including its old withdrawal term.
+                frozen_revision = torch.where(
+                    accepted[:, None, None],
+                    observed_withdrawal,
+                    torch.zeros_like(frozen_revision),
+                )
             prior_energy = frozen_prior
             relation_energy = self._relation_energy(field)
             beta_prior = self._bounded_beta_prior()
@@ -559,6 +585,7 @@ class N02Encoder(nn.Module):
                 measurement_scalar
                 + beta_prior * prior_energy
                 + config.beta_relation * relation_energy
+                + frozen_revision
             )
             scores = -total / config.temperature
             weights = torch.softmax(scores, dim=-1)
@@ -614,7 +641,10 @@ class N02Encoder(nn.Module):
         beta_prior = self._bounded_beta_prior()
         measurement_scalar = self._as_view_scalar(energy_result.energy, field.shape[1])
         total = (
-            measurement_scalar + beta_prior * prior_energy + config.beta_relation * relation_energy
+            measurement_scalar
+            + beta_prior * prior_energy
+            + config.beta_relation * relation_energy
+            + frozen_revision
         )
         logits = -total / config.temperature
         weights = torch.softmax(logits, dim=-1)
@@ -644,6 +674,7 @@ class N02Encoder(nn.Module):
                 if revision.last_reset is not None
                 else state.times_reset
             ).detach(),
+            revision_energy=frozen_revision.detach(),
             support=support.detach(),
             dependency_edge=state.dependency_edge,
             dependency_valid=dependency_valid,
@@ -672,6 +703,8 @@ class N02Encoder(nn.Module):
             prior_energy=prior_energy,
             relation_energy=relation_energy,
             geometry=geometry,
+            revision_energy=frozen_revision,
+            posterior_logits=logits,
             valid=~validity_flag.view(batch, 1),
             support=support,
             step_index=new_state.step_index,

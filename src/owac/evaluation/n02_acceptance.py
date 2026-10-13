@@ -48,7 +48,9 @@ def evaluate(checkpoint: Path, *, seeds=(100, 101, 102, 103), arm="candidate"):
     with torch.no_grad():
         for seed in seeds:
             generator = SyntheticGenerator(options, seed=seed, split="validation")
-            observed = generator.generate(seed=seed, num_frames=8, prior_condition="correct")
+            observed = generator.generate(
+                seed=seed, num_frames=8, prior_condition="correct", identifiable=True
+            )
             observed = replace(observed, prior=replace(observed.prior, log_odds=math.log(19)))
             # Intervene on the declared prior while keeping every raw byte fixed.
             paired = {
@@ -65,12 +67,15 @@ def evaluate(checkpoint: Path, *, seeds=(100, 101, 102, 103), arm="candidate"):
                 "unidentifiable": generator.generate(
                     seed=seed, num_frames=8, prior_condition="uninformative", identifiable=False
                 ),
-                "stale": generator.generate(seed=seed, num_frames=8, prior_condition="stale"),
+                "stale": SyntheticGenerator(
+                    replace(options, staleness=1.0), seed=seed, split="validation"
+                ).generate(seed=seed, num_frames=8, prior_condition="stale", identifiable=True),
             }
             paired["stale"] = replace(
                 paired["stale"], prior=replace(paired["stale"].prior, log_odds=math.log(19))
             )
             for condition, episode in paired.items():
+                quality = generator.measurement_quality(episode)
                 state, steps = None, []
                 context = episode_prior_context([episode], config.K)
                 for index, values in enumerate(episode.frames):
@@ -103,7 +108,7 @@ def evaluate(checkpoint: Path, *, seeds=(100, 101, 102, 103), arm="candidate"):
                             "frame": index,
                             "semantic_mass": semantic,
                             "truth_semantic_mass": semantic[truth],
-                            "cue_visible": bool(episode.cue_strength[index] > 0),
+                            "cue_visible": bool(quality["identifiable_now"][index]),
                             "geometry_proxy": geometry.tolist(),
                             "truth_proxy_nearest_error": float(
                                 (geometry - (2 * truth - 1)).abs().min()
@@ -143,6 +148,8 @@ def evaluate(checkpoint: Path, *, seeds=(100, 101, 102, 103), arm="candidate"):
                         "condition": condition,
                         "measurement_sha256": hashlib.sha256(episode.frames.tobytes()).hexdigest(),
                         "declared_prior": context.hypothesis_prior.tolist(),
+                        "measurement_quality": quality,
+                        "geometry_change_step": episode.geometry_change_step,
                         "steps": steps,
                         "gate_passed": gate,
                         "duplicate_weight_delta": duplicate_delta,

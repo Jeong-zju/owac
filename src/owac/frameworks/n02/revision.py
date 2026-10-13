@@ -20,6 +20,7 @@ setting ``beta_prior`` to zero.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 from typing import Any
 
@@ -184,11 +185,34 @@ class RevisionController(nn.Module):
         threshold = self.revision.contradiction_threshold
         return (score > threshold).all(dim=2, keepdim=True)
 
+    def withdrawal_energy(
+        self, score: torch.Tensor, support: torch.Tensor, *, temperature: float
+    ) -> torch.Tensor:
+        """One observation's supported refutation, separate from measurement NLL.
+
+        No withdrawal when every candidate fits poorly: a reconstruction failure
+        alone cannot support a more confident semantic choice. Strong residuals
+        reach the declared retention factor; weak ones interpolate continuously.
+        The caller freezes this term across solver cycles and duplicate IDs.
+        """
+        cfg = self.revision
+        if not cfg.contradiction_enabled or cfg.downweight_contradicted == 1:
+            return score.new_zeros(score.shape[:3])
+        refuted = self.contradiction_map(score, update_ema=False)
+        justified = refuted & support.bool() & ~self.all_candidates_bad(score)
+        strength = (
+            (score - cfg.contradiction_threshold)
+            / (cfg.strong_contradiction_threshold - cfg.contradiction_threshold)
+        ).clamp(0, 1)
+        fraction = (strength * justified).sum((-1, -2)) / support.sum((-1, -2)).clamp_min(1)
+        return -temperature * math.log(max(cfg.downweight_contradicted, 1e-12)) * fraction
+
     # ----------------------------------------------------------- propagation
     def compatibility(self, dependency_edge: torch.Tensor) -> torch.Tensor:
         """Nonnegative ``[B,V,h,w,4,K,K]`` compatibility; rows normalise at use."""
-        weight = dependency_edge.clamp_min(0.0)
-        return weight
+        # Keep legacy checkpoint forward semantics (negative means absent), but
+        # let a negative parameter recover through a surrogate projection gradient.
+        return dependency_edge + (dependency_edge.clamp_min(0.0) - dependency_edge).detach()
 
     def _edge_weights(
         self,
@@ -208,7 +232,7 @@ class RevisionController(nn.Module):
         depends on source l at its recorded neighbour. Transposing candidate
         axes does not reverse the spatial edge and is not used for propagation.
         """
-        weight = dependency_edge.clamp_min(0.0)
+        weight = self.compatibility(dependency_edge)
         if transpose:
             weight = weight.transpose(-1, -2)
         batch, views, height, width_px, neighbours, K, _ = weight.shape
@@ -217,7 +241,11 @@ class RevisionController(nn.Module):
         )
         # Row normalisation preserves relative compatibility with different
         # neighbour candidates; sum over source l, then average valid directions.
-        weight = weight / weight.sum(dim=-1, keepdim=True).clamp_min(1.0e-8)
+        row_sum = weight.sum(dim=-1, keepdim=True)
+        # Absent rows stay zero in the forward pass, with bounded recovery
+        # gradients instead of division by a near-zero denominator.
+        denominator = torch.where(row_sum > 1e-8, row_sum, torch.ones_like(row_sum))
+        weight = weight / denominator
         weight = weight * valid.view(batch, views, height, width_px, neighbours, 1, 1)
         assert weight.shape == (batch, views, height, width_px, neighbours, K, K), weight.shape
         return weight
@@ -272,7 +300,7 @@ class RevisionController(nn.Module):
         # [B,V,K,W,h,w,4] -> [B,V,h,w,4,K(l),W]
         stacked = neighbours.permute(0, 1, 4, 5, 6, 2, 3).contiguous()
         contribution = weight.unsqueeze(-1) * stacked.unsqueeze(5)  # [..,4,K(k),K(l),W]
-        message = contribution.sum(dim=5).sum(dim=4)  # [B,V,h,w,K,W]
+        message = contribution.sum(dim=6).sum(dim=4)  # [B,V,h,w,K(target),W]
         degree = dependency_valid.sum(dim=-1).clamp_min(1).unsqueeze(-1).unsqueeze(-1)
         message = message / degree
         return message.permute(0, 1, 4, 5, 2, 3).contiguous()
@@ -286,9 +314,11 @@ class RevisionController(nn.Module):
         """Propagate revision priority along the recorded dependency edges.
 
         Returns ``(propagated_selection, priority)``. ``priority`` accumulates the
-        support each (candidate, location) receives from its neighbours;
-        ``propagated_selection`` is the union of the direct contradiction and the
-        locations whose priority exceeds the configured threshold.
+        support each (candidate, location) receives from its neighbours (or takes
+        its maximum when accumulation is disabled). Selection is the union of
+        direct contradiction and per-hop votes above the separately configured
+        normalized support threshold, with both vote and threshold decayed once
+        per hop. Priority remains an audit of the selected local dependency paths.
         """
         cfg = self.revision
         if not cfg.propagation_enabled or cfg.propagation_hops == 0:
@@ -311,12 +341,10 @@ class RevisionController(nn.Module):
             # axis, otherwise the dependency table pairs unrelated slots.
             target = shifted.movedim(2, 5).unsqueeze(5)  # [B,V,h,w,4,1,K(l)]
             vote = (weight * target).sum(dim=-1).sum(dim=4).permute(0, 1, 4, 2, 3)
-            vote = vote * (cfg.propagation_decay**hop)
-            priority = priority + vote
-            # ``>=`` and not ``>``: a single refuted cell sends exactly
-            # ``decay`` to each neighbour, so a strict comparison would make the
-            # default configuration propagate nothing at all.
-            selection = selection | ((vote >= cfg.propagation_decay) & ~selection)
+            # Source already carries previous hops' decay: apply it only once.
+            vote = vote * cfg.propagation_decay
+            priority = priority + vote if cfg.propagate_priority else torch.maximum(priority, vote)
+            selection = selection | (vote >= cfg.propagation_threshold * cfg.propagation_decay**hop)
             source = vote
         return selection, priority
 

@@ -32,12 +32,12 @@ Normalisation, stated once and used for every term
   with no valid sample in a step is skipped for that step and the reason is
   recorded; it is never silently replaced by zero.
 
-The four terms
+The five terms
 --------------
 ``L_measurement``
-    Supervised measurement-space NLL of the candidate anchored to the true
-    latent value: ``mean_b E_k=k_truth(b) / N_obs``. The anchor is the declared
-    two-way task structure (synthetic: ``supervision['value_over_time']``;
+    Mean measurement-space NLL over every compatible slot: all candidates before
+    informative RAW, otherwise all slots of the true semantic parity. The anchor
+    is the declared two-way task structure (synthetic: ``supervision['value_over_time']``;
     analytic: the generating hypothesis index). The hidden geometry enters the
     loss only -- it is never placed in the encoder input.
 ``L_geometry_set``
@@ -45,9 +45,11 @@ The four terms
     through the geometry head. A single-hypothesis model predicts the current
     truth proxy. This is a declared semantic surrogate, not full physical geometry.
 ``L_mixture``
-    Measurement-only cross entropy: uniform before a distinguishing cue and on
-    unidentifiable episodes, otherwise mass on the true semantic slot parity.
-    Kept separate from geometry supervision.
+    Cross entropy of the actual recurrent posterior class mass, including the
+    frozen prior and once-per-frame withdrawal. Before informative RAW the target
+    retains the declared prior (uniform only when uninformative/missing); after
+    informative RAW it is the true semantic class. Stable log scores preserve
+    gradients for a confidently wrong posterior. Kept separate from geometry.
 ``L_revision``
     Active only on the post-contradiction steps of independently declared
     sequences (a cue that refutes a misleading prior, or a declared scene
@@ -320,7 +322,9 @@ def synthetic_batch(
         episodes.append(episode)
         conditions.append(condition)
         identifiable_flags.append(bool(episode.identifiable))
-        identifiable_now[:, index] = torch.from_numpy(episode.cue_strength > 0.0)
+        identifiable_now[:, index] = torch.tensor(
+            generator.measurement_quality(episode)["identifiable_now"]
+        )
         for step in range(num_frames):
             anchor = values_by_task.index(episode.value_over_time[step])
             anchors[step, index] = anchor
@@ -366,6 +370,11 @@ def synthetic_batch(
         notes={
             "task": task,
             "prior_conditions": conditions,
+            "prior_log_odds": [
+                None if not e.prior.available else e.prior.log_odds for e in episodes
+            ],
+            "prior_sampling": episodes[0].metadata["prior_sampling"],
+            "measurement_quality": "physical final-RAW templates; expected log BF >= log(19)",
             "identifiable": identifiable_flags,
             "contradiction_steps": contradiction_steps,
             "frame_size": frame_size,
@@ -568,8 +577,9 @@ def step_terms(
     diversity_active: bool,
     diversity_margin: float = DIVERSITY_MARGIN,
     identifiable_now: torch.Tensor | None = None,
+    ambiguity_prior: torch.Tensor | None = None,
 ) -> dict[str, Any]:
-    """All four loss terms for one encoder step, each with its valid-sample mask.
+    """All five loss terms for one encoder step, each with its valid-sample mask.
 
     Returns a dict of tensors (``None`` where the term is not defined for this
     step) plus the integer sample counts and the skip reasons.
@@ -582,7 +592,6 @@ def step_terms(
     batch, num_candidates = weights.shape
     per_observation = max(1, int(observations))
     scaled = energy / float(per_observation)
-    index = torch.arange(batch, device=energy.device)
     anchor, wrong, post_contradiction = (
         anchor.to(energy.device),
         wrong.to(energy.device),
@@ -593,9 +602,16 @@ def step_terms(
     valid_anchor = (anchor >= 0) & (anchor < num_candidates)
     if num_candidates == 1:
         valid_anchor = anchor >= 0
+    if identifiable_now is None:
+        identifiable_now = post_contradiction
+    identifiable_now = identifiable_now.to(energy.device)
+    slots = torch.arange(num_candidates, device=energy.device) % 2
+    compatible = (~identifiable_now[:, None]) | (slots[None, :] == anchor[:, None])
+    if num_candidates == 1:
+        compatible = torch.ones_like(compatible)
     if valid_anchor.any():
-        selected = scaled[index[valid_anchor], anchor[valid_anchor].clamp_max(num_candidates - 1)]
-        result["measurement"] = selected.mean()
+        selected = (scaled * compatible).sum(-1) / compatible.sum(-1).clamp_min(1)
+        result["measurement"] = selected[valid_anchor].mean()
         result["counts"]["measurement"] = int(valid_anchor.sum())
     else:
         result["measurement"] = None
@@ -642,20 +658,43 @@ def step_terms(
             "no post-contradiction sample with a declared competing candidate"
         )
 
-    evidence_logp = F.log_softmax(-scaled, dim=-1)
-    if identifiable_now is None:
-        identifiable_now = post_contradiction
-    identifiable_now = identifiable_now.to(energy.device)
-    slots = torch.arange(num_candidates, device=energy.device) % 2
-    target = (slots[None, :] == anchor[:, None]).to(energy.dtype)
+    # Supervise the actual recurrent posterior, aggregating redundant slots by
+    # semantic class. Before informative RAW arrives retain the declared prior;
+    # never force an informative prior to uniform, or reveal the future label.
+    if ambiguity_prior is None:
+        ambiguity_prior = torch.full_like(weights, 1.0 / num_candidates)
+    else:
+        ambiguity_prior = ambiguity_prior.to(weights).detach()
+        if ambiguity_prior.shape != weights.shape:
+            raise ValueError("ambiguity_prior must be [B,K]")
+        ambiguity_prior = ambiguity_prior / ambiguity_prior.sum(-1, keepdim=True).clamp_min(1e-12)
+    class_weights = torch.stack([(weights * (slots == c)).sum(-1) for c in range(2)], -1)
+    posterior_logits = getattr(representation, "posterior_logits", None)
+    if posterior_logits is None:
+        class_logp = class_weights.clamp_min(1e-12).log()
+    elif num_candidates == 1:
+        class_logp = posterior_logits.mean(dim=1).expand(-1, 2) * 0
+    else:
+        # These are the exact scores producing representation.weights, including
+        # the frozen prior and withdrawal. Log space prevents a confidently wrong
+        # posterior from losing its training gradient through softmax underflow.
+        slot_logp = F.log_softmax(posterior_logits, -1)
+        class_logp = torch.stack(
+            [
+                torch.logsumexp(slot_logp.masked_fill((slots != c)[None, None], -torch.inf), -1)
+                for c in range(2)
+            ],
+            -1,
+        )
+        class_logp = torch.logsumexp(class_logp, 1) - math.log(views)
+    prior_classes = torch.stack([(ambiguity_prior * (slots == c)).sum(-1) for c in range(2)], -1)
     if num_candidates == 1:
-        target = torch.ones_like(target)
-    target = target / target.sum(-1, keepdim=True).clamp_min(1)
-    target = torch.where(
-        identifiable_now[:, None], target, torch.full_like(target, 1.0 / num_candidates)
-    )
+        target_classes = prior_classes
+    else:
+        target_classes = F.one_hot(anchor.clamp(0, 1), 2).to(weights)
+        target_classes = torch.where(identifiable_now[:, None], target_classes, prior_classes)
     result["mixture"] = (
-        -(target[valid_anchor] * evidence_logp[valid_anchor]).sum(-1).mean()
+        -(target_classes[valid_anchor] * class_logp[valid_anchor]).sum(-1).mean()
         if valid_anchor.any()
         else None
     )
@@ -941,6 +980,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                     if batch.identifiable_now is None
                     else not bool(batch.identifiable_now[index].all()),
                     diversity_margin=float(args.diversity_margin),
+                    ambiguity_prior=context.hypothesis_prior,
                     identifiable_now=None
                     if batch.identifiable_now is None
                     else batch.identifiable_now[index],

@@ -43,20 +43,10 @@ def measurement_identity(
 ) -> float:
     """Max absolute deviation of ``frames`` from ``attenuation * clean + noise``."""
     clean = generator.clean_measurements(episode)
-    if episode.occluder_mask is None:
-        attenuation = np.broadcast_to(
-            episode.transmission[:, None, None],
-            (episode.num_frames, *clean.shape[-2:]),
-        )
-    else:
-        sensor = episode.occluder_mask * episode.transmission[:, None, None]
-        if sensor.shape[-2:] == clean.shape[-2:]:
-            attenuation = sensor
-        else:
-            # CFA mode: the occluder is read at each plane's own photosites.
-            planes = synth.cfa_sample(sensor[0], generator.options.cfa_pattern)[0]
-            attenuation = np.broadcast_to(planes[None], (episode.num_frames,) + clean.shape[-2:])
-    predicted = attenuation[:, None, :, :] * clean + episode.noise
+    attenuation = np.stack(
+        [generator.sensor_attenuation(episode, step) for step in range(episode.num_frames)]
+    )
+    predicted = attenuation * clean + episode.noise
     return float(np.abs(predicted - episode.frames).max())
 
 

@@ -48,6 +48,8 @@ class StructuredRepresentation:
     support: torch.Tensor | None = None  # [B, V, K, h, w]
     step_index: int = 0
     diagnostics: dict = field(default_factory=dict)
+    revision_energy: torch.Tensor | None = None  # explicit withdrawal, separate from NLL
+    posterior_logits: torch.Tensor | None = None  # actual scores, stable posterior supervision
 
     @property
     def K(self) -> int:
