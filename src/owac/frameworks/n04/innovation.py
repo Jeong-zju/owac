@@ -176,6 +176,25 @@ class InnovationDecomposer(nn.Module):
                     f"{int(first.in_channels)} 不一致"
                 )
 
+    def estimate_sensor_gain(
+        self,
+        linear_current,
+        linear_predicted,
+        validity,
+        uncertainty,
+        saturation,
+        linear_validity=None,
+    ):
+        """Estimate once on supported linear measurements, shared by prediction and hint."""
+        reliability = torch.exp(-uncertainty.clamp_min(self.sigma_floor)).clamp(0, 1)
+        support = validity * reliability * (1 - saturation)
+        support = F.interpolate(
+            support, size=linear_current.shape[-2:], mode="bilinear", align_corners=False
+        )
+        if linear_validity is not None:
+            support = support * linear_validity
+        return estimate_low_frequency_gain(linear_current, linear_predicted, support)[0]
+
     def forward(
         self,
         *,
@@ -187,6 +206,7 @@ class InnovationDecomposer(nn.Module):
         linear_current: torch.Tensor | None = None,
         linear_predicted: torch.Tensor | None = None,
         linear_validity: torch.Tensor | None = None,
+        explained_linear_gain: torch.Tensor | None = None,
     ) -> Innovation:
         if current.shape != predicted.shape:
             raise ValueError("current 与 predicted 形状必须一致")
@@ -201,13 +221,16 @@ class InnovationDecomposer(nn.Module):
             saturation = saturation.reshape(b, 1, h, w)
         gain_available = linear_current is not None and linear_predicted is not None
         if self.use_illumination_branch and gain_available:
-            support = validity * prop_reliability * (1 - saturation)
-            support = F.interpolate(
-                support, size=linear_current.shape[-2:], mode="bilinear", align_corners=False
-            )
-            if linear_validity is not None:
-                support = support * linear_validity
-            linear_gain, _ = estimate_low_frequency_gain(linear_current, linear_predicted, support)
+            linear_gain = explained_linear_gain
+            if linear_gain is None:
+                linear_gain = self.estimate_sensor_gain(
+                    linear_current,
+                    linear_predicted,
+                    validity,
+                    uncertainty,
+                    saturation,
+                    linear_validity,
+                )
             gain = F.interpolate(
                 linear_gain.median(1, keepdim=True).values,
                 size=(h, w),

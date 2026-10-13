@@ -519,6 +519,7 @@ class N04Encoder(nn.Module):
             saturation = saturation.reshape(b, 1, h, w)
         avail = avail * (1.0 - saturation).clamp(0, 1)
         reference = pred0
+        explained_linear_gain = None
         innovation_validity = validity.detach()
         if self.config.model.innovation_reference == "sensor_history":
             if linear_predicted is None:
@@ -532,13 +533,30 @@ class N04Encoder(nn.Module):
                             "matched observation support requires current sensor support"
                         )
                     observation_prediction = observation_prediction * current_linear_support
-                reference = self.predict_observation(observation_prediction)
                 if linear_validity is not None:
                     support = measurement_from_linear_planes(
                         linear_validity, self.config.input_mode
                     ).amin(1, keepdim=True)
                     support = F.adaptive_avg_pool2d(support, (h, w))
                     innovation_validity = innovation_validity * support
+                if (
+                    self.config.model.illumination_explanation
+                    and self.config.model.illumination_branch
+                ):
+                    if linear_current is None:
+                        raise ValueError(
+                            "illumination explanation requires linear current measurement"
+                        )
+                    explained_linear_gain = self.decomposer.estimate_sensor_gain(
+                        linear_current,
+                        linear_predicted,
+                        innovation_validity,
+                        uncertainty,
+                        saturation.detach(),
+                        linear_validity,
+                    )
+                    observation_prediction = observation_prediction * explained_linear_gain
+                reference = self.predict_observation(observation_prediction)
         innovation = self.decomposer(
             current=meas0,
             predicted=reference,
@@ -548,6 +566,7 @@ class N04Encoder(nn.Module):
             linear_current=linear_current,
             linear_predicted=linear_predicted,
             linear_validity=linear_validity,
+            explained_linear_gain=explained_linear_gain,
         )
         innovation.diagnostics["innovation_reference"] = self.config.model.innovation_reference
         #: 无测量时（new_measurement=False）只传播不更新。

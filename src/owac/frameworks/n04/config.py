@@ -79,6 +79,8 @@ class N04ModelConfig:
     innovation_reference: Literal["task_state", "sensor_history"] = "task_state"
     #: Apply the current sensor support to the observation prediction before the stem.
     match_observation_support: bool = False
+    #: Explain illumination in linear sensor prediction before the nonlinear stem.
+    illumination_explanation: bool = False
     #: 读出 token 数上限（每相机）。
     readout_tokens: int = 256
     #: 读出 token 宽度。真实 π0.5 前缀为 2048；小尺寸配置单独命名，不冒充真实后端。
@@ -104,6 +106,8 @@ class N04ModelConfig:
     def __post_init__(self) -> None:
         if self.innovation_reference not in ("task_state", "sensor_history"):
             raise ValueError("invalid innovation_reference")
+        if self.illumination_explanation and self.innovation_reference != "sensor_history":
+            raise ValueError("illumination explanation requires sensor_history")
 
     def scale_strides_for(self, scales: int | None = None) -> tuple[int, ...]:
         n = self.scales if scales is None else scales
@@ -127,6 +131,7 @@ class N04ModelConfig:
             "change_branch": self.change_branch,
             "innovation_reference": self.innovation_reference,
             "match_observation_support": self.match_observation_support,
+            "illumination_explanation": self.illumination_explanation,
             "readout_tokens": self.readout_tokens,
             "readout_dim": self.readout_dim,
             "predictor": self.predictor,

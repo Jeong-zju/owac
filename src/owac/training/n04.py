@@ -1004,7 +1004,10 @@ def load_checkpoint(
                 raise ValueError(
                     "checkpoint observation reference differs; oracle overrides must be explicit"
                 )
-            for name, default in (("match_observation_support", False),):
+            for name, default in (
+                ("match_observation_support", False),
+                ("illumination_explanation", False),
+            ):
                 if (
                     getattr(core.config.model, name)
                     != payload.get("model_config", {}).get(name, default)
