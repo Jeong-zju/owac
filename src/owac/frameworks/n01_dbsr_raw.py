@@ -71,6 +71,9 @@ class RawDomainHistory:
         valid = frame.valid_mask & torch.isfinite(frame.values)
         frame = replace(frame, values=frame.values.masked_fill(~valid, 0), valid_mask=valid)
         self.state = push(self.state, frame)
+        # The original buffer folds bad/saturated masks into validity. Missing
+        # pairs provide no refutation; retain the core's gradual forgetting.
+        valid = self.state.valid[0]
         plane = self.state.plane_support("burst")
         evidence, _ = self.integrator.edge_field(frame, self.state)
         measured = torch.stack(

@@ -66,3 +66,21 @@ def test_split_raw_recomputation_retracts_old_neighbour_sums_that_cache_keeps():
     assert torch.equal(outputs[0]["mu"][..., :6], outputs[1]["mu"][..., :6])
     assert not torch.equal(outputs[2]["mu"][..., :6], outputs[3]["mu"][..., :6])
     assert sum(outputs[0]["splits"]) > 0
+
+
+def test_bad_sensor_mask_is_missing_evidence_and_does_not_refute_open_support():
+    from dataclasses import replace
+
+    cfg = config_for(
+        "calibrated_recompute", {"edge_temperature": 3.9740435495127926, "edge_beta": 8.0}
+    )
+    domain = RawDomainHistory(cfg, 1, (12, 12))
+    values = torch.full((1, 4, 12, 12), 0.3)
+    for now in range(3):
+        domain.step(frame(values, now), "calibrated_recompute")
+    assert domain.state.plane_support("burst").open_edges.any()
+    invalid = replace(frame(values, 3), bad_mask=torch.ones_like(values, dtype=torch.bool))
+    result = domain.step(invalid, "calibrated_recompute")
+    assert sum(result["splits"]) == 0
+    assert not domain.state.valid[0].any()
+    assert domain.state.plane_support("burst").open_edges.any()
