@@ -1,0 +1,49 @@
+{
+  "checkpoint_sha256": "9fbb672b44cd9ba2ef4b700d72892d468316af383c17497782a8a77fe005f090",
+  "checkpoint_step": 200,
+  "trained_arm": "candidate",
+  "evaluated_arm": "candidate",
+  "comparison_scope": "historical repaired seed0 step200 on matched final seeds; new recipe has extra synthetic template supervision; not a same-information superiority comparison",
+  "scope": "binary semantic proxy; no physical or closed-loop score",
+  "gate_definition": {
+    "correct": "final true semantic mass >= .7",
+    "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+    "missing": "final true semantic mass > .5",
+    "stale": "true mass >= .7 both before and after actual geometry change",
+    "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+  },
+  "all_gates_passed": false,
+  "gate_applicability": "declared slot-parity convention",
+  "gates": {
+    "correct": {
+      "passed": 15,
+      "total": 32
+    },
+    "misleading": {
+      "passed": 0,
+      "total": 32
+    },
+    "missing": {
+      "passed": 14,
+      "total": 32
+    },
+    "unidentifiable": {
+      "passed": 0,
+      "total": 32
+    },
+    "stale": {
+      "passed": 0,
+      "total": 32
+    }
+  },
+  "encoder_ms": {
+    "p50": 17.098882504797075,
+    "p95": 25.47484850656474
+  },
+  "counterfactual": {
+    "both_correct": 0,
+    "total": 32,
+    "mean_p1_change": 0.01197483018040657
+  },
+  "full_report_sha256": "e04d92a74da0dba0c4d79634df3991e1cbbfa461bf837a7617977646f05aad54"
+}
