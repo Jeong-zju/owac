@@ -1,0 +1,40 @@
+{
+  "protocol": "n01-dbsr-features-development-v1",
+  "seeds": [
+    61
+  ],
+  "methods": [
+    "current",
+    "mean",
+    "mean_capacity",
+    "dbsr_reference",
+    "dbsr_consensus"
+  ],
+  "steps": 128,
+  "batch_size": 2,
+  "evaluation_batch_size": 8,
+  "validation_every": 32,
+  "size": 16,
+  "length": 24,
+  "burn_in": 8,
+  "threads": 1,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.0001,
+  "contrast": 0.08,
+  "noise_sigma": 0.08,
+  "heatmap_sigma": 0.8,
+  "recovery_tolerance_px": 0.75,
+  "recovery_consecutive": 3,
+  "event_window": 6,
+  "device": "cpu",
+  "encoder": {
+    "stem_width": 64,
+    "residual_blocks": 9,
+    "feature_width": 512,
+    "projection_width": 32,
+    "offset_width": 64,
+    "max_history": 8,
+    "fusion": "dbsr_reference"
+  },
+  "development": true
+}

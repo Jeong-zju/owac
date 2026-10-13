@@ -24,6 +24,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "owac.runtime" = ["*.html"]
+"owac.baselines._vendor.dbsr" = ["LICENSE", "provenance.json"]
 
 [tool.ruff]
 target-version = "py311"
@@ -31,6 +32,9 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/owac/baselines/_vendor/dbsr/*.py" = ["E501", "UP008", "UP032"] # Preserve upstream definitions.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
