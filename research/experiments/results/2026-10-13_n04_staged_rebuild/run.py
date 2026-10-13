@@ -113,6 +113,8 @@ def main():
     parser.add_argument("--models", nargs="+", default=None)
     args = parser.parse_args()
     stage = args.stage
+    # Reject reuse before writing the protocol or touching any existing stage evidence.
+    assert not (ROOT / stage).exists(), "Stage output exists; use a fresh reproduction checkout"
     assert torch.cuda.is_available()
     torch.set_num_threads(4)
     cfg, recipe = stage_config(stage)
