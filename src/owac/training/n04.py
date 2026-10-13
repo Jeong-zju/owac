@@ -983,6 +983,7 @@ def load_checkpoint(
     encoder: nn.Module | None = None,
     optimizer: torch.optim.Optimizer | None = None,
     predictor_head: nn.Module | None = None,
+    allow_design_override: bool = False,
 ) -> dict[str, Any]:
     payload = torch.load(Path(path), map_location="cpu", weights_only=False)
     if encoder is not None:
@@ -991,6 +992,17 @@ def load_checkpoint(
                 raise ValueError(
                     "checkpoint uses incompatible N04 score semantics; evaluate it with its "
                     "original source version instead of interpreting cause shares as event scores"
+                )
+            core = getattr(encoder, "encoder", encoder)
+            saved_reference = payload.get("model_config", {}).get(
+                "innovation_reference", "task_state"
+            )
+            if (
+                core.config.model.innovation_reference != saved_reference
+                and not allow_design_override
+            ):
+                raise ValueError(
+                    "checkpoint observation reference differs; oracle overrides must be explicit"
                 )
         state = _align_state_dict(payload["encoder"], encoder)
         #: 懒建的运动编码器要按 checkpoint 记录的实际宽度先建好，否则恢复会丢参数。

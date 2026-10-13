@@ -84,6 +84,19 @@ def _resize_sampling_grid(grid, size):
     return GridSpec(*size).identity_grid(b, grid.device, grid.dtype) + displacement
 
 
+def measurement_from_linear_planes(planes, input_mode):
+    """Restore sensor sampling positions without demosaicing or changing CFA colors."""
+    if input_mode != "bayer_cfa":
+        return planes
+    b, c, h, w = planes.shape
+    if c != 4:
+        raise ValueError("CFA prediction requires four separate sampling planes")
+    samples = planes.new_zeros(b, 1, 2 * h, 2 * w)
+    for i, (dy, dx) in enumerate(((0, 0), (0, 1), (1, 0), (1, 1))):
+        samples[:, :, dy::2, dx::2] = planes[:, i : i + 1]
+    return samples
+
+
 def warp_linear_measurement(values, valid, grid, input_mode):
     """Warp each linear plane in its own coordinates; normalize missing support."""
     if grid is None:
@@ -504,16 +517,31 @@ class N04Encoder(nn.Module):
         else:
             saturation = saturation.reshape(b, 1, h, w)
         avail = avail * (1.0 - saturation).clamp(0, 1)
+        reference = pred0
+        innovation_validity = validity.detach()
+        if self.config.model.innovation_reference == "sensor_history":
+            if linear_predicted is None:
+                reference = torch.zeros_like(meas0)
+                innovation_validity = torch.zeros_like(validity)
+            else:
+                reference = self.predict_observation(linear_predicted)
+                if linear_validity is not None:
+                    support = measurement_from_linear_planes(
+                        linear_validity, self.config.input_mode
+                    ).amin(1, keepdim=True)
+                    support = F.adaptive_avg_pool2d(support, (h, w))
+                    innovation_validity = innovation_validity * support
         innovation = self.decomposer(
             current=meas0,
-            predicted=pred0,
-            validity=validity.detach(),
+            predicted=reference,
+            validity=innovation_validity,
             uncertainty=uncertainty,
             saturation=saturation.detach(),
             linear_current=linear_current,
             linear_predicted=linear_predicted,
             linear_validity=linear_validity,
         )
+        innovation.diagnostics["innovation_reference"] = self.config.model.innovation_reference
         #: 无测量时（new_measurement=False）只传播不更新。
         g_update = innovation.g_update * avail
         new_stable = (1.0 - g_update) * pred0 + g_update * meas0
@@ -526,7 +554,12 @@ class N04Encoder(nn.Module):
         if self.config.model.change_branch:
             #: 变化写入同样只能来自有测量支持的区域：否则被遮挡像素的残差会被写进
             #: change cell，等于用不存在的内容制造“外部变化”。
-            change_delta = innovation.gate_change * (meas0 - pred0) * avail
+            external_support = (
+                innovation.propagation_validity
+                if self.config.model.innovation_reference == "sensor_history"
+                else 1.0
+            )
+            change_delta = innovation.gate_change * innovation.residual * avail * external_support
             innovation.external_evidence = change_delta
             old_change0 = old_change[0] if isinstance(old_change, list) else old_change
             if backward_grid is not None:
@@ -601,6 +634,15 @@ class N04Encoder(nn.Module):
 
     def encode_measurement(self, values: torch.Tensor) -> torch.Tensor:
         """把测量编码成特征场（不修改编码器的状态缓存）。"""
+        return self.stem(values)
+
+    def predict_observation(self, propagated_linear_history: torch.Tensor) -> torch.Tensor:
+        """Predict observation features from propagated past sensor samples only.
+
+        Task-state block corrections do not enter this reference. The original current
+        measurement and task-state prediction remain separate update/readout inputs.
+        """
+        values = measurement_from_linear_planes(propagated_linear_history, self.config.input_mode)
         return self.stem(values)
 
     def step(

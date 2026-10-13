@@ -288,9 +288,7 @@ class SyntheticSequenceGenerator:
             )  # hidden target pixels cannot leak through stem normalization
         # Labels undergo exactly the same sampling as the painted sensor scene.
         # Redrawing a disk after a fractional crop disagrees with bilinear measurements.
-        object_mask = self._rotate_batch(
-            self._crop(object_canvas, top, left), camera_rotation
-        )
+        object_mask = self._rotate_batch(self._crop(object_canvas, top, left), camera_rotation)
         #: 真值单步 ego flow：相机本帧位移的负方向（内容在图像中向相反方向移动）。
         step = camera_translation if camera_step is None else camera_step
         previous_rotation = (

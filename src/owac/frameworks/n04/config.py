@@ -75,6 +75,8 @@ class N04ModelConfig:
     illumination_branch: bool = True
     #: 是否启用独立 change cell（外部变化特征）。
     change_branch: bool = True
+    #: Historical task-state residual versus a prediction in sensor observation space.
+    innovation_reference: Literal["task_state", "sensor_history"] = "task_state"
     #: 读出 token 数上限（每相机）。
     readout_tokens: int = 256
     #: 读出 token 宽度。真实 π0.5 前缀为 2048；小尺寸配置单独命名，不冒充真实后端。
@@ -97,6 +99,10 @@ class N04ModelConfig:
         }
     )
 
+    def __post_init__(self) -> None:
+        if self.innovation_reference not in ("task_state", "sensor_history"):
+            raise ValueError("invalid innovation_reference")
+
     def scale_strides_for(self, scales: int | None = None) -> tuple[int, ...]:
         n = self.scales if scales is None else scales
         if n <= 0:
@@ -117,6 +123,7 @@ class N04ModelConfig:
             "sigma_floor": self.sigma_floor,
             "illumination_branch": self.illumination_branch,
             "change_branch": self.change_branch,
+            "innovation_reference": self.innovation_reference,
             "readout_tokens": self.readout_tokens,
             "readout_dim": self.readout_dim,
             "predictor": self.predictor,
