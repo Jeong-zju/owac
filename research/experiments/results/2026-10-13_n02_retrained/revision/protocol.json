@@ -1,0 +1,63 @@
+{
+  "scope": "scheduler-component audit with exact common recomposition; not full learned N02",
+  "smoke": false,
+  "scorer_seeds": [
+    0,
+    1,
+    2
+  ],
+  "trial_seeds": [
+    27000,
+    27001,
+    27002,
+    27003,
+    27004,
+    27005,
+    27006,
+    27007,
+    27008,
+    27009,
+    27010,
+    27011,
+    27012,
+    27013,
+    27014,
+    27015
+  ],
+  "methods": [
+    "standard_filter",
+    "global_update",
+    "n02_local",
+    "event_cached_filter"
+  ],
+  "patch_grid": [
+    4,
+    4
+  ],
+  "patch_size": 64,
+  "frames": 8,
+  "cue_nodes": [
+    0,
+    5,
+    10,
+    15
+  ],
+  "no_cue_nodes": "other twelve supports; not supplied to solver",
+  "priors": "95% wrong on cue nodes; uniform on others; common explicit input",
+  "dependency": "known task graph, random fixed one-hop directed edges p=.3; shared by all",
+  "derived_state": "q_i = p_i * product(p_j for its recorded neighbours)",
+  "scorer": "previous development-selected innovation CNN, frozen checkpoint200",
+  "source_root": "outputs/n02-retrained-20261013/controls",
+  "measurement": "streaming causal GRU, prefix score replaces evidence; IDs deduplicated",
+  "absolute_fit": "measured-reference attenuation nuisance + fitted Gaussian positive cue; pooled RAW difference noise sqrt(2*.01^2/16), threshold2.5",
+  "fit_limit": "flexible nonpositive nuisance; guard for unstructured bright corruption; not a calibrated full RAW density or hidden renderer oracle",
+  "bad_measurement": "last frame node15 unstructured bright corruption in every fourth trial",
+  "n02_rules": "original semantic_map, geometry gap and propagate at patch granularity",
+  "common_recomposition": "exact algebraic state operator, same for global/local/cache; no learned cell/proposal errors in this conditional audit",
+  "retention": "local and cached update direct factor states plus dependent readout states; standard/global recompute all supported factors and readouts",
+  "drift": "derived q change outside actual cue/dependency affected set; evaluator-only mask",
+  "cost": "full scorer+absolute-fit+controller+recomposition per frame, interleaved order",
+  "unique_gain": "2/3 seeds: no correction degradation, and either drift improvement>=.01 or end-to-end latency ratio bootstrap95% upper<.9 versus event cached filter",
+  "exit": "reliable scorer but no repeatable unique gain: archive current scheduler",
+  "interpretation": "gain over dense alone is incremental computation, not uniqueness"
+}

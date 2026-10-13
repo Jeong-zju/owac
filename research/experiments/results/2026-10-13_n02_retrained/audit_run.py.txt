@@ -1,0 +1,153 @@
+"""Read saved experiments, independently reconstruct metrics, verify a resumed run."""
+
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+
+from owac.baselines.n02_measurement import RetrainedMeasurementScorer
+from owac.baselines.n02_measurement_adapters import MODES, AdaptedMeasurementScorer, adapt_raw
+from owac.evaluation.n02_measurement_isolation import file_digest, tensor_digest, write_json
+from owac.evaluation.n02_ratio_audit import audit_report, equal_tree
+from owac.evaluation.n02_retrained import paired_training_data
+from owac.evaluation.n02_ratio import evaluation_data
+from owac.evaluation.n02_revision_comparison import make_trial, measurement_step, update_state, METHODS
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.revision import RevisionController
+
+torch.set_num_threads(2)
+torch.use_deterministic_algorithms(True)
+root = Path(__file__).parent
+read = lambda p: json.loads(p.read_text())
+load = lambda p: torch.load(p, map_location='cpu', weights_only=False)
+plain, control, revision = root/'run', root/'controls', root/'revision'
+for folder in (plain, control, revision):
+    manifest = read(folder/'manifest.json')
+    for path, digest in manifest['source_sha256'].items():
+        assert file_digest(path) == digest, path
+    assert file_digest(folder/'protocol.json') == manifest['protocol_sha256']
+original = load(plain/'data.pt')
+equal_tree(original['train'], paired_training_data(range(22000, 22256)))
+equal_tree(original['development'], evaluation_data(range(23000, 23016)))
+held = load(control/'holdout_data.pt')
+equal_tree(held, evaluation_data(range(25000, 25016)))
+manifest = read(control/'manifest.json')
+assert tensor_digest(original['train']['raw']) == manifest['train_raw_sha256']
+assert tensor_digest(original['development']['raw']) == manifest['dev_raw_sha256']
+assert read(control/'selection.json')['selected'] == 'innovation'
+model_reports, replayed = {}, 0
+for mode in ('raw',)+MODES:
+    stats = read(plain/'manifest.json')['normalization'] if mode=='raw' else manifest['modes'][mode]
+    actual = original['train']['raw'] if mode=='raw' else adapt_raw(original['train']['raw'], mode)
+    torch.testing.assert_close(actual.mean((0,1,3,4)), torch.tensor(stats['mean']), rtol=0, atol=0)
+    torch.testing.assert_close(actual.std((0,1,3,4)), torch.tensor(stats['std']), rtol=0, atol=0)
+    model_reports[mode] = {}
+    for seed in range(3):
+        folder = plain/f'seed{seed}' if mode=='raw' else control/mode/f'seed{seed}'
+        reports = read(folder/'development.json')
+        model_reports[mode][str(seed)] = {}
+        for step, report in reports.items():
+            model = (RetrainedMeasurementScorer(stats['mean'], stats['std']) if mode=='raw'
+                     else AdaptedMeasurementScorer(stats['mean'], stats['std'], mode)).eval()
+            model.load_state_dict(load(folder/f'checkpoint{step}.pt')['model'])
+            choices = [('development',original['development'],report)]
+            if step=='200' and mode=='innovation':
+                choices += [('holdout',held,read(folder/'holdout.json'))]
+            for split, data, stored in choices:
+                metrics = audit_report(stored,data['zero_prefix'])
+                with torch.no_grad():
+                    scores=torch.cat([model.scores(part) for part in data['raw'].split(16)])
+                expected=torch.tensor([r['log_bayes_factor'] for r in stored['records']],dtype=torch.float64)
+                gap=scores.double()[...,1]-scores.double()[...,0]
+                torch.testing.assert_close(gap,expected,rtol=0,atol=0)
+                replayed += gap.numel()
+                model_reports[mode][str(seed)][f'{split}_{step}']=metrics
+# Genuine saved AdamW continuation; verifies the existing selected seed0 path only.
+stats=manifest['modes']['innovation']
+saved=load(control/'innovation/seed0/checkpoint100.pt')
+model=AdaptedMeasurementScorer(stats['mean'],stats['std'],'innovation').train()
+model.load_state_dict(saved['model'])
+optimizer=torch.optim.AdamW(model.parameters(),lr=1e-3,weight_decay=.01)
+optimizer.load_state_dict(saved['optimizer'])
+schedule=np.array(read(control/'schedule.json'))
+for indexes in schedule[100:200]:
+    selected=torch.tensor(np.stack([2*indexes,2*indexes+1],1).flatten())
+    optimizer.zero_grad(set_to_none=True)
+    logits=model(original['train']['raw'][selected])
+    target=original['train']['truth'][selected,None].expand(-1,8).reshape(-1)
+    F.cross_entropy(logits.flatten(0,1),target).backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(),1)
+    optimizer.step()
+expected=load(control/'innovation/seed0/checkpoint200.pt')
+equal_tree(model.state_dict(),expected['model'])
+equal_tree(optimizer.state_dict(),expected['optimizer'])
+# Independent arithmetic over saved probability trajectories and task graph.
+trials=load(revision/'trials.pt')
+for trial in trials: equal_tree(trial,make_trial(trial['seed']))
+comparison={};correction_speed={};bad_veto={}
+for seed in range(3):
+    rows=read(revision/f'seed{seed}.json')
+    correction_speed[str(seed)]={m:[] for m in METHODS}
+    drift={m:[] for m in METHODS};success={m:0 for m in METHODS}
+    veto={m:0 for m in METHODS}
+    for trial,row in zip(trials,rows,strict=True):
+        prior=trial['prior'].numpy()
+        q0=np.array([prior[i]*np.prod(prior[peers]) for i,peers in enumerate(trial['neighbours'])])
+        unaffected=~trial['affected'].numpy()
+        for step in row['trajectory']:
+            for method in METHODS:
+                p=np.array(step[method]['factors']);q=np.array(step[method]['derived'])
+                expected_q=np.array([p[i]*np.prod(p[peers]) for i,peers in enumerate(trial['neighbours'])])
+                np.testing.assert_allclose(q,expected_q,rtol=1e-6,atol=1e-7)
+                drift[method].append(float(np.mean(np.abs(q[unaffected]-q0[unaffected]))) if unaffected.any() else 0.)
+            assert step['n02_local']==step['event_cached_filter']
+        for method in METHODS:
+            p=np.array(row['trajectory'][-1][method]['factors'])
+            mass=np.where(trial['truth'].numpy(),p,1-p)
+            successes=int(np.sum(mass[list(trial['cue_nodes'])]>=.7))
+            assert successes==row['metrics'][method]['corrected_cue_nodes']
+            success[method]+=successes
+            veto[method]+=row['metrics'][method]['absolute_vetoes']
+            for node in trial['cue_nodes']:
+                trajectory=[step[method]['factors'][node] if trial['truth'][node] else 1-step[method]['factors'][node] for step in row['trajectory']]
+                first=next((i+1 for i,p in enumerate(trajectory) if p>=.7),None)
+                correction_speed[str(seed)][method].append(first)
+    for method in METHODS:
+        speed=correction_speed[str(seed)][method]
+        correction_speed[str(seed)][method]={'per_node_first_frame':speed,
+                                           'successful_mean_frame':float(np.mean([s for s in speed if s is not None])),
+                                           'failed_nodes':sum(s is None for s in speed)}
+    bad_veto[str(seed)]=veto
+    assert all(v==4 for v in veto.values())
+    comparison[str(seed)]={'corrected':success,'mean_unaffected_drift':{m:float(np.mean(v)) for m,v in drift.items()}}
+    assert correction_speed[str(seed)]['n02_local']==correction_speed[str(seed)]['event_cached_filter']
+# Re-execute every solver on a full saved scene (one per scorer seed), without retiming.
+cfg=N02Config.from_json('configs/encoders/n02/tiny_contracts.json');cfg.K=2
+controller=RevisionController(cfg).eval()
+for seed in range(3):
+    model=AdaptedMeasurementScorer(stats['mean'],stats['std'],'innovation').eval()
+    model.load_state_dict(load(control/f'innovation/seed{seed}/checkpoint200.pt')['model'])
+    trial=trials[0];record=read(revision/f'seed{seed}.json')[0]
+    prior=trial['prior'];valid=trial['valid'];peers=trial['neighbours']
+    q=torch.tensor([float(prior[i]*prior[p].prod()) if p else float(prior[i]) for i,p in enumerate(peers)])
+    states={m:(prior.clone(),q.clone()) for m in METHODS};measurement=None
+    edge=valid[None,None,...,None,None].float()*torch.eye(2).reshape(1,1,1,1,1,2,2)
+    for index in range(8):
+        measurement=measurement_step(model,trial['raw'][:,index],measurement,index)
+        for method in METHODS:
+            factors,derived,_=update_state(method,*states[method],measurement,prior,controller,edge,valid,peers)
+            states[method]=(factors,derived)
+            np.testing.assert_allclose(factors.numpy(),record['trajectory'][index][method]['factors'],rtol=0,atol=0)
+            np.testing.assert_allclose(derived.numpy(),record['trajectory'][index][method]['derived'],rtol=0,atol=0)
+receipt={'passed':True,'replayed_measurement_prefixes':replayed,
+         'train_dev_holdout_raw':'regenerated byte-identically','measurement_seed0_resume100_to200':'model/AdamW bitwise identical',
+         'duplicate_verification_optimizer_updates':100,'new_updates_beyond200':0,
+         'all_saved_revision_states_recomputed_algebraically':True,
+         'full_scene_solver_reexecution':'3 scorers x 8 frames x 4 methods, identical states',
+         'bad_measurement_vetoes':bad_veto,'comparison':comparison,'correction_speed':correction_speed,
+         'measurement_models':model_reports,'source_and_protocol_hashes':'passed'}
+write_json(root/'audit.json',receipt)
+print(json.dumps({k:v for k,v in receipt.items() if k not in ['measurement_models','comparison','correction_speed','bad_measurement_vetoes']},indent=2))
