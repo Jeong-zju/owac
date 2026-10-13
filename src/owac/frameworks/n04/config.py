@@ -77,6 +77,8 @@ class N04ModelConfig:
     change_branch: bool = True
     #: Historical task-state residual versus a prediction in sensor observation space.
     innovation_reference: Literal["task_state", "sensor_history"] = "task_state"
+    #: Apply the current sensor support to the observation prediction before the stem.
+    match_observation_support: bool = False
     #: 读出 token 数上限（每相机）。
     readout_tokens: int = 256
     #: 读出 token 宽度。真实 π0.5 前缀为 2048；小尺寸配置单独命名，不冒充真实后端。
@@ -124,6 +126,7 @@ class N04ModelConfig:
             "illumination_branch": self.illumination_branch,
             "change_branch": self.change_branch,
             "innovation_reference": self.innovation_reference,
+            "match_observation_support": self.match_observation_support,
             "readout_tokens": self.readout_tokens,
             "readout_dim": self.readout_dim,
             "predictor": self.predictor,

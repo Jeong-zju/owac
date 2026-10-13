@@ -488,6 +488,7 @@ class N04Encoder(nn.Module):
         linear_current: torch.Tensor | None = None,
         linear_predicted: torch.Tensor | None = None,
         linear_validity: torch.Tensor | None = None,
+        current_linear_support: torch.Tensor | None = None,
     ) -> tuple[N04State, Innovation | None]:
         """以新测量修正状态。
 
@@ -524,7 +525,14 @@ class N04Encoder(nn.Module):
                 reference = torch.zeros_like(meas0)
                 innovation_validity = torch.zeros_like(validity)
             else:
-                reference = self.predict_observation(linear_predicted)
+                observation_prediction = linear_predicted
+                if self.config.model.match_observation_support:
+                    if current_linear_support is None:
+                        raise ValueError(
+                            "matched observation support requires current sensor support"
+                        )
+                    observation_prediction = observation_prediction * current_linear_support
+                reference = self.predict_observation(observation_prediction)
                 if linear_validity is not None:
                     support = measurement_from_linear_planes(
                         linear_validity, self.config.input_mode
@@ -750,6 +758,7 @@ class N04Encoder(nn.Module):
             linear_current=linear_current,
             linear_predicted=linear_predicted,
             linear_validity=linear_support * prior_support if prior_support is not None else None,
+            current_linear_support=linear_support,
         )
         # New evidence replaces supported pixels; otherwise keep propagated history.
         if linear_predicted is None:

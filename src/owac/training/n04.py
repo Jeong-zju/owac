@@ -1004,6 +1004,15 @@ def load_checkpoint(
                 raise ValueError(
                     "checkpoint observation reference differs; oracle overrides must be explicit"
                 )
+            for name, default in (("match_observation_support", False),):
+                if (
+                    getattr(core.config.model, name)
+                    != payload.get("model_config", {}).get(name, default)
+                    and not allow_design_override
+                ):
+                    raise ValueError(
+                        f"checkpoint {name} differs; diagnostic override must be explicit"
+                    )
         state = _align_state_dict(payload["encoder"], encoder)
         #: 懒建的运动编码器要按 checkpoint 记录的实际宽度先建好，否则恢复会丢参数。
         #: 目标是消融 wrapper 时，真正持有编码器的是它的 ``encoder`` 子模块。
