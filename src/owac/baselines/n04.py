@@ -20,6 +20,7 @@ BASELINE_NAMES = (
     "action_conditioned_recurrent",
     "n04_no_ego",
     "n04_no_change_branch",
+    "n04_no_illumination",
     "n04_all_residual_noise",
     "n04_time_shifted_context",
 )
@@ -247,6 +248,8 @@ class N04Ablation(nn.Module):
             cfg = cfg.with_model(predictor="identity")
         elif mode == "n04_no_change_branch":
             cfg = cfg.with_model(change_branch=False)
+        elif mode == "n04_no_illumination":
+            cfg = cfg.with_model(illumination_branch=False)
         elif mode == "n04_all_residual_noise":
             cfg = cfg.with_model(change_branch=False, illumination_branch=False)
         elif mode != "n04_time_shifted_context":

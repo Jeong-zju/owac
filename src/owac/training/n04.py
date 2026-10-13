@@ -831,16 +831,18 @@ def propagation_uncertainty_loss(uncertainty, flow, innovation, frame, cfg):
 
 
 def decomposition_loss(innovation, flow, frame, previous, cfg):
-    """Identifiable synthetic causes plus stability; no scene-ID input to the encoder.
+    """Independent cause support and stability, without relabeling the external event.
 
-    Overlapping causes use soft allocation, not a claim of calibrated event probability.
-    No-cause pixels have no fabricated cause label; the change gate retains static negatives.
+    The external score has exactly one event target in ``change_gate_loss`` and the
+    corresponding observable-amplitude objective. Other causes can coexist with it.
+    Diagnostic normalized proportions never receive loss or drive state updates.
     """
-    size = innovation.mix.shape[-2:]
+    scores = innovation.event_scores
+    size = scores.shape[-2:]
     item = _change_target(frame, size)
     error = _flow_error(flow, frame, cfg, size)
     if item is None or error is None or previous is None:
-        return innovation.mix.sum() * 0
+        return scores.sum() * 0
     external, valid = item
     history = innovation.propagation_validity.detach()
     imaging = F.adaptive_avg_pool2d(frame.saturated_mask, size)
@@ -849,19 +851,16 @@ def decomposition_loss(innovation, flow, frame, previous, cfg):
         imaging = torch.maximum(imaging, (relative - 1).abs()[:, None, None, None].clamp(0, 1))
     ego = (error / (error + 1)).clamp(0, 1) * history
     unknown = 1 - history
-    if not bool(innovation.gate_change.detach().any()):
-        # The no-change ablation has no external branch: do not train a hidden substitute.
-        unknown = torch.maximum(unknown, external)
-        external = torch.zeros_like(external)
-    causes = torch.cat((ego, external, imaging.expand_as(ego), unknown), 1).detach()
-    support = (causes.sum(1, keepdim=True) > 1e-6).to(valid) * valid
-    target = causes / causes.sum(1, keepdim=True).clamp_min(1e-6)
-    classification = -(target * innovation.mix.clamp_min(1e-6).log()).sum(1, keepdim=True)
+    target = torch.cat((ego, imaging.expand_as(ego), unknown), 1).detach()
+    auxiliary_scores = scores[:, (0, 2, 3)]
+    calibration = F.binary_cross_entropy(
+        auxiliary_scores.clamp(1e-6, 1 - 1e-6), target, reduction="none"
+    ).mean(1, keepdim=True)
     # The public stability output already contains exp(-sigma). Use the same
     # calibrated scale, including its floor, rather than an unreachable target 1.
     stable_target = history * torch.exp(-(error + cfg.model.sigma_floor)) * valid * (1 - external)
     stability = F.smooth_l1_loss(innovation.stability, stable_target.detach(), reduction="none")
-    return (classification * support).sum() / support.sum().clamp_min(1) + (
+    return (calibration * valid).sum() / valid.sum().clamp_min(1) + (
         stability * valid
     ).sum() / valid.sum().clamp_min(1)
 
@@ -952,7 +951,7 @@ def save_checkpoint(
 ) -> None:
     payload = {
         "schema_version": 2,
-        "mechanism_revision": "n04-six-fixes-v1",
+        "mechanism_revision": "n04-independent-event-scores-v1",
         "location_head": encoder.location_probe.state_dict(),
         "rng_state": torch.get_rng_state(),
         "encoder": {
@@ -987,6 +986,12 @@ def load_checkpoint(
 ) -> dict[str, Any]:
     payload = torch.load(Path(path), map_location="cpu", weights_only=False)
     if encoder is not None:
+        if any(k.endswith("decomposer.head.weight") for k in payload["encoder"]):
+            if payload.get("mechanism_revision") != "n04-independent-event-scores-v1":
+                raise ValueError(
+                    "checkpoint uses incompatible N04 score semantics; evaluate it with its "
+                    "original source version instead of interpreting cause shares as event scores"
+                )
         state = _align_state_dict(payload["encoder"], encoder)
         #: 懒建的运动编码器要按 checkpoint 记录的实际宽度先建好，否则恢复会丢参数。
         #: 目标是消融 wrapper 时，真正持有编码器的是它的 ``encoder`` 子模块。

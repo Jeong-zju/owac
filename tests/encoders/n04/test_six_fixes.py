@@ -205,10 +205,10 @@ def test_stability_supervision_uses_the_same_calibrated_scale_as_its_output():
         true_illumination=torch.ones(1),
     )
     innovation = SimpleNamespace(
-        mix=torch.full((1, 4, 16, 16), 0.25),
+        event_scores=torch.zeros(1, 4, 16, 16),
         propagation_validity=valid,
         gate_change=torch.ones_like(valid) * 0.25,
         stability=valid * torch.exp(torch.tensor(-cfg.model.sigma_floor)),
     )
     loss = decomposition_loss(innovation, frame.oracle_camera_flow, frame, frame, cfg)
-    assert loss.item() == 0
+    assert loss.item() < 1e-5  # numerical BCE floor; no unreachable stability target

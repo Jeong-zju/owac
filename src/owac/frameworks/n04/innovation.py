@@ -9,10 +9,10 @@
         innovation, f_t, pred_t, warp_valid, uncertainty, metadata_t)
     stable_t, change_t = Update(pred_t, f_t, decomposition)
 
-**未校准前不写成概率。** 三个分支输出的是用于状态更新的学习权重 ``w_*``（0..1 的
-连续门），加一个 ``g_unknown`` 残留通道处理“信息不足/不可识别”。三者与 unknown 通过
-softmax 归一化，故 ``w_ego + w_ext + w_img + w_unknown = 1``，但这不是事件概率，
-只是分配规则。报告里必须这样描述。
+三个原因与 unknown 输出独立的 0..1 支持分数，允许同时存在。``gate_change`` 始终表示
+外部运动事件的存在性，用于同一事件标签的监督、变化写入及检测；它不再是互斥原因占比。
+传播/成像分数另用误差/干扰强度监督，未经校准不冒称事件概率。``mix`` 仅将这些分数
+归一化用于诊断展示，不参与监督或状态更新。
 
 照明分支只在**可靠区域**上估计全局/低频增益，用来解释残差，**不**把测量特征除掉：
 未消除的测量特征仍供 action readout。增益开启/关闭可配置；颜色决定目标选择的反例
@@ -28,7 +28,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-__all__ = ["Innovation", "InnovationDecomposer", "estimate_low_frequency_gain"]
+SCORE_SEMANTICS = "independent-event-scores-v1"
+
+__all__ = ["Innovation", "InnovationDecomposer", "SCORE_SEMANTICS", "estimate_low_frequency_gain"]
 
 
 @dataclass
@@ -41,12 +43,14 @@ class Innovation:
     gate_uncertain: torch.Tensor
     #: unknown / ambiguous 残留通道。
     unknown: torch.Tensor
-    #: 归一化后的三分支占比（和为 1，仅供分析）。
+    #: 归一化后的支持占比（和为 1，仅供分析，绝不当事件分数使用）。
     mix: torch.Tensor
     #: 稳定性门（用于稳定分支更新）：观测可靠、传播可靠时更大。
     stability: torch.Tensor
     #: 最终观测门 ``g_update``：状态更新对当前测量的接受程度。
     g_update: torch.Tensor
+    #: 独立支持分数，顺序 ego / external event / imaging / unknown。
+    event_scores: torch.Tensor | None = None
     #: 照明：只在可靠区域估计的全局/低频增益与其偏差。
     illumination_gain: torch.Tensor | None = None
     illumination_delta: torch.Tensor | None = None
@@ -147,7 +151,7 @@ class InnovationDecomposer(nn.Module):
             nn.GELU(),
         ).to(device, dtype)
         #: 三个分支 + unknown + stability，共 5 个 logit 通道；零初始化使首步门控为
-        #: “三分支各 1/4、unknown 1/4、stability=0.5”，训练自行调整。
+        #: 每个独立支持分数和 stability 均为 0.5，训练自行调整。
         self.head = nn.Conv2d(self.hidden, 5, 1).to(device, dtype)
         nn.init.zeros_(self.head.weight)
         nn.init.zeros_(self.head.bias)
@@ -223,16 +227,16 @@ class InnovationDecomposer(nn.Module):
             self._build(features.shape[1], features.device, features.dtype)
         assert self.trunk is not None and self.head is not None
         logits = self.head(self.trunk(features))
-        mix = torch.softmax(logits[:, :4], dim=1)
-        w_ego = mix[:, 0:1]
-        w_change = mix[:, 1:2]
-        w_uncertain = mix[:, 2:3]
-        unknown = mix[:, 3:4]
-        stability = torch.sigmoid(logits[:, 4:5])
+        scores = torch.sigmoid(logits[:, :4])
         if not self.use_change_branch:
-            #: 消融“无外部变化分支”：变化权重并入 unknown，不再单独承载外部变化。
-            w_change = torch.zeros_like(w_change)
-            unknown = (unknown + mix[:, 1:2]).clamp(max=1.0)
+            # No hidden external-event substitute in unknown for this ablation.
+            scores = torch.cat((scores[:, :1], torch.zeros_like(scores[:, 1:2]), scores[:, 2:]), 1)
+        w_ego = scores[:, 0:1]
+        w_change = scores[:, 1:2]
+        w_uncertain = scores[:, 2:3]
+        unknown = scores[:, 3:4]
+        mix = scores / scores.sum(1, keepdim=True).clamp_min(1e-6)
+        stability = torch.sigmoid(logits[:, 4:5])
         w_ego = w_ego * validity
         #: ``g_update`` 首版是一个**可检查的解析先验**，训练后由分解头继续调整：
         #:
@@ -266,6 +270,7 @@ class InnovationDecomposer(nn.Module):
             mix=mix,
             stability=(stability * validity * prop_reliability).clamp(0.0, 1.0),
             g_update=g_update,
+            event_scores=scores,
             illumination_gain=gain,
             illumination_delta=gain_delta,
             residual=innovation,
@@ -279,5 +284,7 @@ class InnovationDecomposer(nn.Module):
                 "illumination_branch": self.use_illumination_branch,
                 "illumination_available": gain_available,
                 "change_branch": self.use_change_branch,
+                "score_semantics": SCORE_SEMANTICS,
+                "mix_role": "diagnostic_only",
             },
         )

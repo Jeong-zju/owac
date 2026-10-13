@@ -310,7 +310,7 @@ def test_colour_decides_target_selection_counterexample():
 
 
 def test_decomposition_mix_is_normalised_but_not_called_probability():
-    """三分支 + unknown 的 softmax 归一化：和为 1，但记录为更新权重而不是事件概率。"""
+    """归一化的 mix 仅供分析；实际更新使用独立支持分数。"""
     dec = InnovationDecomposer(feature_channels=4, hidden=8)
     current = torch.randn(2, 4, 6, 6)
     predicted = torch.randn(2, 4, 6, 6)
@@ -350,8 +350,8 @@ def test_measurement_acceptance_responds_to_uncertainty_and_residual():
     assert saturated < 0.10, saturated
 
 
-def test_no_change_branch_ablation_moves_weight_into_unknown():
-    """消融“无外部变化分支”：变化权重并入 unknown，而不是凭空消失。"""
+def test_no_change_branch_ablation_disables_external_score():
+    """消融不把外部事件转交 unknown 作为替身。"""
     dec = InnovationDecomposer(feature_channels=4, hidden=8, use_change_branch=False)
     out = dec(
         current=torch.randn(1, 4, 6, 6),
