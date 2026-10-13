@@ -1,0 +1,532 @@
+#!/usr/bin/env python3
+"""Audit and summarize completed formal N01 factorial receipts, without retraining.
+
+Usage: python summarize_formal.py seed17/metrics.json seed29/metrics.json \
+    seed43/metrics.json --output formal-summary
+
+Only full A--F x seeds 17/29/43 test receipts are accepted. Development results,
+partial receipts, duplicate runs, mismatched initialization/data/source, and
+mixed protocols fail loudly. Raw metrics are never overwritten or modified.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import statistics
+from pathlib import Path
+
+SEEDS = (17, 29, 43)
+METHODS = tuple("ABCDEF")
+CONDITIONS = (
+    "static_weak",
+    "translation_oracle_alignment",
+    "occlusion_release",
+    "local_change_stale_history",
+)
+ORDINARY = tuple(name for name in CONDITIONS if name != "translation_oracle_alignment")
+PAIRS = (("C", "A"), ("C", "E"), ("D", "C"), ("D", "F"))
+CONDITION_NAMES = {
+    "static_weak": "静态弱信号",
+    "translation_oracle_alignment": "准确平移对齐（oracle，独立列出）",
+    "occlusion_release": "遮挡解除",
+    "local_change_stale_history": "局部变化／陈旧历史",
+}
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
+def describe(values):
+    values = [float(value) for value in values]
+    require(values and all(math.isfinite(value) for value in values), "nonfinite summary value")
+    return {"mean": statistics.mean(values), "min": min(values), "max": max(values)}
+
+
+def same(values, label):
+    require(all(value == values[0] for value in values[1:]), f"mismatch: {label}")
+
+
+def audit(paths):
+    runs, sources, protocols, receipts, calibrations = {}, [], [], [], {}
+    for source_path in paths:
+        path = Path(source_path).resolve()
+        require(path.name == "metrics.json", f"only completed metrics.json accepted: {path}")
+        raw = path.read_bytes()
+        payload = json.loads(raw)
+        protocol = payload["protocol"]
+        require(not protocol.get("development", False), f"development receipt rejected: {path}")
+        require(
+            payload["source_manifest"] == payload["source_manifest_at_end"],
+            f"source changed during experiment: {path}",
+        )
+        sources.append(payload["source_manifest"])
+        protocols.append(
+            {key: value for key, value in protocol.items() if key not in {"seeds", "methods"}}
+        )
+        receipts.append(
+            {
+                "path": str(path),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "git_head": payload["git_head"],
+                "run_count": len(payload["runs"]),
+            }
+        )
+        for seed, calibration in payload["calibration"].items():
+            if seed in calibrations:
+                same([calibrations[seed], calibration], f"calibration seed={seed}")
+            calibrations[seed] = calibration
+        for run in payload["runs"]:
+            key = (int(run["seed"]), run["method"])
+            require(key not in runs, f"duplicate run {key}")
+            require(key[0] in SEEDS and key[1] in METHODS, f"not a formal preregistered run: {key}")
+            require(run.get("evaluation_split") == "test", f"non-test run rejected: {key}")
+            require(
+                "development_validation" not in run and "test" in run, f"development output: {key}"
+            )
+            require(
+                run["test"]["oracle_excluded_from_main_aggregate"], f"oracle aggregate leak: {key}"
+            )
+            require(set(run["test"]["main_conditions"]) == set(ORDINARY), f"main conditions: {key}")
+            require(set(run["test"]["cases"]) == set(CONDITIONS), f"missing condition: {key}")
+            require(len(run["learning_curve"]) == protocol["steps"], f"truncated training: {key}")
+            require(
+                len(run["train_input_hashes"]) == protocol["steps"], f"missing input hashes: {key}"
+            )
+            require(
+                len(run["train_fixture_hashes"]) == protocol["steps"],
+                f"missing fixture hashes: {key}",
+            )
+            require(
+                1 <= run["best_step"] <= protocol["steps"], f"invalid selected checkpoint: {key}"
+            )
+            selected = run["learning_curve"][run["best_step"] - 1]
+            require(
+                selected["validation_early_error_px"] == run["best_validation_early_error_px"],
+                f"selected checkpoint score mismatch: {key}",
+            )
+            validation_scores = [
+                row["validation_early_error_px"]
+                for row in run["learning_curve"]
+                if "validation_early_error_px" in row
+            ]
+            require(
+                run["best_validation_early_error_px"] == min(validation_scores),
+                f"checkpoint not selected by declared validation rule: {key}",
+            )
+            runs[key] = run
+    require(
+        set(runs) == {(seed, method) for seed in SEEDS for method in METHODS},
+        "need all 18 formal runs",
+    )
+    same(sources, "source manifest across receipts")
+    require(bool(sources[0]), "missing actual source hashes")
+    same(protocols, "formal training/evaluation protocol")
+    protocol = protocols[0]
+    require(protocol["event_window"] == 6, "report expects six-frame early window")
+    require(
+        protocol["recovery_consecutive"] == 3, "report expects three-frame recovery confirmation"
+    )
+    require(
+        protocol["recovery_tolerance_px"] == 0.75,
+        "report expects preregistered 0.75-cell tolerance",
+    )
+    audit_rows = {}
+    for seed in SEEDS:
+        arms = [runs[seed, method] for method in METHODS]
+        same([arm["train_input_hashes"] for arm in arms], f"training inputs seed={seed}")
+        same([arm["train_fixture_hashes"] for arm in arms], f"training fixtures seed={seed}")
+        same(
+            [arm["initial_parameter_hashes"]["common"] for arm in arms],
+            f"common initialization seed={seed}",
+        )
+        same(
+            [runs[seed, method]["initial_parameter_hashes"]["content"] for method in "CDEF"],
+            f"content initialization seed={seed}",
+        )
+        same(
+            [runs[seed, method]["parameter_count"] for method in "CDEF"],
+            f"CDEF capacity seed={seed}",
+        )
+        same(
+            [runs[seed, method]["gradient_active_parameter_count"] for method in "CDEF"],
+            f"CDEF active capacity seed={seed}",
+        )
+        same([runs[seed, method]["parameter_count"] for method in "AB"], f"AB capacity seed={seed}")
+        same([arm["encoder_config"]["width"] for arm in arms], f"backbone width seed={seed}")
+        validation_inputs = []
+        for arm in arms:
+            snapshots = [
+                {name: case["input_sha256"] for name, case in row["validation_cases"].items()}
+                for row in arm["learning_curve"]
+                if "validation_cases" in row
+            ]
+            require(bool(snapshots), f"missing validation inputs seed={seed}")
+            same(snapshots, f"validation dataset across checkpoints seed={seed}")
+            validation_inputs.append(snapshots[0])
+        same(validation_inputs, f"validation inputs across arms seed={seed}")
+        test_hashes = {}
+        for condition in CONDITIONS:
+            cases = [arm["test"]["cases"][condition] for arm in arms]
+            same([case["input_sha256"] for case in cases], f"test inputs seed={seed}/{condition}")
+            same(
+                [case["fixture_sha256"] for case in cases], f"test fixtures seed={seed}/{condition}"
+            )
+            same([case["data_seed"] for case in cases], f"test seed={seed}/{condition}")
+            same([case["event_frame"] for case in cases], f"test event={seed}/{condition}")
+            require(
+                cases[0]["input_sha256"] not in arms[0]["train_input_hashes"],
+                f"training/test input overlap seed={seed}/{condition}",
+            )
+            require(
+                cases[0]["fixture_sha256"] not in arms[0]["train_fixture_hashes"],
+                f"training/test fixture overlap seed={seed}/{condition}",
+            )
+            require(
+                cases[0]["input_sha256"] != validation_inputs[0][condition],
+                f"validation/test input overlap seed={seed}/{condition}",
+            )
+            for case in cases:
+                require(
+                    len(case["error_per_member_per_frame"]) == protocol["evaluation_batch_size"],
+                    f"test denominator mismatch seed={seed}/{condition}",
+                )
+                require(
+                    case["oracle_alignment"] == (condition not in ORDINARY),
+                    "oracle condition mislabelled",
+                )
+                recovery = case["recovery"]
+                if recovery is not None:
+                    require(
+                        recovery["denominator"] == protocol["evaluation_batch_size"],
+                        f"recovery denominator mismatch seed={seed}/{condition}",
+                    )
+                    require(
+                        recovery["censored_count"]
+                        == sum(delay is None for delay in recovery["delay_frames_per_member"]),
+                        f"recovery censor count seed={seed}/{condition}",
+                    )
+            test_hashes[condition] = {
+                name: cases[0][name] for name in ("input_sha256", "fixture_sha256", "data_seed")
+            }
+        audit_rows[str(seed)] = {
+            "common_initial_parameters": arms[0]["initial_parameter_hashes"]["common"],
+            "CDEF_content_initial_parameters": runs[seed, "C"]["initial_parameter_hashes"][
+                "content"
+            ],
+            "training_input_manifest_sha256": digest(arms[0]["train_input_hashes"]),
+            "training_fixture_manifest_sha256": digest(arms[0]["train_fixture_hashes"]),
+            "test_inputs": test_hashes,
+        }
+    require(
+        len({row["common_initial_parameters"] for row in audit_rows.values()}) == len(SEEDS),
+        "formal training seeds reused identical common initialization",
+    )
+    train_inputs = [set(runs[seed, "A"]["train_input_hashes"]) for seed in SEEDS]
+    for first in range(len(train_inputs)):
+        for second in range(first + 1, len(train_inputs)):
+            require(
+                not train_inputs[first] & train_inputs[second],
+                "training data shared across training seeds",
+            )
+    all_train_inputs = set().union(*train_inputs)
+    require(
+        all(
+            case["input_sha256"] not in all_train_inputs
+            for seed in SEEDS
+            for case in runs[seed, "A"]["test"]["cases"].values()
+        ),
+        "test input overlaps another seed's training data",
+    )
+    return runs, {
+        "pass": True,
+        "formal_run_count": len(runs),
+        "independent_training_seeds": list(SEEDS),
+        "source_manifest": sources[0],
+        "protocol": protocol,
+        "receipts": receipts,
+        "per_seed": audit_rows,
+        "calibration": calibrations,
+    }
+
+
+def per_condition(runs, condition, method):
+    cases = [runs[seed, method]["test"]["cases"][condition] for seed in SEEDS]
+    row = {
+        metric: describe(case[metric] for case in cases)
+        for metric in (
+            "mean_error_px",
+            "early_error_px",
+            "event_error_auc_px_frames",
+            "stable_error_px",
+        )
+    }
+    row["per_seed"] = {
+        str(seed): {
+            metric: runs[seed, method]["test"]["cases"][condition][metric]
+            for metric in ("early_error_px", "stable_error_px", "event_error_auc_px_frames")
+        }
+        for seed in SEEDS
+    }
+    if cases[0]["recovery"] is not None:
+        row["recovery"] = {
+            metric: describe(case["recovery"][metric] for case in cases)
+            for metric in ("censored_fraction", "capped_delay_score")
+        }
+        row["recovery"]["censored_count"] = sum(
+            case["recovery"]["censored_count"] for case in cases
+        )
+        row["recovery"]["denominator"] = sum(case["recovery"]["denominator"] for case in cases)
+        row["recovery"]["per_seed"] = {
+            str(seed): runs[seed, method]["test"]["cases"][condition]["recovery"] for seed in SEEDS
+        }
+    else:
+        row["recovery"] = None
+    return row
+
+
+def paired_effects(runs, condition, candidate, reference):
+    def extract(seed, method, metric):
+        test = runs[seed, method]["test"]
+        if condition == "ordinary_main":
+            return test["main_early_error_px"]
+        case = test["cases"][condition]
+        return (
+            case["recovery"][metric]
+            if metric in {"censored_fraction", "capped_delay_score"}
+            else case[metric]
+        )
+
+    metrics = ["early_error_px"]
+    if condition != "ordinary_main":
+        metrics += ["stable_error_px"]
+        if condition in {"occlusion_release", "local_change_stale_history"}:
+            metrics += ["censored_fraction", "capped_delay_score"]
+    result = {}
+    for metric in metrics:
+        differences = {
+            str(seed): extract(seed, candidate, metric) - extract(seed, reference, metric)
+            for seed in SEEDS
+        }
+        result[metric] = {
+            **describe(differences.values()),
+            "per_seed": differences,
+            "improved_training_seed_count": sum(value < 0 for value in differences.values()),
+            "exactly_equal_training_seed_count": sum(value == 0 for value in differences.values()),
+            "denominator_training_seeds": len(SEEDS),
+        }
+    return result
+
+
+def learning_summary(run):
+    curve = run["learning_curve"]
+    validation = [row for row in curve if "validation_early_error_px" in row]
+    tail = curve[-min(24, len(curve)) :]
+    return {
+        "selected_step": run["best_step"],
+        "total_steps": len(curve),
+        "best_validation_early_error_px": run["best_validation_early_error_px"],
+        "last_validation_early_error_px": validation[-1]["validation_early_error_px"],
+        "previous_validation_early_error_px": validation[-2]["validation_early_error_px"]
+        if len(validation) > 1
+        else None,
+        "last_validation_change_px": validation[-1]["validation_early_error_px"]
+        - validation[-2]["validation_early_error_px"]
+        if len(validation) > 1
+        else None,
+        "tail_steps": len(tail),
+        "tail_mean_loss": statistics.mean(row["loss"] for row in tail),
+        "tail_mean_training_error_px": statistics.mean(row["train_error_px"] for row in tail),
+        "tail_by_condition": {
+            condition: {
+                "count": len(rows),
+                "mean_loss": statistics.mean(row["loss"] for row in rows),
+                "mean_training_error_px": statistics.mean(row["train_error_px"] for row in rows),
+            }
+            for condition in CONDITIONS
+            if (rows := [row for row in tail if row["condition"] == condition])
+        },
+        "caution": "training mixtures include oracle; aggregate tail loss is not ordinary-condition test performance",
+    }
+
+
+def build_summary(paths):
+    runs, receipt = audit(paths)
+    conditions = {
+        condition: {method: per_condition(runs, condition, method) for method in METHODS}
+        for condition in CONDITIONS
+    }
+    comparisons = {
+        condition: {
+            f"{candidate}-{reference}": paired_effects(runs, condition, candidate, reference)
+            for candidate, reference in PAIRS
+        }
+        for condition in ("ordinary_main", *CONDITIONS)
+    }
+    costs = {}
+    for method in METHODS:
+        selected = [runs[seed, method] for seed in SEEDS]
+        same([run["parameter_count"] for run in selected], f"parameters across seeds arm={method}")
+        same(
+            [run["gradient_active_parameter_count"] for run in selected],
+            f"active parameters across seeds arm={method}",
+        )
+        costs[method] = {
+            "parameters": selected[0]["parameter_count"],
+            "gradient_active_parameters": selected[0]["gradient_active_parameter_count"],
+            "step_p50_ms": describe(run["step_p50_ms"] for run in selected),
+            "step_p95_ms": describe(run["step_p95_ms"] for run in selected),
+            "peak_state_bytes": max(
+                case["peak_state_bytes"]
+                for run in selected
+                for case in run["test"]["cases"].values()
+            ),
+            "process_peak_rss_bytes": max(run["process_peak_rss_bytes"] for run in selected),
+            "total_wall_seconds": sum(run["total_wall_seconds"] for run in selected),
+            "selected_steps_by_seed": {
+                str(seed): runs[seed, method]["best_step"] for seed in SEEDS
+            },
+            "caution": "RSS is process lifetime maximum; latency may include concurrent independent CPU runs",
+        }
+    return {
+        "summary_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "audit": receipt,
+        "interpretation": {
+            "difference": "candidate minus reference; negative error/delay difference is improvement",
+            "statistical_unit": "three independent training seeds; within-seed sequences are not extra training replicates",
+            "uncertainty": "mean and observed seed range/direction only; no significance or population generalization claims",
+            "units": "packed CFA grid cells; multiply errors by two for physical sensor pixels",
+            "early_windows": "static/oracle frames8..13; event conditions first six frames from test event13",
+            "stable_window": "last four frames, separate from the transient window",
+            "recovery": "three consecutive visible frames <=0.75 cell; unconfirmed late onset is censored; capped penalty is T-event, not RMST",
+            "oracle": "translation positive control reported separately and excluded from main effects",
+            "capacity": "A/B legacy; C/D historical content; E/F equal-capacity current-content branch retaining historical gates",
+        },
+        "conditions": conditions,
+        "paired_comparisons": comparisons,
+        "costs": costs,
+        "learning": {
+            str(seed): {method: learning_summary(runs[seed, method]) for method in METHODS}
+            for seed in SEEDS
+        },
+    }
+
+
+def markdown(summary):
+    lines = [
+        "# N01 正式内容通路机制对照汇总",
+        "",
+        "仅汇总正式 seed 17、29、43 的独立测试结果；开发验证结果不混入测试。",
+        "每个数字先在各训练种子内计算，再对三个种子等权汇总。序列数不当作训练重复次数。",
+        "误差单位为 packed CFA 格点（乘 2 为传感器像素）；差值为前者减后者，负值表示改善。",
+        "",
+        "## 输入、初始化与源码核验",
+        "",
+        "18 个完整正式运行通过核验：各种子六组训练/测试张量、完整监督夹具、公共初始参数一致；C/D/E/F 新通路参数与容量一致；源码与协议一致。准确平移对齐正例不计入普通条件均值。",
+        "",
+        "## 各条件结果",
+        "",
+        "早期误差使用静态/对齐正例第 8–13 帧，事件条件使用变化后首 6 帧；稳定误差使用最后 4 帧。",
+        "",
+        "| 条件 | 组 | 早6帧误差均值 [种子范围] | 稳定4帧误差 | 未恢复数/总数 | 截尾延迟惩罚分 |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for condition in CONDITIONS:
+        for method in METHODS:
+            row = summary["conditions"][condition][method]
+            early, stable, recovery = row["early_error_px"], row["stable_error_px"], row["recovery"]
+            censored = (
+                "—"
+                if recovery is None
+                else f"{recovery['censored_count']}/{recovery['denominator']}"
+            )
+            penalty = "—" if recovery is None else f"{recovery['capped_delay_score']['mean']:.3f}"
+            lines.append(
+                f"| {CONDITION_NAMES[condition]} | {method} | {early['mean']:.4f} [{early['min']:.4f}, {early['max']:.4f}] | {stable['mean']:.4f} | {censored} | {penalty} |"
+            )
+    lines += [
+        "",
+        "恢复要求连续 3 个可见帧误差≤0.75格；未获得完整确认的序列计为截尾，赋 T−事件时刻的预定惩罚。该惩罚分不是生存分析的限制平均恢复时间。",
+        "",
+        "## 配对早期误差差值",
+        "",
+        "| 条件 | 对比 | seed17 | seed29 | seed43 | 均值 [范围] | 改善训练种子数 |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for condition, pairs in summary["paired_comparisons"].items():
+        title = "普通条件等权均值" if condition == "ordinary_main" else CONDITION_NAMES[condition]
+        for pair, metrics in pairs.items():
+            row = metrics["early_error_px"]
+            seeds = " | ".join(f"{row['per_seed'][str(seed)]:+.4f}" for seed in SEEDS)
+            lines.append(
+                f"| {title} | {pair} | {seeds} | {row['mean']:+.4f} [{row['min']:+.4f}, {row['max']:+.4f}] | {row['improved_training_seed_count']}/3 |"
+            )
+    lines += [
+        "",
+        "仅三个独立训练种子，报告实际方向和范围，不宣称统计显著、等价或总体泛化。完整 JSON 另列稳定误差、恢复截尾比例与延迟惩罚差值。",
+        "",
+        "## 容量与实际成本",
+        "",
+        "| 组 | 总参数/有梯度参数 | 步时p50/p95均值(ms) | 状态峰值(B) | 选中step(17/29/43) |",
+        "| --- | ---: | ---: | ---: | --- |",
+    ]
+    for method, row in summary["costs"].items():
+        steps = "/".join(str(row["selected_steps_by_seed"][str(seed)]) for seed in SEEDS)
+        lines.append(
+            f"| {method} | {row['parameters']}/{row['gradient_active_parameters']} | {row['step_p50_ms']['mean']:.1f}/{row['step_p95_ms']['mean']:.1f} | {row['peak_state_bytes']} | {steps} |"
+        )
+    lines += [
+        "",
+        "RSS 为进程生命周期峰值；CPU 并行运行会影响时延，以上实测不用于宣称计算效率优势。完整学习曲线与检查点仍保留在原始运行目录。",
+        "",
+        "## 学习曲线末段与选择",
+        "",
+        "| seed | 组 | 选中step/总step | 最后验证误差 | 最后相邻验证差值 | 末24步训练损失 |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for seed in SEEDS:
+        for method in METHODS:
+            row = summary["learning"][str(seed)][method]
+            change = (
+                "—"
+                if row["last_validation_change_px"] is None
+                else f"{row['last_validation_change_px']:+.4f}"
+            )
+            lines.append(
+                f"| {seed} | {method} | {row['selected_step']}/{row['total_steps']} | {row['last_validation_early_error_px']:.4f} | {change} | {row['tail_mean_loss']:.4f} |"
+            )
+    lines += [
+        "",
+        "末段训练混合包含对齐正例，不以混合训练损失代替普通条件测试；检查点仅由普通条件验证早期误差选择。",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("metrics", nargs="+")
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+    summary = build_summary(args.metrics)
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+    (output / "summary.md").write_text(markdown(summary))
+    print(
+        json.dumps(
+            {"audit": "passed", "formal_runs": 18, "output": str(output)}, ensure_ascii=False
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

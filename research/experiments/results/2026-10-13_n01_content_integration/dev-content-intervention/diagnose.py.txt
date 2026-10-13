@@ -1,0 +1,241 @@
+"""Post-hoc development-only content-branch intervention; never evaluates test."""
+
+from __future__ import annotations
+
+import hashlib
+import io
+import json
+from copy import deepcopy
+from pathlib import Path
+from types import MethodType
+
+import torch
+
+from owac.evaluation.n01_content import ContentProbe, make_protocol_batch, run_sequence
+from owac.evaluation.n01_content_data import CONDITIONS
+from owac.frameworks.n01.config import N01Config
+
+ROOT = Path(__file__).resolve().parent
+SOURCE = ROOT.parent / "development-extended-C/seed101-C-best.pt"
+SNAPSHOT = ROOT / "seed101-C-development-snapshot.pt"
+
+
+def tensor_hash(tensors):
+    digest = hashlib.sha256()
+    for name, value in tensors:
+        value = value.detach().cpu().contiguous()
+        digest.update(f"{name}:{value.dtype}:{tuple(value.shape)}".encode())
+        digest.update(value.numpy().tobytes())
+    return digest.hexdigest()
+
+
+def snapshot():
+    if SNAPSHOT.exists():
+        raise FileExistsError("Independent snapshot already exists; do not overwrite evidence")
+    for _ in range(5):
+        first = SOURCE.read_bytes()
+        second = SOURCE.read_bytes()
+        if first != second:
+            continue
+        try:
+            checkpoint = torch.load(io.BytesIO(first), map_location="cpu", weights_only=False)
+        except (RuntimeError, EOFError, OSError):
+            continue
+        if checkpoint["method"] != "C" or checkpoint["seed"] != 101:
+            raise ValueError("Expected the seed101 C development checkpoint")
+        if not checkpoint["protocol"].get("development", False):
+            raise ValueError("This diagnostic is restricted to development checkpoints")
+        with SNAPSHOT.open("xb") as handle:
+            handle.write(first)
+        return checkpoint, hashlib.sha256(first).hexdigest()
+    raise RuntimeError("Could not obtain a coherent complete checkpoint snapshot")
+
+
+def captured_run(model, batch, protocol):
+    features, deltas, core_hashes = [], [], []
+    encoder = model.encoder
+    original_encode = encoder._encode
+
+    def observe_encode(self, frame, state, statistics, connectivity, selection, plan, motion=None):
+        plane = state.support[frame.camera_id]
+        core_hashes.append(
+            tensor_hash(
+                [
+                    ("raw_values", state.values),
+                    ("raw_variance", state.variance),
+                    ("raw_valid", state.valid),
+                    ("observed", state.observed),
+                    ("frame_ids", state.frame_ids),
+                    ("edges", plane.edges),
+                    ("open_edges", plane.open_edges),
+                    ("merge_count", plane.merge_count),
+                    ("split_count", plane.split_count),
+                    ("statistics_mu", statistics.mu),
+                    ("statistics_variance", statistics.variance_proxy),
+                    ("age", statistics.age),
+                    ("unique_frames", statistics.unique_frames),
+                    ("connectivity", connectivity),
+                    ("selection_weights", selection["weights"]),
+                    ("selection_slice", selection["slice"]),
+                ]
+            )
+        )
+        return original_encode(frame, state, statistics, connectivity, selection, plan, motion)
+
+    encoder._encode = MethodType(observe_encode, encoder)
+    handles = [
+        model.head.register_forward_pre_hook(
+            lambda module, arguments: features.append(arguments[0].detach().clone())
+        )
+    ]
+    for block in encoder.blocks:
+        handles.append(
+            block.content_update.register_forward_hook(
+                lambda module, arguments, result: deltas.append(result.detach().clone())
+            )
+        )
+    try:
+        with torch.no_grad():
+            _, metrics = run_sequence(model, batch, protocol, training=False)
+    finally:
+        for handle in handles:
+            handle.remove()
+        encoder._encode = original_encode
+    return metrics, torch.stack(features), torch.stack(deltas), core_hashes
+
+
+def amplitude(values):
+    per_frame = values.abs().flatten(1).mean(1)
+    return {
+        "mean_absolute": float(values.abs().mean()),
+        "rms": float(values.square().mean().sqrt()),
+        "max_absolute": float(values.abs().max()),
+        "mean_absolute_per_frame": per_frame.tolist(),
+    }
+
+
+def main():
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
+    torch.manual_seed(0)
+    checkpoint, digest = snapshot()
+    config = N01Config.from_dict(checkpoint["encoder_config"])
+    protocol = checkpoint["protocol"]
+    base = ContentProbe(config).eval()
+    base.load_state_dict(checkpoint["model"], strict=True)
+    pristine_hash = tensor_hash(base.named_parameters())
+    result = {
+        "scope": (
+            "post-hoc development validation intervention; "
+            "no formal benefit claim and no tuning basis"
+        ),
+        "checkpoint": {
+            "source": str(SOURCE),
+            "snapshot": str(SNAPSHOT),
+            "sha256": digest,
+            "seed": 101,
+            "method": "C",
+            "best_step_at_snapshot": checkpoint["step"],
+            "selection_metric": checkpoint["selection_metric"],
+        },
+        "split": "validation",
+        "threads": 1,
+        "protocol": protocol,
+        "parameter_hash_before_intervention": pristine_hash,
+        "interventions": {
+            "integrated": "Original C checkpoint without parameter or semantic change",
+            "zero_content_projection": (
+                "Zero only newly added ContentUpdate.projection parameters; "
+                "reliability/head/stem/history gates unchanged"
+            ),
+            "current_content_read": (
+                "After loading C, change only encoder runtime content_mode to current_control; "
+                "all parameter tensors unchanged; do not reload another mode checkpoint"
+            ),
+        },
+        "boundaries": [
+            "Same C weights; current-content intervention is not separately trained E/F.",
+            "All four conditions use original development validation generator and batch size.",
+            "Exact translation is an explicitly labelled oracle control.",
+            "Packed-pixel error; one packed pixel equals two physical sensor pixels.",
+            "No training, optimizer updates, calibration, source edits, or test evaluation.",
+        ],
+        "cases": {},
+    }
+    for index, condition in enumerate(CONDITIONS):
+        batch = make_protocol_batch(protocol, 101, "validation", index, condition)
+        records, references = {}, None
+        for intervention in result["interventions"]:
+            model = deepcopy(base)
+            if intervention == "zero_content_projection":
+                with torch.no_grad():
+                    for block in model.encoder.blocks:
+                        for parameter in block.content_update.projection.parameters():
+                            parameter.zero_()
+            elif intervention == "current_content_read":
+                model.encoder.config = model.encoder.config.replace(content_mode="current_control")
+                assert tensor_hash(model.named_parameters()) == pristine_hash
+            metrics, features, deltas, hashes = captured_run(model, batch, protocol)
+            if references is None:
+                references = (metrics, features, hashes)
+            baseline_metrics, baseline_features, baseline_hashes = references
+            if hashes != baseline_hashes:
+                raise AssertionError(
+                    "An intervention changed measurements/support/integral/selection"
+                )
+            records[intervention] = {
+                "input_sha256": metrics["input_sha256"],
+                "fixture_sha256": metrics["fixture_sha256"],
+                "event_frame": metrics["event_frame"],
+                "oracle_alignment": metrics["oracle_alignment"],
+                "early_error_px": metrics["early_error_px"],
+                "stable_error_px": metrics["stable_error_px"],
+                "mean_error_px": metrics["mean_error_px"],
+                "early_error_delta_from_integrated": metrics["early_error_px"]
+                - baseline_metrics["early_error_px"],
+                "stable_error_delta_from_integrated": metrics["stable_error_px"]
+                - baseline_metrics["stable_error_px"],
+                "error_per_frame": metrics["error_per_frame"],
+                "feature_amplitude": amplitude(features),
+                "feature_change_from_integrated": amplitude(features - baseline_features),
+                "content_delta_amplitude": amplitude(deltas),
+                "core_source_support_selector_hashes": hashes,
+                "same_core_hashes_as_integrated": True,
+                "parameter_hash": tensor_hash(model.named_parameters()),
+            }
+            if intervention == "zero_content_projection":
+                assert torch.count_nonzero(deltas) == 0
+        result["cases"][condition] = records
+    result["base_parameters_unchanged"] = tensor_hash(base.named_parameters()) == pristine_hash
+    output = ROOT / "diagnostic.json"
+    with output.open("x") as handle:
+        json.dump(result, handle, indent=2)
+        handle.write("\n")
+    print(
+        json.dumps(
+            {
+                "output": str(output),
+                "checkpoint_step": checkpoint["step"],
+                "snapshot_sha256": digest,
+                "cases": {
+                    name: {
+                        key: {
+                            metric: value[metric]
+                            for metric in (
+                                "early_error_px",
+                                "stable_error_px",
+                                "early_error_delta_from_integrated",
+                            )
+                        }
+                        for key, value in rows.items()
+                    }
+                    for name, rows in result["cases"].items()
+                },
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,320 @@
+"""Read-only N01 content-path audit; receipts stay beside this script.
+
+Run from the checkout with:
+  PYTHONDONTWRITEBYTECODE=1 .venv/bin/python outputs/n01-content-integration-20261013/core_audit.py
+
+The source/test/config files are never modified. Pytest's cache is disabled and
+its small log/XML receipts are written only to this script's output directory.
+"""
+
+from __future__ import annotations
+
+import ast
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
+
+
+ROOT = Path(__file__).resolve().parents[2]
+OUTPUT = Path(__file__).resolve().parent
+BASE = "1e0162b"
+CORE = "src/owac/frameworks/n01/"
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def baseline(path: str) -> bytes:
+    return subprocess.check_output(["git", "show", f"{BASE}:{path}"], cwd=ROOT)
+
+
+def current(path: str) -> bytes:
+    return (ROOT / path).read_bytes()
+
+
+def subtree(tree: ast.AST, name: str) -> ast.AST:
+    for part in name.split("."):
+        tree = next(node for node in tree.body if getattr(node, "name", None) == part)
+    return tree
+
+
+def ast_bytes(node: ast.AST) -> bytes:
+    return ast.dump(node, include_attributes=False).encode()
+
+
+def manifest() -> dict[str, str]:
+    files = sorted((ROOT / CORE).glob("*.py"))
+    files += sorted((ROOT / "tests/encoders/n01").glob("test*.py"))
+    files += [
+        ROOT / "src/owac/evaluation/n01_content.py",
+        ROOT / "src/owac/evaluation/n01_content_data.py",
+        ROOT / "configs/encoders/n01/content_mechanism.json",
+    ]
+    return {str(path.relative_to(ROOT)): sha(path.read_bytes()) for path in files}
+
+
+def main() -> int:
+    checks = []
+
+    def equal(name, old, new, *, kind, note=None):
+        row = {
+            "name": name,
+            "kind": kind,
+            "baseline_sha256": sha(old),
+            "current_sha256": sha(new),
+            "passed": old == new,
+        }
+        if note:
+            row["note"] = note
+        checks.append(row)
+
+    before = manifest()
+    for filename in ("support.py", "state.py", "motion.py", "temporal.py"):
+        path = CORE + filename
+        equal(path, baseline(path), current(path), kind="byte_for_byte")
+
+    model_path = CORE + "model.py"
+    old_model, new_model = ast.parse(baseline(model_path)), ast.parse(current(model_path))
+    anchors = (
+        "MeasurementStem",
+        "SupportSelector",
+        "SpatialReadout",
+        "encode_evidence_statistics",
+        "calibrate_statistics",
+        "statistics_channels",
+        "N01Encoder._select",
+        "N01Encoder._estimate_motion",
+        "N01Encoder._statistics_payload",
+        "N01Encoder._statistics_scale",
+        "N01Encoder._budget_plan",
+        "N01Encoder.init_state",
+        "N01Encoder.reset",
+        "N01Encoder.detach_state",
+        "N01Encoder.readout",
+        "N01Encoder.predict_measurement",
+    )
+    for anchor in anchors:
+        equal(
+            anchor,
+            ast_bytes(subtree(old_model, anchor)),
+            ast_bytes(subtree(new_model, anchor)),
+            kind="normalized_AST",
+        )
+
+    old_step = subtree(old_model, "N01Encoder.step")
+    new_step = subtree(new_model, "N01Encoder.step")
+
+    def encode_index(step):
+        return next(
+            i
+            for i, node in enumerate(step.body)
+            if isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Attribute)
+            and node.value.func.attr == "_encode"
+        )
+
+    old_prefix = ast.Module(body=old_step.body[: encode_index(old_step)], type_ignores=[])
+    new_prefix = ast.Module(body=new_step.body[: encode_index(new_step)], type_ignores=[])
+    equal(
+        "N01Encoder.step before _encode",
+        ast_bytes(old_prefix),
+        ast_bytes(new_prefix),
+        kind="normalized_AST",
+        note="Preserves push/dedup, fresh masks, edge update and hysteresis, support write-back, split-and-recompute, and selection ordering.",
+    )
+    normalized_step = copy.deepcopy(new_step)
+    encode_call = normalized_step.body[encode_index(normalized_step)].value
+    removed_motion = bool(
+        encode_call.args
+        and isinstance(encode_call.args[-1], ast.Name)
+        and encode_call.args[-1].id == "motion"
+    )
+    if removed_motion:
+        encode_call.args.pop()
+    removed_counters = 0
+    for node in ast.walk(normalized_step):
+        if isinstance(node, ast.Dict):
+            for i in range(len(node.keys) - 1, -1, -1):
+                key = node.keys[i]
+                if isinstance(key, ast.Constant) and key.value == "content_candidate_statistics_computed":
+                    del node.keys[i]
+                    del node.values[i]
+                    removed_counters += 1
+    equal(
+        "N01Encoder.step after removing the two declared additions",
+        ast_bytes(old_step),
+        ast_bytes(normalized_step),
+        kind="normalized_AST_with_explicit_exceptions",
+        note=f"Removed only final motion argument to _encode ({removed_motion}) and content statistics compute counter ({removed_counters}); both must be present exactly once.",
+    )
+    checks.append({
+        "name": "step exception count",
+        "kind": "explicit_exception_inventory",
+        "passed": removed_motion and removed_counters == 1,
+    })
+
+    sequence_path = CORE + "sequence1d.py"
+    old_sequence, new_sequence = baseline(sequence_path), current(sequence_path)
+    guard = (
+        b'        if config.content_mode != "gate_only":\n'
+        b'            raise ValueError("the 1-D adapter currently supports only content_mode=\'gate_only\'")\n'
+    )
+    count = new_sequence.count(guard)
+    equal(
+        sequence_path + " except explicit unsupported-mode guard",
+        old_sequence,
+        new_sequence.replace(guard, b"", 1),
+        kind="byte_for_byte_with_explicit_exception",
+        note=f"The only permitted addition is the two-line constructor rejection; occurrence count={count}.",
+    )
+    checks.append({
+        "name": "sequence1d guard count",
+        "kind": "explicit_exception_inventory",
+        "passed": count == 1,
+    })
+
+    focused_files = [
+        "tests/encoders/n01/test_content.py",
+        "tests/encoders/n01/test_content_experiment.py",
+        "tests/encoders/n01/test_sequence1d.py",
+        "tests/encoders/n01/test_acceptance_regressions.py::test_fractional_overlap_uses_each_original_source_once",
+        "tests/encoders/n01/test_support.py::test_split_removes_the_old_mixed_mean_at_a_strong_edge",
+        "tests/encoders/n01/test_support.py::test_repeated_request_of_the_same_frame_is_not_new_evidence",
+    ]
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        *focused_files,
+        f"--junitxml={OUTPUT / 'core-audit-tests.xml'}",
+    ]
+    env = dict(os.environ)
+    env.update({
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": str(ROOT / "src"),
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+    })
+    result = subprocess.run(command, cwd=ROOT, env=env, text=True, capture_output=True)
+    (OUTPUT / "core-audit-tests.log").write_text(result.stdout + result.stderr)
+    xml_path = OUTPUT / "core-audit-tests.xml"
+    cases = []
+    if xml_path.exists():
+        for case in ET.parse(xml_path).getroot().iter("testcase"):
+            cases.append({
+                "class": case.attrib.get("classname"),
+                "name": case.attrib.get("name"),
+                "passed": not any(case.find(tag) is not None for tag in ("failure", "error", "skipped")),
+            })
+    after = manifest()
+    checks.append({
+        "name": "source/test/config stayed frozen during audit",
+        "kind": "SHA256_manifest",
+        "passed": before == after,
+    })
+    coverage = {
+        "historical_content_and_gradients": [
+            "test_cfa_history_permutation_survives_interior_feature_update",
+            "test_content_gradients_reach_history_values_projection_reliability_and_coordinates",
+            "test_full_causal_training_sequence_reaches_content_branch_without_scale_drift",
+        ],
+        "source_identity_fractional_noise_and_split": [
+            "test_shared_grid_content_preserves_channel_specific_hand_integrals",
+            "test_fractional_content_reuses_original_source_coefficient_statistics",
+            "test_fractional_overlap_uses_each_original_source_once",
+            "test_content_rebuilds_after_support_split_without_cross_boundary_measurements",
+            "test_split_removes_the_old_mixed_mean_at_a_strong_edge",
+            "test_duplicate_frame_reuses_representation_and_does_not_integrate_again",
+        ],
+        "invalid_input_and_coordinates": [
+            "test_invalid_content_and_phase_coordinates_cannot_inject_measured_features",
+            "test_partial_missing_channel_cannot_change_content_projection",
+            "test_sample_coordinates_remain_content_specific_and_quality_independent",
+            "test_all_missing_integrated_frame_remains_finite_with_zero_content",
+        ],
+        "checkpoint_capacity_and_1d": [
+            "test_mode_mismatch_and_wrong_version_are_rejected_even_on_partial_load",
+            "test_added_capacity_preserves_legacy_initialization_and_zero_branch_output",
+            "test_integrated_and_current_control_have_identical_trainable_capacity",
+            "test_current_control_content_has_no_historical_input",
+            "test_unsupported_sequence_content_mode_is_explicit",
+            "test_shared_initial_weights_calibration_and_capacity_modes_are_matched",
+        ],
+        "experiment_fairness_and_causal_events": [
+            "test_prefix_does_not_change_when_future_length_or_event_changes",
+            "test_noise_is_independent_across_cfa_samples_and_matched_across_conditions",
+            "test_events_are_observed_physical_changes_not_oracle_invalid_masks",
+            "test_split_seeds_are_disjoint_and_do_not_depend_on_method",
+            "test_oracle_alignment_uses_past_translation_and_restores_estimator",
+            "test_transient_metric_excludes_burnin_and_keeps_failed_recovery",
+            "test_recovery_is_per_episode_requires_consecutive_good_and_counts_censoring",
+        ],
+    }
+    for names in coverage.values():
+        for name in names:
+            matched = [case for case in cases if case["name"].split("[")[0] == name]
+            checks.append({
+                "name": "executed coverage: " + name,
+                "kind": "pytest_behavior",
+                "passed": bool(matched) and all(case["passed"] for case in matched),
+            })
+    all_passed = result.returncode == 0 and bool(cases) and all(check["passed"] for check in checks)
+    receipt = {
+        "audit": "n01-content-independent-core-and-focused-behavior-v1",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "baseline_commit": subprocess.check_output(["git", "rev-parse", BASE], cwd=ROOT, text=True).strip(),
+        "head_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "source_is_working_tree": True,
+        "script_sha256": sha(Path(__file__).read_bytes()),
+        "all_checks_passed": all_passed,
+        "checks": checks,
+        "intentional_changes": [
+            "config.py adds explicit content modes, unsupported 1D validation and non-default mechanism fingerprint identity.",
+            "content.py introduces per-channel measurement content and independent reliability projection.",
+            "EvidenceBlock and N01Encoder._encode intentionally add content to proposal and a direct residual preserving uniform channel information.",
+            "N01Encoder initialization adds optional branch and strict semantic mode loader.",
+            "step passes its existing motion result to encoding and reports additional source integration work.",
+            "sequence1d.py adds only explicit rejection of unsupported new modes.",
+        ],
+        "limitations": [
+            "Engineering and mechanism-preservation audit only; does not establish adaptive-history task benefit, convergence, or general RAW transfer.",
+            "Overlapping candidate variance is a conservative proxy, not a posterior or exact data-dependent mixture variance.",
+            "Shared-grid RGB3 still inherits the original selector's all-channel availability rule.",
+            "Output validity remains current-frame validity; historical source validity is separate.",
+            "Exact split/source separation applies to measurement ContentFields; pre-existing learned spatial update may exchange contextual features.",
+            "The fractional content test reuses the protected primitive; independent original-source overlap correctness is covered separately by its pre-existing regression.",
+            "This audit runs focused tests only; it is not a claim that the whole repository suite was rerun here.",
+        ],
+        "test_execution": {
+            "command": command,
+            "return_code": result.returncode,
+            "executed_case_count": len(cases),
+            "passed_case_count": sum(case["passed"] for case in cases),
+            "cases": cases,
+            "coverage_map": coverage,
+            "log": "core-audit-tests.log",
+            "junit_xml": "core-audit-tests.xml",
+        },
+        "source_manifest_before": before,
+        "source_manifest_after": after,
+    }
+    path = OUTPUT / "core-audit.json"
+    path.write_text(json.dumps(receipt, indent=2) + "\n")
+    print(json.dumps({"receipt": str(path), "passed": all_passed, "test_cases": len(cases), "failed_checks": [c["name"] for c in checks if not c["passed"]]}, indent=2))
+    return 0 if all_passed else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

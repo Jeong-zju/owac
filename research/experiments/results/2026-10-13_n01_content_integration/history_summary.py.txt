@@ -1,0 +1,56 @@
+"""Describe actual selected history on the completed, fixed factorial test set."""
+import argparse
+import hashlib
+import json
+from collections import defaultdict
+from pathlib import Path
+from statistics import mean
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('metrics', nargs='+', type=Path)
+parser.add_argument('--output', required=True, type=Path)
+args = parser.parse_args()
+rows = []
+identities = set()
+for path in args.metrics:
+    payload = json.loads(path.read_text())
+    if payload['protocol'].get('development'):
+        raise ValueError('Expected formal tests only')
+    for run in payload['runs']:
+        identity = (run['seed'], run['method'])
+        if identity in identities or run['evaluation_split'] != 'test':
+            raise ValueError('Duplicate or non-test result')
+        identities.add(identity)
+        for name, case in run['test']['cases'].items():
+            event = case['event_frame']
+            roi = case['roi_selected_unique_frames_per_frame']
+            global_history = case['selected_unique_frames_per_frame']
+            if len(roi) != 24 or len(global_history) != 24:
+                raise ValueError('Unexpected trajectory length')
+            rows.append({
+                'seed': run['seed'], 'method': run['method'], 'condition': name,
+                'event_frame': event, 'roi_early6': mean(roi[event:event+6]),
+                'roi_last4': mean(roi[-4:]),
+                'global_early6': mean(global_history[event:event+6]),
+                'roi_per_frame': roi, 'global_per_frame': global_history,
+            })
+if identities != {(s,m) for s in [17,29,43] for m in 'ABCDEF'}:
+    raise ValueError('Need the full predeclared 18 runs')
+groups = defaultdict(list)
+for row in rows:
+    groups[(row['condition'],row['method'])].append(row)
+aggregate = []
+for (condition,method), members in sorted(groups.items()):
+    aggregate.append({'condition':condition, 'method':method, **{
+        key: mean(r[key] for r in members)
+        for key in ('roi_early6','roi_last4','global_early6')
+    }})
+result = {
+    'meaning':'Expected unique frame count under selected support weights; not measurement weight mass or proof that the task readout uses that content.',
+    'roi_boundary':'Target truth used for reporting only after encoder execution; does not enter ordinary encoding.',
+    'inputs':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in args.metrics},
+    'per_seed':rows, 'aggregate':aggregate,
+}
+args.output.write_text(json.dumps(result,indent=2)+'\n')
+for row in aggregate:
+    print(row['condition'],row['method'],f"ROI early={row['roi_early6']:.4f}, last={row['roi_last4']:.4f}")

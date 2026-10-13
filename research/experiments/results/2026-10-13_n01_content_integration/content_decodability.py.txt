@@ -1,0 +1,88 @@
+"""Development-only privileged template readout of the actual N01 content fields.
+
+Use correlation/argmax, not a calibrated likelihood: overlapping N01 domain
+means are correlated. Known generator spectrum/PSF are extra diagnostic priors.
+"""
+import hashlib
+import json
+from pathlib import Path
+
+import torch
+import torch.nn.functional as F
+
+from owac.evaluation.n01_content import ContentProbe, make_protocol_batch, run_sequence
+from owac.evaluation.n01_content_data import CFA_OFFSETS, CONDITIONS
+from owac.frameworks.n01.config import N01Config
+
+torch.set_num_threads(1)
+BASE = Path(__file__).resolve().parent
+snapshot = BASE/'dev-content-intervention/seed101-C-development-snapshot.pt'
+checkpoint = torch.load(snapshot,map_location='cpu',weights_only=False)
+protocol = checkpoint['protocol']
+assert checkpoint['seed']==101 and protocol['development']
+model = ContentProbe(N01Config(**checkpoint['encoder_config'])).eval()
+model.load_state_dict(checkpoint['model'],strict=True)
+size = protocol['size']
+radius = 4
+offsets = torch.tensor(CFA_OFFSETS).float()
+yy = torch.arange(-radius,radius+1)[None,:,None] + offsets[:,0,None,None]/2
+xx = torch.arange(-radius,radius+1)[None,None,:] + offsets[:,1,None,None]/2
+template = (torch.tensor([1.,.35,.35,-.55])[:,None,None]
+            *torch.exp(-(yy.square()+xx.square())/(2*.9**2)))[None]
+
+
+def raw_history(batch,t):
+    total = torch.zeros_like(batch.values[:,t]);count=torch.zeros_like(total)
+    for old in range(max(0,t-7),t+1):
+        dy,dx=(batch.translations[0,old]-batch.translations[0,t]).long().tolist()
+        y,x=torch.arange(size)+dy,torch.arange(size)+dx
+        valid=((y>=0)&(y<size))[:,None]&((x>=0)&(x<size))[None,:]
+        source=batch.values[:,old][:,:,y.clamp(0,size-1)][:,:,:,x.clamp(0,size-1)]
+        total+=source*valid[None,None];count+=valid[None,None]
+    return total/count.clamp_min(1)
+
+
+rows=[]
+with torch.no_grad():
+    for index,condition in enumerate(CONDITIONS):
+        batch=make_protocol_batch(protocol,101,'validation',index,condition)
+        fields=[]
+        hook=model.encoder.blocks[0].content_update.register_forward_pre_hook(
+            lambda module,args:fields.append(args[0].mean.detach().clone())
+        )
+        _,learned=run_sequence(model,batch,protocol)
+        hook.remove()
+        assert len(fields)==protocol['length']
+        event=learned['event_frame']
+        measurement_difference=torch.stack([
+            (fields[t]-raw_history(batch,t)).abs()
+            for t in range(protocol['burn_in'],protocol['length'])
+        ])
+        results={}
+        for name in ['current','raw_history8','n01_integrated_mean']:
+            errors=[]
+            for t in range(protocol['length']):
+                values=(batch.values[:,t] if name=='current' else
+                        raw_history(batch,t) if name=='raw_history8' else fields[t])
+                score=F.conv2d(values-.3,template,padding=radius).flatten(1)
+                location=score.argmax(1)
+                prediction=torch.stack([location//size,location%size],1).float()
+                errors.append((prediction-batch.target_xy[:,t]).norm(dim=1))
+            errors=torch.stack(errors,1)
+            results[name]={'early_error_px':float(errors[:,event:event+6].mean()),
+                           'stable_error_px':float(errors[:,-4:].mean()),
+                           'error_per_frame':errors.mean(0).tolist()}
+        rows.append({'condition':condition,'input_sha256':batch.input_hash(),
+                     'event_frame':event,'trained_C_early_error_px':learned['early_error_px'],
+                     'trained_C_stable_error_px':learned['stable_error_px'],
+                     'N01_mean_vs_raw_history8_mean_abs_difference':float(measurement_difference.mean()),
+                     'N01_mean_vs_raw_history8_max_abs_difference':float(measurement_difference.max()),
+                     'template_argmax_readouts':results})
+result={'split':'development validation only, seed101, batch8',
+        'checkpoint_step':checkpoint['step'],
+        'checkpoint_sha256':hashlib.sha256(snapshot.read_bytes()).hexdigest(),
+        'boundary':'Privileged known target spectrum and PSF. Fixed template correlation/argmax; no fitting, no independent-pixel posterior claim, no formal test or training alteration. Trained C uses its original soft-argmax task head; cross-decoder scores are diagnostic, not a fair learned-method ranking.',
+        'rows':rows}
+(BASE/'content-decodability.json').write_text(json.dumps(result,indent=2)+'\n')
+for row in rows:
+    print(row['condition'],row['trained_C_early_error_px'],row['template_argmax_readouts'])

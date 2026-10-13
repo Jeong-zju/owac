@@ -1,0 +1,75 @@
+"""Privileged synthetic-signal positive control; development data only.
+
+Known generator background, target spectrum, Gaussian PSF and noise amplitude
+give a matched-filter likelihood. These privileges are not available to the
+learned probes; this checks information availability, not competitive accuracy.
+"""
+import hashlib
+import json
+from pathlib import Path
+
+import torch
+import torch.nn.functional as F
+
+from owac.evaluation.n01_content import make_protocol_batch
+from owac.evaluation.n01_content_data import CFA_OFFSETS, CONDITIONS
+
+torch.set_num_threads(1)
+ROOT = Path(__file__).resolve().parent
+protocol = json.loads((ROOT / 'development-extended-C.json').read_text())
+assert protocol['development'] and protocol['seeds'] == [101]
+size = protocol['size']
+radius = 4
+offsets = torch.tensor(CFA_OFFSETS).float()
+yy = torch.arange(-radius, radius+1)[None,:,None] + offsets[:,0,None,None]/2
+xx = torch.arange(-radius, radius+1)[None,None,:] + offsets[:,1,None,None]/2
+spectrum = torch.tensor([1.0,0.35,0.35,-0.55])[:,None,None]
+template = protocol['contrast'] * spectrum * torch.exp(-(yy.square()+xx.square())/(2*0.9**2))
+template = template[None]
+coords_y = torch.arange(size)[None,:,None]
+coords_x = torch.arange(size)[None,None,:]
+rows = []
+for condition_index, condition in enumerate(CONDITIONS):
+    batch = make_protocol_batch(protocol,101,'validation',condition_index,condition)
+    for history in (1,8):
+        errors = []
+        for t in range(protocol['length']):
+            total = torch.zeros_like(batch.values[:,t])
+            precision = torch.zeros_like(total)
+            for old in range(max(0,t-history+1),t+1):
+                dy,dx = (batch.translations[0,old]-batch.translations[0,t]).long().tolist()
+                y,x = torch.arange(size)+dy,torch.arange(size)+dx
+                valid = ((y>=0)&(y<size))[:,None] & ((x>=0)&(x<size))[None,:]
+                observed = batch.values[:,old][:,:,y.clamp(0,size-1)][:,:,:,x.clamp(0,size-1)]
+                weights = valid[None,None] / protocol['noise_sigma']**2
+                total += (observed-0.3)*weights
+                precision += weights
+            # log p(data|target centre) up to a centre-independent constant.
+            logits = F.conv2d(total,template,padding=radius) - 0.5*F.conv2d(
+                precision,template.square(),padding=radius
+            )
+            probability = logits.flatten(1).softmax(1).reshape(-1,size,size)
+            position = torch.stack([(probability*coords_y).sum((1,2)),
+                                    (probability*coords_x).sum((1,2))],1)
+            errors.append((position-batch.target_xy[:,t]).norm(dim=1))
+        errors = torch.stack(errors,1)
+        event = protocol['burn_in'] if condition in CONDITIONS[:2] else batch.event_frame
+        rows.append({
+            'condition':condition,'history':history,'event_frame':event,
+            'input_sha256':batch.input_hash(),'fixture_sha256':batch.fixture_hash(),
+            'early_error_px':float(errors[:,event:event+6].mean()),
+            'stable_error_px':float(errors[:,-4:].mean()),
+            'error_per_frame':errors.mean(0).tolist(),
+            'error_per_member_per_frame':errors.tolist(),
+        })
+result = {
+    'split':'development validation only; seed101; batch8; no fitting or test data',
+    'privileges':'Known background0.3, target spectral signature, contrast, Gaussian PSF sigma0.9, Gaussian noise variance; exact causal motion only in labelled translation control. Flat location prior; distractor is unmodelled nuisance.',
+    'boundary':'Information-availability diagnostic. No N01 support graph, learned readout or reliability selector. Not a capacity/information-matched baseline and not an N01 mechanism result.',
+    'unit':'packed CFA pixels; twice this many sensor pixels',
+    'protocol':protocol,'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    'rows':rows,
+}
+(ROOT/'information-control.json').write_text(json.dumps(result,indent=2)+'\n')
+for row in rows:
+    print(row['condition'],row['history'],round(row['early_error_px'],4),round(row['stable_error_px'],4))
