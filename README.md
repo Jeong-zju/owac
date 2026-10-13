@@ -1,6 +1,6 @@
 # OWAC
 
-2026-10-12 编码器研究：N01、N02、N04 使用三个独立 worktree，完整实现提示词及分支路径见 [研究入口](docs/prompts/README.md)。本分支 N02 已完成工程修补与两平台真实 NPZ → π0.5 离线训练/推理检查，学习机制验收仍失败：强错误先验纠正 0/4、不可辨识歧义保持 0/4。详见 [独立验收](research/experiments/2026-10-12_n02_encoder.md#独立验收与修补)。
+2026-10-13 N02：已修复源码 review 的六项问题并完成同预算重训，工程审计通过；强错误先验纠正、歧义保持与场景变化恢复仍未通过，机制不标完成。见[修补与对比结果](research/experiments/2026-10-13_n02_repairs.md)。此前真实 NPZ → π0.5 离线连通性证据见[2026-10-12 验收](research/experiments/2026-10-12_n02_encoder.md#独立验收与修补)，本修补版本尚未在服务器重验。N01/N02/N04 的 worktree 与提示词见[研究入口](docs/prompts/README.md)。
 
 发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 

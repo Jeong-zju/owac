@@ -1,0 +1,69 @@
+{
+  "reviewed_git_sha": "7c567cc33bb6abc382489c4f75c4a3ba810e6d43",
+  "branch": "lzh/n02-measurement-completion",
+  "created_at_utc": "2026-10-12T09:36:39.207832+00:00",
+  "scope": "read-only source review and fixed-weight CPU diagnosis; production algorithms unchanged; no retraining or server operations",
+  "checkpoint": {
+    "local_path": "outputs/n02-final-candidate/checkpoint.pt",
+    "step": 200,
+    "sha256": "64884c124fc517b0dc3033aa6f82582812669c582ee0a67404de592bb480c56f"
+  },
+  "environment": {
+    "python": "3.12.12",
+    "torch": "2.9.1+cpu",
+    "device": "cpu",
+    "intraop_threads": 1
+  },
+  "files": {
+    "summary.json": {
+      "bytes": 67633,
+      "sha256": "f4281fdda65f362cfbcb6fb1468df162bea6efc48e286009c0cf8bcd929f6c47"
+    },
+    "dataset.json": {
+      "bytes": 6039,
+      "sha256": "ea1fbad539f5f8affe766dfdafc9f1d46ec91da22786946ffb9a388685aa49fa"
+    },
+    "dead-config.json": {
+      "bytes": 1574,
+      "sha256": "99098ad5bbe663c543145098dca3914ec652c7152a28729902f8e1345ebdfac4"
+    },
+    "probe.py": {
+      "bytes": 12320,
+      "sha256": "7b6faca91ba2d001e779b35701bd75efc2e68f2fe0810157d68827c6b35532d9"
+    },
+    "dataset_probe.py": {
+      "bytes": 5173,
+      "sha256": "ab2e064926c4d22070a1c418d4f44cdcd5ca8cf44a0e1b9e7b6f91409152fc06"
+    }
+  },
+  "reviewed_sources_sha256": {
+    "src/owac/frameworks/n02/model.py": "9505b5e22381f6b5577c0903285f23fcc80f5afc844c89e7f88f9c319fa936b9",
+    "src/owac/frameworks/n02/revision.py": "4ce76781f038cc45e10bbace94e0fc377f01f23509074417aea34061b77615c2",
+    "src/owac/frameworks/n02/measurement.py": "3f447eddcaba1829c6f65ef02cea9f63dec72fad52c0aba650e1b9823c3a0a0b",
+    "src/owac/frameworks/n02/hypotheses.py": "835e2a1b5ae38460a8883cb92d6ae488b47dc88e516e3db0708ee291b040264d",
+    "src/owac/frameworks/n02/synthetic.py": "ecfd501cb0f8dccae7bc19444bd9d51926130abb2d6a2bee6ba51bec6bbe02a3",
+    "src/owac/frameworks/n02/config.py": "4185fccdf3ec7e9dc998989071da094f66a8ded69bb0a8f3bd166d898dc1ed95",
+    "src/owac/training/n02.py": "a523bd4b6347593e6dd68ecab2e363aa9865e8908bf29b29aed49b0300171837",
+    "src/owac/evaluation/n02_acceptance.py": "6b883c169d8ba6e90ffd55d0387717916943d1835e36201ce82101f5bd7d36bd",
+    "tests/encoders/n02/test_synthetic.py": "27978b28bab8c590f92c076a7d1f0f7997b2cc9bd442fc325db2d246c4e6a9ee",
+    "tests/encoders/n02/test_baselines.py": "be5eb6f33d2615a3e5a657a4cebbb8f23c692f2e25cf6ee4ed464e2901b0feb9"
+  },
+  "ignored_full_report": {
+    "path": "outputs/n02-source-review/report.json",
+    "sha256": "8be6bd8356db496faddf8c3762473ea15da805fe07976caba8a6a00cfd6d24bb",
+    "replays": 74
+  },
+  "validation": {
+    "make_check": "passed",
+    "focused_existing_tests": {
+      "passed": 3,
+      "tests": [
+        "tests/encoders/n02/test_synthetic.py::test_frames_match_the_declared_measurement_law",
+        "tests/encoders/n02/test_synthetic.py::test_occlusion_never_covers_a_marker",
+        "tests/encoders/n02/test_baselines.py::test_propagation_adds_neighbours_beyond_the_direct_contradiction_map"
+      ]
+    },
+    "interpretation": "These passing tests do not detect the cue-erasure or mixed-dependency failures; independent probes are in the linked JSON."
+  },
+  "review": "../../../reviews/2026-10-12_n02_source_review.md"
+}
