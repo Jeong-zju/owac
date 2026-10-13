@@ -60,6 +60,9 @@ class N04State:
     illumination: torch.Tensor | None = None
     #: 最近一次有效测量特征，供 readout。
     measured: torch.Tensor | None = None
+    #: Linear sensor measurements and support, used only for illumination estimation.
+    linear_measurement: torch.Tensor | None = None
+    linear_validity: torch.Tensor | None = None
     #: 最近一步的 forward flow（特征像素），形状 ``[B,H,W,2]``（诊断/监督用）。
     forward_flow: torch.Tensor | None = None
     #: 相机身份与时间语义。
@@ -121,6 +124,8 @@ class N04State:
         self.uncertainty = move(self.uncertainty)
         self.illumination = move(self.illumination)
         self.measured = move(self.measured)
+        self.linear_measurement = move(self.linear_measurement)
+        self.linear_validity = move(self.linear_validity)
         self.forward_flow = move(self.forward_flow)
         self.frame_id = move(self.frame_id)
         self.timestamp = move(self.timestamp)
@@ -146,6 +151,8 @@ class N04State:
         self.uncertainty = d(self.uncertainty)
         self.illumination = d(self.illumination)
         self.measured = d(self.measured)
+        self.linear_measurement = d(self.linear_measurement)
+        self.linear_validity = d(self.linear_validity)
         self.forward_flow = d(self.forward_flow)
         self.decomposition = {k: d(v) for k, v in self.decomposition.items()}
         return self
@@ -171,6 +178,8 @@ class N04State:
             decomposition={k: s(v) for k, v in self.decomposition.items()},
             illumination=s(self.illumination),
             measured=s(self.measured),
+            linear_measurement=s(self.linear_measurement),
+            linear_validity=s(self.linear_validity),
             forward_flow=s(self.forward_flow),
             camera_id=self.camera_id,
             frame_id=s(self.frame_id),
@@ -210,6 +219,8 @@ class N04State:
         self.uncertainty = blank(self.uncertainty)
         self.illumination = blank(self.illumination)
         self.measured = blank(self.measured)
+        self.linear_measurement = blank(self.linear_measurement)
+        self.linear_validity = blank(self.linear_validity)
         self.forward_flow = blank(self.forward_flow)
         self.decomposition = {k: blank(v) for k, v in self.decomposition.items()}
         self.history_valid = (
@@ -241,6 +252,8 @@ class N04State:
             self.uncertainty,
             self.illumination,
             self.measured,
+            self.linear_measurement,
+            self.linear_validity,
             self.forward_flow,
             self.frame_id,
             self.timestamp,

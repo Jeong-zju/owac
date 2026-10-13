@@ -52,6 +52,9 @@ class Innovation:
     illumination_delta: torch.Tensor | None = None
     #: 中间量，便于测试与诊断。
     residual: torch.Tensor | None = None
+    propagation_validity: torch.Tensor | None = None
+    #: Instantaneous signed external contribution, before memory decay/write scaling.
+    external_evidence: torch.Tensor | None = None
     diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
@@ -65,8 +68,8 @@ def estimate_low_frequency_gain(
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """在**可靠且曝光良好**的区域上估计全局/低频增益 ``g``：``current ≈ g · predicted``。
 
-    输入不能是原始测量值：增益必须在线性光强域估计，因此本函数期望传入编码后的
-    特征（或线性强度）。实现要点：
+    输入必须是校准到共同单位的线性测量，不能是经过 GELU/GroupNorm 的特征。
+    CFA 调用方保持各滤色采样平面分离。实现要点：
 
     * 只用 ``weight>0`` 且 ``|predicted|`` 足够大的像素参与最小二乘
       ``g = Σ w·c·p / Σ w·p²``。全图幅值比会被大片暗背景（光照变化在那里不可观测）
@@ -90,20 +93,17 @@ def estimate_low_frequency_gain(
     num = (ww * cur * pred).sum(dim=(-2, -1))  # [B,C]
     den = (ww * pred * pred).sum(dim=(-2, -1))
     per_channel = num / (den + eps)
-    floor = torch.full_like(per_channel, 0.2)
     valid = (den > eps).to(torch.bool)
-    per_channel = torch.where(valid, per_channel.clamp(0.2, 5.0), floor)
-    gain_scalar = per_channel.median(dim=1).values.clamp(0.2, 5.0)  # [B]
+    per_channel = per_channel.clamp(0.2, 5.0).masked_fill(~valid, float("nan"))
+    gain_scalar = per_channel.nanmedian(dim=1).values.clamp(0.2, 5.0)  # [B]
     gain_scalar = torch.where((den > eps).any(dim=1), gain_scalar, torch.ones_like(gain_scalar))
     scalar = gain_scalar.reshape(b, 1, 1, 1)
     if not low_frequency:
         return scalar.expand_as(cur), (scalar - 1.0).expand_as(cur)
-    #: 低频：标量增益与预测场的局部均值比平均，得到空间平滑的增益场。
-    local = F.avg_pool2d(pred.abs(), kernel_size=5, stride=1, padding=2)
-    local_cur = F.avg_pool2d(cur.abs(), kernel_size=5, stride=1, padding=2)
-    informative = (local > 1e-3).to(cur.dtype)
-    smooth = (local_cur + eps) / (local + eps)
-    smooth = torch.where(informative > 0, smooth, scalar)
+    #: 与标量估计使用同一可靠支持；无效内容不能经局部池化污染邻近有效区域。
+    local_num = F.avg_pool2d(ww * cur * pred, kernel_size=5, stride=1, padding=2)
+    local_den = F.avg_pool2d(ww * pred.square(), kernel_size=5, stride=1, padding=2)
+    smooth = torch.where(local_den > eps, local_num / local_den.clamp_min(eps), scalar)
     gain_field = (0.5 * scalar + 0.5 * smooth).clamp(0.2, 5.0)
     return gain_field, gain_field - 1.0
 
@@ -180,6 +180,9 @@ class InnovationDecomposer(nn.Module):
         validity: torch.Tensor,
         uncertainty: torch.Tensor,
         saturation: torch.Tensor | None = None,
+        linear_current: torch.Tensor | None = None,
+        linear_predicted: torch.Tensor | None = None,
+        linear_validity: torch.Tensor | None = None,
     ) -> Innovation:
         if current.shape != predicted.shape:
             raise ValueError("current 与 predicted 形状必须一致")
@@ -192,9 +195,22 @@ class InnovationDecomposer(nn.Module):
             saturation = torch.zeros(b, 1, h, w, device=current.device, dtype=current.dtype)
         else:
             saturation = saturation.reshape(b, 1, h, w)
-        if self.use_illumination_branch:
-            gain_weight = validity.clamp(0, 1) * prop_reliability
-            gain, gain_delta = estimate_low_frequency_gain(current, predicted, gain_weight)
+        gain_available = linear_current is not None and linear_predicted is not None
+        if self.use_illumination_branch and gain_available:
+            support = validity * prop_reliability * (1 - saturation)
+            support = F.interpolate(
+                support, size=linear_current.shape[-2:], mode="bilinear", align_corners=False
+            )
+            if linear_validity is not None:
+                support = support * linear_validity
+            linear_gain, _ = estimate_low_frequency_gain(linear_current, linear_predicted, support)
+            gain = F.interpolate(
+                linear_gain.median(1, keepdim=True).values,
+                size=(h, w),
+                mode="bilinear",
+                align_corners=False,
+            ).expand_as(current)
+            gain_delta = gain - 1
         else:
             gain = torch.ones_like(current)
             gain_delta = torch.zeros_like(gain)
@@ -229,7 +245,15 @@ class InnovationDecomposer(nn.Module):
         change_score = 1.0 - torch.exp(-mismatch)
         exposure_reliability = 1.0 - saturation
         base = (0.10 + 0.40 * prop_reliability + 0.25 * change_score).clamp(0.0, 1.0)
-        gate = (base * (0.5 + 0.5 * w_change) * (1.0 - 0.5 * w_uncertain)).clamp(0.0, 1.0)
+        # Ego mismatch accepts corrective evidence; unknown limits commitment.
+        # Their distinct effects break the former identical-gradient symmetry.
+        gate = (
+            base
+            * (0.5 + 0.5 * w_change + 0.5 * w_ego)
+            * (1.0 - 0.5 * w_uncertain)
+            * (0.75 + 0.5 * stability)
+            * (1.0 - 0.25 * unknown)
+        ).clamp(0.0, 1.0)
         gate = gate * (1.0 - self.exposure_gate * saturation)
         g_update = (gate * exposure_reliability + (1.0 - exposure_reliability) * 0.05).clamp(
             0.0, 1.0
@@ -245,6 +269,7 @@ class InnovationDecomposer(nn.Module):
             illumination_gain=gain,
             illumination_delta=gain_delta,
             residual=innovation,
+            propagation_validity=validity,
             diagnostics={
                 #: 诊断量只用于记录/评测：显式 detach，避免把带梯度的张量转成标量。
                 "prop_reliability_mean": float(prop_reliability.detach().mean()),
@@ -252,6 +277,7 @@ class InnovationDecomposer(nn.Module):
                 "change_gate_mean": float(w_change.detach().mean()),
                 "unknown_mean": float(unknown.detach().mean()),
                 "illumination_branch": self.use_illumination_branch,
+                "illumination_available": gain_available,
                 "change_branch": self.use_change_branch,
             },
         )

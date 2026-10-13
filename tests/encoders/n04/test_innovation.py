@@ -254,7 +254,15 @@ def test_illumination_branch_reduces_geometry_residual_misread():
     bright = (base * 1.6).clamp(0, 1)
     validity = torch.ones(1, 1, 12, 12)
     uncertainty = torch.zeros(1, 1, 12, 12)
-    on = dec_on(current=bright, predicted=base, validity=validity, uncertainty=uncertainty)
+    on = dec_on(
+        current=bright,
+        predicted=base,
+        validity=validity,
+        uncertainty=uncertainty,
+        linear_current=bright,
+        linear_predicted=base,
+        linear_validity=validity,
+    )
     off = dec_off(current=bright, predicted=base, validity=validity, uncertainty=uncertainty)
     assert on.illumination_delta is not None and on.illumination_gain is not None
     estimated = float(on.illumination_gain.median())

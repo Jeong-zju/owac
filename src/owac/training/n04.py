@@ -620,9 +620,18 @@ def train(
                     probe_loss = _masked_feature_loss(out.state.stable, measured.detach(), frame)
                 totals["location"] += probe_loss
                 if out.innovation is not None and bool(out.innovation.gate_change.detach().any()):
-                    totals["change"] += _change_loss(out.state.change, frame)
+                    totals["change"] += _change_loss(
+                        out.innovation.external_evidence, frame, residual=out.innovation.residual
+                    )
                     totals["change"] += change_gate_loss(out.innovation.gate_change, frame)
+                if out.innovation is not None:
+                    totals["change"] += 0.25 * decomposition_loss(
+                        out.innovation, out.state.forward_flow, frame, previous, cfg
+                    )
                 totals["ego_warp"] += _ego_warp_loss(out.state.forward_flow, frame, cfg)
+                totals["ego_warp"] += propagation_uncertainty_loss(
+                    out.state.uncertainty, out.state.forward_flow, out.innovation, frame, cfg
+                )
                 assert previous is not None
                 totals["future_measurement"] += _future_loss(
                     predictor_head,
@@ -774,18 +783,87 @@ def change_gate_loss(gate, frame):
     return (loss * weight).sum() / weight.sum().clamp_min(1)
 
 
-def _change_loss(change, frame):
-    if change is None:
+def _change_loss(change, frame, *, residual=None):
+    """Supervise observable external innovation, not an impossible binary cell amplitude.
+
+    ``change`` is this frame's external evidence, BEFORE decay/write into memory.
+    A memory containing earlier events must not receive a single-frame target.
+    The gate still has moving-object event supervision; unchanged interiors have target zero.
+    The target is detached, so this loss cannot reduce its own reference amplitude.
+    """
+    if change is None or residual is None:
         return frame.measured.sum() * 0
     value = _first(change)
     item = _change_target(frame, value.shape[-2:])
     if item is None:
         return value.sum() * 0
     target, valid = item
-    # Absolute amplitude supervision prevents arbitrary collapse of the cell.
+    observed = residual.detach().square().mean(1, keepdim=True).add(1e-8).sqrt()
+    observed = F.adaptive_avg_pool2d(observed, value.shape[-2:])
     magnitude = value.square().mean(dim=1, keepdim=True).add(1e-8).sqrt()
     weight = valid * (1 + 7 * target)
-    return ((magnitude - target).abs() * weight).sum() / weight.sum().clamp_min(1)
+    return ((magnitude - target * observed).abs() * weight).sum() / weight.sum().clamp_min(1)
+
+
+def _flow_error(forward_flow, frame, cfg, size):
+    if forward_flow is None or frame.oracle_camera_flow is None:
+        return None
+    target = frame.oracle_camera_flow.permute(0, 3, 1, 2) / cfg.geometry.pixel_stride
+    flow = forward_flow.permute(0, 3, 1, 2)
+    target = F.interpolate(target, size=flow.shape[-2:], mode="bilinear", align_corners=False)
+    error = (flow.detach() - target).abs().mean(1, keepdim=True)
+    return F.adaptive_avg_pool2d(error, size)
+
+
+def propagation_uncertainty_loss(uncertainty, flow, innovation, frame, cfg):
+    """Calibrate expected flow error using synthetic labels, never online oracle inputs."""
+    if uncertainty is None:
+        return frame.measured.sum() * 0
+    error = _flow_error(flow, frame, cfg, uncertainty.shape[-2:])
+    if error is None:
+        return uncertainty.sum() * 0
+    valid = (
+        innovation.propagation_validity if innovation is not None else torch.ones_like(uncertainty)
+    ).detach()
+    target = error + cfg.model.sigma_floor
+    loss = F.smooth_l1_loss(uncertainty, target, reduction="none")
+    return (loss * valid).sum() / valid.sum().clamp_min(1)
+
+
+def decomposition_loss(innovation, flow, frame, previous, cfg):
+    """Identifiable synthetic causes plus stability; no scene-ID input to the encoder.
+
+    Overlapping causes use soft allocation, not a claim of calibrated event probability.
+    No-cause pixels have no fabricated cause label; the change gate retains static negatives.
+    """
+    size = innovation.mix.shape[-2:]
+    item = _change_target(frame, size)
+    error = _flow_error(flow, frame, cfg, size)
+    if item is None or error is None or previous is None:
+        return innovation.mix.sum() * 0
+    external, valid = item
+    history = innovation.propagation_validity.detach()
+    imaging = F.adaptive_avg_pool2d(frame.saturated_mask, size)
+    if frame.true_illumination is not None and previous.true_illumination is not None:
+        relative = frame.true_illumination / previous.true_illumination.clamp_min(1e-6)
+        imaging = torch.maximum(imaging, (relative - 1).abs()[:, None, None, None].clamp(0, 1))
+    ego = (error / (error + 1)).clamp(0, 1) * history
+    unknown = 1 - history
+    if not bool(innovation.gate_change.detach().any()):
+        # The no-change ablation has no external branch: do not train a hidden substitute.
+        unknown = torch.maximum(unknown, external)
+        external = torch.zeros_like(external)
+    causes = torch.cat((ego, external, imaging.expand_as(ego), unknown), 1).detach()
+    support = (causes.sum(1, keepdim=True) > 1e-6).to(valid) * valid
+    target = causes / causes.sum(1, keepdim=True).clamp_min(1e-6)
+    classification = -(target * innovation.mix.clamp_min(1e-6).log()).sum(1, keepdim=True)
+    # The public stability output already contains exp(-sigma). Use the same
+    # calibrated scale, including its floor, rather than an unreachable target 1.
+    stable_target = history * torch.exp(-(error + cfg.model.sigma_floor)) * valid * (1 - external)
+    stability = F.smooth_l1_loss(innovation.stability, stable_target.detach(), reduction="none")
+    return (classification * support).sum() / support.sum().clamp_min(1) + (
+        stability * valid
+    ).sum() / valid.sum().clamp_min(1)
 
 
 def _ego_warp_loss(
@@ -874,6 +952,7 @@ def save_checkpoint(
 ) -> None:
     payload = {
         "schema_version": 2,
+        "mechanism_revision": "n04-six-fixes-v1",
         "location_head": encoder.location_probe.state_dict(),
         "rng_state": torch.get_rng_state(),
         "encoder": {

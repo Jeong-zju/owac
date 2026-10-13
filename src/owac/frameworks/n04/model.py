@@ -64,12 +64,58 @@ def measurement_saturation(values: torch.Tensor, *, near_max: float = 0.99) -> t
     return (values >= near_max).to(values.dtype).amax(dim=1, keepdim=True)
 
 
+def linear_measurement_planes(values, valid, input_mode):
+    """Keep linear sensor samples; CFA planes retain their sampling offsets."""
+    if input_mode != "bayer_cfa":
+        return torch.where(valid > 0, values.detach(), 0), valid
+    planes = [values[:, :, dy::2, dx::2] for dy, dx in ((0, 0), (0, 1), (1, 0), (1, 1))]
+    masks = [valid[:, :, dy::2, dx::2] for dy, dx in ((0, 0), (0, 1), (1, 0), (1, 1))]
+    support = torch.cat(masks, 1)
+    return torch.where(support > 0, torch.cat(planes, 1).detach(), 0), support
+
+
+def _resize_sampling_grid(grid, size):
+    # Resize displacement, not absolute coordinates: identity remains exact at borders.
+    b, h, w, _ = grid.shape
+    origin = GridSpec(h, w).identity_grid(b, grid.device, grid.dtype)
+    displacement = F.interpolate(
+        (grid - origin).permute(0, 3, 1, 2), size=size, mode="bilinear", align_corners=False
+    ).permute(0, 2, 3, 1)
+    return GridSpec(*size).identity_grid(b, grid.device, grid.dtype) + displacement
+
+
+def warp_linear_measurement(values, valid, grid, input_mode):
+    """Warp each linear plane in its own coordinates; normalize missing support."""
+    if grid is None:
+        return values, valid
+    if input_mode == "bayer_cfa":
+        h, w = values.shape[-2:]
+        full_grid = _resize_sampling_grid(grid, (2 * h, 2 * w))
+        warped, supports = [], []
+        for i, (dy, dx) in enumerate(((0, 0), (0, 1), (1, 0), (1, 1))):
+            sub_grid = full_grid[:, dy::2, dx::2] + full_grid.new_tensor(
+                [(1 - 2 * dx) / (2 * w), (1 - 2 * dy) / (2 * h)]
+            )
+            support = F.grid_sample(valid[:, i : i + 1], sub_grid, align_corners=False)
+            sample = F.grid_sample(
+                values[:, i : i + 1] * valid[:, i : i + 1], sub_grid, align_corners=False
+            )
+            warped.append(sample / support.clamp_min(1e-6))
+            supports.append(support)
+        return torch.cat(warped, 1), torch.cat(supports, 1)
+    grid = _resize_sampling_grid(grid, values.shape[-2:])
+    support = F.grid_sample(valid, grid, align_corners=False)
+    sample = F.grid_sample(values * valid, grid, align_corners=False)
+    return sample / support.clamp_min(1e-6), support
+
+
 class MeasurementStem(nn.Module):
     """把测量编码成特征场。
 
-    **不在测量域做几何插值。** 带采样坐标的 CFA 测量先按平面编码，再在特征坐标下传播
+    主表征不在测量域做几何插值。带采样坐标的 CFA 测量先按平面编码，再在特征坐标下传播
     （`ego`/`geometry` 只作用于特征场）。CFA 的四个子平面**不是**四个共址颜色通道：
     每个子平面在 2x2 周期内各自有固定的行列采样相位，本模块显式保留该相位。
+    线性测量的辅助对齐仅用于照明统计，保持滤色平面分离，不生成中间 RGB。
     """
 
     def __init__(
@@ -393,8 +439,7 @@ class N04Encoder(nn.Module):
         prev = state.stable
         had_history = state.history_valid
         result = self.propagator(prev, self.spec, context)
-        #: validity/uncertainty 是掩码与可靠性量，不参与梯度；detach 它们可以让
-        #: “第一帧无历史 ⇒ 无预测贡献”这一语义不切断传播参数的梯度路径。
+        # Discrete support is detached; learned uncertainty retains its training path.
         validity = result.validity.detach()
         if state.warp_validity is not None and getattr(result, "backward_grid", None) is not None:
             validity = (
@@ -407,7 +452,7 @@ class N04Encoder(nn.Module):
                     align_corners=False,
                 ).detach()
             )
-        uncertainty = result.uncertainty.detach()
+        uncertainty = result.uncertainty
         if torch.is_tensor(had_history):
             keep = had_history.reshape(-1, 1, 1, 1).to(validity.dtype)
             validity = validity * keep
@@ -426,6 +471,10 @@ class N04Encoder(nn.Module):
         saturation: torch.Tensor | None = None,
         availability: torch.Tensor | bool = True,
         measurement_valid: torch.Tensor | None = None,
+        backward_grid: torch.Tensor | None = None,
+        linear_current: torch.Tensor | None = None,
+        linear_predicted: torch.Tensor | None = None,
+        linear_validity: torch.Tensor | None = None,
     ) -> tuple[N04State, Innovation | None]:
         """以新测量修正状态。
 
@@ -459,8 +508,11 @@ class N04Encoder(nn.Module):
             current=meas0,
             predicted=pred0,
             validity=validity.detach(),
-            uncertainty=uncertainty.detach(),
+            uncertainty=uncertainty,
             saturation=saturation.detach(),
+            linear_current=linear_current,
+            linear_predicted=linear_predicted,
+            linear_validity=linear_validity,
         )
         #: 无测量时（new_measurement=False）只传播不更新。
         g_update = innovation.g_update * avail
@@ -475,7 +527,15 @@ class N04Encoder(nn.Module):
             #: 变化写入同样只能来自有测量支持的区域：否则被遮挡像素的残差会被写进
             #: change cell，等于用不存在的内容制造“外部变化”。
             change_delta = innovation.gate_change * (meas0 - pred0) * avail
+            innovation.external_evidence = change_delta
             old_change0 = old_change[0] if isinstance(old_change, list) else old_change
+            if backward_grid is not None:
+                old_change0 = (
+                    F.grid_sample(
+                        old_change0, backward_grid, padding_mode="zeros", align_corners=False
+                    )
+                    * validity
+                )
             decay = torch.sigmoid(self.change_decay)
             new_change0 = decay * old_change0 + torch.tanh(self.change_write) * change_delta
         else:
@@ -522,6 +582,8 @@ class N04Encoder(nn.Module):
             },
             illumination=innovation.illumination_gain,
             measured=measured,
+            linear_measurement=state.linear_measurement,
+            linear_validity=state.linear_validity,
             forward_flow=state.forward_flow,
             camera_id=state.camera_id,
             frame_id=state.frame_id,
@@ -577,6 +639,15 @@ class N04Encoder(nn.Module):
             )
         if cached_only:
             raise KeyError(f"缓存中没有帧 {key!r}")
+        sat_raw = saturation if saturation is not None else measurement_saturation(values)
+        raw_valid = torch.ones_like(values[:, :1])
+        if measurement_valid is not None:
+            raw_valid = raw_valid * measurement_valid.to(values)
+        available = torch.as_tensor(new_measurement, device=values.device).expand(values.shape[0])
+        raw_valid = raw_valid * (1 - sat_raw) * available.reshape(-1, 1, 1, 1)
+        linear_current, linear_support = linear_measurement_planes(
+            values, raw_valid, self.config.input_mode
+        )
         if measurement_valid is not None:
             values = values * measurement_valid.to(values)
         if saturation is not None:
@@ -585,6 +656,14 @@ class N04Encoder(nn.Module):
         values = values * available.reshape(-1, 1, 1, 1).to(values)
         measured = self.stem(values)
         pred, validity, uncertainty, propagation = self.predict_before_observe(state, context)
+        linear_predicted = prior_support = None
+        if state.linear_measurement is not None:
+            linear_predicted, prior_support = warp_linear_measurement(
+                state.linear_measurement,
+                state.linear_validity,
+                propagation.backward_grid,
+                self.config.input_mode,
+            )
         state = N04State(
             stable=state.stable,
             change=state.change,
@@ -598,6 +677,8 @@ class N04Encoder(nn.Module):
             decomposition=state.decomposition,
             illumination=state.illumination,
             measured=state.measured,
+            linear_measurement=state.linear_measurement,
+            linear_validity=state.linear_validity,
             forward_flow=getattr(propagation, "forward_flow", None),
             camera_id=camera_id or state.camera_id,
             frame_id=state.frame_id,
@@ -609,7 +690,7 @@ class N04Encoder(nn.Module):
             observed_frame=state.observed_frame,
             extra=state.extra,
         )
-        sat = saturation if saturation is not None else measurement_saturation(values)
+        sat = sat_raw
         if sat.shape[-2:] != measured.shape[-2:]:
             sat = F.adaptive_max_pool2d(sat, measured.shape[-2:])
         if measurement_valid is not None and measurement_valid.shape[-2:] != measured.shape[-2:]:
@@ -623,7 +704,23 @@ class N04Encoder(nn.Module):
             saturation=sat,
             availability=new_measurement,
             measurement_valid=measurement_valid,
+            backward_grid=propagation.backward_grid,
+            linear_current=linear_current,
+            linear_predicted=linear_predicted,
+            linear_validity=linear_support * prior_support if prior_support is not None else None,
         )
+        # New evidence replaces supported pixels; otherwise keep propagated history.
+        if linear_predicted is None:
+            new_state.linear_measurement = linear_current
+            new_state.linear_validity = linear_support
+        else:
+            retained_support = prior_support * (1 - linear_support)
+            total_support = linear_support + retained_support
+            new_state.linear_measurement = (
+                (linear_current * linear_support + linear_predicted * retained_support)
+                / total_support.clamp_min(1e-6)
+            ).detach()
+            new_state.linear_validity = total_support.detach()
         new_state.forward_flow = getattr(propagation, "forward_flow", None)
         representation = torch.cat(
             (
