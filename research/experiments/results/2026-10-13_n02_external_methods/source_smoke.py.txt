@@ -1,0 +1,115 @@
+"""Run inspected upstream loss classes only; no N02 model training or imports."""
+
+import ast
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import List, Union
+
+import torch
+from torch import Tensor, nn
+from torch.nn import functional as F
+
+ROOT = Path(__file__).parent
+torch.set_num_threads(1)
+torch.manual_seed(19)
+sources = {}
+
+
+def upstream_class(relative, name):
+    path = ROOT / "sources" / relative
+    sources[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+    tree = ast.parse(path.read_text())
+    node = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == name)
+    module = ast.fix_missing_locations(ast.Module(body=[node], type_ignores=[]))
+    namespace = dict(torch=torch, Tensor=Tensor, nn=nn, F=F, List=List, Union=Union)
+    exec(compile(module, str(path), "exec"), namespace)
+    return namespace[name]
+
+
+NRELoss = upstream_class("probabilists/lampe/lampe/inference/nre.py", "NRELoss")
+BNRELoss = upstream_class("probabilists/lampe/lampe/inference/bnre.py", "BNRELoss")
+FAMO = upstream_class("Cranial-XIX/FAMO/famo.py", "FAMO")
+
+
+class Adapter(nn.Module):
+    """Toy estimator obeying upstream theta/x broadcast contract, not an N02 model."""
+
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(nn.Linear(5, 8), nn.Tanh(), nn.Linear(8, 1))
+
+    def forward(self, theta, x):
+        theta, x = torch.broadcast_tensors(theta[..., :1], x)
+        return self.net(torch.cat((theta[..., :1], x), -1)).squeeze(-1)
+
+
+theta = torch.tensor([-1.0, 1.0] * 8).reshape(-1, 1)
+x = torch.randn(16, 4)
+model = Adapter()
+loss_checks = {}
+for loss_class in (NRELoss, BNRELoss):
+    model.zero_grad(set_to_none=True)
+    loss = loss_class(model)(theta, x)
+    loss.backward()
+    norm = torch.stack([p.grad.norm() for p in model.parameters()]).norm()
+    assert torch.isfinite(loss) and torch.isfinite(norm) and norm > 0
+    loss_checks[loss_class.__name__] = {
+        "loss": float(loss.detach()),
+        "gradient_norm": float(norm),
+    }
+
+
+class BiasedEstimator(nn.Module):
+    def forward(self, theta, x):
+        return 3.0 * theta[..., 0]
+
+
+# A constructed counterexample, not a trained BNRE result: marginal balancing
+# alone can be zero even though a theta-dependent score ignores all observations.
+biased = BiasedEstimator()
+base = NRELoss(biased)(theta, x)
+balanced = BNRELoss(biased)(theta, x)
+penalty = (balanced - base) / 100
+assert penalty.abs() < 1e-7
+
+p = nn.Parameter(torch.tensor([0.2, -0.1]))
+opt = torch.optim.AdamW([p], lr=1e-3)
+weighting = FAMO(2, "cpu")
+losses = (p - torch.tensor([1.0, -1.0])).square() + 0.1
+positive_loss = weighting.backward(losses, shared_parameters=[p])
+opt.step()
+with torch.no_grad():
+    weighting.update((p - torch.tensor([1.0, -1.0])).square() + 0.1)
+assert torch.isfinite(positive_loss) and torch.isfinite(weighting.w).all()
+
+log_path = Path("outputs/n02-joint-controls-20261013/factorial/seed0/baseline/train_log.jsonl")
+row = json.loads(log_path.read_text().splitlines()[0])
+terms = row["weighted"]
+raw = torch.tensor(list(terms.values()), requires_grad=True)
+raw_loss = FAMO(len(terms), "cpu").get_weighted_loss(raw)
+assert (raw < 0).any() and not torch.isfinite(raw_loss)
+
+result = {
+    "scope": "Inspected upstream loss classes loaded by unchanged AST extraction; no full package installation, N02 optimizer updates, or performance reproduction.",
+    "torch_version": torch.__version__,
+    "source_sha256": sources,
+    "loss_interface": loss_checks,
+    "bnre_constructed_counterexample": {
+        "description": "Score=3*theta ignores x; alternating balanced theta batch. Balancing penalty alone is zero, but NRE BCE penalizes this score.",
+        "nre_bce": float(base),
+        "bnre_balance_penalty": float(penalty),
+        "uniform_prior_binary_posterior_p1": torch.sigmoid(torch.tensor(6.0)).item(),
+        "trained_result": False,
+    },
+    "famo": {
+        "positive_objective_toy_one_step_finite": True,
+        "raw_n02_weighted_terms": terms,
+        "raw_n02_default_min_losses_result": "nonfinite",
+        "cause": "D=losses-min_losses+1e-8 is negative for Gaussian NLL terms; D.log() invalid.",
+        "n02_optimizer_updates": 0,
+    },
+}
+(ROOT / "source_smoke.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+print(json.dumps(result, indent=2, allow_nan=False))
