@@ -132,6 +132,16 @@ def align_features(features, valid, offsets_xy):
     rows = torch.arange(h, device=features.device, dtype=features.dtype)[None, None, :, None]
     cols = torch.arange(w, device=features.device, dtype=features.dtype)[None, None, None, :]
     x, y = cols + offsets_xy[:, :, 0], rows + offsets_xy[:, :, 1]
+    # Integer fixture alignment has an exact gather implementation. CUDA
+    # grid_sample backward has no deterministic implementation in our runtime;
+    # do not disable determinism just to train the labelled integer control.
+    if not offsets_xy.requires_grad and torch.equal(offsets_xy, offsets_xy.round()):
+        inside = ((x >= 0) & (x <= w - 1) & (y >= 0) & (y <= h - 1)).unsqueeze(2)
+        index = (y.long().clamp(0, h - 1) * w + x.long().clamp(0, w - 1)).flatten(2)
+        aligned = features.flatten(3).gather(3, index[:, :, None].expand(-1, -1, c, -1))
+        usable = valid.flatten(3).gather(3, index[:, :, None]).reshape(b, t, 1, h, w)
+        usable = usable & inside
+        return aligned.reshape(b, t, c, h, w).masked_fill(~usable, 0), usable, offsets_xy
     grid = torch.stack((2 * (x + 0.5) / w - 1, 2 * (y + 0.5) / h - 1), dim=-1)
     grid = grid.reshape(b * t, h, w, 2)
     aligned = F.grid_sample(
