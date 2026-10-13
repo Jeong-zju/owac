@@ -32,7 +32,7 @@ import torch.nn.functional as F
 
 from ...core.encoder_contract import ComputeBudget, EncoderOutput, MeasurementFrame
 from .config import N01Config
-from .model import statistics_channels
+from .model import encode_evidence_statistics, statistics_channels
 from .state import N01State
 from .state import init_state as init_state_fn
 from .state import push as push_fn
@@ -79,9 +79,9 @@ class HeteroscedasticSequence1DTask:
     """
 
     SNR_SETTINGS = {
-        "low": (2.0e-4, 0.012, 0.05),
+        "low": (2.0e-2, 0.012, 0.05),
         "medium": (2.0e-3, 0.005, 0.10),
-        "high": (2.0e-2, 0.002, 0.20),
+        "high": (2.0e-4, 0.002, 0.20),
     }
 
     def __init__(
@@ -282,6 +282,9 @@ class N01Sequence1DEncoder(nn.Module):
         self.last_diagnostics: dict[str, Any] = {}
         self.last_statistics: Any = None
         self.last_connectivity: Any = None
+        self.register_buffer("evidence_scales", torch.ones(self.statistics_channels))
+        self.register_buffer("evidence_calibration_count", torch.tensor(0, dtype=torch.long))
+        self.register_buffer("evidence_encoding_version", torch.tensor(1, dtype=torch.long))
 
     # -- interface ----------------------------------------------------------
     def init_state(self, batch_size: int, length: int, device: str = "cpu") -> N01State:
@@ -419,6 +422,13 @@ class N01Sequence1DEncoder(nn.Module):
             ],
             dim=1,
         )
+        if getattr(self, "calibrating", False) and int(self.evidence_calibration_count) < 64:
+            estimates = statistics_tensor.detach().abs().mean(dim=(0, 2)).clamp_min(1e-6)
+            with torch.no_grad():
+                count = int(self.evidence_calibration_count)
+                self.evidence_scales.copy_((self.evidence_scales * count + estimates) / (count + 1))
+                self.evidence_calibration_count.add_(1)
+        statistics_tensor = encode_evidence_statistics(statistics_tensor, self.evidence_scales)
         if statistics_tensor.shape[1] != self.statistics_channels:
             raise ValueError(
                 f"1-D statistics block has {statistics_tensor.shape[1]} channels, blocks "

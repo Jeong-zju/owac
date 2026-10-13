@@ -748,6 +748,7 @@ def sequence_step(
                 time_unit="frame",
                 new_measurement=batch.new_measurement[:, index].to(device).bool(),
                 metadata={"variance": frame_variance_metadata(frame_variance)},
+                sample_xy=batch.meta.get("sample_xy"),
             )
             started = time.perf_counter()
             output = encoder.step(frame, None, state, budget)
@@ -1172,18 +1173,13 @@ def train(
             flush=True,
         )
     if int(encoder.calibration_count) == 0:
-        encoder.calibrating = True
-        sequence_step(
+        from owac.frameworks.n01.model import calibrate_statistics
+
+        calibrate_statistics(
             encoder,
-            heads,
             source.calibration_batch(settings.batch_size, settings.length),
-            step=0,
-            tbptt=0,
-            grad_enabled=False,
             device=settings.device,
-            holdout=False,
         )
-        encoder.calibrating = False
     step_times: list[float] = []
     baseline_rss = peak_rss_bytes()
     started = time.perf_counter()

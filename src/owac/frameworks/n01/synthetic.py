@@ -95,9 +95,9 @@ class SequenceBatch:
 
 _SNR_SETTINGS = {
     # (photon scale, read noise std, contrast) for a normalised [0, 1] field.
-    "low": (2.0e-4, 0.010, 0.05),
+    "low": (2.0e-2, 0.010, 0.05),
     "medium": (2.0e-3, 0.004, 0.10),
-    "high": (2.0e-2, 0.0015, 0.20),
+    "high": (2.0e-4, 0.0015, 0.20),
 }
 
 _MOTION_SETTINGS = {
@@ -126,7 +126,7 @@ class SyntheticWeakEdgeTask:
         tolerance: str = "wide",
         seed: int = 0,
         augment: str = "none",
-        cfa: bool = False,
+        cfa: bool | None = None,
         dead_pixel_rate: float = 0.002,
         saturation_fraction: float = 0.0,
         noise_scale: float = 1.0,
@@ -138,6 +138,14 @@ class SyntheticWeakEdgeTask:
             raise ValueError(f"Unknown motion {motion!r}")
         if tolerance not in _TOLERANCE_SETTINGS:
             raise ValueError(f"Unknown tolerance {tolerance!r}")
+        if augment not in {
+            "none",
+            "sudden_appear",
+            "direction_reversal",
+            "occlusion_release",
+            "crossing",
+        }:
+            raise ValueError(f"Unknown augment {augment!r}")
         self.config = config
         self.image_size = int(image_size)
         self.snr = snr
@@ -145,19 +153,32 @@ class SyntheticWeakEdgeTask:
         self.tolerance = tolerance
         self.seed = int(seed)
         self.augment = augment
-        self.cfa = bool(cfa)
+        self.cfa = config.planes == 4 if cfa is None else bool(cfa)
+        if self.cfa and (config.channels != 4 or config.planes != 4 or image_size % 2):
+            raise ValueError("CFA requires four declared planes and an even sensor image size")
         self.dead_pixel_rate = float(dead_pixel_rate)
         self.saturation_fraction = float(saturation_fraction)
         self.noise_scale = float(noise_scale)
         self.device = device
         self.condition = (snr, motion)
         self.channels = 4 if self.cfa else config.channels
+        self.event = (
+            augment
+            if augment != "none"
+            else (
+                motion
+                if motion
+                in {"sudden_appear", "direction_reversal", "occlusion_release", "crossing"}
+                else "none"
+            )
+        )
 
     # -- specification ------------------------------------------------------
     def spec(self) -> dict:
         photon, read, contrast = _SNR_SETTINGS[self.snr]
         return {
             "task": "synthetic_weak_edge_narrow_gap_localisation",
+            "generator_version": "linear_pixel_footprint_v2",
             "image_size": self.image_size,
             "snr": self.snr,
             "motion": self.motion,
@@ -166,9 +187,12 @@ class SyntheticWeakEdgeTask:
             "tolerance_px": _TOLERANCE_SETTINGS[self.tolerance],
             "seed": self.seed,
             "augment": self.augment,
+            "event": self.event,
             "cfa": self.cfa,
             "cfa_pattern": self.config.cfa_pattern if self.cfa else None,
             "channels": self.channels,
+            "measurement_grid_size": self.image_size // 2 if self.cfa else self.image_size,
+            "layout": "compact_2x2_phase_planes" if self.cfa else "shared_grid",
             "photon_scale": photon,
             "read_std": read,
             "nominal_contrast": contrast,
@@ -209,40 +233,37 @@ class SyntheticWeakEdgeTask:
         base = torch.empty(batch_size, 2).uniform_(0.3, 0.7, generator=generator)
         separation = torch.empty(batch_size).uniform_(0.05, 0.18, generator=generator)
         for step in range(length):
-            phase = 1.0 - step / max(length - 1, 1)
             progress = (length - 1 - step) / max(length - 1, 1)
             if self.motion in ("still", "sudden_appear", "occlusion_release"):
                 offset = torch.zeros(batch_size)
-            elif self.motion == "direction_reversal":
-                offset = (
-                    torch.where(torch.tensor(progress > 0.5), direction, -direction)
-                    * amplitude
-                    * (size / 64.0)
-                    * (1.0 - progress)
-                )
             else:
                 offset = direction * amplitude * (size / 64.0) * progress
+            if self.event == "direction_reversal":
+                # Continuous triangular path: turn without teleporting.
+                offset = direction * amplitude * (size / 64.0) * (1.0 - abs(2.0 * progress - 1.0))
             target_xy[:, step, 1] = (base[:, 1] + offset / size * 2.0).clamp(0.08, 0.92)
             target_xy[:, step, 0] = base[:, 0].clamp(0.08, 0.92)
             second_xy[:, step, 1] = (base[:, 1] + offset / size * 2.0).clamp(0.08, 0.92)
             second_xy[:, step, 0] = (base[:, 0] + separation * progress).clamp(0.08, 0.92)
-            del phase
-        if self.motion == "sudden_appear":
+            if self.event == "crossing":
+                displacement = direction * separation * (2.0 * progress - 1.0) * 0.5
+                target_xy[:, step, 1] = base[:, 1] + displacement
+                second_xy[:, step, 1] = base[:, 1] - displacement
+                second_xy[:, step, 0] = base[:, 0]
+        if self.event == "sudden_appear":
             visible[:, : max(length // 2, 1)] = False
-        if self.motion == "occlusion_release":
+        if self.event == "occlusion_release":
             visible[:, length // 3 : 2 * length // 3] = False
 
         clean, edge_truth = self._render(target_xy, second_xy, visible, width_px, contrast, size)
         values, variance, saturated, bad = self._measure(clean, generator, photon, read_std)
         valid = ~(bad | saturated)
         if self.cfa:
-            # Only the plane whose phase matches the mosaic site holds a
-            # measurement there; the other three planes are missing at that site.
-            present = torch.zeros_like(valid)
-            for row in range(2):
-                for col in range(2):
-                    present[:, :, row * 2 + col, row::2, col::2] = True
-            valid = valid & present
+            # Supervision is reduced onto the compact cell grid; no measurement
+            # value is interpolated. Geometry stays in normalised coordinates.
+            edge_truth = F.avg_pool2d(edge_truth.reshape(-1, 1, size, size), 2).reshape(
+                batch_size, length, size // 2, size // 2
+            )
         # Timestamps are declared per batch member as [B, T]; without a real clock
         # the unit stays "frame" and the index is used unchanged.
         timestamps = (
@@ -275,6 +296,15 @@ class SyntheticWeakEdgeTask:
                 "spec": self.spec(),
                 "tolerance_px": _TOLERANCE_SETTINGS[self.tolerance],
                 "second_target_xy": second_xy.to(device),
+                "event": self.event,
+                "event_frame": length // 2 if self.event != "none" else None,
+                "sample_xy": self.sample_xy().to(device),
+                "max_motion_sensor_px_per_frame": float(
+                    ((target_xy[:, 1:] - target_xy[:, :-1]) * (size - 1)).norm(dim=-1).max()
+                )
+                if length > 1
+                else 0.0,
+                "tolerance_unit": "measurement_grid_pixel",
             },
         )
 
@@ -291,11 +321,19 @@ class SyntheticWeakEdgeTask:
             second_row = second_xy[:, step, 0][:, None, None] * (size - 1)
             second_col = second_xy[:, step, 1][:, None, None] * (size - 1)
             slit = width_px[:, None, None]
-            first = (cols - centre_col).abs() < slit * 0.5
-            second = ((rows - second_row).abs() < slit * 0.5) & (
-                (cols - second_col).abs() < slit * 0.5
-            )
-            field = first.float() * contrast + second.float() * contrast
+
+            # Integrate the linear slit over each sensor pixel footprint. A
+            # subpixel movement must alter measurements rather than disappear
+            # under a binary centre-in-pixel test. No image-domain resize occurs.
+            def coverage(grid, centre, slit=slit):
+                return (
+                    torch.minimum(grid + 0.5, centre + slit * 0.5)
+                    - torch.maximum(grid - 0.5, centre - slit * 0.5)
+                ).clamp(0, 1)
+
+            first = coverage(cols, centre_col)
+            second = coverage(rows, second_row) * coverage(cols, second_col)
+            field = (first + second) * contrast
             edge = torch.exp(-((cols - centre_col) ** 2) / (2.0 * (slit * 0.5) ** 2))
             edge = edge + torch.exp(
                 -((rows - second_row) ** 2 + (cols - second_col) ** 2) / (2.0 * slit**2)
@@ -339,13 +377,6 @@ class SyntheticWeakEdgeTask:
             variance_out = self._mosaic(variance, variance_out)
             saturated_out = self._mosaic(saturated, saturated_out)
             bad_out = self._mosaic(bad, bad_out)
-            # A site that carries no measurement for this plane is missing, not a
-            # measured zero, so the validity mask must say so.
-            present = torch.zeros_like(target, dtype=torch.bool)
-            for row in range(2):
-                for col in range(2):
-                    present[:, :, row * 2 + col, row::2, col::2] = True
-            variance_out = torch.where(present, variance_out, torch.ones_like(variance_out))
         else:
             target = noisy.unsqueeze(2).expand(-1, -1, self.channels, -1, -1).contiguous()
             variance_out = variance.unsqueeze(2).expand(-1, -1, self.channels, -1, -1).contiguous()
@@ -375,15 +406,12 @@ class SyntheticWeakEdgeTask:
         Each site of the 2x2 tile carries exactly one filter measurement, so the
         mosaic reorders into four planes with sampling phases (0,0), (0,1), (1,0)
         and (1,1).  The planes are separate measurements at different positions,
-        never four co-sited colours, and no value is interpolated: the remaining
-        channels of a site stay zero (and are masked as missing, not as a
-        measured zero).
+        never four co-sited colours. Each compact-grid step is two sensor pixels;
+        all original sites occur exactly once and no value is interpolated.
         """
-        for row in range(2):
-            for col in range(2):
-                plane = row * 2 + col
-                target[:, :, plane, row::2, col::2] = plane_values[:, :, row::2, col::2]
-        return target
+        return torch.stack(
+            [plane_values[:, :, row::2, col::2] for row in range(2) for col in range(2)], dim=2
+        )
 
     def sample_xy(self) -> torch.Tensor:
         """Declared per-plane sampling offset (row, col) of the CFA phase."""

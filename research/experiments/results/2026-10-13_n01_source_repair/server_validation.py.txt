@@ -1,0 +1,77 @@
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+from owac.raw.rawvla_sequence import RawVLASequenceDataset
+from owac.runtime.n01_acceptance import verify
+
+root=Path('/workspace/owac/rawvla/research/n01-source-repair-20261013')
+verify(root)
+records=[]
+for suite, expected_horizon, expected_control, expected_replan in [('libero',10,7,5),('robotwin2',50,14,50)]:
+    if '--robotwin-service-only' in sys.argv and suite=='libero':
+        continue
+    weights='/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors' if suite=='libero' else '/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors'
+    dataset_config=root/'configs/encoders/n01'/('rawvla-libero-smoke.json' if suite=='libero' else 'rawvla-robotwin-smoke.json')
+    common=['--config',str(root/'configs/encoders/n01/tiny.json'),'--suite',suite,'--dataset-config',str(dataset_config),'--weights',weights,'--tokenizer','/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model']
+    for learned in ([] if '--robotwin-service-only' in sys.argv else [False,True]):
+        output=root/'outputs'/f'{suite}-learned{int(learned)}'
+        command=[sys.executable,'-m','owac.training.n01_action',*common,'--steps','3','--output',str(output)]
+        if learned:
+            command+=['--learned-support','--aux-weight','0.1']
+        subprocess.run(command,check=True,cwd=root)
+        report=json.loads((output/'run.json').read_text())
+        assert report['encoder_parameter_update']>0 and report['backend_gradients']==0
+        if learned:
+            assert any(row['gradient_norms']['gate']>0 and row['gradient_norms']['selector']>0 for row in report['rows'])
+        records.append({'suite':suite,'learned':learned,'steps':3,'run':str(output/'run.json')})
+    service_log=(root/f'{suite}-service.log').open('w')
+    service_command=[sys.executable,'-m','owac.runtime.n01_feature_service','--suite',suite,'--weights',weights,'--tokenizer','/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model','--checkpoint',str(root/'outputs'/f'{suite}-learned0/checkpoint.pt'),'--port','18123']
+    process=subprocess.Popen(service_command,cwd=root,stdout=service_log,stderr=subprocess.STDOUT)
+    try:
+        from deployment.model_server.tools.websocket_policy_client import WebsocketClientPolicy
+        client=None
+        deadline=time.monotonic()+120
+        while time.monotonic()<deadline:
+            if process.poll() is not None:
+                raise RuntimeError(f'service exited: {process.returncode}')
+            try:
+                client=WebsocketClientPolicy('127.0.0.1',18123)
+                break
+            except (OSError,ConnectionError):
+                time.sleep(1)
+        if client is None:
+            raise RuntimeError('service did not become ready')
+        metadata=client.get_server_metadata()
+        assert metadata['action_horizon']==expected_horizon and metadata['control_dim']==expected_control and metadata['replan_steps']==expected_replan, metadata
+        dataset=RawVLASequenceDataset(root='/workspace/owac/rawvla',dataset_format=suite,window=1,fixture_provenance='real',**json.loads(dataset_config.read_text()))
+        sample=dataset[0]
+        frames={camera:{'values':window.values[-1:,:,:32,:32].numpy(),'value_units':'normalized_raw_measurement','episode_ids':['a'],'frame_ids':[0],'timestamp':[0.]} for camera,window in sample.windows.items()}
+        data={'frames':frames,'normalized_state':sample.state.numpy()[None],'language':[sample.meta['task_description']]}
+        responses=[]
+        for index in range(3):
+            if index==2:
+                for item in frames.values():
+                    item['episode_ids']=['b']
+            response=client.predict_action(data)
+            assert response.get('ok',False), response
+            payload=response.get('data',response.get('result',response))
+            assert np.isfinite(payload['normalized_actions']).all()
+            assert list(payload['normalized_actions'].shape)==[1,expected_horizon,32]
+            assert all(count==[1] for count in payload['unique_frames'].values())
+            responses.append({'action_shape':list(payload['normalized_actions'].shape),'unique_frames':payload['unique_frames'],'encoder_steps':payload['encoder_steps']})
+        (root/f'{suite}-service-smoke.json').write_text(json.dumps({'metadata':metadata,'responses':responses,'requests':3,'physical_control_executed':False},indent=2)+'\n')
+    finally:
+        process.terminate()
+        try:
+            process.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            process.kill();process.wait()
+        service_log.close()
+records=[{'suite':suite,'learned':learned,'steps':len(json.loads((root/'outputs'/f'{suite}-learned{int(learned)}'/'run.json').read_text())['rows']),'run':str(root/'outputs'/f'{suite}-learned{int(learned)}'/'run.json')} for suite in ['libero','robotwin2'] for learned in [False,True]]
+(root/'real-validation.json').write_text(json.dumps({'records':records,'total_training_batches':12,'total_service_requests':6,'physical_control_executed':False},indent=2)+'\n')
+print('real validation complete',flush=True)

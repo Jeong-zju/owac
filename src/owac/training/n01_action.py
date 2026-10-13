@@ -141,6 +141,8 @@ def load_backend(suite, checkpoint, tokenizer, device):
 
 
 def build_bridge(policy, config, camera_order, device, method="n01", suite="libero"):
+    if suite not in {"libero", "robotwin2"}:
+        raise ValueError(f"unknown suite {suite!r}")
     if method == "n01":
         encoder = N01Encoder(config).to(device)
     else:

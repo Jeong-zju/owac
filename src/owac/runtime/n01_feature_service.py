@@ -24,10 +24,16 @@ class N01FeatureService:
     def __init__(self, policy, encoder, bridge, *, device="cuda"):
         self.policy, self.encoder, self.bridge = policy, encoder, bridge
         self.device = device
+        if (
+            policy.action_horizon != bridge.protocol.action_horizon
+            or policy.action_dim != bridge.protocol.model_action_dim
+        ):
+            raise ValueError("policy dimensions do not match the selected suite action protocol")
         self.states = {}
         self.episodes = {}
         self.metadata = {
             "interface": "owac-n01-calibrated-raw-v1",
+            "suite": bridge.protocol.suite,
             "actions": "normalized",
             "action_horizon": policy.action_horizon,
             "action_dim": policy.action_dim,
@@ -156,10 +162,17 @@ def main(argv=None):
     p.add_argument("--port", type=int, default=18120)
     args = p.parse_args(argv)
     checkpoint = torch.load(args.checkpoint, map_location=args.device, weights_only=False)
+    if checkpoint.get("suite") != args.suite:
+        raise ValueError("checkpoint suite must match the requested service suite")
     config = N01Config.from_dict(checkpoint["config"])
     policy, _audit = load_backend(args.suite, args.weights, args.tokenizer, args.device)
     encoder, bridge = build_bridge(
-        policy, config, checkpoint["camera_order"], args.device, checkpoint.get("method", "n01")
+        policy,
+        config,
+        checkpoint["camera_order"],
+        args.device,
+        checkpoint.get("method", "n01"),
+        suite=args.suite,
     )
     encoder.load_state_dict(checkpoint["encoder"])
     bridge.postprocessor.load_state_dict(checkpoint["postprocessor"])

@@ -1,0 +1,29 @@
+import ast
+import hashlib
+import json
+from pathlib import Path
+root=Path(__file__).resolve().parent
+checkout=root.parents[1]
+def symbol(path, name):
+ tree=ast.parse(path.read_text())
+ for node in ast.walk(tree):
+  if isinstance(node,(ast.FunctionDef,ast.ClassDef)) and node.name==name:
+   return hashlib.sha256(ast.dump(node,include_attributes=False).encode()).hexdigest()
+ raise KeyError(name)
+checks={}
+for file,names in {
+ 'frameworks/n01/model.py':['EvidenceBlock','SupportSelector','_select','_statistics_scale'],
+ 'frameworks/n01/support.py':['domain_statistics','_fractional_statistics','update_edges','_edge_coefficient','_path_weight'],
+}.items():
+ for name in names:
+  try:
+   before=symbol(root/'before/src/owac'/file,name);after=symbol(checkout/'src/owac'/file,name)
+  except KeyError:
+   continue
+  checks[file+':'+name]={'before_ast_sha256':before,'after_ast_sha256':after,'identical':before==after}
+for file in ['frameworks/n01/config.py','frameworks/n01/state.py','frameworks/n01/motion.py','raw/rawvla_sequence.py','backends/rawvla_features.py','baselines/n01.py','baselines/raw_controls.py','runtime/rawvla_full_eval.py']:
+ before=hashlib.sha256((root/'before/src/owac'/file).read_bytes()).hexdigest();after=hashlib.sha256((checkout/'src/owac'/file).read_bytes()).hexdigest()
+ checks[file]={'before_sha256':before,'after_sha256':after,'identical':before==after}
+assert all(row['identical'] for row in checks.values())
+(root/'core-preservation-audit.json').write_text(json.dumps(checks,indent=2)+'\n')
+print('unchanged core checks:',len(checks))

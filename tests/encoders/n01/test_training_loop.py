@@ -449,10 +449,10 @@ def test_measurement_holdout_is_disjoint_from_the_input():
     result = sequence_step(encoder, heads, batch, step=0, tbptt=0, grad_enabled=False)
     assert result.measurement_target is not None
     # targets come from the clean frame t-1, evaluated on the holdout block only
-    # [B, T-1, C, P] with P the fixed held-out pixel count; every element is valid
-    # and fresh in this batch, so the weighted valid count is B*(T-1)*C*P.
+    # [B, T-1, C, P] with P the fixed held-out pixel count. Bad samples are
+    # excluded according to the actual mask, independent of random draw order.
     assert result.measurement_target.shape == (1, 2, 3, int(mask.sum()))
-    assert result.measurement_valid_count == 1 * 2 * 3 * int(mask.sum())
+    assert result.measurement_valid_count == int(batch.valid[:, :-1, :, mask].sum())
 
 
 def test_loss_weights_override_and_units():

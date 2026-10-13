@@ -204,11 +204,14 @@ def test_synthetic_cfa_mode_declares_one_measurement_per_site():
         config, image_size=16, snr="high", motion="still", seed=2, cfa=True
     )
     batch = task.sample(1, 2)
-    assert batch.values.shape == (1, 2, 4, 16, 16)
-    # Exactly one channel is non-zero at each mosaic site, so no colour is
-    # interpolated and no site carries two co-sited measurements.
-    non_zero = (batch.values > 0).sum(dim=2)
-    assert int(non_zero.max().item()) == 1
+    assert batch.values.shape == (1, 2, 4, 8, 8)
+    sensor = torch.arange(256).reshape(1, 1, 16, 16)
+    packed = task._mosaic(sensor, None)
+    restored = torch.empty_like(sensor)
+    for row in range(2):
+        for col in range(2):
+            restored[:, :, row::2, col::2] = packed[:, :, row * 2 + col]
+    assert torch.equal(restored, sensor)  # Every site occurs once, without interpolation.
     offsets = task.sample_xy()
     assert offsets.shape == (4, 2)
     # RGGB: the two green planes share one phase, red and blue the other.
@@ -218,9 +221,8 @@ def test_synthetic_cfa_mode_declares_one_measurement_per_site():
     phases = [tuple(item.tolist()) for item in offsets]
     assert phases == [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
     assert task.plane_colours() == ("R", "G", "G", "B")
-    # Only the plane that owns a site carries a measurement there.
-    assert int((batch.valid.sum(dim=2) > 0).max().item()) == 1
-    assert int((batch.valid.sum(dim=2) == 0).sum().item()) > 0
+    assert batch.valid.sum() == (~(batch.bad | batch.saturated)).sum()
+    assert batch.edge_target.shape == (1, 2, 8, 8)
 
 
 def test_learned_selector_runs_and_receives_gradient():

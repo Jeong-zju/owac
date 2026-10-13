@@ -176,7 +176,7 @@ class Condition:
         }
 
 
-def build_conditions(base_seed: int = 0, tolerance_px: float = 2.0) -> list[Condition]:
+def build_conditions(base_seed: int = 0, tolerance_px: float | None = None) -> list[Condition]:
     """SNR x motion x tolerance grid plus the four event conditions."""
     conditions: list[Condition] = []
     index = 0
@@ -191,7 +191,12 @@ def build_conditions(base_seed: int = 0, tolerance_px: float = 2.0) -> list[Cond
                         motion=motion,
                         tolerance=tolerance,
                         seed=base_seed + index,
-                        tolerance_px=tolerance_px,
+                        tolerance_px=(2.5 if tolerance == "wide" else 0.75)
+                        if tolerance_px is None
+                        else tolerance_px,
+                        tolerance_source="condition_specific"
+                        if tolerance_px is None
+                        else "explicit_override",
                     )
                 )
     for augment in ("sudden_appear", "direction_reversal", "occlusion_release", "crossing"):
@@ -204,7 +209,10 @@ def build_conditions(base_seed: int = 0, tolerance_px: float = 2.0) -> list[Cond
                 tolerance="wide",
                 augment=augment,
                 seed=base_seed + index,
-                tolerance_px=tolerance_px,
+                tolerance_px=2.5 if tolerance_px is None else tolerance_px,
+                tolerance_source="condition_specific"
+                if tolerance_px is None
+                else "explicit_override",
             )
         )
     return conditions
@@ -293,8 +301,10 @@ def condition_metrics(
         for row in range(batch)
     ]
     finite = [value for value in per_batch_error if math.isfinite(value)]
-    scores = [bool(value) for value in inside.any(dim=0).tolist()]
-    first_stable = _first_stable_frame(scores)
+    scores = [[bool(value) for value in row.tolist()] for row in inside]
+    stable_per_trajectory = [_first_stable_frame(row) for row in scores]
+    measured_stable = [value for value in stable_per_trajectory if value is not None]
+    first_stable = float(np.mean(measured_stable)) if measured_stable else None
     reversal = None
     if condition.augment == "direction_reversal":
         # The reversal is where the target trajectory turns hardest; it is derived
@@ -303,7 +313,11 @@ def condition_metrics(
             velocity = centre[:, 1:] - centre[:, :-1]
             turn = (velocity[:, 1:] - velocity[:, :-1]).norm(dim=-1).mean(dim=0)
             reversal = int(torch.argmax(turn).item()) + 1
-    recovery = None if reversal is None else _recovery_frames(scores, reversal)
+    recovery_per_trajectory = [
+        None if reversal is None else _recovery_frames(row, reversal) for row in scores
+    ]
+    measured_recovery = [value for value in recovery_per_trajectory if value is not None]
+    recovery = float(np.mean(measured_recovery)) if measured_recovery else None
     timings = result.step_times_ms
     sample_age = result.sample_age
     age_mean = (
@@ -324,6 +338,9 @@ def condition_metrics(
         "augment": condition.augment,
         "tolerance_px": condition.tolerance_px,
         "tolerance_source": condition.tolerance_source,
+        "first_stable_frame_per_trajectory": stable_per_trajectory,
+        "stable_trajectory_fraction": len(measured_stable) / batch,
+        "recovery_frames_per_trajectory": recovery_per_trajectory,
         "frames_scored": int(valid_frames.sum()),
         "position_error_px": float(np.nanmean(per_batch_error)) if finite else float("nan"),
         "position_error_norm": float(error_norm[valid_frames].mean())
@@ -874,10 +891,12 @@ def evaluate_probe(
                     if bool(valid.any())
                     else float("nan")
                 ),
-                "first_stable_frame": _first_stable_frame(
-                    [bool(value) for value in (error <= condition.tolerance_px)[valid].tolist()]
-                ),
+                # This comparison scores one endpoint per trajectory. A batch
+                # axis cannot provide time-to-stability or recovery evidence.
+                "first_stable_frame": None,
                 "recovery_frames": None,
+                "temporal_metrics_status": "unmeasured_endpoint_only",
+                "tolerance_source": condition.tolerance_source,
                 "support_count_mean": statistics_payload.get("support_count")
                 or diagnostics.get("mean_support_count"),
                 "history_age_mean_frames": statistics_payload.get("age")
@@ -1101,7 +1120,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--seed", type=int, default=1234, help="suite seed (per-condition seeds derive from it)"
     )
-    parser.add_argument("--tolerance-px", type=float, default=2.0)
+    parser.add_argument(
+        "--tolerance-px",
+        type=float,
+        default=None,
+        help="Explicit global override; otherwise wide=2.5, narrow=0.75 grid pixels",
+    )
     parser.add_argument("--image-size", type=int, default=32)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--comparison-steps", type=int, default=50)

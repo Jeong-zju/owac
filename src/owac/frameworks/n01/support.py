@@ -271,9 +271,12 @@ class SupportDomainIntegrator(nn.Module):
     def _motion_gate(self, motion, batch: int, current: torch.Tensor):
         config = self.config
         dtype, device = current.dtype, current.device
-        if motion is None:
+        if motion is None or (isinstance(motion, (list, tuple)) and len(motion) < 2):
             return torch.ones((batch, 1, 1, 1), device=device, dtype=dtype), 1.0
-        head = motion[0] if isinstance(motion, (list, tuple)) else motion
+        # Slot zero is the current frame's identity warp. Spatial support uses
+        # the nearest historical correspondence; identity carries no evidence
+        # of temporal compatibility. Invalid history remains unresolved.
+        head = motion[1] if isinstance(motion, (list, tuple)) else motion
         error = head.residual.detach().to(dtype)
         valid = head.valid.detach()
         gate = torch.exp(-config.edge_alpha * error)[:, None, None, None]

@@ -1,0 +1,59 @@
+"""Run either archived or repaired source against the same tensor archive."""
+import hashlib
+import json
+import sys
+from pathlib import Path
+from types import SimpleNamespace
+
+import torch
+from owac.baselines.n01 import baseline_registry
+from owac.evaluation import n01 as evaluation
+from owac.frameworks.n01.config import N01Config
+
+root = Path(__file__).resolve().parent
+label = sys.argv[1]
+torch.set_num_threads(4)
+payload = torch.load(root / 'shared-data.pt', map_location='cpu', weights_only=False)
+cfg = N01Config.from_dict(payload['config'])
+conditions = [evaluation.Condition(**item) for item in payload['conditions']]
+original_require = evaluation._require
+class FrozenTask:
+    def __init__(self, config, **kwargs):
+        self.seed = kwargs['seed']
+    def sample(self, batch_size, length, **kwargs):
+        return payload['evaluation'][self.seed]
+evaluation._require = lambda name, purpose: SimpleNamespace(SyntheticWeakEdgeTask=FrozenTask) if name == 'owac.frameworks.n01.synthetic' else original_require(name, purpose)
+results = {}
+for name, factory in baseline_registry().items():
+    torch.manual_seed(1234)
+    method = factory(cfg)
+    torch.manual_seed(1234 + 100003)
+    heads = evaluation.probe_heads_for(method, cfg, image_size=32, device='cpu')
+    training = evaluation.train_baseline(method, heads, payload['training'], lr=3e-4, weight_decay=1e-4, grad_clip=1., location_mode='huber', sigma=1.5, device='cpu')
+    evaluated = evaluation.evaluate_probe(method, heads, cfg, conditions, 4, 12, 'cpu')
+    results[name] = {'training': training, **evaluated}
+    if name in {'n01', 'n01_no_merge', 'n01_fixed_horizon'}:
+        torch.save({'model': method.state_dict(), 'heads': heads.state_dict()}, root / f'{label}-{name}-40.pt')
+    if name == 'n01':
+        sample = payload['evaluation'][conditions[0].seed]
+        captures = []
+        hooks = [block.gate.register_forward_hook(lambda module, args, out: captures.append(out.detach())) for block in method.encoder.blocks]
+        method.reset_state()
+        with torch.no_grad():
+            original = method.encode(sample.values, sample.valid, sample.variance, sample.timestamps)
+        for hook in hooks:
+            hook.remove()
+        def erase(module, args):
+            feature, stats, graph, mask = args
+            changed = torch.zeros_like(stats)
+            changed[:, 3] = stats[:, 3]
+            return feature, changed, graph, mask
+        hooks = [block.register_forward_pre_hook(erase) for block in method.encoder.blocks]
+        method.reset_state()
+        with torch.no_grad():
+            erased = method.encode(sample.values, sample.valid, sample.variance, sample.timestamps)
+        for hook in hooks:
+            hook.remove()
+        results[name]['gate_diagnostic'] = {'saturated_fraction': float(torch.cat([x.flatten() for x in captures]).le(1e-6).logical_or(torch.cat([x.flatten() for x in captures]).ge(1-1e-6)).float().mean()), 'erasure_feature_max_difference': float((original-erased).abs().max()), 'calibration_count': int(method.encoder.calibration_count), 'scales': method.encoder.normalization_scales.tolist()}
+    print(json.dumps({'source': label, 'method': name, 'position_error_px': evaluated['aggregate']['position_error_px_mean']}), flush=True)
+(root / f'{label}-comparison.json').write_text(json.dumps({'shared_data_sha256': hashlib.sha256((root/'shared-data.pt').read_bytes()).hexdigest(), 'protocol': payload['protocol'], 'results': results}, indent=2) + '\n')

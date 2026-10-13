@@ -66,6 +66,46 @@ STATISTIC_NAMES = (
 )
 
 
+def encode_evidence_statistics(values: torch.Tensor, scales: torch.Tensor) -> torch.Tensor:
+    """Bounded, invertible units for learned gates; raw integrals stay untouched.
+
+    Precision mass can exceed 100,000 while variance is below 0.001. Feeding
+    those units directly to a sigmoid destroys the other channels. Training-only
+    scales followed by x/(s+|x|) retain sign/order and gradients without clipping
+    or treating precision mass as a literal observation count.
+    """
+    shape = (1, -1) + (1,) * (values.ndim - 2)
+    scale = scales.detach().to(values).clamp_min(1e-6).reshape(shape)
+    return values / (scale + values.abs())
+
+
+def calibrate_statistics(encoder, batch, *, device="cpu") -> None:
+    """Fit once on a caller-declared training batch, without heads or updates."""
+    if int(encoder.calibration_count):
+        return
+    state = encoder.init_state(
+        batch.values.shape[0],
+        {"camera_ids": ["camera"], "shape": tuple(batch.values.shape[-2:])},
+        device,
+    )
+    previous = getattr(encoder, "calibrating", False)
+    encoder.calibrating = True
+    try:
+        with torch.no_grad():
+            for index in range(batch.values.shape[1]):
+                frame = MeasurementFrame(
+                    values=batch.values[:, index].to(device),
+                    valid_mask=batch.valid[:, index].to(device),
+                    timestamp=batch.timestamps[:, index].to(device),
+                    camera_id="camera",
+                    sample_xy=batch.meta.get("sample_xy"),
+                    metadata={"variance": batch.variance[:, index].to(device)},
+                )
+                state = encoder.step(frame, state=state).state
+    finally:
+        encoder.calibrating = previous
+
+
 def statistics_channels(config: N01Config) -> int:
     """Channels of the explicit statistics block fed to every block and head.
 
@@ -389,6 +429,8 @@ class N01Encoder(nn.Module):
         self.chain = MotionChain(self.correspondence)
         self.register_buffer("normalization_scales", torch.ones(6))
         self.register_buffer("calibration_count", torch.tensor(0))
+        # Reject weights trained on raw gate units rather than reinterpret them.
+        self.register_buffer("evidence_encoding_version", torch.tensor(1, dtype=torch.long))
         self.last_diagnostics: dict = {}
         # The candidate statistics of the most recent step, kept for diagnostics
         # and for the trajectory explorer.  Never part of the recurrent state.
@@ -830,6 +872,10 @@ class N01Encoder(nn.Module):
             as_channel(plane_concentration, "weight_concentration"),
         ]
         statistics_tensor = torch.cat(statistic_list, dim=1)
+        scales = torch.cat(
+            [self.normalization_scales[[5, 0, 1, 2, 3]], self.normalization_scales.new_ones(1)]
+        )
+        statistics_tensor = encode_evidence_statistics(statistics_tensor, scales)
         if statistics_tensor.shape[1] != statistics_channels(config):
             raise ValueError(
                 f"statistics block has {statistics_tensor.shape[1]} channels, the blocks "

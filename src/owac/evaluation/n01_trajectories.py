@@ -145,7 +145,19 @@ def run_trajectory(
     )
     batch = task.sample(1, int(spec["length"]), seed=int(spec["seed"]))
     encoder = encoder or build_encoder(config, seed=int(spec["seed"]))
+    encoder.to(device)
     encoder.eval()
+    from ..frameworks.n01.model import calibrate_statistics
+
+    calibration_source = "retained_encoder_training_scales"
+    if not int(encoder.calibration_count):
+        # Same declared training calibration for every evaluation trajectory.
+        # It is independent of all three evaluation seeds and never optimises weights.
+        calibration = SyntheticWeakEdgeTask(
+            config, image_size=int(spec["image_size"]), snr="low", motion="slow", seed=500000
+        ).sample(1, config.max_history)
+        calibrate_statistics(encoder, calibration, device=device)
+        calibration_source = "independent_training_low_slow_seed_500000"
     diagnostics: list[dict[str, Any]] = []
     panels = {
         "measurement": [],
@@ -153,7 +165,9 @@ def run_trajectory(
         "integrated_mu": [],
         "connectivity": [],
     }
-    state = encoder.init_state(1, {"camera_ids": ["camera"], "shape": (spec["image_size"],) * 2})
+    state = encoder.init_state(
+        1, {"camera_ids": ["camera"], "shape": tuple(batch.values.shape[-2:])}, device
+    )
     with torch.inference_mode():
         for index in range(int(spec["length"])):
             frame = MeasurementFrame(
@@ -163,6 +177,7 @@ def run_trajectory(
                 timestamp=batch.timestamps[:, index].to(device),
                 time_unit="frame",
                 new_measurement=batch.new_measurement[:, index].to(device),
+                sample_xy=batch.meta.get("sample_xy"),
                 metadata={"variance": batch.variance[:, index].to(device)},
             )
             output = encoder.step(frame, None, state, ComputeBudget(max_updates=1, max_history=8))
@@ -206,6 +221,9 @@ def run_trajectory(
             "length": spec["length"],
             "image_size": spec["image_size"],
             "config_fingerprint": _fingerprint(config),
+            "calibration_source": calibration_source,
+            "calibration_count": int(encoder.calibration_count),
+            "normalization_scales": encoder.normalization_scales.detach().cpu().tolist(),
         },
         images={key: torch.stack(value) for key, value in panels.items()},
         diagnostics=diagnostics,
