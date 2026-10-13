@@ -1,6 +1,6 @@
 # OWAC
 
-2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，本分支 N04 的历史独立修补见 [验收记录](research/experiments/2026-10-12_n04_acceptance.md)及[六项源码修复](research/experiments/2026-10-13_n04_six_fixes.md)，当前事件分数统一和三初始化复验见 [2026-10-13 记录](research/experiments/2026-10-13_n04_event_semantics.md)；最新[机制诊断](research/reviews/2026-10-13_n04_mechanism_diagnosis/README.md)发现合成批次标签缺陷，旧定位/漏报及消融排序需重训复验；分数语义修复证据保留。其他方向在各自 worktree 维护。
+2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，本分支 N04 的历史独立修补见 [验收记录](research/experiments/2026-10-12_n04_acceptance.md)及[六项源码修复](research/experiments/2026-10-13_n04_six_fixes.md)，此前的事件分数统一和三初始化复验见 [2026-10-13 记录](research/experiments/2026-10-13_n04_event_semantics.md)；[机制诊断](research/reviews/2026-10-13_n04_mechanism_diagnosis/README.md)发现的批次标签缺陷已按[分阶段重建与留出验收](research/experiments/2026-10-13_n04_staged_rebuild.md)修复：36权重、248测试，定位及召回有局部改善，但匹配消融更好，动态记忆收益尚未建立；旧错误数据结论保留为历史。其他方向在各自 worktree 维护。
 
 发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 
@@ -8,7 +8,7 @@
 
 Arena DROID / PolaRiS 评测、场景重建和该衍生集的公开发布已按用户要求终止。旧源码、权重、数据与结果保留，部分结果不作为完整基准或全集交付。定时任务保持关闭。
 
-OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。候选框架尚未实现或验证。
+OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。本分支N04原型已完成合成机制复验，完整架构及具身收益尚未建立。
 
 工作空间为 `/home/jeong/zeno/owac/`，主仓库位于 `/home/jeong/zeno/owac/repo/`，后续 worktree 统一放在 `/home/jeong/zeno/owac/worktrees/<task>/`。代码、配置、研究决策及实验记录在本仓库的版本历史下维护。
 
