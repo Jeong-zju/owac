@@ -1,0 +1,135 @@
+"""Structural history-content witness; no parameter fitting or task-score claim."""
+import hashlib
+import json
+import platform
+import subprocess
+from pathlib import Path
+
+import torch
+
+from owac.core.encoder_contract import MeasurementFrame
+from owac.frameworks.n01.config import N01Config
+from owac.frameworks.n01.model import N01Encoder
+
+ROOT = Path(__file__).resolve().parents[2]
+torch.set_num_threads(4)
+
+
+def digest(tensor):
+    return hashlib.sha256(tensor.contiguous().numpy().tobytes()).hexdigest()
+
+
+def frame(values, index, variance):
+    return MeasurementFrame(
+        values=values,
+        valid_mask=torch.ones_like(values, dtype=torch.bool),
+        timestamp=torch.tensor([float(index)]),
+        frame_ids=torch.tensor([index]),
+        camera_id="camera",
+        metadata={"variance": torch.full_like(values, variance)},
+    )
+
+
+def run(encoder, history, current=0.1875):
+    state = encoder.init_state(1, {"camera_ids": ["camera"], "shape": (16, 16)}, "cpu")
+    captured = []
+    hook = encoder.blocks[0].register_forward_pre_hook(
+        lambda module, args: captured.append(args[1].clone())
+    )
+    values = torch.tensor(history).reshape(1, 4, 1, 1).expand(1, 4, 16, 16).clone()
+    inputs = []
+    representations = []
+    with torch.no_grad():
+        for index in range(8):
+            observed = values if index < 7 else torch.full_like(values, current)
+            inputs.append(observed)
+            output = encoder.step(
+                frame(observed, index, 1 / 256 if index < 7 else 1 / 16), state=state
+            )
+            state = output.state
+            representations.append(output.representation.clone())
+        tokens = encoder.readout(output).values
+        mu = (
+            encoder.last_selection_weights
+            * encoder.last_statistics.mu[encoder.last_selection_slice]
+        ).sum(0)
+    hook.remove()
+    return {
+        "feature": representations[-1],
+        "previous_feature": representations[-2],
+        "tokens": tokens,
+        "gate_statistics": captured[-1],
+        "selected_plane_mu": mu,
+        "mean_unique_frames": output.diagnostics["mean_unique_frames"],
+        "current_sha256": digest(inputs[-1]),
+        "sequence_sha256": digest(torch.stack(inputs)),
+    }
+
+
+def difference(left, right):
+    return float((left - right).abs().max())
+
+
+rows = []
+for seed in (0, 1, 2):
+    for horizon, depths in (("adaptive", (1, 4, 8)), ("fixed8", (8,))):
+        torch.manual_seed(seed)
+        config = N01Config(
+            input_mode="bayer_cfa", channels=4, planes=4, width=8, num_blocks=1,
+            time_depths=depths, alignment="none", learnable_gate=False,
+            selection="analytic", readout_tokens=16, readout_width=32,
+        )
+        encoder = N01Encoder(config).eval()
+        # Calibration uses a separate noisy constant scene. All interventions
+        # share its fixed scales, and no model parameter is updated.
+        generator = torch.Generator().manual_seed(7000)
+        state = encoder.init_state(1, {"camera_ids": ["camera"], "shape": (16, 16)}, "cpu")
+        encoder.calibrating = True
+        with torch.no_grad():
+            for index in range(8):
+                values = 0.2 + 0.05 * torch.randn((1, 4, 16, 16), generator=generator)
+                state = encoder.step(frame(values, index, 0.0025), state=state).state
+        encoder.calibrating = False
+        a = run(encoder, [0.375, 0.125, 0.125, 0.125])
+        b = run(encoder, [0.125, 0.125, 0.125, 0.375])
+        control = run(encoder, [0.4375, 0.1875, 0.1875, 0.1875])
+        current_control = run(encoder, [0.375, 0.125, 0.125, 0.125], current=0.25)
+        row = {
+            "seed": seed, "horizon": horizon, "config": config.to_dict(),
+            "scales": encoder.normalization_scales.tolist(),
+            "calibration_count": int(encoder.calibration_count),
+            "a_input_sha256": a["sequence_sha256"],
+            "b_input_sha256": b["sequence_sha256"],
+            "current_equal": a["current_sha256"] == b["current_sha256"],
+            "selected_plane_mu_a": a["selected_plane_mu"][0, :, 8, 8].tolist(),
+            "selected_plane_mu_b": b["selected_plane_mu"][0, :, 8, 8].tolist(),
+            "mean_unique_frames_a": a["mean_unique_frames"],
+            "mean_unique_frames_b": b["mean_unique_frames"],
+            **{f"permutation_{key}_max_difference": difference(a[key], b[key])
+               for key in ("feature", "tokens", "gate_statistics", "selected_plane_mu", "previous_feature")},
+            "history_brightness_control_feature_max_difference": difference(a["feature"], control["feature"]),
+            "current_control_feature_max_difference": difference(a["feature"], current_control["feature"]),
+        }
+        assert row["current_equal"]
+        assert row["permutation_selected_plane_mu_max_difference"] > 0.1
+        assert row["permutation_feature_max_difference"] < 1e-5
+        assert row["history_brightness_control_feature_max_difference"] > 1e-4
+        rows.append(row)
+
+source_paths = [
+    "src/owac/frameworks/n01/model.py", "src/owac/frameworks/n01/support.py",
+    "src/owac/frameworks/n01/temporal.py", "src/owac/frameworks/n01/state.py",
+    "src/owac/frameworks/n01/config.py", "src/owac/frameworks/n01/motion.py",
+]
+result = {
+    "purpose": "CFA plane-history permutation witness, not a trained task benchmark",
+    "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+    "python": platform.python_version(), "torch": torch.__version__, "threads": 4,
+    "training_steps": 0, "calibration_seed": 7000,
+    "input_note": "Deterministic packed-CFA fixture with declared variances; not real sensor data.",
+    "source_sha256": {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest() for path in source_paths},
+    "rows": rows,
+}
+destination = Path(__file__).with_name("content-probe.json")
+destination.write_text(json.dumps(result, indent=2) + "\n")
+print(json.dumps([{key: value for key, value in row.items() if key not in {"config", "scales"}} for row in rows], indent=2))

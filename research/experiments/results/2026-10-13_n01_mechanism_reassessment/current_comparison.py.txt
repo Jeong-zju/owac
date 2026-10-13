@@ -1,0 +1,66 @@
+"""Refresh the existing one-seed, 40-step comparison after motion repair."""
+import hashlib
+import json
+import platform
+import subprocess
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+import torch
+
+from owac.baselines.n01 import baseline_registry
+from owac.evaluation import n01 as evaluation
+from owac.frameworks.n01.config import N01Config
+
+root = Path(__file__).resolve().parent
+repo = root.parents[1]
+archive = repo / "outputs/n01-source-repair-20261013/shared-data.pt"
+torch.set_num_threads(4)
+payload = torch.load(archive, map_location="cpu", weights_only=False)
+cfg = N01Config.from_dict(payload["config"])
+conditions = [evaluation.Condition(**item) for item in payload["conditions"]]
+original_require = evaluation._require
+
+
+class FrozenTask:
+    def __init__(self, config, **kwargs):
+        self.seed = kwargs["seed"]
+
+    def sample(self, batch_size, length, **kwargs):
+        return payload["evaluation"][self.seed]
+
+
+evaluation._require = lambda name, purpose: (
+    SimpleNamespace(SyntheticWeakEdgeTask=FrozenTask)
+    if name == "owac.frameworks.n01.synthetic" else original_require(name, purpose)
+)
+results = {}
+for name in ("n01", "n01_fixed_horizon"):
+    started = time.perf_counter()
+    torch.manual_seed(1234)
+    method = baseline_registry()[name](cfg)
+    torch.manual_seed(1234 + 100003)
+    heads = evaluation.probe_heads_for(method, cfg, image_size=32, device="cpu")
+    training = evaluation.train_baseline(
+        method, heads, payload["training"], lr=3e-4, weight_decay=1e-4,
+        grad_clip=1., location_mode="huber", sigma=1.5, device="cpu",
+    )
+    evaluated = evaluation.evaluate_probe(method, heads, cfg, conditions, 4, 12, "cpu")
+    results[name] = {"training": training, **evaluated, "wall_seconds": time.perf_counter() - started}
+    torch.save({"model": method.state_dict(), "heads": heads.state_dict()}, root / f"{name}-40.pt")
+    print(json.dumps({"method": name, "position_error_px": evaluated["aggregate"]["position_error_px_mean"], "wall_seconds": results[name]["wall_seconds"]}), flush=True)
+
+source_paths = [
+    "src/owac/frameworks/n01/model.py", "src/owac/frameworks/n01/temporal.py",
+    "src/owac/frameworks/n01/support.py", "src/owac/baselines/n01.py",
+    "src/owac/evaluation/n01.py", "src/owac/training/n01.py",
+]
+(root / "current-comparison.json").write_text(json.dumps({
+    "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
+    "config": payload["config"], "protocol": payload["protocol"],
+    "shared_data_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+    "source_sha256": {path: hashlib.sha256((repo / path).read_bytes()).hexdigest() for path in source_paths},
+    "python": platform.python_version(), "torch": torch.__version__, "threads": 4,
+    "results": results,
+}, indent=2) + "\n")
