@@ -1,0 +1,20 @@
+import hashlib,json
+from pathlib import Path
+root=Path('/workspace/owac/research/n01-dbsr-20261013');selected=[]
+for seed in [61,73,89]:
+ for method in ['dbsr_reference','mean_capacity','current']:
+  name=f'{seed}-{method}';parent=root/'baseline-runs'/name
+  row=json.loads((parent/'result.json').read_text());folder=parent
+  if not row['operationally_settled']:
+   folder=root/'continuations'/name
+   if not (folder/'result.json').exists():raise SystemExit('NOT READY '+name)
+   row=json.loads((folder/'result.json').read_text())
+  if not row['operationally_settled']:raise SystemExit('NOT SETTLED '+name)
+  selected.append({'name':name,'output':str(folder),'steps':row['steps'],'best_step':row['best_step'],'result_sha256':hashlib.sha256((folder/'result.json').read_bytes()).hexdigest()})
+accepted=root/'accepted-baselines';accepted.mkdir(exist_ok=True)
+for item in selected:
+ link=accepted/item['name'];target=Path(item['output'])
+ if link.exists():assert link.resolve()==target
+ else:link.symlink_to(target,target_is_directory=True)
+(root/'baseline-acceptance.json').write_text(json.dumps({'all_nine_operationally_settled':True,'runs':selected},indent=2)+'\n')
+print('READY all nine accepted',flush=True)

@@ -1,0 +1,37 @@
+import copy,hashlib,json,shutil,subprocess
+from pathlib import Path
+root=Path('outputs/n01-dbsr-mechanism-20261013');dest=Path('research/experiments/results/2026-10-13_n01_dbsr_mechanism')
+for source,target in [('baseline-summary.json','baseline-summary.json'),('support-result.json','cnn-support-summary.json'),('raw-domain-result.json','raw-domain-summary.json'),('uniform-intervention.json','uniform-intervention.json')]:
+ payload=json.loads((root/source).read_text());small=copy.deepcopy(payload)
+ rows=small['runs'] if isinstance(small,dict) else small
+ for row in rows:
+  groups=[row['cases']] if 'cases' in row else [row[k]['cases'] for k in ['learned','uniform_same_backbone_head'] if k in row]
+  for cases in groups:
+   for case in cases.values():
+    for key in ['error_per_member_per_frame','supervised_visible_per_member_per_frame']:case.pop(key,None)
+    for frame in case.get('graph_per_frame',[]):frame.pop('unique_source_ids',None)
+ (dest/target).write_text(json.dumps(small,indent=2)+'\n')
+for name in ['baseline-acceptance.json','baseline-replay.json','attention-roi.json','gpu-probe.json','support-gpu-probe.json','gpu-environment.txt']:
+ shutil.copy2(root/name,dest/name)
+proof={'tests':{'passed':348,'warnings':1,'log':'outputs/n01-dbsr-mechanism-20261013/full-tests-final-348.log'},'original_core_unchanged':{},'paired_parameters_and_inputs':True,'baseline_runs_settled':9,'cnn_support_runs':21,'raw_domain_runs':21,'raw_domain_execution_commit':'7a50d5f','post_execution_fix':'Missing sensor mask is read from original N01 buffer; this alters only bad/saturated metadata, absent from every executed fixture. No task parameters changed.'}
+for file in Path('src/owac/frameworks/n01').glob('*.py'):
+ assert file.read_bytes()==subprocess.check_output(['git','show',f'c5d9439:{file}'])
+ proof['original_core_unchanged'][str(file)]=hashlib.sha256(file.read_bytes()).hexdigest()
+for file,revision in [('support-result.json','e3ea0af'),('raw-domain-result.json','7a50d5f')]:
+ p=json.loads((root/file).read_text());assert len(p['runs'])==21
+ for path,digest in p['sources'].items():
+  assert hashlib.sha256(subprocess.check_output(['git','show',f'{revision}:{path}'])).hexdigest()==digest,(revision,path)
+ for seed in p['protocol']['seeds']:
+  rows=[r for r in p['runs'] if r['seed']==seed]
+  assert len({r['parameter_digest'] for r in rows})==1
+  for c in rows[0]['cases']:
+   for key in ['input_sha256','fixture_sha256']:assert len({r['cases'][c][key] for r in rows})==1
+(dest/'verification.json').write_text(json.dumps(proof,indent=2)+'\n')
+artifacts={}
+for file in root.iterdir():
+ if file.is_file() and file.suffix not in {'.gz','.md'}:
+  artifacts[str(file)]={'sha256':hashlib.sha256(file.read_bytes()).hexdigest(),'bytes':file.stat().st_size}
+(dest/'artifacts.json').write_text(json.dumps(artifacts,indent=2)+'\n')
+for name in ['replay_baselines.py','accept_baselines.py','archive_baselines.py','uniform_intervention.py','attention_roi.py']:
+ shutil.copy2(root/name,dest/(name+'.txt'))
+print('Archived; sources/parameters/inputs verified')

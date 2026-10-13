@@ -1,0 +1,37 @@
+import json,hashlib
+from pathlib import Path
+import torch
+from owac.baselines.burst_features import BurstFeatureConfig
+from owac.evaluation.n01_burst import BurstProbe,parameter_digest
+from owac.evaluation.n01_burst_training import configure_runtime,evaluate,training_sources
+root=Path('/workspace/owac/research/n01-dbsr-20261013/baseline-runs')
+rows=[]
+for seed in [61,73,89]:
+ folder=root/f'{seed}-dbsr_reference';p=json.loads((folder/'result.json').read_text())
+ assert p['sources']==training_sources()
+ configure_runtime(p['protocol'])
+ cp=torch.load(folder/'best.pt',map_location='cpu',weights_only=True)
+ model=BurstProbe(BurstFeatureConfig(**cp['encoder_config']));model.load_state_dict(cp['model']);model.cuda()
+ assert parameter_digest(model)==p['best_parameter_digest']
+ for split in ['validation','test']:
+  actual=evaluate(model,p['protocol'],seed,split)
+  differences=[]
+  def compare(a,b,path=''):
+   if isinstance(a,dict):
+    assert set(a)==set(b)
+    for key in a:compare(a[key],b[key],path+'/'+key)
+   elif isinstance(a,list):
+    assert len(a)==len(b)
+    for index,(x,y) in enumerate(zip(a,b)):compare(x,y,path+'/'+str(index))
+   elif isinstance(a,(float,int)) and not isinstance(a,bool):
+    if a!=b:differences.append((path,float(a),float(b),abs(float(a)-float(b))))
+   else:assert a==b,(path,a,b)
+  compare(actual,p[split])
+  worst=max([x[3] for x in differences],default=0)
+  print(seed,split,'numeric differences',len(differences),'max',worst,'examples',differences[:3],flush=True)
+  assert worst<=1e-4,(seed,split,worst)
+  rows.append({'seed':seed,'split':split,'bitwise_equal':not differences,'maximum_absolute_metric_difference':worst,'numeric_tolerance':1e-4})
+ rows.append({'seed':seed,'mode':'dbsr_reference','numeric_metrics_reproduced':True,'checkpoint_sha256':hashlib.sha256((folder/'best.pt').read_bytes()).hexdigest()})
+ print(seed,'GPU validation/test reproduced',flush=True)
+ del model;torch.cuda.empty_cache()
+Path('/workspace/owac/research/n01-dbsr-20261013/baseline-replay.json').write_text(json.dumps(rows,indent=2)+'\n')
