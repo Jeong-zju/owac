@@ -1,6 +1,6 @@
 # OWAC
 
-2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，本分支 N04 的历史独立修补见 [验收记录](research/experiments/2026-10-12_n04_acceptance.md)及[六项源码修复](research/experiments/2026-10-13_n04_six_fixes.md)，当前事件分数统一和三初始化复验见 [2026-10-13 记录](research/experiments/2026-10-13_n04_event_semantics.md)；语义修复通过，漏报改善，整体机制收益仍未通过。其他方向在各自 worktree 维护。
+2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，本分支 N04 的历史独立修补见 [验收记录](research/experiments/2026-10-12_n04_acceptance.md)及[六项源码修复](research/experiments/2026-10-13_n04_six_fixes.md)，当前事件分数统一和三初始化复验见 [2026-10-13 记录](research/experiments/2026-10-13_n04_event_semantics.md)；最新[机制诊断](research/reviews/2026-10-13_n04_mechanism_diagnosis/README.md)发现合成批次标签缺陷，旧定位/漏报及消融排序需重训复验；分数语义修复证据保留。其他方向在各自 worktree 维护。
 
 发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 

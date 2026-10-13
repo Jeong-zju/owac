@@ -1,0 +1,510 @@
+{
+  "protocol": {
+    "no_training": true,
+    "reviewed_code_commit": "57138c1bac916f3c65644de73b1855c78062a62e",
+    "source_sha256": {
+      "src/owac/frameworks/n04/synthetic.py": "fad4333f47a67926c9ca5ceca4ed69a7ad5347c598c67f06e22f00a4162ddc9f",
+      "src/owac/frameworks/n04/model.py": "07b486678e0830a2d980783173510aa8606f4113bc2800043ff50ad892ad57b6",
+      "src/owac/frameworks/n04/innovation.py": "7eb5100bc51bfc09cef598b628b5359b6f7a5b58ee491178b1de59e2df63310b",
+      "src/owac/training/n04.py": "cd7723a2476fd5e564afb7c92fbc9519558d18e45c0fd7bce676b90f0c940dc5",
+      "src/owac/evaluation/n04.py": "daa401c5f50fce81a29c26a0d0094824cfbac1ca148e9fc80de4f6ab0a3c4a56"
+    },
+    "new_static_scene_seeds": [
+      31000,
+      31001
+    ],
+    "frames": 32,
+    "average_frames": [
+      8,
+      31
+    ],
+    "device": "cpu",
+    "modes": [
+      "learned",
+      "oracle_zero_ego",
+      "oracle_zero_ego_without_block_correction"
+    ],
+    "caveat": "Oracle identity also changes propagation uncertainty; block bypass isolates correction under the same oracle identity. No task benefit is claimed. The inspected weights were trained with corrupted multi-sample object labels."
+  },
+  "batch_alignment": [
+    {
+      "batch": 1,
+      "broadcast_centers_shape": [
+        1,
+        1,
+        2
+      ],
+      "expected_image_centroids": [
+        [
+          44.0,
+          32.0
+        ]
+      ],
+      "actual_image_centroids": [
+        [
+          44.0,
+          32.0
+        ]
+      ],
+      "label_centroids": [
+        [
+          44.0,
+          32.0
+        ]
+      ],
+      "rendered_pixels": [
+        113.0
+      ],
+      "label_pixels": [
+        113.0
+      ],
+      "phantom_label_pixels": [
+        0
+      ],
+      "render_label_equal": true,
+      "render_matches_requested_motion": true
+    },
+    {
+      "batch": 2,
+      "broadcast_centers_shape": [
+        2,
+        2,
+        2
+      ],
+      "expected_image_centroids": [
+        [
+          44.0,
+          32.0
+        ],
+        [
+          20.0,
+          32.0
+        ]
+      ],
+      "actual_image_centroids": [
+        [
+          44.0,
+          32.0
+        ],
+        [
+          44.0,
+          32.0
+        ]
+      ],
+      "label_centroids": [
+        [
+          32.0,
+          32.0
+        ],
+        [
+          32.0,
+          32.0
+        ]
+      ],
+      "rendered_pixels": [
+        113.0,
+        113.0
+      ],
+      "label_pixels": [
+        226.0,
+        226.0
+      ],
+      "phantom_label_pixels": [
+        113,
+        113
+      ],
+      "render_label_equal": false,
+      "render_matches_requested_motion": false
+    },
+    {
+      "batch": 4,
+      "broadcast_centers_shape": [
+        4,
+        4,
+        2
+      ],
+      "expected_image_centroids": [
+        [
+          44.0,
+          32.0
+        ],
+        [
+          20.0,
+          32.0
+        ],
+        [
+          32.0,
+          44.0
+        ],
+        [
+          32.0,
+          20.0
+        ]
+      ],
+      "actual_image_centroids": [
+        [
+          44.0,
+          32.0
+        ],
+        [
+          44.0,
+          32.0
+        ],
+        [
+          44.0,
+          32.0
+        ],
+        [
+          44.0,
+          32.0
+        ]
+      ],
+      "label_centroids": [
+        [
+          32.0,
+          32.0
+        ],
+        [
+          32.0,
+          32.0
+        ],
+        [
+          32.0,
+          32.0
+        ],
+        [
+          32.0,
+          32.0
+        ]
+      ],
+      "rendered_pixels": [
+        113.0,
+        113.0,
+        113.0,
+        113.0
+      ],
+      "label_pixels": [
+        452.0,
+        452.0,
+        452.0,
+        452.0
+      ],
+      "phantom_label_pixels": [
+        339,
+        339,
+        339,
+        339
+      ],
+      "render_label_equal": false,
+      "render_matches_requested_motion": false
+    }
+  ],
+  "training_support": {
+    "scope": "first complete nine-condition cycle of actual training data, frames 2..11",
+    "conditions": [
+      {
+        "condition": "camera_only",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "object_only",
+        "moving_object_pixel_sum": 8024.0,
+        "moving_object_usable_pixel_sum": 5522.0,
+        "usable_positive_fraction": 0.688185443668993,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": 60.0,
+        "object_only_changed_background_pixels": 24.0
+      },
+      {
+        "condition": "both",
+        "moving_object_pixel_sum": 7723.9990234375,
+        "moving_object_usable_pixel_sum": 6044.03857421875,
+        "usable_positive_fraction": 0.7825012090082971,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "illumination",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "same_direction",
+        "moving_object_pixel_sum": 12468.003234863281,
+        "moving_object_usable_pixel_sum": 10742.011108398438,
+        "usable_positive_fraction": 0.861566275372901,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "occlusion",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "calibration_error",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "action_delay",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      },
+      {
+        "condition": "exposure_step",
+        "moving_object_pixel_sum": 0.0,
+        "moving_object_usable_pixel_sum": 0.0,
+        "usable_positive_fraction": null,
+        "simultaneous_motion_illumination_sample_frames": 0.0,
+        "object_only_positive_pixels_with_clean_frame_difference": null,
+        "object_only_changed_background_pixels": null
+      }
+    ]
+  },
+  "existing_results": {
+    "condition_means": {
+      "camera_only": {
+        "change_at_object": 0.05922836044596301,
+        "change_off_object": 0.009619616097696716,
+        "change_response": 0.010988198594921934,
+        "prediction_residual": 0.3014855354078232
+      },
+      "object_only": {
+        "change_at_object": 0.06490043383683003,
+        "change_off_object": 0.00768487970159936,
+        "change_response": 0.010313065944328193,
+        "prediction_residual": 0.31688949649059583
+      },
+      "both": {
+        "change_at_object": 0.05926100164651871,
+        "change_off_object": 0.008546824719237593,
+        "change_response": 0.010884285142223928,
+        "prediction_residual": 0.30186037210718036
+      },
+      "illumination": {
+        "change_at_object": 0.08368714620906209,
+        "change_off_object": 0.01390779763922125,
+        "change_response": 0.01583286280751169,
+        "prediction_residual": 0.3195194404513117
+      }
+    },
+    "matched_moving_window_ratios": [
+      {
+        "initialization": 0,
+        "eval_seed": 20000,
+        "camera_over_object_frames_2_to_7": 1.255438653382618,
+        "illumination_over_object_frames_2_to_7": 2.061569493147314
+      },
+      {
+        "initialization": 0,
+        "eval_seed": 20001,
+        "camera_over_object_frames_2_to_7": 1.305088092917076,
+        "illumination_over_object_frames_2_to_7": 2.8298959791768894
+      },
+      {
+        "initialization": 0,
+        "eval_seed": 20002,
+        "camera_over_object_frames_2_to_7": 1.041112891777108,
+        "illumination_over_object_frames_2_to_7": 2.60845964412027
+      },
+      {
+        "initialization": 1,
+        "eval_seed": 20000,
+        "camera_over_object_frames_2_to_7": 1.31161014611531,
+        "illumination_over_object_frames_2_to_7": 1.7348966301035644
+      },
+      {
+        "initialization": 1,
+        "eval_seed": 20001,
+        "camera_over_object_frames_2_to_7": 1.451707838397991,
+        "illumination_over_object_frames_2_to_7": 2.088057519164171
+      },
+      {
+        "initialization": 1,
+        "eval_seed": 20002,
+        "camera_over_object_frames_2_to_7": 1.1955271515750712,
+        "illumination_over_object_frames_2_to_7": 1.8984706999545715
+      },
+      {
+        "initialization": 2,
+        "eval_seed": 20000,
+        "camera_over_object_frames_2_to_7": 1.369658790056153,
+        "illumination_over_object_frames_2_to_7": 2.374136289808718
+      },
+      {
+        "initialization": 2,
+        "eval_seed": 20001,
+        "camera_over_object_frames_2_to_7": 1.3486199105662087,
+        "illumination_over_object_frames_2_to_7": 2.983556981714888
+      },
+      {
+        "initialization": 2,
+        "eval_seed": 20002,
+        "camera_over_object_frames_2_to_7": 1.128655870850996,
+        "illumination_over_object_frames_2_to_7": 2.8290677608551182
+      }
+    ],
+    "note": "Post-hoc diagnostic only; original frozen acceptance numbers and thresholds remain unchanged. Batch-label defect invalidates their physical interpretation."
+  },
+  "static_control": [
+    {
+      "initialization": 0,
+      "mode": "learned",
+      "checkpoint_sha256": "05573d537b3c93e2a6c4aedda886b11466259491ab8192b4a0452e9e09cf23f7",
+      "decay": 0.7374523282051086,
+      "write_scale": 0.13256901502609253,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.3362671447296937,
+        "instant_external_l1": 0.008161012005681792,
+        "persistent_change_l1": 0.005046436485523979,
+        "external_gate_mean": 0.025758548406884074,
+        "event_positive_fraction": 0.012379964192708334,
+        "stable_to_measurement_l1": 0.33019695803523064
+      }
+    },
+    {
+      "initialization": 0,
+      "mode": "oracle_zero_ego",
+      "checkpoint_sha256": "05573d537b3c93e2a6c4aedda886b11466259491ab8192b4a0452e9e09cf23f7",
+      "decay": 0.7374523282051086,
+      "write_scale": 0.13256901502609253,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.2846519115070502,
+        "instant_external_l1": 0.0008400450121068085,
+        "persistent_change_l1": 0.0004149597880314104,
+        "external_gate_mean": 0.008875905574920276,
+        "event_positive_fraction": 0.00634765625,
+        "stable_to_measurement_l1": 0.2865864324072997
+      }
+    },
+    {
+      "initialization": 0,
+      "mode": "oracle_zero_ego_without_block_correction",
+      "checkpoint_sha256": "05573d537b3c93e2a6c4aedda886b11466259491ab8192b4a0452e9e09cf23f7",
+      "decay": 0.7374523282051086,
+      "write_scale": 0.13256901502609253,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 1.4463339859105417e-08,
+        "instant_external_l1": 1.623668393023007e-10,
+        "persistent_change_l1": 8.039940790673568e-11,
+        "external_gate_mean": 0.013479603454470634,
+        "event_positive_fraction": 0.005126953125,
+        "stable_to_measurement_l1": 1.4463441703564209e-08
+      }
+    },
+    {
+      "initialization": 1,
+      "mode": "learned",
+      "checkpoint_sha256": "e0fb800f1ad6c753aa606b7eeb8f04329d91ce2e62d1880b4fb5cc82ca64a6e5",
+      "decay": 0.7360110282897949,
+      "write_scale": 0.12681128084659576,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.37830324098467827,
+        "instant_external_l1": 0.009604950959328562,
+        "persistent_change_l1": 0.0047066929982975125,
+        "external_gate_mean": 0.028192795114591718,
+        "event_positive_fraction": 0.016693115234375,
+        "stable_to_measurement_l1": 0.3765660648544629
+      }
+    },
+    {
+      "initialization": 1,
+      "mode": "oracle_zero_ego",
+      "checkpoint_sha256": "e0fb800f1ad6c753aa606b7eeb8f04329d91ce2e62d1880b4fb5cc82ca64a6e5",
+      "decay": 0.7360110282897949,
+      "write_scale": 0.12681128084659576,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.27308477895955247,
+        "instant_external_l1": 0.0005780405166054455,
+        "persistent_change_l1": 0.00027239633952073444,
+        "external_gate_mean": 0.010034363678035637,
+        "event_positive_fraction": 0.010264078776041666,
+        "stable_to_measurement_l1": 0.27458138143022853
+      }
+    },
+    {
+      "initialization": 1,
+      "mode": "oracle_zero_ego_without_block_correction",
+      "checkpoint_sha256": "e0fb800f1ad6c753aa606b7eeb8f04329d91ce2e62d1880b4fb5cc82ca64a6e5",
+      "decay": 0.7360110282897949,
+      "write_scale": 0.12681128084659576,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 1.271585148288068e-08,
+        "instant_external_l1": 1.7504817040325804e-10,
+        "persistent_change_l1": 8.242885772095458e-11,
+        "external_gate_mean": 0.015215719118714333,
+        "event_positive_fraction": 0.013427734375,
+        "stable_to_measurement_l1": 1.271585148288068e-08
+      }
+    },
+    {
+      "initialization": 2,
+      "mode": "learned",
+      "checkpoint_sha256": "dfbb1041b8aeed94527cfe5ed6b15a2a7beac235118495ba95c7be95d49f4ed7",
+      "decay": 0.7376325130462646,
+      "write_scale": 0.13423429429531097,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.2653639068206151,
+        "instant_external_l1": 0.003452570216419796,
+        "persistent_change_l1": 0.0019251067472699408,
+        "external_gate_mean": 0.016993358187998336,
+        "event_positive_fraction": 0.010060628255208334,
+        "stable_to_measurement_l1": 0.2580243858198325
+      }
+    },
+    {
+      "initialization": 2,
+      "mode": "oracle_zero_ego",
+      "checkpoint_sha256": "dfbb1041b8aeed94527cfe5ed6b15a2a7beac235118495ba95c7be95d49f4ed7",
+      "decay": 0.7376325130462646,
+      "write_scale": 0.13423429429531097,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 0.18610328063368797,
+        "instant_external_l1": 0.0004940375195777355,
+        "persistent_change_l1": 0.00024715005444401567,
+        "external_gate_mean": 0.008743763513242206,
+        "event_positive_fraction": 0.005615234375,
+        "stable_to_measurement_l1": 0.18702132254838943
+      }
+    },
+    {
+      "initialization": 2,
+      "mode": "oracle_zero_ego_without_block_correction",
+      "checkpoint_sha256": "dfbb1041b8aeed94527cfe5ed6b15a2a7beac235118495ba95c7be95d49f4ed7",
+      "decay": 0.7376325130462646,
+      "write_scale": 0.13423429429531097,
+      "mean_frames_8_to_31": {
+        "feature_innovation_l1": 1.2619004952085788e-08,
+        "instant_external_l1": 1.4303366766462341e-10,
+        "persistent_change_l1": 7.17540058041884e-11,
+        "external_gate_mean": 0.01107507012784481,
+        "event_positive_fraction": 0.001953125,
+        "stable_to_measurement_l1": 1.2619033373795219e-08
+      }
+    }
+  ]
+}
