@@ -46,6 +46,7 @@ import torch.nn.functional as F
 
 from ...core.encoder_contract import ComputeBudget, EncoderOutput, MeasurementFrame, VisualTokens
 from .config import N01Config
+from .content import ContentUpdate, content_fields
 from .motion import AlignmentMode, CausalCorrespondence, MotionChain, MotionField
 from .state import N01State, state_bytes
 from .state import detach as detach_state_fn
@@ -206,8 +207,20 @@ class EvidenceBlock(nn.Module):
         )
         self.norm = nn.GroupNorm(_groups(width), width)
         self.graph = SupportDomainIntegrator(config) if False else None
+        # Initialized after all legacy modules by N01Encoder, so enabling the
+        # branch cannot alter shared parameters under an identical random seed.
+        self.content_update: ContentUpdate | None = None
 
-    def forward(self, features, statistics, connectivity, update_mask=None):
+    def forward(
+        self,
+        features,
+        statistics,
+        connectivity,
+        update_mask=None,
+        *,
+        content=None,
+        content_scales=None,
+    ):
         """``features`` [B,W,H,W]; ``statistics`` [B,S,H,W]; ``connectivity`` [B,K,H,W]."""
         graph = connectivity
         if graph is not None and graph.numel():
@@ -227,9 +240,21 @@ class EvidenceBlock(nn.Module):
             mixed = features
         gate_input = torch.cat([mixed, statistics], dim=1)
         retain = self.gate(gate_input)
-        proposal = self.update(mixed)
+        proposal_input = mixed
+        content_delta = None
+        if content is not None:
+            if self.content_update is None or content_scales is None:
+                raise ValueError("content updates require an enabled branch and declared units")
+            content_delta = self.content_update(content, content_scales)
+            proposal_input = mixed + content_delta
+        proposal = self.update(proposal_input)
         updated = self.norm(retain * proposal + (1.0 - retain) * mixed)
-        activated = F.relu(mixed + updated)
+        residual = mixed + updated
+        if content_delta is not None:
+            # Preserve measured DC/channel information: channelwise GroupNorm
+            # can erase a spatially uniform content contribution to proposal.
+            residual = residual + content_delta
+        activated = F.relu(residual)
         if update_mask is not None:
             activated = torch.where(update_mask[:, None, None, None], activated, mixed)
         return activated
@@ -434,12 +459,48 @@ class N01Encoder(nn.Module):
         self.register_buffer("evidence_encoding_version", torch.tensor(1, dtype=torch.long))
         # Motion units changed: old selector weights/scales need recalibration.
         self.register_buffer("temporal_cost_version", torch.tensor(1, dtype=torch.long))
+        self.content_integrator: SupportDomainIntegrator | None = None
+        self.last_content_fields = None
+        if config.content_mode != "gate_only":
+            self.register_buffer(
+                "content_mode_version",
+                torch.tensor(1 if config.content_mode == "integrated" else 2, dtype=torch.long),
+            )
+            for block in self.blocks:
+                block.content_update = ContentUpdate(config)
+            if config.content_mode == "integrated" and config.planes == 1 and config.channels > 1:
+                self.content_integrator = SupportDomainIntegrator(
+                    config.replace(channels=1, planes=1, learnable_gate=False)
+                )
         self.last_diagnostics: dict = {}
         # The candidate statistics of the most recent step, kept for diagnostics
         # and for the trajectory explorer.  Never part of the recurrent state.
         self.last_statistics: Any = None
         self.last_connectivity: Any = None
         self.calls = 0
+
+    def _load_from_state_dict(
+        self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+    ):
+        # A buffer alone would be silently overwritten by another mode's value.
+        # Check semantic identity even when callers request partial loading.
+        key = prefix + "content_mode_version"
+        incoming = state_dict.get(key)
+        expected = getattr(self, "content_mode_version", None)
+        if (incoming is None) != (expected is None) or (
+            incoming is not None
+            and (
+                incoming.shape != expected.shape or not torch.equal(incoming.cpu(), expected.cpu())
+            )
+        ):
+            raise RuntimeError(
+                f"content_mode_version mismatch for {self.config.content_mode!r}; "
+                "use matching architecture checkpoints or explicitly copy shared parameters. "
+                "Pre-content checkpoints are compatible only with gate_only."
+            )
+        super()._load_from_state_dict(
+            state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+        )
 
     # -- state --------------------------------------------------------------
     def init_state(self, batch_size: int, camera_spec, device: str = "cpu") -> N01State:
@@ -549,7 +610,7 @@ class N01Encoder(nn.Module):
             estimator=self.correspondence,
         )
         selection = self._select(statistics, connectivity, motion, plan, shifted)
-        features = self._encode(frame, shifted, statistics, connectivity, selection, plan)
+        features = self._encode(frame, shifted, statistics, connectivity, selection, plan, motion)
 
         if previous.last_representation is not None:
             features = torch.where(
@@ -565,6 +626,11 @@ class N01Encoder(nn.Module):
             "state_bytes": int(state_bytes(shifted)),
             "wall_ms": (time.perf_counter() - started) * 1000.0,
             "candidate_statistics_computed": int(statistics.candidate_count),
+            "content_candidate_statistics_computed": (
+                self.config.channels * int(statistics.candidate_count)
+                if self.content_integrator is not None
+                else 0
+            ),
         }
         diagnostics = {
             **edge_info,
@@ -825,7 +891,7 @@ class N01Encoder(nn.Module):
                 self.calibration_count.add_(1)
         return {key: self.normalization_scales[i].detach().clone() for i, key in enumerate(keys)}
 
-    def _encode(self, frame, state, statistics, connectivity, selection, plan):
+    def _encode(self, frame, state, statistics, connectivity, selection, plan, motion=None):
         config = self.config
         values = state.values[0]
         valid = state.valid[0]
@@ -897,12 +963,36 @@ class N01Encoder(nn.Module):
             ],
             1,
         )
+        content = None
+        if config.content_mode != "gate_only":
+            content = content_fields(
+                config,
+                state,
+                statistics,
+                selection,
+                frame.sample_xy,
+                integrator=self.content_integrator,
+                edges=open_strength,
+                motion=motion,
+                estimator=self.correspondence,
+            )
+            self.last_content_fields = content
         blocks = int(plan.get("blocks", config.num_blocks))
         update_mask = torch.ones((features.shape[0],), device=features.device, dtype=torch.bool)
         for block in range(config.num_blocks):
             if block >= blocks:
                 break
-            features = self.blocks[block](features, statistics_tensor, graph, update_mask)
+            if content is None:
+                features = self.blocks[block](features, statistics_tensor, graph, update_mask)
+            else:
+                features = self.blocks[block](
+                    features,
+                    statistics_tensor,
+                    graph,
+                    update_mask,
+                    content=content,
+                    content_scales=self.normalization_scales,
+                )
         return features
 
     # -- readout ------------------------------------------------------------

@@ -55,6 +55,9 @@ class N01Config:
     soft_argmax: bool = True
     soft_argmax_temperature: float = 0.05
     selection: str = "analytic"
+    # gate_only preserves the original statistics-conditioned update exactly.
+    # current_control matches integrated's extra capacity with current RAW only.
+    content_mode: str = "gate_only"
     selection_use_learned: bool = False
     selector_temperature: float = 0.1
     cost_weights: dict[str, float] = field(
@@ -120,6 +123,10 @@ class N01Config:
             raise ValueError(f"Unknown alignment {self.alignment!r}")
         if self.selection not in {"analytic", "learned"}:
             raise ValueError(f"Unknown selection {self.selection!r}")
+        if self.content_mode not in {"gate_only", "integrated", "current_control"}:
+            raise ValueError(f"Unknown content_mode {self.content_mode!r}")
+        if self.input_mode == "sequence1d" and self.content_mode != "gate_only":
+            raise ValueError("sequence1d currently supports only content_mode='gate_only'")
         if self.planes == 4 and self.cfa_pattern not in {"RGGB", "BGGR", "GRBG", "GBRG"}:
             raise ValueError("Unknown CFA pattern")
         missing = {"location", "measurement_prediction", "budget"} - set(self.loss_weights)
@@ -212,6 +219,10 @@ class N01Config:
             "alignment",
             "selection",
         ]
+        # Preserve pre-content gate-only checkpoint fingerprints. Enabled modes
+        # are distinct mechanisms and always carry their explicit identity.
+        if self.content_mode != "gate_only":
+            keys.append("content_mode")
         data = self.to_dict()
         return {key: data[key] for key in keys}
 

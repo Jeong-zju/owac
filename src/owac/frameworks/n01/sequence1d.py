@@ -266,6 +266,8 @@ class N01Sequence1DEncoder(nn.Module):
     def __init__(self, config: N01Config):
         super().__init__()
         config.validate()
+        if config.content_mode != "gate_only":
+            raise ValueError("the 1-D adapter currently supports only content_mode='gate_only'")
         if config.channels != 1:
             raise ValueError("the 1-D adapter expects config.channels == 1")
         self.config = config
