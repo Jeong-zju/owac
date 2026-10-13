@@ -25,6 +25,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "owac.runtime" = ["*.html"]
+"owac.baselines._vendor.rkn" = ["LICENSE", "provenance.json"]
 
 [tool.ruff]
 target-version = "py311"
@@ -32,6 +33,9 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/owac/baselines/_vendor/rkn/*.py" = ["E501", "UP", "B028"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
