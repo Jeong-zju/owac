@@ -1,0 +1,21 @@
+import concurrent.futures,json,subprocess,sys
+from pathlib import Path
+root=Path(__file__).resolve().parent
+config=json.loads(Path('configs/encoders/n01/burst_features_pilot.json').read_text())
+(root/'protocol.json').write_text(json.dumps(config,indent=2)+'\n')
+def run(method):
+ p=dict(config,methods=[method]); cfg=root/(method+'.json');cfg.write_text(json.dumps(p,indent=2)+'\n')
+ with (root/(method+'.log')).open('w') as log:
+  done=subprocess.run([sys.executable,'-m','owac.evaluation.n01_burst','--config',str(cfg),'--output',str(root/method)],stdout=log,stderr=subprocess.STDOUT)
+ print(method,done.returncode,flush=True)
+ return (method,done.returncode)
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+ results=list(pool.map(run,config['methods']))
+ if any(code for _,code in results):raise SystemExit('some methods failed; logs retained')
+payload={'protocol':config,'execution':'five independent processes, one Torch thread each; timings include shared-host contention','runs':[]}
+for method in config['methods']:
+ p=json.loads((root/method/'metrics.json').read_text());payload['runs']+=p['runs']
+ if 'source_manifest' in payload:assert payload['source_manifest']==p['source_manifest']
+ else:
+  for key in ['source_manifest','git_head','environment','scope','training_cache']:payload[key]=p[key]
+(root/'metrics.json').write_text(json.dumps(payload,indent=2)+'\n')
