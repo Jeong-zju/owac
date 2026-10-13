@@ -34,12 +34,21 @@ class MeasurementConfig:
     head_depth: int = 2
     geometry_dim: int = 8
     saturation_is_observation: bool = False
+    energy_reduction: str = "mean"  # mean (legacy) | sum (independent measurement units)
+    variance_mode: str = "legacy"  # legacy | sensor_plus_model
+    head_kind: str = "independent"  # independent | geometry_coupled
 
     def __post_init__(self) -> None:
         if self.input_mode not in {"bayer_cfa", "rawvla_rgb3"}:
             raise ValueError(f"unknown input_mode: {self.input_mode!r}")
         if self.robust not in {"huber", "gaussian"}:
             raise ValueError(f"unknown robust mode: {self.robust!r}")
+        if self.energy_reduction not in {"mean", "sum"}:
+            raise ValueError("energy_reduction must be mean or sum")
+        if self.variance_mode not in {"legacy", "sensor_plus_model"}:
+            raise ValueError("unknown variance_mode")
+        if self.head_kind not in {"independent", "geometry_coupled"}:
+            raise ValueError("unknown head_kind")
 
 
 @dataclass(slots=True)
@@ -66,10 +75,16 @@ class RevisionConfig:
     tolerance: float = 1.0e-4
     min_iterations: int = 1
     write_dependency_edges: bool = True
+    semantic_refutation: bool = False
+    semantic_log_bayes_threshold: float = 2.9444389791664403  # log(19), local diagnostic
+    geometry_separation: float = 1.0  # binary geometry proxy spans [-1,1]
+    separate_fit_updates: bool = False
 
     def __post_init__(self) -> None:
         if not 0 < self.propagation_threshold <= 1:
             raise ValueError("propagation_threshold must lie in (0, 1]")
+        if self.semantic_log_bayes_threshold <= 0 or self.geometry_separation <= 0:
+            raise ValueError("semantic refutation thresholds must be positive")
         if self.strong_contradiction_threshold <= self.contradiction_threshold:
             raise ValueError("strong contradiction threshold must exceed contradiction threshold")
         if self.propagation_hops < 0:
@@ -98,6 +113,7 @@ class LossWeights:
     diversity: float = 0.01
     mixture: float = 1.0
     collapse_penalty: float = 0.0
+    counterfactual: float = 0.0  # synthetic physical templates, supervision only
 
     def as_dict(self) -> dict[str, float]:
         return asdict(self)
@@ -131,6 +147,8 @@ class N02Config:
     loss_weights: LossWeights = field(default_factory=LossWeights)
 
     def __post_init__(self) -> None:
+        if self.revision.semantic_refutation and self.measurement.head_kind != "geometry_coupled":
+            raise ValueError("semantic refutation requires a geometry-coupled measurement head")
         if self.K < 1:
             raise ValueError("K must be >= 1")
         if self.D < 1:

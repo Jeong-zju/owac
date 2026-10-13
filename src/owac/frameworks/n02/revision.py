@@ -186,7 +186,12 @@ class RevisionController(nn.Module):
         return (score > threshold).all(dim=2, keepdim=True)
 
     def withdrawal_energy(
-        self, score: torch.Tensor, support: torch.Tensor, *, temperature: float
+        self,
+        score: torch.Tensor,
+        support: torch.Tensor,
+        *,
+        temperature: float,
+        semantic_refutation: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """One observation's supported refutation, separate from measurement NLL.
 
@@ -198,7 +203,14 @@ class RevisionController(nn.Module):
         cfg = self.revision
         if not cfg.contradiction_enabled or cfg.downweight_contradicted == 1:
             return score.new_zeros(score.shape[:3])
-        refuted = self.contradiction_map(score, update_ema=False)
+        if cfg.semantic_refutation:
+            if semantic_refutation is None:
+                raise ValueError(
+                    "semantic refutation must come from candidate measurement comparisons"
+                )
+            refuted = semantic_refutation
+        else:
+            refuted = self.contradiction_map(score, update_ema=False)
         justified = refuted & support.bool() & ~self.all_candidates_bad(score)
         strength = (
             (score - cfg.contradiction_threshold)
@@ -206,6 +218,22 @@ class RevisionController(nn.Module):
         ).clamp(0, 1)
         fraction = (strength * justified).sum((-1, -2)) / support.sum((-1, -2)).clamp_min(1)
         return -temperature * math.log(max(cfg.downweight_contradicted, 1e-12)) * fraction
+
+    def semantic_map(self, energy) -> torch.Tensor:
+        """Measured preference for a geometrically distinct, well-fitting rival.
+
+        A common prediction error or an unobserved pixel never proves a semantic
+        alternative. This predicate uses predictions and actual support only;
+        synthetic geometry labels and identifiability flags are never inputs.
+        """
+        if energy.geometry_gap_from_best is None:
+            raise ValueError("semantic comparison needs geometry-bound predictions")
+        return (
+            energy.support_mask
+            & (energy.geometry_gap_from_best >= self.revision.geometry_separation)
+            & (energy.local_log_evidence_against >= self.revision.semantic_log_bayes_threshold)
+            & (energy.best_normalized_residual <= self.revision.contradiction_threshold)
+        ).unsqueeze(1)
 
     # ----------------------------------------------------------- propagation
     def compatibility(self, dependency_edge: torch.Tensor) -> torch.Tensor:
@@ -417,6 +445,7 @@ class RevisionController(nn.Module):
         iteration: int = 0,
         cold_start: bool = False,
         measurement_feature: torch.Tensor | None = None,
+        semantic_refutation: torch.Tensor | None = None,
     ) -> RevisionOutput:
         """Run one revision cycle and return the new field plus its audit trail."""
         cfg = self.revision
@@ -424,9 +453,14 @@ class RevisionController(nn.Module):
         cold = torch.as_tensor(cold_start, device=state.h.device).bool()
         if cold.ndim == 0:
             cold = cold.expand(state.h.shape[0])
-        contradiction = self.contradiction_map(
-            normalized_residual, update_ema=not bool(cold.all()), revision=revision
-        )
+        if cfg.semantic_refutation:
+            if semantic_refutation is None:
+                raise ValueError("semantic refutation mask is required")
+            contradiction = semantic_refutation
+        else:
+            contradiction = self.contradiction_map(
+                normalized_residual, update_ema=not bool(cold.all()), revision=revision
+            )
         if not cfg.contradiction_enabled:
             contradiction = torch.zeros_like(contradiction)
         edge = state.dependency_edge
@@ -438,8 +472,11 @@ class RevisionController(nn.Module):
         if valid is None:
             raise ValueError("dependency validity mask is required")
         selection, priority = self.propagate(contradiction, edge, valid)
+        fit_correction = torch.zeros_like(selection)
+        if cfg.separate_fit_updates:
+            fit_correction = normalized_residual > cfg.contradiction_threshold
         update_mask = self.location_mask(
-            selection,
+            selection | fit_correction,
             residual_feature,
             prior_feature,
             location_code,
@@ -522,6 +559,7 @@ class RevisionController(nn.Module):
                 "contradicted_fraction": contradicted_fraction,
                 "reset_fraction": float(reset.to(torch.float32).mean().item()),
                 "propagated_fraction": float(selection.to(torch.float32).mean().item()),
+                "fit_correction_fraction": float(fit_correction.float().mean()),
             },
         )
 

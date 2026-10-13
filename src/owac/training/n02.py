@@ -130,6 +130,7 @@ from owac.core.encoder_contract import (
 )
 from owac.frameworks.n02.config import N02Config, load_config
 from owac.frameworks.n02.hypotheses import diversity_penalty
+from owac.frameworks.n02.measurement import gaussian_nll
 from owac.frameworks.n02.model import build_encoder
 from owac.frameworks.n02.readout import (
     TokenReadout,
@@ -179,6 +180,7 @@ class StepBatch:
     contexts: list[EmbodimentContext] = field(default_factory=list)
     identifiable_now: torch.Tensor | None = None  # evaluator/loss only, [T,B]
     sample_xy: Any = None  # declared sampling descriptor
+    counterfactual_templates: list[torch.Tensor] | None = None  # [B,2,C,H,W], loss only
 
     @property
     def num_steps(self) -> int:
@@ -367,6 +369,14 @@ def synthetic_batch(
         contexts=[episode_prior_context(episodes, config.K)] * num_frames,
         identifiable_now=identifiable_now,
         sample_xy=torch.from_numpy(episodes[0].sample_xy),
+        counterfactual_templates=[
+            torch.from_numpy(
+                np.stack([generator.measurement_templates(episode, step) for episode in episodes])
+            ).float()
+            for step in range(num_frames)
+        ]
+        if config.loss_weights.counterfactual > 0
+        else None,
         notes={
             "task": task,
             "prior_conditions": conditions,
@@ -578,6 +588,7 @@ def step_terms(
     diversity_margin: float = DIVERSITY_MARGIN,
     identifiable_now: torch.Tensor | None = None,
     ambiguity_prior: torch.Tensor | None = None,
+    measurement_normalizer: float = 1.0,
 ) -> dict[str, Any]:
     """All five loss terms for one encoder step, each with its valid-sample mask.
 
@@ -611,7 +622,7 @@ def step_terms(
         compatible = torch.ones_like(compatible)
     if valid_anchor.any():
         selected = (scaled * compatible).sum(-1) / compatible.sum(-1).clamp_min(1)
-        result["measurement"] = selected[valid_anchor].mean()
+        result["measurement"] = selected[valid_anchor].mean() / measurement_normalizer
         result["counts"]["measurement"] = int(valid_anchor.sum())
     else:
         result["measurement"] = None
@@ -719,6 +730,29 @@ def step_terms(
 
 
 # ----------------------------------------------------------------------------- loop
+
+
+def counterfactual_measurement_loss(model, representation, targets, *, sensor_variance):
+    """Supervise both physical explanations without exposing templates to inference.
+
+    The targets are noiseless synthetic forward measurements. Model error is
+    fitted with Gaussian NLL including log variance; sensor variance is added so
+    perfect templates cannot drive the denominator below sensor uncertainty.
+    """
+    mean, log_variance, _ = model.measurement.predict(representation.h)
+    batch, views, K, channels, height, width = mean.shape
+    if views != 1 or targets.shape[:3] != (batch, 2, channels):
+        raise ValueError("binary template supervision requires [B,2,C,H,W] and one view")
+    targets = targets.to(mean)
+    targets = F.adaptive_avg_pool2d(
+        targets.reshape(batch * 2, channels, *targets.shape[-2:]), (height, width)
+    ).reshape(batch, 2, channels, height, width)
+    target = targets[:, torch.arange(K, device=mean.device) % 2].unsqueeze(1)
+    sensor_variance = torch.as_tensor(sensor_variance, device=mean.device, dtype=mean.dtype)
+    if sensor_variance.ndim == 4:
+        sensor_variance = sensor_variance[:, None, None]
+    variance = log_variance.exp() + sensor_variance
+    return gaussian_nll(mean - target, variance.log(), robust="gaussian").mean()
 
 
 def _frame(batch: StepBatch, step: int) -> MeasurementFrame:
@@ -897,6 +931,10 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         # The analytic reference has exactly one measurement channel; the declared
         # head must match it. The override is recorded in summary.json.
         config.measurement.input_mode = "bayer_cfa"
+    if config.loss_weights.counterfactual > 0 and source != "synthetic":
+        raise ValueError(
+            "counterfactual physical templates are only available for synthetic training"
+        )
     # Validate the data source's shape requirements before any training work happens.
     if source == "synthetic":
         validate_synthetic_frame_size(int(args.frame_size), seed=seed, split="train")
@@ -953,10 +991,10 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             diversity = diversity_active or batch.multi_solution
             model.train()
             optimizer.zero_grad(set_to_none=True)
-            accumulators = {
-                name: TermAccumulator()
-                for name in ("measurement", "geometry_set", "revision", "diversity", "mixture")
-            }
+            term_names = ["measurement", "geometry_set", "revision", "diversity", "mixture"]
+            if weights.counterfactual > 0:
+                term_names.append("counterfactual")
+            accumulators = {name: TermAccumulator() for name in term_names}
             step_tensors: dict[str, list[torch.Tensor]] = {name: [] for name in accumulators}
             state = model.init_state(batch.batch_size, batch.camera, device)
             step_start = time.perf_counter()
@@ -984,7 +1022,26 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                     identifiable_now=None
                     if batch.identifiable_now is None
                     else batch.identifiable_now[index],
+                    measurement_normalizer=(
+                        representation.h.shape[-2]
+                        * representation.h.shape[-1]
+                        * model.measurement.out_channels
+                        if config.measurement.energy_reduction == "sum"
+                        else 1.0
+                    ),
                 )
+                if weights.counterfactual > 0:
+                    if batch.counterfactual_templates is None:
+                        raise ValueError("counterfactual supervision is missing")
+                    terms["counterfactual"] = counterfactual_measurement_loss(
+                        model,
+                        representation,
+                        batch.counterfactual_templates[index],
+                        sensor_variance=step_output.state.diagnostics["_buffer"]
+                        .frames[-1]
+                        .variance,
+                    )
+                    terms["counts"]["counterfactual"] = batch.batch_size
                 for name, accumulator in accumulators.items():
                     value = terms[name]
                     if value is None:
@@ -1001,8 +1058,12 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                 if not values:
                     continue
                 total = total + float(getattr(weights, name)) * torch.stack(values).mean()
+            if not torch.isfinite(total):
+                raise FloatingPointError(f"non-finite loss at step {step}")
             total.backward()
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), float(args.grad_clip))
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                model.parameters(), float(args.grad_clip), error_if_nonfinite=True
+            )
             optimizer.step()
             step_seconds = time.perf_counter() - step_start
             step_cpu_seconds = time.process_time() - step_cpu_start

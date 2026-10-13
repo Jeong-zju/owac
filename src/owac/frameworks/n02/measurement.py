@@ -149,12 +149,14 @@ class MeasurementHead(nn.Module):
         predict_variance: bool = True,
         geometry_dim: int = 8,
         kernel: int = 3,
+        head_kind: str = "independent",
     ) -> None:
         super().__init__()
         self.K = K
         self.out_channels = out_channels
         self.predict_variance = predict_variance
         self.geometry_dim = geometry_dim
+        self.head_kind = head_kind
         hidden = max(8, width // 2)
         self.trunk = nn.Sequential(
             nn.Conv2d(width * K, hidden * K, kernel, padding=kernel // 2, groups=K),
@@ -173,6 +175,16 @@ class MeasurementHead(nn.Module):
             nn.SiLU(),
             nn.Linear(max(8, hidden), geometry_dim),
         )
+        if head_kind == "geometry_coupled":
+            # A shared nuisance prediction and shared contrast are modulated by
+            # the *returned* geometry. No independent per-slot RAW output can
+            # bypass this relation. Contrast zero means observational equivalence.
+            self.contrast = nn.Conv2d(hidden, out_channels, 1)
+            nn.init.zeros_(self.contrast.weight)
+            nn.init.zeros_(self.contrast.bias)
+            if self.log_variance is not None:
+                nn.init.zeros_(self.log_variance.weight)
+                nn.init.constant_(self.log_variance.bias, -5.991464547107982)  # log(.05**2)
 
     def forward(self, features: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """``features`` is ``[B*V, K, D', h, w]``; returns mean/log-variance/geometry."""
@@ -187,6 +199,14 @@ class MeasurementHead(nn.Module):
             log_variance = self.log_variance(x).reshape_as(mean).clamp(-12.0, 12.0)
         pooled = F.adaptive_avg_pool2d(x, 1).reshape(batch_views, K, hidden)
         geometry = self.geometry(pooled)
+        if self.head_kind == "geometry_coupled":
+            geometry = torch.cat([geometry[..., :1].tanh(), geometry[..., 1:]], -1)
+            shared = x.reshape(batch_views, K, hidden, height, width_px).mean(1)
+            contrast = self.contrast(shared).unsqueeze(1)
+            mean = mean.mean(1, keepdim=True) + geometry[..., :1, None, None] * contrast
+            # Shared model error prevents a candidate winning by changing its
+            # uncertainty alone. Sensor noise is added separately during scoring.
+            log_variance = log_variance.mean(1, keepdim=True).expand_as(mean)
         return mean, log_variance, geometry
 
 
@@ -281,6 +301,9 @@ class EnergyResult:
     unresolved: bool = False
     diagnostics: dict = field(default_factory=dict)
     support_mask: torch.Tensor | None = None
+    local_log_evidence_against: torch.Tensor | None = None
+    best_normalized_residual: torch.Tensor | None = None
+    geometry_gap_from_best: torch.Tensor | None = None
 
 
 def compute_measurement_energy(
@@ -303,6 +326,7 @@ def compute_measurement_energy(
     device = mean.device
     energy = torch.zeros(batch, K, device=device, dtype=mean.dtype)
     residual_map = torch.zeros(batch, K, height, width, device=device, dtype=mean.dtype)
+    local_cost = torch.zeros_like(residual_map)
     per_observation: list[torch.Tensor] = []
     effective = 0.0
     support_mask = torch.zeros(batch, K, height, width, device=device, dtype=torch.bool)
@@ -351,11 +375,13 @@ def compute_measurement_energy(
             "variance_is_estimate", config.shot_scale is None and config.read_scale is None
         )
         scoring_variance = variance
-        if use_sensor_variance:
+        if use_sensor_variance or config.variance_mode == "sensor_plus_model":
             sensor_variance = frame.variance.to(device=device, dtype=torch.float32)
             if sensor_variance.shape[-2:] != (height, width):
                 sensor_variance = F.interpolate(sensor_variance, size=(height, width), mode="area")
             scoring_variance = sensor_variance.unsqueeze(1).expand_as(mean)
+            if config.variance_mode == "sensor_plus_model":
+                scoring_variance = scoring_variance + variance
         log_variance = torch.log(scoring_variance.clamp_min(config.variance_floor))
         residual = torch.where(observed.unsqueeze(1), values.unsqueeze(1) - mean, 0.0)
         nll = gaussian_nll(
@@ -364,11 +390,14 @@ def compute_measurement_energy(
         weights = observed.unsqueeze(1).to(nll.dtype)  # [B, 1, C, h, w]
         support_mask = support_mask | observed.any(dim=1).unsqueeze(1)
         count = weights.sum(dim=(2, 3, 4)).clamp_min(1.0)  # [B, 1]
-        per_frame = (nll * weights).sum(dim=(2, 3, 4)) / count  # [B, K]
+        per_frame = (nll * weights).sum(dim=(2, 3, 4))
+        if config.energy_reduction == "mean":
+            per_frame = per_frame / count
         energy = energy + per_frame
         per_observation.append(per_frame.detach())
         effective += float(weights.sum(dim=(2, 3, 4)).mean().item())
         with torch.no_grad():
+            local_cost = local_cost + (nll * weights).sum(dim=2).detach()
             normalize = torch.sqrt(scoring_variance.clamp_min(config.variance_floor))
             normalized = (residual / normalize).abs()  # [B, K, C, h, w]
             pooled = (normalized * weights).sum(dim=2) / weights.sum(dim=2).clamp_min(1.0)
@@ -378,6 +407,11 @@ def compute_measurement_energy(
         weight_map = torch.full_like(residual_map, 1.0 / len(frames))
         residual_map = residual_map * weight_map
     duplicate_count = int(getattr(buffer, "duplicate_count", 0))
+    best_cost, best_index = local_cost.min(dim=1, keepdim=True)
+    geometry_gap = None
+    if config.head_kind == "geometry_coupled":
+        geometry = prediction.geometry[:, view_index, :, 0, None, None].expand_as(local_cost)
+        geometry_gap = (geometry - geometry.gather(1, best_index)).abs()
     return EnergyResult(
         energy=energy,
         measurement_energy=energy,
@@ -387,11 +421,16 @@ def compute_measurement_energy(
         duplicates_skipped=duplicate_count,
         effective_samples=effective,
         support_mask=support_mask,
+        local_log_evidence_against=local_cost - best_cost,
+        best_normalized_residual=residual_map.gather(1, best_index),
+        geometry_gap_from_best=geometry_gap,
         diagnostics={
             "observations": len(frames),
             "duplicates_skipped": duplicate_count,
             "history_len": len(frames),
             "effective_samples": effective,
+            "energy_reduction": config.energy_reduction,
+            "variance_mode": config.variance_mode,
         },
     )
 
@@ -431,6 +470,7 @@ class MeasurementModel(nn.Module):
             predict_variance=measurement.predict_variance,
             geometry_dim=measurement.geometry_dim,
             kernel=config.cell_kernel,
+            head_kind=measurement.head_kind,
         )
         self.geometry_dim = measurement.geometry_dim
 

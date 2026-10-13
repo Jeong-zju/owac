@@ -558,6 +558,11 @@ class N02Encoder(nn.Module):
                 prediction, buffer, config.measurement, view_index=0
             )
             measurement_scalar = self._as_view_scalar(energy_result.energy, field.shape[1])
+            semantic_kwargs = (
+                {"semantic_refutation": self.reviser.semantic_map(energy_result)}
+                if config.revision.semantic_refutation
+                else {}
+            )
             if iteration == 0 and added:
                 # Compute withdrawal once from the pre-revision predictions and
                 # actual measurement support. New evidence alone refreshes it.
@@ -565,6 +570,7 @@ class N02Encoder(nn.Module):
                     energy_result.normalized_residual.unsqueeze(1),
                     self._support_map(energy_result, field),
                     temperature=config.temperature,
+                    **semantic_kwargs,
                 ).detach()
                 accepted = (~cold_start) & (
                     buffer.last_added
@@ -605,6 +611,7 @@ class N02Encoder(nn.Module):
                 iteration=iteration,
                 cold_start=cold_start if iteration == 0 else torch.zeros_like(cold_start),
                 measurement_feature=basis,
+                **semantic_kwargs,
             )
             diagnostics.contradiction_trace.append(revision.contradicted_fraction)
             diagnostics.revision_trace.append(dict(revision.trace))
