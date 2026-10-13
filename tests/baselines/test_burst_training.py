@@ -87,3 +87,20 @@ def test_resume_restores_optimizer_scheduler_stream_and_matches_uninterrupted(
         assert resumed[key] == reference[key]
     with pytest.raises(FileExistsError):
         train(p, 61, "dbsr_reference", tmp_path / "resumed", resume=True)
+
+
+def test_budget_extension_preserves_parent_and_continues_the_same_learning_stream(tmp_path):
+    from owac.runtime.n01_burst_budget import continue_budget
+
+    p = protocol()
+    parent = train(p, 61, "dbsr_reference", tmp_path / "parent")
+    parent_bytes = (tmp_path / "parent/result.json").read_bytes()
+    extended = continue_budget(tmp_path / "parent", tmp_path / "child", 6)
+    reference = train(dict(p, max_steps=6), 61, "dbsr_reference", tmp_path / "reference")
+    for key in ["curves", "best_parameter_digest", "train_input_sha256"]:
+        assert extended[key] == reference[key]
+    assert (tmp_path / "parent/result.json").read_bytes() == parent_bytes
+    assert parent["steps"] == 4 and extended["steps"] == 6
+    assert extended["budget_continuation"]["changed_protocol_fields"] == ["max_steps"]
+    with pytest.raises(ValueError, match="increase"):
+        continue_budget(tmp_path / "parent", tmp_path / "invalid", 4)

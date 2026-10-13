@@ -36,8 +36,12 @@ def graph_sequence(values, valid, variance, config):
     b, t, c, h, w = values.shape
     if c != 4 or valid.shape != values.shape or variance.shape != values.shape:
         raise ValueError("four-plane values, validity and variance must match")
+    if valid.dtype != torch.bool:
+        raise ValueError("measurement validity must be boolean")
     if not bool(torch.isfinite(variance).all()) or bool((variance <= 0).any()):
         raise ValueError("declared variance must be finite and positive")
+    valid = valid & torch.isfinite(values)
+    values = values.masked_fill(~valid, 0)
     integrator = SupportDomainIntegrator(config)
     state = init_state(config, b, {"camera_ids": ["burst"], "shape": (h, w)}, values.device)
     graphs, diagnostics = [], []
@@ -210,6 +214,7 @@ def support_config(overrides=None):
 def encode_window(model, values, valid, gates, *, chunk=16):
     """Rebuild features from RAW using the current graph, with bounded batches."""
     b, t, c, h, w = values.shape
+    valid = valid & torch.isfinite(values)
     flat = values.masked_fill(~valid, 0).flatten(0, 1)
     shared = gates[:, None].expand(-1, t, -1, -1, -1).flatten(0, 1)
     rows = [
@@ -236,6 +241,7 @@ def sequence_features(model, batch, mode, config, *, freeze_frame=8, encode_chun
         raise ValueError("the intervention requires the mature DBSR fusion predictor")
     device = next(model.parameters()).device
     values, valid = batch.values.to(device), batch.valid.to(device)
+    valid = valid & torch.isfinite(values)
     b, t, _, h, w = values.shape
     graphs, records = graph_sequence(batch.values, batch.valid, batch.variance, config)
     integrator = SupportDomainIntegrator(config)

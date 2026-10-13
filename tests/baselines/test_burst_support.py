@@ -4,13 +4,16 @@ import copy
 import json
 from pathlib import Path
 
+import pytest
 import torch
 
 from owac.baselines.burst_features import BurstFeatureConfig, BurstFeatureEncoder
 from owac.frameworks.n01.support import SupportDomainIntegrator
 from owac.frameworks.n01_dbsr import (
+    encode_window,
     graph_sequence,
     kernel_support,
+    sequence_features,
     support_config,
     supported_backbone,
     supported_fusion,
@@ -126,3 +129,59 @@ def test_locked_noise_calibration_controls_flat_pair_refutation_without_a_networ
     fraction = float((gate < config.split_threshold).float().mean())
     assert 0.007 < fraction < 0.013
     assert sum(p.numel() for p in integrator.parameters()) == 0
+
+
+def test_unconstrained_intervention_preserves_ordinary_dbsr_sequence():
+    from owac.evaluation.n01_burst import BurstProbe
+    from owac.evaluation.n01_content_data import make_batch
+
+    model = BurstProbe(encoder().config).eval()
+    batch = make_batch(
+        "local_change_stale_history", seed=5101, batch_size=1, length=16, event_frame=8
+    )
+    with torch.no_grad():
+        for now, (feature, weights, _, _) in enumerate(
+            sequence_features(model, batch, "none", support_config())
+        ):
+            start = max(0, now + 1 - model.encoder.config.max_history)
+            expected, _, expected_weights = model.encoder(
+                batch.values[:, start : now + 1].flip(1), batch.valid[:, start : now + 1].flip(1)
+            )
+            assert torch.equal(feature, expected)
+            assert torch.equal(weights, expected_weights)
+
+
+def test_budget_limited_baseline_keeps_mechanism_holdout_sealed(tmp_path, monkeypatch):
+    import owac.evaluation.n01_burst_support as runner
+
+    baseline = tmp_path / "baselines/61-dbsr_reference"
+    baseline.mkdir(parents=True)
+    (baseline / "result.json").write_text(json.dumps({"operationally_settled": False}))
+    protocol = {"seeds": [61], "required_baselines": ["dbsr_reference"]}
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("holdout data was consumed before baseline acceptance")
+
+    monkeypatch.setattr(runner, "make_protocol_batch", forbidden)
+    with pytest.raises(ValueError, match="budget-limited"):
+        runner.probe(protocol, tmp_path / "baselines", tmp_path / "probe")
+
+
+def test_nonfinite_raw_is_missing_for_graph_decisions_and_recomputed_features():
+    model = type("Probe", (), {"encoder": encoder()})()
+    raw = torch.full((1, 4, 4, 12, 12), 0.3)
+    valid = torch.ones_like(raw, dtype=torch.bool)
+    variance = torch.full_like(raw, 0.0064)
+    broken = raw.clone()
+    broken[:, :, 0, 5, 5] = float("nan")
+    marked = valid.clone()
+    marked[:, :, 0, 5, 5] = False
+    safe = raw.masked_fill(~marked, 0)
+    actual_graph, _ = graph_sequence(broken, valid, variance, support_config())
+    expected_graph, _ = graph_sequence(safe, marked, variance, support_config())
+    assert torch.equal(actual_graph, expected_graph)
+    gates = kernel_support(graph(), SupportDomainIntegrator(support_config()))
+    actual, availability = encode_window(model, broken, valid, gates)
+    expected, expected_availability = encode_window(model, safe, marked, gates)
+    assert torch.equal(actual, expected) and torch.equal(availability, expected_availability)
+    assert torch.isfinite(actual).all() and not availability[..., 5, 5].any()
