@@ -1,0 +1,22 @@
+{
+  "commands": [
+    {
+      "command": "make check",
+      "result": "pass; Ruff check, 178 files formatted, compileall pass"
+    },
+    {
+      "command": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 uv run --locked pytest -q",
+      "result": "349 passed, 4 skipped, 1 warning in 25.77s"
+    }
+  ],
+  "skipped_assets": [
+    "Real RawVLA-Bench NPZ cache: /workspace unavailable locally",
+    "starVLA + author pi05_libero checkpoint + paligemma tokenizer unavailable locally"
+  ],
+  "warning": "Existing requires_grad Tensor-to-scalar warning in test_baselines.py:682",
+  "production_changes": false,
+  "formal_n02_training_updates": 0,
+  "head_diagnostic_updates": 1200,
+  "disposable_adam_steps": 144,
+  "revision_coverage_gradient_only_cases": 6
+}

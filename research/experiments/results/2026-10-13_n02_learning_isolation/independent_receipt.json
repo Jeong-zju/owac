@@ -1,0 +1,129 @@
+{
+  "passed": true,
+  "scope": "Independent saved-artifact recomputation; no diagnostic assess/objective helpers imported.",
+  "measurement": {
+    "0": {
+      "contrast_nmse": 0.852186084985822,
+      "cosine": 0.49346242868510476,
+      "projection_gain": 0.09085748654953207,
+      "actual_both_correct": 0,
+      "oracle_common_both_correct": 16,
+      "exact_template_both_correct": 16,
+      "pair_denominator": 16,
+      "same_scene_pair_frames_regenerated": 256,
+      "max_same_noise_roundoff": 2.3718900482583294e-08,
+      "train_eval_raw_overlap": 0,
+      "background_decomposition": {
+        "formula_max_abs_error": 2.4868995751603507e-14,
+        "replacement_delta_formula_max_abs_error": 2.4868995751603507e-14,
+        "paired_worlds": 32,
+        "actual_world_correct": 16,
+        "oracle_common_world_correct": 32,
+        "signed_actual_margin_mean": 3.0668342041357093,
+        "signed_oracle_common_margin_mean": 3.0172935996467025,
+        "signed_common_bias_mean": 0.04954060448901387,
+        "absolute_common_bias_median": 144.10745800712706,
+        "absolute_useful_margin_median": 2.793265567508892,
+        "absolute_bias_over_useful_median": 50.57169904585304,
+        "background_flips_oracle_correct_worlds": 16,
+        "scope": "Sum eight unique-frame scores per paired world; positive signed margin supports true class. Exact fp64 common replacement; no retraining."
+      }
+    },
+    "1": {
+      "contrast_nmse": 0.6854895653954749,
+      "cosine": 0.597409199637549,
+      "projection_gain": 0.23390206808032082,
+      "actual_both_correct": 3,
+      "oracle_common_both_correct": 16,
+      "exact_template_both_correct": 16,
+      "pair_denominator": 16,
+      "same_scene_pair_frames_regenerated": 256,
+      "max_same_noise_roundoff": 2.3718900482583294e-08,
+      "train_eval_raw_overlap": 0,
+      "background_decomposition": {
+        "formula_max_abs_error": 3.197442310920451e-14,
+        "replacement_delta_formula_max_abs_error": 2.7533531010703882e-14,
+        "paired_worlds": 32,
+        "actual_world_correct": 19,
+        "oracle_common_world_correct": 32,
+        "signed_actual_margin_mean": 8.050944923195562,
+        "signed_oracle_common_margin_mean": 8.455145470353756,
+        "signed_common_bias_mean": -0.40420054715819154,
+        "absolute_common_bias_median": 15.483836825023548,
+        "absolute_useful_margin_median": 7.772248545385333,
+        "absolute_bias_over_useful_median": 1.9950409490657108,
+        "background_flips_oracle_correct_worlds": 13,
+        "scope": "Sum eight unique-frame scores per paired world; positive signed margin supports true class. Exact fp64 common replacement; no retraining."
+      }
+    },
+    "2": {
+      "contrast_nmse": 0.7222935296366031,
+      "cosine": 0.6375537030699748,
+      "projection_gain": 0.1776930805491575,
+      "actual_both_correct": 0,
+      "oracle_common_both_correct": 16,
+      "exact_template_both_correct": 16,
+      "pair_denominator": 16,
+      "same_scene_pair_frames_regenerated": 256,
+      "max_same_noise_roundoff": 2.3718900482583294e-08,
+      "train_eval_raw_overlap": 0,
+      "background_decomposition": {
+        "formula_max_abs_error": 1.0658141036401503e-14,
+        "replacement_delta_formula_max_abs_error": 1.2434497875801753e-14,
+        "paired_worlds": 32,
+        "actual_world_correct": 16,
+        "oracle_common_world_correct": 32,
+        "signed_actual_margin_mean": 5.4438479829363695,
+        "signed_oracle_common_margin_mean": 5.791917931660231,
+        "signed_common_bias_mean": -0.3480699487238619,
+        "absolute_common_bias_median": 48.3499906866947,
+        "absolute_useful_margin_median": 5.314509706175256,
+        "absolute_bias_over_useful_median": 9.025373922616737,
+        "background_flips_oracle_correct_worlds": 16,
+        "scope": "Sum eight unique-frame scores per paired world; positive signed margin supports true class. Exact fp64 common replacement; no retraining."
+      }
+    }
+  },
+  "checks": {
+    "six_checkpoint_hashes_match_historical_training_receipts": true,
+    "production_and_existing_evaluation_config_files_unchanged_since_b415c12": true,
+    "baseline_files_compared": 70,
+    "both_run_source_hash_sets_current": true,
+    "measurement_input_template_prior_identical_across_checkpoint_seeds": true,
+    "six_cache_tensor_hash_sets_verified": true
+  },
+  "limits": [
+    "Did not independently rerun all 144 optimizer forks or all per-term gradients; cardinality and regenerated input identity verified.",
+    "Did not repeat the 200-step head optimizations; saved head predictions and metrics independently recomputed.",
+    "Only contrast_mse arms independently rescored; paired_nll values remain worker-reported.",
+    "No-cue evaluation worlds were hash-checked but not independently regenerated.",
+    "No-cue ratio was not independently recomputed.",
+    "No original 600-step training data regeneration in this audit; original checkpoint hashes matched historical receipts."
+  ],
+  "gradient": {
+    "cases": 24,
+    "arms_per_case": 6,
+    "disposable_optimizer_steps": 144,
+    "inputs_shared_across_6_checkpoints": true,
+    "four_input_batches_independently_regenerated": true,
+    "maximum_reported_gradient_sum_relative_error": 6.57062018760285e-07,
+    "revision_inactive_cases": 24,
+    "revision_coverage_supplement": {
+      "cases": 6,
+      "rng_seed": 904,
+      "input_independently_regenerated": true,
+      "natural_revision_active_frames": 2,
+      "natural_revision_active_samples": 4,
+      "optimizer_updates": 0,
+      "input_sha256": "39b882db4394e1e34390ceeb21a6600d5da9079d3353725483b307f5e3723913",
+      "records_sha256": "6d49c6dc93e052d90c1e3905a1f8de3e3420b36207cb123f7e8cfd1a255e0756"
+    }
+  },
+  "artifact_sha256": {
+    "measurement_results": "cb5841622f3a71df6bb231fcf605d6910d8a04ac086a037fbd83b3749220331c",
+    "measurement_manifest": "2fe5d46b4a6d94fb7171dc1a5c57dc24c540ad89b84f8c43f3807c7c0f1e7794",
+    "gradient_records": "7e2eb829fbc39ea81fd6241cf71a66b2ecd7f41779aeb7db52cf3915e292c399",
+    "gradient_manifest": "1b23b9c6a141913341cfc2a46df7f22528b78f98d0d8ef1495fcaf64ae16d4dd",
+    "script": "bee1da405974dcb1b9d59a6250961c093952664adfc5bcc01e50311a9f08a936"
+  }
+}

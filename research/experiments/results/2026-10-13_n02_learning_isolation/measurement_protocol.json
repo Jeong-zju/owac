@@ -1,0 +1,71 @@
+{
+  "diagnostic_only": true,
+  "smoke": false,
+  "checkpoint_steps": 200,
+  "checkpoint_seeds": [
+    0,
+    1,
+    2
+  ],
+  "fit_generator_seed": 910,
+  "fit_rng_seeds": [
+    910,
+    911,
+    912,
+    913,
+    914,
+    915,
+    916,
+    917
+  ],
+  "fit_split": "train",
+  "fit_batch": 2,
+  "fit_frames": 8,
+  "frame_size": 64,
+  "evaluation_split": "validation",
+  "evaluation_seeds": [
+    720,
+    721,
+    722,
+    723,
+    724,
+    725,
+    726,
+    727,
+    728,
+    729,
+    730,
+    731,
+    732,
+    733,
+    734,
+    735
+  ],
+  "geometry": "production head pre-tanh geometry0 overridden to parity +/-20",
+  "variance": "cached original predicted variance VALUES + actual buffered sensor variance",
+  "objectives": [
+    "paired_nll",
+    "contrast_mse"
+  ],
+  "contrast_normalization": "fixed all-frame all-pixel train contrast mean-square",
+  "contrast_objective_changes_weighting": true,
+  "contrast_objective_scope": "removes common-fit loss and inverse-variance spatial weights; its improvement cannot uniquely distinguish sparse signal dilution from shared-trunk interference",
+  "no_spatial_cue_mask_in_losses": true,
+  "updates_per_arm": 200,
+  "sampler_seed": 910,
+  "optimizer": "AdamW",
+  "lr": 0.0003,
+  "weight_decay": 0.01,
+  "clip_gradient_norm": 1.0,
+  "threads": 1,
+  "precision": "float32 training, float64 contrast reductions/scoring",
+  "criteria": {
+    "eval_contrast_nmse_max": 0.5,
+    "eval_cosine_min": 0.5,
+    "eval_actual_common_pair_both_min": 12,
+    "eval_pair_denominator": 16,
+    "eval_no_cue_false_contrast_ratio_max": 0.1
+  },
+  "reference": "exact templates and oracle common are nondeployable controls",
+  "scope": "fixed-field head learnability; failure cannot prove architecture incapacity"
+}
