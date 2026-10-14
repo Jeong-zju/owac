@@ -1,10 +1,12 @@
 # OWAC
 
-发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。LIBERO 全量成功率 58.20%；RoboTwin 全量仍在运行。范围与复用规则见 [0012 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
+[打开 N01 / N02 / N04 研究统筹台](outputs/research-hub/index.html)：开发树、当前路线、文档阅读与提示词复制的统一入口。日常使用[自动更新入口](http://127.0.0.1:8876/)：刷新页面即在主 repo 执行 `make research-hub`。服务用 `make research-hub-serve` 启动；离线快照也可直接阅读。详见[使用与维护说明](docs/research-hub.md)。
 
-当前和后续实验统一使用 **RAWVLA-bench**，见 [0011 路线决定](docs/decisions/0011-rawvla-bench-main-route.md)。[π0.5 全量基线](research/experiments/2026-10-10_rawvla_pi05_full_baseline.md)已在用户新服务器运行：作者 LIBERO 10,000 + RoboTwin 3,250 条完整清单，附加 632 条原采样条件单独核查；尚无最终成绩。沿用作者环境、数据与现成权重，后续算法按同一冻结协议比较。
+发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。2026-10-14 主清单已完整：LIBERO 58.20%、RoboTwin 15.63%；[完整评测报告](research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md)单独留档，原标签不移动。冻结范围见 [0012](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 
-Arena DROID / PolaRiS 评测、场景重建和该衍生集的公开发布已按用户要求终止。旧源码、权重、数据与结果保留，部分结果不作为完整基准或全集交付。定时任务保持关闭。
+当前和后续实验统一使用 **RAWVLA-bench**，见 [0011 路线决定](docs/decisions/0011-rawvla-bench-main-route.md)。主基线 10,000 + 3,250 条全部完成，另有 632 条原采样条件独立核查。沿用冻结环境、数据、检查点与比较协议；这份本机完整基线可作为后续算法参照，论文数值尚未复现。训练/评测参数与全部数字结果已[本机归档](research/archives/2026-10-14_rawvla_pi05_baseline.md)，后续按同一条件指纹配对比较。
+
+Arena DROID / PolaRiS 评测、场景重建和该衍生集的公开发布已按用户要求终止。旧源码、权重、数据与结果保留；[Arena 历史页面](outputs/arena-droid-baseline/progress.html)及[PolaRiS 历史页面](outputs/polaris-rgb-raw-reconstruction/progress.html)已标注终止，部分结果不作为完整基准或全集交付。定时任务保持关闭。
 
 OWAC 探索可组合、可扩展的新计算框架，以 RAW 编码和机器人闭环作为首个完整实例。π0.5 PyTorch 后端已完成离线部署，RAWVLA-bench 的现成三通道 RAW 按作者来源与处理历史使用；不冒称原始 Bayer CFA。候选框架尚未实现或验证。
 
@@ -14,11 +16,14 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 
 ## 先读这些文件
 
-- [当前 research roadmap v4](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
-- [RawVLA-Bench 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)、[当前路线](docs/decisions/0011-rawvla-bench-main-route.md)：已跑通的部署、现成 π0.5 与固定评测协议。
+- [OWAC 学术研究方案](docs/OWAC_academic_research_proposal_2026-10-09.md)：面向研究讨论的 Markdown 正文，包含问题定义、核心框架、机制假设、实验设计与参考文献。
+- [当前 research roadmap v6](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
+- [生物弱光与信息补全综述](research/reviews/2026-10-09_bio_lowlight_inference.md)、[机制重组决议](docs/decisions/0006-bio-inspired-inference.md)：六类机制问题、原始依据与反证实验。
+- [Cui 的 RAW 与机器人论文综述](research/reviews/2026-10-08_ziteng_cui_raw_physical_intelligence.md)、[具身增量决议](docs/decisions/0005-physical-intelligence-contribution.md)：已有边界、可吸收经验与新增实验要求。
 - [AGENTS.md](AGENTS.md)：所有 agent 的开发与研究规则。
 - [当前状态与下一阶段](docs/status.md)：已完成的基础设施和待开展的研究。
-- [仿真 benchmark 优先决议](docs/decisions/0004-simulation-benchmark-first.md)、[选型调研](docs/simulation-benchmark-selection.md)：最新建设顺序、首选任务套件及待验证的版本/数据条件。
+- [RAWVLA-bench 当前路线](docs/decisions/0011-rawvla-bench-main-route.md)、[全量基线](research/experiments/2026-10-10_rawvla_pi05_full_baseline.md)：当前执行入口、数据和固定比较协议。
+- [历史仿真 benchmark 优先决议](docs/decisions/0004-simulation-benchmark-first.md)、[选型调研](docs/simulation-benchmark-selection.md)：最新建设顺序、首选任务套件及待验证的版本/数据条件。
 - [可运行的 RAW 仿真 benchmark](docs/raw-sim-bench-deployment.md)：Lightwheel-LIBERO 单任务、独立 runtime、原生 CFA 数据及启动命令。
 - [π0.5 后端优先部署决议](docs/decisions/0003-pi05-backend-first.md)：用户分工、已完成的后端部署及其决策来源。
 - [π0.5 本地部署](docs/pi05-deployment.md)：独立 PyTorch 环境、权重转换、离线推理与 RAW 接入审计。

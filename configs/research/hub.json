@@ -1,0 +1,521 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-14",
+  "routes": [
+    {
+      "id": "N01",
+      "name": "自适应时空证据积分",
+      "short": "把多次弱观测积成可靠证据",
+      "color": "green",
+      "checkout": "worktrees/n01-evidence-integration",
+      "branch": "lzh/n01-evidence-integration",
+      "version": "v1.0 · 分阶段开发提示词",
+      "status": "提示词已就绪 · P0 待启动",
+      "current_stage": "P0",
+      "question": "光太暗、单帧看不清时，哪些历史测量应该继续积累，哪些必须及时撤回？",
+      "summary": "已有成熟 DBSR 与空间撤回负结果。新版按来源级时空支持域推进；P0–P8 独立提示词已就绪，附真实代码审计、参考实现与远程训练路径，新模型尚未实施。",
+      "next": "复制 P0 完整交接包开始；完成后按原始要求、代码与实际收据独立复核。",
+      "boundary": "接口验收、合成对照与完整机器人闭环分别判断；不把训练收敛当作机制成功。",
+      "primary_document": "docs/N01_full_development_plan_2026-10-14_v1.0.md",
+      "evidence_document": "research/experiments/2026-10-13_n01_dbsr_mechanism.md",
+      "documents": [
+        "research/experiments/2026-10-13_n01_dbsr_mechanism.md",
+        "docs/n01-burst-features.md",
+        "research/candidates/N01.md",
+        "docs/prompts/DeepSeek_N01_implementation.md",
+        "docs/N01_full_development_plan_2026-10-14_v1.0.md",
+        "docs/prompts/n01_v1_0/README.md",
+        "docs/prompts/n01_v1_0/EARLY_POLICY_PREFLIGHT.md",
+        "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+        "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+        "docs/prompts/n01_v1_0/02_REFERENCES.md",
+        "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md"
+      ],
+      "summary_sources": {
+        "docs/status.md": "5e46baf2329bbd02e36bf2a137e862cd28643a4b80ef362730468e2943f65e30",
+        "research/experiments/2026-10-13_n01_dbsr_mechanism.md": "4ffa93089f47d4218311ad1fe79228c5408fe95c20ad4b870662e4b04732e09b",
+        "docs/N01_full_development_plan_2026-10-14_v1.0.md": "9e1132d283abde96df7d905af373ee7c730a2455769dc8b9176b9d4afff02289",
+        "docs/prompts/n01_v1_0/README.md": "3abffea3dc7943821e6d5dd5de206db0aae96a452eaf3f375f0a9aa2dca23ba8",
+        "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md": "61cee27a60755a57c1b156cf9c7cebc0e24d61cbaf01004b26ffdf35507fc6d6"
+      },
+      "stages": [
+        {
+          "id": "P0",
+          "title": "问题、数据与依赖",
+          "state": "current",
+          "label": "下一阶段 · 未启动",
+          "description": "冻结源身份、数据协议、理论义务与正式模型来源。",
+          "document": "docs/prompts/n01_v1_0/P0_FOUNDATION.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P0_FOUNDATION.md"
+          ],
+          "instruction": "本次只执行 P0，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P1",
+          "title": "可组合与可撤回参考",
+          "state": "planned",
+          "label": "计划",
+          "description": "来源账本、支持域统计、去重合并与精确重建。",
+          "document": "docs/prompts/n01_v1_0/P1_ANALYTIC_REFERENCE.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/EARLY_POLICY_PREFLIGHT.md",
+            "docs/prompts/n01_v1_0/P1_ANALYTIC_REFERENCE.md"
+          ],
+          "instruction": "本次只执行 P1，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P2",
+          "title": "运动对应与噪声模型",
+          "state": "planned",
+          "label": "计划",
+          "description": "真实 RAW 对齐、不确定性、遮挡和分数位移。",
+          "document": "docs/prompts/n01_v1_0/P2_RAW_MOTION.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/EARLY_POLICY_PREFLIGHT.md",
+            "docs/prompts/n01_v1_0/P2_RAW_MOTION.md"
+          ],
+          "instruction": "本次只执行 P2，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P3",
+          "title": "空间与时间支持",
+          "state": "planned",
+          "label": "计划",
+          "description": "同时组织空间相容和时间有效期，撤回错误历史。",
+          "document": "docs/prompts/n01_v1_0/P3_SPATIOTEMPORAL_SUPPORT.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P3_SPATIOTEMPORAL_SUPPORT.md"
+          ],
+          "instruction": "本次只执行 P3，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P4",
+          "title": "成熟特征与充分训练",
+          "state": "planned",
+          "label": "计划",
+          "description": "完整 DBSR 同信息、同容量匹配重训，检验独立增量。",
+          "document": "docs/prompts/n01_v1_0/P4_MATCHED_FEATURE_TRAINING.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P4_MATCHED_FEATURE_TRAINING.md"
+          ],
+          "instruction": "本次只执行 P4，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P5",
+          "title": "长期状态与期限读出",
+          "state": "planned",
+          "label": "计划",
+          "description": "先全量重放，再检验局部重算和持久状态是否值得。",
+          "document": "docs/prompts/n01_v1_0/P5_STATE_REPLAY_DEADLINE.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P5_STATE_REPLAY_DEADLINE.md"
+          ],
+          "instruction": "本次只执行 P5，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P6",
+          "title": "真实 RAW 与可复用表征",
+          "state": "planned",
+          "label": "计划",
+          "description": "真实 RAW 留出、第二骨干、多个下游读出。",
+          "document": "docs/prompts/n01_v1_0/P6_REAL_RAW_TRANSFER.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P6_REAL_RAW_TRANSFER.md"
+          ],
+          "instruction": "本次只执行 P6，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P7",
+          "title": "π0.5 适配与动作训练",
+          "state": "planned",
+          "label": "计划",
+          "description": "重新核验完整编码器，完成匹配的充分动作训练。",
+          "document": "docs/prompts/n01_v1_0/P7_POLICY_TRAINING.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P7_POLICY_TRAINING.md"
+          ],
+          "instruction": "本次只执行 P7，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        },
+        {
+          "id": "P8",
+          "title": "RawVLA-Bench 完整闭环",
+          "state": "planned",
+          "label": "计划",
+          "description": "固定官方清单，分别报告机制、表征与闭环结论。",
+          "document": "docs/prompts/n01_v1_0/P8_FULL_CLOSED_LOOP.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+            "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
+            "docs/prompts/n01_v1_0/02_REFERENCES.md",
+            "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+            "docs/prompts/n01_v1_0/P8_FULL_CLOSED_LOOP.md"
+          ],
+          "instruction": "本次只执行 P8，按阶段提示词直接实现与验证，实际训练优先使用用户服务器。完成后生成阶段报告并停在本阶段交接点。"
+        }
+      ],
+      "legacy_prompt": "docs/prompts/DeepSeek_N01_implementation.md"
+    },
+    {
+      "id": "N02",
+      "name": "测量约束的循环补全",
+      "short": "让新证据纠正旧解释",
+      "color": "blue",
+      "checkout": "worktrees/n02-measurement-completion",
+      "branch": "lzh/n02-measurement-completion",
+      "version": "v1.1 · 全局求解优先",
+      "status": "P0 已验收并提交",
+      "current_stage": "P1",
+      "question": "先前以为是杯子，新的测量却不支持时，系统能否撤回错误解释及其影响？",
+      "summary": "P0 基础、数据与数值参考已独立验收并提交：实现 5ddfdb5，验收归档 861c46f。当前接续 P1；新机制行为与机器人闭环仍待后续验证。",
+      "next": "接续 P1 RAW 观测与绝对拟合；按最新共同契约优先在数据主机开发，使用 P0 已验收的数据划分和归一化入口。",
+      "boundary": "旧固定候选调度已归档；P0 工程与数值验收不代表新机制或闭环成立。",
+      "primary_document": "docs/plans/N02_full_development_plan_2026-10-13.md",
+      "evidence_document": "research/experiments/2026-10-14_n02_p0_independent_acceptance.md",
+      "documents": [
+        "docs/plans/N02_full_development_plan_2026-10-13.md",
+        "research/experiments/2026-10-14_n02_p0_independent_acceptance.md",
+        "docs/decisions/0014-n02-scheduler-archive.md"
+      ],
+      "summary_sources": {
+        "docs/status.md": "f20397a6073239fd8ec9da153c4186738d5f2361e6a7d568f5d0d634b187547c",
+        "docs/plans/N02_full_development_plan_2026-10-13.md": "09961ee9ef8b3abc765a9241e27049d0de755b398af05fdcd9710de277193352",
+        "research/experiments/2026-10-14_n02_p0_independent_acceptance.md": "6dffb1da94f37e8469a3ab60e0b28a6c536cc57c8e8bab2ed8624f5e8957d251"
+      },
+      "stages": [
+        {
+          "id": "P0",
+          "title": "基础、数据与上游一致性",
+          "state": "recorded",
+          "label": "已验收并提交",
+          "description": "独立验收通过；实现 5ddfdb5，验收归档 861c46f。保留原始提示词供回查。",
+          "document": "docs/prompts/n02_v1_1/P0_FOUNDATION.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P0_FOUNDATION.md"
+          ],
+          "instruction": "P0 已独立验收并提交（实现 5ddfdb5，验收归档 861c46f）。此包仅用于核对历史要求与交付；不要重新启动 P0。新的开发接续 P1。"
+        },
+        {
+          "id": "P1",
+          "title": "RAW 观测与绝对拟合",
+          "state": "current",
+          "label": "当前接续阶段 · 待启动",
+          "description": "先学可靠测量，区分可解释、信息不足和模型不足。",
+          "document": "docs/prompts/n02_v1_1/P1_OBSERVATION.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P1_OBSERVATION.md"
+          ],
+          "instruction": "本次只做 P1；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "E1",
+          "title": "早期策略预检 · direct",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "P1 后，最多 2k 更新的接口检查。",
+          "document": "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md"
+          ],
+          "instruction": "本次只做 E1；按阶段原文读取前序真实交付，完成后停在本阶段交接点。本次 mode=direct，另一模式不在本次范围。"
+        },
+        {
+          "id": "P2",
+          "title": "对象循环与全局求解",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "固定结构内求解，建立完整目标与全局参考。",
+          "document": "docs/prompts/n02_v1_1/P2_ENTITIES_SOLVER.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P2_ENTITIES_SOLVER.md"
+          ],
+          "instruction": "本次只做 P2；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "E2",
+          "title": "早期策略预检 · objects",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "P2 末，与 E1 同协议比较对象读出。",
+          "document": "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md"
+          ],
+          "instruction": "本次只做 E2；按阶段原文读取前序真实交付，完成后停在本阶段交接点。本次 mode=objects，另一模式不在本次范围。"
+        },
+        {
+          "id": "P3",
+          "title": "发现新的结构解释",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "出生、拆合与身份修订，不限于初始候选。",
+          "document": "docs/prompts/n02_v1_1/P3_STRUCTURE_DISCOVERY.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P3_STRUCTURE_DISCOVERY.md"
+          ],
+          "instruction": "本次只做 P3；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "P4",
+          "title": "来源依赖与正确撤回",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "多支持撤回、因果重放和神经状态重建。",
+          "document": "docs/prompts/n02_v1_1/P4_PROVENANCE_REPLAY.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P4_PROVENANCE_REPLAY.md"
+          ],
+          "instruction": "本次只做 P4；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "P5",
+          "title": "机制审计与局部执行",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "比较成熟强基线，独立决定是否启用局部执行。",
+          "document": "docs/prompts/n02_v1_1/P5_MECHANISM_AUDIT.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P5_MECHANISM_AUDIT.md"
+          ],
+          "instruction": "本次只做 P5；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "P6",
+          "title": "正式 π0.5 适配",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "充分动作训练，分开冻结与同预算解冻后端。",
+          "document": "docs/prompts/n02_v1_1/P6_POLICY_TRAINING.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P6_POLICY_TRAINING.md"
+          ],
+          "instruction": "本次只做 P6；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        },
+        {
+          "id": "P7",
+          "title": "完整机器人闭环",
+          "state": "planned",
+          "label": "待前序验收",
+          "description": "冻结主清单与机制扩展套件分别报告。",
+          "document": "docs/prompts/n02_v1_1/P7_CLOSED_LOOP.md",
+          "prompt_kind": "original",
+          "prompt_sources": [
+            "docs/prompts/n02_v1_1/00_SHARED_CONTRACT.md",
+            "docs/prompts/n02_v1_1/P7_CLOSED_LOOP.md"
+          ],
+          "instruction": "本次只做 P7；按阶段原文读取前序真实交付，完成后停在本阶段交接点。"
+        }
+      ],
+      "legacy_prompt": "docs/prompts/DeepSeek_N02_implementation.md"
+    },
+    {
+      "id": "N04",
+      "name": "自运动预测与变化分离",
+      "short": "分清自己动了，还是物体动了",
+      "color": "orange",
+      "checkout": "worktrees/n04-egomotion-separation",
+      "branch": "lzh/n04-egomotion-separation",
+      "version": "v1.0 · 全量开发方案",
+      "status": "方案已就绪 · 待实施",
+      "current_stage": "S0",
+      "question": "腕部相机随手臂移动时，怎样保留对物体真实运动、停止和反向的判断？",
+      "summary": "以 ConvNeXt-B 与 RKN / Ac-RKN 为起点，依次核验观测、动态记忆、自运动、误差更新及外部变化修订。S0—S7 为开发计划。",
+      "next": "从 S0 数据、因果合同和诊断标准开始；页面提供方案生成的阶段交接包。",
+      "boundary": "现成 RKN 的动态收益不能转称 N04 新增分解规则已通过；正式闭环尚未验证。",
+      "primary_document": "docs/plans/N04_full_development_v1.0.md",
+      "evidence_document": "research/experiments/2026-10-13_n04_matched_tracking.md",
+      "documents": [
+        "docs/plans/N04_full_development_v1.0.md",
+        "research/experiments/2026-10-13_n04_matched_tracking.md"
+      ],
+      "summary_sources": {
+        "docs/status.md": "9573ef0146813f92203afe26e1e7eebdc371e12c9793aacb4836d2bc315ea583",
+        "docs/plans/N04_full_development_v1.0.md": "e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2",
+        "research/candidates/N04.md": "479a437827329d2883e1f10e7fe077cfaea1006954b0b919c0e7476182e33a8c"
+      },
+      "stages": [
+        {
+          "id": "S0",
+          "title": "数据与因果合同",
+          "state": "current",
+          "label": "计划起点",
+          "description": "冻结数据、源轨迹拆分、坐标时间与逐样本诊断。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S0 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S1",
+          "title": "正式 RAW 视觉测量",
+          "state": "planned",
+          "label": "计划",
+          "description": "训练独立当前帧 ConvNeXt-B，建立同骨干无记忆基线。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S1 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S2",
+          "title": "RKN 空间动态记忆",
+          "state": "planned",
+          "label": "计划",
+          "description": "固定视觉测量后，单独验证动态状态。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S2 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S3",
+          "title": "动作、自运动与几何",
+          "state": "planned",
+          "label": "计划",
+          "description": "依次接入 Ac-RKN、本体传播和三维几何。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S3 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S4",
+          "title": "误差解释与可信更新",
+          "state": "planned",
+          "label": "计划",
+          "description": "区分成像、噪声、几何与时间误差。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S4 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S5",
+          "title": "外部变化修订记忆",
+          "state": "planned",
+          "label": "计划",
+          "description": "让停止与反向事件真实改变后续传播。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S5 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S6",
+          "title": "组合训练与迁移",
+          "state": "planned",
+          "label": "计划",
+          "description": "三种子、冻结干预及匹配重训消融。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S6 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        },
+        {
+          "id": "S7",
+          "title": "π0.5 正式训练与闭环",
+          "state": "planned",
+          "label": "计划",
+          "description": "分开接口、充分训练与全量闭环验收。",
+          "document": "docs/plans/N04_full_development_v1.0.md",
+          "section_source": "docs/plans/N04_full_development_v1.0.md",
+          "prompt_kind": "plan",
+          "prompt_sources": [
+            "docs/plans/N04_full_development_v1.0.md"
+          ],
+          "instruction": "按完整方案第 8 节，只执行 S7 及其子项。先检查前置条件，保留本阶段要求的对照和出口证据；后续阶段不在本次范围。"
+        }
+      ],
+      "legacy_prompt": "docs/prompts/DeepSeek_N04_implementation.md"
+    }
+  ],
+  "shared_documents": [
+    "AGENTS.md",
+    "docs/status.md",
+    "docs/OWAC_research_roadmap_2026-10-08.md",
+    "docs/OWAC_academic_research_proposal_2026-10-09.md",
+    "docs/architecture.md",
+    "docs/decisions/0011-rawvla-bench-main-route.md",
+    "docs/decisions/0012-rawvla-pi05-protocol-freeze.md"
+  ]
+}
