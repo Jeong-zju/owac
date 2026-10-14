@@ -2,7 +2,9 @@
   "checked_at_utc": "2026-10-10T05:56:01.397437+00:00",
   "simulator_requirement": "Isaac Sim only; native CameraCore pre-ISP CFA; MuJoCo path rejected by user",
   "status": "已找到官方通用采集/扩增/回放脚本；未找到当前 DROID 九组任务的现成自动专家生成器",
-  "reason": "PolaRiS 公开仿真共同训练 RLDS 缺少逐帧物体状态。Isaac Lab 的状态记录和回放工具可复用，但当前 DROID 没有 Mimic 入口，默认 SE3 遥操作与 8 维绝对关节动作未接通；仍需选定专家来源并适配。",
+  "reason": "PolaRiS 已公开仿真共同训练演示，应优先恢复原场景、初态和控制/相机时序并核验动作回放。缺少完整逐帧物体状态不是单独的否决条件；这些来源尚未恢复。若另采新专家，Isaac Lab 通用工具可复用，但 DROID 尚无已核验的 Mimic/遥操作适配。",
+  "training_data_audit": "2026-10-10_pi05_training_data_audit.json",
+  "replay_criterion": "Verified scene, initial robot/object state, control/physics and camera/time alignment plus reference-deviation checks can support action replay without full per-frame object states.",
   "dataset": {
     "repo": "owhan/PolaRiS-datasets",
     "revision": "dca86b8e186df63323eb375344a1977d92f508f7",
@@ -104,6 +106,7 @@
   "other_official_datasets": "GR1/G1 Mimic demonstration datasets exist but are different tasks/embodiments; not substituted for DROID",
   "curobo_note": "Arena cuRobo extension is used for environment reachability checks; no complete expert pick-and-place generator for these nine configurations was verified",
   "candidate_next_steps": [
+    "recover original PolaRiS simulation training scenes, episode initial conditions, controller/camera timing and exact sample manifest before considering new expert generation",
     "adapt DROID teleoperation/IK and record a few verified successful seed demonstrations, then implement DROID Mimic integration",
     "implement and verify a DROID-specific scripted/planning expert; would create a new dataset, not recover the checkpoint original training trajectories"
   ]

@@ -1,4 +1,4 @@
-"""Native CFA cameras mirroring the two official Arena DROID policy views."""
+"""Native CFA cameras mirroring configured Arena DROID RGB views."""
 
 from __future__ import annotations
 
@@ -21,7 +21,14 @@ def opengl_pose_matrix(position, quaternion_xyzw):
 
 
 class ArenaRawCapture:
-    def __init__(self, env, output: Path, *, profile: RawCameraProfile | None = None):
+    def __init__(
+        self,
+        env,
+        output: Path,
+        *,
+        profile: RawCameraProfile | None = None,
+        camera_names=("external_camera", "wrist_camera"),
+    ):
         import omni.usd
         from pxr import UsdGeom
 
@@ -33,7 +40,9 @@ class ArenaRawCapture:
         self.maximum_quantization_error_dn = 0
         stage = omni.usd.get_context().get_stage()
         profile = profile or RawCameraProfile(width=1280, height=720)
-        for name in ("external_camera", "wrist_camera"):
+        if not camera_names or len(set(camera_names)) != len(camera_names):
+            raise ValueError("Native camera names must be nonempty and unique")
+        for name in camera_names:
             source = self.env.scene.sensors[name]
             # The compiled path may use env_[^/]+; use the camera's resolved USD handle.
             source_path = source._sensor_prims[0].GetPrim().GetPath().pathString

@@ -1,0 +1,86 @@
+{
+  "dataset": "polaris-native-raw-reconstruction-v1",
+  "source_repo": "owhan/PolaRiS-datasets",
+  "source_revision": "dca86b8e186df63323eb375344a1977d92f508f7",
+  "source_episodes": 316,
+  "source_control_frames": 52914,
+  "source_scene_count": 14,
+  "source_instruction_count": 17,
+  "source_inventory_sha256": "fe62686ee5498bf67e2bd048ca3b091bd1246d0335bb7e33629b7f44e55b3394",
+  "source_shards_manifest_sha256": "9736ce1aa0a28f3aa45fa554ef82603e835eaf74a11f497382f3dceec22643dc",
+  "source_rgb_fields": [
+    "exterior_image_1_left",
+    "exterior_image_2_left",
+    "wrist_image_left"
+  ],
+  "camera_field_mapping": {
+    "exterior_image_1_left": "external_camera",
+    "exterior_image_2_left": "external_camera",
+    "wrist_image_left": "wrist_camera"
+  },
+  "alias_evidence": "All 52914 source frames have byte-identical exterior JPEG fields; all 316 episodes were checked.",
+  "resolution_width_height": [
+    320,
+    180
+  ],
+  "nominal_control_hz": 15,
+  "source_control_timestamps_available": false,
+  "action_interface": "7 absolute joint positions and 1 gripper command, unchanged float32 source actions",
+  "training_state": "actual replay 7 arm joints and actual finger_joint divided by pi/4",
+  "raw": {
+    "origin": "Isaac Sim 6.1 CameraCore native scene-HDR to pre-ISP CFA",
+    "cfa_pattern": "GRBG",
+    "container_dtype": "uint32",
+    "nominal_bits": 24,
+    "preserve_buffers": [
+      "0-texread",
+      "2-cfa",
+      "3-noise"
+    ],
+    "allow_host_remosaic": false,
+    "allow_host_clipping": false,
+    "paired_rgb": "same native render product at the same held pre-action physics state"
+  },
+  "reconstruction": {
+    "scope": "author training trajectories in individually reconstructed Isaac scenes; official original scenes are not claimed",
+    "source_rgb_reference_required": true,
+    "preserve_original_source_identity_and_actions": true,
+    "preserve_task_instruction": true,
+    "object_teleport_after_initialization_allowed": false,
+    "measure_joint_tracking_and_physical_task_outcome": true,
+    "record_scene_camera_similarity_and_unknowns": true,
+    "source_action_grasp_assistance": {
+      "authorized_by_user": true,
+      "authorization_date_local": "2026-10-11",
+      "method": "USD fixed joint at actual relative pose",
+      "trigger": "unchanged original close command and measured TCP/object proximity",
+      "release": "unchanged original open command",
+      "object_teleport_after_initialization": false,
+      "record": [
+        "source_object_association",
+        "joint_attach_release_events",
+        "proximity",
+        "relative_pose_errors",
+        "attachment_readiness_frame",
+        "gripper_object_collision_filter_scope"
+      ],
+      "label": "constraint_assisted_reconstruction",
+      "allowed_in_frozen_policy_benchmark": false,
+      "gripper_object_collisions": "temporarily filtered only while fixed joint is active; environment collisions and released object remain dynamic"
+    }
+  },
+  "training_action_horizon": 15,
+  "split_unit": "source scene and source episode, never adjacent frames",
+  "publication": {
+    "authorized_by_user": true,
+    "repo_id": "Jeong-zju/isaac-arena-droid-rgb-raw-reconstructed",
+    "private": false,
+    "license": "mit",
+    "full_release_requires_all_316_episodes": true,
+    "full_release_requires_all_original_control_frames": true,
+    "full_release_requires_all_three_schema_fields": true,
+    "full_release_requires_training_loader_validation": true,
+    "unresolved_or_failed_replays_cannot_be_hidden": true,
+    "official_dataset_label_allowed": false
+  }
+}

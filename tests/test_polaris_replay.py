@@ -1,4 +1,5 @@
 import copy
+import json
 import math
 
 import numpy as np
@@ -76,6 +77,55 @@ def test_bin_occupancy_with_closed_gripper_does_not_pass_release():
     result = evaluate(rows, config)
     assert not result["checks"]["released"]
     assert not result["success"]
+
+
+def test_one_successful_object_does_not_complete_a_multi_object_source_task():
+    rows, config = fixture_rows()
+    assert evaluate(rows, config)["success"]
+    config["source_multi_object_task_incomplete"] = True
+    result = evaluate(rows, config)
+    assert result["checks"]["inside_target_bin"]
+    assert not result["checks"]["all_source_task_objects_reconstructed"]
+    assert not result["success"]
+
+
+def test_multi_object_reconstruction_requires_every_object_to_complete():
+    rows, config = fixture_rows()
+    for row in rows:
+        row["objects"] = {
+            name: {
+                "position": row["cube_position"].copy(),
+                "quaternion_xyzw": [0, 0, 0, 1],
+                "speed": 0,
+            }
+            for name in ("cube", "other")
+        }
+    config.update(
+        reconstructed_objects=[{"name": name, "size": [0.04] * 3} for name in ("cube", "other")],
+        source_object_count_visually_reviewed=True,
+    )
+    assert evaluate(rows, config)["success"]
+    for row in rows:
+        row["objects"]["other"]["position"] = [0.5, -0.25, 0.12]
+    result = evaluate(rows, config)
+    assert result["checks"]["object_cube_task_complete"]
+    assert not result["checks"]["object_other_task_complete"]
+    assert not result["success"]
+
+
+def test_rotation_result_serializes_and_rejects_wrong_angle():
+    rows, config = fixture_rows()
+    config.update(
+        task_kind="rotate", success_rotation_target_deg=90, success_rotation_tolerance_deg=25
+    )
+    for row in rows:
+        theta = 0 if row is rows[0] else math.pi / 2
+        row["cube_quaternion_xyzw"] = [0, 0, math.sin(theta / 2), math.cos(theta / 2)]
+    result = evaluate(rows, config)
+    assert json.loads(json.dumps(result))["success"]
+    for row in rows[-15:]:
+        row["cube_quaternion_xyzw"] = [0, 0, 1, 0]
+    assert not evaluate(rows, config)["checks"]["rotated_90_degrees"]
 
 
 def capture_fixture():

@@ -69,19 +69,23 @@ def forward(root, chain, q, tcp_offset=(0.14, 0, 0)):
     return pose, tcp[:3]
 
 
-def prepare(root):
+def prepare(root, episode=None, carry_cycle=None, tcp_offset=(0.14, 0, 0)):
     asset = root / "assets/franka_robotiq_2f_85_flattened.usd"
-    episode = root / "episodes/episode-009"
+    episode = episode or root / "episodes/episode-009"
     with np.load(episode / "trajectory.npz") as data:
         actions, states = data["actions"], data["states"]
     initial, chain = robot_chain(asset)
-    tcp = np.asarray([forward(initial, chain, q[:7])[1] for q in states])
+    tcp = np.asarray([forward(initial, chain, q[:7], tcp_offset)[1] for q in states])
     closing = np.flatnonzero((actions[:, 7] > 0.5) & (np.r_[0, actions[:-1, 7]] <= 0.5))
     if not len(closing):
         raise ValueError("No original close transition")
     close = int(closing[0])
     opening = np.flatnonzero((actions[:, 7] <= 0.5) & (np.r_[0, actions[:-1, 7]] > 0.5))
     release = int(next(i for i in opening if i > close))
+    if carry_cycle is not None:
+        close, release = carry_cycle
+        if close not in closing or release not in opening or release <= close:
+            raise ValueError("Reconstruction anchors must be original close/open transitions")
     table_top = float(tcp[close, 2] - 0.02)
     config = {
         "experiment": "polaris-expert-replay-pilot-v1",
@@ -97,7 +101,7 @@ def prepare(root):
         "scene_uses_reference_future_for_offline_reconstruction": True,
         "source_close_frame": close,
         "source_release_frame": release,
-        "tcp_offset": [0.14, 0, 0],
+        "tcp_offset": list(tcp_offset),
         "initial_base_pose": initial.tolist(),
         "cube_size": 0.04,
         "cube_mass": 0.04,
@@ -122,7 +126,7 @@ def prepare(root):
             "release_tcp": tcp[release].tolist(),
             "minimum_tcp_z": float(tcp[:, 2].min()),
             "maximum_tcp_z": float(tcp[:, 2].max()),
-            "zero_joint_base": forward(initial, chain, np.zeros(7))[0].tolist(),
+            "zero_joint_base": forward(initial, chain, np.zeros(7), tcp_offset)[0].tolist(),
         },
     }
     write_json(root / "config.json", config)

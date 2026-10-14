@@ -24,6 +24,7 @@ SMALL_FILES = (
     "source_hashes.json",
     "replay_audit.json",
     "deployment_validation.json",
+    "route_retirement.json",
 )
 
 
@@ -268,6 +269,24 @@ def render(directory, page):
     pilot_path = directory / "replay_pilot.json"
     pilot = json.loads(pilot_path.read_text()) if pilot_path.exists() else None
     esc = lambda x: html.escape(str(x))  # noqa: E731
+    retirement_path = directory / "route_retirement.json"
+    retirement = json.loads(retirement_path.read_text()) if retirement_path.exists() else {}
+    retired = retirement.get("status") == "retired_by_user"
+    route_notice = (
+        "<div class='notice'><b>路线已终止 · 后续统一使用 RAWVLA-bench</b>"
+        "<p>Arena 评测、PolaRiS 重建及其公开发布已按用户要求停止。以下为历史部分结果，"
+        "未完成条目不再执行，不计为策略失败。</p>"
+        "<a href='../../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md'>"
+        "查看 RAWVLA-bench 当前基线记录</a></div>"
+        if retired
+        else ""
+    )
+    run_status = "用户终止，保留部分结果" if retired else status["status"]
+    reconstruction_status = (
+        "全集重建与公开上传已终止，历史单条试验不代表全集交付。"
+        if retired
+        else "全集重建与公开上传正在实施，历史单条试验不代表全集交付。"
+    )
     n = summary["episodes"]
     score = f"{summary['successes']}/{n}" if n else "未测量"
     interval = lambda v: f"{v[0]:.2%}–{v[1]:.2%}" if v else "未测量"  # noqa: E731
@@ -342,28 +361,37 @@ margin:30px auto;padding:0 20px}}a{{color:#8acaff}}h1{{font-size:25px}}
 td,th{{text-align:left;padding:10px;border-bottom:1px solid #334052}}
 pre{{white-space:pre-wrap;overflow-wrap:anywhere}}.notice{{padding:16px;background:#29251e}}
 </style><h1>Isaac Sim · Arena DROID · 官方 π0.5</h1>
+{route_notice}
 <p>最后成功云端检查：{esc(check["checked_at_utc"])} · 手动快照，定时任务关闭</p>
 {check_error}
 <div class="cards"><div class="card"><b>阶段 1：完整 RGB 基准</b>
-<p class="score">完成 {n}/{protocol["expected_episodes"]} · 成功 {score}</p>
-<p>{esc(status["status"])} · {esc(status.get("variation", ""))}
+<p class="score">已完成 {n}/{protocol["expected_episodes"]}</p>
+<p>计划总数 {protocol["expected_episodes"]} 条 · 尚待完成 {protocol["expected_episodes"] - n} 条。
+已完成中：成功 {summary["successes"]} 条、正常策略失败 {n - summary["successes"]} 条；
+当前成功比例 {score}。</p>
+<p>{esc(run_status)} · {esc(status.get("variation", ""))}
  · seed {esc(status.get("seed", "—"))}</p>
-<p>累计有效样本 Wilson 95%：{interval(summary["wilson_95"])}</p></div>
+<p>已完成样本 Wilson 95%：{interval(summary["wilson_95"])}</p></div>
 <div class="card"><b>阶段 2：原始专家训练数据回放</b>
 <p class="score">{replay_score}</p>
 <p>{replay_status}</p></div></div>
 <p>固定官方九组对象/容器/HDR 配置，每组种子 0–99，共 900 个独立完整 episode。
 复用官方权重，额外训练 0 步；每次重新启动策略及仿真，保留全部正常失败。
 这是 OWAC 固定协议，不是整个 Arena 平台的官方总分。</p>
-<p>当前统计包含已完成样本，全部 900 条完成前不作为最终基准结论。
+<p>完成数量包含成功和正常策略失败；尚待完成的 episode 不计入成功率，也不算无效样本。
+当前统计包含已完成样本，全部 900 条完成前不作为最终基准结论。
 推理请求 p50 / p95：{latency}（含冷启动）；已完成 episode 策略显存峰值：
 {f"{memory:.3f} GiB" if n else "未测量"}（不含模拟器）。
 流程累计 wall：{status["wall_seconds"]:.1f} s。</p>
 <p>基础设施异常尝试：{len(status["infrastructure_failures"])}，不计策略失败；
 只在新 attempt 目录重试同一配置 / 种子，原因保留于下方状态记录。</p>
-<table><thead><tr><th>配置</th><th>有效完成</th><th>成功数</th><th>Wilson 95%</th></tr></thead>
+<table><thead><tr><th>配置</th><th>已完成 / 计划</th>
+<th>成功 / 已完成</th><th>Wilson 95%</th></tr></thead>
 <tbody>{table}</tbody></table>
 {replay_detail}
+<p><a href="../polaris-rgb-raw-reconstruction/progress.html">
+查看全部 316 条源训练轨迹的 RGB / 原生 RAW 重建进度</a>：
+{reconstruction_status}</p>
 <div class="notice"><b>原始训练回放的缺口</b><p>{esc(audit["reason"])}</p>
 <p>仅采用 Isaac 原生 CameraCore 的 ISP 前 CFA；不采用 MuJoCo，
 不从 RGB 逆处理或重新马赛克，不把评测策略轨迹当成原始专家训练演示。</p></div>
@@ -441,6 +469,11 @@ print(json.dumps({{"checked_at_utc":datetime.datetime.now(datetime.UTC).isoforma
                     "checked_at_utc": snapshot["checked_at_utc"],
                     "remote_root": REMOTE,
                     "check_error": None,
+                    "route_status": (
+                        json.loads(files["route_retirement.json"])["status"]
+                        if "route_retirement.json" in files
+                        else "active"
+                    ),
                 },
             )
     render(args.destination, args.page)
