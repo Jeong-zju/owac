@@ -1,0 +1,287 @@
+{
+  "format": "owac.n01_full.independent_acceptance.v1",
+  "phase": "P1",
+  "date": "2026-10-14",
+  "original_head": "fd92383385fd17103e27a68c345fc7af15822ffe",
+  "original_verdict": "REJECTED",
+  "status": {
+    "implementation_status": "PASS_P1_AFTER_REPAIR",
+    "training_status": "NOT_STARTED",
+    "effect_status": "NOT_APPLICABLE"
+  },
+  "source_verification": {
+    "code_commit": "2d82bbbfe4e556c91c6a55c2b9c500ea5f3183ce",
+    "files": 153,
+    "matching": 153,
+    "mismatches": [],
+    "archive_sha256": "90d3eedab6eac71643bd80acd978e330a5f8d040e43d36fdde336bcebe3af767",
+    "tracked_files_matching_commit": 129,
+    "untracked_upstream_files_matching_workspace": 24
+  },
+  "before": {
+    "original_p1_tests_passed": 34,
+    "independent_counterexamples_failed": 14,
+    "failures": [
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_affine_bound_cannot_cancel",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_interpolation_bound_uses_raw_noise",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_rank_deficiency_has_no_false_covariance",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_unidentifiable_query_is_invalid_even_when_coefficients_are_finite",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_oracle_keeps_prior_in_unobserved_direction",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_noise_binding_cannot_be_silently_overridden",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_frame_read_api_cannot_mutate_raw_records",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_counterfactual_frame_api_and_overlay_cannot_resurrect_source",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_unbatched_masks_follow_unbatched_values",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_exact_window_actually_bounds_state_and_solve",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_beyond_window_rebuild_drops_old_sources_not_just_a_label",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_fixed_replay_rejects_empty_replacement_or_query",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_large_integer_identity_order_is_exact",
+      "tests/encoders/n01_full/test_p1_acceptance.py::test_counterfactual_support_decision_cannot_read_deleted_value"
+    ]
+  },
+  "local": {
+    "pytest_passed": 495,
+    "warnings": 1,
+    "adversarial_tests_passed": 22,
+    "make_check": "passed",
+    "analytic": {
+      "total": 9,
+      "passed": 9,
+      "failed": []
+    },
+    "environment": {
+      "python": "3.12.12",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "numpy": "2.5.1",
+      "torch": "2.9.1+cpu"
+    }
+  },
+  "remote": {
+    "root": "/workspace/owac/rawvla/research/n01-v1/runs/p1-independent-20261014",
+    "snapshot": "source-v5",
+    "verify": {
+      "status": "passed",
+      "checks": 22,
+      "files": 153
+    },
+    "pytest_passed": 147,
+    "warnings": [
+      "bundle omits pyproject pytest marker registration"
+    ],
+    "analytic": {
+      "total": 9,
+      "passed": 9,
+      "failed": []
+    },
+    "encoder_environment": {
+      "python": "3.11.16",
+      "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+      "numpy": "2.4.6",
+      "torch": "2.9.1+cu128"
+    },
+    "policy_environment": {
+      "python": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+      "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+      "torch": "2.7.1+cu128",
+      "cuda_available": true,
+      "device": "cuda"
+    },
+    "policy_contract": {
+      "libero": {
+        "episodes": [
+          "libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+          "libero_object_no_noops_1.0.0_lerobot/episode_000040/variant_00.npz"
+        ],
+        "losses": [
+          0.884316086769104,
+          4.722530841827393
+        ],
+        "encoder_gradient_norms": [
+          368.8384450878948,
+          1596.549508690834
+        ],
+        "bridge_gradient_norms": [
+          164.08457857370377,
+          833.1912220716476
+        ],
+        "parameter_updates_l1": [
+          {
+            "encoder": 29.520123801368754,
+            "bridge": 423.4805810004473
+          },
+          {
+            "encoder": 20.161263023415813,
+            "bridge": 267.2386908531189
+          }
+        ],
+        "prefix_shapes": [
+          [
+            1,
+            512,
+            2048
+          ],
+          [
+            1,
+            512,
+            2048
+          ]
+        ],
+        "validation_drift": 0.0,
+        "frozen_backend_hash_unchanged": true,
+        "unique_source_check": {
+          "batches": 2,
+          "frames_observed": 32,
+          "registered_frames": 28,
+          "unique_frames_per_camera": {
+            "agentview": 14,
+            "wrist": 14
+          },
+          "samples": 86016,
+          "validity_counts": {
+            "valid": 86016,
+            "missing": 0,
+            "bad": 0,
+            "saturated": 0
+          },
+          "duplicate_repeat_new_samples": 0,
+          "duplicate_repeat_frames": 1,
+          "arrivals": 33,
+          "skipped_arrivals": 0,
+          "sample_xy_declared": true,
+          "sample_xy_shape": [
+            3,
+            2
+          ],
+          "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+          "first_source_example": [
+            0
+          ]
+        }
+      },
+      "robotwin2": {
+        "episodes": [
+          "grab_roller/episode_000001.npz",
+          "place_dual_shoes/episode_000023.npz"
+        ],
+        "losses": [
+          1.0756815671920776,
+          1.585963249206543
+        ],
+        "encoder_gradient_norms": [
+          57.9083857126534,
+          132.38007029891014
+        ],
+        "bridge_gradient_norms": [
+          32.54129021242261,
+          58.05475541949272
+        ],
+        "parameter_updates_l1": [
+          {
+            "encoder": 29.57890604333079,
+            "bridge": 423.70034454762936
+          },
+          {
+            "encoder": 20.46160603351018,
+            "bridge": 283.79122573137283
+          }
+        ],
+        "prefix_shapes": [
+          [
+            1,
+            768,
+            2048
+          ],
+          [
+            1,
+            768,
+            2048
+          ]
+        ],
+        "validation_drift": 0.0,
+        "frozen_backend_hash_unchanged": true,
+        "unique_source_check": {
+          "batches": 2,
+          "frames_observed": 48,
+          "registered_frames": 42,
+          "unique_frames_per_camera": {
+            "head_camera": 14,
+            "left_camera": 14,
+            "right_camera": 14
+          },
+          "samples": 129024,
+          "validity_counts": {
+            "valid": 129024,
+            "missing": 0,
+            "bad": 0,
+            "saturated": 0
+          },
+          "duplicate_repeat_new_samples": 0,
+          "duplicate_repeat_frames": 1,
+          "arrivals": 49,
+          "skipped_arrivals": 0,
+          "sample_xy_declared": true,
+          "sample_xy_shape": [
+            3,
+            2
+          ],
+          "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+          "first_source_example": [
+            1
+          ]
+        }
+      }
+    },
+    "final_updates_per_platform": 2,
+    "development_updates_across_three_snapshots_total": 12,
+    "crop": 32,
+    "resource_preflight_gpu_used_mib": 53066,
+    "resource_preflight_gpu_total_mib": 97887,
+    "preserved_failures": [
+      "initial verify invocation exit 127 from planned, nonexistent encoder env path; corrected using actual P0 acceptance env"
+    ]
+  },
+  "versions_recomputed": {
+    "value_version": {
+      "before": 1.9999999999999993,
+      "after": 4.999999999999998
+    },
+    "mapping_versions": [
+      1.0,
+      3.0
+    ],
+    "parameter_version": {
+      "before": 0.5800256583859739,
+      "after": 0.9293491751468356,
+      "closure_difference": 0.0,
+      "recomputed": [
+        "hidden",
+        "output",
+        "readout"
+      ]
+    },
+    "scope": "explicit invalidation of changed operator; P1 has no automatic neural cache"
+  },
+  "not_claimed": [
+    "N01 mechanism effect or closed-loop capability",
+    "long training or P2 implementation",
+    "full resolution policy or real CFA",
+    "constant peak memory of offline archive replay",
+    "automatic neural cache invalidation",
+    "joint posterior combining cross-phase correlated noise and priors",
+    "source independence for callbacks capturing unredacted external state"
+  ],
+  "evidence_sha256": {
+    "adversarial-after.txt": "96532562c4a1d9d0c7cdf9e78fc421ebb8d8b46e34d9956497969864e1c78682",
+    "adversarial-before.txt": "836fbdef5656681e0d67461825006370db7373b0dbae34ead6b2962cc2122dd2",
+    "analytic-local.json": "17a1a93ab62b989cbbe6a3d1a0334badaaf8c198f67ceadd7a3286222f068d21",
+    "analytic-remote.json": "f8088220840fb56b73bee5c823f9b5f2aced40606943746d8f5b6ca3d6f25624",
+    "committed-source-verification.json": "cce60ce51a8044750de22e7df616c7486b8f77115580922cf281d66e161abe44",
+    "full-pytest.txt": "b2057881e38dc88ab15f6ba6abbf33537f33da7057a61ae5c75535c7a065be07",
+    "ledger-check-remote.json": "199b93bd56272a1ab79591a005fe732cba643095214d13aff4ae89a683e86e7f",
+    "make-check.txt": "0e9a799f1d00c6371852f99f44ee2c074649523f5e5178acd1bf2bd5b1b77b45",
+    "policy-contract-remote.json": "85e98452c7bbec78953cd33dbb534c85c06d9309c5b4330cd2abd37e1eac789d",
+    "remote-pytest.txt": "61bc9f4d335f1c40b6cc7f437519e1b303b8f54db4a5049bafc22a607fc1ee55",
+    "source-manifest.json": "366ea6e499657c9a61c74a5ebbea31503c378df8af99ceb132d6ac93bb8ffe33",
+    "verify-remote.json": "e93235f762fdcbc6702a1514f37eeb3d83f14ad8b7c138c00e84abc254386fd3",
+    "version-recomputation.json": "a75b9383f6f9da6bb3d74de45df6a861f9a21784bc6a9091bcca815ea2d53d61"
+  }
+}

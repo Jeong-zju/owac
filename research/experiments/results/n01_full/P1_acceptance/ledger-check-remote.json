@@ -1,0 +1,80 @@
+{
+  "kind": "n01-full-ledger-check",
+  "protocol": "configs/encoders/n01_full/protocol_v1.json",
+  "region": "train",
+  "environment": {
+    "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39"
+  },
+  "platforms": {
+    "libero": {
+      "manifest_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+      "samples": 39296,
+      "statistics": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+      "check": {
+        "batches": 2,
+        "frames_observed": 32,
+        "registered_frames": 28,
+        "unique_frames_per_camera": {
+          "agentview": 14,
+          "wrist": 14
+        },
+        "samples": 86016,
+        "validity_counts": {
+          "valid": 86016,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 33,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          0
+        ]
+      }
+    },
+    "robotwin2": {
+      "manifest_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "samples": 14400,
+      "statistics": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "check": {
+        "batches": 2,
+        "frames_observed": 48,
+        "registered_frames": 42,
+        "unique_frames_per_camera": {
+          "head_camera": 14,
+          "left_camera": 14,
+          "right_camera": 14
+        },
+        "samples": 129024,
+        "validity_counts": {
+          "valid": 129024,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 49,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          1
+        ]
+      }
+    }
+  }
+}

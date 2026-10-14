@@ -1,5 +1,7 @@
 # OWAC
 
+2026-10-14 **N01 v1.0 P1 独立验收修补后通过**。原交付的 34 项测试通过，但新增首批 14 项反例全部失败；已修复保守方差界、秩亏读出、先验坐标、反事实帧级泄漏、实际 32 帧窗口及策略梯度/更新证据。最终本地 495 passed、服务器 147 passed、解析两端 9/9、verify 22/22、153/153 文件哈希一致；两平台真实来源计数与 encoder/bridge 各自更新、后端冻结及 validation 无更新已重验。实现提交 `2d82bbb`。仍停在 P1，未进入 P2、无长训练或机制/闭环结论。见[独立验收报告](research/experiments/n01_full/P1_acceptance_report.md)；下方原 P1 完成记录保留为修补前历史。
+
 2026-10-14 N01 v1.0 **P1（可组合与可撤回的解析参考）完成**：交付身份账本、版本化支持域、逐相位 GLS（秩/可辨识掩码/先验单列/未知相关性保守界）、两套回放接口与 32 帧精确窗口、独立 NumPy FP64 oracle 和一维同语义例子；`analytic` 子命令 9/9、新增 34 项测试、本地全仓 473 passed、`make check` 通过。远程源包 152/152 hash 一致、`verify` 22/22、125 passed，真实两平台唯一来源计数与 `mode=contract` 桥接/冻结证据（后端梯度 0、validation 参数漂移 0.0）通过；检查中修复 7 个缺陷。**未开始 P2/长训练，无机制效果结论**。见 [P1 报告](research/experiments/n01_full/P1_report.md)与[收据](research/experiments/results/n01_full/P1/receipt.json)。
 
 2026-10-14 P0 独立验收修补完成：修正 RoboTwin 协议归一化键、可执行 profiling、严格数据身份检查、GPU 环境路径/依赖、任务层统计与完整预算。两平台四区真实 loader、远程 55/55 checks、139/139 源包、91 项 P0 测试通过；本地全仓 439 passed。仅接受 P0 工程起点，未开始 P1/长训练。 见[独立验收报告](research/experiments/n01_full/P0_acceptance_report.md)。

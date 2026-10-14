@@ -1,0 +1,615 @@
+{
+  "mode": "contract",
+  "reference_encoder": {
+    "note": "the already-accepted three-channel reference encoder; the P1 analytic coefficients are not a neural front end",
+    "config": "configs/encoders/n01_full/policy_contract_encoder.json",
+    "method": "n01"
+  },
+  "environment": {
+    "python": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "torch": "2.7.1+cu128",
+    "cuda_available": true,
+    "device": "cuda"
+  },
+  "protocol": "configs/encoders/n01_full/protocol_v1.json",
+  "protocol_sha256": "66ca60f3276acb5320dc6a4fd68db7e342fa40a58c9986e477dac2287bc7dfa4",
+  "encoder_config_sha256": "9dd07baef26e43e50d3e8c2731c45589fc88e483fb3893703e28df366075b3ca",
+  "runtime_sha256": "807722cc25e2d06d3325c339c600c3babf05e44fb7cb189d8cde2df6f654dce9",
+  "platforms": {
+    "libero": {
+      "weights": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+      "weights_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+      "regions": {
+        "train_samples": 39296,
+        "validation_samples": 6592,
+        "train_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+        "validation_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000031/variant_00.npz"
+      },
+      "initial_model_hashes": {
+        "encoder": "7764aab9836f8cbce5b6b6bd5219db135fddd851df59582107f008cb9a040bcd",
+        "bridge": "acdc78c47bf5858031d32393a88e38e8ca11ad4f60500d965ca0056fa76479e7",
+        "backend": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8"
+      },
+      "crop": 32,
+      "train_updates": [
+        {
+          "step": 0,
+          "episode": "libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+          "cameras": [
+            "agentview",
+            "wrist"
+          ],
+          "action_loss": 0.884316086769104,
+          "valid_actions": 10,
+          "encoder_gradient": {
+            "total": 368.8384450878948,
+            "finite": true,
+            "tensors": 50
+          },
+          "bridge_gradient": {
+            "total": 164.08457857370377,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "encoder": 29.520123801368754,
+            "bridge": 423.4805810004473
+          },
+          "input_hashes": {
+            "windows": {
+              "agentview": {
+                "values": "f1aaa280e6d69141ee2f50393f375aa422e30fc020627798829d087072810876",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "424b9fc7a5e66260a41842713a8e3e766465109ddf0f28e1f44ab6f49ea4289e",
+                "new_measurement": "5c649d15a6f3a544b572461d4dc382087ff6f8c9bb2989223b3e6444d3267109"
+              },
+              "wrist": {
+                "values": "5b8a2df4eeada448b024e9ddac1f76c5e7053cb010826a9d024f807a2a876657",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "424b9fc7a5e66260a41842713a8e3e766465109ddf0f28e1f44ab6f49ea4289e",
+                "new_measurement": "5c649d15a6f3a544b572461d4dc382087ff6f8c9bb2989223b3e6444d3267109"
+              }
+            },
+            "actions": "6749e706e59cccc47e7b801c99116d4a3d5888b46e67c3243556ce0f5d4c2ba4",
+            "action_mask": "62987c1e1e520807954d225ed0ba88c586d2f6a013871a8e6e7b4260f4ac1c1e",
+            "state": "93272e7a195e2491eab5510d7ffdf2c8325d4a00945fb63d0ba7867b74ca0f8a"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            512,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "a1aaa8101572452cdede3a7b32d9bef3b7286795f8feb0196b24f736c1de2f36",
+          "backend_gradients": 0,
+          "wall_ms": 9308.575137518346,
+          "prefix_tokens": [
+            1,
+            512,
+            2048
+          ],
+          "prefix_mask_valid": 512,
+          "diagnostics": {}
+        },
+        {
+          "step": 1,
+          "episode": "libero_object_no_noops_1.0.0_lerobot/episode_000040/variant_00.npz",
+          "cameras": [
+            "agentview",
+            "wrist"
+          ],
+          "action_loss": 4.722530841827393,
+          "valid_actions": 8,
+          "encoder_gradient": {
+            "total": 1596.549508690834,
+            "finite": true,
+            "tensors": 50
+          },
+          "bridge_gradient": {
+            "total": 833.1912220716476,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "encoder": 20.161263023415813,
+            "bridge": 267.2386908531189
+          },
+          "input_hashes": {
+            "windows": {
+              "agentview": {
+                "values": "1ed846dc9a460bbc5713ac4b40b0f87d1eb3f45fd196fc7cfbb8b619a61e6fbe",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "eee899bd8a84524a39e16dce0405a857a489296660ccf5c0c01be312e1a7fc8e",
+                "frame_ids": "cec2a371a2d7a397417d56f0cc84ad95cb21dd7944419e614e69be26ac82bb37",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "wrist": {
+                "values": "4c102e577ada66b84eea217d56f7b13fc28c7169ed696b7b092ea812094fa759",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "f84355b4029ef6fe9e3339bb859ae672bdab6f8ee5490fdd544974cc9d5bdf6a",
+                "frame_ids": "cec2a371a2d7a397417d56f0cc84ad95cb21dd7944419e614e69be26ac82bb37",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "0bb02a0e812ce2777759521e4c46a6ecc7b3d70e688162fc3848eb9a9833054a",
+            "action_mask": "857932b8dc167e23fb127ee496a4238049284b266a8ab8d0f83b079fcd98118a",
+            "state": "2bb0e8c33a1ab54d96abe530e7d1c0bac6ca533d37fb58a155fbac187b171408"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            512,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "a0a9f8a1ef075bcf7fa4fe7a55ff9791b8c7f19d19be6e84d9b28e3004f5d339",
+          "backend_gradients": 0,
+          "wall_ms": 9812.202288769186,
+          "prefix_tokens": [
+            1,
+            512,
+            2048
+          ],
+          "prefix_mask_valid": 486,
+          "diagnostics": {}
+        }
+      ],
+      "token_contract": {
+        "values_shape": [
+          1,
+          512,
+          2048
+        ],
+        "mask_shape": [
+          1,
+          512
+        ],
+        "camera_ids": [
+          "agentview",
+          "wrist"
+        ],
+        "frozen_backend_parameters": 375
+      },
+      "validation": {
+        "rows": [
+          {
+            "episode": "libero_10_no_noops_1.0.0_lerobot/episode_000031/variant_00.npz",
+            "action_loss": 0.5277262926101685,
+            "updated": false
+          }
+        ],
+        "parameter_drift_after_validation": 0.0,
+        "before_hashes": {
+          "encoder": "209da416f1d589e9465d5ec37fa5373698411345635a7f68094c2a8d5353a90b",
+          "bridge": "9b10e4468ed9df13001775a33d51d3c5b3bea4621c49003ba9efdf183dd43d2f"
+        },
+        "after_hashes": {
+          "encoder": "209da416f1d589e9465d5ec37fa5373698411345635a7f68094c2a8d5353a90b",
+          "bridge": "9b10e4468ed9df13001775a33d51d3c5b3bea4621c49003ba9efdf183dd43d2f"
+        }
+      },
+      "encoder_parameter_update": 42.58381385667599,
+      "bridge_parameter_update": 592.3271761536598,
+      "backend_parameter_hashes": {
+        "before": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8",
+        "after": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8"
+      },
+      "load_audit": {
+        "loaded_keys": 376,
+        "model_keys": 376,
+        "inactive_keys": [],
+        "active_missing": [],
+        "unexpected": [],
+        "shape_mismatch": [],
+        "replaced_vision_keys": 437,
+        "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+        "replaced_vision_key_sample": [
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+        ],
+        "parameter_groups": {
+          "language_model": {
+            "prefixes": [
+              "vlm.model.model.language_model.",
+              "vlm.model.language_model."
+            ],
+            "model_tensors": 164,
+            "checked_tensors": 164,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 2508531712
+          },
+          "language_projection": {
+            "prefixes": [
+              "vlm.model.lm_head.",
+              "vlm.model.model.embed_tokens.",
+              "vlm.lm_head."
+            ],
+            "model_tensors": 1,
+            "checked_tensors": 1,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 526647296
+          },
+          "action_expert": {
+            "prefixes": [
+              "action_head."
+            ],
+            "model_tensors": 209,
+            "checked_tensors": 209,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 693422112
+          }
+        },
+        "vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": false,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "notes": [
+          "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+          "language/action parameters were checked item by item before loading"
+        ]
+      },
+      "ledger_source_check": {
+        "batches": 2,
+        "frames_observed": 32,
+        "registered_frames": 28,
+        "unique_frames_per_camera": {
+          "agentview": 14,
+          "wrist": 14
+        },
+        "samples": 86016,
+        "validity_counts": {
+          "valid": 86016,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 33,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          0
+        ]
+      }
+    },
+    "robotwin2": {
+      "weights": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "weights_sha256": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+      "regions": {
+        "train_samples": 14400,
+        "validation_samples": 1856,
+        "train_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000001.npz",
+        "validation_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000014.npz"
+      },
+      "initial_model_hashes": {
+        "encoder": "d8f147a956d23a323ae21f8bea967abb8bcc8c4835d507fb2b7a91e423202297",
+        "bridge": "2bb2ab941ec9215e421a2362ff66f607463b0c0a2927b881e4fc9cb7641e0e65",
+        "backend": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b"
+      },
+      "crop": 32,
+      "train_updates": [
+        {
+          "step": 0,
+          "episode": "grab_roller/episode_000001.npz",
+          "cameras": [
+            "head_camera",
+            "left_camera",
+            "right_camera"
+          ],
+          "action_loss": 1.0756815671920776,
+          "valid_actions": 50,
+          "encoder_gradient": {
+            "total": 57.9083857126534,
+            "finite": true,
+            "tensors": 50
+          },
+          "bridge_gradient": {
+            "total": 32.54129021242261,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "encoder": 29.57890604333079,
+            "bridge": 423.70034454762936
+          },
+          "input_hashes": {
+            "windows": {
+              "head_camera": {
+                "values": "8da1b1740e6b56b4e5901189f5a46678c2ae42644f5823fa0e03dd39b139f5b0",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "left_camera": {
+                "values": "280e28a93dff575cf3675971dcaa4bb7e5bdd6b8a0fb535e2fd6a5467442f3e9",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "right_camera": {
+                "values": "af6d766a074c7be94d4e052fde13b5c67d979f5ff44cc817bc1db8870dfa5bf5",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "cd77c5719103d839fcf650efd2ad9de64bd3e58bfdad5a4d4c562f4954ef9fe7",
+            "action_mask": "ce4b80ca5f34e66bb42e2ec958e768d4872ea2d5e0adf2d22b37a9426a59256d",
+            "state": "0250389a1a439ffa8a34b06171f5f88fe2ad6813adea71b1fb00b8068e3d4053"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            768,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "c70628ae96a81388d768386f35948e83dbac69aede0278563f96f439d51c51f1",
+          "backend_gradients": 0,
+          "wall_ms": 13150.109014473855,
+          "prefix_tokens": [
+            1,
+            768,
+            2048
+          ],
+          "prefix_mask_valid": 768,
+          "diagnostics": {}
+        },
+        {
+          "step": 1,
+          "episode": "place_dual_shoes/episode_000023.npz",
+          "cameras": [
+            "head_camera",
+            "left_camera",
+            "right_camera"
+          ],
+          "action_loss": 1.585963249206543,
+          "valid_actions": 50,
+          "encoder_gradient": {
+            "total": 132.38007029891014,
+            "finite": true,
+            "tensors": 50
+          },
+          "bridge_gradient": {
+            "total": 58.05475541949272,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "encoder": 20.46160603351018,
+            "bridge": 283.79122573137283
+          },
+          "input_hashes": {
+            "windows": {
+              "head_camera": {
+                "values": "7fdc92ebb663348692e9b6a83209f0128d79251fe365bc6c6559e32cb9fa7da3",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "left_camera": {
+                "values": "feea6e8f299b261da190558f5d5f5a861157db1989cca1d056b802b82723d424",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "right_camera": {
+                "values": "0f345203da93a0d91ca95d27dc6105aa6dfdfc1edf88ca0e76d46334677547d1",
+                "valid_mask": "765008e273429fcf809e8dbe4fdf4b5db0d7367d13ded8147ffbe91aa9d6a7bf",
+                "bad_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "saturated_mask": "7e8c67f59ee8cfe6670233c362c7ddcd37a5540f40c11c9604bcea7d052a389d",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "be2a0adf12e393b4b4dbd05783509c34c8cad22172432e8e65cd6eb6c4236f5b",
+            "action_mask": "ce4b80ca5f34e66bb42e2ec958e768d4872ea2d5e0adf2d22b37a9426a59256d",
+            "state": "89f610efc27b03876b49d9a6203f9737bb1ba76812f4d45b1c4d0105d6d71079"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            768,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "c70628ae96a81388d768386f35948e83dbac69aede0278563f96f439d51c51f1",
+          "backend_gradients": 0,
+          "wall_ms": 12881.0826074332,
+          "prefix_tokens": [
+            1,
+            768,
+            2048
+          ],
+          "prefix_mask_valid": 768,
+          "diagnostics": {}
+        }
+      ],
+      "token_contract": {
+        "values_shape": [
+          1,
+          768,
+          2048
+        ],
+        "mask_shape": [
+          1,
+          768
+        ],
+        "camera_ids": [
+          "head_camera",
+          "left_camera",
+          "right_camera"
+        ],
+        "frozen_backend_parameters": 375
+      },
+      "validation": {
+        "rows": [
+          {
+            "episode": "grab_roller/episode_000014.npz",
+            "action_loss": 2.047611951828003,
+            "updated": false
+          }
+        ],
+        "parameter_drift_after_validation": 0.0,
+        "before_hashes": {
+          "encoder": "55f88326e9633408d146cc5233ff4ef97fef2bcf62f67dfa8aa4dfcf10edca15",
+          "bridge": "287c31a44e5e53cff3de336d8dec3993e29ca5f2924a0b4f163e1673798d1ed6"
+        },
+        "after_hashes": {
+          "encoder": "55f88326e9633408d146cc5233ff4ef97fef2bcf62f67dfa8aa4dfcf10edca15",
+          "bridge": "287c31a44e5e53cff3de336d8dec3993e29ca5f2924a0b4f163e1673798d1ed6"
+        }
+      },
+      "encoder_parameter_update": 44.08982379062218,
+      "bridge_parameter_update": 632.4454330503941,
+      "backend_parameter_hashes": {
+        "before": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b",
+        "after": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b"
+      },
+      "load_audit": {
+        "loaded_keys": 376,
+        "model_keys": 376,
+        "inactive_keys": [],
+        "active_missing": [],
+        "unexpected": [],
+        "shape_mismatch": [],
+        "replaced_vision_keys": 437,
+        "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+        "replaced_vision_key_sample": [
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+        ],
+        "parameter_groups": {
+          "language_model": {
+            "prefixes": [
+              "vlm.model.model.language_model.",
+              "vlm.model.language_model."
+            ],
+            "model_tensors": 164,
+            "checked_tensors": 164,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 2508531712
+          },
+          "language_projection": {
+            "prefixes": [
+              "vlm.model.lm_head.",
+              "vlm.model.model.embed_tokens.",
+              "vlm.lm_head."
+            ],
+            "model_tensors": 1,
+            "checked_tensors": 1,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 526647296
+          },
+          "action_expert": {
+            "prefixes": [
+              "action_head."
+            ],
+            "model_tensors": 209,
+            "checked_tensors": 209,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 693422112
+          }
+        },
+        "vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": true,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "notes": [
+          "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+          "language/action parameters were checked item by item before loading"
+        ]
+      },
+      "ledger_source_check": {
+        "batches": 2,
+        "frames_observed": 48,
+        "registered_frames": 42,
+        "unique_frames_per_camera": {
+          "head_camera": 14,
+          "left_camera": 14,
+          "right_camera": 14
+        },
+        "samples": 129024,
+        "validity_counts": {
+          "valid": 129024,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 49,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          1
+        ]
+      }
+    }
+  }
+}
