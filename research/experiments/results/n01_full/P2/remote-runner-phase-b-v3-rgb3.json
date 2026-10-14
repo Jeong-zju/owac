@@ -1,0 +1,170 @@
+{
+  "kind": "n01-full-p2-phase-b-v3-and-rgb3",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T10:12:56+00:00",
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "source_snapshots": {
+    "source": {
+      "note": "phase-A snapshot (v1), 172 files, tar f47349da…",
+      "role": "superseded"
+    },
+    "source-v2": {
+      "note": "phase-B snapshot, 179 files, tar 313940f2…3147bc, pytest 277 passed remote",
+      "role": "parent of source-v3; seed 101 runs this code"
+    },
+    "source-v3": {
+      "note": "source-v2 copy + 2 replaced files + 1 added config; all other v2 files byte-identical",
+      "role": "seeds 211/307 and all fixed-criterion verdicts"
+    }
+  },
+  "source_v3_changes": [
+    {
+      "path": "src/owac/training/n01_motion.py",
+      "v2_sha256": "cd70406638227e9cd33760443e32f15d4c96912ceeb5f4bcc29631c77d99e84a",
+      "v3_sha256": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+      "change": "D1 platform criterion fix (real improvement over run + tail within delta_val of best) and stem-report subcommand + top-level scale label"
+    },
+    {
+      "path": "src/owac/raw/n01_noise.py",
+      "v2_sha256": "b8594d0e50ffa3f80900189745cc9bbecb5068bb1205c443c6ee023b8df061e1",
+      "v3_sha256": "44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d",
+      "change": "D2 diagonal-block variance fix; training/n01_motion.py only imports apply_exposure_gain, so the training trajectory is unchanged"
+    },
+    {
+      "path": "configs/encoders/n01_full/p2_motion_train_rgb3.json",
+      "v2_sha256": null,
+      "v3_sha256": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+      "change": "new rgb3 dev config"
+    }
+  ],
+  "source_v3_verification": {
+    "method": "sha256 of every file in source-v3 vs the v2 bundle manifest (179 declared files)",
+    "changed": 2,
+    "missing": 0,
+    "extra": [
+      "bundle-manifest.json",
+      "configs/encoders/n01_full/p2_motion_train_rgb3.json"
+    ],
+    "status": "ok",
+    "receipts": [
+      "receipts/source-v2-vs-v3-diff.json",
+      "receipts/source-v3-receipt.json"
+    ],
+    "cleanup": "__pycache__ and .pytest_cache byproducts of verification runs removed from source-v3"
+  },
+  "chain_configuration": {
+    "seed_101": {
+      "program": "owac-n01-v1-p2-motion-seed-101",
+      "snapshot": "source-v2",
+      "status": "RUNNING (started 2026-10-14T09:46:31Z), never restarted"
+    },
+    "seed_211": {
+      "program": "owac-n01-v1-p2-motion-seed-211",
+      "snapshot": "source-v3",
+      "handoff": "before its own training it rechecks seed-101 with source-v3 decide_platform; on exit 10 it continues seed-101 via --resume last.pt to 100000 and rechecks again; aborts with exit 4 if the continuation fails"
+    },
+    "seed_307": {
+      "program": "owac-n01-v1-p2-motion-seed-307",
+      "snapshot": "source-v3",
+      "handoff": "same recheck/continuation for seed-211"
+    },
+    "recheck_tool": "/workspace/.../runs/p2-motion-20261014/scripts/recheck_platform.py (exit 0 terminal, 10 needs continuation, 2 malformed receipt)",
+    "supervisor_flags": "autostart=false, autorestart=false, startsecs=60, startretries=0, stopwaitsecs=900, CUDA_VISIBLE_DEVICES=0"
+  },
+  "rgb3_dev_arm": {
+    "stem_report": {
+      "file": "stem-report/stem_report.json",
+      "total_trainable": {
+        "cfa4": 19673284,
+        "rgb3": 19663876,
+        "delta": -9408
+      },
+      "analytic_delta": -9408,
+      "matches_analytic": true,
+      "groups": {
+        "cnet": -6272,
+        "fnet": -3136,
+        "init_conv": 0,
+        "update_block": 0,
+        "flow_head": 0,
+        "upsample_weight": 0
+      },
+      "stem_conv": {
+        "kernel": [
+          7,
+          7
+        ],
+        "out_channels": 64,
+        "fnet_input": [
+          4,
+          3
+        ],
+        "cnet_input": [
+          8,
+          6
+        ]
+      }
+    },
+    "fit_check": {
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 88.7,
+      "input_mode": "rawvla_rgb3",
+      "samples": 512,
+      "loss": {
+        "initial_window_mean": 18.746,
+        "final_window_mean": 2.429
+      },
+      "checks": {
+        "small_set_fit_decreased": true,
+        "small_set_fit_target": true,
+        "inputs_finite": true,
+        "inputs_within_limit": true,
+        "gradient_groups_nonzero": true,
+        "unit_round_trip_exact": true
+      },
+      "gradient_groups_first_step": {
+        "cnet": 0.3217,
+        "fnet": 0.2151,
+        "update_block": 1.2629,
+        "flow_head": 1.0104,
+        "init_conv": 0.2522,
+        "upsample_weight": 0.000613
+      }
+    },
+    "train_256": {
+      "exit": 0,
+      "mode": "rgb3",
+      "updates": 256,
+      "budget": 256,
+      "wall_seconds": 115.8,
+      "platform_status": "budget_exhausted",
+      "platform_reasons": [
+        "fewer than two validation points (1); no plateau is claimable"
+      ],
+      "loss": {
+        "first_window_mean": 8.4619,
+        "last_window_mean": 4.4381,
+        "min": 3.1581
+      },
+      "peak_cuda_bytes": 759120896,
+      "lr_drops": 0,
+      "diagnostics_passed": true,
+      "note": "dev-scale run; never reaches the 50k/80k LR drops, so budget_exhausted is the expected verdict"
+    }
+  },
+  "throughput_decomposition": {
+    "data_block_p50_ms": 75.4,
+    "render_only_p50_ms": 73.05,
+    "forward_backward_step_p50_ms": 407.08,
+    "full_update_p50_ms": 482.22,
+    "peak_allocated_mib": 725.9,
+    "peak_reserved_mib": 764.0
+  },
+  "seed_101_runtime_observation": {
+    "first_checkpoint_utc": "10:00:37",
+    "second_checkpoint_utc": "10:12:11",
+    "observed_step_seconds_1000_2000": 0.694,
+    "note": "device shared with other tenants at ~99% util; ETA to be re-measured over a longer window"
+  }
+}

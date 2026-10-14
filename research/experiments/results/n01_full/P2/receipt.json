@@ -1,0 +1,845 @@
+{
+ "schema": "owac.n01-full.p2-receipt.v1",
+ "stage": "P2",
+ "date": "2026-10-14",
+ "branch": "lzh/n01-evidence-integration",
+ "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+ "base_head": "01e0316",
+ "files": {
+  "src/owac/frameworks/n01_full/statistics.py": "d24107dbdf42b3c60f4aad0cdcc9b6158ffeda76614ee785ea258d1539e85d50",
+  "src/owac/runtime/n01_full_policy_preflight.py": "6e5c85f094072fc94d38ff2ce1d5f4b7d6c314e89151fbf32c6c24d13282956c",
+  "configs/encoders/n01_full/p2_motion_noise.json": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+  "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+  "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+  "research/experiments/n01_full/P2_report.md": "c4ddbb7d903c329792df19d1f3176bf5108f1d5bd93161bd868f779572e871e8",
+  "src/owac/backends/raw_correspondence.py": "1a39133b02d3b4f70963a1a9a245560e478986d00c8709ccfbbf865e5afa4fb7",
+  "src/owac/evaluation/n01_motion.py": "8c1f5f9b2dee74087045fbb75f3febe8ca0c28e245614da5ac43ccbf41edf5f5",
+  "src/owac/frameworks/n01_full/adapters.py": "ff460ee397c6e94a87e859a22aff4dc51a952a1802274a13956f36c844638f50",
+  "src/owac/frameworks/n01_full/motion_builders.py": "fefbfd3c8ffd3ad11d4bfcea70cf39de25a300164cfd3e900e1a3876ccb6d842",
+  "src/owac/raw/n01_motion_data.py": "27e44636087fd03cd57d425faeaa76c6dbd56723afbd45280a41082cc0861795",
+  "src/owac/raw/n01_noise.py": "44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d",
+  "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+  "tests/encoders/n01_full/test_motion.py": "9d7312a8ed334d2bf18a567ebb657368bc6f030eaea49641f5f3b058c1839840",
+  "tests/encoders/n01_full/test_motion_bridge.py": "eb32f5034b6560550ba12bd4b3d33da87bd6bca88e6c92d824ce25bbcb4967d0",
+  "tests/encoders/n01_full/test_motion_data.py": "96e684d2f335eaa9b32c7bc15526f3a00232fc5113ce4cea2cdb055dabfb6d57",
+  "tests/encoders/n01_full/test_motion_eval.py": "d74e341244522538f5c93941b315228089a3d8be6471334f0b4f8242131ed67b",
+  "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+  "tests/encoders/n01_full/test_noise.py": "720f6ed48a896796e637ac961ae21498cede9f6abeb96400c90143f07cb91d01",
+  "tests/encoders/n01_full/test_p2_acceptance.py": "6761a5a0cc84185cfe5d1884d1e82349c01e61f3002ddc8a990ecb8455bf2015",
+  "tests/encoders/n01_full/test_raw_adapter.py": "ea8153808df11a4ea1672ecee9f5a3a32ccc4e5e491d607b0661dd1aad8c7d85",
+  "src/owac/baselines/_vendor/sea_raft/LICENSE": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+  "src/owac/baselines/_vendor/sea_raft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/__init__.cpython-312.pyc": "0cc95789182d3b4e653e68d7e229e90d47b6c0043edf4b8d6b4deae10f2c4ef8",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/corr.cpython-312.pyc": "82662643afcd8137374b09251a178420bcdea9a0540e9b0b7fa239e077799d18",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/extractor.cpython-312.pyc": "835709ea5c94520f3121d16f67683a2576070f75327c1cacf3988c0b8c6e6da3",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/layer.cpython-312.pyc": "58a3691c12a29b2da19bdb2cbc97a569b0c2fec1592ccf9168012b673e495208",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/raft.cpython-312.pyc": "c731fabc8d2556d03023fe79652d3b00f2754b2bb943ffba053bff03f79af091",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/update.cpython-312.pyc": "a5dd518a671a1bfdc5f96abcbd17a152c824c6188b95cf1412223b9e1006d158",
+  "src/owac/baselines/_vendor/sea_raft/corr.py": "8e5c700258f8e8da4e2be6c38bc1d1498a73d82c37e9fd4caca668b245bc318d",
+  "src/owac/baselines/_vendor/sea_raft/extractor.py": "1ef874b6bd6c90c700966180bc40bc2a85d83b187bf53a6772db3f67f85c3294",
+  "src/owac/baselines/_vendor/sea_raft/layer.py": "7f70c868e80cee021c8e2e26b5d1e160ff9aff83a8b141f36977ad12405a2859",
+  "src/owac/baselines/_vendor/sea_raft/provenance.json": "4cb19842fa49c5c145cb886be4e3bdcc314480a4a7a543a2494341f57132e4a7",
+  "src/owac/baselines/_vendor/sea_raft/raft.py": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+  "src/owac/baselines/_vendor/sea_raft/update.py": "4f94abfc36ac057c481aa5f8e830192b2d1d15b7b88a4172e4895ee8b0d5ecd9",
+  "src/owac/baselines/_vendor/sea_raft/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "src/owac/baselines/_vendor/sea_raft/utils/__pycache__/__init__.cpython-312.pyc": "0c84da34b2938d18872ab84a6fa80d3b904719f8af5ecd59f2962140f5f5aac4",
+  "src/owac/baselines/_vendor/sea_raft/utils/__pycache__/utils.cpython-312.pyc": "fd06f41741def392943e1c432dc0b1d932491204efb6c6ce1f3eeef816ceae9e",
+  "src/owac/baselines/_vendor/sea_raft/utils/utils.py": "f861c1f4b5d186f05118124e530e105a6039bda3f8aa1f6086a757ec0f330747",
+  "pyproject.toml": "ea2e887fd1a7a8d8f74d98ffc49f979167e00813fd7f5731fe3097e55f293ff5"
+ },
+ "upstream": {
+  "sea_raft": {
+   "repository": "https://github.com/princeton-vl/SEA-RAFT",
+   "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+   "license": "BSD-3-Clause",
+   "vendored": "src/owac/baselines/_vendor/sea_raft",
+   "provenance": {
+    "repository": "https://github.com/princeton-vl/SEA-RAFT",
+    "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+    "license": "BSD-3-Clause (LICENSE vendored verbatim; Copyright (c) 2024, Princeton Vision & Learning Lab)",
+    "vendored_by": "N01 v1.0 P2 RAW motion adapter (task motion-core)",
+    "source_layout": "upstream core/ -> this package root; upstream core/utils/ -> this package's utils/",
+    "changes": "Declared changes only. (1) imports rewritten from top-level to package-relative; (2) the HuggingFace Hub dependency and PyTorchModelHubMixin base class removed; (3) the input channel count is a constructor argument (cfa4 builds fnet 4 / cnet 8, rgb3 builds fnet 3 / cnet 6) instead of the hard-coded 3/6; (4) ResNetFPN takes an explicit depth argument and its torchvision ImageNet branch is deleted, so model depth and pretrained-weight loading are independent and no configuration can re-enable a download; (5) the 2 * (x / 255) - 1 RGB rescale is removed from RAFT.forward, so callers must supply calibrated, normalised RAW values; (6) in utils/utils.py the scipy import is local to forward_interpolate because scipy is not a dependency of this repository and no vendored model path calls it; (7) ruff format applied (whitespace/docstring layout only). Author definitions are otherwise unchanged: compare executable_ast_sha256 per file.",
+    "ast_digest_rule": "executable_ast_sha256 = sha256 of '\\n'.join(canonical(node) for each top-level FunctionDef/ClassDef of the module AST after docstring statements are removed), where canonical(node) = (node type name, ((field name, canonical(value)), ...)) over ast.iter_fields, skipping the CPython-version-dependent field 'type_params' (PEP 695, present on FunctionDef/AsyncFunctionDef/ClassDef from 3.12 on, absent on 3.11). Every other field is always emitted, including empty lists, so CPython 3.13's ast.dump show_empty=False default cannot move a digest either. The digest is identical under CPython 3.11 and 3.12.",
+    "files": {
+     "raft.py": {
+      "path": "core/raft.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/raft.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "4bb02c831f04b16a27fd016c8bb4ecfcf5834ea88f40e84fac9d2555864d5979",
+      "local_sha256": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+      "upstream_executable_ast_sha256": "1e42d4c3fe0262e13dbe0d6aa96bd6d9d63f3f6198a62d6b39274b8ef982575e",
+      "executable_ast_sha256": "dddde3e49ccd6984500f20c33e5f4e1a826c43f879be465b6cc8d4b14b5b4c13",
+      "changes": [
+       "package_relative_imports",
+       "huggingface_hub_mixin_removed",
+       "input_channels_parameterised",
+       "depth_argument_separated_from_weights",
+       "remove_255_rgb_rescale",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "extractor.py": {
+      "path": "core/extractor.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/extractor.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "684cfe479ef6cbe5796397749939676c79626f0c3fcbc033c8fb5cab9475bc7a",
+      "local_sha256": "1ef874b6bd6c90c700966180bc40bc2a85d83b187bf53a6772db3f67f85c3294",
+      "upstream_executable_ast_sha256": "7edd1df4b53760610c73f9cbe3158ff585333bb7d296845b63127e54a92f1b08",
+      "executable_ast_sha256": "0ecbc3e7bd36979999c88c57400cf3d19db19f79c8122abeac14b12d7f2debb4",
+      "changes": [
+       "package_relative_imports",
+       "torchvision_imagenet_autoload_removed",
+       "input_channels_parameterised",
+       "depth_argument_separated_from_weights",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "corr.py": {
+      "path": "core/corr.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/corr.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "e89bc770f1e6712447d90b8a8c75fd136c98816726d4338972f8ea5d7d6d24fb",
+      "local_sha256": "8e5c700258f8e8da4e2be6c38bc1d1498a73d82c37e9fd4caca668b245bc318d",
+      "upstream_executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "changes": [
+       "package_relative_imports",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "update.py": {
+      "path": "core/update.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/update.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "978dc580e4ebd394b29894f5d5460153a2fe5a7d4c50e5e83823330298133f69",
+      "local_sha256": "4f94abfc36ac057c481aa5f8e830192b2d1d15b7b88a4172e4895ee8b0d5ecd9",
+      "upstream_executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "changes": [
+       "package_relative_imports",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "layer.py": {
+      "path": "core/layer.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/layer.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "580f4cced2b5f3551667b4b4b24b8ff7cd024ef4e3f8723bf3c5fbb7baf74563",
+      "local_sha256": "7f70c868e80cee021c8e2e26b5d1e160ff9aff83a8b141f36977ad12405a2859",
+      "upstream_executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "changes": [
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "utils/utils.py": {
+      "path": "core/utils/utils.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/utils/utils.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "04d88de0f161db56f856776e05d4337cecaadabdc1decc104b22c6ea642f11ae",
+      "local_sha256": "f861c1f4b5d186f05118124e530e105a6039bda3f8aa1f6086a757ec0f330747",
+      "upstream_executable_ast_sha256": "bd2a50a27dc83d4b8d6cd6e2e58c173220041beb7353d6eee4a1877cabd94eba",
+      "executable_ast_sha256": "fec046abe81af38ec72996da324a2249dcc8353c356ebaefa40833ae673f89f6",
+      "changes": [
+       "scipy_import_made_local",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "LICENSE": {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/LICENSE",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "local_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "upstream_executable_ast_sha256": null,
+      "executable_ast_sha256": null,
+      "changes": [],
+      "verbatim_bytes": true
+     }
+    },
+    "owac_files": {
+     "__init__.py": "Package marker added by OWAC; not derived from upstream bytes.",
+     "utils/__init__.py": "Package marker added by OWAC; not derived from upstream bytes."
+    },
+    "runtime_verified": false,
+    "runtime_verified_note": "The vendored model was executed on CPU by the P2 tests; no upstream weight file was downloaded and no author training recipe was reproduced."
+   }
+  }
+ },
+ "local_checks": {
+  "make_check": "passed",
+  "pytest_full": "682 passed, 2 warnings",
+  "pytest_n01_full": "338 passed",
+  "pytest_p1_regression": "61 passed (test_p1_acceptance+test_replay+test_foundation+test_statistics)",
+  "acceptance_file": "53 passed, 0 xfail"
+ },
+ "independent_acceptance": {
+  "receipt": "p2-verifier-acceptance",
+  "generated_on": "2026-10-14",
+  "role": "independent adversarial verifier (did not modify implementation code)",
+  "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+  "branch": "lzh/n01-evidence-integration",
+  "test_file": "tests/encoders/n01_full/test_p2_acceptance.py",
+  "test_file_sha256": "6761a5a0cc84185cfe5d1884d1e82349c01e61f3002ddc8a990ecb8455bf2015",
+  "test_file_lines": 1694,
+  "tests_collected": 53,
+  "local_commands": {
+   "pytest_n01_full": "uv run --locked pytest -q tests/encoders/n01_full",
+   "pytest_repo": "uv run --locked pytest -q",
+   "check": "make check"
+  },
+  "counts": {
+   "new_file_only": "53 passed in 2.48s",
+   "n01_full": "334 passed, 1 warning in 14.65s",
+   "repo": "682 passed, 2 warnings in 40.62s",
+   "make_check": "exit 0 (ruff check, ruff format --check, compileall)",
+   "xfail_count": 0,
+   "baseline_before_this_file": "277 passed (n01_full) / 625 passed (repo)"
+  },
+  "xfail_tripwires_strict": [],
+  "defects": [
+   {
+    "id": "D1",
+    "severity": "major",
+    "status": "FIXED_AND_VERIFIED",
+    "where": "src/owac/training/n01_motion.py::decide_platform",
+    "fix": "two new conditions: real_improvement_over_run (first - best > delta_val) and tail_within_delta_val_of_best (|final - best| <= delta_val)",
+    "converted_assertions": [
+     "test_a_degrading_validation_curve_is_not_a_plateau",
+     "test_a_constant_validation_curve_is_not_a_plateau",
+     "test_a_flat_tail_that_drifts_away_from_its_best_is_not_converged (new)"
+    ]
+   },
+   {
+    "id": "D2",
+    "severity": "medium",
+    "status": "FIXED_AND_VERIFIED",
+    "where": "src/owac/raw/n01_noise.py::build_noise_model",
+    "fix": "one marginal rule for every branch: audited block variance (or the declared upper bound while unaudited) is added to each sample's own variance",
+    "converted_assertions": [
+     "test_a_single_sample_block_still_carries_its_black_level_variance"
+    ]
+   }
+  ],
+  "mutation_experiments": {
+   "method": "pristine src copied to /tmp/mutant/src, one mutation applied there, tests run with PYTHONPATH=/tmp/mutant/src from the worktree (no mutation entered the worktree)",
+   "results": [
+    [
+     "M1 variance-map interpolation replaces a.T Sigma a",
+     3
+    ],
+    [
+     "M2 pull sign flipped in source_xy",
+     9
+    ],
+    [
+     "M3 author-loss legal mask loosened",
+     1
+    ],
+    [
+     "M4 plateau additionally requires best_index > 0 (D1 fix)",
+     2
+    ],
+    [
+     "M5 resume drops numpy/torch RNG restore",
+     1
+    ],
+    [
+     "M6 diagonal branch adds block variance (D2 fix)",
+     1
+    ],
+    [
+     "M7 ledger.without skips physical redaction",
+     3
+    ],
+    [
+     "M8 pooled mask loosened to always-true",
+     2
+    ],
+    [
+     "M9 proxy ignores the declared var_min clamp",
+     1
+    ],
+    [
+     "M10 builder columns unfiltered",
+     1
+    ],
+    [
+     "M11 readout in_dim defaults to readout_width",
+     3
+    ],
+    [
+     "M12 step counts two arrivals per event",
+     1
+    ],
+    [
+     "M13 supervision leaked into visible metadata",
+     1
+    ],
+    [
+     "M14 selection split check dropped",
+     1
+    ],
+    [
+     "M15 calibrated flag ignored for a supplied table",
+     1
+    ],
+    [
+     "M16 exposure gain applied once to the variance",
+     1
+    ]
+   ],
+   "tripwire_note": "M4 and M6 make the D1/D2 xfail tests fail as strict XPASS, so fixing either defect forces the marker to be removed",
+   "revert_checks_after_fix": {
+    "method": "the fixed src was copied to /tmp/mutant/src and the fix locally reverted; the converted assertions must fail (no mutation entered the worktree)",
+    "results": [
+     [
+      "R1 revert both D1 conditions",
+      "3 failed: degrading, constant, drift"
+     ],
+     [
+      "R2 revert only the D1 drift condition (partial fix)",
+      "2 failed: degrading (wrong condition value) and the new drift test; the constant test still passes, showing the drift test's added value"
+     ],
+     [
+      "R3 revert the D2 diagonal block term",
+      "1 failed: single-sample-block marginal"
+     ]
+    ]
+   }
+  },
+  "not_covered": [
+   "real SEA-RAFT weights / any GPU or server run (CPU-only local verification)",
+   "the raw_adapter real (non-smoke) preflight on both platforms; only its missing-asset hard-failure and the local smoke receipt are checked",
+   "motion evaluation four-arm metrics (EPE quantiles, AUC, p50/p95 latency, memory) beyond the calibration-only fit refusal and the static/o rbit labels",
+   "the checkpoint selection winner identity across real training runs (only the guard paths)",
+   "32-frame window behaviour under multiple cameras/episodes in one stream"
+  ],
+  "uncommitted_only": true
+ },
+ "local_smoke": {
+  "kind": "n01-full-p2-motion-train-eval-local-smoke",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T09:30:37Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "files_sha256": {
+   "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+   "src/owac/evaluation/n01_motion.py": "8c1f5f9b2dee74087045fbb75f3febe8ca0c28e245614da5ac43ccbf41edf5f5",
+   "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+   "tests/encoders/n01_full/test_motion_eval.py": "d74e341244522538f5c93941b315228089a3d8be6471334f0b4f8242131ed67b"
+  },
+  "local_checks": {
+   "make_check": "passed (ruff check, ruff format --check, compileall)",
+   "pytest_tests_encoders_n01_full": "277 passed",
+   "pytest_full_repo": "625 passed",
+   "environment": "Python 3.12.12, torch 2.9.1+cpu, numpy 2.5.1, CPU only"
+  },
+  "recipe": {
+   "loss": "author sequence_loss re-implemented at training/n01_motion.py::sequence_loss; gamma**(n-i-1) iteration weights, masked mean per iteration, mag<max_flow exclusion, packed-cell unit for both prediction and target",
+   "optimizer": "AdamW(lr from selection, weight_decay=1e-4, eps=1e-8), clip_grad=1.0, gamma=0.8, bf16 autocast on CUDA",
+   "lr_tiers": [
+    0.00025,
+    5e-05
+   ],
+   "iteration_tiers": [
+    4,
+    8
+   ],
+   "lr_drops": [
+    [
+     50000,
+     0.1
+    ],
+    [
+     80000,
+     0.01
+    ]
+   ],
+   "budget_updates": 100000,
+   "budget_ceiling": 300000,
+   "validation_interval": 1000,
+   "plateau_checks": 8,
+   "delta_val": 0.002,
+   "monitor": "val_epe_sensor_px",
+   "seeds": [
+    101,
+    211,
+    307
+   ]
+  },
+  "local_results": {
+   "fit_check_shipped_config_256_updates": {
+    "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output outputs/n01-full-p2/motion-train-eval/fit-check-real --device cpu --seed 101",
+    "passed": true,
+    "initial_window_mean": 12.995,
+    "final_window_mean": 2.449,
+    "samples_consumed": 512,
+    "wall_seconds": 96.8
+   },
+   "smoke_chain_minimal_config": {
+    "config": "outputs/n01-full-p2/motion-train-eval/smoke_config.json (resnet34, iters 4, 256x256 sensor, batch 1, 2-4 updates)",
+    "fit_check_passed": true,
+    "selection_winner": {
+     "lr": 0.00025,
+     "iters": 4
+    },
+    "selection_split": "validation",
+    "train_platform": "budget_exhausted",
+    "train_updates": 2,
+    "train_loss_first_last": [
+     45.53,
+     13.68
+    ],
+    "train_parameter_abs_update": 12430.4,
+    "resume": "loaded update 2 of 4; next batch identity and per-update loss equal to the continuous run in the unit test",
+    "evaluation_arms_test_epe_sensor_px": {
+     "no_alignment": 2.11,
+     "old_simplified": 2.85,
+     "sea_raft": 149.48,
+     "oracle": 0.0
+    },
+    "evaluation_latency_cpu_p50_p95_ms": [
+     62.03,
+     62.14
+    ],
+    "evaluation_buckets": {
+     "fast_alignable": [
+      "translation_subpixel",
+      "exposure_gain",
+      "motion_blur"
+     ],
+     "fast_hard": [
+      "layered_occlusion",
+      "repeated_texture"
+     ],
+     "slow_structural_change": [
+      "rotation",
+      "local_nonrigid"
+     ],
+     "current_frame_anomaly": [
+      "combined_hard"
+     ]
+    },
+    "note": "the smoke model is trained for two updates only; its EPE is not a research result"
+   }
+  },
+  "remote_bundle_gap": {
+   "existing_bundle": "outputs/n01-full-p2/bundle-v1 (git head 01e0316, 172 files)",
+   "contains_my_files": false,
+   "required_action": "re-bundle (or overlay) the five files listed in files_sha256 before the remote run"
+  },
+  "remote_command_sequence": {
+   "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+   "environment": "new encoder env with CUDA torch and Python >= 3.11; PYTHONPATH=<snapshot>/src",
+   "fit_check": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/fit-check --device cuda",
+   "select": "python -m owac.training.n01_motion select --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/select --device cuda",
+   "formal_seed": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json",
+   "formal_seed_211": "same with --seed 211 --output $RUN/seed-211",
+   "formal_seed_307": "same with --seed 307 --output $RUN/seed-307",
+   "resume_continuation": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json --resume $RUN/seed-101/checkpoints/last.pt --max-updates <authorised total>",
+   "evaluation": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/eval-seed-101 --device cuda --checkpoint $RUN/seed-101/checkpoints/best.pt",
+   "expected_outputs": {
+    "fit_check": "$RUN/fit-check/fit_check.json",
+    "select": "$RUN/select/selection.json + winner.json",
+    "train": "$RUN/seed-<seed>/receipt.json + train_loss_curve.json + checkpoints/{best,last}.pt",
+    "eval": "$RUN/eval-seed-<seed>/receipt.json + risk_calibration.json + pairs.jsonl"
+   }
+  },
+  "known_differences_and_risks": [
+   "the vendored tree ships no core/loss.py, so sequence_loss is re-implemented with the fetched upstream sha256 recorded in the module docstring; the only declared difference is a mask-sum clamp so an empty mask contributes zero instead of NaN",
+   "no upstream pretrained or ImageNet weights are loaded (model.pretrained_checkpoint = null); every seed starts from its seeded random initialisation",
+   "the shipped noise-config geometry is 64x64 sensor (32x32 packed), below the vendored 4-level correlation pyramid minimum of 128 packed cells at iters>0; the training config overrides to 256x256 sensor and scales every pixel-valued recipe length by 4 (translation_subpixel tokens stay absolute)",
+   "LR drops are declared at absolute updates (50k, 80k); extending a resumed run therefore replays the same LR trajectory instead of moving phase boundaries",
+   "checkpoint size is ~226 MB per file (19.7M params + AdamW moments); last.pt is overwritten every 1000 updates and best.pt on every improvement",
+   "validation_plateau is a stop condition, not a quality verdict: a run whose validation only degrades also has 'no improvements' for eight checks; the receipt carries the whole validation history and the best checkpoint",
+   "the old_simplified arm is a global integer correlation alignment on the delivered RAW planes (the old align_planes path needs a given offset field, so this arm supplies it); its variance shortcut is not reused",
+   "the evaluation caps region sizes case-balanced so every case (and every bucket) keeps at least one pair"
+  ],
+  "d1_platform_criteria_fix": {
+   "defect": "D1: decide_platform accepted a constant or monotonically degrading validation curve as validation_plateau",
+   "fix": [
+    "real_improvement_over_run: first_value - best_value > delta_val (strictly)",
+    "tail_within_delta_val_of_best: |final_value - best_value| <= delta_val",
+    "flat_tail_below_delta_val stays literal: slow persistent improvement below delta_val is still a plateau"
+   ],
+   "reasons_are_named_per_condition": [
+    "platform condition failed: real_improvement_over_run",
+    "platform condition failed: tail_within_delta_val_of_best",
+    "platform condition failed: flat_tail_below_delta_val",
+    "platform condition failed: two_effective_lr_drops",
+    "platform condition failed: final_low_lr_phase",
+    "platform condition failed: best_not_at_budget_end",
+    "platform condition failed: diagnostics_passed"
+   ],
+   "observed_verdicts": {
+    "constant_5.0_x12": "budget_exhausted (real_improvement_over_run)",
+    "monotonic_worsening_1..12": "budget_exhausted (real_improvement_over_run, tail_within_delta_val_of_best)",
+    "improve_then_degrade": "budget_exhausted (tail_within_delta_val_of_best)",
+    "slow_improvement_0.5x_delta_per_step": "validation_plateau"
+   },
+   "operational_note": "decide_platform is called only with the validation history; the fix changes neither the training trajectory nor any checkpoint's tensor content. An already-finished run whose old receipt says validation_plateau on a zero-improvement or drifting curve must have its status re-derived (the checkpoint stores val_history/lr_drops, so this is a pure recomputation), and a run that is still executing keeps the old function in memory until restarted; it never needs an update rerun."
+  },
+  "later_additions": "the rgb3 (pseudo-RAW) dev-scale stem arm and the stem-report entry point were added after this receipt; they change no loss, schedule or checkpoint semantics, so the platform statuses recorded here are unaffected. See motion-train-eval-stem-rgb3.json"
+ },
+ "stem_rgb3": {
+  "kind": "n01-full-p2-motion-stem-rgb3",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T10:03:46Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "requirement": "P2 section 2: the CFA and pseudo-RAW stems are configured and trained separately and the parameter difference is reported",
+  "files_sha256": {
+   "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+   "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+   "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+   "outputs/n01-full-p2/motion-train-eval/stem-report/stem_report.json": "2c3f9a30689adb341c28e8d1c90ba771068c95cd5df56eb8087455dc52affa66"
+  },
+  "cfa_config_unchanged": {
+   "sha256": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "statement": "the CFA configuration is bit-identical to the D1 revision; the only added config field is `scale`, which defaults to 'formal' and stays out of core_fingerprint"
+  },
+  "stem_report": {
+   "command": "python -m owac.training.n01_motion stem-report --config configs/encoders/n01_full/p2_motion_train.json --compare configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/stem-report --device cpu",
+   "stem_convolutions": {
+    "kernel": [
+     7,
+     7
+    ],
+    "out_channels": 64,
+    "fnet_input": [
+     4,
+     3
+    ],
+    "cnet_input": [
+     8,
+     6
+    ]
+   },
+   "channels": {
+    "cfa4": 4,
+    "rgb3": 3
+   },
+   "total_trainable": {
+    "cfa4": 19673284,
+    "rgb3": 19663876,
+    "delta": -9408,
+    "analytic_delta": -9408,
+    "matches_analytic": true
+   },
+   "groups": {
+    "cnet": {
+     "cfa4_params": 8256704,
+     "rgb3_params": 8250432,
+     "delta": -6272,
+     "analytic_delta": -6272,
+     "matches_analytic": true,
+     "shapes_equal": false,
+     "differing_tensors": {
+      "cnet.conv1.weight": {
+       "cfa4": [
+        64,
+        8,
+        7,
+        7
+       ],
+       "rgb3": [
+        64,
+        6,
+        7,
+        7
+       ]
+      }
+     }
+    },
+    "fnet": {
+     "cfa4_params": 8244160,
+     "rgb3_params": 8241024,
+     "delta": -3136,
+     "analytic_delta": -3136,
+     "matches_analytic": true,
+     "shapes_equal": false,
+     "differing_tensors": {
+      "fnet.conv1.weight": {
+       "cfa4": [
+        64,
+        4,
+        7,
+        7
+       ],
+       "rgb3": [
+        64,
+        3,
+        7,
+        7
+       ]
+      }
+     }
+    },
+    "init_conv": {
+     "cfa4_params": 590080,
+     "rgb3_params": 590080,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "update_block": {
+     "cfa4_params": 1830142,
+     "rgb3_params": 1830142,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "flow_head": {
+     "cfa4_params": 308998,
+     "rgb3_params": 308998,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "upsample_weight": {
+     "cfa4_params": 443200,
+     "rgb3_params": 443200,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    }
+   },
+   "differing_parameter_names": [
+    "cnet.conv1.weight",
+    "fnet.conv1.weight"
+   ],
+   "only_stem_input_channels_differ": true,
+   "verdict": {
+    "only_expected_config_differences": true,
+    "only_stem_parameters_differ": true,
+    "analytic_matches_measured": true,
+    "evidence_scale": {
+     "cfa4": "formal",
+     "rgb3": "dev",
+     "statement": "the cfa4 arm carries the authorised formal budget; the rgb3 arm is a development-scale arm (same budget/schedule/criteria, dev-scale evidence)"
+    }
+   },
+   "analytic_expectation": "both stems are Conv2d(C, 64, 7, stride=2, padding=3): fnet C = RAW channels (4->3) gives (3-4)*64*49 = -3136; cnet C = 2*channels (8->6) gives (6-8)*64*49 = -6272; total -9408, and every other group is delta 0 with identical shapes"
+  },
+  "local_rgb3_fit_check": {
+   "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/fit-check-rgb3 --device cpu --seed 101",
+   "passed": true,
+   "run_scale": "dev",
+   "updates": 256,
+   "initial_window_mean": 18.384477195739745,
+   "final_window_mean": 2.4443642711639404,
+   "checks": {
+    "small_set_fit_decreased": true,
+    "small_set_fit_target": true,
+    "inputs_finite": true,
+    "inputs_within_limit": true,
+    "gradient_groups_nonzero": true,
+    "unit_round_trip_exact": true
+   },
+   "gradient_groups_first_step": {
+    "cnet": 0.32883310690716855,
+    "fnet": 0.21786860575968883,
+    "update_block": 1.2609106041439955,
+    "flow_head": 1.0113435140810907,
+    "init_conv": 0.2523330415133387,
+    "upsample_weight": 0.0006247068713491899
+   },
+   "samples_consumed": 512,
+   "wall_seconds": 108.41700946600031,
+   "specs": [
+    "x+0.25",
+    "x+0.25"
+   ]
+  },
+  "remote_commands": {
+   "rgb3_fit_check_dev": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-fit-check --device cuda",
+   "rgb3_dev_train_256": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-seed-101 --device cuda --seed 101 --max-updates 256",
+   "rgb3_dev_train_resume": "add --resume $RUN/rgb3-seed-101/checkpoints/last.pt --max-updates <authorised total>",
+   "rgb3_optional_eval": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-eval-seed-101 --device cuda --checkpoint $RUN/rgb3-seed-101/checkpoints/best.pt",
+   "note": "the 256-update dev run never reaches the 50k/80k LR drops, so its platform status must be budget_exhausted; it is a dev-scale stem-arm run, not a formal result"
+  },
+  "evidence_scale_boundary": {
+   "formal": "cfa4: three seeds x 100k authorised; train/select/fit-check commands unchanged",
+   "dev_rgb3_done_here": [
+    "configuration exists and loads (128x128 pseudo-RAW geometry, empty phase, packed 1:1)",
+    "stem-report with measured vs analytic parameter difference",
+    "real 256-update CPU fit-check on the rgb3 stem (all diagnostics pass)",
+    "real rgb3 forward/backward/parameter-update test on CPU"
+   ],
+   "dev_rgb3_not_done_here": [
+    "the 256-update dev training run itself (remote-runner, command above)",
+    "three-seed rgb3 runs and any platform/plateau claim (needs the 50k/80k drops)",
+    "rgb3 evaluation on the test region (command given as optional)"
+   ],
+   "naming_caveat": "the shipped noise calibration version is named 'p2-synth-cfa-v1' and is shared by both stems as the declared synthetic calibration artifact; the geometry and material class differ (synthetic CFA vs rawvla_rgb3_hdr_derived), and the receipts record both"
+  }
+ },
+ "remote": {
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "source_snapshots": {
+   "source": {
+    "files": 172,
+    "remote_hash_compare": "172/172 matched",
+    "verify": "passed"
+   },
+   "source-v2": {
+    "files": 179,
+    "remote_hash_compare": "179/179 matched",
+    "verify": "passed"
+   },
+   "source-v3": {
+    "parent": "source-v2",
+    "changed": [
+     "src/owac/training/n01_motion.py",
+     "src/owac/raw/n01_noise.py"
+    ],
+    "added": [
+     "configs/encoders/n01_full/p2_motion_train_rgb3.json"
+    ],
+    "note": "3 项替换/新增，其余与 v2 逐字节相同"
+   }
+  },
+  "short_tasks": {
+   "fit_check": {
+    "passed": true,
+    "loss_first": 13.039,
+    "loss_final": 2.414,
+    "samples": 512,
+    "wall_s": 96.6,
+    "diagnostics": "6/6 true"
+   },
+   "select": {
+    "winner": {
+     "lr": 0.00025,
+     "iters": 4
+    },
+    "val_epe_sensor_px": {
+     "2.5e-4/4": 1.2079,
+     "2.5e-4/8": 1.4641,
+     "5e-5/4": 2.7207,
+     "5e-5/8": 1.8965
+    },
+    "wall_s": 476.4
+   },
+   "rgb3_fit_check": {
+    "passed": true,
+    "loss_first": 18.746,
+    "loss_final": 2.429,
+    "wall_s": 88.7
+   },
+   "rgb3_train_256": {
+    "platform": "budget_exhausted",
+    "loss_first": 8.462,
+    "loss_final": 4.438,
+    "peak_mib": 723.9,
+    "wall_s": 115.8
+   },
+   "stem_report": {
+    "cfa4_total": 19673284,
+    "rgb3_total": 19663876,
+    "delta": -9408,
+    "only_stem_input_channels_differ": true
+   }
+  },
+  "training": {
+   "101": {
+    "status": "validation_plateau",
+    "stopped_at_update": 82000,
+    "wall_s": 13990.8,
+    "gpu_hours": 3.886,
+    "val_epe_first": 0.774721,
+    "val_epe_best": 0.069852,
+    "val_epe_final": 0.069852,
+    "best_sha256": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+    "last_sha256": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09",
+    "note": "旧判据 81k 判平台；source-v3 重算拒绝并续训 1,000 updates 至 82k"
+   },
+   "211": {
+    "status": "budget_exhausted",
+    "stopped_at_update": 100000,
+    "wall_s": 4749.3,
+    "gpu_hours": 1.319,
+    "updates_per_s": 21.06,
+    "val_epe_first": 0.73451,
+    "val_epe_best": 0.0758537,
+    "val_epe_best_update": 91000,
+    "val_epe_final": 0.089877,
+    "lr_drops": 2,
+    "peak_mib": 725.1,
+    "best_sha256": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+    "last_sha256": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8"
+   },
+   "307": {
+    "status": "interrupted_instance_outage",
+    "started_utc": "2026-10-14T15:06:31Z",
+    "outage_utc": "2026-10-14T15:20Z"
+   }
+  },
+  "evaluation": {
+   "status": "pending_instance_outage"
+  },
+  "raw_adapter_preflight": {
+   "status": "pending_instance_outage"
+  },
+  "receipts_local": [
+   "remote-runner-seed-101-receipt.json",
+   "remote-runner-seed-101-receipt-pre-continuation.json",
+   "remote-runner-seed-101-platform-recheck.json",
+   "remote-runner-seed-211-receipt.json",
+   "remote-runner-seed-211-platform-recheck.json",
+   "remote-runner-phase-a.json",
+   "remote-runner-phase-b-v3-rgb3.json"
+  ]
+ },
+ "decisions": {
+  "budget": "分级授权：256 拟合 + 两档 LR 选择 → 3 seeds × 100k 第一段；续训需再授权（不上 300k）",
+  "initialization": "从零训练，主结论不使用任何 RGB/ImageNet 权重",
+  "gpu_cleanup": "用户明确授权停止 N04 seed17 与 N02 进程/编排脚本；4 个 rawvla policy 服务保留"
+ },
+ "defects_found_and_fixed": [
+  {
+   "id": "D1",
+   "severity": "major",
+   "where": "src/owac/training/n01_motion.py::decide_platform",
+   "found_by": "independent verifier",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "D2",
+   "severity": "medium",
+   "where": "src/owac/raw/n01_noise.py::build_noise_model",
+   "found_by": "independent verifier",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "X1",
+   "severity": "minor",
+   "where": "tests/encoders/n01_full/test_motion.py AST digest",
+   "found_by": "remote Python 3.11 pytest",
+   "status": "fixed_and_verified"
+  }
+ ],
+ "status": {
+  "implementation_status": "PASS_P2_LOCAL",
+  "training_status": "PARTIAL_P2_SEGMENT",
+  "effect_status": "NOT_APPLICABLE"
+ }
+}

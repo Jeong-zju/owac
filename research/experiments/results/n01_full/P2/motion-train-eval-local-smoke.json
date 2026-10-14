@@ -1,0 +1,166 @@
+{
+  "kind": "n01-full-p2-motion-train-eval-local-smoke",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T09:30:37Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "files_sha256": {
+    "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+    "src/owac/evaluation/n01_motion.py": "8c1f5f9b2dee74087045fbb75f3febe8ca0c28e245614da5ac43ccbf41edf5f5",
+    "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+    "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+    "tests/encoders/n01_full/test_motion_eval.py": "d74e341244522538f5c93941b315228089a3d8be6471334f0b4f8242131ed67b"
+  },
+  "local_checks": {
+    "make_check": "passed (ruff check, ruff format --check, compileall)",
+    "pytest_tests_encoders_n01_full": "277 passed",
+    "pytest_full_repo": "625 passed",
+    "environment": "Python 3.12.12, torch 2.9.1+cpu, numpy 2.5.1, CPU only"
+  },
+  "recipe": {
+    "loss": "author sequence_loss re-implemented at training/n01_motion.py::sequence_loss; gamma**(n-i-1) iteration weights, masked mean per iteration, mag<max_flow exclusion, packed-cell unit for both prediction and target",
+    "optimizer": "AdamW(lr from selection, weight_decay=1e-4, eps=1e-8), clip_grad=1.0, gamma=0.8, bf16 autocast on CUDA",
+    "lr_tiers": [
+      0.00025,
+      5e-05
+    ],
+    "iteration_tiers": [
+      4,
+      8
+    ],
+    "lr_drops": [
+      [
+        50000,
+        0.1
+      ],
+      [
+        80000,
+        0.01
+      ]
+    ],
+    "budget_updates": 100000,
+    "budget_ceiling": 300000,
+    "validation_interval": 1000,
+    "plateau_checks": 8,
+    "delta_val": 0.002,
+    "monitor": "val_epe_sensor_px",
+    "seeds": [
+      101,
+      211,
+      307
+    ]
+  },
+  "local_results": {
+    "fit_check_shipped_config_256_updates": {
+      "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output outputs/n01-full-p2/motion-train-eval/fit-check-real --device cpu --seed 101",
+      "passed": true,
+      "initial_window_mean": 12.995,
+      "final_window_mean": 2.449,
+      "samples_consumed": 512,
+      "wall_seconds": 96.8
+    },
+    "smoke_chain_minimal_config": {
+      "config": "outputs/n01-full-p2/motion-train-eval/smoke_config.json (resnet34, iters 4, 256x256 sensor, batch 1, 2-4 updates)",
+      "fit_check_passed": true,
+      "selection_winner": {
+        "lr": 0.00025,
+        "iters": 4
+      },
+      "selection_split": "validation",
+      "train_platform": "budget_exhausted",
+      "train_updates": 2,
+      "train_loss_first_last": [
+        45.53,
+        13.68
+      ],
+      "train_parameter_abs_update": 12430.4,
+      "resume": "loaded update 2 of 4; next batch identity and per-update loss equal to the continuous run in the unit test",
+      "evaluation_arms_test_epe_sensor_px": {
+        "no_alignment": 2.11,
+        "old_simplified": 2.85,
+        "sea_raft": 149.48,
+        "oracle": 0.0
+      },
+      "evaluation_latency_cpu_p50_p95_ms": [
+        62.03,
+        62.14
+      ],
+      "evaluation_buckets": {
+        "fast_alignable": [
+          "translation_subpixel",
+          "exposure_gain",
+          "motion_blur"
+        ],
+        "fast_hard": [
+          "layered_occlusion",
+          "repeated_texture"
+        ],
+        "slow_structural_change": [
+          "rotation",
+          "local_nonrigid"
+        ],
+        "current_frame_anomaly": [
+          "combined_hard"
+        ]
+      },
+      "note": "the smoke model is trained for two updates only; its EPE is not a research result"
+    }
+  },
+  "remote_bundle_gap": {
+    "existing_bundle": "outputs/n01-full-p2/bundle-v1 (git head 01e0316, 172 files)",
+    "contains_my_files": false,
+    "required_action": "re-bundle (or overlay) the five files listed in files_sha256 before the remote run"
+  },
+  "remote_command_sequence": {
+    "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+    "environment": "new encoder env with CUDA torch and Python >= 3.11; PYTHONPATH=<snapshot>/src",
+    "fit_check": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/fit-check --device cuda",
+    "select": "python -m owac.training.n01_motion select --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/select --device cuda",
+    "formal_seed": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json",
+    "formal_seed_211": "same with --seed 211 --output $RUN/seed-211",
+    "formal_seed_307": "same with --seed 307 --output $RUN/seed-307",
+    "resume_continuation": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json --resume $RUN/seed-101/checkpoints/last.pt --max-updates <authorised total>",
+    "evaluation": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/eval-seed-101 --device cuda --checkpoint $RUN/seed-101/checkpoints/best.pt",
+    "expected_outputs": {
+      "fit_check": "$RUN/fit-check/fit_check.json",
+      "select": "$RUN/select/selection.json + winner.json",
+      "train": "$RUN/seed-<seed>/receipt.json + train_loss_curve.json + checkpoints/{best,last}.pt",
+      "eval": "$RUN/eval-seed-<seed>/receipt.json + risk_calibration.json + pairs.jsonl"
+    }
+  },
+  "known_differences_and_risks": [
+    "the vendored tree ships no core/loss.py, so sequence_loss is re-implemented with the fetched upstream sha256 recorded in the module docstring; the only declared difference is a mask-sum clamp so an empty mask contributes zero instead of NaN",
+    "no upstream pretrained or ImageNet weights are loaded (model.pretrained_checkpoint = null); every seed starts from its seeded random initialisation",
+    "the shipped noise-config geometry is 64x64 sensor (32x32 packed), below the vendored 4-level correlation pyramid minimum of 128 packed cells at iters>0; the training config overrides to 256x256 sensor and scales every pixel-valued recipe length by 4 (translation_subpixel tokens stay absolute)",
+    "LR drops are declared at absolute updates (50k, 80k); extending a resumed run therefore replays the same LR trajectory instead of moving phase boundaries",
+    "checkpoint size is ~226 MB per file (19.7M params + AdamW moments); last.pt is overwritten every 1000 updates and best.pt on every improvement",
+    "validation_plateau is a stop condition, not a quality verdict: a run whose validation only degrades also has 'no improvements' for eight checks; the receipt carries the whole validation history and the best checkpoint",
+    "the old_simplified arm is a global integer correlation alignment on the delivered RAW planes (the old align_planes path needs a given offset field, so this arm supplies it); its variance shortcut is not reused",
+    "the evaluation caps region sizes case-balanced so every case (and every bucket) keeps at least one pair"
+  ],
+  "d1_platform_criteria_fix": {
+    "defect": "D1: decide_platform accepted a constant or monotonically degrading validation curve as validation_plateau",
+    "fix": [
+      "real_improvement_over_run: first_value - best_value > delta_val (strictly)",
+      "tail_within_delta_val_of_best: |final_value - best_value| <= delta_val",
+      "flat_tail_below_delta_val stays literal: slow persistent improvement below delta_val is still a plateau"
+    ],
+    "reasons_are_named_per_condition": [
+      "platform condition failed: real_improvement_over_run",
+      "platform condition failed: tail_within_delta_val_of_best",
+      "platform condition failed: flat_tail_below_delta_val",
+      "platform condition failed: two_effective_lr_drops",
+      "platform condition failed: final_low_lr_phase",
+      "platform condition failed: best_not_at_budget_end",
+      "platform condition failed: diagnostics_passed"
+    ],
+    "observed_verdicts": {
+      "constant_5.0_x12": "budget_exhausted (real_improvement_over_run)",
+      "monotonic_worsening_1..12": "budget_exhausted (real_improvement_over_run, tail_within_delta_val_of_best)",
+      "improve_then_degrade": "budget_exhausted (tail_within_delta_val_of_best)",
+      "slow_improvement_0.5x_delta_per_step": "validation_plateau"
+    },
+    "operational_note": "decide_platform is called only with the validation history; the fix changes neither the training trajectory nor any checkpoint's tensor content. An already-finished run whose old receipt says validation_plateau on a zero-improvement or drifting curve must have its status re-derived (the checkpoint stores val_history/lr_drops, so this is a pure recomputation), and a run that is still executing keeps the old function in memory until restarted; it never needs an update rerun."
+  },
+  "later_additions": "the rgb3 (pseudo-RAW) dev-scale stem arm and the stem-report entry point were added after this receipt; they change no loss, schedule or checkpoint semantics, so the platform statuses recorded here are unaffected. See motion-train-eval-stem-rgb3.json"
+}

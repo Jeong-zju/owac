@@ -1,0 +1,202 @@
+{
+  "kind": "n01-full-p2-motion-stem-rgb3",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T10:03:46Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "requirement": "P2 section 2: the CFA and pseudo-RAW stems are configured and trained separately and the parameter difference is reported",
+  "files_sha256": {
+    "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+    "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+    "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+    "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+    "outputs/n01-full-p2/motion-train-eval/stem-report/stem_report.json": "2c3f9a30689adb341c28e8d1c90ba771068c95cd5df56eb8087455dc52affa66"
+  },
+  "cfa_config_unchanged": {
+    "sha256": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+    "statement": "the CFA configuration is bit-identical to the D1 revision; the only added config field is `scale`, which defaults to 'formal' and stays out of core_fingerprint"
+  },
+  "stem_report": {
+    "command": "python -m owac.training.n01_motion stem-report --config configs/encoders/n01_full/p2_motion_train.json --compare configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/stem-report --device cpu",
+    "stem_convolutions": {
+      "kernel": [
+        7,
+        7
+      ],
+      "out_channels": 64,
+      "fnet_input": [
+        4,
+        3
+      ],
+      "cnet_input": [
+        8,
+        6
+      ]
+    },
+    "channels": {
+      "cfa4": 4,
+      "rgb3": 3
+    },
+    "total_trainable": {
+      "cfa4": 19673284,
+      "rgb3": 19663876,
+      "delta": -9408,
+      "analytic_delta": -9408,
+      "matches_analytic": true
+    },
+    "groups": {
+      "cnet": {
+        "cfa4_params": 8256704,
+        "rgb3_params": 8250432,
+        "delta": -6272,
+        "analytic_delta": -6272,
+        "matches_analytic": true,
+        "shapes_equal": false,
+        "differing_tensors": {
+          "cnet.conv1.weight": {
+            "cfa4": [
+              64,
+              8,
+              7,
+              7
+            ],
+            "rgb3": [
+              64,
+              6,
+              7,
+              7
+            ]
+          }
+        }
+      },
+      "fnet": {
+        "cfa4_params": 8244160,
+        "rgb3_params": 8241024,
+        "delta": -3136,
+        "analytic_delta": -3136,
+        "matches_analytic": true,
+        "shapes_equal": false,
+        "differing_tensors": {
+          "fnet.conv1.weight": {
+            "cfa4": [
+              64,
+              4,
+              7,
+              7
+            ],
+            "rgb3": [
+              64,
+              3,
+              7,
+              7
+            ]
+          }
+        }
+      },
+      "init_conv": {
+        "cfa4_params": 590080,
+        "rgb3_params": 590080,
+        "delta": 0,
+        "analytic_delta": 0,
+        "matches_analytic": true,
+        "shapes_equal": true,
+        "differing_tensors": {}
+      },
+      "update_block": {
+        "cfa4_params": 1830142,
+        "rgb3_params": 1830142,
+        "delta": 0,
+        "analytic_delta": 0,
+        "matches_analytic": true,
+        "shapes_equal": true,
+        "differing_tensors": {}
+      },
+      "flow_head": {
+        "cfa4_params": 308998,
+        "rgb3_params": 308998,
+        "delta": 0,
+        "analytic_delta": 0,
+        "matches_analytic": true,
+        "shapes_equal": true,
+        "differing_tensors": {}
+      },
+      "upsample_weight": {
+        "cfa4_params": 443200,
+        "rgb3_params": 443200,
+        "delta": 0,
+        "analytic_delta": 0,
+        "matches_analytic": true,
+        "shapes_equal": true,
+        "differing_tensors": {}
+      }
+    },
+    "differing_parameter_names": [
+      "cnet.conv1.weight",
+      "fnet.conv1.weight"
+    ],
+    "only_stem_input_channels_differ": true,
+    "verdict": {
+      "only_expected_config_differences": true,
+      "only_stem_parameters_differ": true,
+      "analytic_matches_measured": true,
+      "evidence_scale": {
+        "cfa4": "formal",
+        "rgb3": "dev",
+        "statement": "the cfa4 arm carries the authorised formal budget; the rgb3 arm is a development-scale arm (same budget/schedule/criteria, dev-scale evidence)"
+      }
+    },
+    "analytic_expectation": "both stems are Conv2d(C, 64, 7, stride=2, padding=3): fnet C = RAW channels (4->3) gives (3-4)*64*49 = -3136; cnet C = 2*channels (8->6) gives (6-8)*64*49 = -6272; total -9408, and every other group is delta 0 with identical shapes"
+  },
+  "local_rgb3_fit_check": {
+    "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/fit-check-rgb3 --device cpu --seed 101",
+    "passed": true,
+    "run_scale": "dev",
+    "updates": 256,
+    "initial_window_mean": 18.384477195739745,
+    "final_window_mean": 2.4443642711639404,
+    "checks": {
+      "small_set_fit_decreased": true,
+      "small_set_fit_target": true,
+      "inputs_finite": true,
+      "inputs_within_limit": true,
+      "gradient_groups_nonzero": true,
+      "unit_round_trip_exact": true
+    },
+    "gradient_groups_first_step": {
+      "cnet": 0.32883310690716855,
+      "fnet": 0.21786860575968883,
+      "update_block": 1.2609106041439955,
+      "flow_head": 1.0113435140810907,
+      "init_conv": 0.2523330415133387,
+      "upsample_weight": 0.0006247068713491899
+    },
+    "samples_consumed": 512,
+    "wall_seconds": 108.41700946600031,
+    "specs": [
+      "x+0.25",
+      "x+0.25"
+    ]
+  },
+  "remote_commands": {
+    "rgb3_fit_check_dev": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-fit-check --device cuda",
+    "rgb3_dev_train_256": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-seed-101 --device cuda --seed 101 --max-updates 256",
+    "rgb3_dev_train_resume": "add --resume $RUN/rgb3-seed-101/checkpoints/last.pt --max-updates <authorised total>",
+    "rgb3_optional_eval": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-eval-seed-101 --device cuda --checkpoint $RUN/rgb3-seed-101/checkpoints/best.pt",
+    "note": "the 256-update dev run never reaches the 50k/80k LR drops, so its platform status must be budget_exhausted; it is a dev-scale stem-arm run, not a formal result"
+  },
+  "evidence_scale_boundary": {
+    "formal": "cfa4: three seeds x 100k authorised; train/select/fit-check commands unchanged",
+    "dev_rgb3_done_here": [
+      "configuration exists and loads (128x128 pseudo-RAW geometry, empty phase, packed 1:1)",
+      "stem-report with measured vs analytic parameter difference",
+      "real 256-update CPU fit-check on the rgb3 stem (all diagnostics pass)",
+      "real rgb3 forward/backward/parameter-update test on CPU"
+    ],
+    "dev_rgb3_not_done_here": [
+      "the 256-update dev training run itself (remote-runner, command above)",
+      "three-seed rgb3 runs and any platform/plateau claim (needs the 50k/80k drops)",
+      "rgb3 evaluation on the test region (command given as optional)"
+    ],
+    "naming_caveat": "the shipped noise calibration version is named 'p2-synth-cfa-v1' and is shared by both stems as the declared synthetic calibration artifact; the geometry and material class differ (synthetic CFA vs rawvla_rgb3_hdr_derived), and the receipts record both"
+  }
+}

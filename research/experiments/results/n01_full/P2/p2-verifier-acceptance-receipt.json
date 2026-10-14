@@ -1,0 +1,144 @@
+{
+  "receipt": "p2-verifier-acceptance",
+  "generated_on": "2026-10-14",
+  "role": "independent adversarial verifier (did not modify implementation code)",
+  "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+  "branch": "lzh/n01-evidence-integration",
+  "test_file": "tests/encoders/n01_full/test_p2_acceptance.py",
+  "test_file_sha256": "6761a5a0cc84185cfe5d1884d1e82349c01e61f3002ddc8a990ecb8455bf2015",
+  "test_file_lines": 1694,
+  "tests_collected": 53,
+  "local_commands": {
+    "pytest_n01_full": "uv run --locked pytest -q tests/encoders/n01_full",
+    "pytest_repo": "uv run --locked pytest -q",
+    "check": "make check"
+  },
+  "counts": {
+    "new_file_only": "53 passed in 2.48s",
+    "n01_full": "334 passed, 1 warning in 14.65s",
+    "repo": "682 passed, 2 warnings in 40.62s",
+    "make_check": "exit 0 (ruff check, ruff format --check, compileall)",
+    "xfail_count": 0,
+    "baseline_before_this_file": "277 passed (n01_full) / 625 passed (repo)"
+  },
+  "xfail_tripwires_strict": [],
+  "defects": [
+    {
+      "id": "D1",
+      "severity": "major",
+      "status": "FIXED_AND_VERIFIED",
+      "where": "src/owac/training/n01_motion.py::decide_platform",
+      "fix": "two new conditions: real_improvement_over_run (first - best > delta_val) and tail_within_delta_val_of_best (|final - best| <= delta_val)",
+      "converted_assertions": [
+        "test_a_degrading_validation_curve_is_not_a_plateau",
+        "test_a_constant_validation_curve_is_not_a_plateau",
+        "test_a_flat_tail_that_drifts_away_from_its_best_is_not_converged (new)"
+      ]
+    },
+    {
+      "id": "D2",
+      "severity": "medium",
+      "status": "FIXED_AND_VERIFIED",
+      "where": "src/owac/raw/n01_noise.py::build_noise_model",
+      "fix": "one marginal rule for every branch: audited block variance (or the declared upper bound while unaudited) is added to each sample's own variance",
+      "converted_assertions": [
+        "test_a_single_sample_block_still_carries_its_black_level_variance"
+      ]
+    }
+  ],
+  "mutation_experiments": {
+    "method": "pristine src copied to /tmp/mutant/src, one mutation applied there, tests run with PYTHONPATH=/tmp/mutant/src from the worktree (no mutation entered the worktree)",
+    "results": [
+      [
+        "M1 variance-map interpolation replaces a.T Sigma a",
+        3
+      ],
+      [
+        "M2 pull sign flipped in source_xy",
+        9
+      ],
+      [
+        "M3 author-loss legal mask loosened",
+        1
+      ],
+      [
+        "M4 plateau additionally requires best_index > 0 (D1 fix)",
+        2
+      ],
+      [
+        "M5 resume drops numpy/torch RNG restore",
+        1
+      ],
+      [
+        "M6 diagonal branch adds block variance (D2 fix)",
+        1
+      ],
+      [
+        "M7 ledger.without skips physical redaction",
+        3
+      ],
+      [
+        "M8 pooled mask loosened to always-true",
+        2
+      ],
+      [
+        "M9 proxy ignores the declared var_min clamp",
+        1
+      ],
+      [
+        "M10 builder columns unfiltered",
+        1
+      ],
+      [
+        "M11 readout in_dim defaults to readout_width",
+        3
+      ],
+      [
+        "M12 step counts two arrivals per event",
+        1
+      ],
+      [
+        "M13 supervision leaked into visible metadata",
+        1
+      ],
+      [
+        "M14 selection split check dropped",
+        1
+      ],
+      [
+        "M15 calibrated flag ignored for a supplied table",
+        1
+      ],
+      [
+        "M16 exposure gain applied once to the variance",
+        1
+      ]
+    ],
+    "tripwire_note": "M4 and M6 make the D1/D2 xfail tests fail as strict XPASS, so fixing either defect forces the marker to be removed",
+    "revert_checks_after_fix": {
+      "method": "the fixed src was copied to /tmp/mutant/src and the fix locally reverted; the converted assertions must fail (no mutation entered the worktree)",
+      "results": [
+        [
+          "R1 revert both D1 conditions",
+          "3 failed: degrading, constant, drift"
+        ],
+        [
+          "R2 revert only the D1 drift condition (partial fix)",
+          "2 failed: degrading (wrong condition value) and the new drift test; the constant test still passes, showing the drift test's added value"
+        ],
+        [
+          "R3 revert the D2 diagonal block term",
+          "1 failed: single-sample-block marginal"
+        ]
+      ]
+    }
+  },
+  "not_covered": [
+    "real SEA-RAFT weights / any GPU or server run (CPU-only local verification)",
+    "the raw_adapter real (non-smoke) preflight on both platforms; only its missing-asset hard-failure and the local smoke receipt are checked",
+    "motion evaluation four-arm metrics (EPE quantiles, AUC, p50/p95 latency, memory) beyond the calibration-only fit refusal and the static/o rbit labels",
+    "the checkpoint selection winner identity across real training runs (only the guard paths)",
+    "32-frame window behaviour under multiple cameras/episodes in one stream"
+  ],
+  "uncommitted_only": true
+}
