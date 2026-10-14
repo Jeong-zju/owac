@@ -1,0 +1,99 @@
+{
+  "kind": "n01-full-p2-seed-summaries",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T15:51:30+00:00",
+  "criterion_note": "All statuses below are decided by source-v3 (D1 fix). Seed 101 initially stopped at 81,000 under source-v2 and was continued 81k->82k under source-v3; seed 211 ran the whole budget under source-v3.",
+  "seed_101": {
+    "status_fixed_criterion": "validation_plateau",
+    "reasons": [
+      "all platform conditions satisfied"
+    ],
+    "stopped_at_update": 82000,
+    "budget": 100000,
+    "wall_seconds": 13990.86518776603,
+    "gpu_hours": 3.8863514410461195,
+    "lr_drops": 2,
+    "updates": 82000,
+    "val_epe_sensor_px": {
+      "first": 0.7747213886334345,
+      "best": 0.06985233220844887,
+      "best_update": 82000,
+      "final": 0.06985233220844887
+    },
+    "val_loss_best": 2.4063907770010142,
+    "peak_cuda_bytes": 757896192,
+    "parameter_hash": "225722b0566097ceffd1468608d183b579aad10adc489d6523d75726e1151bf8",
+    "recheck": {
+      "recorded": "validation_plateau",
+      "recomputed": "budget_exhausted",
+      "needs_continuation": true,
+      "recomputed_reasons": [
+        "platform condition failed: tail_within_delta_val_of_best"
+      ]
+    },
+    "checkpoint_sha256": {
+      "best.pt": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+      "last.pt": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09"
+    }
+  },
+  "seed_101_pre_continuation": {
+    "status_old_criterion": "validation_plateau",
+    "stopped_at_update": 81000,
+    "wall_seconds": 13934.848257849924,
+    "val_epe_best": 0.07040005291883762,
+    "val_epe_best_update": 71000
+  },
+  "seed_211": {
+    "status_fixed_criterion": "budget_exhausted",
+    "reasons": [
+      "platform condition failed: tail_within_delta_val_of_best"
+    ],
+    "stopped_at_update": 100000,
+    "budget": 100000,
+    "wall_seconds": 4749.281231815927,
+    "gpu_hours": 1.3192447866155352,
+    "lr_drops": 2,
+    "updates": 100000,
+    "val_epe_sensor_px": {
+      "first": 0.7345104022667959,
+      "best": 0.07585365341331524,
+      "best_update": 91000,
+      "final": 0.08987736757486485
+    },
+    "val_loss_best": 2.4089862199930043,
+    "peak_cuda_bytes": 760337408,
+    "parameter_hash": "ef2164271fa51709adfb26c0f2e770ccff960a5034998420f458346738c9e2f8",
+    "recheck": {
+      "recorded": "budget_exhausted",
+      "recomputed": "budget_exhausted",
+      "needs_continuation": false,
+      "recomputed_reasons": [
+        "platform condition failed: tail_within_delta_val_of_best"
+      ]
+    },
+    "checkpoint_sha256": {
+      "best.pt": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+      "last.pt": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8"
+    }
+  },
+  "seed_307": {
+    "status": "INTERRUPTED BY SERVER OUTAGE; last seen RUNNING at 15:19Z (started 15:06:31Z)",
+    "resume_plan": "on recovery, read-only recon then supervisorctl start owac-n01-v1-p2-motion-seed-307 (wrapper resumes from last.pt)"
+  },
+  "throughput": {
+    "contended_before_cleanup_s_per_update": [
+      0.409,
+      0.415,
+      0.694,
+      1.23
+    ],
+    "clean_after_cleanup_s_per_update": [
+      0.0665,
+      0.047,
+      0.048,
+      0.0475
+    ],
+    "seed_101_total_updates_per_s": 5.860967059542743,
+    "seed_211_total_updates_per_s": 21.05581773723772
+  }
+}

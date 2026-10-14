@@ -4,7 +4,7 @@
 起点为 P1 修补提交 `2d82bbb` 与独立验收归档 `6fb3807`（本轮 HEAD 为 `01e0316`，其上是本阶段未提交改动）。
 本阶段只执行 P2 及其规定的 `mode=raw_adapter` 早期预检，完成后停在 P2 交接点；不进入 P3/P4，不执行 300k 续训。
 
-> 状态：本地实现、测试与内部独立验收已完成；远程第一段 seed 101/211 已完成并同步收据，seed 307 与两平台 `raw_adapter` 预检在 2026-10-14T15:20Z 服务器实例失联时中断，标为 **PENDING（实例故障）**，恢复后按同一源码快照续跑。所有标 PENDING 的数字以最终收据为准。
+> 状态：本地实现、测试与内部独立验收已完成；远程 3 seeds × 100k 第一段全部结束（101 plateau@82k、211 budget_exhausted@100k、307 plateau@99k，经历一次 62 分钟实例失联后精确续训），三 seed GPU 评测与两平台 `raw_adapter` 真实预检均已通过并同步收据。P2 已停在交接点，未进入 P3/P4。
 
 ## 1. 实际修改文件、入口、数据流与要求对应
 
@@ -114,6 +114,18 @@
 
 修复不改变训练轨迹：`decide_platform` 只读 validation 历史、不参与前向/反向/LR/RNG；`build_noise_model` 在训练路径无调用（训练只 `apply_exposure_gain`）；`scale` 标签不进 `core_fingerprint`。
 
+### 3.3b 远程集成阶段发现的缺陷（A–E）
+
+全部由真实环境/真实数据暴露，非本地可预知；修复后均在服务器上重验。
+
+| 缺陷 | 症状与最小复现 | 修复 | 回测 |
+| --- | --- | --- | --- |
+| A `_load_pretrained` | torch 2.7.1 `weights_only=True` 拒绝含 NumPy RNG 的训练 checkpoint：`UnpicklingError … numpy._core.multiarray._reconstruct` | `_load_pretrained_payload`：先 strict；失败时**仅在文件字节含本项目 schema 标记**时重试 `weights_only=False`，随后校验 schema/`model`/`core_fingerprint`；非本 schema 一律拒绝；`pretrained_report` 记录 `weights_only_fallback/sha256/schema` | 同形 payload 修复前 `UnpicklingError` → 修复后 `fallback=True, schema=owac.n01_full.p2_motion_checkpoint.v1, loaded_tensors=276`；第三方 schema 被拒 |
+| B preflight 窗口计数 | `MeasurementWindowBatch` 无 `unique_frame_count()`（该 helper 只在单窗类型上）：`AttributeError`，identity 预检 exit 1 | `_window_unique_counts()`：按 identity=(episode_id, frame_id) 逐成员计数，`unique_matches_window` 改为逐成员 bool 列表并记录 `unique_frame_identity_rule` | 负控换回旧表达式立刻以同一 `AttributeError` 失败；真实 collate 批次端到端通过 |
+| C estimator 设备混用 | CUDA 上 `validity[:, ii, jj]`（CPU mask × CUDA 索引）：`indices … not on the same device`，GPU 评测 exit 1 | 后处理统一到 `flow.device`（`validity.to(device)`、origins/arange/coords 同设备），返回 map 全同设备并写入 docstring | 新增 CUDA 用例在 GPU 机真跑（`-k gpu` → 3 passed / 0 skipped）；spy 断言旧表达式 `.to()` 调用数为 0 |
+| D evaluation 设备混用 | `_collect_calibration_samples`：`flow`(CUDA) − `target.channel_flow`(CPU) → `found at least two devices`，三 seed GPU 评测 exit 1 | `_align_to` 以模型输出 device 为准；全模块扫描后一并修掉 `_pair_error`/相位一致性/`map_proxy` 边界/`arm_map`/风险覆盖共 5 处 | `meta` 设备等价复现证明删掉对齐即报错；CUDA 端到端用例通过 |
+| E 预检 stem 配对 | cfa4 checkpoint 配 rgb3 窗口：torch `size mismatch for cnet.conv1.weight [64,8,7,7] vs [64,6,7,7]` | 裁定**配对规则**：真实 3 通道窗口 ⇒ rgb3/3/6 estimator（禁止给 3 通道帧伪造第四测量）；并新增加载前 stem 推断校验，报出两侧通道、协议规则与建议 | 故意错配 exit 1、消息含两侧通道与规则、输出目录 0 文件；正确配对 exit 0 |
+
 ### 3.4 远程正式训练（第一段：3 seeds × 100k）
 
 短任务（已完成，`source-v2`）：
@@ -132,7 +144,7 @@
 | --- | --- | --- | --- | --- | --- |
 | 101 | **完成** | 13,990.8 s / **3.886** | `validation_plateau` @ 82,000（reasons: all satisfied；run_improvement 0.70487，best_update 82,000） | 0.069852 / 0.069852 | `012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141` |
 | 211 | **完成** | 4,749.3 s / **1.319** | `budget_exhausted` @ 100,000（reason: `tail_within_delta_val_of_best`） | 0.0758537 @91k / 0.089877 @100k | `8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4` |
-| 307 | PENDING（实例故障） | — | — | — | — |
+| 307 | **完成**（断点续训） | ~4,686 s / **1.302** | `validation_plateau` @ 99,000（reasons: all satisfied） | 0.082897 @83k / 0.083346 @99k | `3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38` |
 
 seed 101 是 D1 修复价值的直接证据：source-v2 旧判据在 **81,000** 判 `validation_plateau`；source-v3 重算判 `budget_exhausted`（尾部漂离 best）→ 按授权 `--resume last.pt --max-updates 100000` 续训 1,000 updates 到 82,000，修复后判据方才接受 plateau。旧 receipt 保留为 `seed-101-receipt-pre-continuation.json`。
 
@@ -140,19 +152,27 @@ seed 101 是 D1 修复价值的直接证据：source-v2 旧判据在 **81,000** 
 
 ### 3.5 评测与两平台 `mode=raw_adapter` 预检
 
-| 项 | 状态 |
+| 项 | 结果 |
 | --- | --- |
-| `evaluation/n01_motion`（四臂：旧简化/无对齐/实际 SEA-RAFT/oracle，test 分区） | PENDING（实例故障，恢复后补） |
-| 风险校准表（calibration 拟合 → validation 覆盖 → test 报告） | PENDING（同上） |
-| 两平台 `--mode raw_adapter`（libero / robotwin2，`--motion-checkpoint seed-101/best.pt`，`--motion-calibration-version p2-synth-cfa-v1`） | PENDING（同上） |
+| 三 seed **GPU** 评测（`--device cuda`，test 32 pairs） | sea_raft EPE **0.08689 / 0.08930 / 0.09497**；`no_alignment` 1.92132、`old_simplified` 2.98518（三 seed 逐位一致，不依赖权重）、`oracle` 0.0（单列 `used_as_inference_input=false`） |
+| GPU 时延与显存（end-to-end `estimate()` 单对已到达帧，iters=4，19,673,284 参数，repeats=5） | p50 **6.790 / 6.840 / 6.803 ms**；p95 **6.811 / 6.895 / 6.816 ms**；peak device **108,712,960 B = 103.7 MiB** |
+| 设备自洽 | CPU 与 CUDA 的 sea_raft EPE 只差 3e-5–7e-5；CPU p50 41.9 ms 仅作历史对照，不作 GPU 指标 |
+| 风险分档 | 四个 bucket 齐全（fast_hard 最好 0.027–0.032；current_frame_anomaly 0.067–0.074；slow_structural_change 0.051–0.099；fast_alignable 0.111–0.125） |
+| 静态误拒 | validation、容差 0.5 px：三 seed 均 rate 0.0，mean predicted displacement 0.188/0.196/0.208 px |
+| 风险校准表分区 | `fitted_split=calibration`；`regions={fitted_on: calibration, validated_on: validation, reported_on: test, test_used_only_for_reporting: true}` |
+| motion 路径预检（两平台，`--crop 128`，rgb3 dev checkpoint） | exit 0；`p2_motion_status="motion_provider"`；`offsets_shape=[1,8,2,128,128]`；图像塔 0 调用；`p3_support_applied=false`；`unique_frames_window`/`unique_new_measurements_window`/`adapter_unique_lifetime` 为按成员列表、`unique_matches_window` 全 True、`unique_frame_identity_rule="(episode_id, frame_id)"`；`weights_only_fallback=true`、schema 正确、checkpoint sha256 `133eb47d…` |
+| identity 对照 | crop-128 exit 0；crop-32 历史版保留（两版并列） |
+| 故意错配诊断 | cfa4 checkpoint + rgb3 窗口 → 加载前明确报错（含两侧通道、协议规则与建议），**输出目录 0 文件** |
+
+披露：预检用的 rgb3 motion 模型是 **256-update dev 臂**（`run_scale=dev`、`budget_exhausted`、update=256），只证明接口/梯度/单次到达语义连通，**不构成对齐质量结论**；正式质量证据是上表 CFA 三 seed 评测，两者分别陈述。motion 路径需要 `crop≥128`（rgb3 下 128×128 packed），这是 vendored 4 层金字塔的**几何下限**（训练配置 notes 早已声明、rgb3 臂训练几何即 128×128），不是为通过检查而放宽；`crop=32` 在 rgb3 下几何上不可能满足。是否用正式预算补一条 rgb3 臂（当前吞吐约 4 GPU 小时）留待研究负责人决定。
 
 ### 3.6 基础设施事件
 
 | 时间（UTC） | 事件 | 处置 |
 | --- | --- | --- |
-| 15:20 起 | 实例 `107.209.104.125:44327` 失联（SSH/TCP 22/44327 均超时；本地网络对照正常：github.com/api.github.com:443、8.8.8.8:53、ICMP 均通） | 判定实例侧故障；seed 307（15:06:31Z 启动）被切断；运行守护脚本每 10 分钟只读重试并留痕 `remote-runner-outage-*.json`；恢复后先只读勘察 run 根/supervisor/307 目录，目录仍在才 `--resume last.pt` 续跑 |
+| 15:20–16:32 | 实例 `107.209.104.125:44327` 失联（SSH/TCP 22/44327 均超时；本地网络对照正常：github.com/api.github.com:443、8.8.8.8:53、ICMP 均通） | 判定实例侧故障；seed 307（15:06:31Z 启动、13,000 updates 处被切断）被中断；守护脚本每 10 分钟只读重试并留痕 `remote-runner-outage-20261014T1520Z.json`（62 min、67 条探测）；16:32Z 恢复后先只读勘察（run 根完整、`/workspace` 未 recycle、307 `last.pt` 完整），再 `--resume last.pt` 精确续跑至 99,000，未从 step 0 重来、未重跑 101/211 |
 
-已同步回本地的证据（不依赖实例）：`remote-runner-seed-101-receipt.json`、`…-seed-101-receipt-pre-continuation.json`、`…-seed-101-platform-recheck.json`、`…-seed-211-receipt.json`、`…-seed-211-platform-recheck.json`。
+已同步回本地的证据（46 个文件 / 964 KB，不依赖实例存活）：三 seed 训练 receipt 与平台重算、307 断点续训证据、三份 CUDA eval receipt 与风险校准、两份 identity 对照、motion 预检 receipt、断网留痕、source-v3/v4/v5 整树比对、失败日志原文与最终汇总 `remote-runner-p2-final-handoff.json`。
 
 ## 4. 接口交接
 
@@ -160,12 +180,12 @@ seed 101 是 D1 修复价值的直接证据：source-v2 旧判据在 **81,000** 
 - **模型配置**：`configs/encoders/n01_full/p2_motion_train.json`（CFA 正式）、`p2_motion_train_rgb3.json`（3 通道 dev）；`CorrespondenceEstimator(mode=cfa4|rgb3, depth, iters, normalization, risk_calibration)`。
 - **支持/校准版本**：`noise_block_id` 按帧；`calibration_version=p2-synth-cfa-v1` ⇒ `noise_version=n01-noise-p2-synth-cfa-v1`（域绑定值）；`mapping_version` 由 provider/builder 声明（`p2-motion-window-v1` / `p2-ledger-correspondence-v1`）。
 - **下一阶段命令**：`python -m owac.training.n01_motion {fit-check,select,train,stem-report}`、`python -m owac.evaluation.n01_motion`、`python -m owac.runtime.n01_full_policy_preflight --mode raw_adapter --platform libero --platform robotwin2 --motion-checkpoint <best.pt>`。
-- **已知差异**：`RawSensorFrame.validity` 是单一布尔掩码，饱和/低于黑电平/出场景未分型（P1 `MeasurementRecord.validity_kind` 才区分）；CFA 的 ledger 几何是声明式（`raw_frame_from_ledger` 用调用者给的 pattern/phase/origin），要把 `CfaPlaneStack.global_sample_xy` 完全接进 ledger 构建侧留给 P4；rgb3 正式预算与三 seed 评测未执行。
+- **已知差异**：`RawSensorFrame.validity` 是单一布尔掩码，饱和/低于黑电平/出场景未分型（P1 `MeasurementRecord.validity_kind` 才区分）；CFA 的 ledger 几何是声明式（`raw_frame_from_ledger` 用调用者给的 pattern/phase/origin），要把 `CfaPlaneStack.global_sample_xy` 完全接进 ledger 构建侧留给 P4；预检的 motion 路径需要 `crop≥128`（vendored 金字塔几何下限）；rgb3 **正式预算**臂未训练（只有 256-update dev 臂；当前吞吐下约 4 GPU 小时可补）。
 - **未验证项**：真实 SEA-RAFT 官方权重（本轮按用户决定"从零训练"不使用）；远程序列上的覆盖统计；P4 域支持/重编码；P3 时间规则；闭环。
 
 ## 5. 状态字段
 
-- `implementation_status`：**PASS_P2_LOCAL**（全部模块、配置、测试、内部独立反例验收与 D1/D2 修复回测通过；远程 `raw_adapter` 真实预检待实例恢复后补）
-- `training_status`：**PARTIAL_P2_SEGMENT**（远程 256 拟合 + 两档 LR 选择完成，winner `lr=2.5e-4/iters=4`；第一段 101 plateau@82k、211 budget_exhausted@100k 完成，307 因实例故障中断待续；尚无充分训练结论）
-- `effect_status`：**NOT_APPLICABLE**（本阶段不产生 N01 机制增量或闭环结论）
-- 资源：P2 已消耗远程 GPU 时间约 5.2 小时（101 3.886 + 211 1.319 + fit-check/select/rgb3/探针约 0.4），其中含被 N02/N04 争用的时段；H100 级别单卡。
+- `implementation_status`：**PASS_P2**（全部模块、配置、测试、内部独立反例验收（53 项 + 16 变异）、D1/D2 与远程 A–E 修复回测，以及两平台 `raw_adapter` 真实预检与故意错配诊断均通过；本地全仓 709 passed / 2 skipped，`make check` 通过）
+- `training_status`：**P2_FIRST_SEGMENT_COMPLETE**（远程 256 拟合 + 两档 LR 选择 winner `lr=2.5e-4/iters=4`；第一段三种子全部结束：101 plateau@82k、211 budget_exhausted@100k（尾部漂移）、307 plateau@99k；**非**充分训练结论，续训与 rgb3 正式臂未授权）
+- `effect_status`：**NOT_APPLICABLE**（本阶段不产生 N01 机制增量或闭环结论；对齐质量只在合成 CFA test 分区报告，真实数据只证明接口连通）
+- 资源：P2 远程 GPU 时间合计 **约 6.88 小时**（训练 6.507 = 101 3.886 + 211 1.319 + 307 1.302；select+fit-check 0.159；rgb3 dev 臂 0.057；显存探针 0.064；评测/预检/回归验证约 0.09）。设备为 RTX PRO 6000 Blackwell 单卡（共享）。

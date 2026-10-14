@@ -1,0 +1,23 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Traceback (most recent call last):
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/runtime/n01_full_policy_preflight.py", line 1820, in <module>
+    raise SystemExit(main())
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/runtime/n01_full_policy_preflight.py", line 1796, in main
+    report = contract(args) if args.mode == "contract" else raw_adapter(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/runtime/n01_full_policy_preflight.py", line 1791, in raw_adapter
+    return _raw_adapter_real(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/runtime/n01_full_policy_preflight.py", line 1214, in _raw_adapter_real
+    state, output, feed = _adapter_encode_batch(adapter, batch, args.device, tbptt=4)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/runtime/n01_full_policy_preflight.py", line 308, in _adapter_encode_batch
+    output = adapter.step(
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/frameworks/n01_full/adapters.py", line 542, in step
+    motion = self.motion_provider(
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/frameworks/n01_full/motion_builders.py", line 341, in __call__
+    estimated = self._estimator.estimate(
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v5/src/owac/backends/raw_correspondence.py", line 870, in estimate
+    raise ValueError(
+ValueError: the vendored 4-level correlation pyramid needs at least 128 packed cells per side, got (32, 32)
