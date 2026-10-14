@@ -1,0 +1,343 @@
+{
+  "prepared_date": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "scope": "Prompt preparation and existing code checks only; no new N04 stage implementation/training; no commit/push",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "head": "fd6255b769d661af568738bec194bb599601a644",
+  "initial_dirty_state_record": "outputs/n04-prompt-prep-20261014/before.json",
+  "baseline_plan_sha256": "e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2",
+  "source_and_test_files_unchanged": true,
+  "plan_unchanged": true,
+  "source_entry_checks": [
+    {
+      "file": "src/owac/raw/rawvla_sequence.py",
+      "sha256": "4f41e10f7bef2e3d4829d2031565a7a205a42b3998965681d688f9bdf9c90575",
+      "symbols": {
+        "RawVLASequenceLoader": 183,
+        "source_identity": 163
+      }
+    },
+    {
+      "file": "src/owac/frameworks/n04/proprio.py",
+      "sha256": "e96494ede9668f1f60af5c47841601f55a78502bbdee8e9ecad650cb6897b630",
+      "symbols": {
+        "relative_rotation_vector": 119,
+        "proprio_delta": 172
+      }
+    },
+    {
+      "file": "src/owac/frameworks/n04/geometry.py",
+      "sha256": "35c2596ec815df23095ec9e63f889702dff902185c16b4298edb799b8f0788c3",
+      "symbols": {
+        "GridSpec": 67,
+        "forward_project_points": 599,
+        "forward_splat": 450
+      }
+    },
+    {
+      "file": "src/owac/frameworks/n04/model.py",
+      "sha256": "768c8203967c8dcf54af208833caeab61bfb9e80b08b88077656981729492c60",
+      "symbols": {
+        "MeasurementStem": 125,
+        "N04Encoder": 323,
+        "predict_before_observe": 442,
+        "correct_after_observe": 476
+      }
+    },
+    {
+      "file": "src/owac/baselines/n04_tracking.py",
+      "sha256": "089488e9de3d6db0cb2ac2ba988986ba72c5c53e59715cf10bfed034eef33cbd",
+      "symbols": {
+        "RKNPositionTracker": 35
+      }
+    },
+    {
+      "file": "src/owac/baselines/_vendor/rkn/cell.py",
+      "sha256": "085c3aa77f12ed65558017c5706f903d6b0dcbc36706985fcc4134f04df75d59",
+      "symbols": {
+        "RKNCell": 55,
+        "get_transition_model": 194,
+        "_update": 221,
+        "_predict": 280
+      }
+    },
+    {
+      "file": "src/owac/backends/rawvla_features.py",
+      "sha256": "814453dc466d7d4153be1a0d6dbb96ef34e7575aa7d90921b25cff4c7c8021d1",
+      "symbols": {
+        "RawVLAFeaturePolicy": 132,
+        "encode_observation": 174,
+        "forward_from_observation": 233,
+        "sample_actions": 281
+      }
+    },
+    {
+      "file": "src/owac/training/n04.py",
+      "sha256": "73a2dfd828e7fb661a11cd512ea9984683ab45dbee654f9636ecffaf29efe832",
+      "symbols": {
+        "build_real_context": 116,
+        "save_checkpoint": 945,
+        "load_checkpoint": 984
+      }
+    },
+    {
+      "file": "src/owac/evaluation/n04_raw_diagnostics.py",
+      "sha256": "2616b5830de0c5792c5675f9a8a9bbada638c6f30fd52a8d2be916eebe8f91be",
+      "symbols": {
+        "bilinear_variance": 25,
+        "residual_score": 48
+      }
+    }
+  ],
+  "checks": {
+    "existing_n04_tests": {
+      "command": "uv run --locked --extra encoder pytest -q tests/encoders/n04",
+      "passed": 198,
+      "warnings": 2,
+      "seconds": 5.06
+    },
+    "make_check": {
+      "status": "passed",
+      "formatted_files": 196
+    },
+    "git_diff_check": {
+      "status": "passed"
+    },
+    "local_links": 118,
+    "missing_local_links": 0,
+    "external_unique_urls": 53,
+    "code_fence_syntax": [
+      {
+        "file": "S4_uncertainty.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S6_joint_ablation.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "remote_execution.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "remote_execution.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "implementation_contract.md",
+        "language": "python",
+        "valid": true
+      },
+      {
+        "file": "implementation_contract.md",
+        "language": "json",
+        "valid": true
+      },
+      {
+        "file": "S2_spatial_rkn.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S1_raw_measurement.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S1_raw_measurement.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S0_data_contracts.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S0_data_contracts.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S5_dynamic_revision.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S3_action_geometry.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S7_pi05_closed_loop.md",
+        "language": "bash",
+        "valid": true
+      },
+      {
+        "file": "S7_pi05_closed_loop.md",
+        "language": "bash",
+        "valid": true
+      }
+    ]
+  },
+  "remote": {
+    "ssh_host": "root@107.209.104.125",
+    "ssh_port": 44327,
+    "local_forward": "8080:localhost:8080",
+    "access": "read_only",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "gpu_total_mib": 97887,
+    "gpu_used_mib_snapshot": 32047,
+    "environment": {
+      "python": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+      "torch": "2.7.1+cu128",
+      "numpy": "1.26.4",
+      "cuda": "12.8"
+    },
+    "npz_files_count": {
+      "libero": 1771,
+      "robotwin2": 632
+    },
+    "counts_are_not_source_identity_audit": true,
+    "baseline_report": {
+      "version": "owac-rawvla-pi05-complete-20261014-v1",
+      "created_at": "2026-10-14T02:44:24Z",
+      "state": "complete",
+      "main_completed": 13250,
+      "original_conditions_completed": 632,
+      "protocol_sha256": "3ac9626ef71eab4719be540393f51b66b767d7348dc4cac0ce5f5455f5b52e0e",
+      "manifest_sha256": {
+        "libero": "e3a054f43060912d668e57d35873b573a289c6d3c941fec9c029569c82971168",
+        "robotwin": "632b8360836595a868affffd24f9ecf1262d68a52a505ef5ffe801598d8317e5"
+      },
+      "weights_sha256": {
+        "libero": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+        "robotwin": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+        "robotwin_norm": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7"
+      },
+      "source_commit": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+      "limitations": [
+        "OptiX replaces incompatible SAPIEN bundled OIDN on Blackwell",
+        "StarVLA image preprocessing; native LeRobot full numerical parity not established",
+        "Explicit per-episode action noise improves repeatability; published RNG sequence unknown",
+        "Full manifest coverage is not a claim to reproduce published numerical scores",
+        "Main simulation Default PI05 only; learned ISP methods and real robots excluded"
+      ],
+      "extra_training_steps": 0,
+      "platforms": {
+        "libero": {
+          "completed": 10000,
+          "success": 5820,
+          "policy_failure": 4180,
+          "success_rate_percent": 58.2,
+          "actual_policy_steps": 2330573,
+          "steps_mean": 233.0573,
+          "steps_p50": 220,
+          "steps_p95": 520,
+          "episode_wall_mean_seconds": 12.414263658914528,
+          "episode_wall_p50_seconds": 11.438848123885691,
+          "episode_wall_p95_seconds": 24.80435041245073,
+          "summed_episode_wall_seconds": 124142.63658914529
+        },
+        "robotwin": {
+          "completed": 3250,
+          "success": 508,
+          "policy_failure": 2742,
+          "success_rate_percent": 15.63076923076923,
+          "actual_policy_steps": 1966195,
+          "steps_mean": 604.983076923077,
+          "steps_p50": 600,
+          "steps_p95": 1700,
+          "episode_wall_mean_seconds": 83.86018812435091,
+          "episode_wall_p50_seconds": 80.96848745271564,
+          "episode_wall_p95_seconds": 176.45222051348537,
+          "summed_episode_wall_seconds": 272545.6114041405
+        }
+      },
+      "repair": {
+        "state": "complete",
+        "original_protocol_unchanged": true,
+        "original_3217_records_unchanged": true,
+        "main_completed": 13250,
+        "platform_scores": {
+          "libero": 58.2,
+          "robotwin": 15.63076923076923
+        }
+      }
+    },
+    "identity_audit": {
+      "state": "complete",
+      "errors": [],
+      "expected": 13250,
+      "completed": 13250
+    },
+    "starvla_checkout": {
+      "path": "/workspace/owac/rawvla/source/starVLA",
+      "head": "57d508cb180d0510ac9060358009c0f6ffaac420",
+      "python_package_path": "/workspace/owac/rawvla/source/starVLA/starVLA",
+      "verified_by": "git rev-parse, rg source, importlib.util.find_spec"
+    }
+  },
+  "references": {
+    "current_web_confirmed": [
+      "RKN paper",
+      "Ac-RKN paper",
+      "RKN fixed cell page",
+      "ConvNeXt Base definition",
+      "MTS3 acRKN entry",
+      "OpenVINS nullspace",
+      "RAFT fixed utils page",
+      "Dynamo-Depth fixed Trainer page",
+      "RawVLA dataset card",
+      "MCDS-VSS repository code-access status",
+      "RawVLA fixed PI0 page",
+      "RawVLA fixed NPZ loader page"
+    ],
+    "remaining_sources": "Inherited fixed source manifests or explicitly marked conditional/plan reference; not all URLs re-downloaded this turn",
+    "network_limitations": [
+      "GitHub REST 403 rate limit",
+      "raw.githubusercontent.com connection reset/timeout"
+    ],
+    "all_external_implementations_executed": false
+  },
+  "prompt_files": {
+    "S0_data_contracts.md": {
+      "characters": 7578,
+      "sha256": "ecfa4da66062b33a30c473a5491739ed7039279a4974b16fb5c874f26e45016a"
+    },
+    "S1_raw_measurement.md": {
+      "characters": 6306,
+      "sha256": "367462bcc86ae6b286ee76c38b1966d81692feb1c3152ebe60b8ac8b6c2172c4"
+    },
+    "S2_spatial_rkn.md": {
+      "characters": 5661,
+      "sha256": "5698a3b8d4c5a2373271c383215d20e2674fb78e560ed092f52d7d7d818ec90f"
+    },
+    "S3_action_geometry.md": {
+      "characters": 5554,
+      "sha256": "aabfa04ff9e2f0970fe05831af31a62950808b343e8138734ac5f2b0fc0b768f"
+    },
+    "S4_uncertainty.md": {
+      "characters": 5907,
+      "sha256": "7862bcf8d1d650a67fc4afcca3687b2388784ab5b56430454652e539c097bdb9"
+    },
+    "S5_dynamic_revision.md": {
+      "characters": 6182,
+      "sha256": "7233a0ba53c5df0754d5b338ee81fa9b6e5b70091b89691ee7b4f9770eb7c9af"
+    },
+    "S6_joint_ablation.md": {
+      "characters": 5579,
+      "sha256": "1c8030051b4137786b6e3b82c1416549d8b903a3d4998c79ab63bab346999373"
+    },
+    "S7_pi05_closed_loop.md": {
+      "characters": 8695,
+      "sha256": "d0cd251f3cf0ab35032bfe1cc46506f015ca65c63633589652162b28037196bc"
+    }
+  },
+  "errors": [],
+  "status": "passed"
+}

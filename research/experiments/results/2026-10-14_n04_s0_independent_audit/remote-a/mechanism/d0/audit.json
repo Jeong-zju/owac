@@ -1,0 +1,981 @@
+{
+  "batch_sizes": [
+    1,
+    2,
+    4
+  ],
+  "cameras": [
+    {
+      "cx_px": 63.5,
+      "cy_px": 47.5,
+      "fx_px": 110.0,
+      "fy_px": 110.0,
+      "height": 96,
+      "model": "pinhole_no_distortion",
+      "name": "cam0",
+      "width": 128
+    },
+    {
+      "cx_px": 64.0,
+      "cy_px": 48.0,
+      "fx_px": 95.0,
+      "fy_px": 100.0,
+      "height": 96,
+      "model": "pinhole_no_distortion",
+      "name": "cam1",
+      "width": 128
+    }
+  ],
+  "checks": {
+    "B=1": {
+      "max_missed": 0,
+      "max_symmetric_difference_excess": 0.0,
+      "max_unexplained": 0,
+      "per_camera": {
+        "cam0": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              163.0,
+              88.0,
+              64.0,
+              55.0
+            ]
+          ],
+          "contamination": {},
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 2.384185793236071e-08,
+            "max_outside_face_margin_m": 7.586045611129855e-10,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 3072,
+            "pixels_skipped_texture_boundary": 0,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9963418841362,
+              0.7857142686843872,
+              1.0,
+              0.8571428656578064
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.7857142686843872,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              106,
+              56,
+              40,
+              34
+            ]
+          ],
+          "reference_area_per_body": [
+            11984,
+            168,
+            80,
+            56
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 34,
+            "object_1": 27,
+            "object_2": 22
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              44,
+              36,
+              0,
+              8
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "cam1": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              143.5,
+              79.0,
+              61.0,
+              49.0
+            ]
+          ],
+          "contamination": {},
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 5.2452087562215866e-08,
+            "max_outside_face_margin_m": 0.0,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 3071,
+            "pixels_skipped_texture_boundary": 1,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9966942071914673,
+              0.8196721076965332,
+              0.8307692408561707,
+              0.8292682766914368
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.8196721076965332,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              93,
+              50,
+              38,
+              30
+            ]
+          ],
+          "reference_area_per_body": [
+            12060,
+            122,
+            65,
+            41
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 31,
+            "object_1": 24,
+            "object_2": 21
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              40,
+              22,
+              11,
+              7
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "reference_depth_max_error": 2.384185793236071e-08
+    },
+    "B=2": {
+      "max_missed": 0,
+      "max_symmetric_difference_excess": 0.0,
+      "max_unexplained": 0,
+      "per_camera": {
+        "cam0": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              160.0,
+              85.0,
+              64.0,
+              55.0
+            ],
+            [
+              160.0,
+              85.0,
+              64.0,
+              55.0
+            ]
+          ],
+          "contamination": {
+            "claim[0]<-ref[1]": 0.0,
+            "claim[1]<-ref[0]": 0.0
+          },
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 2.384185793236071e-08,
+            "max_outside_face_margin_m": 0.0,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 6139,
+            "pixels_skipped_texture_boundary": 5,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9970908761024475,
+              0.9166666865348816,
+              0.8999999761581421,
+              0.75
+            ],
+            [
+              0.9970908761024475,
+              0.9166666865348816,
+              0.8999999761581421,
+              0.75
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.75,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              104,
+              54,
+              40,
+              34
+            ],
+            [
+              104,
+              54,
+              40,
+              34
+            ]
+          ],
+          "reference_area_per_body": [
+            23992,
+            312,
+            160,
+            112
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 188,
+            "object_1": 135,
+            "object_2": 106
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              35,
+              13,
+              8,
+              14
+            ],
+            [
+              35,
+              13,
+              8,
+              14
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "cam1": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              145.0,
+              79.0,
+              61.0,
+              49.0
+            ],
+            [
+              149.5,
+              82.0,
+              64.0,
+              49.0
+            ]
+          ],
+          "contamination": {
+            "claim[0]<-ref[1]": 0.0,
+            "claim[1]<-ref[0]": 0.0
+          },
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 5.2452087562215866e-08,
+            "max_outside_face_margin_m": 0.0,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 6142,
+            "pixels_skipped_texture_boundary": 2,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9943041205406189,
+              0.7286821603775024,
+              0.6388888955116272,
+              0.8095238208770752
+            ],
+            [
+              0.9972718358039856,
+              0.9224137663841248,
+              0.7910447716712952,
+              0.761904776096344
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.6388888955116272,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              94,
+              50,
+              38,
+              30
+            ],
+            [
+              97,
+              52,
+              40,
+              30
+            ]
+          ],
+          "reference_area_per_body": [
+            24108,
+            245,
+            139,
+            84
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 157,
+            "object_1": 115,
+            "object_2": 91
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              69,
+              35,
+              26,
+              8
+            ],
+            [
+              33,
+              9,
+              14,
+              10
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "reference_depth_max_error": 2.384185793236071e-08
+    },
+    "B=4": {
+      "max_missed": 0,
+      "max_symmetric_difference_excess": 0.0,
+      "max_unexplained": 0,
+      "per_camera": {
+        "cam0": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              160.0,
+              85.0,
+              64.0,
+              55.0
+            ],
+            [
+              163.0,
+              88.0,
+              64.0,
+              55.0
+            ],
+            [
+              163.0,
+              88.0,
+              64.0,
+              55.0
+            ],
+            [
+              160.0,
+              85.0,
+              64.0,
+              55.0
+            ]
+          ],
+          "contamination": {
+            "claim[0]<-ref[1]": 0.0,
+            "claim[0]<-ref[2]": 0.0,
+            "claim[0]<-ref[3]": 0.0,
+            "claim[1]<-ref[0]": 0.0,
+            "claim[1]<-ref[2]": 0.0,
+            "claim[1]<-ref[3]": 0.0,
+            "claim[2]<-ref[0]": 0.0,
+            "claim[2]<-ref[1]": 0.0,
+            "claim[2]<-ref[3]": 0.0,
+            "claim[3]<-ref[0]": 0.0,
+            "claim[3]<-ref[1]": 0.0,
+            "claim[3]<-ref[2]": 0.0
+          },
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 2.384185793236071e-08,
+            "max_outside_face_margin_m": 0.0,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 12283,
+            "pixels_skipped_texture_boundary": 5,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9970908761024475,
+              0.9166666865348816,
+              0.8999999761581421,
+              0.75
+            ],
+            [
+              0.9960934519767761,
+              0.851190447807312,
+              0.8999999761581421,
+              0.75
+            ],
+            [
+              0.9960934519767761,
+              0.851190447807312,
+              0.8999999761581421,
+              0.75
+            ],
+            [
+              0.9970908761024475,
+              0.9166666865348816,
+              0.8999999761581421,
+              0.75
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.75,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              104,
+              54,
+              40,
+              34
+            ],
+            [
+              106,
+              56,
+              40,
+              34
+            ],
+            [
+              106,
+              56,
+              40,
+              34
+            ],
+            [
+              104,
+              54,
+              40,
+              34
+            ]
+          ],
+          "reference_area_per_body": [
+            47960,
+            648,
+            320,
+            224
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 188,
+            "object_1": 135,
+            "object_2": 106
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              35,
+              13,
+              8,
+              14
+            ],
+            [
+              47,
+              25,
+              8,
+              14
+            ],
+            [
+              47,
+              25,
+              8,
+              14
+            ],
+            [
+              35,
+              13,
+              8,
+              14
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "cam1": {
+          "allowed_symmetric_difference_per_body": [
+            [
+              145.0,
+              79.0,
+              61.0,
+              49.0
+            ],
+            [
+              149.5,
+              79.0,
+              61.0,
+              55.0
+            ],
+            [
+              148.0,
+              79.0,
+              61.0,
+              52.0
+            ],
+            [
+              149.5,
+              82.0,
+              64.0,
+              49.0
+            ]
+          ],
+          "contamination": {
+            "claim[0]<-ref[1]": 0.0,
+            "claim[0]<-ref[2]": 0.0,
+            "claim[0]<-ref[3]": 0.0,
+            "claim[1]<-ref[0]": 0.0,
+            "claim[1]<-ref[2]": 0.0,
+            "claim[1]<-ref[3]": 0.0,
+            "claim[2]<-ref[0]": 0.0,
+            "claim[2]<-ref[1]": 0.0,
+            "claim[2]<-ref[3]": 0.0,
+            "claim[3]<-ref[0]": 0.0,
+            "claim[3]<-ref[1]": 0.0,
+            "claim[3]<-ref[2]": 0.0
+          },
+          "image_label_consistency": {
+            "inside_tolerance_m": 1e-06,
+            "max_depth_error": 5.2452087562215866e-08,
+            "max_outside_face_margin_m": 0.0,
+            "max_radiance_error": 2.8610229518832853e-08,
+            "pixels_checked": 12284,
+            "pixels_skipped_texture_boundary": 4,
+            "tolerance": 1e-05
+          },
+          "iou_per_body": [
+            [
+              0.9943041205406189,
+              0.7286821603775024,
+              0.6388888955116272,
+              0.8095238208770752
+            ],
+            [
+              0.9949628114700317,
+              0.7839999794960022,
+              0.6666666865348816,
+              0.761904776096344
+            ],
+            [
+              0.9958691596984863,
+              0.8583333492279053,
+              0.7611940503120422,
+              0.6382978558540344
+            ],
+            [
+              0.9972718358039856,
+              0.9224137663841248,
+              0.7910447716712952,
+              0.761904776096344
+            ]
+          ],
+          "max_missed": 0,
+          "max_symmetric_difference_excess": 0.0,
+          "max_unexplained": 0,
+          "min_iou": 0.6382978558540344,
+          "missed_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "perimeter_per_body": [
+            [
+              94,
+              50,
+              38,
+              30
+            ],
+            [
+              97,
+              50,
+              38,
+              34
+            ],
+            [
+              96,
+              50,
+              38,
+              32
+            ],
+            [
+              97,
+              52,
+              40,
+              30
+            ]
+          ],
+          "reference_area_per_body": [
+            48211,
+            490,
+            278,
+            173
+          ],
+          "reference_grid_steps_per_body": {
+            "background": 257,
+            "object_0": 157,
+            "object_1": 115,
+            "object_2": 91
+          },
+          "reference_points_per_pixel": {
+            "max_covered": 2,
+            "min_covered": 1
+          },
+          "symmetric_difference_per_body": [
+            [
+              69,
+              35,
+              26,
+              8
+            ],
+            [
+              61,
+              27,
+              24,
+              10
+            ],
+            [
+              50,
+              17,
+              16,
+              17
+            ],
+            [
+              33,
+              9,
+              14,
+              10
+            ]
+          ],
+          "unexplained_pixels": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "reference_depth_max_error": 2.384185793236071e-08
+    },
+    "batch_permutation": {
+      "exact": true,
+      "order": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "samples": 4
+    },
+    "cfa_channel_phase": {
+      "bit_depth": 12,
+      "black_level_dn": 64,
+      "exact": true,
+      "max_dn_error": 0,
+      "pattern": "GRBG",
+      "phase_channel_table": {
+        "BGGR": [
+          [
+            2,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "GBRG": [
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "GRBG": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "RGGB": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "white_level_dn": 4095
+    },
+    "historical_broadcast_counterexample": {
+      "contamination": {
+        "claim[0]<-ref[1]": 1.0,
+        "claim[0]<-ref[2]": 1.0,
+        "claim[0]<-ref[3]": 1.0,
+        "claim[1]<-ref[0]": 1.0,
+        "claim[1]<-ref[2]": 1.0,
+        "claim[1]<-ref[3]": 1.0,
+        "claim[2]<-ref[0]": 1.0,
+        "claim[2]<-ref[1]": 1.0,
+        "claim[2]<-ref[3]": 1.0,
+        "claim[3]<-ref[0]": 1.0,
+        "claim[3]<-ref[1]": 1.0,
+        "claim[3]<-ref[2]": 1.0
+      },
+      "defect": "[B,1,2] + [B,2] broadcast to [B,B,2] merges object positions across samples",
+      "detected": true,
+      "image_label_disagreement_pixels": 3740,
+      "source": "docs/status.md 2026-10-13 (synthetic.py label merge)",
+      "unexplained_pixels": [
+        [
+          0,
+          492,
+          240,
+          168
+        ],
+        [
+          0,
+          480,
+          240,
+          168
+        ],
+        [
+          0,
+          480,
+          240,
+          168
+        ],
+        [
+          0,
+          492,
+          240,
+          168
+        ]
+      ]
+    },
+    "single_sample_perturbation": {
+      "others_unchanged": true,
+      "perturbed_sample_changed": true
+    },
+    "static_zero_residual": {
+      "max_abs_residual": 0.0,
+      "tolerance": 1e-07
+    },
+    "unidentifiable_full_view_plane": {
+      "camera_only_covers_full_view": true,
+      "delta_m": 0.02,
+      "identical": true,
+      "max_radiance_difference": 0.0,
+      "meaning": "measurement alone cannot separate camera translation from plane translation",
+      "object_only_covers_full_view": true
+    }
+  },
+  "failures": [],
+  "grid": "adaptive",
+  "passed": true,
+  "schema": "n04-d0-label-audit-v1"
+}

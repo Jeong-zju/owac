@@ -1,0 +1,131 @@
+FFFFFFFFFF                                                               [100%]
+=================================== FAILURES ===================================
+_________ test_unverified_control_never_reaches_online_replay[unknown] _________
+
+level = 'unknown'
+
+    @pytest.mark.parametrize("level", ["unknown", "inferred", "producer_code_order"])
+    def test_unverified_control_never_reaches_online_replay(level):
+        context = sidecar(controls=(control(evidence_level=level),)).context_for(
+            exposure_time=0.01, decision_time=0.5)
+>       assert context.replay_controls == ()
+E       AssertionError: assert (ExecutedCont...1', note=''),) == ()
+E         
+E         Left contains one more item: ExecutedControl(command_id='c', value=array([1., 1.]), mode='unknown', units='unknown', status='executed', evidence_le... start_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note='')
+E         Use -v to get more diff
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:30: AssertionError
+________ test_unverified_control_never_reaches_online_replay[inferred] _________
+
+level = 'inferred'
+
+    @pytest.mark.parametrize("level", ["unknown", "inferred", "producer_code_order"])
+    def test_unverified_control_never_reaches_online_replay(level):
+        context = sidecar(controls=(control(evidence_level=level),)).context_for(
+            exposure_time=0.01, decision_time=0.5)
+>       assert context.replay_controls == ()
+E       AssertionError: assert (ExecutedCont...1', note=''),) == ()
+E         
+E         Left contains one more item: ExecutedControl(command_id='c', value=array([1., 1.]), mode='unknown', units='unknown', status='executed', evidence_le... start_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note='')
+E         Use -v to get more diff
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:30: AssertionError
+___ test_unverified_control_never_reaches_online_replay[producer_code_order] ___
+
+level = 'producer_code_order'
+
+    @pytest.mark.parametrize("level", ["unknown", "inferred", "producer_code_order"])
+    def test_unverified_control_never_reaches_online_replay(level):
+        context = sidecar(controls=(control(evidence_level=level),)).context_for(
+            exposure_time=0.01, decision_time=0.5)
+>       assert context.replay_controls == ()
+E       AssertionError: assert (ExecutedCont...1', note=''),) == ()
+E         
+E         Left contains one more item: ExecutedControl(command_id='c', value=array([1., 1.]), mode='unknown', units='unknown', status='executed', evidence_le... start_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note='')
+E         Use -v to get more diff
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:30: AssertionError
+_________________ test_interval_returns_only_executed_fragment _________________
+
+    def test_interval_returns_only_executed_fragment():
+        original = control()
+        result = interval_report([original], t0=0.2, t1=0.5, time_unit="s")
+>       assert result.controls[0].start_time == 0.2
+E       AssertionError: assert 0.1 == 0.2
+E        +  where 0.1 = ExecutedControl(command_id='c', value=array([1., 1.]), mode='unknown', units='unknown', status='executed', evidence_le... start_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note='').start_time
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:37: AssertionError
+__________________ test_mixed_time_units_cannot_enter_context __________________
+
+    def test_mixed_time_units_cannot_enter_context():
+>       with pytest.raises(ValueError, match="time_unit"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:44: Failed
+____________________ test_mixed_clocks_cannot_enter_context ____________________
+
+    def test_mixed_clocks_cannot_enter_context():
+        first = sidecar().timing[0]
+>       with pytest.raises(ValueError, match="clock"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:51: Failed
+_________ test_missing_value_and_frame_only_control_are_not_replayable _________
+
+    def test_missing_value_and_frame_only_control_are_not_replayable():
+        for c in (control(value=None), control(command_time=None, start_time=None,
+                                             end_time=None, frame=0, dispatch_phase="unknown")):
+            result = interval_report([c], t0=0., t1=1., time_unit="s", exposure_lookup={0:0.1})
+>           assert not result.controls
+E           AssertionError: assert not (ExecutedControl(command_id='c', value=None, mode='unknown', units='unknown', status='executed', evidence_level='execu...tart_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note=''),)
+E            +  where (ExecutedControl(command_id='c', value=None, mode='unknown', units='unknown', status='executed', evidence_level='execu...tart_time=0.1, end_time=0.9, frame=None, dispatch_phase='unknown', time_unit='s', source='executor.jsonl:1', note=''),) = ExecutedInterval(t0=0.0, t1=1.0, time_unit='s', controls=(ExecutedControl(command_id='c', value=None, mode='unknown', ...ote=''),), excluded=(), order_violations=(), gaps=((0.0, 0.1), (0.9, 1.0)), overlaps=(), missing_time=(), coverage=0.8).controls
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:60: AssertionError
+_________________ test_delays_have_distinct_physical_meanings __________________
+
+    def test_delays_have_distinct_physical_meanings():
+        context = sidecar().context_for(exposure_time=0.01, decision_time=0.5)
+>       assert context.arrival_delay == pytest.approx(0.02)
+E       assert 0.46 == 0.02 ± 2.0e-08
+E         
+E         comparison failed
+E         Obtained: 0.46
+E         Expected: 0.02 ± 2.0e-08
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:66: AssertionError
+_____________________ test_nonfinite_time_is_rejected[nan] _____________________
+
+value = nan
+
+    @pytest.mark.parametrize("value", [float("nan"), float("inf")])
+    def test_nonfinite_time_is_rejected(value):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:73: Failed
+_____________________ test_nonfinite_time_is_rejected[inf] _____________________
+
+value = inf
+
+    @pytest.mark.parametrize("value", [float("nan"), float("inf")])
+    def test_nonfinite_time_is_rejected(value):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n04_full/test_s0_acceptance_repairs.py:73: Failed
+=========================== short test summary info ============================
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_unverified_control_never_reaches_online_replay[unknown]
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_unverified_control_never_reaches_online_replay[inferred]
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_unverified_control_never_reaches_online_replay[producer_code_order]
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_interval_returns_only_executed_fragment
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_mixed_time_units_cannot_enter_context
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_mixed_clocks_cannot_enter_context
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_missing_value_and_frame_only_control_are_not_replayable
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_delays_have_distinct_physical_meanings
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_nonfinite_time_is_rejected[nan]
+FAILED tests/encoders/n04_full/test_s0_acceptance_repairs.py::test_nonfinite_time_is_rejected[inf]
+10 failed in 0.09s

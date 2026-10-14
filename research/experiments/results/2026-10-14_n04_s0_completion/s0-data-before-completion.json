@@ -1,0 +1,110 @@
+{
+  "schema": "n04-s0-data-v1",
+  "stage": "S0",
+  "owner_branch": "lzh/n04-egomotion-separation",
+  "intent": "S0 冻结数据、因果合同与诊断标准；本文件是跨模块只读接口，由 Lead 维护，子模块只读取。",
+  "split_seed": 20261014,
+  "split_ratio": {
+    "train": 0.8,
+    "dev": 0.1,
+    "final": 0.1
+  },
+  "local": {
+    "repo_root": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+    "artifact_root": "outputs/n04-v1/s0"
+  },
+  "remote": {
+    "ssh_host": "root@107.209.104.125",
+    "ssh_port": 44327,
+    "root": "/workspace/owac/research/n04-v1",
+    "encoder_python": null,
+    "data": {
+      "libero_raw": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw",
+      "robotwin_raw": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw"
+    },
+    "frozen": {
+      "rawvla_source": "/workspace/owac/rawvla/source",
+      "rawvla_source_head": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+      "starvla_checkout": "/workspace/owac/rawvla/source/starVLA",
+      "starvla_head": "57d508cb180d0510ac9060358009c0f6ffaac420",
+      "starvla_python": "/workspace/owac/rawvla/envs/starvla/bin/python",
+      "records_frozen_protocol": "/workspace/owac/rawvla/records/pi05-full-20261010-v3",
+      "records_complete_report": "/workspace/owac/rawvla/records/pi05-complete-report-20261014-v1",
+      "weights_libero": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+      "weights_robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+    }
+  },
+  "manifest": {
+    "npz_glob": "**/*.npz",
+    "header_only": true,
+    "deep_sample": {
+      "per_platform": 24,
+      "seed": 20261014,
+      "max_frames_read": 4
+    },
+    "splits": {
+      "group_key": "source_trajectory_id",
+      "stratify_by": "platform",
+      "variants_stay_together": true,
+      "holdouts": ["object", "scene", "camera", "unseen_factor_combination"]
+    }
+  },
+  "mechanism_data": {
+    "d0": {
+      "engine": "analytic_pinhole_zbuffer",
+      "resolution": [96, 128],
+      "depths_m": [0.35, 0.6, 1.2],
+      "objects": 3,
+      "frames": 24,
+      "cameras": ["cam0", "cam1"],
+      "factors": [
+        "static",
+        "camera_only",
+        "object_only",
+        "both",
+        "stop_reverse",
+        "occlusion_recovery",
+        "robot_self_occlusion",
+        "gain",
+        "noise",
+        "time_shift",
+        "wrong_association",
+        "unidentifiable_full_view_plane"
+      ],
+      "cfa": {
+        "pattern": "GRBG",
+        "bit_depth": 12,
+        "black_level_dn": 64,
+        "white_level_dn": 4095
+      }
+    },
+    "d1": {
+      "enabled": false,
+      "note": "本轮只交付采集器与逐项可行性核查；只有确认逐帧对应时才挂 sidecar，否则新建独立命名扩展集。",
+      "platforms": ["libero", "robotwin2"]
+    }
+  },
+  "protocol": {
+    "reference_2d": {
+      "relative_improvement_min": 0.10,
+      "absolute_improvement_px_min": 0.05,
+      "source": "N04 v1.0 §11.2 动态状态门，继承旧二维门槛"
+    },
+    "nominal_camera": {
+      "focal_px": 320.0,
+      "depth_m": 0.6,
+      "image_size": [256, 256],
+      "feature_stride": 32,
+      "note": "用于把像素门槛换算为米制门槛的诊断参照，不是真实标定；真实标定缺失时明确标注。"
+    },
+    "error_separation": {
+      "dev_false_positive_budget": 0.01,
+      "false_positive_relative_reduction_min": 0.20,
+      "event_recall_drop_max_pp": 2.0
+    },
+    "dynamic_revision": {
+      "stop_reverse_integration_error_reduction_min": 0.15,
+      "missing_phase_error_degradation_max": 0.05
+    }
+  }
+}

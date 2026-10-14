@@ -1,0 +1,1013 @@
+{
+  "schema": "n04-s0-contracts-v1",
+  "stage": "S0",
+  "workflow": "D 合同验证与预注册门槛",
+  "generated_at": "2026-10-14T12:10:20+0800",
+  "elapsed_s": 1.274,
+  "command": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/evaluation/n04_contracts.py --config configs/n04/full/s0_data.json --output research/experiments/results/2026-10-14_n04_s0_contracts/contracts.json",
+  "repo": {
+    "branch": "lzh/n04-egomotion-separation",
+    "head": "fd6255b769d661af568738bec194bb599601a644",
+    "dirty": true,
+    "porcelain_lines": 34
+  },
+  "source": {
+    "config": {
+      "path": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/configs/n04/full/s0_data.json",
+      "sha256": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33"
+    },
+    "module": {
+      "path": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/evaluation/n04_contracts.py",
+      "sha256": "f6d371aef4a9b0fbfce923c8327c1a28cd53cf53af9a5a18fe400c61d4da215a"
+    },
+    "protocol": {
+      "path": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/configs/n04/full/protocol.json",
+      "sha256": "055acc442c7fa7bbb1b1f06257a32ca5a8431c4abc6f0ea23c28d3e9bf2053bc"
+    },
+    "protocol_frozen": true,
+    "dependencies": {
+      "owac.raw.n04_mechanism_data": {
+        "importable": true,
+        "sha256": "0613376f278bd1b855923c5f429efca2b48ffc00b5b5ccb033dc442e3f0a2c24",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/raw/n04_mechanism_data.py"
+      },
+      "owac.raw.n04_manifest": {
+        "importable": true,
+        "sha256": "cffd1f36d99fcfa03c8c4e38d8b2a2db31b2f7bebc7e0d485e4bf47d6f28b197",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/raw/n04_manifest.py"
+      },
+      "owac.raw.telemetry": {
+        "importable": true,
+        "sha256": "786cea46f032109f5d1cd747fdf42566e02c04b0634da73be2b589660e1f0267",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/raw/telemetry.py"
+      },
+      "owac.raw.rawvla_sequence": {
+        "importable": true,
+        "sha256": "a56b052ab4c4d424491ea73fa91c5a770efd375d40ce2c18949d644288b3e085",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/raw/rawvla_sequence.py"
+      },
+      "owac.frameworks.n04.measurement_geometry": {
+        "importable": true,
+        "sha256": "5012a499d5ec04dff2dce2ec00128f9ad34a89b00c254cb06c94422a5534f75f",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/frameworks/n04/measurement_geometry.py"
+      },
+      "owac.frameworks.n04.geometry": {
+        "importable": true,
+        "sha256": "35c2596ec815df23095ec9e63f889702dff902185c16b4298edb799b8f0788c3",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/frameworks/n04/geometry.py"
+      },
+      "owac.frameworks.n04.model": {
+        "importable": true,
+        "sha256": "93af3a3994221050c6ad9e84395c1cfca636c2b6d203fbb4369b7020f3f6f599",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/frameworks/n04/model.py"
+      },
+      "owac.evaluation.n04_raw_diagnostics": {
+        "importable": true,
+        "sha256": "2616b5830de0c5792c5675f9a8a9bbada638c6f30fd52a8d2be916eebe8f91be",
+        "detail": "import ok: /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/src/owac/evaluation/n04_raw_diagnostics.py"
+      }
+    }
+  },
+  "environment": {
+    "python": "3.12.12 (main, Jan 14 2026, 19:35:58) [Clang 21.1.4 ]",
+    "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "torch": "2.14.1+cu130",
+    "numpy": "2.5.1"
+  },
+  "availability_policy": {
+    "timestamps": "unavailable",
+    "calibration": "unavailable（K / T / 畸变 / 时间偏移）",
+    "executed_action_libero": "partial_provisional（evidence_level=producer_code_order, verified=false）",
+    "executed_action_robotwin": "unavailable",
+    "policy": "缺失项记 skipped 并写明原因；不得用 fixture 冒充真实数据合同通过",
+    "recorded_at": "2026-10-14",
+    "source": "ws-telemetry 远端实测结论（Lead 转发）"
+  },
+  "readme": {
+    "check_status_rule": "组内：任一 failed → failed；passed 与 skipped 并存 → partial；全 skipped → skipped；否则 passed",
+    "skipped_policy": "依赖兄弟工作流产物缺失时记 skipped 并保留同一 CLI 重跑入口；不伪造输入",
+    "scope": "C1/C5/C7 的生产者模块由 ws-mechanism/ws-telemetry/ws-manifest 交付；C2.5 由 ws-geometry 交付；失败项只报告不代改"
+  },
+  "checks": [
+    {
+      "id": "C0",
+      "title": "protocol.json 冻结与换算一致性（附加）",
+      "status": "passed",
+      "required": false,
+      "note": "",
+      "subchecks": [
+        {
+          "id": "C0.1",
+          "title": "protocol 已冻结",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "frozen": true,
+            "frozen_at": "2026-10-14"
+          }
+        },
+        {
+          "id": "C0.2",
+          "title": "source_config.sha256 与 s0_data.json 一致",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "recorded": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33",
+            "actual": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33"
+          }
+        },
+        {
+          "id": "C0.3",
+          "title": "二维门槛继承与配置镜像一致",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "protocol_relative": 0.1,
+            "config_relative": 0.1,
+            "protocol_absolute_px": 0.05,
+            "config_absolute_px": 0.05
+          }
+        },
+        {
+          "id": "C0.4",
+          "title": "三维米制门槛与 nominal_camera / theory §7 换算一致",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "recomputed_m": {
+              "focal_px": 320.0,
+              "depth_m": 0.6,
+              "feature_stride": 32.0,
+              "inherited_original_m": 9.375e-05,
+              "resolution_original_m": 0.001875,
+              "inherited_feature_px": 0.0015625,
+              "resolution_feature_px": 0.03125,
+              "feature_scale_m": 0.06
+            },
+            "mismatches": {},
+            "diagnostic_reference_labeled": true,
+            "theory_source": "research/theory/n04_v1.md"
+          }
+        },
+        {
+          "id": "C0.5",
+          "title": "H1/H2 门槛与配置一致",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "mismatches": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1",
+      "title": "D0 逐样本图像—标签对应（独立投影重算）",
+      "status": "passed",
+      "required": true,
+      "note": "参照核已验证；D0 数据交互在生产者就绪后自动启用（接口不匹配记 skipped，不伪造输入）。",
+      "subchecks": [
+        {
+          "id": "C1.1",
+          "title": "独立 FP64 重投影参照核自检",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "object_counts": [
+              1,
+              2,
+              4
+            ],
+            "cameras": 2,
+            "batch_shapes": [
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "max_abs_diff_vec_vs_loop": 5.684341886080802e-14,
+            "max_abs_diff_permutation": 0.0,
+            "tolerance": 1e-12,
+            "scope": "参照核自身正确性；D0 样本级对应仍需生产者数据"
+          }
+        },
+        {
+          "id": "C1.2",
+          "title": "D0 随机逐样本渲染标签重算（B=1/2/4、多物体、多相机、置换不串位）",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "producer_audit_error": null,
+            "producer_audit_failures": [],
+            "per_batch": {
+              "B1": {
+                "bodies": 4,
+                "cameras": 2,
+                "max_centre_error_px": 0.0
+              },
+              "B2": {
+                "bodies": 4,
+                "cameras": 2,
+                "max_centre_error_px": 0.0
+              },
+              "B4": {
+                "bodies": 4,
+                "cameras": 2,
+                "max_centre_error_px": 0.0
+              }
+            },
+            "independent_reprojection_max_err_px": 0.0,
+            "permutation_body_index_mismatch_pixels": 0,
+            "permutation_label_max_err": 0.0,
+            "tolerance_px": 1e-06,
+            "source": "owac.raw.n04_mechanism_data（audit_d0 / build_factor_worlds / render_world / frame_labels）",
+            "note": "独立重投影使用审计侧 numpy FP64 参照核；置换检查把同一 world 的 batch 维重排后重渲染。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "title": "已知 K / 90 度旋转 / 复合逆 / 深度符号 / 像素中心 / CFA 四相位",
+      "status": "passed",
+      "required": true,
+      "note": "C2.1–C2.4 针对 geometry.py 基元与 CFA 相位律；C2.5–C2.6 针对 ws-geometry 的 measurement_geometry（crop/resize 内参、原图→特征单位链、有限差分）。",
+      "subchecks": [
+        {
+          "id": "C2.1",
+          "title": "像素中心 / 归一化坐标 / stride 换算",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "normalized_first": [
+              -0.875,
+              -0.875
+            ],
+            "normalized_last": [
+              0.875,
+              0.875
+            ],
+            "hand_first": [
+              -0.875,
+              -0.875
+            ],
+            "hand_last": [
+              0.875,
+              0.875
+            ],
+            "roundtrip_max_err": 0.0,
+            "stride_roundtrip_max_err": 0.0,
+            "in_bounds_minus_half": true,
+            "in_bounds_eight_and_half": false,
+            "tolerance": 1e-12
+          }
+        },
+        {
+          "id": "C2.2",
+          "title": "K 已知的 90 度旋转与非交换复合/逆",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "cases": [
+              {
+                "name": "yaw+90",
+                "got_px": [
+                  126.25,
+                  127.5
+                ],
+                "hand_px": [
+                  126.25,
+                  127.5
+                ],
+                "in_front": true,
+                "error_px": 0.0
+              },
+              {
+                "name": "roll+90",
+                "got_px": [
+                  127.5,
+                  47.5
+                ],
+                "hand_px": [
+                  127.5,
+                  47.5
+                ],
+                "in_front": true,
+                "error_px": 0.0
+              },
+              {
+                "name": "pitch-90",
+                "got_px": [
+                  127.5,
+                  126.25
+                ],
+                "hand_px": [
+                  127.5,
+                  126.25
+                ],
+                "in_front": true,
+                "error_px": 0.0
+              }
+            ],
+            "max_hand_error_px": 0.0,
+            "noncommutativity_max_abs": 1.0,
+            "inverse_order_error": 0.0,
+            "inverse_identity_error": 6.123233995736766e-17,
+            "tolerance_rotation_px": 1e-09,
+            "hand_derivation": "X_cur = R_cam^T X_prev, u = f*x/z + c_u（numpy 独立参照另有 C1.1 核）"
+          }
+        },
+        {
+          "id": "C2.3",
+          "title": "正/负深度与 in_front 支持掩码",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "negative_pixel": [
+              47.5,
+              127.5
+            ],
+            "negative_expected_px": [
+              47.5,
+              127.5
+            ],
+            "negative_uv_error_px": 0.0,
+            "in_front_positive": true,
+            "in_front_negative": false,
+            "behind_camera_in_front": false
+          }
+        },
+        {
+          "id": "C2.4",
+          "title": "CFA 四相位坐标律与平面打包往返",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "patterns": [
+              "RGGB",
+              "BGGR",
+              "GRBG",
+              "GBRG"
+            ],
+            "phase_law": [
+              {
+                "pattern": "RGGB",
+                "declared": [
+                  [
+                    "R",
+                    0,
+                    0
+                  ],
+                  [
+                    "Gr",
+                    0,
+                    1
+                  ],
+                  [
+                    "Gb",
+                    1,
+                    0
+                  ],
+                  [
+                    "B",
+                    1,
+                    1
+                  ]
+                ],
+                "expected": [
+                  [
+                    "R",
+                    0,
+                    0
+                  ],
+                  [
+                    "Gr",
+                    0,
+                    1
+                  ],
+                  [
+                    "Gb",
+                    1,
+                    0
+                  ],
+                  [
+                    "B",
+                    1,
+                    1
+                  ]
+                ],
+                "match": true
+              },
+              {
+                "pattern": "BGGR",
+                "declared": [
+                  [
+                    "B",
+                    0,
+                    0
+                  ],
+                  [
+                    "Gb",
+                    0,
+                    1
+                  ],
+                  [
+                    "Gr",
+                    1,
+                    0
+                  ],
+                  [
+                    "R",
+                    1,
+                    1
+                  ]
+                ],
+                "expected": [
+                  [
+                    "B",
+                    0,
+                    0
+                  ],
+                  [
+                    "Gb",
+                    0,
+                    1
+                  ],
+                  [
+                    "Gr",
+                    1,
+                    0
+                  ],
+                  [
+                    "R",
+                    1,
+                    1
+                  ]
+                ],
+                "match": true
+              },
+              {
+                "pattern": "GRBG",
+                "declared": [
+                  [
+                    "Gr",
+                    0,
+                    0
+                  ],
+                  [
+                    "R",
+                    0,
+                    1
+                  ],
+                  [
+                    "B",
+                    1,
+                    0
+                  ],
+                  [
+                    "Gb",
+                    1,
+                    1
+                  ]
+                ],
+                "expected": [
+                  [
+                    "Gr",
+                    0,
+                    0
+                  ],
+                  [
+                    "R",
+                    0,
+                    1
+                  ],
+                  [
+                    "B",
+                    1,
+                    0
+                  ],
+                  [
+                    "Gb",
+                    1,
+                    1
+                  ]
+                ],
+                "match": true
+              },
+              {
+                "pattern": "GBRG",
+                "declared": [
+                  [
+                    "Gb",
+                    0,
+                    0
+                  ],
+                  [
+                    "B",
+                    0,
+                    1
+                  ],
+                  [
+                    "R",
+                    1,
+                    0
+                  ],
+                  [
+                    "Gr",
+                    1,
+                    1
+                  ]
+                ],
+                "expected": [
+                  [
+                    "Gb",
+                    0,
+                    0
+                  ],
+                  [
+                    "B",
+                    0,
+                    1
+                  ],
+                  [
+                    "R",
+                    1,
+                    0
+                  ],
+                  [
+                    "Gr",
+                    1,
+                    1
+                  ]
+                ],
+                "match": true
+              }
+            ],
+            "roundtrip_max_err": 0.0,
+            "roundtrip_tolerance": 1e-15,
+            "law": "平面 (i,j) 对应原始格点 (2i+dy, 2j+dx)；G 与 R 同行记 Gr，否则记 Gb"
+          }
+        },
+        {
+          "id": "C2.5",
+          "title": "crop/resize 内参更新与像素仿射链一致（FP64）",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "resize_only_max_err_px": 1.4210854715202004e-14,
+            "crop_then_resize_max_err_px": 1.4210854715202004e-14,
+            "chain_inverse_max_err_px": 0.0,
+            "tolerance_px": 1e-09,
+            "chain": "crop(offset=(x=10,y=20)) -> resize(236x246 -> 118x123)，中心对齐公式"
+          }
+        },
+        {
+          "id": "C2.6",
+          "title": "原图→特征单位链、有限差分 Jacobian、负深度支持与 CFA 坐标",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "stride_vs_feature_intrinsics_max_err_px": 8.881784197001252e-16,
+            "feature_intrinsics": [
+              10.0,
+              3.5
+            ],
+            "feature_intrinsics_expected": [
+              10.0,
+              3.5
+            ],
+            "finite_difference_max_err": 6.991296430669536e-12,
+            "behind_camera_in_front": [
+              0
+            ],
+            "behind_camera_support": 0.0,
+            "cfa_offsets_match_synthetic": true,
+            "cfa_coordinate_grbg_r_3_5": [
+              6,
+              11
+            ],
+            "tolerance": {
+              "stride_px": 1e-09,
+              "finite_difference": 1e-06
+            },
+            "threshold_link": "protocol.json 三维门槛的 feature/original px 换算依赖该 stride=32 单位链"
+          }
+        }
+      ]
+    },
+    {
+      "id": "C3",
+      "title": "未观测值 NaN / 极大值：更新与梯度不受影响",
+      "status": "passed",
+      "required": true,
+      "note": "被测接口为现存 N04Encoder.step（N04FullEncoder 尚未实现）；后验均值、变化单元、不确定度与全部参数梯度均纳入比较，未只检查有限性。",
+      "subchecks": [
+        {
+          "id": "C3.1",
+          "title": "未观测区替换 NaN：更新与梯度不受影响",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "substitution": "nan",
+            "posterior_stable_finite": true,
+            "uncertainty_finite": true,
+            "change_finite": true,
+            "representation_finite": true,
+            "all_fields_finite": true,
+            "equal_to_clean_masked_run": true,
+            "param_grads_total": 18,
+            "param_grads_compared": 18,
+            "param_grads_nonfinite": 0,
+            "max_grad_abs_diff_vs_clean": 0.0
+          }
+        },
+        {
+          "id": "C3.2",
+          "title": "未观测区替换极大值 1e30：更新与梯度不受影响",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "substitution": "huge",
+            "posterior_stable_finite": true,
+            "uncertainty_finite": true,
+            "change_finite": true,
+            "representation_finite": true,
+            "all_fields_finite": true,
+            "equal_to_clean_masked_run": true,
+            "param_grads_total": 18,
+            "param_grads_compared": 18,
+            "param_grads_nonfinite": 0,
+            "max_grad_abs_diff_vs_clean": 0.0
+          }
+        },
+        {
+          "id": "C3.3",
+          "title": "按合同清洗（where(valid, value, 0)）后与干净掩码运行一致",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "substitution": "sanitized",
+            "posterior_stable_finite": true,
+            "uncertainty_finite": true,
+            "change_finite": true,
+            "representation_finite": true,
+            "all_fields_finite": true,
+            "equal_to_clean_masked_run": true,
+            "param_grads_total": 18,
+            "param_grads_compared": 18,
+            "param_grads_nonfinite": 0,
+            "max_grad_abs_diff_vs_clean": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "C4",
+      "title": "未来动作与当前图像置乱；已执行控制改变上下文选择",
+      "status": "passed",
+      "required": true,
+      "note": "模型效果留 S3；此处检查信息路由与上下文选择。head 为未训练零初始化，路由检查使用审计专用的确定性结构扰动并在证据中标注。",
+      "subchecks": [
+        {
+          "id": "C4.1",
+          "title": "预测签名与输出不读当前图像（batch 置换逐样本不变）",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "predict_parameters": [
+              "self",
+              "state",
+              "context"
+            ],
+            "measurement_parameters": [],
+            "head_perturbed": true,
+            "permutation": "batch [0,1] -> [1,0]",
+            "max_prior_abs_diff_after_permutation": 0.0,
+            "tolerance": 1e-12
+          }
+        },
+        {
+          "id": "C4.2",
+          "title": "上下文选择跟随已执行控制；未标记可用的值不泄漏；未来监督字段不进入上下文",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "context_parameters": [
+              "frame",
+              "previous",
+              "camera_index"
+            ],
+            "executed_action_delta": 3.0,
+            "motion_vector_delta_when_unavailable": 0.0,
+            "motion_vector_delta_when_available": 3.0,
+            "raw_frame_has_supervised_action": false,
+            "executed_action_available": false
+          }
+        },
+        {
+          "id": "C4.3",
+          "title": "已执行控制改变传播先验（结构路由，未训练权重）",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "identical_measurements": true,
+            "max_prior_diff_same_context": 0.0,
+            "max_prior_diff_action_0_vs_5": 0.9190224409103394,
+            "tolerance_same_context": 1e-12,
+            "scope": "审计专用 head 结构扰动；不代表已训练模型效果（S3）"
+          }
+        }
+      ]
+    },
+    {
+      "id": "C5",
+      "title": "迟到帧按曝光时刻回补缓存并重放已执行控制；未到达本体不泄漏",
+      "status": "partial",
+      "required": true,
+      "note": "C5.1 为合成 sidecar 语义检查；C5.2 为编码器侧可用性门控；C5.3 记录真实数据可用性缺口（skipped），不得当作真实数据合同通过。",
+      "subchecks": [
+        {
+          "id": "C5.1",
+          "title": "迟到帧按曝光时刻回补缓存并重放已执行控制（telemetry 合成 sidecar）",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "checks": {
+              "late_frame_hidden_before_arrival": true,
+              "late_frame_flagged": true,
+              "latest_visible_frame": true,
+              "replay_executed_in_command_order": true,
+              "planned_not_replayed": true,
+              "late_frame_visible_after_arrival": true,
+              "late_window_replay_order": true,
+              "late_window_pending": true,
+              "arrival_delay_recorded": true,
+              "target_actions_included_false": true,
+              "proprio_follows_visible_frame": true,
+              "proprio_not_leaked_when_unavailable": true,
+              "loader_time_selection_methods": true,
+              "loader_wrapper_binding": true
+            },
+            "early_visible_frames": [
+              0,
+              2
+            ],
+            "early_missing_frames": [
+              1
+            ],
+            "early_replay": [
+              "c2"
+            ],
+            "early_pending": [
+              "c4"
+            ],
+            "late_visible_frames": [
+              0,
+              1
+            ],
+            "late_replay": [
+              "c1",
+              "c2"
+            ],
+            "late_pending": [
+              "c3",
+              "c4"
+            ],
+            "arrival_delay_s": 0.10000000000000009,
+            "age_since_exposure_s": 1.495,
+            "loader_methods": {
+              "context_at": true,
+              "executed_between": true
+            },
+            "loader_binding": {
+              "sequence_context_type": "OnlineContext",
+              "loader_context_type": "OnlineContext",
+              "context_matches_sidecar": true,
+              "sequence_interval_type": "ExecutedInterval",
+              "interval_controls": [
+                "c1",
+                "c2"
+              ],
+              "interval_matches_loader": true,
+              "loader_context_signature": "(self, sequence: 'RawVLASequence', exposure_time: 'float', decision_time: 'float') -> 'OnlineContext'",
+              "loader_executed_between_signature": "(self, sequence: 'RawVLASequence', t0: 'float', t1: 'float') -> 'ExecutedInterval'"
+            },
+            "source": "owac.raw.telemetry.TelemetrySidecar.context_for；RawVLASequenceLoader.context_at/executed_between 为同一实现的加载器入口",
+            "scope": "合成 sidecar 的语义检查；真实 NPZ 时间戳覆盖由 ws-telemetry 的远端运行报告"
+          }
+        },
+        {
+          "id": "C5.2",
+          "title": "未到达（availability=False）的本体/动作不能泄漏进先验",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "head_perturbed": true,
+            "max_prior_diff_between_unavailable_values": 0.0,
+            "tolerance": 1e-12,
+            "scope": "可用性门控（编码器侧）；按物理时间的选择由 C5.1 覆盖"
+          }
+        },
+        {
+          "id": "C5.3",
+          "title": "真实数据的到达时刻/标定/已执行动作可用性（不得用 fixture 冒充）",
+          "status": "skipped",
+          "reason": "真实数据合同未验证：时间戳=不可用；标定 K/T/畸变/时间偏移=不可用；LIBERO 已执行动作=partial/provisional（evidence_level=producer_code_order，verified=false）；RoboTwin 已执行动作=不可用。以上口径由 Lead 转发 ws-telemetry 远端实测结论（2026-10-14）。C5.1 只验证合成 sidecar 的代码语义，不等于真实数据合同通过。",
+          "evidence": {
+            "availability_policy": "Lead 转发 ws-telemetry 远端实测口径（2026-10-14）",
+            "rerun": "真实时间戳/标定/执行日志补齐后重跑同一 CLI"
+          }
+        }
+      ]
+    },
+    {
+      "id": "C6",
+      "title": "sensor residual 数值精度；曝光增益改变均值/方差；饱和/遮挡独立",
+      "status": "passed",
+      "required": true,
+      "note": "静态 residual 在被测编码器的 sensor_history 参照路径上检查；曝光增益使用仓库内Poisson–Gaussian 诊断采样器做经验均值/方差标定（非生产 ISP）。",
+      "subchecks": [
+        {
+          "id": "C6.1",
+          "title": "静态无噪声/恒等几何/同曝光：sensor residual 接近数值精度",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "residual_max_by_step": [
+              2.4700756072998047,
+              0.0,
+              0.0
+            ],
+            "residual_max_after_first_frame": 0.0,
+            "first_frame_excluded_reason": "首帧没有历史，残差=当前测量本身，不代表静态一致性",
+            "tolerance": 1e-06,
+            "reference": "innovation_reference=sensor_history, predictor=identity"
+          }
+        },
+        {
+          "id": "C6.2",
+          "title": "正曝光增益同时改变均值与方差",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "samples": 400,
+            "mean_low": 0.2251523733139038,
+            "mean_high": 0.4503156244754791,
+            "mean_ratio": 2.000048313271192,
+            "variance_low": 0.0012270096922293305,
+            "variance_high": 0.0023504281416535378,
+            "variance_ratio": 1.9155742261359725,
+            "predicted_variance_ratio": 1.9184210902646297,
+            "alpha": 0.005,
+            "beta": 0.0001,
+            "sensor_model": "owac.evaluation.n04_raw_diagnostics.shot_read（诊断用 Poisson–Gaussian 采样器）",
+            "scope": "数据/传感器合同检查，不是生产 ISP 或机制结果"
+          }
+        },
+        {
+          "id": "C6.3",
+          "title": "饱和与遮挡各自独立地关闭更新支持",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "cases": [
+              {
+                "case": "saturation_only",
+                "g_update_max_in_masked_region": 0.0,
+                "g_update_max_outside": 0.3518328368663788
+              },
+              {
+                "case": "occlusion_only",
+                "g_update_max_in_masked_region": 0.0,
+                "g_update_max_outside": 0.3518328368663788
+              },
+              {
+                "case": "none",
+                "g_update_max_in_masked_region": 0.31532272696495056,
+                "g_update_max_outside": 0.31532272696495056
+              }
+            ],
+            "region": "特征场上半 [:, :, :8, :]",
+            "tolerance": 1e-12
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7",
+      "title": "manifest 两次生成一致、hash 稳定、拆分源 ID 交集为零",
+      "status": "partial",
+      "required": true,
+      "note": "C7.1 验证审计侧拆分参照核；C7.2 在合成元数据上验证 ws-manifest build_split 的确定性/互斥/覆盖/成员表 hash；C7.3 需远端真实产物或 --manifest。",
+      "subchecks": [
+        {
+          "id": "C7.1",
+          "title": "拆分参照核：确定性、源 ID 交集为零、比例符合冻结 seed/比例",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "seed": 20261014,
+            "counts": {
+              "train": 80,
+              "dev": 10,
+              "final": 10
+            },
+            "proportions": {
+              "train": 0.8,
+              "dev": 0.1,
+              "final": 0.1
+            },
+            "target_ratio": {
+              "train": 0.8,
+              "dev": 0.1,
+              "final": 0.1
+            },
+            "max_ratio_error": 0.0,
+            "pairwise_intersection_sizes": {
+              "train_dev": 0,
+              "train_final": 0,
+              "dev_final": 0
+            },
+            "union_size": 100,
+            "ids_total": 100,
+            "hash_recipe": "sha256(f'{seed}:{source_id}')[:16] as unit float, then sort tie-break by id",
+            "scope": "审计侧参照实现；ws-manifest 产物仍须用 --manifest 复核"
+          }
+        },
+        {
+          "id": "C7.2",
+          "title": "ws-manifest 分层拆分：确定性、源 ID 互斥、变体不拆散、成员表 hash",
+          "status": "passed",
+          "reason": "",
+          "evidence": {
+            "synthetic_sources": 48,
+            "synthetic_files": 96,
+            "deterministic": true,
+            "unique_sources": true,
+            "source_overlap": {
+              "train_dev": [],
+              "train_final": [],
+              "dev_final": []
+            },
+            "variants_kept_together": true,
+            "member_table_sha256": "2e1604bd9b0406af002298e0a844cec36ba18550ece64b94b8e109ffe367ff01",
+            "recomputed_member_table_sha256": "2e1604bd9b0406af002298e0a844cec36ba18550ece64b94b8e109ffe367ff01",
+            "counts_by_split": {
+              "train": 40,
+              "dev": 4,
+              "final": 4
+            },
+            "seed": 20261014,
+            "ratios": {
+              "train": 0.8,
+              "dev": 0.1,
+              "final": 0.1
+            },
+            "producer_cli": "python -m owac.raw.n04_manifest --config <s0_data.json> --output <inventory.json>",
+            "scope": "拆分函数在合成元数据上的行为；完整 inventory 需要远端 NPZ，未在本地运行"
+          }
+        },
+        {
+          "id": "C7.3",
+          "title": "真实 manifest 产物复核（拆分互斥 / 成员表 hash / 二次生成一致）",
+          "status": "skipped",
+          "reason": "本地没有远端 NPZ 数据根，未运行完整 manifest；需 ws-manifest 的 splits.json 产物",
+          "evidence": {
+            "rerun": "python -m owac.raw.n04_manifest --config configs/n04/full/s0_data.json --output <run_dir>/inventory.json；再运行本 CLI 并加 --manifest <run_dir>/splits.json",
+            "producer_cli": "python -m owac.raw.n04_manifest --config <s0_data.json> --output <inventory.json>",
+            "producer_main_present": true
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "partial": 2,
+    "required_total": 7
+  }
+}

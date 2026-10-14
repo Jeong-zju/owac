@@ -1,0 +1,83 @@
+{
+  "absolute_rule": "relative improvement >=10% AND absolute improvement strictly above one original pixel at the scored Z/fx; 0.05px inherited floor is smaller",
+  "calibration_source": "training split only",
+  "camera_references": {
+    "libero/agentview": {
+      "absolute_improvement_reference_m": 0.0031937240094492216,
+      "focal_px": 309.01933598375615,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 0.0001596862004724611,
+      "one_original_pixel_m": 0.0031937240094492216,
+      "reference_depth_m": 0.9869224727153778,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.0031937240094492216
+    },
+    "libero/robot0_eye_in_hand": {
+      "absolute_improvement_reference_m": 0.002123585837608317,
+      "focal_px": 166.81284772367434,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 0.00010617929188041585,
+      "one_original_pixel_m": 0.002123585837608317,
+      "reference_depth_m": 0.35424140095710754,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.002123585837608317
+    },
+    "robotwin2/front_camera": {
+      "absolute_improvement_reference_m": 0.0023128668369017088,
+      "focal_px": 358.6421813964844,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 0.00011564334184508543,
+      "one_original_pixel_m": 0.0023128668369017088,
+      "reference_depth_m": 0.8294916076660156,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.0023128668369017088
+    },
+    "robotwin2/head_camera": {
+      "absolute_improvement_reference_m": 0.0021260766370827335,
+      "focal_px": 358.6421813964844,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 0.00010630383185413667,
+      "one_original_pixel_m": 0.0021260766370827335,
+      "reference_depth_m": 0.7625007629394531,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.0021260766370827335
+    },
+    "robotwin2/left_camera": {
+      "absolute_improvement_reference_m": 0.0017409744411732246,
+      "focal_px": 358.6421813964844,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 8.704872205866123e-05,
+      "one_original_pixel_m": 0.0017409744411732246,
+      "reference_depth_m": 0.6243868713378906,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.0017409744411732246
+    },
+    "robotwin2/right_camera": {
+      "absolute_improvement_reference_m": 0.0017307933968953506,
+      "focal_px": 358.6421813964844,
+      "frame_samples": 384,
+      "inherited_point05px_reference_m": 8.653966984476754e-05,
+      "one_original_pixel_m": 0.0017307933968953506,
+      "reference_depth_m": 0.6207355194091797,
+      "train_sources": 16,
+      "visible_segment_tolerance_reference_m": 0.0017307933968953506
+    }
+  },
+  "data_audit_sha256": "23155dee91d349235d17b8de06c1244ea6b0c5b14383e924018dc4fa90277fa1",
+  "frozen": true,
+  "frozen_before_any_s1_training": true,
+  "parent_protocol_sha256": "8263fef9487bf34c04b2c4617eb49f44d8770298698ebadb3ba7629bfc36fdb8",
+  "pixel_coordinates": "integer pixel centres; K converted before supervision",
+  "pointwise_rule_m": "max(0.05, 1.0) * Z_m / fx_original_px",
+  "schema": "n04-calibrated-simulation-protocol-v1",
+  "scope": "new calibrated simulator extensions; no real sensor calibration claim; original nominal protocol retained as historical reference",
+  "selection_rule": "Z/fx evaluated in the declared metric space; no fit to dev/final or model errors",
+  "unchanged_hypothesis_gates": {
+    "h1_false_positive_budget": 0.01,
+    "h1_false_positive_reduction": 0.2,
+    "h1_recall_drop_max_pp": 2.0,
+    "h2_missing_degradation_max": 0.05,
+    "h2_stop_reverse_reduction": 0.15
+  },
+  "visible_segment_tolerance_m": "Z_m / fx_original_px"
+}

@@ -19,26 +19,50 @@ RoboTwin
 ``availability`` 显式区分：本体缺失、已执行动作缺失、时间戳缺失、噪声模型缺失。
 只有帧索引时 ``time_unit="frame"``，不编造秒数。开头 padding 的重复帧用
 ``new_measurement=False`` 标识；动作尾部的 padding 用独立监督 mask。
+
+S0 之后本模块支持可选 **遥测 sidecar**（:mod:`owac.raw.telemetry`）。三条结构被显式分开：
+
+* **普通测量**：``measurements`` / ``proprio`` / ``frame_ids``，由 :meth:`measurement_view` 取用；
+* **训练目标**：``supervised_action`` / ``supervised_action_mask``，由 :meth:`target_view`
+  取用，永远标记 ``future=True``；
+* **在线可用上下文**：:meth:`context_at`，只含 ``decision_time`` 之前已到达的帧与已经
+  执行的控制，绝不包含未来监督动作。
+
+``sidecar=None``（默认）时行为与加入 sidecar 之前逐位一致：不补时间、不补已执行动作，
+``time_unit`` 仍是 ``"frame"``。没有 sidecar 时调用 :meth:`context_at` /
+:meth:`executed_between` 会明确报错，而不是假定"帧立即到达"。
 """
 
 from __future__ import annotations
 
 import json
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
 import torch
 
+from owac.raw.telemetry import (
+    VERIFIED_EVIDENCE_LEVELS,
+    ExecutedControl,
+    ExecutedInterval,
+    FrameTiming,
+    OnlineContext,
+    TelemetrySidecar,
+    interval_report,
+)
+
 __all__ = [
     "LIBERO_STATE_DIM",
     "LIBERO_ACTION_DIM",
     "ROBOTWIN_JOINT_DIM",
+    "MeasurementView",
     "RawVLASequence",
     "RawVLASequenceLoader",
     "SequenceAvailability",
+    "TargetView",
 ]
 
 LIBERO_STATE_DIM = 8
@@ -83,6 +107,65 @@ class SequenceAvailability:
         }
 
 
+@dataclass(frozen=True)
+class MeasurementView:
+    """**普通测量**：某一帧实际测到的内容与其时间。
+
+    这个结构里没有任何未来动作，也没有控制记录——它只回答"这一帧测到了什么、
+    什么时候曝光、什么时候到达"。
+    """
+
+    frame: int
+    camera_ids: tuple[str, ...]
+    value_range: dict[str, tuple[float, float]]
+    is_new_measurement: bool
+    timing: FrameTiming | None
+    time_unit: str
+    exposure_available: bool
+    arrival_available: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "frame": self.frame,
+            "camera_ids": list(self.camera_ids),
+            "value_range": {k: list(v) for k, v in self.value_range.items()},
+            "is_new_measurement": self.is_new_measurement,
+            "timing": None if self.timing is None else self.timing.as_dict(),
+            "time_unit": self.time_unit,
+            "exposure_available": self.exposure_available,
+            "arrival_available": self.arrival_available,
+        }
+
+
+@dataclass(frozen=True)
+class TargetView:
+    """**训练目标**：这一帧之后的专家动作，``future=True``。
+
+    这个结构只能进损失，不能进在线上下文；把它当"已执行控制"使用会直接把未来信息
+    泄漏进预测。``valid_steps`` 是去掉尾部 padding 后真正参与损失的步数。
+    """
+
+    frame: int
+    actions: torch.Tensor
+    mask: torch.Tensor
+    horizon: int
+    action_dim: int
+    future: bool = True
+
+    @property
+    def valid_steps(self) -> int:
+        return int((self.mask > 0).sum())
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "frame": self.frame,
+            "horizon": self.horizon,
+            "action_dim": self.action_dim,
+            "valid_steps": self.valid_steps,
+            "future": self.future,
+        }
+
+
 @dataclass
 class RawVLASequence:
     """一条已经读入内存的序列。
@@ -106,6 +189,8 @@ class RawVLASequence:
     availability: SequenceAvailability
     value_range: dict[str, tuple[float, float]] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
+    #: 可选遥测 sidecar。``None`` 表示这条序列**没有**到达时刻与控制日志记录。
+    telemetry: TelemetrySidecar | None = None
 
     def __len__(self) -> int:
         return int(self.proprio.shape[0])
@@ -113,8 +198,62 @@ class RawVLASequence:
     def camera(self, name: str) -> torch.Tensor:
         return self.measurements[name]
 
+    # -- 三类结构的显式分离 -----------------------------------------------------------
+
+    def measurement_view(self, frame: int) -> MeasurementView:
+        """普通测量视图：不含任何未来动作。"""
+        timing = None if self.telemetry is None else self.telemetry.timing_for(frame)
+        return MeasurementView(
+            frame=frame,
+            camera_ids=self.camera_ids,
+            value_range=self.value_range,
+            is_new_measurement=bool(self.new_measurement[frame]),
+            timing=timing,
+            time_unit=self.time_unit,
+            exposure_available=bool(timing is not None and timing.has_exposure),
+            arrival_available=bool(timing is not None and timing.arrival_time is not None),
+        )
+
+    def target_view(self, frame: int) -> TargetView:
+        """训练目标视图：未来专家动作，永远 ``future=True``。"""
+        return TargetView(
+            frame=frame,
+            actions=self.supervised_action[frame],
+            mask=self.supervised_action_mask[frame],
+            horizon=int(self.supervised_action.shape[1]),
+            action_dim=int(self.supervised_action.shape[2]),
+        )
+
+    def telemetry_of(self) -> TelemetrySidecar:
+        if self.telemetry is None:
+            raise ValueError(
+                "该序列没有遥测 sidecar：没有到达时刻、没有已执行控制记录。"
+                "帧号与测量本身不含这些信息，不能假定帧立即到达或动作已经执行。"
+            )
+        return self.telemetry
+
+    def context_at(self, exposure_time: float, decision_time: float) -> OnlineContext:
+        """``decision_time`` 时刻在线真正可得的上下文（见 `OnlineContext`）。"""
+        return self.telemetry_of().context_for(
+            exposure_time=exposure_time,
+            decision_time=decision_time,
+            n_frames=len(self),
+            proprio_available=bool(self.availability.proprio),
+        )
+
+    def executed_between(self, t0: float, t1: float) -> ExecutedInterval:
+        """``(t0, t1]`` 内已经执行的控制片段，保序并检查覆盖与间隔。"""
+        sidecar = self.telemetry_of()
+        return interval_report(
+            sidecar.controls,
+            t0=t0,
+            t1=t1,
+            time_unit=sidecar.time_unit,
+            exposure_lookup=sidecar.exposure_lookup(),
+        )
+
     def summary(self) -> dict[str, Any]:
-        return {
+        payload = {
             "suite": self.suite,
             "episode_id": self.episode_id,
             "length": len(self),
@@ -129,6 +268,14 @@ class RawVLASequence:
             "value_range": {k: list(v) for k, v in self.value_range.items()},
             "new_measurement_false": int((~self.new_measurement).sum()),
         }
+        if self.telemetry is not None:
+            report = self.telemetry.validate(n_frames=len(self))
+            payload["telemetry"] = {
+                "schema": self.telemetry.schema,
+                "conditions": [condition.code for condition in report.conditions],
+                "availability": report.availability,
+            }
+        return payload
 
 
 def _require(npz, names: tuple[str, ...], *, where: str) -> None:
@@ -192,22 +339,137 @@ class RawVLASequenceLoader:
         *,
         suite: Literal["libero", "robotwin"],
         require_executed_action: bool = False,
+        sidecar: TelemetrySidecar | None = None,
     ) -> None:
         if suite not in ("libero", "robotwin"):
             raise ValueError(f"未知套件 {suite!r}")
         self.suite = suite
         self.require_executed_action = require_executed_action
+        self.sidecar = sidecar
 
     def load(self, path: Path | str, *, episode_id: str | None = None) -> RawVLASequence:
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"找不到 NPZ 文件：{path}")
         with np.load(path, allow_pickle=False) as npz:
-            if self.require_executed_action:
+            if self.require_executed_action and self.sidecar is None:
                 raise ValueError("该缓存没有可靠的已执行动作记录；不能使用未来监督动作")
             if self.suite == "libero":
-                return self._load_libero(npz, path, episode_id)
-            return self._load_robotwin(npz, path, episode_id)
+                sequence = self._load_libero(npz, path, episode_id)
+            else:
+                sequence = self._load_robotwin(npz, path, episode_id)
+        if self.sidecar is not None:
+            sequence = self._apply_sidecar(sequence, self.sidecar)
+            if self.require_executed_action and sequence.executed_action is None:
+                raise ValueError(
+                    "sidecar 没有给出逐帧一一对应的已执行控制；不能把未来监督动作当成已执行动作"
+                )
+        return sequence
+
+    # -- sidecar -----------------------------------------------------------------
+
+    @staticmethod
+    def _apply_sidecar(sequence: RawVLASequence, sidecar: TelemetrySidecar) -> RawVLASequence:
+        """把遥测挂到序列上，**只**把确实有记录的字段标成可得。
+
+        * ``episode_id`` 不一致直接报错：挂错 sidecar 比没有 sidecar 更危险。
+        * ``time_unit`` 只在 sidecar 有真实秒时才改为秒；帧号 sidecar 保持 ``"frame"``。
+        * ``executed_action`` 只有在每一帧都恰好有一条 ``after_exposure`` 的已执行控制、
+          数值维度一致、**且证据等级已核实**（``executed_log`` / ``replay_verified``）时才
+          建立；否则保持 ``None`` 并写下原因，不用零动作补。仅有生产者代码顺序证据
+          （``producer_code_order``）不算核实，见 `owac.raw.telemetry` 的证据等级说明。
+        """
+        if sidecar.episode_id and sequence.episode_id and sidecar.episode_id != sequence.episode_id:
+            raise ValueError(
+                f"sidecar episode_id {sidecar.episode_id!r} 与序列 {sequence.episode_id!r} 不一致"
+            )
+        length = len(sequence)
+        if any(record.frame < 0 or record.frame >= length for record in sidecar.timing):
+            raise ValueError("sidecar 含超出序列长度的帧号")
+        availability = replace(
+            sequence.availability,
+            timestamp=sidecar.has_real_seconds
+            and any(record.has_exposure for record in sidecar.timing),
+            exposure=any(record.has_exposure for record in sidecar.timing),
+            intrinsics=any(record.K is not None for record in sidecar.calibration),
+            pose=any(record.T_A_from_B is not None for record in sidecar.calibration),
+        )
+        executed_action, reason = RawVLASequenceLoader._executed_action_from_sidecar(
+            sidecar, length=length
+        )
+        availability = replace(availability, executed_action=executed_action is not None)
+        metadata = dict(sequence.metadata)
+        metadata["telemetry"] = {
+            "schema": sidecar.schema,
+            "time_unit": sidecar.time_unit,
+            "provenance": dict(sidecar.provenance),
+            "executed_action_unavailable_reason": reason,
+            "unavailable_conditions": [
+                condition.code for condition in sidecar.validate(n_frames=length).conditions
+            ],
+        }
+        return replace(
+            sequence,
+            time_unit=sidecar.time_unit,
+            availability=availability,
+            telemetry=sidecar,
+            executed_action=executed_action,
+            metadata=metadata,
+        )
+
+    @staticmethod
+    def _executed_action_from_sidecar(
+        sidecar: TelemetrySidecar, *, length: int
+    ) -> tuple[torch.Tensor | None, str | None]:
+        """从 sidecar 重建逐帧已执行动作；条件不满足时返回 ``(None, 原因)``。"""
+        by_frame: dict[int, list[ExecutedControl]] = {}
+        for control in sidecar.controls:
+            if not control.executed or control.frame is None:
+                continue
+            by_frame.setdefault(control.frame, []).append(control)
+        if len(by_frame) != length:
+            return None, f"只有 {len(by_frame)}/{length} 帧带已执行控制记录"
+        dims = set()
+        for controls in by_frame.values():
+            if len(controls) != 1:
+                return None, (
+                    f"第 {controls[0].frame} 帧有 {len(controls)} 条已执行控制，不是一一对应"
+                )
+            if controls[0].dispatch_phase != "after_exposure":
+                return None, (
+                    f"第 {controls[0].frame} 帧的 dispatch_phase="
+                    f"{controls[0].dispatch_phase!r}，无法确定相对该帧曝光的相位"
+                )
+            if controls[0].evidence_level not in VERIFIED_EVIDENCE_LEVELS:
+                return None, (
+                    f"第 {controls[0].frame} 帧的控制证据等级 "
+                    f"{controls[0].evidence_level!r} 未核实（需 executed_log 或 "
+                    "replay_verified）；真实 episode 级同版本重放核对前不建立 executed_action"
+                )
+            if controls[0].value is None:
+                return None, f"第 {controls[0].frame} 帧的已执行控制没有数值"
+            dims.add(np.asarray(controls[0].value, dtype=np.float64).shape)
+        if len(dims) != 1:
+            return None, f"各帧已执行控制数值维度不一致：{sorted(dims)}"
+        dim = dims.pop()[0]
+        if dim == 0:
+            return None, "已执行控制数值为空"
+        stacked = np.zeros((length, dim), dtype=np.float32)
+        for frame, controls in by_frame.items():
+            stacked[frame] = np.asarray(controls[0].value, dtype=np.float32)
+        return torch.from_numpy(stacked), None
+
+    # -- 在线因果上下文 ---------------------------------------------------------------
+
+    def context_at(
+        self, sequence: RawVLASequence, exposure_time: float, decision_time: float
+    ) -> OnlineContext:
+        """``decision_time`` 时刻在线可得的上下文；不含未来监督动作。"""
+        return sequence.context_at(exposure_time, decision_time)
+
+    def executed_between(self, sequence: RawVLASequence, t0: float, t1: float) -> ExecutedInterval:
+        """``(t0, t1]`` 内已执行的控制片段，保序并检查覆盖与间隔。"""
+        return sequence.executed_between(t0, t1)
 
     # -- LIBERO ------------------------------------------------------------------
 
@@ -311,7 +573,8 @@ class RawVLASequenceLoader:
             intrinsics=False,
             pose=False,
         )
-        if self.require_executed_action and not availability.executed_action:
+        needs_executed = self.require_executed_action and self.sidecar is None
+        if needs_executed and not availability.executed_action:
             raise ValueError("该缓存没有可靠的已执行动作记录；已按要求拒绝把它当作已执行动作使用")
         return RawVLASequence(
             suite="robotwin",

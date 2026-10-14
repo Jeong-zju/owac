@@ -1,0 +1,28 @@
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/owac/rawvla/envs/starvla/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+{
+  "plan": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-2/collection-plan-variant_00.json",
+  "mode": "extension_set",
+  "trace": {
+    "rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+    "bit_exact_recomputable": true,
+    "evidence_level": "bit_exact_recomputable",
+    "missing": [],
+    "verification": {
+      "method": "re-run the recorded recipe in a fresh environment and re-apply the recorded warm-start policy, then compare with the collected post_state",
+      "steps": 8,
+      "max_abs_diff": 1.7301603400833587e-14,
+      "tolerance": 1e-12,
+      "bit_exact": true
+    },
+    "controller_buffer_policy": "recorded_initial_conditions",
+    "warmstart_mode": "disabled_by_flag",
+    "notes": []
+  }
+}

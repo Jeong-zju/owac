@@ -1,0 +1,155 @@
+# ws-infra（N04 v1.0 S0 / 工作流 E）实际执行命令
+
+checkout：`/home/jeong/zeno/owac/worktrees/n04-egomotion-separation`（分支 `lzh/n04-egomotion-separation`，HEAD `fd6255b769d661af568738bec194bb599601a644`）。
+远端：`root@107.209.104.125`，端口 `44327`，根目录 `/workspace/owac/research/n04-v1`。
+所有远端操作只用 `ssh -o BatchMode=yes -o ConnectTimeout=20 -p 44327 root@107.209.104.125` 与 `scp -P 44327`；未启动/停止/重启任何 supervisor program。
+
+## 0. 只读环境探测
+
+```bash
+ssh -p 44327 root@107.209.104.125 'bash -lc "ls -1 /usr/bin/python3* /usr/local/bin/python3* | sort -u; \
+  for p in /usr/bin/python3 /usr/bin/python3.12; do \$p -V; done; which -a python3 pip3 uv; \
+  du -sh /root/.cache/pip; ls -d /root/.cache/uv; /usr/bin/python3 -c \"import numpy;print(numpy.__version__)\"; \
+  /usr/bin/python3 -c \"import venv,ensurepip;print(\\\"venv+ensurepip OK\\\")\"; df -h /workspace; \
+  nvidia-smi --query-gpu=index,name,memory.total,memory.used,driver_version --format=csv,noheader; supervisorctl status"'
+```
+
+结果：只有 `/usr/bin/python3.12`（3.12.3）；`uv 0.12.10` 在 `/usr/local/bin/uv`；`~/.cache/uv` 不存在，`/root/.cache/pip` 约 44 MB；系统 numpy 2.5.3；`df` 1.3 TB 可用；GPU 0 = RTX PRO 6000 Blackwell 97887 MiB；`supervisorctl status` 10 个 RUNNING（含 4 个既有 policy 服务）。
+
+## 1. 本地检查（只对自己拥有的文件）
+
+```bash
+cd /home/jeong/zeno/owac/worktrees/n04-egomotion-separation
+export PATH="$HOME/.local/bin:$PATH"
+uv run --locked ruff format scripts/n04_full/package_source.py tests/encoders/n04_full/test_packaging.py
+uv run --locked ruff check scripts/n04_full/package_source.py tests/encoders/n04_full/test_packaging.py
+uv run --locked --extra encoder pytest -q tests/encoders/n04_full/test_packaging.py
+uv run --locked --extra encoder pytest -q tests/encoders/n04 tests/encoders/n04_full
+```
+
+实测：`ruff format` 通过；`ruff check` `All checks passed!`；packaging 测试 `8 passed`；`tests/encoders/n04 tests/encoders/n04_full` 合计 `288 passed, 2 warnings`。
+未运行仓库级 `make check`，未运行 `ruff format .`。
+
+## 2. 打包（本地）
+
+```bash
+cd /home/jeong/zeno/owac/worktrees/n04-egomotion-separation
+python3 scripts/n04_full/package_source.py build --output-dir outputs/n04-v1/s0/source-packages
+```
+
+输出（权威快照）：
+`outputs/n04-v1/s0/source-packages/n04-s0-20261014T040846Z-30640b9274ed.{tar.gz,manifest.json,sha256sums.txt}`
+
+远端复核（同一工具，`--tree` 指向解出的快照）：
+
+```bash
+/workspace/owac/research/n04-v1/envs/encoder/bin/python \
+  source/<snapshot_id>/scripts/n04_full/package_source.py verify \
+  --manifest manifests/<snapshot_id>.manifest.json \
+  --tree source/<snapshot_id> \
+  --package source/<snapshot_id>.tar.gz
+```
+
+## 3. 远端目录与纯 encoder 环境
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=20 -p 44327 root@107.209.104.125 'bash -s' <<'REMOTE_SCRIPT'
+set -uo pipefail
+ROOT=/workspace/owac/research/n04-v1
+UV=/usr/local/bin/uv
+PY=/usr/bin/python3.12
+INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
+mkdir -p "$ROOT/source" "$ROOT/runs" "$ROOT/data" "$ROOT/envs" "$ROOT/manifests"
+find "$ROOT" -maxdepth 1 -mindepth 1 -printf '%p %y\n' | sort
+df -h "$ROOT" | tail -1
+"$PY" -V
+ls -d /root/.cache/uv 2>/dev/null || echo "uv cache: absent"
+du -sh /root/.cache/pip 2>/dev/null || echo "pip cache: absent"
+"$UV" venv --python "$PY" "$ROOT/envs/encoder"
+"$UV" pip install --python "$ROOT/envs/encoder/bin/python" --default-index "$INDEX" \
+    "numpy==2.5.1" "torch==2.14.1" "pytest==9.1.1"
+"$ROOT/envs/encoder/bin/python" -V
+"$ROOT/envs/encoder/bin/python" -c "import numpy; print('numpy', numpy.__version__)"
+"$ROOT/envs/encoder/bin/python" -c "import torch; print('torch', torch.__version__, 'cuda', torch.version.cuda, 'available', torch.cuda.is_available())"
+"$ROOT/envs/encoder/bin/python" -m pytest --version
+"$UV" pip freeze --python "$ROOT/envs/encoder/bin/python" > "$ROOT/envs/encoder.freeze.txt"
+/usr/bin/python3 - <<'PYEOF'
+# 小脚本：固定 seed 的 NumPy 数组 sha256 + 协方差特征值
+PYEOF
+"$ROOT/envs/encoder/bin/python" /tmp/n04_env_smoke.py
+readlink -f "$ROOT/envs/encoder/bin/python"
+du -sh "$ROOT/envs/encoder"
+REMOTE_SCRIPT
+```
+
+实测：`numpy==2.5.1`、`torch==2.14.1+cu130`（`cuda 13.0 available True`，arch 含 `sm_120`）、`pytest 9.1.1`；35 个包写入 `envs/encoder.freeze.txt`；小脚本输出 `{"python": "3.12.3", "numpy": "2.5.1", "array_sha256": "ee6adb5c714cff4f22526ac6f637221a07343b8077e13d533427f46ac9ebd388", "eig_min_max": [0.25859175550658114, 2.7973249503841604], "dtype": "float32"}`；环境 5.3 GB。
+未改动共享环境：`starvla` 仍为 Python 3.10.21 / numpy 1.26.4 / torch 2.7.1+cu128（与 preparation_audit 一致，已复核后写入 `manifests/environment.json`）。
+
+## 4. 冻结资产只读核对
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=20 -p 44327 root@107.209.104.125 'bash -s' <<'REMOTE_SCRIPT'
+# 只读：sha256 重算 report/protocol/manifest/两平台权重，解析 complete-summary.json、
+# identity-audit.json、checksums.json、protocol.json，抓 supervisorctl status 与 nvidia-smi，
+# 全部写入 /workspace/owac/research/n04-v1/manifests/frozen-assets.json
+REMOTE_SCRIPT
+```
+
+（脚本正文见 `manifests/frozen-assets.json` 同批落盘的同源命令；未重跑任何基线、未触碰任何 supervisor program、未停止任何 GPU 作业。）
+其中权重 sha256 在远端重算：LIBERO 9,354,050,752 B、RoboTwin 8,522,039,320 B，与 `complete-summary.json` 的 `weights_sha256` 逐条一致。
+
+## 5. 快照同步与远端复核（权威快照 `n04-s0-20261014T040846Z-30640b9274ed`）
+
+```bash
+cd /home/jeong/zeno/owac/worktrees/n04-egomotion-separation/outputs/n04-v1/s0/source-packages
+ID=n04-s0-20261014T040846Z-30640b9274ed
+scp -P 44327 "$ID.tar.gz" root@107.209.104.125:/workspace/owac/research/n04-v1/source/
+scp -P 44327 "$ID.manifest.json" "$ID.sha256sums.txt" root@107.209.104.125:/workspace/owac/research/n04-v1/manifests/
+```
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=20 -p 44327 root@107.209.104.125 \
+  "bash -s -- $ID 30640b9274ed209ab25728dfb7119cba57cae41eb6692505a067ca7c21bf0f53" <<'REMOTE_SCRIPT'
+set -uo pipefail
+ID=$1
+PKG_SHA=$2
+ROOT=/workspace/owac/research/n04-v1
+cd "$ROOT"
+ACTUAL=$(sha256sum "source/$ID.tar.gz" | awk '{print $1}')
+[ "$ACTUAL" = "$PKG_SHA" ] && echo "PACKAGE_SHA_MATCH=yes" || exit 1
+mkdir -p "source/$ID"
+tar -xzf "source/$ID.tar.gz" -C "source/$ID"
+cd "source/$ID"
+sha256sum -c "$ROOT/manifests/$ID.sha256sums.txt" > "/tmp/$ID.sha256check.txt" 2>&1
+grep -c ': OK$' "/tmp/$ID.sha256check.txt"
+grep -c 'FAILED' "/tmp/$ID.sha256check.txt"
+cd "$ROOT"
+ENC=$(/usr/bin/python3 -c 'import json;print(json.load(open("manifests/environment.json"))["encoder_python"])')
+"$ENC" "source/$ID/scripts/n04_full/package_source.py" verify \
+  --manifest "manifests/$ID.manifest.json" --tree "source/$ID" --package "source/$ID.tar.gz" \
+  > "manifests/$ID.verify.json"
+cat "manifests/$ID.verify.json"
+# 写 manifests/$ID.sync-record.json（transfer/extraction/per_file_check/tool_verify/source_identity）
+REMOTE_SCRIPT
+```
+
+实测：`PACKAGE_SHA_MATCH=yes`；`extracted_regular_files=781`（= manifest `counts.packed`）；`sha256sum -c` → `ok_lines=781, failed_lines=0`；tool verify → `checked=781, mismatched=0, missing=0, extra=0, differences=0, package_sha256_match=true`。
+被取代的快照 `n04-s0-20261014T040701Z-bd7782632fc6` 在同一复核下得到 `failed_lines=1`（`tests/encoders/n04_full/test_mechanism_data.py` 在被打包期间被其他 agent 重写），因此工具加入「写入同一次读取中计算 hash + 构建后稳定性复查」，重建后差异为 0。
+
+## 6. 回传小结果
+
+```bash
+RUN=/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/research/experiments/results/2026-10-14_n04_s0_infra
+mkdir -p "$RUN"
+R=root@107.209.104.125:/workspace/owac/research/n04-v1
+scp -P 44327 -q "$R/manifests/environment.json" "$R/manifests/frozen-assets.json" \
+  "$R/manifests/source-snapshots.json" "$RUN/"
+scp -P 44327 -q "$R/manifests/$ID.sync-record.json" "$R/manifests/$ID.verify.json" "$RUN/"
+```
+
+## 7. 未执行的命令（说明）
+
+- 未执行 `make check`、`ruff format .`（仓库级、越界）。
+- 未执行任何 `git commit/push/stash/checkout/restore`。
+- 未执行任何 `supervisorctl reread/update/start/stop/restart`；模板未复制进 `/etc/supervisor/conf.d/`。
+- 未重跑 π0.5 基线、未启动任何 GPU 作业、未停止他人作业。

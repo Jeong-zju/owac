@@ -1,0 +1,11 @@
+import json,numpy as np
+from pathlib import Path
+from owac.raw.n04_mechanism_data import _libero_env_from_npz
+root=Path('/workspace/owac/research/n04-v1/runs/s0/completion-libero-probe-g/episode-011')
+r=json.loads((root/'record.json').read_text());e,_,_=_libero_env_from_npz(r['metadata']['source_npz'],env_seed=r['metadata']['seed']);e.reset();e.sim.render(256,256,camera_name='agentview')
+c=e.sim._render_context_offscreen;opaque=[int(g.objid) for g in c.scn.geoms[:c.scn.ngeom] if g.objtype==5 and g.rgba[3]>=.999]
+ratios=[];fractions=[];excluded=0
+for f in r['frames']:
+ d=np.load(root/f['file']);ids=d['gt_segmentation'][:,(32,64,128,192,224),:][:,:,(32,64,128,192,224),1].reshape(-1);m=d['audit_ray_matching_geom'] & np.isin(ids,opaque);ratios.append(float(np.max((d['audit_ray_error_m']/d['audit_ray_bound_m'])[m],initial=0)));fractions.append(float(m.mean()));excluded+=int((~np.isin(ids,opaque)).sum())
+e.close();result=dict(max_opaque_ratio=max(ratios),min_opaque_support=min(fractions),transparent_sample_count=excluded)
+print(result);Path('/workspace/owac/research/n04-v1/manifests/opacity-probe.json').write_text(json.dumps(result,indent=2))

@@ -1,0 +1,19 @@
+usage: python -m owac.evaluation.n04_contracts [-h] [--config CONFIG] --output
+                                               OUTPUT [--protocol PROTOCOL]
+                                               [--manifest MANIFEST]
+                                               [--checks CHECKS] [--seed SEED]
+                                               [--threads THREADS]
+                                               [--fail-on-failed]
+
+N04 S0 合同审计：逐条输出 passed/failed/skipped 与数值证据。
+
+options:
+  -h, --help           show this help message and exit
+  --config CONFIG      S0 数据合同配置（默认 configs/n04/full/s0_data.json）
+  --output OUTPUT      审计 JSON 输出路径
+  --protocol PROTOCOL  预注册门槛文件（默认 configs/n04/full/protocol.json）
+  --manifest MANIFEST  ws-manifest 产物路径（可选，用于 C7.2）
+  --checks CHECKS      逗号分隔的检查子集，如 C2,C3（C0 始终运行）
+  --seed SEED          审计内部随机种子
+  --threads THREADS    Torch CPU 线程数（多 agent 共享机器）
+  --fail-on-failed     兼容选项；failed 检查始终返回非零退出码

@@ -1,0 +1,898 @@
+{
+ "schema": "n04-s0-telemetry-source-audit-v1",
+ "stage": "S0",
+ "workstream": "A1 telemetry & causal context",
+ "executor": "ws-telemetry",
+ "generated_at_utc": "2026-10-14T04:02:00Z",
+ "access": "read-only",
+ "remote": {
+  "ssh_host": "root@107.209.104.125",
+  "ssh_port": 44327,
+  "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+  "frozen_rawvla_source": "/workspace/owac/rawvla/source",
+  "frozen_rawvla_head": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+  "writes_performed": "none（脚本位于远端 /tmp，未写 /workspace/owac/rawvla/**）"
+ },
+ "method": {
+  "keys_union": "对全部 NPZ 用 zipfile.namelist() 扫描成员名（不读数组体），统计每个键出现的文件数。",
+  "header_sample": "每平台按排序等距抽取 40 个文件，用 np.load 读 .npy header 得到 shape/dtype，并检查同一文件内各数组帧数是否一致。",
+  "deep_samples": "每平台 3 个文件完整读入并解析 metadata_json。",
+  "metadata_distribution": "全部文件读出 metadata_json 后统计关键字段分布。"
+ },
+ "platforms": {
+  "libero": {
+   "platform": "libero",
+   "npz_count": 1771,
+   "glob": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/**/episode_*/variant_*.npz",
+   "keys_union": {
+    "agentview_raw_uint8": 1771,
+    "wrist_raw_uint8": 1771,
+    "actions": 1771,
+    "states": 1771,
+    "robot_states": 1771,
+    "rewards": 1771,
+    "dones": 1771,
+    "metadata_json": 1771
+   },
+   "deep_samples": [
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+     "size_kb": 112819.6,
+     "arrays": {
+      "agentview_raw_uint8": {
+       "shape": [
+        293,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "wrist_raw_uint8": {
+       "shape": [
+        293,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "actions": {
+       "shape": [
+        293,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "states": {
+       "shape": [
+        293,
+        123
+       ],
+       "dtype": "float64"
+      },
+      "robot_states": {
+       "shape": [
+        293,
+        8
+       ],
+       "dtype": "float32"
+      },
+      "rewards": {
+       "shape": [
+        293
+       ],
+       "dtype": "uint8"
+      },
+      "dones": {
+       "shape": [
+        293
+       ],
+       "dtype": "uint8"
+      }
+     },
+     "metadata": {
+      "agentview_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 1.0,
+       "mean_luma": 0.004039807710796595,
+       "median_luma": 0.0036384316626936197,
+       "p01_luma": 0.0,
+       "p95_luma": 0.00953098013997078
+      },
+      "agentview_table_flood": 0.0,
+      "benchmark": "rawvla-bench-light-libero-v1-train-rerender-npz",
+      "dataset_name": "libero_10_no_noops_1.0.0_lerobot",
+      "demo_index": 1,
+      "demo_key": "demo_1",
+      "hdf5_path": "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket_demo.hdf5",
+      "lighting_domain": "ExtremeLow",
+      "lighting_ev": -4.742945919623928,
+      "lighting_rig": "common_agentview_key",
+      "lighting_sample_unit": 0.5047027202507149,
+      "lighting_scale": 0.03734487502283198,
+      "noise_seed": 747586517,
+      "noops_filtered": 0,
+      "npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+      "num_frames": 293,
+      "paired_rgb_render_order": "default_lighting_rgb256_then_rotate_180",
+      "raw_shape": [
+       256,
+       256,
+       3
+      ],
+      "render_order": "env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize",
+      "replay_mode": "actions",
+      "representation": "raw",
+      "rgb_npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+      "sensor_saturation_ev": 0.0,
+      "source_shape": [
+       256,
+       256,
+       3
+      ],
+      "suite": "libero_10",
+      "task_description": "put both the alphabet soup and the tomato sauce in the basket",
+      "task_id": 0,
+      "task_name": "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket",
+      "trajectory_id": 1,
+      "variant_index": 0,
+      "wrist_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 1.0,
+       "mean_luma": 0.0038569094613194466,
+       "median_luma": 0.0036384316626936197,
+       "p01_luma": 0.0,
+       "p95_luma": 0.00898039247840643
+      }
+     }
+    },
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_object_no_noops_1.0.0_lerobot/episode_000035/variant_00.npz",
+     "size_kb": 53512.2,
+     "arrays": {
+      "agentview_raw_uint8": {
+       "shape": [
+        139,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "wrist_raw_uint8": {
+       "shape": [
+        139,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "actions": {
+       "shape": [
+        139,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "states": {
+       "shape": [
+        139,
+        110
+       ],
+       "dtype": "float64"
+      },
+      "robot_states": {
+       "shape": [
+        139,
+        8
+       ],
+       "dtype": "float32"
+      },
+      "rewards": {
+       "shape": [
+        139
+       ],
+       "dtype": "uint8"
+      },
+      "dones": {
+       "shape": [
+        139
+       ],
+       "dtype": "uint8"
+      }
+     },
+     "metadata": {
+      "agentview_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 1.0,
+       "mean_luma": 0.009226590394973755,
+       "median_luma": 0.00953098013997078,
+       "p01_luma": 0.0005662745679728687,
+       "p95_luma": 0.015423530712723732
+      },
+      "agentview_table_flood": 0.0,
+      "benchmark": "rawvla-bench-light-libero-v1-train-rerender-npz",
+      "dataset_name": "libero_object_no_noops_1.0.0_lerobot",
+      "demo_index": 35,
+      "demo_key": "demo_35",
+      "hdf5_path": "pick_up_the_alphabet_soup_and_place_it_in_the_basket_demo.hdf5",
+      "lighting_domain": "ExtremeLow",
+      "lighting_ev": -4.179060142706982,
+      "lighting_rig": "common_agentview_key",
+      "lighting_sample_unit": 0.8806265715286786,
+      "lighting_scale": 0.05520488930212027,
+      "noise_seed": 1510299126,
+      "noops_filtered": 0,
+      "npz_relpath": "libero_object_no_noops_1.0.0_lerobot/episode_000035/variant_00.npz",
+      "num_frames": 139,
+      "paired_rgb_render_order": "default_lighting_rgb256_then_rotate_180",
+      "raw_shape": [
+       256,
+       256,
+       3
+      ],
+      "render_order": "env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize",
+      "replay_mode": "actions",
+      "representation": "raw",
+      "rgb_npz_relpath": "libero_object_no_noops_1.0.0_lerobot/episode_000035/variant_00.npz",
+      "sensor_saturation_ev": 0.0,
+      "source_shape": [
+       256,
+       256,
+       3
+      ],
+      "suite": "libero_object",
+      "task_description": "pick up the alphabet soup and place it in the basket",
+      "task_id": 0,
+      "task_name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+      "trajectory_id": 35,
+      "variant_index": 0,
+      "wrist_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 0.9999996706736174,
+       "mean_luma": 0.009746972471475601,
+       "median_luma": 0.010364705696702003,
+       "p01_luma": 0.0,
+       "p95_luma": 0.01709097996354103
+      }
+     }
+    },
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_spatial_no_noops_1.0.0_lerobot/episode_000499/variant_00.npz",
+     "size_kb": 48875.4,
+     "arrays": {
+      "agentview_raw_uint8": {
+       "shape": [
+        127,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "wrist_raw_uint8": {
+       "shape": [
+        127,
+        256,
+        256,
+        3
+       ],
+       "dtype": "uint8"
+      },
+      "actions": {
+       "shape": [
+        127,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "states": {
+       "shape": [
+        127,
+        92
+       ],
+       "dtype": "float64"
+      },
+      "robot_states": {
+       "shape": [
+        127,
+        8
+       ],
+       "dtype": "float32"
+      },
+      "rewards": {
+       "shape": [
+        127
+       ],
+       "dtype": "uint8"
+      },
+      "dones": {
+       "shape": [
+        127
+       ],
+       "dtype": "uint8"
+      }
+     },
+     "metadata": {
+      "agentview_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 1.0,
+       "mean_luma": 0.008628561161458492,
+       "median_luma": 0.008960000239312649,
+       "p01_luma": 0.0,
+       "p95_luma": 0.015423530712723732
+      },
+      "agentview_table_flood": 0.0,
+      "benchmark": "rawvla-bench-light-libero-v1-train-rerender-npz",
+      "dataset_name": "libero_spatial_no_noops_1.0.0_lerobot",
+      "demo_index": 49,
+      "demo_key": "demo_49",
+      "hdf5_path": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate_demo.hdf5",
+      "lighting_domain": "ExtremeLow",
+      "lighting_ev": -4.122344663484085,
+      "lighting_rig": "common_agentview_key",
+      "lighting_sample_unit": 0.9184368910106101,
+      "lighting_scale": 0.057418336193411995,
+      "noise_seed": 2154304917,
+      "noops_filtered": 0,
+      "npz_relpath": "libero_spatial_no_noops_1.0.0_lerobot/episode_000499/variant_00.npz",
+      "num_frames": 127,
+      "paired_rgb_render_order": "default_lighting_rgb256_then_rotate_180",
+      "raw_shape": [
+       256,
+       256,
+       3
+      ],
+      "render_order": "env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize",
+      "replay_mode": "actions",
+      "representation": "raw",
+      "rgb_npz_relpath": "libero_spatial_no_noops_1.0.0_lerobot/episode_000499/variant_00.npz",
+      "sensor_saturation_ev": 0.0,
+      "source_shape": [
+       256,
+       256,
+       3
+      ],
+      "suite": "libero_spatial",
+      "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+      "task_id": 9,
+      "task_name": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate",
+      "trajectory_id": 499,
+      "variant_index": 0,
+      "wrist_stats": {
+       "clip_ratio": 0.0,
+       "dark_ratio": 0.9999997597041093,
+       "mean_luma": 0.009412497282028198,
+       "median_luma": 0.009814118035137653,
+       "p01_luma": 0.0,
+       "p95_luma": 0.01709097996354103
+      }
+     }
+    }
+   ],
+   "header_sample": {
+    "files": 40,
+    "shape_dtype_patterns": 9,
+    "unaligned_frame_counts": 0,
+    "note": "states 维度随场景变化（47/51/71/79/84/92/110/123, float64）——是 MuJoCo sim state，不是固定维本体向量。"
+   },
+   "metadata_distribution": {
+    "replay_mode": {
+     "actions": 1771
+    },
+    "num_frames": {
+     "min": 63,
+     "max": 478,
+     "sum": 261131
+    }
+   },
+   "verdict": {
+    "executed_action": {
+     "status": "partial",
+     "evidence_level": "producer_code_order",
+     "verified": false,
+     "what_exists": "actions[t] 为 7 维 OSC 命令序列，逐帧一条，生产者按'先渲染 frame t，再 step(actions[t])'执行。",
+     "why_not_available": "只有生产者代码顺序证据，未做真实 episode 级同版本重放核对；且缓存不含控制器限幅后真正应用的数值。",
+     "usable_as": "训练监督目标（既有用法）；在 availability.executed_action 上必须保持 False。"
+    },
+    "timestamp": {
+     "status": "unavailable",
+     "what_exists": "无。",
+     "why_not_available": "键并集与 metadata 均无时间戳/帧率字段；帧号不是秒。"
+    },
+    "calibration": {
+     "status": "unavailable",
+     "what_exists": "无。",
+     "why_not_available": "NPZ 无 K/T/畸变/时间偏移；LIBERO 相机由 MuJoCo 模型在运行时定义。"
+    }
+   },
+   "missing": [
+    "控制器限幅/变换后真正下发并作用到执行器的数值（缓存只存命令值）。",
+    "任何时间戳、帧率、曝光参数。",
+    "K / T / 畸变模型 / 相机-机器人时间偏移。",
+    "真实 episode 级重放核对结论（帧 t 与 actions[t] 的逐帧对应）。"
+   ],
+   "unblock_plan": [
+    "在远端新建独立 run 目录，用冻结 RoboTwin/LIBERO 仿真环境，按 producer 相同协议重放若干 episode。",
+    "逐帧比较相机帧、q/末端、时序；保存误差、哈希与容忍度，产出 episode 级核对报告。",
+    "只有核对通过才把对应控制的 evidence_level 升为 replay_verified，并据此生成 sidecar；核对不通过则新建独立命名的扩展数据集，不挂原 NPZ。"
+   ]
+  },
+  "robotwin2": {
+   "platform": "robotwin2",
+   "npz_count": 632,
+   "glob": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/<task>/episode_*.npz",
+   "keys_union": {
+    "actions": 632,
+    "robot_states": 632,
+    "left_endpose": 632,
+    "right_endpose": 632,
+    "dones": 632,
+    "rewards": 632,
+    "head_camera_raw_float32": 632,
+    "left_camera_raw_float32": 632,
+    "right_camera_raw_float32": 632,
+    "metadata_json": 632
+   },
+   "deep_samples": [
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000000.npz",
+     "size_kb": 251123.6,
+     "arrays": {
+      "actions": {
+       "shape": [
+        93,
+        14
+       ],
+       "dtype": "float32"
+      },
+      "robot_states": {
+       "shape": [
+        93,
+        16
+       ],
+       "dtype": "float32"
+      },
+      "left_endpose": {
+       "shape": [
+        93,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "right_endpose": {
+       "shape": [
+        93,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "dones": {
+       "shape": [
+        93
+       ],
+       "dtype": "uint8"
+      },
+      "rewards": {
+       "shape": [
+        93
+       ],
+       "dtype": "uint8"
+      },
+      "head_camera_raw_float32": {
+       "shape": [
+        93,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "left_camera_raw_float32": {
+       "shape": [
+        93,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "right_camera_raw_float32": {
+       "shape": [
+        93,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      }
+     },
+     "metadata": {
+      "benchmark": "rawvla-bench-light-robotwin2-v1-train-state-copy",
+      "clean_protocol": "original_lighting_joint_action_replay",
+      "clean_replay_record": "episode0.json",
+      "dataset_seed": 0,
+      "entry_index": 0,
+      "episode": 0,
+      "lighting_applied": {
+       "domain": "Low",
+       "extra_light_intensity": 0.0,
+       "lighting_ev": -6.481873738595874,
+       "lighting_scale": 0.011188234916780785,
+       "raw_sensor_read_noise": 3.90625e-08,
+       "raw_sensor_shot_noise": 2.5e-05,
+       "raw_white_level": 3.5,
+       "sample_unit": 0.5181262614041264,
+       "sensor_saturation_ev": 0.0,
+       "strategy": "environment_only"
+      },
+      "lighting_domain": "Low",
+      "lighting_ev": -6.481873738595874,
+      "lighting_sample_unit": 0.5181262614041264,
+      "lighting_scale": 0.011188234916780785,
+      "lighting_strategy": "environment_only",
+      "noise_seed": 2879643119,
+      "num_frames": 93,
+      "raw_npz": "episode_000000.npz",
+      "raw_protocol": "copy_clean_physics_state_each_frame_then_render_without_action",
+      "raw_sensor_noise_enabled": true,
+      "raw_sensor_read_noise": 3.90625e-08,
+      "raw_sensor_shot_noise": 2.5e-05,
+      "raw_white_level": 3.5,
+      "representation": "three_channel_linear_float32",
+      "rgb_npz": "episode_000000.npz",
+      "source_hdf5": "episode0.hdf5",
+      "source_trajectory": "episode0.pkl",
+      "task_name": "grab_roller",
+      "views": [
+       "head_camera",
+       "left_camera",
+       "right_camera"
+      ]
+     }
+    },
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/place_dual_shoes/episode_000017.npz",
+     "size_kb": 596746.0,
+     "arrays": {
+      "actions": {
+       "shape": [
+        221,
+        14
+       ],
+       "dtype": "float32"
+      },
+      "robot_states": {
+       "shape": [
+        221,
+        16
+       ],
+       "dtype": "float32"
+      },
+      "left_endpose": {
+       "shape": [
+        221,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "right_endpose": {
+       "shape": [
+        221,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "dones": {
+       "shape": [
+        221
+       ],
+       "dtype": "uint8"
+      },
+      "rewards": {
+       "shape": [
+        221
+       ],
+       "dtype": "uint8"
+      },
+      "head_camera_raw_float32": {
+       "shape": [
+        221,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "left_camera_raw_float32": {
+       "shape": [
+        221,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "right_camera_raw_float32": {
+       "shape": [
+        221,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      }
+     },
+     "metadata": {
+      "benchmark": "rawvla-bench-light-robotwin2-v1-train-state-copy",
+      "clean_protocol": "original_lighting_joint_action_replay",
+      "clean_replay_record": "episode17.json",
+      "dataset_seed": 26,
+      "entry_index": 316,
+      "episode": 17,
+      "lighting_applied": {
+       "domain": "ExtremeOver",
+       "extra_light_intensity": 0.0,
+       "lighting_ev": 2.1618848033055866,
+       "lighting_scale": 4.474991069608698,
+       "raw_sensor_read_noise": 3.90625e-08,
+       "raw_sensor_shot_noise": 2.5e-05,
+       "raw_white_level": 3.5,
+       "sample_unit": 0.32376960661117316,
+       "sensor_saturation_ev": 0.0,
+       "strategy": "environment_only"
+      },
+      "lighting_domain": "ExtremeOver",
+      "lighting_ev": 2.1618848033055866,
+      "lighting_sample_unit": 0.32376960661117316,
+      "lighting_scale": 4.474991069608698,
+      "lighting_strategy": "environment_only",
+      "noise_seed": 2090442930,
+      "num_frames": 221,
+      "raw_npz": "episode_000017.npz",
+      "raw_protocol": "copy_clean_physics_state_each_frame_then_render_without_action",
+      "raw_sensor_noise_enabled": true,
+      "raw_sensor_read_noise": 3.90625e-08,
+      "raw_sensor_shot_noise": 2.5e-05,
+      "raw_white_level": 3.5,
+      "representation": "three_channel_linear_float32",
+      "rgb_npz": "episode_000017.npz",
+      "source_hdf5": "episode17.hdf5",
+      "source_trajectory": "episode17.pkl",
+      "task_name": "place_dual_shoes",
+      "views": [
+       "head_camera",
+       "left_camera",
+       "right_camera"
+      ]
+     }
+    },
+    {
+     "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/stack_bowls_two/episode_000049.npz",
+     "size_kb": 907265.9,
+     "arrays": {
+      "actions": {
+       "shape": [
+        336,
+        14
+       ],
+       "dtype": "float32"
+      },
+      "robot_states": {
+       "shape": [
+        336,
+        16
+       ],
+       "dtype": "float32"
+      },
+      "left_endpose": {
+       "shape": [
+        336,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "right_endpose": {
+       "shape": [
+        336,
+        7
+       ],
+       "dtype": "float32"
+      },
+      "dones": {
+       "shape": [
+        336
+       ],
+       "dtype": "uint8"
+      },
+      "rewards": {
+       "shape": [
+        336
+       ],
+       "dtype": "uint8"
+      },
+      "head_camera_raw_float32": {
+       "shape": [
+        336,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "left_camera_raw_float32": {
+       "shape": [
+        336,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      },
+      "right_camera_raw_float32": {
+       "shape": [
+        336,
+        240,
+        320,
+        3
+       ],
+       "dtype": "float32"
+      }
+     },
+     "metadata": {
+      "benchmark": "rawvla-bench-light-robotwin2-v1-train-state-copy",
+      "clean_protocol": "original_lighting_joint_action_replay",
+      "clean_replay_record": "episode49.json",
+      "dataset_seed": 61,
+      "entry_index": 632,
+      "episode": 49,
+      "lighting_applied": {
+       "domain": "Normal",
+       "extra_light_intensity": 0.0,
+       "lighting_ev": 0.21072141446538928,
+       "lighting_scale": 1.157266726307663,
+       "raw_sensor_read_noise": 3.90625e-08,
+       "raw_sensor_shot_noise": 2.5e-05,
+       "raw_white_level": 3.5,
+       "sample_unit": 0.7107214144653893,
+       "sensor_saturation_ev": 0.0,
+       "strategy": "environment_only"
+      },
+      "lighting_domain": "Normal",
+      "lighting_ev": 0.21072141446538928,
+      "lighting_sample_unit": 0.7107214144653893,
+      "lighting_scale": 1.157266726307663,
+      "lighting_strategy": "environment_only",
+      "noise_seed": 3810293792,
+      "num_frames": 336,
+      "raw_npz": "episode_000049.npz",
+      "raw_protocol": "copy_clean_physics_state_each_frame_then_render_without_action",
+      "raw_sensor_noise_enabled": true,
+      "raw_sensor_read_noise": 3.90625e-08,
+      "raw_sensor_shot_noise": 2.5e-05,
+      "raw_white_level": 3.5,
+      "representation": "three_channel_linear_float32",
+      "rgb_npz": "episode_000049.npz",
+      "source_hdf5": "episode49.hdf5",
+      "source_trajectory": "episode49.pkl",
+      "task_name": "stack_bowls_two",
+      "views": [
+       "head_camera",
+       "left_camera",
+       "right_camera"
+      ]
+     }
+    }
+   ],
+   "header_sample": {
+    "files": 40,
+    "shape_dtype_patterns": 1,
+    "unaligned_frame_counts": 0,
+    "note": "三路相机 240x320x3 float32 HDR-derived；actions 14 维为实测关节状态。"
+   },
+   "metadata_distribution": {
+    "clean_protocol": {
+     "original_lighting_joint_action_replay": 632
+    },
+    "num_frames": {
+     "min": 88,
+     "max": 783,
+     "sum": 146944
+    }
+   },
+   "verdict": {
+    "executed_action": {
+     "status": "unavailable",
+     "evidence_level": "producer_code_order",
+     "verified": false,
+     "what_exists": "actions[t] = joint_action['vector'] = concat(left_arm_jointState(7), right_arm_jointState(7))，是**实测关节状态**。",
+     "why_not_available": "缓存不含已下发控制；metadata 引用的 clean_replay_record(episode*.json) 与 source_trajectory(episode*.pkl) 未随数据交付（远端 find 无结果）。",
+     "usable_as": "14 维本体状态；不得当作已执行控制，也不得以零动作补齐。"
+    },
+    "timestamp": {
+     "status": "unavailable",
+     "what_exists": "无。",
+     "why_not_available": "同 LIBERO：无任何时间/帧率键。"
+    },
+    "calibration": {
+     "status": "unavailable",
+     "what_exists": "无。",
+     "why_not_available": "K/T 只在 SAPIEN 运行时由 camera.get_intrinsic_matrix() 算出，未写入缓存。"
+    }
+   },
+   "missing": [
+    "已下发控制（关节目标/力矩）；缓存只有实测关节状态。",
+    "metadata 引用的 clean_replay_record 与 source_trajectory 文件本身。",
+    "任何时间戳/帧率。",
+    "K / T / 畸变 / 时间偏移（运行时可得但未写入缓存）。"
+   ],
+   "unblock_plan": [
+    "在远端用同一 RoboTwin 环境重跑 play_once，在执行器侧记录真正下发的关节目标与时间，形成新的扩展数据集（独立命名）。",
+    "若需要标定，同版本环境下调用 camera.get_intrinsic_matrix()/fovy 与相机位姿，连同场景版本与哈希一起写入 sidecar provenance。",
+    "不要尝试从实测关节状态反推控制；两者物理含义不同。"
+   ]
+  }
+ },
+ "evidence": [
+  {
+   "file": "/workspace/owac/rawvla/source/scripts/replay/replay_libero_train_rawvla_light_npz.py",
+   "lines": "273,284,288,325,333,350",
+   "what": "LIBERO 生产者循环：L273 逐条遍历演示动作；L284 取当前 sim state；L288 渲染该状态；L325 才 actions.append(action)；L333 才 rgb_env.step(action)。即观测先于该条命令下发，actions[t] 是'看到 frame t 之后下发的 7 维 OSC 命令'，L350 按顺序堆叠。"
+  },
+  {
+   "file": "/workspace/owac/rawvla/source/scripts/replay/replay_libero_train_rawvla_light_npz.py",
+   "lines": "81",
+   "what": "_state_from_obs：robot_states = [eef_pos(3), eef_axisangle(3), gripper_qpos(2)]，不是关节角。"
+  },
+  {
+   "file": "/workspace/owac/rawvla/source/scripts/replay/replay_robotwin2_paired_lighting_training.py",
+   "lines": "131,201,203,213,245",
+   "what": "RoboTwin 生产者：L131 robot_state 由 endpose 组成；L201 paired_take_picture；L203 copy_physics_state(clean->raw) 后渲染，帧与 clean 观测同物理状态；L213 actions 取 clean_observation['joint_action']['vector']；L245 clean_protocol=原始光照关节动作重放。"
+  },
+  {
+   "file": "/workspace/owac/rawvla/source/third_party/RoboTwin/envs/_base_task.py",
+   "lines": "440,490,497,511,848,885,889",
+   "what": "L440 get_obs；L490 get_left_arm_jointState(); L497 joint_action['vector'] 由实测关节状态拼成；L511 _take_picture；L848/885/889 在 play_once 内于 scene.step() 之后调用 _take_picture。=> RoboTwin 缓存 actions 是**实测关节状态**，不是已下发控制。"
+  },
+  {
+   "file": "/workspace/owac/rawvla/source/third_party/RoboTwin/envs/camera/camera.py",
+   "lines": "139,322",
+   "what": "fovy 与 camera.get_intrinsic_matrix() 只在运行时可得（L322 用于 get_config），不写入交付 NPZ。"
+  },
+  {
+   "file": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/**/metadata_json（2434/2403 文件实测统计）",
+   "lines": "-",
+   "what": "LIBERO replay_mode='actions' 1771/1771；RoboTwin clean_protocol='original_lighting_joint_action_replay' 632/632；两平台键并集内无任何时间/帧率键。"
+  }
+ ],
+ "confidence": {
+  "libero.executed_action": {
+   "evidence_level": "producer_code_order",
+   "verified": false
+  },
+  "robotwin2.executed_action": {
+   "evidence_level": "producer_code_order",
+   "verified": false
+  },
+  "timestamp": {
+   "evidence_level": "exhaustive_key_scan",
+   "verified": true
+  },
+  "calibration": {
+   "evidence_level": "exhaustive_key_scan",
+   "verified": true
+  }
+ },
+ "not_verified": [
+  "未做真实 episode 级重放核对，因此 LIBERO 的 actions 是否与帧逐帧对应仍是代码级推断。",
+  "未对全部 2403 个文件的数组体做深读（仅 header 全量 + 40/平台 shape 抽样 + 3/平台深读）。",
+  "RoboTwin gripper 归一化区间未逐值验证。",
+  "本地没有真实 NPZ，因此真实缓存未挂 sidecar。"
+ ],
+ "decision_required_by_lead": [
+  "是否启动远端同版本重放核对，以把 LIBERO 控制证据等级升到 replay_verified。",
+  "RoboTwin 是否新建独立命名的扩展数据集（带执行器侧控制日志），而不是给原 NPZ 挂 sidecar。"
+ ]
+}

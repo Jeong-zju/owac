@@ -4,6 +4,16 @@ N04 传播算子的运动输入必须是**语义正确**的相对量。直接把
 通道上是错的：两个轴角之差不是相对旋转，也没有短弧归一化。本模块按仓库已记录的字段
 定义把状态切成通道组，线性组做差，旋转组用四元数求 ``R_t R_{t-1}^{T}`` 的旋转向量。
 
+旋转参考系必须说清楚（方案 §6.1）：已知 ``R_W_from_B``（把本体系坐标变到世界系）时
+
+* **世界系增量** ``ΔR_W = R_t R_prev^T``，满足 ``R_t = ΔR_W R_prev``；
+* **上一体坐标系增量** ``ΔR_B = R_prev^T R_t``，满足 ``R_t = R_prev ΔR_B``。
+
+两者一般不同（旋转不可交换）。旧函数 `relative_rotation_vector` 的数值行为就是前者
+（``R_t R_prev^T``），但旧注释把它写成了“体坐标系”，属于命名/注释错误；首版**保留**
+旧数值行为不动，正式接口改用显式 ``frame`` 参数的 `relative_rotation_increment`，
+不悄悄改变旧 checkpoint 的输入语义。
+
 数据定义（与 `src/owac/raw/rawvla_sequence.py` 保持一致）：
 
 LIBERO ``robot_states[t]``（8 维）
@@ -29,15 +39,20 @@ __all__ = [
     "ROBOTWIN_JOINT_LAYOUT",
     "ChannelGroup",
     "ProprioDelta",
+    "RelativeRotationFrame",
     "layout_for_suite",
     "proprio_delta",
     "quaternion_to_rotvec",
+    "relative_rotation_increment",
     "relative_rotation_vector",
     "rotvec_to_quaternion",
 ]
 
 #: 通道组的语义类型。``linear`` 逐元素相减；``rotation_vector`` 走四元数相对旋转。
 GroupKind = Literal["linear", "rotation_vector"]
+
+#: 相对旋转的参考系：``world`` = ``R_t R_prev^T``；``body`` = ``R_prev^T R_t``。
+RelativeRotationFrame = Literal["world", "body"]
 
 
 @dataclass(frozen=True)
@@ -116,19 +131,16 @@ def quaternion_to_rotvec(quaternion: torch.Tensor) -> torch.Tensor:
     return xyz * scale
 
 
-def relative_rotation_vector(current: torch.Tensor, previous: torch.Tensor) -> torch.Tensor:
-    """``current``/``previous`` 为轴角 ``[..., 3]``，返回 ``R_current R_previous^T`` 的轴角。
+def _quaternion_conjugate(quaternion: torch.Tensor) -> torch.Tensor:
+    """单位四元数共轭，即逆旋转（``w, x, y, z`` 约定不变）。"""
+    return torch.cat([quaternion[..., :1], -quaternion[..., 1:]], dim=-1)
 
-    这是**体坐标系**下的相对旋转（先施加 previous，再施加 current 的增量），与
-    ``q_t - q_{t-1}`` 的逐元素差完全不同。返回角度被限制在 ``[0, pi]``。
-    """
-    q_current = rotvec_to_quaternion(current)
-    q_previous = rotvec_to_quaternion(previous)
-    #: 四元数共轭即逆旋转（单位四元数）。
-    conjugate = torch.cat([q_previous[..., :1], -q_previous[..., 1:]], dim=-1)
-    w1, x1, y1, z1 = q_current.unbind(dim=-1)
-    w2, x2, y2, z2 = conjugate.unbind(dim=-1)
-    relative = torch.stack(
+
+def _quaternion_multiply(left: torch.Tensor, right: torch.Tensor) -> torch.Tensor:
+    """Hamilton 积 ``left ⊗ right``，对应旋转矩阵复合 ``R_left @ R_right``。"""
+    w1, x1, y1, z1 = left.unbind(dim=-1)
+    w2, x2, y2, z2 = right.unbind(dim=-1)
+    return torch.stack(
         [
             w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
             w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
@@ -137,7 +149,53 @@ def relative_rotation_vector(current: torch.Tensor, previous: torch.Tensor) -> t
         ],
         dim=-1,
     )
+
+
+def relative_rotation_increment(
+    current: torch.Tensor,
+    previous: torch.Tensor,
+    *,
+    frame: RelativeRotationFrame,
+    rotation_convention: Literal["W_from_B"] = "W_from_B",
+) -> torch.Tensor:
+    """显式参考系的相对旋转：输入为 ``R_W_from_B`` 的轴角 ``[..., 3]``。
+
+    * ``frame="world"``：``ΔR_W = R_t R_prev^T``，满足 ``R_t = ΔR_W R_prev``；
+    * ``frame="body"``：``ΔR_B = R_prev^T R_t``，满足 ``R_t = R_prev ΔR_B``，
+      旋转轴表达在**上一帧体坐标系**。
+
+    两者一般不同（旋转不可交换），也都不等于 ``q_t - q_{t-1}``。返回轴角取短弧
+    （角度 ``<= pi``）。``rotation_convention`` 目前只接受 ``"W_from_B"``：输入是
+    反方向约定 ``R_B_from_W`` 时必须先自行取逆，函数不猜。
+    """
+    if rotation_convention != "W_from_B":
+        raise ValueError(
+            f"不支持的旋转约定 {rotation_convention!r}；本接口只接受 W_from_B（R 把本体系"
+            "坐标变到世界系）。B_from_W 输入请先对每个旋转求逆"
+        )
+    if frame not in ("world", "body"):
+        raise ValueError(f"未知相对旋转参考系 {frame!r}；只允许 'world' 或 'body'")
+    q_current = rotvec_to_quaternion(current)
+    q_previous = rotvec_to_quaternion(previous)
+    conjugate = _quaternion_conjugate(q_previous)
+    relative = (
+        _quaternion_multiply(q_current, conjugate)
+        if frame == "world"
+        else _quaternion_multiply(conjugate, q_current)
+    )
     return quaternion_to_rotvec(relative)
+
+
+def relative_rotation_vector(current: torch.Tensor, previous: torch.Tensor) -> torch.Tensor:
+    """旧接口（数值行为保留）：返回 ``R_current R_previous^T`` 的轴角。
+
+    输入为 ``R_W_from_B`` 轴角时，这是**世界系增量** ``ΔR_W = R_t R_prev^T``，满足
+    ``R_t = ΔR_W R_prev``。旧注释曾把它描述为“体坐标系”相对旋转，那是命名/注释错误：
+    上一体坐标系增量是 ``R_prev^T R_t``，见 `relative_rotation_increment` 的
+    ``frame="body"``。本函数只修正注释，不改数值行为，避免悄悄改变旧 checkpoint 的输入
+    语义。返回角度被限制在 ``[0, pi]``。
+    """
+    return relative_rotation_increment(current, previous, frame="world")
 
 
 @dataclass
@@ -177,12 +235,16 @@ def proprio_delta(
     available: torch.Tensor | bool = True,
     dt: torch.Tensor | None = None,
     time_unit: str = "frame",
+    rotation_frame: RelativeRotationFrame = "world",
 ) -> ProprioDelta:
     """按通道语义计算 ``proprio_t`` 相对 ``previous`` 的增量。
 
     * ``previous is None``：没有前置状态，全部标为不可用（缺失 != 零运动）。
     * ``available`` 可以是整体布尔或 ``[B]``/``[B, 1]`` 张量，用于“本体整体缺失”的情况。
     * ``dt`` 只接受**真实单位**的时间间隔；只有帧索引时传 ``None``，``time_unit="frame"``。
+    * ``rotation_frame``：旋转通道使用哪个参考系，默认 ``"world"``，与旧接口
+      `relative_rotation_vector`（``R_t R_prev^T``）的数值行为一致；``"body"`` 为
+      ``R_prev^T R_t``。默认值保持不变，旧 checkpoint 的输入语义不被悄悄改写。
     """
     if proprio.dim() != 2:
         raise ValueError(f"proprio 期望 [B, D]，实际 {tuple(proprio.shape)}")
@@ -198,7 +260,11 @@ def proprio_delta(
             availability=torch.zeros(batch, width, device=device, dtype=dtype),
             time_unit=time_unit,
             dt=dt,
-            info={"groups": {g.name: False for g in layout}, "reason": "no_previous_state"},
+            info={
+                "groups": {g.name: False for g in layout},
+                "reason": "no_previous_state",
+                "rotation_frame": rotation_frame,
+            },
         )
 
     delta = torch.zeros_like(proprio)
@@ -217,7 +283,9 @@ def proprio_delta(
         if group.kind == "linear":
             value = proprio[:, index] - previous[:, index]
         else:
-            value = relative_rotation_vector(proprio[:, index], previous[:, index])
+            value = relative_rotation_increment(
+                proprio[:, index], previous[:, index], frame=rotation_frame
+            )
         delta[:, index] = value * base
         availability[:, index] = base
         groups[group.name] = bool(base.min() > 0.5)
@@ -226,5 +294,5 @@ def proprio_delta(
         availability=availability,
         time_unit=time_unit,
         dt=dt,
-        info={"groups": groups},
+        info={"groups": groups, "rotation_frame": rotation_frame},
     )

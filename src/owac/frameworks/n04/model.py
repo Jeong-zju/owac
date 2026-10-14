@@ -714,6 +714,15 @@ class N04Encoder(nn.Module):
             raw_valid = raw_valid * measurement_valid.to(values)
         available = torch.as_tensor(new_measurement, device=values.device).expand(values.shape[0])
         raw_valid = raw_valid * (1 - sat_raw) * available.reshape(-1, 1, 1, 1)
+        #: 无效观测（缺失/遮挡/饱和/非新帧）的数值先清洗成有限占位再进网络：
+        #: 掩码乘法遇到 NaN 会得到 NaN（NaN×0=NaN），极大值也不能进入 stem。
+        observed = torch.ones_like(values[:, :1], dtype=torch.bool)
+        if measurement_valid is not None:
+            observed = observed & (measurement_valid.to(values) > 0.5)
+        if saturation is not None:
+            observed = observed & (saturation.to(values) <= 0.5)
+        observed = observed & available.reshape(-1, 1, 1, 1)
+        values = torch.where(observed, values, torch.zeros_like(values))
         linear_current, linear_support = linear_measurement_planes(
             values, raw_valid, self.config.input_mode
         )

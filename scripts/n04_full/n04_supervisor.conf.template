@@ -1,0 +1,74 @@
+; ---------------------------------------------------------------------------
+; N04 supervisor program template        (S0 deliverable, NOT registered)
+; ---------------------------------------------------------------------------
+; This file is a template only.  S0 created it and did NOT copy it into
+; /etc/supervisor/conf.d/, did NOT `supervisorctl reread`, and did NOT start or
+; restart any program.  Registration happens in the stage that actually runs a
+; job, and only with the scoped commands below - this host also runs other
+; projects' services, so a global `restart all` / `update all` is forbidden.
+;
+; Install (replace the placeholders, then add only this program):
+;
+;   SNAPSHOT_ID=n04-s0-<utc>-<hash12>
+;   STAGE=s1
+;   RUN_ID=<run-id>
+;   SOURCE_DIR=/workspace/owac/research/n04-v1/source/$SNAPSHOT_ID
+;   RUN_DIR=/workspace/owac/research/n04-v1/runs/$STAGE/$RUN_ID
+;   PYTHON=$(/usr/bin/python3 -c 'import json;print(json.load(open("/workspace/owac/research/n04-v1/manifests/environment.json"))["encoder_python"])')
+;   mkdir -p "$RUN_DIR/logs"
+;   sed -e "s|__STAGE__|$STAGE|g" -e "s|__RUN_ID__|$RUN_ID|g" \
+;       -e "s|__SNAPSHOT_ID__|$SNAPSHOT_ID|g" -e "s|__SOURCE_DIR__|$SOURCE_DIR|g" \
+;       -e "s|__RUN_DIR__|$RUN_DIR|g" -e "s|__PYTHON__|$PYTHON|g" \
+;       -e "s|__ENTRY_MODULE__|owac.training.n04_full|g" \
+;       -e "s|__CONFIG__|$SOURCE_DIR/configs/n04/full/<stage>.json|g" \
+;       -e "s|__CUDA_DEVICE__|0|g" -e "s|__EXTRA_ARGS__||g" \
+;       "$SOURCE_DIR/scripts/n04_full/n04_supervisor.conf.template" \
+;       > /etc/supervisor/conf.d/owac-n04-$STAGE-$RUN_ID.conf
+;   supervisorctl reread                  ; reads new/changed files only
+;   supervisorctl update                  ; adds/changes ONLY affected programs
+;   supervisorctl start owac-n04-$STAGE-$RUN_ID
+;
+; Rules encoded here:
+;   * program name is `owac-n04-<stage>-<run_id>`, so a run is addressable
+;     without touching any other project's services;
+;   * the code root is an immutable snapshot under source/<snapshot_id>/, not a
+;     live checkout: editing the local worktree during a run cannot change the
+;     running model;
+;   * the interpreter is absolute and comes from manifests/environment.json
+;     (`encoder_python`), never from the shell `python` on PATH;
+;   * one CUDA device per run (CUDA_VISIBLE_DEVICES) - no multi-run GPU sharing
+;     by accident;
+;   * the process stays in the foreground (no fork/daemonize) so supervisor owns
+;     the PID; logs are redirected to the run directory;
+;   * autostart=false and autorestart=false: a crash must not silently re-run or
+;     re-sample; resume is an explicit decision via --resume with a checkpoint.
+; ---------------------------------------------------------------------------
+
+[program:owac-n04-__STAGE__-__RUN_ID__]
+; absolute interpreter (manifests/environment.json -> encoder_python)
+command=__PYTHON__ -u -m __ENTRY_MODULE__ --config __CONFIG__ --output __RUN_DIR__ __EXTRA_ARGS__
+; fixed immutable source snapshot for this run
+directory=__SOURCE_DIR__
+environment=PYTHONPATH="__SOURCE_DIR__/src",PYTHONUNBUFFERED="1",CUDA_VISIBLE_DEVICES="__CUDA_DEVICE__",N04_PYTHON="__PYTHON__",N04_SOURCE_DIR="__SOURCE_DIR__",N04_SNAPSHOT_ID="__SNAPSHOT_ID__",N04_RUN_DIR="__RUN_DIR__",OMP_NUM_THREADS="8"
+process_name=%(program_name)s
+numprocs=1
+user=root
+
+; explicit lifecycle: nothing starts by itself, nothing restarts by itself
+autostart=false
+autorestart=false
+startsecs=30
+startretries=0
+
+; a training step can take a while to checkpoint; give it time to exit cleanly
+stopwaitsecs=600
+stopsignal=INT
+stopasgroup=true
+killasgroup=false
+
+; logs: one file per stage/run, bounded rotation, stderr folded into stdout
+redirect_stderr=true
+stdout_logfile=__RUN_DIR__/logs/__STAGE__-__RUN_ID__.supervisor.log
+stdout_logfile_maxbytes=256MB
+stdout_logfile_backups=4
+stdout_logfile_nocapture=true

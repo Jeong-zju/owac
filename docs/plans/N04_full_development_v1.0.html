@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="source-sha256" content="e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2"><meta name="description" content="N04 自运动预测与外部变化分离全量开发方案 v1.0：成熟网络、条件理论、单因素阶段、充分训练与 π0.5 / RawVLA-Bench 验收。"><title>N04 全量开发方案 · v1.0</title><style>
+:root{--navy:#122a37;--ink:#203541;--muted:#62727a;--paper:#fffefa;--bg:#f1f3f0;--line:#dce3de;--accent:#087e83;--soft:#e9f4ef;--orange:#b76724}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:84px}body{margin:0;color:var(--ink);background:var(--bg);font-family:"Noto Sans CJK SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:16px;line-height:1.9}a{color:#086f78;text-underline-offset:3px;overflow-wrap:anywhere}a:hover{color:#034950}a:focus-visible,button:focus-visible,.table-wrap:focus-visible{outline:3px solid #d8a23b;outline-offset:3px}.skip{position:fixed;top:-80px;left:16px;z-index:99;background:white;padding:8px}.skip:focus{top:6px}
+.toolbar{height:62px;position:sticky;top:0;z-index:20;background:var(--navy);color:#eef7f6;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid #34505c}.brand{letter-spacing:.1em;font-size:13px;display:flex;align-items:center;gap:13px}.brand b{font-size:21px;letter-spacing:0;color:white}.pill{padding:1px 9px;border:1px solid #637b82;border-radius:4px;font-size:11px;color:#d0ebdf}.tools{display:flex;align-items:center;gap:20px}.tools a,.tools button{font:inherit;font-size:12px;color:#e6efed;background:transparent;border:0;text-decoration:none;cursor:pointer;padding:6px 0}.tools a:hover,.tools button:hover{color:#a6dcc8}#progress{height:3px;background:#69b7a5;position:fixed;top:59px;left:0;width:0;z-index:25}
+.layout{display:grid;grid-template-columns:258px minmax(0,1fr);max-width:1500px;margin:auto}.sidebar{position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;padding:27px 18px 30px 25px;border-right:1px solid var(--line)}.sidebar-label{font-size:11px;letter-spacing:.16em;color:var(--muted);margin:0 0 15px}.toc a{display:block;padding:7px 10px;margin:2px 0;text-decoration:none;font-size:12px;line-height:1.55;color:#536972;border-radius:4px;border-left:2px solid transparent}.toc a:hover,.toc a.active{color:#075f68;background:#e0ece7;border-left-color:var(--accent)}.toc .stage{font-size:11px;padding-left:20px;color:#6e7c83}.sidebar-note{font-size:11px;line-height:1.8;color:#74828a;margin:25px 10px 0}.mobile-menu{display:none}
+main{min-width:0;padding:38px 48px 70px;max-width:1170px}.cover-label{font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--accent);margin-bottom:15px}.overview{display:flex;gap:16px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:25px;font-size:12px;color:var(--muted)}.overview strong{color:var(--ink);font-size:13px;font-weight:500}.roadmap{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;margin:0 0 28px}.roadmap a{display:flex;flex-direction:column;align-items:flex-start;padding:9px 9px 10px;background:var(--paper);border:1px solid var(--line);border-top:3px solid #88ada1;text-decoration:none;line-height:1.5;font-size:11px;color:#536972;white-space:nowrap}.roadmap span{font-family:ui-monospace,monospace;color:#0b6c75;font-weight:700;font-size:13px;margin-bottom:4px}.roadmap a:hover{background:var(--soft);border-top-color:var(--accent)}
+article{background:var(--paper);border:1px solid #e3e7e1;padding:40px 43px;border-radius:3px;box-shadow:0 3px 16px #173b2c04}h1{font-size:34px;line-height:1.48;letter-spacing:-.025em;color:var(--navy);margin:0 0 17px;font-weight:720}h1+p{font-size:12px;color:var(--muted);padding-bottom:19px;border-bottom:1px solid var(--line)}h1+p strong{font-weight:500}h1+p+p{font-size:15px;color:#52646c}h2{margin:62px 0 20px;padding-top:20px;border-top:2px solid #375d66;font-size:23px;line-height:1.55;letter-spacing:-.025em;color:var(--navy)}h3{margin:35px 0 15px;font-size:18px;line-height:1.65;color:#145866}h3[id^="stage-"]{background:var(--soft);padding:13px 16px;border-left:4px solid var(--accent);margin-top:39px;border-radius:0 4px 4px 0}p{margin:15px 0;text-align:justify;overflow-wrap:anywhere}strong{font-weight:680;color:#183b47}ul,ol{padding-left:1.5em;margin:15px 0}li{padding-left:4px;margin:7px 0}li p{margin:7px 0}li::marker{color:#287680;font-weight:600}blockquote{margin:22px 0;padding:5px 20px;border-left:3px solid var(--accent);background:var(--soft)}code{font-family:ui-monospace,"Cascadia Code","DejaVu Sans Mono",monospace;font-size:.86em;background:#eef2ee;padding:2px 5px;border-radius:3px;overflow-wrap:anywhere;color:#28515a}pre{max-width:100%;overflow:auto;background:#132d3a;color:#e2eeed;padding:20px 22px;border-radius:5px;font-size:12px;line-height:1.9;white-space:pre;tab-size:4}pre code{padding:0;background:none;color:inherit;font-size:inherit;overflow-wrap:normal}.table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--line);margin:22px 0;border-radius:4px}table{border-collapse:collapse;width:100%;font-size:12.5px;line-height:1.8;min-width:570px}th,td{padding:13px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{background:#e8efeb;color:#234c56;font-weight:650}tr:last-child td{border-bottom:0}td:first-child{font-weight:560;color:#244c59}tbody tr:nth-child(even){background:#f8faf5}table p{margin:0}td code{font-size:.88em}.ref-link{font-size:.85em;white-space:nowrap;text-decoration:none;color:#19818b}li[id^="ref-"]{font-size:13px;line-height:1.9;padding:10px 0 10px 4px;border-bottom:1px solid #e8ece6;scroll-margin-top:90px}li[id^="ref-"]:target{background:#e7f2de}.endnote{font-size:11px;color:var(--muted);margin:20px 0;line-height:1.9;word-break:break-all}.backtop{display:inline-block;font-size:12px;margin-top:12px;text-decoration:none}
+@media(min-width:1500px){main{padding-left:60px;padding-right:60px}}
+@media(max-width:1150px){.layout{grid-template-columns:220px minmax(0,1fr)}main{padding:26px}article{padding:30px}.sidebar{padding-left:16px}.roadmap{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:820px){html{scroll-padding-top:110px}.toolbar{padding:0 17px;height:56px}.brand{font-size:10px;gap:8px}.brand b{font-size:18px}.brand .edition{display:none}.brand{flex-shrink:0}.tools{gap:14px;white-space:nowrap}.tools a,.tools button{font-size:11px}.layout{display:block}.sidebar{display:none}main{padding:20px 14px 40px}.mobile-menu{display:block;position:sticky;top:56px;z-index:18;background:#e9efeb;border-bottom:1px solid #cfd9d3;font-size:12px;line-height:1.8}.mobile-menu summary{padding:10px 17px;cursor:pointer;list-style-position:inside}.mobile-menu nav{max-height:60vh;overflow-y:auto;padding:0 12px 12px;box-shadow:0 10px 15px #1b3e2020}#progress{top:53px}.overview{font-size:11px;align-items:flex-start;gap:10px;margin-bottom:18px}.overview strong{font-size:12px}.cover-label{margin:0 0 10px;font-size:10px}.roadmap{gap:5px;margin-bottom:18px}.roadmap a{padding:8px 10px;font-size:11px}article{padding:25px 20px}h1{font-size:26px}h2{font-size:21px;margin-top:44px}h3{font-size:17px}body{font-size:15px}p{text-align:left}pre{padding:15px;font-size:11px}.table-wrap{margin:18px 0}th,td{padding:10px 12px}table{font-size:12px}h1+p{line-height:1.9}.endnote{font-size:10px}}
+@media(max-width:380px){.brand .edition{display:none}article{padding:20px 15px}h1{font-size:24px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{body{background:white;font-size:10pt;line-height:1.65;color:black}.toolbar,.sidebar,.mobile-menu,.roadmap,#progress,.backtop{display:none!important}.layout{display:block;max-width:none}main{padding:0;max-width:none}article{border:0;box-shadow:none;padding:0}h1{font-size:24pt}h2{font-size:17pt;margin-top:28px;break-after:avoid}h3{font-size:13pt;break-after:avoid}a{color:inherit}pre{background:#f1f3f2;color:#111;white-space:pre-wrap;overflow-wrap:anywhere;font-size:8pt}.table-wrap{overflow:visible;max-width:100%}table{min-width:0;table-layout:fixed;font-size:8pt}th,td{padding:6px}thead{display:table-header-group}tr{break-inside:avoid}.overview{margin-top:10px}li[id^="ref-"]{font-size:9pt}.endnote{font-size:8pt}@page{size:A4;margin:16mm}}
+</style></head>
+<body><a class="skip" href="#top">跳到正文</a><header class="toolbar"><div class="brand"><b>N04</b><span class="edition">RESEARCH &amp; DEVELOPMENT</span><span class="pill">v1.0</span></div><div class="tools"><a href="N04_full_development_v1.0.md" download>Markdown 源文档 ↗</a><button id="print-button" type="button">打印</button></div></header><div id="progress" aria-hidden="true"></div><details class="mobile-menu"><summary>目录 · 15 章 / 8 阶段</summary><nav class="toc" aria-label="移动端文档目录"><a class="chapter" href="#section-1">1. 要解决的实际问题</a>
+<a class="chapter" href="#section-2">2. 当前证据：可以继承什么，不能推出什么</a>
+<a class="chapter" href="#section-3">3. 文献检索结论与选型</a>
+<a class="chapter" href="#section-4">4. 拟研究的新机制与可证伪主张</a>
+<a class="chapter" href="#section-5">5. 目标计算架构</a>
+<a class="chapter" href="#section-6">6. 坐标、时间与真实测量合同</a>
+<a class="chapter" href="#section-7">7. 可证明的性质、假设与不可保证的部分</a>
+<a class="chapter" href="#section-8">8. 分阶段实施：每次只改变一个因素</a>
+<a class="stage" href="#stage-0">S0：冻结可信数据、因果合同与诊断标准</a>
+<a class="stage" href="#stage-1">S1：建立正式规模、独立当前帧的 RAW 测量</a>
+<a class="stage" href="#stage-2">S2：把 RKN 从二维探针扩展为实际空间状态</a>
+<a class="stage" href="#stage-3">S3：依次接入实际动作、本体传播与标定几何</a>
+<a class="stage" href="#stage-4">S4：逐项建立可信残差和误差感知更新</a>
+<a class="stage" href="#stage-5">S5：让外部变化真正修改动态记忆</a>
+<a class="stage" href="#stage-6">S6：组合训练、跨条件迁移与充分消融</a>
+<a class="stage" href="#stage-7">S7：π0.5 / RawVLA-Bench 正式训练与闭环验收</a>
+<a class="chapter" href="#section-9">9. 数据设计与诊断上限</a>
+<a class="chapter" href="#section-10">10. 充分训练与资源计划</a>
+<a class="chapter" href="#section-11">11. 指标、统计与阶段门槛</a>
+<a class="chapter" href="#section-12">12. 源码落点与交付件</a>
+<a class="chapter" href="#section-13">13. 决策分支与失败后的处理</a>
+<a class="chapter" href="#section-14">14. 实施优先级与 v1.0 完成定义</a>
+<a class="chapter" href="#section-15">15. 参考文献与源码入口</a></nav></details><div class="layout"><aside class="sidebar"><p class="sidebar-label">DOCUMENT OUTLINE</p><nav class="toc" aria-label="文档目录"><a class="chapter" href="#section-1">1. 要解决的实际问题</a>
+<a class="chapter" href="#section-2">2. 当前证据：可以继承什么，不能推出什么</a>
+<a class="chapter" href="#section-3">3. 文献检索结论与选型</a>
+<a class="chapter" href="#section-4">4. 拟研究的新机制与可证伪主张</a>
+<a class="chapter" href="#section-5">5. 目标计算架构</a>
+<a class="chapter" href="#section-6">6. 坐标、时间与真实测量合同</a>
+<a class="chapter" href="#section-7">7. 可证明的性质、假设与不可保证的部分</a>
+<a class="chapter" href="#section-8">8. 分阶段实施：每次只改变一个因素</a>
+<a class="stage" href="#stage-0">S0：冻结可信数据、因果合同与诊断标准</a>
+<a class="stage" href="#stage-1">S1：建立正式规模、独立当前帧的 RAW 测量</a>
+<a class="stage" href="#stage-2">S2：把 RKN 从二维探针扩展为实际空间状态</a>
+<a class="stage" href="#stage-3">S3：依次接入实际动作、本体传播与标定几何</a>
+<a class="stage" href="#stage-4">S4：逐项建立可信残差和误差感知更新</a>
+<a class="stage" href="#stage-5">S5：让外部变化真正修改动态记忆</a>
+<a class="stage" href="#stage-6">S6：组合训练、跨条件迁移与充分消融</a>
+<a class="stage" href="#stage-7">S7：π0.5 / RawVLA-Bench 正式训练与闭环验收</a>
+<a class="chapter" href="#section-9">9. 数据设计与诊断上限</a>
+<a class="chapter" href="#section-10">10. 充分训练与资源计划</a>
+<a class="chapter" href="#section-11">11. 指标、统计与阶段门槛</a>
+<a class="chapter" href="#section-12">12. 源码落点与交付件</a>
+<a class="chapter" href="#section-13">13. 决策分支与失败后的处理</a>
+<a class="chapter" href="#section-14">14. 实施优先级与 v1.0 完成定义</a>
+<a class="chapter" href="#section-15">15. 参考文献与源码入口</a></nav><p class="sidebar-note">研究方案 · 2026.10.14<br>34 项原始参考资料<br>已有证据与计划分别标注</p></aside><main><div class="cover-label">OWAC / CONTINUOUS STATE ESTIMATION</div><div class="overview"><strong>预测应该发生的变化，修订实际观察到的偏差。</strong><span>v1.0 · 开发方案</span></div><nav class="roadmap" aria-label="开发阶段快捷导航"><a href="#stage-0"><span>S0</span>数据合同</a><a href="#stage-1"><span>S1</span>正式测量</a><a href="#stage-2"><span>S2</span>动态记忆</a><a href="#stage-3"><span>S3</span>动作几何</a><a href="#stage-4"><span>S4</span>误差更新</a><a href="#stage-5"><span>S5</span>外部修订</a><a href="#stage-6"><span>S6</span>组合训练</a><a href="#stage-7"><span>S7</span>π0.5 闭环</a></nav><article id="document"><h1 id="top">N04 全量开发方案：自运动预测与外部变化分离</h1>
+<p><strong>版本：v1.0 · 日期：2026-10-14 · 状态：开发方案，尚未实施。</strong></p>
+<p>本方案以当前 N04 与作者 RKN 实验为起点，规定从数据协议、成熟网络、可分析的状态更新，到 π0.5 / RawVLA-Bench 全量训练和闭环验证的开发顺序。文中的训练预算、验收门槛与新增机制均为计划；已有数字单独标明。Markdown 是源文档，<a href="N04_full_development_v1.0.html">HTML 阅读版</a>由同一正文生成。</p>
+<h2 id="section-1">1. 要解决的实际问题</h2>
+<p>机器人抬起手臂，腕部相机里的杯子向下移动。这不一定是杯子动了，可能只是相机动了。随后杯子被推动，即使画面也在整体移动，机器人仍应发现杯子相对桌面的位置发生了变化。若杯子被手臂遮住几帧，机器人需要依据最近确认的运动继续估计；再次看见杯子已经停下时，又必须迅速放弃旧速度。</p>
+<p>N04 要建立的计算过程是：<strong>先用实际发生的动作、本体状态和标定预测观测应该怎样变化，再用新测量修正没有被充分解释的部分，并让这次修正影响下一次预测和最终动作。</strong></p>
+<p>这里有三个不同的问题：</p>
+<ol>
+<li><strong>自运动解释</strong>：哪些视觉变化可以由相机、机器人本体与已知成像条件解释？</li>
+<li><strong>外部状态估计</strong>：物体在哪里、怎样运动，有哪些量仍不确定？物体运动可以是可预测的，也可以由机器人接触引起。</li>
+<li><strong>意外变化修订</strong>：哪些新测量反驳了原有预测，需要修改位置、速度、接触模式或可见性？</li>
+</ol>
+<p>“物体正在运动”不等于“当前预测出错”。一个持续匀速运动、已经被准确预测的杯子，运动分数应高，但创新残差可以很小。曝光变化也能产生大残差，却不一定需要改变物体速度。方案必须同时保留这两层语义，不能再次把运动存在、残差幅值和原因占比当成同一种分数。</p>
+<p>预测不要求生成完整图像。首选输出是带坐标的局部几何、空间关系和连续潜在状态；RAW 域重投影只承担观测解释与诊断。最终成功标准是：<strong>在同等视觉测量、可用信息及合理训练预算下，状态更可靠、错误先验修订更快，并在机器人任务中产生可重复的收益。</strong></p>
+<h2 id="section-2">2. 当前证据：可以继承什么，不能推出什么</h2>
+<p>本次核查的代码 HEAD 为 <code>fd6255b769d661af568738bec194bb599601a644</code>，已提交作者 RKN 相关修改。FilterPy 相关实现保存在既有 stash 中，本方案不恢复、不改写。当前工作树还包含此前未提交的实验记录和 RAW 诊断；文档记录的历史运行身份优先于 HEAD，不能把所有历史实验标成由这个提交重新跑出。</p>
+<p>以下数字来自<a href="../../research/experiments/2026-10-13_n04_matched_tracking.md">同测量动态对照与 RAW 诊断</a>，不是本次新增实验。</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>已有实验</th>
+<th>实际结果</th>
+<th>对后续开发的含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>相同当前帧位置测量，匀速运动期间缺失 2/4/6 帧</td>
+<td>保持上次位置 1.2029 px；FilterPy 0.2027 px；作者 RKN 0.2522 ± 0.0117 px</td>
+<td>动态状态有用；尚未证明 RKN 优于简单滤波或 N04 新机制有用</td>
+</tr>
+<tr>
+<td>完整观测下的停止 / 反向</td>
+<td>RKN 0.3280 / 0.6455 px；无滤波 0.1679 / 0.1347 px</td>
+<td>旧预测会拖慢修订，不能只优化遮挡外推</td>
+</tr>
+<tr>
+<td>遮挡开始时清除 RKN 后半潜在均值</td>
+<td>缺失误差从约 0.25 px 升到 1.5–1.9 px</td>
+<td>动态状态确实影响后续预测；不能据此把潜在维度称为物理速度</td>
+</tr>
+<tr>
+<td>独立 RAW 噪声归一化</td>
+<td>整体召回 84.92% → 88.38%；高噪声组召回 86.31% → 65.87%</td>
+<td>存在噪声组间取舍；传感器域检测收益还不是定位或动作收益</td>
+</tr>
+<tr>
+<td>真值外部运动解释</td>
+<td>物体 / 混合运动区域 RAW 参考误差降低 77.8% / 58.8%</td>
+<td>运动解释存在空间，但更好的重投影不自动改进任务</td>
+</tr>
+<tr>
+<td>相同 KF 更新，加入最近可见帧真值速度</td>
+<td>缺失误差 0.2115 → 0.1830 px，额外改善 0.02855 px</td>
+<td>未到原定 0.05 px 训练触发值；旧二维任务不足以支持启动整套 Dynamo-Depth</td>
+</tr>
+</tbody>
+</table></div>
+<p>这些实验采用简单合成测量、无相机旋转、低维定位。当前视觉测量模型约一万参数，RKN 为 209 参数的二维诊断配置；它们证明了路径依赖，不能代表完整模型的容量或充分训练。RKN 的三个初始化共享同一个视觉测量模型，也不是三个完整视觉系统的独立训练。</p>
+<p>因此保留 RKN 路线的理由是“已有动态传播路径值得扩展”，不是“全部 N04 机制已经通过”。后续需要单独验证大规模测量、动作条件预测、误差可辨识性、修订行为与闭环控制。</p>
+<h2 id="section-3">3. 文献检索结论与选型</h2>
+<p>检索截至 2026-10-14，围绕动作条件状态空间模型、可微滤波、自运动与物体运动分解、视觉估计中的时空标定、RAW 噪声和具身策略展开。主要依据为论文原文、作者页面和公开源码；完整条目见第 15 节。选读及源码核查不等于完成作者实验复现。</p>
+<h3 id="section-3-1">3.1 最接近的既有工作</h3>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>研究线及文献</th>
+<th>已经解决或提出的部分</th>
+<th>本方案如何使用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RKN <a class="ref-link" href="#ref-r01">[R01]</a>、Ac-RKN <a class="ref-link" href="#ref-r02">[R02]</a></td>
+<td>潜在均值 / 协方差的递归估计；动作条件动力学</td>
+<td>RKN 是保留的状态核心，Ac-RKN 是必须比较的最近基线；“加入动作”本身没有新颖性</td>
+</tr>
+<tr>
+<td>HiP-RSSM <a class="ref-link" href="#ref-r03">[R03]</a>、MTS3 <a class="ref-link" href="#ref-r04">[R04]</a></td>
+<td>变化动力学的上下文、不同时间尺度的潜在状态</td>
+<td>当跨物体动力学或长时间跨度成为已证实瓶颈时，采用作者模型作扩展对照</td>
+</tr>
+<tr>
+<td>SE3-Nets、SE3-Pose-Nets [R05–R06]</td>
+<td>由机器人动作预测结构化刚体运动及位姿</td>
+<td>说明“动作 + 可解释运动”已有先例；其深度 / 点云输入不能被默认为当前 RAW 已知量</td>
+</tr>
+<tr>
+<td>SfM-Net、Dynamo-Depth、EMR-MSF [R07–R09]</td>
+<td>相机运动、深度、独立运动及刚性分解</td>
+<td>参考几何解释和分阶段训练；只有真值诊断显示任务空间后，才训练对应完整模块</td>
+</tr>
+<tr>
+<td>MCDS-VSS <a class="ref-link" href="#ref-r30">[R30]</a></td>
+<td>ego 补偿、残余运动补偿、递归特征融合</td>
+<td>与旧 N04 流程非常接近，必须作为结构层面的最近工作；不能把这种顺序本身称为创新</td>
+</tr>
+<tr>
+<td>RAFT、RAFT-3D [R10–R11]</td>
+<td>稠密对应、局部刚体场景流</td>
+<td>需要对应关系时优先复用正式架构；当前帧光流只能用于观测校正，不能进入提前预测</td>
+</tr>
+<tr>
+<td>不变 EKF、时空自标定、OpenVINS [R12–R15]</td>
+<td>几何误差、可观测性、时间偏移与 nuisance 消元</td>
+<td>为坐标、误差传播及局部保证提供依据；不把视觉惯性系统的稳定性结论移植给任意神经网络</td>
+</tr>
+<tr>
+<td>DSO、Poisson–Gaussian 噪声、EMVD [R16–R19]</td>
+<td>光度校准、异方差噪声与时序测量融合</td>
+<td>解释曝光与传感器残差，避免让自由度过高的照明分支吞掉物体变化</td>
+</tr>
+<tr>
+<td>ConvNeXt <a class="ref-link" href="#ref-r20">[R20]</a></td>
+<td>已发表、完整规模的视觉骨干</td>
+<td>采用 Base 主配置；只修改 RAW 输入和任务输出接口，不用自制微型 CNN 替代主干</td>
+</tr>
+<tr>
+<td>可微多模态滤波 <a class="ref-link" href="#ref-r21">[R21]</a>、DreamerV3 <a class="ref-link" href="#ref-r22">[R22]</a></td>
+<td>学习测量和不确定性；动作驱动世界模型</td>
+<td>作为学习测量与更强潜在动力学参照；不能默认为各测量独立或稳定</td>
+</tr>
+<tr>
+<td>RawVLA、π0.5 [R23–R25]</td>
+<td>RAW 具身任务、策略训练与动作生成</td>
+<td>最近系统基线及最终任务平台；沿用本仓库冻结协议</td>
+</tr>
+<tr>
+<td>Bayesian online changepoint detection <a class="ref-link" href="#ref-r26">[R26]</a>、Kalman Delta Networks <a class="ref-link" href="#ref-r27">[R27]</a></td>
+<td>在线变化判断；带不确定性的递归记忆</td>
+<td>新意边界补充；后者是 2026 年预印本，本轮仅核查摘要，不将其当已复现的机器人模块</td>
+</tr>
+<tr>
+<td>GEM、CUT3R、STream3R、Segment Any Motion [R31–R34]</td>
+<td>可控视频预测、持续三维状态、因果几何重建、运动分割</td>
+<td>补查 2025–2026 邻近路线；输入、等待时间、目标和 RAW 边界不同，不能直接视为可替换的滤波内核</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>选型决定：采用“完整 RAW 视觉骨干 + RKN / Ac-RKN + 显式几何与误差传播”的混合框架。</strong> 它允许神经网络学习测量和未知动力学，同时保留可逐项检验的坐标、残差与更新过程。Dynamo-Depth、HiP-RSSM、MTS3 是条件分支，不是默认全部串联。</p>
+<p>MCDS-VSS 的论文把残余流同时用于物体运动和深度 / ego 对齐误差的补偿，并利用当前帧特征完成估计；这正是 N04 需要进一步区分的两种来源。其公开仓库目前主要提供入口，README 要求联系作者获取代码，不能写成可直接下载的完整实现。本方案只按论文设置结构对照；取得代码前明确标为论文复现。GEM 的完整视频生成、CUT3R / STream3R 的几何重建和运动分割模型可作为辅助观测参照，但它们的公开结果本身不证明“没有当前观测时的动作条件预测”。</p>
+<h3 id="section-3-2">3.2 网络规模与复用边界</h3>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>部件</th>
+<th>正式配置与来源</th>
+<th>允许的改动 / 禁止的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前帧视觉测量</td>
+<td>作者 ConvNeXt-Base，stage depths <code>[3,3,27,3]</code>、widths <code>[128,256,512,1024]</code>；原分类模型约 89M 参数 <a class="ref-link" href="#ref-r20">[R20]</a></td>
+<td>取多尺度空间特征，替换输入通道和分类头；适配后实测参数。主结果不用现有 tiny stem 替代</td>
+</tr>
+<tr>
+<td>动态潜在状态</td>
+<td>作者 RKN 单元和 Ac-RKN 论文结构 [R01–R02]；首版观测维 256、状态维 512，局部状态共享转移参数</td>
+<td>维度是本项目工程配置，不冒称作者最优值；保留局部线性混合、协方差和缺失更新，审计带宽与正定约束</td>
+</tr>
+<tr>
+<td>动作条件转移</td>
+<td>Ac-RKN 的控制条件机制；参考 MTS3 官方仓库中的 acRKN 实现 <a class="ref-link" href="#ref-r04">[R04]</a></td>
+<td>先核准授权；可以基于已引入的 MIT RKN 按论文实现控制项，不能随意用小 MLP 替换整套转移后仍称作者模型</td>
+</tr>
+<tr>
+<td>对应 / 深度 / 运动</td>
+<td>完整 RAFT；Dynamo-Depth 原始深度和运动分解配置，必要时用完整 Monodepth2 [R08,R10,R28]</td>
+<td>修改 RAW 输入、单位与采样接口；不以几十层缩成两层的网络冒充复现。学习运动前必须通过诊断门</td>
+</tr>
+<tr>
+<td>读出接口</td>
+<td>空间池化 / 投影到每相机 <code>256 × 2048</code> 视觉前缀，接既有 π0.5</td>
+<td>小型投影与方差头可以存在，但归入总参数、训练和时延；它们不是主网络的容量替代品</td>
+</tr>
+</tbody>
+</table></div>
+<p>首版统一采用 ConvNeXt-B 的随机初始化并在 RAW 训练数据上充分预训练；若需要采用 ImageNet 权重初始化，作为独立、明确披露的初始化实验，所有学习对照共享同一来源。它不授权 RGB 教师蒸馏或在主链生成 RGB。完整 ConvNeXt-S 可作为论文已有的资源档对照，不把它与 Base 混成同预算主结论。</p>
+<p>已有 RKN PyTorch 单元固定于 <code>7cb29e1c57307a87729fd5e20ca60a22f5798da5</code>，MIT 文件及来源已保留。MTS3 / HiP-RSSM 的许可证在本次核查中未得到完整确认，实施前固定版本并核查文件级授权；公开可读不等于可任意复制。ConvNeXt 为 MIT、RAFT 为 BSD-3-Clause；Dynamo-Depth 顶层 MIT 仍需核查继承组件。DSO / OpenVINS 的 GPL 代码作为原理与离线对照参考，主实现不直接搬入整套系统。EMVD 后续 IPOL 代码和传感器噪声软件另核授权。<a href="../../research/reviews/2026-10-13_n04_existing_methods/sources.json">既有源码清单</a>保留此前已固定的身份。</p>
+<h2 id="section-4">4. 拟研究的新机制与可证伪主张</h2>
+<p>N04 的候选增量应集中在：<strong>将测量支持、时空标定误差和外部动态修订放到同一个因果更新过程里，使系统既不会轻易把自运动误差认成物体事件，也不会因为残差大就把真实变化全部降权。</strong></p>
+<p>三个研究假设分别验收，不以一个总分相互抵消：</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>假设</th>
+<th>预期行为</th>
+<th>最近对照与反证</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1：误差解释提高外部变化判断的特异性</td>
+<td>时间 / 标定 / 增益扰动下少误报，在同等误报预算下保留真实外部变化</td>
+<td>Ac-RKN + 几何补偿 + 校准测量噪声；若新增规则仅把所有更新变小，H1 不成立</td>
+</tr>
+<tr>
+<td>H2：被确认的外部变化修订动态状态</td>
+<td>停止、反向、接触切换后更快改变后续预测，同时保留遮挡收益</td>
+<td>Ac-RKN、自适应过程噪声 / 鲁棒更新；切断“事件 → 转移状态”路径应损害事件后的预测，否则新分支没有机制作用</td>
+</tr>
+<tr>
+<td>H3：这种修订改善物理决策</td>
+<td>再次观测后更少追逐旧位置、更少误抓，在连续任务中提高成功率</td>
+<td>同骨干、同动作输入、同后端训练预算的 Ac-RKN 与无记忆模型；只改善 RAW 重投影不算 H3 成立</td>
+</tr>
+</tbody>
+</table></div>
+<p>动作条件网络、RAW 接入、几何 warp、协方差传播、nullspace 消元和变化检测各自都有前人。MCDS-VSS 也已组合了 ego / 外部运动补偿与特征更新。候选创新是针对<strong>可辨识的外部变化如何修订因果运动记忆</strong>形成的新更新规则及其证据，而不是模块拼装的名称。S0 和投稿前均需重新做最近文献检索；本方案不作“首次提出”承诺。若最近基线已经获得同样收益，应保留有效工程方案，撤回新增机制主张。</p>
+<h2 id="section-5">5. 目标计算架构</h2>
+<h3 id="section-5-1">5.1 输入、状态与因果顺序</h3>
+<p>每次新观测到达时，执行以下流程：</p>
+<pre><code class="language-text">上次后验状态 + 上次曝光之后实际执行的动作序列
+             + 已到达的本体测量 + 标定 / 时间模型
+                       ↓
+              predict_before_observe
+                       ↓
+几何位置 / 局部结构的当前先验 + 动态潜在状态 + 不确定性
+                       ↓
+当前 RAW → 独立当前帧测量 → 关联与有效支持 → 观测创新
+                       ↓
+         成像 / 运动误差解释 + 外部状态修订
+                       ↓
+当前后验状态 → π0.5 视觉前缀 → 动作块 → 实际执行日志
+       └──────────────────→ 下一次预测
+</code></pre>
+<p>建议接口 <code>predict_before_observe(state, executed_interval, proprio_history, calibration, target_time)</code> 不接受当前图像或由它计算的光流。它可以使用预测时确已到达的本体信息。<code>measure(raw, sensor_metadata)</code> 只读取当前 RAW 和当帧传感器元数据，输出测量、噪声估计、有效性与坐标；不读取上一帧滤波状态。状态关联、投影、更新放在下一层，避免把已融合历史的特征再次当成独立新证据。</p>
+<p>状态分为四部分：</p>
+<ul>
+<li><strong>几何与动力学状态</strong>：局部三维点 / 表面锚点、位置与速度、机器人可见结构及其不确定性；物理量有明确坐标系和单位。</li>
+<li><strong>RKN 潜在状态</strong>：每个局部支持的测量相关部分与记忆部分，初始采用 128 个锚点、256 维观测 / 512 维状态，参数共享。潜在变量不自动解释成物理量。</li>
+<li><strong>标定与成像量</strong>：相机位姿 / 内外参、时间偏移、曝光 / 增益及其不确定性；固定标定和在线估计分别标记。</li>
+<li><strong>证据元数据</strong>：最后真实观测时间、连续缺失时长、可见支持、关联置信度、measurement ID、reset / 失效原因。</li>
+</ul>
+<p>锚点数是首版预算，不是理论常数。先比较单相机，再加入多相机；共享物体状态与相机特征间的相关性不能当成独立测量相乘。固定网格需进行几何运输；跟踪锚点需记录出生、遮挡、重新关联和消失，不能随帧换序后仍复用旧协方差。完整 RKN 的逐样本有效性需要显式扩展为逐锚点有效性，并单独检验；初版可把独立锚点展平为批次，但需披露空间相关性近似。</p>
+<h3 id="section-5-2">5.2 动作、本体与相机运动不能互相替代</h3>
+<p>动作告诉系统“控制器实际向机器人发了什么”，本体状态告诉系统“机器人实际上到了哪里”。受延迟、碰撞、柔顺和控制饱和影响，两者可能不同。相机运动优先由可用的本体状态、正运动学和外参计算；动作条件转移补充尚未观测到的控制区间和接触动力学，不能把同一次运动从动作与位姿重复叠加。</p>
+<p>手臂在固定相机画面内运动属于机器人自身可见结构变化，不是相机 ego flow。它由运动学和机器人几何支持单独解释；机器人推动杯子产生的杯子运动仍是外部对象状态，可以被动作预测。无法判断接触关系时保留不确定性，不把“外部”强行定义成“与动作无因果关系”。</p>
+<h3 id="section-5-3">5.3 不让新增分支再次失去作用</h3>
+<p>外部修订量必须修改下一次传播所使用的位置 / 速度 / 接触模式或潜在转移状态。只把 change 附加到输出 token，或只训练事件分类但不进入状态转移，不满足本方案。</p>
+<p>同时保留两个接口：<code>motion_presence</code> 表示外部对象是否运动；<code>prediction_mismatch</code> 表示新测量是否反驳预测。二者具有独立标签、分数校准与报告。不能在新数据集里静默更改旧版 event 的含义；旧权重显式标记 schema 版本。</p>
+<h3 id="section-5-4">5.4 首版修订规则：比较解释，再修改对应状态</h3>
+<p>首版不再用一个自由学习的 change gate 决定所有事情。对同一当前测量，先用共享的 Ac-RKN 预测构造三种解释：正常延续、外部动力学改变、时空 / 成像误差；无效或严重异常测量另外标记。正常延续允许物体按既有速度运动，不等同于静态背景。</p>
+<p>三种解释共享当前视觉测量，区别限定在有物理含义的误差方向：</p>
+<pre><code class="language-text">延续解释：Q0，沿用已确认的动态状态
+动态改变：Qdyn = Q0 + Bdyn Λdyn Bdynᵀ
+误差解释：Ση,error = Ση,base + Δη
+
+每种解释 j：rj, Sj → 观测似然 ℓj → 后验 (μj, Pj)
+wj ∝ prior_mode_probability_j × ℓj
+μ = Σj wj μj
+P = Σj wj [Pj + (μj-μ)(μj-μ)ᵀ]
+</code></pre>
+<p><code>Bdyn</code> 只作用于物理速度 / 接触动态和与其明确耦合的潜在方向；<code>Δη</code> 受可观测标定误差和时间先验约束，不允许把任意局部物体位移装进增益或相机误差。尚不能确定的解释保留混合或 unknown；初版不将混合均值当成唯一确定的动作目标。先做有单位的几何状态版本，再单独评估几何—潜在状态桥接；桥接参数同样记录来源、梯度与总预算。</p>
+<p>这使用了多模型估计的成熟思路 <a class="ref-link" href="#ref-r29">[R29]</a>，必须以标准模式切换 / 自适应 Q 为近邻对照。候选新增部分是：用 RAW 测量支持及标定 / 时间 Jacobian 限定各解释的可用方向，并让被支持的动态解释改变下一次 Ac-RKN 的状态。若只输出一个原因标签而不影响后续传播，该规则没有完成。</p>
+<p>在各分量 Pj 半正定、wj 非负且和为 1 时，上式混合协方差仍半正定；额外项保留解释之间的分歧。它只是矩匹配，不能保证多峰分布被单 Gaussian 准确表示。S5 必须对混合被压成均值后出现错误中间位置的反例做验收；必要时保留有限模式分量，并计入计算成本。</p>
+<h3 id="section-5-5">5.5 训练目标与防止退化解</h3>
+<p>S1 使用当前帧几何 / 对应监督；S2–S3 使用多步状态与测量预测；S4 使用校准似然；S5 加入事件和修订后的预测；S7 才加入正式动作目标。统一损失表如下，权重在开发集固定，消融中共享选择预算：</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>项</th>
+<th>计算对象</th>
+<th>主要约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>L_geometry</code></td>
+<td>有效支持上的位置 / 深度 / 相对位姿</td>
+<td>米、像素和旋转单独归一化；尺度监督只来自训练可用标签</td>
+</tr>
+<tr>
+<td><code>L_predict</code></td>
+<td>当前校正前 prior 与未来多步预测</td>
+<td>缺失阶段不输入未来测量；只用目标计算损失</td>
+</tr>
+<tr>
+<td><code>L_measurement_nll</code></td>
+<td>同单位残差与协方差</td>
+<td>包含 log determinant，不能只用残差除以方差；方差膨胀另用覆盖率与宽度检验</td>
+</tr>
+<tr>
+<td><code>L_revision</code></td>
+<td>首次新证据之后的动态状态和多步误差</td>
+<td>不只优化事件分类；后续预测必须对动态修订可导且有干预响应</td>
+</tr>
+<tr>
+<td><code>L_event</code></td>
+<td>运动存在与预测失配两个独立标签</td>
+<td>标签版本、可见支持、模糊区固定；不得用预测自身生成全部“真值”</td>
+</tr>
+<tr>
+<td><code>L_raw</code>，可选</td>
+<td>合法支持上的 RAW 预测参考</td>
+<td>噪声、曝光、遮挡、裁剪及插值正确；不做 RGB 重建</td>
+</tr>
+<tr>
+<td><code>L_action</code></td>
+<td>冻结协议的 π0.5 flow-matching 动作目标</td>
+<td>动作规范化、padding、horizon 与作者一致；未来专家动作仅作监督</td>
+</tr>
+</tbody>
+</table></div>
+<p>不以“特征间距离越小越好”单独训练所有模块，否则常数特征可能得到好损失。需要几何 / 动作监督、方差与支持审计，并报告 prior、posterior 和读出三层误差。由当前图像估计的方差可能与残差相关，拟合后的 NLL 仅是模型目标，仍需独立校准。</p>
+<h2 id="section-6">6. 坐标、时间与真实测量合同</h2>
+<h3 id="section-6-1">6.1 坐标及几何传播</h3>
+<p>统一用 <code>T_A←B</code> 表示把 B 系坐标变到 A 系，W 是世界 / 局部参考系，C 是相机系。对上一帧的静态点：</p>
+<pre><code class="language-text">p_C(t-1) = depth × K(t-1)^(-1) × homogeneous(pixel)
+p_C(t)   = T_C(t)←W × T_W←C(t-1) × p_C(t-1)
+pixel_t  = project(K(t) × p_C(t))
+</code></pre>
+<p>独立物体运动在世界系或明确的物体局部系额外传播，再变到当前相机系。相机的前向点投影不是 <code>grid_sample</code> 的反向采样网格；遮挡、多对一、越界和负深度必须产生支持掩码。统一仓库 <code>align_corners=False</code> / zeros 约定，并将外部代码的 border / True 约定转换后验收，不能直接拼接。</p>
+<p>记录原传感器、裁剪、缩放、CFA 平面、特征网格的每一层坐标变换。对于四平面 Bayer，平面像素 <code>(i,j)</code> 对应原始格点 <code>(2i+δy,2j+δx)</code>；R/G1/G2/B 不能共享一个忽略相位的坐标。裁剪缩放后用对应仿射变换更新 K，特征 stride 的中心偏移也要校验。保持单位明确：米、秒、弧度、原图像素、特征像素不能混用。</p>
+<p>当前 <code>proprio.py</code> 使用 wxyz 四元数，并存在需要复核的“相对旋转表达式与 body-frame 注释”问题：在常用 world-from-body 约定下，<code>R_t R_prev^T</code> 与 <code>R_prev^T R_t</code> 表达的参考系不同。S0 通过已知旋转、复合和逆变换测试确定语义，不靠变量名猜测，不全局替换为另一种四元数顺序。</p>
+<h3 id="section-6-2">6.2 时间与动作合同</h3>
+<p>必须同时保存曝光开始 / 中点 / 结束、帧到达时间、本体采样时间、控制命令时间及实际执行区间。缺失字段用 availability 标识；帧号不是秒数，缺失动作不是零动作。滚动快门若存在，应记录行读出时间；首版不能准确建模时先限定全局快门实验，再单因素加入滚动快门。</p>
+<p>当前 RawVLA 适配器的关键事实是：</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>数据路径</th>
+<th>已有内容</th>
+<th>不能直接假定的内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIBERO</td>
+<td>agentview / wrist 三通道 uint8 pseudo-RAW，8 维机器人状态，7 维动作目标</td>
+<td>未来动作标签不是当前已执行动作；末端位姿不等于完整关节状态</td>
+</tr>
+<tr>
+<td>RoboTwin</td>
+<td>head / left / right 三通道 float32 HDR-derived RAW；当前代码把 <code>actions[t]</code> 当 14 维关节状态，后续序列作为目标</td>
+<td>16 维 <code>robot_states</code> 是末端状态表示，不能替代关节角；采样对齐需逐字段核对</td>
+</tr>
+<tr>
+<td>当前统一接口</td>
+<td><code>executed_action=None</code>，多项物理时间 / 标定 / 曝光元数据尚不可用</td>
+<td>不能仅把 target_actions 改名就声称动作条件化已经实现</td>
+</tr>
+</tbody>
+</table></div>
+<p>S0 应核查作者原始缓存、仿真记录与控制器日志能否补齐。可通过<strong>完全一致的仿真版本和轨迹重放</strong>生成标定 / 时间 sidecar，但要验证观测、机器人轨迹和动作执行一一对应。重放漂移时不得强行挂接；生成新的扩展训练数据并单独命名。新闭环运行从执行器侧记录经过裁剪 / 限幅后真正下发的控制序列，未执行的动作块不进入预测历史。</p>
+<p>迟到观测按曝光时刻更新历史缓存，再用已发生的控制重新传播到当前；报告真实输出时刻和可用信息。若使用固定延迟平滑，必须另报等待时延，不能把事后修正轨迹当作在线遮挡预测。在线和训练都以同一时间合同运行。</p>
+<h3 id="section-6-3">6.3 RAW 边界与测量独立性</h3>
+<p>RawVLA-Bench 的现成输入是三通道 pseudo-RAW / HDR-derived RAW，不等同于原生 Bayer CFA。<a href="https://huggingface.co/datasets/ToferFish/RawVLA-Bench" rel="noopener noreferrer" target="_blank">官方数据卡</a>说明训练数据包含 1,771 条 LIBERO 和 632 条 RoboTwin 轨迹的 RAW / RGB 配对；测试通过另行仿真清单生成。实际文件与分母仍以本项目冻结清单核对。</p>
+<p>项目保持两条明确的输入标签：<code>rawvla_rgb3</code> 服务官方 benchmark 可比性，<code>bayer_cfa</code> 服务原生采样机制实验。二者可以共享主干后的状态模块，但输入 stem、坐标和噪声模型分别实现、分别计分。原生 CFA 的合成实验不能宣称真实传感器验证；官方三通道闭环成绩不能宣称已经完成原生 Bayer 闭环验证。</p>
+<p>主链不产生 RGB / sRGB / XYZ 中间图像，不使用 RGB 教师或 RGB 重建。只允许明确披露的黑电平、响应、曝光 / 增益、坏点、CFA 重排与 RAW 方差处理。每个新 measurement ID 只融合一次；π0.5 内部重复去噪不是获得新观测。</p>
+<h2 id="section-7">7. 可证明的性质、假设与不可保证的部分</h2>
+<p>本方案的“理论保证”分为可证明的局部性质和必须实验验证的系统主张。以下证明针对明确的模型假设；它们不能推出任意场景的分离正确、任意神经网络稳定或策略成功率必然提高。</p>
+<h3 id="section-7-1">7.1 带误差的观测模型</h3>
+<p>记 x 为希望估计的场景状态，η 为相机位姿、时间、内外参和增益等干扰量，y 为当前独立测量。在线性化点附近：</p>
+<pre><code class="language-text">r = y - h(μ⁻, η_hat) ≈ H e + Jη δη + ε
+e = x - μ⁻,  Cov(e)=P⁻,  Cov(δη)=Ση,  Cov(ε)=R
+C = Cov(e, δη)
+S = H P⁻ Hᵀ + Jη Ση Jηᵀ + H C Jηᵀ + Jη Cᵀ Hᵀ + R
+K = (P⁻ Hᵀ + C Jηᵀ) S^(-1)
+</code></pre>
+<p>相机姿态不准、曝光时刻偏差越大，相应预测残差的合理范围就应变宽。若状态与标定独立，可令 C=0；若它们由相同历史估计，必须使用联合状态 / 交叉协方差，或明确验证保守近似，不能默默假设独立。一个误差来源不能既进入 P 又重复加入 R。</p>
+<p>这套模型用于有单位的几何 / 测量分支。神经潜在特征的 R 必须在自身单位下学习和校准；RAW 像素方差不能直接塞进任意非线性特征的协方差。</p>
+<h3 id="section-7-2">7.2 性质 A：协方差的半正定性</h3>
+<p>在线性预测 <code>P⁻ = A P Aᵀ + Q</code> 中，若 P、Q 半正定，则 P⁻ 半正定。联合状态的观测更新使用 Joseph 形式：</p>
+<pre><code class="language-text">P⁺ = (I - K H) P⁻ (I - K H)ᵀ + K R Kᵀ
+</code></pre>
+<p>在正确维度及半正定 R 下，任意给定 K 都保持代数上的半正定性。采用 Cholesky / 正值参数化、方差下界和 FP32 更新，辅以小维度 dense 参照，避免仅靠损失去“学会正定”。作者 RKN 的结构化协方差也需满足其交叉块约束；不能只对对角线做 softplus。</p>
+<p>这保证的是数值结构，不保证估计方差等于真实误差。当增益依赖当前残差、采用关联筛选或非高斯门控时，不能把 Joseph 输出直接解释成精确 Bayesian 后验协方差。S4 必须另做经验覆盖率检查。</p>
+<h3 id="section-7-3">7.3 性质 B：对局部干扰的一阶不敏感性</h3>
+<p>对严格正定的基础残差噪声 R 做 <code>R = L Lᵀ</code>，令 <code>Jw = L⁻¹ Jη</code>。取 U 为 Jw 列空间的正交补基：</p>
+<pre><code class="language-text">Uᵀ Jw = 0
+e_perp = Uᵀ L⁻¹ r
+∂e_perp / ∂δη = 0        （当前线性化点的一阶项）
+</code></pre>
+<p>因此，该分量不会把可由局部标定 / 时间 / 增益扰动解释的一阶残差直接当成外部事件。这沿用估计中的 nuisance 消元原理 <a class="ref-link" href="#ref-r15">[R15]</a>，并不是首次发明 nullspace 投影。</p>
+<p>代价同样明确：若真实物体运动的观测方向也落在 Jw 的列空间，它也会被消去。设外部运动的测量 Jacobian 为 Jd，只有 <code>rank(Uᵀ L⁻¹ Jd)</code> 保留的方向能够由该分量检出。全画面只有一个平面、相机和物体以相同方式运动、深度不可确定等情形，可能根本不可辨识。系统应输出“解释不唯一”，借助其他视角或后续测量，而不是强行输出高置信原因。</p>
+<p>主实现先采用有先验不确定性的<strong>边缘化更新</strong>，保留全部测量方向；硬投影作为后续独立对照，用于高不确定干扰下的事件证据。两者不能无审计叠加，也不能将同一残差先拟合校准再按未拟合的自由度计算显著性。大时间偏差、强旋转与滚动快门的高阶项不在该一阶保证内。</p>
+<h3 id="section-7-4">7.4 性质 C：缺失阶段能给出有限时域误差界</h3>
+<p>若传播 f 在考察区域有 Lipschitz 常数 L，模型和扰动误差每步上界为 b，则缺失 k 步后：</p>
+<pre><code class="language-text">||e_k|| ≤ L^k ||e_0|| + b Σ(i=0…k-1) L^i
+</code></pre>
+<p>这是有限时域的误差积累界，需要验证适用区域和噪声假设；不能假定所有物理系统 L&lt;1。匀速位置积分本来就会积累速度误差，强制所有状态收缩可能破坏正确动力学。线性状态还需报告 A 的 k 次乘积与过程噪声累积。RKN 只在局部近似条件下使用这些诊断，不直接继承 IEKF 的特定稳定性定理 <a class="ref-link" href="#ref-r12">[R12]</a>。</p>
+<p>看不见期间、没有任何额外线索的随机停止 / 反向不可被保证提前预测。合理目标是扩大不确定性、保留多种可能，并在恢复测量后迅速修订。</p>
+<h3 id="section-7-5">7.5 性质 D：成像尺度与统计阈值必须一致</h3>
+<p>独立 Poisson–Gaussian 近似下，黑电平校正后的 RAW 方差可写为 <code>α × signal + β</code> <a class="ref-link" href="#ref-r17">[R17]</a>。乘性增益 g 使方差乘以 g²；线性重采样 W 的完整协方差为 <code>W Σ Wᵀ</code>。只取独立输入的单点方差时才可写成权重平方求和，插值后的相邻像素一般相关。</p>
+<p>若参考帧也有噪声，差分残差应同时计入当前与参考的不确定性，以及重复使用历史导致的相关性。饱和与裁剪破坏零均值 Gaussian 假设，应屏蔽或用截断似然，不能把饱和像素的低残差当高置信。</p>
+<p>只有在模型正确、线性 Gaussian、自由度和选择过程明确时，标准化创新平方才能按 χ² 解释。实际特征采用独立开发集校准，在轨迹层面报告覆盖率、分组误报和可靠性；默认不承诺任意分布漂移下的统计覆盖。</p>
+<h3 id="section-7-6">7.6 理论交付要求</h3>
+<p>S0 写出坐标和生成模型，S4 交付每项性质的假设、推导、数值对照和反例。必须覆盖：关联错误、共享历史相关性、秩不足、物体运动与 nuisance 重合、强非线性和迟到测量。若这些条件不满足，报告适用范围缩小；不能用训练曲线补充缺失的证明，也不能用局部证明替代 H1–H3 的实验。</p>
+<h2 id="section-8">8. 分阶段实施：每次只改变一个因素</h2>
+<p>主顺序为 <strong>S0 数据与理论合同 → S1 正式视觉测量 → S2 动态记忆 → S3 动作与自运动 → S4 测量误差与更新 → S5 外部运动修订 → S6 组合与迁移 → S7 π0.5 全量闭环</strong>。阶段可以复用数据与训练设施，但验收时不同时更换观测、状态、损失和后端。</p>
+<h3 id="stage-0">S0：冻结可信数据、因果合同与诊断标准</h3>
+<p><strong>输入</strong>：当前 checkout、既有合成器、RawVLA 原始缓存 / manifest / 部署记录。</p>
+<p><strong>工作</strong>：</p>
+<ol>
+<li>建立 episode / source-trajectory 分组，所有照明、噪声、裁剪变体归属于同一个拆分；固定训练、开发、最终留出清单。</li>
+<li>审计实际执行动作、时间戳、关节 / 末端状态、相机标定的可获得性，生成带 provenance 的 sidecar 或独立扩展数据集。</li>
+<li>写明第 6–7 节的单位、坐标、误差模型和可辨识反例；修正经测试确认的接口 / 注释不一致。</li>
+<li>以逐样本图像—标签对应、静态零残差、已知旋转、曝光缩放、控制延迟、隐藏测量 NaN 毒化、未来动作置乱检验数据与因果性。</li>
+<li>核对已有远端 supervisor、冻结权重及评测清单；本机历史记录不代表服务器当前进度，不能启动重复评测。</li>
+</ol>
+<p><strong>训练</strong>：无网络训练，仅标定与小规模数值诊断。</p>
+<p><strong>出口</strong>：数据字段覆盖表、不可用条件清单、split hashes、理论假设表及逐样本审计通过。若动作或标定无法可靠补齐，先建立新数据；此时不把普通视频 RKN 验收为动作条件 N04。</p>
+<h3 id="stage-1">S1：建立正式规模、独立当前帧的 RAW 测量</h3>
+<p><strong>唯一新增因素</strong>：把诊断 tiny stem 替换为正式 ConvNeXt-B，输出多尺度特征、局部几何测量、方差和支持。状态模块暂不训练。</p>
+<p><strong>训练</strong>：使用 RAW-only 几何 / 对应监督和传感器域自监督；标签可来自训练仿真真值，输入不能包含真值。先训练单帧测量，固定后导出相同测量缓存。深度存在尺度歧义时使用可信多视角 / 运动尺度约束，不能在测试时借助真值尺度。随机初始化与任何公开预训练初始化分别建账。</p>
+<p><strong>诊断</strong>：真实测量误差对比“真值位置 / 深度测量”的诊断替换。若真值测量也不能改善任务，优先修正任务和读出；若差距主要来自测量，继续训练观测网络，不急于堆记忆。</p>
+<p><strong>出口</strong>：训练与开发学习曲线趋稳；测量缓存、权重、误差单位、方差可靠性可复现。建立同骨干无记忆基线，不要求大模型一定胜过易任务的小模型。</p>
+<h3 id="stage-2">S2：把 RKN 从二维探针扩展为实际空间状态</h3>
+<p><strong>唯一新增因素</strong>：固定 S1 测量，接作者 RKN，不加动作新项、曝光修正或事件分支。先在相同已知坐标中验证状态，随后单独扩展局部缺失和多目标关联。</p>
+<p><strong>训练 / 对照</strong>：完整 RKN、同信息 GRU 和保持测量基线共享缓存；低维子任务沿用已有 KF 结果，并可在隔离环境复现强数值对照，不自动恢复 FilterPy stash。必要时采用合法可复用的鲁棒 / 多模式滤波作为诊断比较。</p>
+<p><strong>真值诊断</strong>：分别替换当前测量、最后可见速度和关联，不在隐藏阶段输入真值运动。通过状态重置、后半潜在状态清零、跨场景置换证明动态路径影响预测。</p>
+<p><strong>出口</strong>：既改善连续运动中的缺失误差，又量化停止 / 反向修订代价；若平滑收益伴随不可接受的修订退化，进入 S4 / S5 的问题清单，不能把 S2 写成完整机制通过。</p>
+<h3 id="stage-3">S3：依次接入实际动作、本体传播与标定几何</h3>
+<p>分成三个可独立回滚和评价的子阶段：</p>
+<ul>
+<li><strong>S3a</strong>：普通 RKN → Ac-RKN。只增加过去已执行控制，保持相同视觉测量和状态规模；测试动作置乱、时间偏移、实际限幅与未执行计划替换。</li>
+<li><strong>S3b</strong>：只增加本体 / 正运动学给出的相机位姿传播，保持 S3a 训练协议；固定相机与腕部相机分报。动作控制项只解释剩余未知动力学。</li>
+<li><strong>S3c</strong>：加入深度或局部三维结构，使 ego 预测从二维补偿升级为三维投影；先用真值深度诊断，再训练正式深度模块。</li>
+</ul>
+<p><strong>训练</strong>：未来测量 / 几何状态预测损失、可见区似然及多步预测；未来数据只作为训练目标，不能作为在线输入。训练时随机丢帧与时间间隔变化使用物理时间。</p>
+<p><strong>诊断阶梯</strong>：估计 ego → 真值 ego → 真值 ego + 深度；每次只换一项，保持掩码、更新和读出一致。真实位姿改进很小则不训练大型 ego 网络；位姿来源足够好时优先保留解析几何。</p>
+<p><strong>出口</strong>：预测误差随可用运动信息改善；正确时间比错位动作更有用；纯相机运动不会凭空产生外部对象速度。若动作无增量，如实采用本体 / 几何有效部分，不能把 action token 存在当收益。</p>
+<h3 id="stage-4">S4：逐项建立可信残差和误差感知更新</h3>
+<p>固定 S3 的测量与转移，按以下顺序分别验收：</p>
+<ol>
+<li><strong>S4a 成像解释</strong>：可靠曝光 / 增益元数据 → 受约束的残余低频增益；先真值增益后估计增益。未知阴影和物体材质变化保留为未解释量，不让任意局部 gain 抹掉它们。</li>
+<li><strong>S4b 传感器噪声</strong>：只引入 α、β 与正确插值方差；先真值参数再训练 / 标定参数，分噪声组报告。</li>
+<li><strong>S4c 几何与时间误差</strong>：只加入位姿 / 时间 / 标定协方差传播；比较固定 R、仅学 R、显式传播、联合校准，避免只与劣质固定阈值比较。</li>
+<li><strong>S4d 外部事件证据</strong>：比较边缘化残差与一阶 nuisance 正交分量；增加不可辨识 / unknown 输出，并验收第 7 节理论性质及反例。</li>
+</ol>
+<p><strong>训练</strong>：先冻结测量与传播，仅标定噪声、必要的误差头和更新参数；每项通过后才做匹配重训。事件阈值固定在独立开发集的相同误报预算，不能按最终数据重新选。</p>
+<p><strong>出口</strong>：纯 ego / 光照 / 时间偏差误报降低，同时外部运动召回、位置更新和停止修订没有被一起压低。必须用“最强误差建模基线”证明新增事件判断的剩余增量。</p>
+<h3 id="stage-5">S5：让外部变化真正修改动态记忆</h3>
+<p>此阶段解决目前最明确的短板：持续运动先验会在停止和反向后拖住系统。</p>
+<p><strong>S5a 诊断事件</strong>：在当前可见时，分别使用真值事件标签、真值当前位置、真值当前速度，保持同一更新公式和协方差配置，测量每一项的空间。真值事件只告知“模型失配”，不能同时偷偷提供新速度。</p>
+<p><strong>S5b 学习修订</strong>：在 S4 可靠证据上修改动态状态 / 转移模式；优先使用 Ac-RKN 状态校正与成熟的模式切换 / 自适应过程噪声对照。新增头可读取局部残差、支持和协方差，但不能以无限增大 R 为唯一解法。外部变化可能需要增加 Q、修改速度均值或切换接触模式，单纯降低测量权重常常适得其反。</p>
+<p><strong>S5c 条件运动网络</strong>：只有当真值外部运动在困难三维 / 操作任务上带来实际状态或动作收益，才接入完整 Dynamo-Depth / RAFT 类模块。先在其原任务或可重建的作者条件下做最小忠实复现，再逐项适配 RAW、几何与因果时间。深度、ego、外部运动分阶段训练，避免不可辨识解相互补偿。</p>
+<p>原二维实验的 0.02855 px 增量仍保留为未触发证据。新任务必须在读取最终测试前确定新的工程意义门槛，不能只因想训练大网络而放宽旧门槛。光流网络需要当前观测，所以它只负责当下校正；遮挡期间仍依赖最近确认的动态状态。</p>
+<p><strong>出口</strong>：事件后的预测和动作相关误差下降；切断“修订 → 下次传播”路径会显著损害结果；若只提升事件分类却不改变未来状态，S5 不通过。</p>
+<h3 id="stage-6">S6：组合训练、跨条件迁移与充分消融</h3>
+<p><strong>工作</strong>：将已独立验证的部件组合，再进行端到端训练。按纯因素、两两组合、全组合分层采样；留出未见的因素组合、对象、速度 / 加速度范围、相机位姿和传感器噪声。</p>
+<p>同时保留两种评价：</p>
+<ul>
+<li><strong>冻结权重干预</strong>：同一模型内切断一条路径，检查实际依赖。它能回答机制有没有被使用，不能替代完整消融。</li>
+<li><strong>匹配重训消融</strong>：无动作、无几何、无不确定性传播、无事件修订分别从同一初始化按同预算训练。它能回答新增机制是否优于充分训练的替代。</li>
+</ul>
+<p>必要矩阵包括无记忆、原版 RKN、Ac-RKN、Ac-RKN + 几何 + 校准 R、Ac-RKN + 自适应 Q / 鲁棒更新、完整 N04。模型规模、可用上下文、训练轨迹、后端和调参次数分别列出。</p>
+<p>另以 MCDS-VSS 的“ego + 残余流 + 特征融合”作为结构对照，逐项披露 RAW 和骨干适配；未获得作者源码时不冒称官方复现。若正式运动分支被启用，必须比较“残余运动一概用于补偿”与“区分误差来源后修订状态”，才能支持分离规则的增量。</p>
+<p><strong>出口</strong>：至少三个完整训练种子，主要收益的轨迹级配对区间支持预定方向；未出现“相机误报改善但外部事件几乎全被忽略”。各项局部收益与组合收益分报，未通过部件从主配置移除并保留负结果。</p>
+<h3 id="stage-7">S7：π0.5 / RawVLA-Bench 正式训练与闭环验收</h3>
+<p>S7a 是数据和动作梯度合同验收，S7b 是充分训练，S7c 才是最终闭环。不得把前者替代后者。</p>
+<p><strong>S7a 接入</strong>：复用 <code>rawvla_features.py</code> 的外部视觉前缀入口；保留语言、掩码、位置编码、动作规范化和作者任务配置。每相机 256 × 2048 前缀的容量保持一致，一次新观测只运行一次编码器，后续所有 flow-matching 去噪步复用它。冻结 π0.5 参数时仍保留经过后端回传到编码器的梯度，不套整个后端 <code>no_grad()</code>。</p>
+<p><strong>S7b 训练</strong>：分别在 LIBERO 和 RoboTwin 的正式训练轨迹上训练。先以冻结 π0.5 比较视觉和状态机制，再让全部主对照使用相同的后端适配方式和参数预算。若全量微调后端优于冻结 / adapter，再作为第二训练档，对所有主对照统一开放。不能让 N04 更新整个后端、基线只训练线性头后声称机制获胜。</p>
+<p>LIBERO 外部动作 7 维 / horizon 10，RoboTwin 14 维 / horizon 50，以冻结配置再次核验；后端内部 32 维 padding 和 10 步去噪迭代不是实际执行 32 维动作或每 10 步才更新视觉。执行动作块长度、重规划间隔、采样频率和观测延迟均按实际值记录，不从 horizon 猜测。</p>
+<p><strong>S7c 闭环</strong>：使用被冻结的 10,000 条 LIBERO + 3,250 条 RoboTwin 主清单，另有 632 条原条件核查独立计分。开始前确认既有基线已补齐并审计；本方案不把历史部分 RoboTwin 结果算成完整成绩。基础设施异常保留身份和原分母，补跑成功前标记 incomplete，不能静默删除；策略达到步数上限记真实失败。</p>
+<p>最少三个主要系统：同骨干无记忆、同骨干 Ac-RKN、完整 N04；各三个独立训练种子、每个 checkpoint 完整 13,250 条，合计 <strong>119,250 次主清单 rollout</strong>。若资源不足，先完成开发集预选；最终仍按预注册主对照补全，不把部分测试当全量。原版 RKN 与强误差建模基线至少在机制全量评测中保留；若 N04 的主张依赖其差异，也纳入最终闭环主对照。RawVLA 原系统是额外强系统基线，沿冻结协议复核，不能用未经同等训练的历史 smoke 作对照。</p>
+<p>新增遮挡、延迟、错误先验、物体停止 / 反向属于独立的机制闭环套件，不能混入官方分母后继续使用官方成绩名称。可在同一初态做配对评测，但动作改变后的物理轨迹不能强求逐像素一致。</p>
+<p><strong>最终出口</strong>：完整成功 / 失败分母、三个训练种子的统计、全部成本、无未来信息证据和具身机制反证均齐备。π0.5 动作 loss 下降、离线动作误差改善或权重能加载，都不足以单独宣布 N04 完成。</p>
+<h2 id="section-9">9. 数据设计与诊断上限</h2>
+<h3 id="section-9-1">9.1 从可辨识条件到真实难点</h3>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>数据层</th>
+<th>内容</th>
+<th>主要用途与限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D0 解析控制</td>
+<td>静态、单轴平移 / 旋转、已知 K / 深度 / 曝光；无噪声和独立传感器噪声</td>
+<td>验证坐标、方差和局部理论；不作大模型性能主证据</td>
+</tr>
+<tr>
+<td>D1 三维仿真机制</td>
+<td>多物体、不同深度、相机 / 机械臂运动、遮挡、接触、物体停止和反向、阴影 / 高光</td>
+<td>标签从生成过程导出，逐样本核对；包含可辨识和不可辨识反例</td>
+</tr>
+<tr>
+<td>D2 RAW 域与传感器变化</td>
+<td>原生 CFA 采样、黑电平 / 噪声 / 曝光 / 裁剪；已测真实 RAW 可用时另建集合</td>
+<td>标记模拟与真实传感器来源；不把重新马赛克的 RGB 当原始 RAW</td>
+</tr>
+<tr>
+<td>D3 RawVLA-Bench 训练</td>
+<td>官方三通道 RAW，补齐可靠 telemetry 的 sidecar 或独立扩展集</td>
+<td>真值几何可作训练监督，不作普通测试输入；作者轨迹按 source 分组</td>
+</tr>
+<tr>
+<td>D4 官方 / 扩展闭环</td>
+<td>正式测试 manifest；另建动态与延迟挑战</td>
+<td>官方与新增任务分别计分，正确动作改变时重新示范 / 规划</td>
+</tr>
+</tbody>
+</table></div>
+<p>训练至少覆盖：纯 ego、纯外部运动、纯增益、纯传感器噪声、静态、机器人自遮挡、对象出生 / 消失、错误关联、迟到帧、校准偏移，以及它们的组合。稳定的背景标定支持可能不存在，应专门加入整幅画面被移动物体占据的反例。</p>
+<h3 id="section-9-2">9.2 真值诊断只替换一个环节</h3>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>替换项</th>
+<th>其余保持不变</th>
+<th>能定位的瓶颈</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前真值测量</td>
+<td>转移、Q/R、缺失、读出</td>
+<td>当前视觉测量是否限制状态和任务</td>
+</tr>
+<tr>
+<td>真值 ego / 时间 / 标定，各自单独替换</td>
+<td>当前测量、外部动态、更新</td>
+<td>自运动或同步误差是否值得建模</td>
+</tr>
+<tr>
+<td>真值增益 / 噪声参数，各自替换</td>
+<td>几何、标签、阈值预算</td>
+<td>成像解释和噪声尺度的空间</td>
+</tr>
+<tr>
+<td>当前可见时的真值事件</td>
+<td>不提供新速度，不更换协方差</td>
+<td>事件检测错误还是状态修订错误</td>
+</tr>
+<tr>
+<td>最近可见时的真值外部速度</td>
+<td>隐藏期间不读取真值；同一更新</td>
+<td>动力学估计的额外任务空间</td>
+</tr>
+<tr>
+<td>真值关联 / 可见性</td>
+<td>不改变测量值或运动</td>
+<td>数据关联 / 支持掩码是否才是瓶颈</td>
+</tr>
+</tbody>
+</table></div>
+<p>这里的“上限”是<strong>诊断参照</strong>，不是自动严格高于所有学习方法的数学最优值。插值、噪声、估计偏差和其他模块失配都可能导致真值替换的指标更差，应保留这种排序并解释。</p>
+<h2 id="section-10">10. 充分训练与资源计划</h2>
+<p>充分训练由正式容量、数据覆盖、学习曲线和独立复验共同决定，不能再用 200 步 toy 训练承担机制否定或全量完成结论。以下是启动前要转成配置的<strong>初始预算</strong>，不是已经消耗的 GPU 时间，也不是论文保证。</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>初始正式预算</th>
+<th>首版优化与数据要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 当前测量</td>
+<td>100k–300k 更新</td>
+<td>ConvNeXt-B，RAW 输入，独立帧与多视角监督；有效 batch 128 帧起，经显存测量调整</td>
+</tr>
+<tr>
+<td>S2 / S3 动态</td>
+<td>每个主要对照 100k–300k 更新</td>
+<td>有效 batch 16 段；先 16 帧 burn-in + 32 帧训练，再独立比较 64 / 128 帧跨度；物理 Δt 输入一致</td>
+</tr>
+<tr>
+<td>S4 校准 / 更新</td>
+<td>每项 30k–100k 更新或估计收敛</td>
+<td>固定测量和传播，分别训练噪声 / 修订参数；不在一次运行中一起更换四项因素</td>
+</tr>
+<tr>
+<td>S5 条件运动网络</td>
+<td>通过诊断才安排 100k–300k 更新</td>
+<td>参照作者完整配置并记录迁移差异；新增数据必须足够支持深度 / 动态分解</td>
+</tr>
+<tr>
+<td>S6 组合</td>
+<td>100k–200k 更新</td>
+<td>已确认部件联合训练，混合因素和独立留出组合；三完整种子</td>
+</tr>
+<tr>
+<td>S7 π0.5</td>
+<td>每系统、每平台、每种子 100k 更新起，必要时延长至 200k+</td>
+<td>相同动作规范化、数据访问、后端可训练参数和选择次数；完整记录 epoch 等效覆盖</td>
+</tr>
+</tbody>
+</table></div>
+<p>采用 AdamW 及 warmup / cosine 等成熟训练配方，首轮开发集学习率网格为 <code>{1e-4, 3e-4, 1e-3}</code> 的编码器 / 新模块档；预训练后端采用单独较低学习率网格并对各系统一致开放。不是所有模块都使用同一学习率。梯度裁剪、混合精度、EMA 是否采用均在配置中冻结，协方差和几何校准优先 FP32。</p>
+<p>每个正式档至少三完整种子；五种子用于关键差异小或方差较大的主张。开发集每 5k 更新评价，连续五次主要开发指标相对改善小于 1% 才作为趋稳证据，同时查看困难组和过拟合；最终测试不参与早停。若预算上限到达时仍明显改善，按预先规定扩展一档（如 ×2），或明确标为训练未充分，不能改口说机制已失败。避免以反复运行最终集来选择训练时长。</p>
+<p>两张表分别报告“相同步数 / 数据 / 调参机会的受控比较”和“各方法充分调优后的能力比较”。视觉骨干相同不代表总计算相同，还要记录训练 FLOPs 或实测 GPU 小时、显存、数据吞吐与总参数。Dynamo 网络引入的额外成本不能隐去。</p>
+<p>先进行 500–1,000 步正式形状的资源 profiling，测量单卡和多卡吞吐、序列缓存、通信与检查点大小；据此生成 GPU 小时预算和排期。当前本地 RTX 5090 的诊断速度不能外推成完整 π0.5 训练时长。可从 4–8 张 80GB 级 GPU 的资源档估算多模型训练，但这是待验证配置，不是已可用资源或采购要求；资源有限时用梯度累积 / checkpointing 保留正式容量。</p>
+<h2 id="section-11">11. 指标、统计与阶段门槛</h2>
+<h3 id="section-11-1">11.1 统一指标语义</h3>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>必须固定的定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>几何预测误差</td>
+<td>校正前 prior；米 / 原图 px / 特征 px 分报；静态背景与动态对象分别统计</td>
+</tr>
+<tr>
+<td>当前状态误差</td>
+<td>校正后 posterior；与 prior 不混用</td>
+</tr>
+<tr>
+<td>外部运动存在</td>
+<td>由对象相对参考系的运动标签定义，与是否预测准确无关</td>
+</tr>
+<tr>
+<td>创新事件</td>
+<td>由已有动力学是否被反驳定义；既有匀速运动可不是事件</td>
+</tr>
+<tr>
+<td>RAW 可观测变化</td>
+<td>无噪声成像变化达到固定阈值的采样点，不等于整个运动物体掩码</td>
+</tr>
+<tr>
+<td>修订延迟</td>
+<td>从首次可用、有效的新证据开始计时，到误差连续回到容忍区间；未恢复记 censored</td>
+</tr>
+<tr>
+<td>缺失误差</td>
+<td>按真实缺失时长分桶，报告误差随时间的曲线和面积，不只平均一个 gap</td>
+</tr>
+<tr>
+<td>不确定性</td>
+<td>NLL、分组覆盖率、预测区间宽度；有真值物理状态时另测 NEES，潜在状态不硬套物理 NEES</td>
+</tr>
+<tr>
+<td>任务收益</td>
+<td>官方任务成功率、错误目标 / 误抓、恢复时间及控制代价；动作 loss 作为训练诊断</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="section-11-2">11.2 预注册的开发门槛</h3>
+<p>以下为 v1.0 建议的工程门槛。S0 根据坐标精度和任务容忍度冻结；若修改必须先记理由并重新冻结开发协议，不依据最终测试结果调门槛。</p>
+<ul>
+<li><strong>动态状态门</strong>：旧二维数据沿用缺失误差至少降低 10% 且 0.05 px；新三维任务采用至少 10% 且超过标定 / 测量分辨率的绝对收益。可见段退化不得超过预设任务容忍度。</li>
+<li><strong>误差分离门</strong>：相同开发误报预算（首版 1%）下，比较外部变化召回；在标定 / 时间扰动负样本上，新增规则较最强既有对照误报相对降低至少 20%，外部事件召回下降不超过 2 个百分点，并要求配对区间支持方向。每个关键组单列，不允许平均值掩盖失效组。</li>
+<li><strong>动态修订门</strong>：停止 / 反向后的积分误差较 Ac-RKN 至少降低 15%，缺失期误差退化不超过 5%；修订延迟同时改善或不退化。用误导 / 过期状态验证，不只测试正确历史。</li>
+<li><strong>运动网络训练触发</strong>：同更新、同掩码条件下的真值运动使主要状态 / 任务指标达到上述工程意义门槛；否则保留诊断，不启动大规模运动训练。</li>
+<li><strong>最终闭环门</strong>：完整 N04 相对同骨干 Ac-RKN 的主要成功率差异用任务分层、初态配对的 95% 区间报告；目标为总体至少 +3 个百分点且区间下界大于 0，同时关键安全 / 控制组无超过预定容忍度的退化。若仅扩展挑战有收益，应将结论限定到该挑战，不宣称官方基准普遍更好。</li>
+</ul>
+<p>所有主张分开判定。具有局部显著性但未达到工程意义阈值，报告“收益小”；区间过宽报告“证据不足”。不得把相邻帧、同一轨迹的照明变体或百万像素作为独立样本增加显著性。训练种子与环境随机性分别建账，bootstrap 以任务 / 源轨迹为分组单位，多个次要指标作探索性报告。</p>
+<h3 id="section-11-3">11.3 完整系统成本</h3>
+<p>记录曝光至动作下发的 p50 / p95、编码器 / 传播 / 读出 / π0.5 / 通信分项、状态显存、峰值显存、每个新观测的调用次数、控制频率、动作执行长度、迟到帧数量和恢复缓存开销。CUDA 计时需同步，warmup 单列；batch 吞吐不能冒充在线单帧延迟。若计算延迟改变机器人表现，另做等延迟对照。</p>
+<h2 id="section-12">12. 源码落点与交付件</h2>
+<p>以下新路径是<strong>拟新增文件</strong>，不是现有实现已具备功能。优先复用现有接口，将完整新路线与旧 tiny 原型分别注册配置，保留旧实验可复现性。</p>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>工作范围</th>
+<th>现有入口 / 拟新增文件</th>
+<th>交付要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>因果数据 / telemetry</td>
+<td>现有 <code>src/owac/raw/rawvla_sequence.py</code>；拟新增 <code>src/owac/raw/telemetry.py</code></td>
+<td>执行动作区间、物理时间、availability、标定 sidecar provenance</td>
+</tr>
+<tr>
+<td>坐标及误差</td>
+<td>现有 <code>frameworks/n04/geometry.py</code>、<code>proprio.py</code>；拟新增 <code>measurement_geometry.py</code></td>
+<td>CFA / feature 坐标、SE(3)、Jacobian、visibility、单位测试</td>
+</tr>
+<tr>
+<td>正式 RAW 测量</td>
+<td>拟新增 <code>frameworks/n04/measurement.py</code></td>
+<td>ConvNeXt-B 来源、空间输出、方差单位、单帧无历史测量合同</td>
+</tr>
+<tr>
+<td>RKN / Ac-RKN</td>
+<td>现有 <code>baselines/_vendor/rkn/</code>、<code>baselines/n04_tracking.py</code>；拟新增 <code>frameworks/n04/state_estimator.py</code></td>
+<td>作者单元保持来源；明确扩展差异、逐锚点 mask、prior / posterior 时序</td>
+</tr>
+<tr>
+<td>误差与动态修订</td>
+<td>拟新增 <code>frameworks/n04/uncertainty.py</code>、<code>revision.py</code></td>
+<td>联合 / 近似协方差、可辨识支持、动态修订真正进入传播</td>
+</tr>
+<tr>
+<td>模型组合</td>
+<td>现有 <code>frameworks/n04/model.py</code>；拟新增完整配置注册</td>
+<td>老权重不静默装入新语义；状态 schema 和 checkpoint migration 明确</td>
+</tr>
+<tr>
+<td>训练与实验</td>
+<td>现有 <code>training/n04.py</code>；拟新增 <code>training/n04_full.py</code>、<code>configs/n04/full/</code></td>
+<td>数据拆分、三种子、消融矩阵、resume 身份、完整 loss / 预算</td>
+</tr>
+<tr>
+<td>π0.5</td>
+<td>现有 <code>backends/rawvla_features.py</code>、<code>core/encoder_contract.py</code></td>
+<td>真权重前反向、一次观测一次融合、reset / 连续动作执行验收</td>
+</tr>
+<tr>
+<td>理论与证据</td>
+<td>拟新增 <code>research/theory/n04_v1.md</code>；逐阶段 <code>research/experiments/</code> 记录</td>
+<td>假设 / 推导 / 反例、原始结果索引、失败与诊断保留</td>
+</tr>
+</tbody>
+</table></div>
+<p>每阶段交付相同的一组最小证据：配置、依赖 / 来源与许可证、源码 SHA + 未提交 diff hash、数据 manifest、权重 hash、训练曲线、开发选择记录、冻结后的最终结果、失败样本、实测资源和审计命令。大权重和日志放忽略目录或外部存储，Git 只存小清单与结论。每一因素可以形成清晰 diff，但是否提交、何时提交仍由用户安排。</p>
+<p>测试重点是逐样本标签、时间因果性、数据泄漏、坐标逆 / 复合、协方差、隐藏测量毒化、动态干预、状态 reset 和真实 π0.5 梯度。工程测试通过只证明相应合同，不把绿色测试数量当机制证据。依赖更新在目标 checkout 内完成并同步锁文件；沿用后端冻结 Python 环境，不能把本地 Python 3.12 可运行等同于后端兼容。</p>
+<h2 id="section-13">13. 决策分支与失败后的处理</h2>
+<div aria-label="可横向滚动的数据表" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>发现</th>
+<th>下一步</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真值测量有效，学习测量差</td>
+<td>增加 S1 数据、覆盖或训练；不把问题归因于动态状态</td>
+</tr>
+<tr>
+<td>真值运动也不改善任务</td>
+<td>该任务没有足够机制空间；在新三维 / 遮挡任务上重新诊断，或保留简单状态模型</td>
+</tr>
+<tr>
+<td>误报下降但真实变化也消失</td>
+<td>检查 nuisance 与外部运动重叠、R 膨胀与门控；输出 unknown，减少无依据解释</td>
+</tr>
+<tr>
+<td>事件识别对，后续预测不变</td>
+<td>修复事件至转移的路径，做梯度和干预；不先扩事件分类网络</td>
+</tr>
+<tr>
+<td>遮挡更好，重现后更慢</td>
+<td>优先状态修订 / 模式变化；不要继续增大平滑强度</td>
+</tr>
+<tr>
+<td>潜在 NLL 更好，物理状态不改善</td>
+<td>检查方差膨胀、读出、关联和尺度；不要只优化 NLL 排名</td>
+</tr>
+<tr>
+<td>几何 / 状态改善，π0.5 不获益</td>
+<td>检查读出、信息是否被后端使用、动作对齐和动作相关性；以冻结 / 适配双档定位</td>
+</tr>
+<tr>
+<td>仅算力更多时提升</td>
+<td>报告充分能力与受控预算的差别；补做等成本对照，不归因为新机制</td>
+</tr>
+<tr>
+<td>Ac-RKN + 标准误差建模已达到相同表现</td>
+<td>保留成熟方案，撤回无增量模块；创新主张需要重新定位</td>
+</tr>
+<tr>
+<td>只有三通道 RawVLA 结果</td>
+<td>可报告该 benchmark 的闭环结论，原生 CFA / 真实传感器结论继续留空</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-14">14. 实施优先级与 v1.0 完成定义</h2>
+<p>第一批工作集中在 S0–S2：补齐可信控制 / 时间 / 标定合同，建立正式视觉测量，再确认空间 RKN 在复杂连续状态上的收益。第二批 S3–S5 才引入自运动、误差解释和可改变未来预测的外部修订。第三批 S6–S7 完成充分训练、匹配消融和完整机器人闭环。</p>
+<p>排期应以 S0 数据可得性和正式模型 profiling 为依据，不用 toy CPU 数字承诺几天完成。每个阶段结束写一页“已验证结果—剩余假设—下一项单因素实验”，进入下一阶段的依据必须是实际证据。</p>
+<p>本路线达到“全量 N04 开发完成”需同时具备：</p>
+<ol>
+<li>成熟来源、正式规模的 RAW 测量与状态模型，充分训练、可重复加载和继续训练。</li>
+<li>实际执行动作、本体状态、标定、坐标和时间进入因果预测的可核查链条。</li>
+<li>有假设与反例的理论性质，以及 H1 / H2 的匹配实验和动态路径干预。</li>
+<li>π0.5 在两个 RawVLA-Bench 平台的正式训练、完整闭环分母、强基线和成本比较。</li>
+<li>清楚区分得到收益的条件、未通过的主张及三通道 RAW / 原生 CFA / 真实传感器范围。</li>
+</ol>
+<p>如果第 1–2 项完成而第 3–4 项没有收益，可以交付完整系统和负结果，但不能声称新机制成立。当前这份 v1.0 是上述工作的研究和开发合同，不提前写成验收通过。</p>
+<h2 id="section-15">15. 参考文献与源码入口</h2>
+<p>引用以作者 / 出版方原始来源为主。检索范围覆盖到 2026-10-14；许可证与源码版本在正式集成时再次固定。下面明确给出的代码入口不表示本轮已运行其训练。MTS3 中 acRKN、ConvNeXt 架构、几何 / 标定文档及现有本地 RKN 接口已做选段核查；其余按论文、项目或摘要层面使用。</p>
+<ol>
+<li id="ref-r01"><strong><a class="ref-link" href="#ref-r01">[R01]</a></strong> Becker et al. <em>Recurrent Kalman Networks: Factorized Inference in High-Dimensional Deep Feature Spaces</em>. ICML 2019. <a href="https://proceedings.mlr.press/v97/becker19a.html" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/ALRhub/rkn_share" rel="noopener noreferrer" target="_blank">作者 PyTorch 代码</a>。复用对象：可学习潜在转移及结构化滤波。</li>
+<li id="ref-r02"><strong><a class="ref-link" href="#ref-r02">[R02]</a></strong> Shaj et al. <em>Action-Conditional Recurrent Kalman Networks for Forward and Inverse Dynamics Learning</em>. CoRL 2020 / PMLR 2021. <a href="https://proceedings.mlr.press/v155/shaj21a.html" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://proceedings.mlr.press/v155/shaj21a/shaj21a.pdf" rel="noopener noreferrer" target="_blank">全文</a>。动作条件化属于既有工作。</li>
+<li id="ref-r03"><strong><a class="ref-link" href="#ref-r03">[R03]</a></strong> <em>Hidden Parameter Recurrent State Space Models for Changing Dynamics Scenarios</em>. ICLR 2022. <a href="https://arxiv.org/abs/2206.14697" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/ALRhub/HiP-RSSM" rel="noopener noreferrer" target="_blank">代码</a>。隐藏动力学上下文，避免使用未来上下文造成泄漏。</li>
+<li id="ref-r04"><strong><a class="ref-link" href="#ref-r04">[R04]</a></strong> <em>Multi Time Scale World Models</em>. NeurIPS 2023. <a href="https://arxiv.org/abs/2310.18534" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/ALRhub/MTS3" rel="noopener noreferrer" target="_blank">代码</a> · <a href="https://github.com/ALRhub/MTS3/blob/master/agent/worldModels/acRKN.py" rel="noopener noreferrer" target="_blank">acRKN 入口</a>。代码复用前核查授权及具体分支。</li>
+<li id="ref-r05"><strong><a class="ref-link" href="#ref-r05">[R05]</a></strong> Byravan &amp; Fox. <em>SE3-Nets: Learning Rigid Body Motion using Deep Neural Networks</em>. ICRA 2017. <a href="https://arxiv.org/abs/1606.02378" rel="noopener noreferrer" target="_blank">论文</a>。动作驱动结构化运动的先例。</li>
+<li id="ref-r06"><strong><a class="ref-link" href="#ref-r06">[R06]</a></strong> Byravan et al. <em>SE3-Pose-Nets: Structured Deep Dynamics Models for Visuomotor Planning and Control</em>. ICRA 2018. <a href="https://arxiv.org/abs/1710.00489" rel="noopener noreferrer" target="_blank">论文</a>。低维姿态与动作控制，不直接等价于 RAW 输入方法。</li>
+<li id="ref-r07"><strong><a class="ref-link" href="#ref-r07">[R07]</a></strong> Vijayanarasimhan et al. <em>SfM-Net: Learning of Structure and Motion from Video</em>. 2017. <a href="https://arxiv.org/abs/1704.07804" rel="noopener noreferrer" target="_blank">论文</a>。结构、相机运动和物体运动的既有分解。</li>
+<li id="ref-r08"><strong><a class="ref-link" href="#ref-r08">[R08]</a></strong> Sun et al. <em>Dynamo-Depth: Fixing Unsupervised Depth Estimation for Dynamical Scenes</em>. NeurIPS 2023. <a href="https://arxiv.org/abs/2310.18887" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/YihongSun/Dynamo-Depth" rel="noopener noreferrer" target="_blank">代码</a>。几何 / 动态分解与分阶段训练候选。</li>
+<li id="ref-r09"><strong><a class="ref-link" href="#ref-r09">[R09]</a></strong> Jiang et al. <em>EMR-MSF: Self-Supervised Recurrent Monocular Scene Flow Exploiting Ego-Motion Rigidity</em>. ICCV 2023. <a href="https://openaccess.thecvf.com/content/ICCV2023/html/Jiang_EMR-MSF_Self-Supervised_Recurrent_Monocular_Scene_Flow_Exploiting_Ego-Motion_Rigidity_ICCV_2023_paper.html" rel="noopener noreferrer" target="_blank">论文</a>。ego 刚性约束的最近场景流参照。</li>
+<li id="ref-r10"><strong><a class="ref-link" href="#ref-r10">[R10]</a></strong> Teed &amp; Deng. <em>RAFT: Recurrent All-Pairs Field Transforms for Optical Flow</em>. ECCV 2020. <a href="https://arxiv.org/abs/2003.12039" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/princeton-vl/RAFT" rel="noopener noreferrer" target="_blank">代码</a>。完整对应网络候选，当前帧依赖属于校正阶段。</li>
+<li id="ref-r11"><strong><a class="ref-link" href="#ref-r11">[R11]</a></strong> Teed &amp; Deng. <em>RAFT-3D: Scene Flow Using Rigid-Motion Embeddings</em>. CVPR 2021. <a href="https://openaccess.thecvf.com/content/CVPR2021/html/Teed_RAFT-3D_Scene_Flow_Using_Rigid-Motion_Embeddings_CVPR_2021_paper.html" rel="noopener noreferrer" target="_blank">论文</a>。输入深度条件需要单独满足。</li>
+<li id="ref-r12"><strong><a class="ref-link" href="#ref-r12">[R12]</a></strong> Barrau &amp; Bonnabel. <em>The Invariant Extended Kalman Filter as a Stable Observer</em>. IEEE TAC 2017. <a href="https://arxiv.org/abs/1410.1465" rel="noopener noreferrer" target="_blank">论文</a>。稳定性有系统结构、可观测性和局部条件。</li>
+<li id="ref-r13"><strong><a class="ref-link" href="#ref-r13">[R13]</a></strong> Yang et al. <em>Online Self-Calibration for Visual-Inertial Navigation Systems: Models, Analysis and Degeneracy</em>. <a href="https://arxiv.org/abs/2201.09170" rel="noopener noreferrer" target="_blank">论文</a>。标定可观测性和退化分析。</li>
+<li id="ref-r14"><strong><a class="ref-link" href="#ref-r14">[R14]</a></strong> Qin &amp; Shen. <em>Online Temporal Calibration for Monocular Visual-Inertial Systems</em>. IROS 2018. <a href="https://arxiv.org/abs/1808.00692" rel="noopener noreferrer" target="_blank">论文</a>。时间误差模型参照，不要求 N04 凭空拥有 IMU。</li>
+<li id="ref-r15"><strong><a class="ref-link" href="#ref-r15">[R15]</a></strong> OpenVINS 原始技术文档及实现。<a href="https://docs.openvins.com/update-null.html" rel="noopener noreferrer" target="_blank">nullspace 消元</a> · <a href="https://docs.openvins.com/update.html" rel="noopener noreferrer" target="_blank">测量更新</a> · <a href="https://github.com/rpng/open_vins" rel="noopener noreferrer" target="_blank">代码</a>。用于估计原理和诊断，不直接移植整套视觉惯性前端。</li>
+<li id="ref-r16"><strong><a class="ref-link" href="#ref-r16">[R16]</a></strong> Engel et al. <em>Direct Sparse Odometry</em>. IEEE TPAMI 2018. <a href="https://arxiv.org/abs/1607.02565" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/JakobEngel/dso" rel="noopener noreferrer" target="_blank">代码</a>。曝光、响应和光度解释参考。</li>
+<li id="ref-r17"><strong><a class="ref-link" href="#ref-r17">[R17]</a></strong> Foi et al. <em>Practical Poissonian-Gaussian Noise Modeling and Fitting for Single-Image Raw-Data</em>. IEEE TIP 2008. <a href="https://webpages.tuni.fi/foi/sensornoise.html" rel="noopener noreferrer" target="_blank">作者页面</a> · <a href="https://webpages.tuni.fi/foi/papers/Foi-PoissonianGaussianClippedRaw-2007-IEEE_TIP.pdf" rel="noopener noreferrer" target="_blank">全文</a>。物理噪声模型与裁剪边界。</li>
+<li id="ref-r18"><strong><a class="ref-link" href="#ref-r18">[R18]</a></strong> Maggioni et al. <em>Efficient Multi-Stage Video Denoising with Recurrent Spatio-Temporal Fusion</em>. CVPR 2021. <a href="https://arxiv.org/abs/2103.05407" rel="noopener noreferrer" target="_blank">论文</a>。RAW 时空融合参照。</li>
+<li id="ref-r19"><strong><a class="ref-link" href="#ref-r19">[R19]</a></strong> Zheng, Facciolo &amp; Arias. EMVD 复现与改进的 IPOL 预印本 / 实现。<a href="https://www.ipol.im/pub/pre/464/" rel="noopener noreferrer" target="_blank">原始入口</a>。截至检索仍按预印本标记，参考运动补偿与方差处理，代码授权另核。</li>
+<li id="ref-r20"><strong><a class="ref-link" href="#ref-r20">[R20]</a></strong> Liu et al. <em>A ConvNet for the 2020s</em>. CVPR 2022. <a href="https://openaccess.thecvf.com/content/CVPR2022/html/Liu_A_ConvNet_for_the_2020s_CVPR_2022_paper.html" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/facebookresearch/ConvNeXt" rel="noopener noreferrer" target="_blank">代码</a> · <a href="https://github.com/facebookresearch/ConvNeXt/blob/main/models/convnext.py" rel="noopener noreferrer" target="_blank">正式模型定义</a>。主骨干采用完整 Base 配置。</li>
+<li id="ref-r21"><strong><a class="ref-link" href="#ref-r21">[R21]</a></strong> <em>Multimodal Sensor Fusion with Differentiable Filters</em>. <a href="https://arxiv.org/abs/2010.13021" rel="noopener noreferrer" target="_blank">论文</a>。学习测量与滤波结合的研究参照。</li>
+<li id="ref-r22"><strong><a class="ref-link" href="#ref-r22">[R22]</a></strong> Hafner et al. <em>Mastering Diverse Domains through World Models</em> / DreamerV3. <a href="https://arxiv.org/abs/2301.04104" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/danijar/dreamerv3" rel="noopener noreferrer" target="_blank">代码</a>。动作条件潜在世界模型备选，不直接沿用 RGB 重建主链。</li>
+<li id="ref-r23"><strong><a class="ref-link" href="#ref-r23">[R23]</a></strong> Liu et al. <em>RawVLA: Embodied Neural Image Signal Processor For Robotic Manipulation</em>. 2026 预印本. <a href="https://arxiv.org/abs/2609.37530" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://shuhongll.github.io/rawvla/" rel="noopener noreferrer" target="_blank">项目</a> · <a href="https://github.com/ShuhongLL/RawVLA" rel="noopener noreferrer" target="_blank">代码</a>。本方案使用仓库冻结的基准协议。</li>
+<li id="ref-r24"><strong><a class="ref-link" href="#ref-r24">[R24]</a></strong> Physical Intelligence. <em>π0.5: a Vision-Language-Action Model with Open-World Generalization</em>. <a href="https://arxiv.org/abs/2504.16054" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/Physical-Intelligence/openpi" rel="noopener noreferrer" target="_blank">openpi</a>。后端采用已部署版本，不自动追随最新 main。</li>
+<li id="ref-r25"><strong><a href="https://huggingface.co/datasets/ToferFish/RawVLA-Bench" rel="noopener noreferrer" target="_blank">R25</a></strong> RawVLA-Bench 官方训练数据卡。<a href="https://huggingface.co/datasets/ToferFish/RawVLA-Bench" rel="noopener noreferrer" target="_blank">数据与字段</a>。区分作者训练数据、仿真测试清单和本地审计。</li>
+<li id="ref-r26"><strong><a class="ref-link" href="#ref-r26">[R26]</a></strong> Adams &amp; MacKay. <em>Bayesian Online Changepoint Detection</em>. 2007. <a href="https://arxiv.org/abs/0710.3742" rel="noopener noreferrer" target="_blank">论文</a>。变化点机制的已有方法边界。</li>
+<li id="ref-r27"><strong><a class="ref-link" href="#ref-r27">[R27]</a></strong> Bui, Huang &amp; Ying. <em>Kalman Delta Networks: Uncertainty-aware Associative Memory</em>. 2026 预印本. <a href="https://arxiv.org/abs/2609.07816" rel="noopener noreferrer" target="_blank">摘要与版本</a>。本轮仅核查摘要，不能据此声称已复现或优于 RKN。</li>
+<li id="ref-r28"><strong><a class="ref-link" href="#ref-r28">[R28]</a></strong> Godard et al. <em>Digging Into Self-Supervised Monocular Depth Estimation</em>. ICCV 2019. <a href="https://openaccess.thecvf.com/content_ICCV_2019/html/Godard_Digging_Into_Self-Supervised_Monocular_Depth_Estimation_ICCV_2019_paper.html" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/nianticlabs/monodepth2" rel="noopener noreferrer" target="_blank">代码</a>。完整深度模块参考；静态假设 / automasking 不应直接掩掉操作中的真实动态。</li>
+<li id="ref-r29"><strong><a class="ref-link" href="#ref-r29">[R29]</a></strong> Blom &amp; Bar-Shalom. <em>The Interacting Multiple Model Algorithm for Systems with Markovian Switching Coefficients</em>. IEEE TAC 1988. <a href="https://ieeexplore.ieee.org/document/1299" rel="noopener noreferrer" target="_blank">出版方入口</a> · <a href="https://doi.org/10.1109/9.1299" rel="noopener noreferrer" target="_blank">DOI</a>。多模型与矩匹配的既有方法；本轮未从出版方读取完整正文。</li>
+<li id="ref-r30"><strong><a class="ref-link" href="#ref-r30">[R30]</a></strong> Villar-Corrales et al. <em>MCDS-VSS: Moving Camera Dynamic Scene Video Semantic Segmentation by Filtering with Self-Supervised Geometry and Motion</em>. BMVC 2024. <a href="https://arxiv.org/abs/2405.19921" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://arxiv.org/html/2405.19921v2" rel="noopener noreferrer" target="_blank">方法全文</a> · <a href="https://github.com/angelvillar96/MCDS-VSS" rel="noopener noreferrer" target="_blank">作者仓库</a>。本轮阅读方法部分；仓库获取限制按第 3 节处理。</li>
+<li id="ref-r31"><strong><a class="ref-link" href="#ref-r31">[R31]</a></strong> Hassan et al. <em>GEM: A Generalizable Ego-Vision Multimodal World Model for Fine-Grained Ego-Motion, Object Dynamics, and Scene Composition Control</em>. CVPR 2025. <a href="https://arxiv.org/abs/2412.11198" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/vita-epfl/GEM" rel="noopener noreferrer" target="_blank">代码</a>。生成式世界模型边界参照，本轮未进行文件级审计。</li>
+<li id="ref-r32"><strong><a class="ref-link" href="#ref-r32">[R32]</a></strong> Wang et al. <em>Continuous 3D Perception Model with Persistent State</em> (CUT3R). 2025. <a href="https://arxiv.org/abs/2501.12387" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://cut3r.github.io/" rel="noopener noreferrer" target="_blank">项目</a> · <a href="https://github.com/CUT3R/CUT3R" rel="noopener noreferrer" target="_blank">代码</a>。持续几何状态参照，未运行 RAW 迁移。</li>
+<li id="ref-r33"><strong><a class="ref-link" href="#ref-r33">[R33]</a></strong> Lan et al. <em>STream3R: Scalable Sequential 3D Reconstruction with Causal Transformer</em>. 2025 预印本 / ICLR 2026（作者仓库标注）. <a href="https://arxiv.org/abs/2508.10893" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://github.com/NIRVANALAN/STream3R" rel="noopener noreferrer" target="_blank">代码</a>。因果几何重建参照，本轮核查摘要与项目入口。</li>
+<li id="ref-r34"><strong><a class="ref-link" href="#ref-r34">[R34]</a></strong> Huang et al. <em>Segment Any Motion in Videos</em>. CVPR 2025. <a href="https://openaccess.thecvf.com/content/CVPR2025/html/Huang_Segment_Any_Motion_in_Videos_CVPR_2025_paper.html" rel="noopener noreferrer" target="_blank">论文</a> · <a href="https://motion-seg.github.io/" rel="noopener noreferrer" target="_blank">项目</a>。轨迹 / 语义驱动的运动分割参照；不直接搬入 RGB 教师与未核准的时窗。</li>
+</ol>
+</article><p class="endnote">正文由同目录 Markdown 源文档生成，离线阅读无需外部脚本或字体。<br>源文档 SHA-256：e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2</p><a class="backtop" href="#top">↑ 返回文首</a></main></div><script>
+const updateProgress=()=>{const h=document.documentElement;const extent=h.scrollHeight-h.clientHeight;document.getElementById('progress').style.width=(extent>0?100*h.scrollTop/extent:0)+'%';};
+addEventListener('scroll',updateProgress,{passive:true});updateProgress();
+const headings=[...document.querySelectorAll('article h2, article h3[id^="stage-"]')];
+const observer=new IntersectionObserver(items=>{for(const i of items){if(i.isIntersecting){document.querySelectorAll('.toc a').forEach(a=>a.classList.toggle('active',a.hash==='#'+i.target.id));}}},{rootMargin:'-10% 0px -75% 0px',threshold:0});headings.forEach(h=>observer.observe(h));
+document.querySelectorAll('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>document.querySelector('.mobile-menu').removeAttribute('open')));
+document.getElementById('print-button').addEventListener('click',()=>window.print());
+</script></body></html>

@@ -1,0 +1,17 @@
+........................................................................ [ 20%]
+........................................................................ [ 41%]
+........................................................................ [ 62%]
+........................................................................ [ 82%]
+............................................................             [100%]
+=============================== warnings summary ===============================
+tests/encoders/n04/test_ego_state.py::test_learned_proprio_can_learn_identity_for_fixed_camera
+  /workspace/owac/research/n04-v1/source/n04-s0-20261014T045714Z-d5c72bb3fd15/tests/encoders/n04/test_ego_state.py:160: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+    identity_err = float((res.predicted - prev).abs().mean())
+
+tests/encoders/n04/test_ego_state.py::test_calibrated_geometry_identity_pose_gives_identity_warp
+  /workspace/owac/research/n04-v1/source/n04-s0-20261014T045714Z-d5c72bb3fd15/src/owac/frameworks/n04/geometry.py:337: UserWarning: index_reduce() is in beta and the API may change at any time. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/TensorAdvancedIndexing.cpp:1523.)
+    out.index_reduce_(0, flat_keys, values.reshape(-1), reduce="amin", include_self=False)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+348 passed, 2 warnings in 7.17s

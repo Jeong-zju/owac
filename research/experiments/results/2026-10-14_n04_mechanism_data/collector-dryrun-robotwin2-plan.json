@@ -1,0 +1,161 @@
+{
+  "correspondence_notes": [
+    "recorded `robot_states` and per-frame `actions` present in the npz",
+    "RoboTwin npz records actions and robot_states but no full physics state; exact frame correspondence cannot be confirmed from this file alone",
+    "robot_states shape [93, 16]"
+  ],
+  "correspondence_verified": false,
+  "fields_to_collect": [
+    "executed_action",
+    "camera_intrinsics_k",
+    "camera_pose",
+    "robot_pose",
+    "depth_m",
+    "visibility_mask",
+    "contact_state"
+  ],
+  "limit_frames": 2,
+  "npz_probe": {
+    "actions_finite": true,
+    "actions_per_frame": 14,
+    "bytes": 257150606,
+    "cfa_like_keys": [],
+    "dtypes": {
+      "actions": "float32",
+      "dones": "uint8",
+      "head_camera_raw_float32": "float32",
+      "left_camera_raw_float32": "float32",
+      "left_endpose": "float32",
+      "metadata_json": "<U1263",
+      "rewards": "uint8",
+      "right_camera_raw_float32": "float32",
+      "right_endpose": "float32",
+      "robot_states": "float32"
+    },
+    "exists": true,
+    "has_contact": false,
+    "has_depth": false,
+    "has_intrinsics": false,
+    "has_pose": true,
+    "has_visibility": false,
+    "image_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "keys": [
+      "actions",
+      "robot_states",
+      "left_endpose",
+      "right_endpose",
+      "dones",
+      "rewards",
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32",
+      "metadata_json"
+    ],
+    "metadata": {
+      "benchmark": "rawvla-bench-light-robotwin2-v1-train-state-copy",
+      "clean_protocol": "original_lighting_joint_action_replay",
+      "clean_replay_record": "episode0.json",
+      "dataset_seed": 0,
+      "entry_index": 0,
+      "episode": 0,
+      "lighting_applied": {
+        "domain": "Low",
+        "extra_light_intensity": 0.0,
+        "lighting_ev": -6.481873738595874,
+        "lighting_scale": 0.011188234916780785,
+        "raw_sensor_read_noise": 3.90625e-08,
+        "raw_sensor_shot_noise": 2.5e-05,
+        "raw_white_level": 3.5,
+        "sample_unit": 0.5181262614041264,
+        "sensor_saturation_ev": 0.0,
+        "strategy": "environment_only"
+      },
+      "lighting_domain": "Low",
+      "lighting_ev": -6.481873738595874,
+      "lighting_sample_unit": 0.5181262614041264,
+      "lighting_scale": 0.011188234916780785,
+      "lighting_strategy": "environment_only",
+      "noise_seed": 2879643119,
+      "num_frames": 93,
+      "raw_npz": "episode_000000.npz",
+      "raw_protocol": "copy_clean_physics_state_each_frame_then_render_without_action",
+      "raw_sensor_noise_enabled": true,
+      "raw_sensor_read_noise": 3.90625e-08,
+      "raw_sensor_shot_noise": 2.5e-05,
+      "raw_white_level": 3.5,
+      "representation": "three_channel_linear_float32",
+      "rgb_npz": "episode_000000.npz",
+      "source_hdf5": "episode0.hdf5",
+      "source_trajectory": "episode0.pkl",
+      "task_name": "grab_roller",
+      "views": [
+        "head_camera",
+        "left_camera",
+        "right_camera"
+      ]
+    },
+    "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000000.npz",
+    "robot_state_dim": 16,
+    "sha256": "0d0c834f5d0c1b22207663eeae34f0b0c7564beacffa279166f6afc6957b3316",
+    "shapes": {
+      "actions": [
+        93,
+        14
+      ],
+      "dones": [
+        93
+      ],
+      "head_camera_raw_float32": [
+        93,
+        240,
+        320,
+        3
+      ],
+      "left_camera_raw_float32": [
+        93,
+        240,
+        320,
+        3
+      ],
+      "left_endpose": [
+        93,
+        7
+      ],
+      "metadata_json": [],
+      "rewards": [
+        93
+      ],
+      "right_camera_raw_float32": [
+        93,
+        240,
+        320,
+        3
+      ],
+      "right_endpose": [
+        93,
+        7
+      ],
+      "robot_states": [
+        93,
+        16
+      ]
+    },
+    "three_channel_image_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ]
+  },
+  "output_dir": "/workspace/owac/research/n04-v1/manifests/collector-dryrun",
+  "platform": "robotwin2",
+  "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000000.npz",
+  "target": {
+    "mode": "extension_set",
+    "name": "n04ext_robotwin2_episode_000000.npz",
+    "reason": "correspondence not confirmed; original NPZ name is not reused"
+  }
+}

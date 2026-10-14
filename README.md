@@ -1,6 +1,13 @@
 # OWAC
 
-2026-10-13 按用户选择保留作者 RKN 动态状态为后续开发基础：固定当前帧测量，匀速缺失误差从保持位置的 1.203 px 降到 0.252±0.012 px；停止和反向仍有滞后。RKN 与无滤波入口可独立运行，FilterPy 相关实现另存 stash。局部收益不代表 N04 分解或机器人闭环通过。见 [RKN 交付记录](research/experiments/2026-10-13_n04_rkn_delivery.md)。
+2026-10-14 N04 v1.0 **S0 远端补齐验收通过**：两平台 40 条成对扩展、960 时刻 / 2,880 相机帧，以及 16 因素 / 152 条真实三维渲染诊断；C0–C7 为 8 passed、0 partial，本地与远端各 361 tests passed。实际时序、执行控制、几何支持与输入隔离均已验收，按训练相机重新冻结米制门槛。S1 尚未启动。详见[本轮记录](research/experiments/2026-10-14_n04_v1_s0_completion.md)。
+
+
+2026-10-14 较早的 N04 S0 **独立验收修补（历史，已由上述远端补齐取代）**：原交付存在在线控制绕过证据等级、时间域比较、D1 假对应/空采集成功、热启动和连续性问题，已修补并通过 349 项本地测试及远端合同复跑。当前严格状态为**核心工程合同通过、完整 S0 数据交付 partial**（C5 仍 partial）。新增 LIBERO 两任务四条独立扩展（32 时刻/64 相机帧），连续执行与独立几何射线核验通过；RoboTwin live geometry 已实测，但历史控制与完整成对训练集仍缺。未进入 S1。详见[独立验收记录](research/experiments/2026-10-14_n04_v1_s0_independent_acceptance.md)。
+
+2026-10-14 N04 [全量开发方案 v1.0](docs/plans/N04_full_development_v1.0.md) / [HTML 阅读版](docs/plans/N04_full_development_v1.0.html)：基于已提交的作者 RKN，制定 S0–S7 数据、正式规模 RAW 测量、动作 / 几何传播、误差建模、动态修订与 π0.5 / RawVLA-Bench 全量训练验收路线。方案区分文献依据、条件理论性质和待验证创新；本轮只交付文档，未新增训练或提交。
+
+2026-10-13 N04 新[同测量对照与独立 RAW 诊断](research/experiments/2026-10-13_n04_matched_tracking.md)：复用现成 FilterPy/作者RKN确认匀速缺失中的动态状态收益；停止/反向代价和噪声分组取舍明确保留。新增N04机制及闭环收益仍未建立，本轮改动未提交，由用户安排提交。
 
 2026-10-12 编码器研究准备：N01、N02、N04 使用三个独立 worktree，完整 DeepSeek 实现提示词、分支路径和启动语见 [研究入口](docs/prompts/README.md)。三个分支共享部署基线及 roadmap v6 / research proposal 快照，本分支 N04 的历史独立修补见 [验收记录](research/experiments/2026-10-12_n04_acceptance.md)及[六项源码修复](research/experiments/2026-10-13_n04_six_fixes.md)，此前的事件分数统一和三初始化复验见 [2026-10-13 记录](research/experiments/2026-10-13_n04_event_semantics.md)；[机制诊断](research/reviews/2026-10-13_n04_mechanism_diagnosis/README.md)发现的批次标签缺陷已按[分阶段重建与留出验收](research/experiments/2026-10-13_n04_staged_rebuild.md)修复：36权重、248测试，定位及召回有局部改善，但匹配消融更好，动态记忆收益尚未建立；旧错误数据结论保留为历史。其他方向在各自 worktree 维护。
 

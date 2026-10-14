@@ -1,0 +1,19 @@
+import json,numpy as np,mujoco
+from pathlib import Path
+from owac.raw.n04_mechanism_data import _libero_env_from_npz
+root=Path('/workspace/owac/research/n04-v1/runs/s0/completion-live-20261014/episode-011')
+r=json.loads((root/'record.json').read_text());env,_,_=_libero_env_from_npz(r['metadata']['source_npz'],env_seed=r['metadata']['seed']);env.reset()
+for f in r['frames']:
+ d=np.load(root/f['file']);inds=np.flatnonzero(d['audit_ray_error_m']>10*d['audit_ray_bound_m'])
+ if not len(inds):continue
+ env.sim.set_state_from_flattened(d['trace_pre_state']);env.sim.forward();m=env.sim.model._model;state=env.sim.data._data
+ for index in inds[:3]:
+  view=index//25;v=[32,64,128,192,224][index%25//5];u=[32,64,128,192,224][index%5];g=int(d['gt_segmentation'][view,v,u,1]);mesh=int(m.geom_dataid[g]);typ=int(m.geom_type[g]);print('bodydelta',np.max(abs(env.sim.data.body_xpos-d['gt_body_position_W'])),'geomname',env.sim.model.geom_id2name(g));print('frame',f['index'],'viewuv',view,u,v,'geom',g,typ,mesh,'error',d['audit_ray_error_m'][index])
+  if typ!=int(mujoco.mjtGeom.mjGEOM_MESH):continue
+  verts=m.mesh_vert[m.mesh_vertadr[mesh]:m.mesh_vertadr[mesh]+m.mesh_vertnum[mesh]];faces=m.mesh_face[m.mesh_faceadr[mesh]:m.mesh_faceadr[mesh]+m.mesh_facenum[mesh]]
+  verts=verts@state.geom_xmat[g].reshape(3,3).T+state.geom_xpos[g];tri=verts[faces];pose=d['gt_T_W_from_C'][view];origin=pose[:3,3];ray=pose[:3,:3]@np.linalg.solve(d['online_K'][view],np.array([u,v,1.]));e1=tri[:,1]-tri[:,0];e2=tri[:,2]-tri[:,0];h=np.cross(ray,e2);det=(e1*h).sum(-1);safe=np.where(abs(det)>1e-10,det,1);ss=origin-tri[:,0];a=(ss*h).sum(-1)/safe;q=np.cross(ss,e1);b=(ray*q).sum(-1)/safe;t=(e2*q).sum(-1)/safe;valid=(abs(det)>1e-10)&(a>=0)&(b>=0)&(a+b<=1)&(t>0);hits=sorted(zip(t[valid].tolist(),det[valid].tolist(),a[valid].tolist(),b[valid].tolist()));print('gpu',d['gt_depth_m'][view,v,u],'triangle hits',hits[:10],'near',m.stat.extent*m.vis.map.znear,'cull',env.sim._render_context_offscreen.scn.flags[int(mujoco.mjtRndFlag.mjRND_CULL_FACE)])
+ env.sim.render(256,256,camera_name='robot0_eye_in_hand',depth=True)
+ for gg in env.sim._render_context_offscreen.scn.geoms:
+  if gg.objid==197: print('scn',gg)
+ break
+env.close()

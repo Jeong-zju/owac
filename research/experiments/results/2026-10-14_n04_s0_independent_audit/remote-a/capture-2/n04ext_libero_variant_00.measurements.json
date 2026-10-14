@@ -1,0 +1,257 @@
+{
+  "action_semantics": "trace issued_command is clipped normalized env.step command, not motor torque",
+  "arrays": {
+    "gt_T_W_from_C": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        2,
+        4,
+        4
+      ]
+    },
+    "gt_body_position_W": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        31,
+        3
+      ]
+    },
+    "gt_body_rotation_W": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        31,
+        9
+      ]
+    },
+    "gt_contact_distance_m_0000": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0001": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0002": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0003": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0004": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0005": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0006": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_distance_m_0007": {
+      "dtype": "float64",
+      "shape": [
+        24
+      ]
+    },
+    "gt_contact_geom_pairs_0000": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0001": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0002": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0003": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0004": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0005": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0006": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_contact_geom_pairs_0007": {
+      "dtype": "int32",
+      "shape": [
+        24,
+        2
+      ]
+    },
+    "gt_depth_m": {
+      "dtype": "float32",
+      "shape": [
+        8,
+        2,
+        256,
+        256
+      ]
+    },
+    "gt_segmentation": {
+      "dtype": "int32",
+      "shape": [
+        8,
+        2,
+        256,
+        256,
+        2
+      ]
+    },
+    "gt_visible_support": {
+      "dtype": "bool",
+      "shape": [
+        8,
+        2,
+        256,
+        256
+      ]
+    },
+    "online_K": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        2,
+        3,
+        3
+      ]
+    },
+    "online_qpos": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        26
+      ]
+    },
+    "online_qvel": {
+      "dtype": "float64",
+      "shape": [
+        8,
+        24
+      ]
+    },
+    "online_rawvla_rgb3": {
+      "dtype": "uint8",
+      "shape": [
+        8,
+        2,
+        256,
+        256,
+        3
+      ]
+    },
+    "online_sim_time_s": {
+      "dtype": "float64",
+      "shape": [
+        8
+      ]
+    },
+    "reference_rgb": {
+      "dtype": "uint8",
+      "shape": [
+        8,
+        2,
+        256,
+        256,
+        3
+      ]
+    }
+  },
+  "camera_coordinates": "T_W_from_C; C has x right, y down, z forward; K in original pixels",
+  "cameras": [
+    "agentview",
+    "robot0_eye_in_hand"
+  ],
+  "factor_coverage": "bounded replay of source commands; D1 factor coverage remains partial",
+  "frames": 8,
+  "image_coordinates": "top-left; x right, y down; raw/depth/segmentation same grid; no resize",
+  "label_coverage": [
+    "depth_m",
+    "camera_pose",
+    "body_pose",
+    "segmentation",
+    "contact"
+  ],
+  "mode": "extension_set",
+  "native_cfa": false,
+  "noise_seed": 0,
+  "npz": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-2/n04ext_libero_variant_00.measurements.npz",
+  "processing": "MuJoCo RGB -> frozen RawVLA make_rawvla_observation; benchmark pseudo-RAW",
+  "replay_max_errors": {
+    "gt_T_W_from_C": 0.0,
+    "gt_body_position_W": 1.1102230246251565e-16,
+    "gt_body_rotation_W": 3.4661943454361577e-16,
+    "gt_contact_distance_m": 5.881119159376058e-17,
+    "gt_contact_geom_pairs": 0.0,
+    "gt_depth_m": 0.0,
+    "gt_segmentation": 0.0,
+    "gt_visible_support": 0.0,
+    "online_K": 0.0,
+    "online_qpos": 1.7490213921264597e-16,
+    "online_qvel": 1.7301603400833587e-14,
+    "online_rawvla_rgb3": 0.0,
+    "online_sim_time_s": 0.0,
+    "reference_rgb": 0.0
+  },
+  "replay_verified": true,
+  "representation": "rawvla_rgb3",
+  "schema": "n04-d1-libero-extension-v1",
+  "sha256": "2af7cc0ce395bba85f453fa978831fff6f6fef183f05c3beb81035e271e7add1",
+  "source_correspondence_verified": false,
+  "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000150/variant_00.npz",
+  "source_trace": "n04ext_libero_variant_00.trace.json",
+  "supervision_policy": "gt_* only supervision; no external NPZ labels or source expert success inherited",
+  "time_semantics": "ideal instantaneous simulator sampling in sim seconds; no real exposure or arrival latency",
+  "trace_sha256": "f6ebd5d7a446b9140bba7861dbcb80c9fa4ed4cd33ea0576388c2dfcbe22c2ed"
+}

@@ -1,0 +1,28 @@
+usage: python -m owac.raw.n04_manifest [-h] --config CONFIG --output OUTPUT
+                                       [--platform {libero,robotwin}]
+                                       [--platform-root PLATFORM=DIR]
+                                       [--limit LIMIT]
+                                       [--deep-per-platform DEEP_PER_PLATFORM]
+                                       [--split-seed SPLIT_SEED]
+                                       [--summary-out SUMMARY_OUT]
+                                       [--reference-root REFERENCE_ROOT]
+
+N04 S0 RawVLA-Bench 逐 NPZ 清单、源轨迹分组与冻结拆分（只读）。
+
+options:
+  -h, --help            show this help message and exit
+  --config CONFIG       s0_data.json 路径（只读）
+  --output OUTPUT       inventory.json 输出路径
+  --platform {libero,robotwin}
+                        只扫描指定平台（可重复）；默认两个平台
+  --platform-root PLATFORM=DIR
+                        覆盖配置里的数据根（fixture/迁移用）
+  --limit LIMIT         每个平台最多处理多少个 NPZ（smoke 用）
+  --deep-per-platform DEEP_PER_PLATFORM
+                        覆盖 deep_sample.per_platform
+  --split-seed SPLIT_SEED
+                        覆盖 split_seed
+  --summary-out SUMMARY_OUT
+                        额外写出小型汇总 JSON
+  --reference-root REFERENCE_ROOT
+                        解析被引用产物（如 ws-telemetry 来源表）的根目录；默认用配置 local.repo_root
