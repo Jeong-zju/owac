@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="N01 自适应时空证据积分全量开发方案 v1.0：25 项论文来源、六项理论义务、九阶段实现及 π0.5 / RawVLA-Bench 训练验证。"><meta name="source-sha256" content="9e1132d283abde96df7d905af373ee7c730a2455769dc8b9176b9d4afff02289"><title>N01 自适应时空证据积分 · 全量开发方案 v1.0</title><style>
+:root{--paper:#fffdf9;--bg:#eeeae3;--ink:#25343c;--nav:#172e37;--muted:#64767f;--line:#dddcd5;--teal:#186b6f;--gold:#b88237}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:36px}body{margin:0;color:var(--ink);background:var(--bg);font:16px/1.85 -apple-system,BlinkMacSystemFont,"Noto Sans CJK SC","Microsoft YaHei",sans-serif}
+a{color:var(--teal);text-underline-offset:3px;overflow-wrap:anywhere}button,input{font:inherit}button{cursor:pointer}
+.sidebar{position:fixed;inset:0 auto 0 0;width:286px;background:var(--nav);color:#e7edea;padding:30px 24px;overflow:auto}.brand{letter-spacing:.13em;font-size:12px;color:#9eccc7}.sidebar h1{font-size:23px;line-height:1.4;margin:12px 0 5px}.side-meta{font-size:12px;color:#9fb3b9;margin-bottom:18px}.sidebar input{border:1px solid #486068;background:#213d46;color:white;width:100%;padding:8px 10px;border-radius:6px;font-size:13px}.sidebar input::placeholder{color:#abc0c6}
+.toc{margin-top:20px}.toc a{display:block;text-decoration:none;color:#b7cbd0;border-left:2px solid transparent;padding:4px 9px;margin:2px 0;line-height:1.55;font-size:13px}.toc a.toc-h2{font-weight:650;color:#eaf2ef;margin-top:12px}.toc a.toc-h3{padding-left:20px;font-size:12px}.toc a:hover,.toc a.active{color:white;border-left-color:#69beb0;background:#294852}.toc a[hidden]{display:none}
+.page{margin-left:286px;max-width:1220px;padding:46px 50px 70px}.hero{border-top:5px solid var(--teal);padding:36px 40px 30px;background:var(--paper);border-radius:3px 3px 0 0}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--teal);font-weight:700}.hero h1{font-size:38px;line-height:1.35;letter-spacing:-.03em;margin:17px 0}.subtitle{color:var(--muted);font-size:17px;max-width:720px}.badges{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.badge{border:1px solid #b7d4cd;color:#24635d;border-radius:4px;padding:3px 9px;font-size:12px}.badge.pending{border-color:#d9c39e;color:#866022}.actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}.actions button{border:1px solid #ccd2ca;background:#f8faf6;color:#284b4e;border-radius:5px;padding:7px 13px;font-size:13px}.actions button:hover{background:#e9f3ee}.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:25px}.pipeline div{background:#edf3ef;border-radius:4px;padding:13px 12px;line-height:1.55;font-size:12px;color:#5a706e}.pipeline b{display:block;font-size:14px;color:#285754;margin-bottom:3px}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.overview div{background:#f7f5ef;padding:18px 22px;font-size:13px;color:#59696e}.overview strong{display:block;font-size:23px;color:#294c52;line-height:1.4}
+.document{padding:28px 40px 50px;background:var(--paper)}.document>p:first-child{font-size:13px;color:var(--muted)}h2{font-size:26px;line-height:1.45;margin:54px 0 23px;border-top:1px solid var(--line);padding-top:34px;color:#183e46}h3{font-size:19px;line-height:1.5;margin:32px 0 16px;color:#28636a}p{margin:15px 0}strong{font-weight:700;color:#193b43}ul,ol{padding-left:25px}li{margin:8px 0}li::marker{color:#508078}.table-scroll{overflow:auto;border:1px solid var(--line);border-radius:5px;margin:23px 0}table{border-collapse:collapse;width:100%;min-width:570px;font-size:13px;line-height:1.75}th,td{padding:12px 13px;border-bottom:1px solid #e6e7e0;text-align:left;vertical-align:top;min-width:120px}th{background:#e9f0eb;color:#244e54;font-weight:700}tr:nth-child(even) td{background:#faf9f4}tr:last-child td{border-bottom:0}code{font-family:"DejaVu Sans Mono",Consolas,monospace;font-size:.86em;background:#f0eee7;color:#815627;border-radius:3px;padding:2px 4px;overflow-wrap:anywhere}pre{padding:20px;background:#1d353e;color:#e2eeeb;border-radius:6px;overflow:auto;font-size:13px;line-height:1.75}pre code{background:none;color:inherit;white-space:pre;padding:0}.reference{font-size:14px;line-height:1.9;padding:13px 0;border-bottom:1px solid #eee9de}.footer{padding:25px 40px;background:#e2e9e2;color:#506765;font-size:12px;overflow-wrap:anywhere}.progress{height:3px;position:fixed;top:0;left:286px;right:0;z-index:9;background:transparent}.progress>i{display:block;height:100%;width:0;background:var(--gold)}.mobile-nav{display:none}
+@media(min-width:1600px){.page{margin-left:calc(286px + (100vw - 1560px)/2)}}
+@media(max-width:1080px){.sidebar{width:244px;padding:24px 18px}.page{margin-left:244px;padding:28px 22px}.progress{left:244px}.hero,.document{padding-left:27px;padding-right:27px}.hero h1{font-size:32px}.pipeline{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){body{font-size:15px}.sidebar{position:relative;width:100%;max-height:none;padding:20px}.sidebar h1{font-size:20px}.toc{display:none;max-height:55vh;overflow:auto}.sidebar.expanded .toc{display:block}.sidebar input{display:none}.sidebar.expanded input{display:block}.mobile-nav{display:inline-block;background:transparent;border:1px solid #75918e;color:#e3eeec;border-radius:4px;padding:5px 10px;font-size:12px}.side-meta{margin-bottom:10px}.page{margin:0;padding:14px 10px 30px}.hero,.document{padding:24px 20px}.hero h1{font-size:28px}.subtitle{font-size:15px}.pipeline{gap:5px}.overview div{padding:15px 10px;font-size:11px}.overview strong{font-size:20px}h2{font-size:23px}h3{font-size:18px}th,td{padding:10px;min-width:120px}.progress{left:0}.footer{padding:20px}}
+@media print{body{background:white;color:black;font-size:10pt;line-height:1.65}.sidebar,.actions,.progress,.mobile-nav{display:none}.page{margin:0;padding:0;max-width:none}.hero,.document{padding:10mm}.hero{border-top:2px solid #333}.hero h1{font-size:27pt}.overview{break-inside:avoid}.table-scroll{overflow:visible;border:0}table{min-width:0;font-size:8pt}th,td{min-width:0;padding:5px}h2{font-size:17pt;break-after:avoid}h3{font-size:13pt;break-after:avoid}pre{white-space:pre-wrap;color:black;background:#f0f0f0}pre code{white-space:pre-wrap}.reference{font-size:9pt}a{color:#1c5357;text-decoration:none}.footer{font-size:8pt}tr{break-inside:avoid}thead{display:table-header-group}@page{size:A4;margin:12mm}}
+</style></head>
+<body><div class="progress" aria-hidden="true"><i></i></div><aside class="sidebar"><div class="brand">OWAC / RESEARCH & DEVELOPMENT</div><h1>N01 开发方案</h1><div class="side-meta">v1.0 · 2026.10.14 · lzh</div><button id="toggle-nav" class="mobile-nav" aria-label="展开或收起目录">展开 / 收起目录</button><input id="toc-search" type="search" placeholder="筛选目录…" aria-label="筛选文档目录"><nav class="toc" aria-label="文档目录"><a class="toc-h2" href="#section-1">1. 目标与路线判断</a><a class="toc-h2" href="#section-2">2. 当前已经做到哪里，下一步真正缺什么</a><a class="toc-h2" href="#section-3">3. 文献依据与复用决策</a><a class="toc-h3" href="#section-4">3.1 哪些东西已有成熟答案</a><a class="toc-h3" href="#section-5">3.2 优先级和实际代码边界</a><a class="toc-h3" href="#section-6">3.3 准备提出的增量</a><a class="toc-h2" href="#section-7">4. 完整计算对象与组合规则</a><a class="toc-h3" href="#section-8">4.1 测量、支持域、状态和读出分开定义</a><a class="toc-h3" href="#section-9">4.2 用局部结构模型替代“所有位置值相等”</a><a class="toc-h3" href="#section-10">4.3 八种规则及其组合条件</a><a class="toc-h3" href="#section-11">4.4 时间支持必须直接表示，而不能借空间图代替</a><a class="toc-h3" href="#section-12">4.5 撤回要覆盖完整依赖，不能仅覆盖一个 mask</a><a class="toc-h3" href="#section-13">4.6 状态保留、压缩与期限</a><a class="toc-h3" href="#section-14">4.7 首版算法如何把这些规则串起来</a><a class="toc-h2" href="#section-15">5. 理论层面要保证什么</a><a class="toc-h3" href="#section-16">5.1 T1：唯一来源与合并/分裂/撤回的一致性</a><a class="toc-h3" href="#section-17">5.2 T2：固定支持条件下的估计与不确定性</a><a class="toc-h3" href="#section-18">5.3 T3：顺序决策的误撤回控制</a><a class="toc-h3" href="#section-19">5.4 T4：可变时间常数与局部交换的稳定边界</a><a class="toc-h3" href="#section-20">5.5 T5：局部重建与全量重放等价</a><a class="toc-h3" href="#section-21">5.6 T6：可中断执行与不确定性读出</a><a class="toc-h3" href="#section-22">5.7 理论交付的最低内容</a><a class="toc-h2" href="#section-23">6. 两类实现及它们如何共享规则</a><a class="toc-h3" href="#section-24">6.1 非神经参考：来源可追溯的局部顺序估计</a><a class="toc-h3" href="#section-25">6.2 神经主线：成熟内容模型 + 显式支持契约</a><a class="toc-h3" href="#section-26">6.3 神经状态场：在回放语义成立后引入</a><a class="toc-h3" href="#section-27">6.4 读出保持有来源、有容量控制</a><a class="toc-h2" href="#section-28">7. 按阶段实现与验收</a><a class="toc-h3" href="#section-29">P0：冻结研究问题、数据与依赖</a><a class="toc-h3" href="#section-30">P1：建立可组合、可撤回的解析参考</a><a class="toc-h3" href="#section-31">P2：建立可靠的运动对应与传感器噪声模型</a><a class="toc-h3" href="#section-32">P3：完成空间与时间支持的共同组织</a><a class="toc-h3" href="#section-33">P4：接入成熟特征并进行匹配充分训练</a><a class="toc-h3" href="#section-34">P5：长期状态、局部交换与期限读出</a><a class="toc-h3" href="#section-35">P6：真实 RAW、规模和可复用表征</a><a class="toc-h3" href="#section-36">P7：π0.5 接入、表征适配与充分动作训练</a><a class="toc-h3" href="#section-37">P8：RawVLA-Bench 全量闭环验证</a><a class="toc-h2" href="#section-38">8. “训练充分”的操作定义</a><a class="toc-h3" href="#section-39">8.1 三层训练安排</a><a class="toc-h3" href="#section-40">8.2 统一的收敛与比较规则</a><a class="toc-h3" href="#section-41">8.3 预训练与辅助损失</a><a class="toc-h2" href="#section-42">9. 能分清增量的实验矩阵</a><a class="toc-h3" href="#section-43">9.1 主矩阵：先固定成熟内容模块</a><a class="toc-h3" href="#section-44">9.2 至少覆盖的条件</a><a class="toc-h3" href="#section-45">9.3 指标与预注册判据</a><a class="toc-h2" href="#section-46">10. 数据路线与 RAW 身份</a><a class="toc-h2" href="#section-47">11. π0.5 与 RawVLA-Bench 的最终验证方案</a><a class="toc-h3" href="#section-48">11.1 复用已部署接口，重新验收完整模型</a><a class="toc-h3" href="#section-49">11.2 系统对照与训练公平性</a><a class="toc-h3" href="#section-50">11.3 固定协议与新增动态验证分开</a><a class="toc-h3" href="#section-51">11.4 最终结论的口径</a><a class="toc-h2" href="#section-52">12. 工程组织、资源与实施顺序</a><a class="toc-h3" href="#section-53">12.1 现有资产和拟新增模块</a><a class="toc-h3" href="#section-54">12.2 服务器与成本安排</a><a class="toc-h3" href="#section-55">12.3 每阶段的交付格式</a><a class="toc-h2" href="#section-56">13. v1.0 完成时应具备的成果</a><a class="toc-h2" href="#section-57">14. 参考文献与官方实现</a><a class="toc-h2" href="#section-58">15. 版本记录</a></nav></aside>
+<main class="page"><header class="hero"><div class="eyebrow">FULL DEVELOPMENT PLAN / VERSION 1.0</div><h1>自适应时空证据积分</h1><p class="subtitle">以测量支持域为核心，组织证据的建立、保留与撤回。<br>从成熟 RAW 特征模块，走向可验证的 π0.5 具身表征。</p><div class="badges"><span class="badge">基于已有 DBSR 强基线</span><span class="badge">RAW → 非图像表征</span><span class="badge pending">研究方案 · 尚未执行新训练</span></div><div class="pipeline"><div><b>01 / 测量与对应</b>唯一来源 · 坐标 · 噪声</div><div><b>02 / 支持域</b>合并 · 分裂 · 时间有效性</div><div><b>03 / 可撤回状态</b>内容积分 · 失效传播 · 重建</div><div><b>04 / 期限读出</b>一致快照 → π0.5 动作</div></div><div class="actions"><button id="download-md">下载 Markdown 源文档</button><button id="print">打印 / 保存 PDF</button></div></header><section class="overview" aria-label="方案概览"><div><strong>25 项</strong>论文与官方来源</div><div><strong>6 项</strong>理论义务及适用边界</div><div><strong>P0—P8</strong>实现、训练与全量闭环</div></section><article class="document">
+<p><strong>版本：v1.0 · 日期：2026-10-14 · 负责人：lzh · 状态：待实施的研究与开发方案</strong></p>
+<p>代码依据：<code>lzh/n01-evidence-integration</code>，提交 <code>85790ccbd5661225a49ed95e02180902f9ca4d63</code>。文献检索截止本日期。本文提出后续设计、理论义务和验收标准，不表示新机制、训练或闭环实验已经完成。<a href="N01_full_development_plan_2026-10-14_v1.0.html">HTML 阅读版</a>与本 Markdown 同源。</p>
+<h2 id="section-1">1. 目标与路线判断</h2>
+<p>设想机器人在暗处观察一个杯子的边缘。杯子不动时，前面几帧里很弱的线索可以共同支持当前判断；杯子移动但对应关系准确时，旧测量仍然有用；遮挡解除后，原来属于遮挡物的测量应当退出；如果只是当前一帧突然受到噪声干扰，又不应立即清空所有历史。N01 要解决的是这几种情况如何使用同一组规则处理，并在机器人必须行动时，给出当下最可靠的结构表征。</p>
+<p><strong>完整 N01 的核心对象应从“几个候选窗口”推进为“带来源、对应关系、有效时期和可撤回依赖的测量支持域”。</strong> 成熟网络负责提取和融合内容；N01 负责规定哪些测量可以共同参与、何时应分开、哪些状态需要重建，以及当前预算允许读出什么。解析实现是可检验的参考，神经实现承担更丰富的表征能力，两者使用同一套来源和更新语义。</p>
+<p>本路线值得继续开发，但目前的依据是“研究问题仍未被完整实现和检验”，而不是“效果已被证明”。新的实现必须同时回答：</p>
+<ol>
+<li><strong>证据是否用对了：</strong> 对齐后的旧测量确实属于当前结构吗？重复来源或共享噪声有没有被重复计为信息？</li>
+<li><strong>反证是否生效：</strong> 来源失效后，其内容是否从积分、特征、递归状态和读出中退出？</li>
+<li><strong>规则是否有价值：</strong> 在充分训练的成熟融合器之上，是否减少错误历史拖尾，并保留静态弱信号收益？</li>
+<li><strong>是否可复用：</strong> 同一套规则能否用于不同 RAW 来源和任务，最终改善 π0.5 在 RawVLA-Bench 上的闭环表现？</li>
+</ol>
+<p>最终交付链为：<strong>唯一 RAW 测量 → 运动对应与不确定性 → 时空支持域 → 可撤回积分/状态场 → 条件化非图像读出 → π0.5 动作。</strong> 主链不生成 RGB/sRGB/XYZ，不使用 RGB 教师或 RGB 重建目标。输出可以是结构系数、局部状态或特征令牌。</p>
+<h2 id="section-2">2. 当前已经做到哪里，下一步真正缺什么</h2>
+<p>依据<a href="../research/experiments/2026-10-13_n01_dbsr_mechanism.md">完整 DBSR 实验记录</a>、<a href="../research/experiments/2026-10-13_n01_source_repair.md">此前真实后端验收</a>和当前源码，现状如下。</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>已有事实</th>
+<th>可以据此判断</th>
+<th>仍不能据此判断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9 个基线运行达到声明的验证平台，共 74,496 个优化步骤</td>
+<td>已有可用的合成任务强对照和续训协议</td>
+<td>16×16 packed CFA 上的平台不等于真实 RAW、复杂任务或 π0.5 的充分训练</td>
+</tr>
+<tr>
+<td>当前帧 / 同容量平均 / DBSR 的早期误差为 1.91848 / 1.75656 / 1.52998 packed 格点</td>
+<td>成熟 DBSR 有可测的平均收益；同权重改均匀融合退化约 0.55570</td>
+<td>DBSR 并非每个种子均胜出，也不能从此推出 N01 有效</td>
+</tr>
+<tr>
+<td>RAW 域动态旧缓存 / 动态重算为 1.55314 / 1.55214；原 DBSR 为 1.54597</td>
+<td>原空间撤回执行正确，任务增量约 0.001 且方向不完全一致</td>
+<td>不能把微小均值差写成机制已成立</td>
+</tr>
+<tr>
+<td>CNN 每层硬图约束严重退化；原 RAW 域额外积分节点也未建立收益</td>
+<td>接入位置、噪声尺度和特征分布是实际问题</td>
+<td>冻结干预不能代替匹配重训，不能否定所有完整 N01 实现</td>
+</tr>
+<tr>
+<td>旧 N01 已跑过真实 NPZ、π0.5 动作反向和服务请求</td>
+<td>已有可复用的真实特征桥和动作协议</td>
+<td>作者三通道 pseudo-RAW 接线不等于新 DBSR/N01 全链验收或原生 Bayer 泛化</td>
+</tr>
+</tbody>
+</table></div>
+<p>当前实现的关键局限有六项：</p>
+<ul>
+<li><code>n01_dbsr_raw.py</code> 主要检验空间图；半径 2、历史 8 固定，<strong>同坐标的旧时间来源不会因空间边关闭而撤回</strong>。</li>
+<li>旧积分主要描述局部值的一致性；完整“共同支持一个结构”还需要带坐标的局部结构模型，不能把不同位置亮度相同当作充分条件。</li>
+<li>对应关系仍以简化运动和整数 oracle 对照为主，尚无适配本项目数据的强 RAW 运动模块及可信的不确定性。</li>
+<li>支持域变更后，来源、积分缓存、网络感受野、状态和读出的依赖还没有形成统一契约。</li>
+<li>新积分通路只进行了冻结权重干预；需要相同信息、容量和训练条件下的匹配重训。</li>
+<li>反应期限、长序列状态、真实传感器迁移和最终 π0.5 闭环尚未在完整路线中联合检验。</li>
+</ul>
+<p>因此，v1.0 保留已有负结果与强基线，<strong>新增完整的时间支持和依赖撤回，再做匹配训练</strong>。不继续仅调整历史档位，不再把支持图硬套到成熟骨干的所有卷积上。</p>
+<h2 id="section-3">3. 文献依据与复用决策</h2>
+<p>本次按六条线检索：RAW burst 内容融合、运动对应、噪声与顺序估计、图与增量重算、稳定状态模型、任务读出与 VLA。优先使用论文原文、作者项目页、官方仓库；不是穷尽所有相关工作，也不据检索结果宣称首创。完整链接见第 14 节，核查范围见<a href="../research/reviews/2026-10-14_n01_full_plan_sources.json">来源清单</a>。</p>
+<h3 id="section-4">3.1 哪些东西已有成熟答案</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>方向</th>
+<th>代表依据</th>
+<th>对 N01 的作用</th>
+<th>不能直接继承的结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多帧 RAW 特征融合</td>
+<td>DBSR [R01]；BSRT [R02]</td>
+<td>保留完整特征层和融合层；BSRT 作为第二骨干候选</td>
+<td>原图像恢复性能不等于非图像表征或机器人性能</td>
+</tr>
+<tr>
+<td>RAW 统计与鲁棒融合</td>
+<td>Handheld MFSR [R03]；Foi 噪声模型 [R04]</td>
+<td>校准噪声、结构方向和错配风险</td>
+<td>输出 RGB 的原管线不符合本项目主链边界</td>
+</tr>
+<tr>
+<td>历史内容利用与优化</td>
+<td>KPN [R05]</td>
+<td>研究来源分支训练、辅助损失退火</td>
+<td>不能强迫遮挡前旧帧预测未见的新结构</td>
+</tr>
+<tr>
+<td>成熟运动对应</td>
+<td>RAFT / SEA-RAFT [R06–R07]</td>
+<td>复用相关体、迭代更新和运动训练方法</td>
+<td>RGB 输入与预训练不自动适配 CFA，预测尺度也不自动是校准概率</td>
+</tr>
+<tr>
+<td>RAW 视频与真实噪声</td>
+<td>RViDeNet / CRVD、RViDeformer / ReCRVD [R08–R09]</td>
+<td>检验真实 RAW 噪声和跨场景适配</td>
+<td>原训练可能包含 ISP/RGB 损失；数据许可和真实运动覆盖须分别核查</td>
+</tr>
+<tr>
+<td>时间支持变化</td>
+<td>BOCPD、鲁棒 BOCPD [R10–R11]</td>
+<td>不只选固定窗口，而是估计当前结构从何时开始有效；区分异常点和持续变化</td>
+<td>模型内后验、鲁棒性与频率学误报保证不是同一件事</td>
+</tr>
+<tr>
+<td>任意时刻有效的统计判断</td>
+<td>Confidence sequences [R12]</td>
+<td>为反复观察后撤回或合并提供有条件的错误率控制</td>
+<td>单帧 99% 阈值不能直接变成长期、全图 99% 保证</td>
+</tr>
+<tr>
+<td>依赖维护与重算</td>
+<td>iSAM2 / GTSAM [R13]</td>
+<td>来源因子、增量更新、删除和重线性化的参考</td>
+<td>非线性局部最优不等于全局最优；已边缘化摘要不一定可任意撤回</td>
+</tr>
+<tr>
+<td>空间域组织</td>
+<td>图分割 [R14]</td>
+<td>空间连通域的成熟对照与候选生成</td>
+<td>图分割区域不自动等于同一物理结构，连通性也不自动证明可共同积分</td>
+</tr>
+<tr>
+<td>有选择的长期状态</td>
+<td>S4、Mamba [R15–R16]</td>
+<td>复用成熟状态空间模块，不手写小型 GRU 替代</td>
+<td>稳定的线性状态矩阵不保证整个非线性网络稳定，更不保证撤回</td>
+</tr>
+<tr>
+<td>运动与状态结合</td>
+<td>TS-Mamba、QMambaBSR、BurstMamba [R17–R19]</td>
+<td>提醒我们运动轨迹上的状态传播和跨帧选择已有先例</td>
+<td>新颖性不能只写“RAW + Mamba + 自适应时间常数”</td>
+</tr>
+<tr>
+<td>稳定性与读出</td>
+<td>REN [R20]；Perceiver IO [R21]</td>
+<td>理论对照、基于查询的成熟读出候选</td>
+<td>外加空间交换与门控后，要重新证明组合条件</td>
+</tr>
+<tr>
+<td>RAW 自监督</td>
+<td>Noise2Noise、Noise2Self [R22–R23]</td>
+<td>可选的 RAW 域预训练依据</td>
+<td>共享噪声、对齐泄漏或同源目标会破坏原假设</td>
+</tr>
+<tr>
+<td>具身终点</td>
+<td>RawVLA [R24]；π0.5 [R25]</td>
+<td>直接系统基线与最终训练后端</td>
+<td>RAW 接入、动作监督和时序状态本身均不是新贡献</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="section-5">3.2 优先级和实际代码边界</h3>
+<p><strong>第一优先：沿用已经运行过的全尺寸 DBSR。</strong> 固定上游提交 <code>16f158e0553b6702cc1693c43f733c2830973278</code>，64 通道、9 个残差块、512 维局部特征，保留现有融合器。已有参数规模约 165 万，包含共同定位头。这是当前任务已经验证过的起点，不再另写一个小网络充当强基线。</p>
+<p><strong>运动模块首选 SEA-RAFT 的完整作者实现，作为需要适配和训练的候选。</strong> 本次实读 <a href="https://github.com/princeton-vl/SEA-RAFT/blob/main/core/raft.py" rel="noopener noreferrer" target="_blank"><code>core/raft.py</code></a>：其原输入是 3 通道，双帧上下文入口为 6 通道，内部执行 <code>/255</code> 归一化。CFA 路线必须明确改为 4/8 通道测量入口，并更换数值归一化；三通道 RawVLA 路线仍需遵守其实际线性数据单位。保留作者特征提取、相关和更新模块。原代码中的 recurrent update 可以复用，这不等于另造一个简化 GRU。首版不直接把 RGB 权重当作已经可用的 RAW 模型。[R07]</p>
+<p><strong>第二骨干候选为 BSRT，后置到可复用性阶段。</strong> 作者代码包含 Swin/变形对齐和既有 RGB 风格光流分支，本次实读的 <a href="https://github.com/Algolzw/BSRT/blob/main/code/synthetic/bsrt/model/bsrt.py" rel="noopener noreferrer" target="_blank"><code>bsrt.py</code></a>还包含去 Bayer 工具、SpyNet、图像归一化和预训练路径。可以提取成熟 RAW 特征与融合模块，不能原样执行整网并仍称 RAW-only。优先保留作者发布的 S/L 配方；正式采用哪档由 P0 的资源与源代码验收确定。[R02]</p>
+<p><strong>神经状态分支首选官方 Mamba 模块；S4 和 REN 用于结构/理论对照。</strong> 本次实读 Mamba 的 <a href="https://github.com/state-spaces/mamba/blob/main/mamba_ssm/modules/mamba_simple.py" rel="noopener noreferrer" target="_blank"><code>mamba_simple.py</code></a>：流式缓存同时有短卷积状态和 SSM 状态，撤回不能只清其中一个。S4 仓库的 <code>models/s4/s4d.py</code> 明确是教学用精简版，不能拿它充当正式强网络；正式实验需作者完整实现及配置。REN 作者仓库为 Julia，保留为独立理论参考，不承诺直接接入当前 PyTorch 管线。[R15–R16、R20]</p>
+<p><strong>TS-Mamba 等近期方法先列近邻对照，不直接升级主线。</strong> TS-Mamba 官方仓库已有在线视频超分辨率代码与配置，但本轮只核查仓库说明，未完成主干因果性、RAW 适配和 CUDA 兼容审计。QMambaBSR 和 BurstMamba 本轮核查到论文/作者页，未完成可运行模型代码验收。年份新不能代替可复用性证据。[R17–R19]</p>
+<p>DBSR 许可为 CC-BY-NC-SA-4.0，并有学术用途声明，现有派生代码须保持归属。新增模块在 P0 固定仓库提交、配置、许可证、依赖、预训练数据与权重哈希。本轮 GitHub API 限流、Git 直连超时，因此新增仓库的<strong>分支链接只是本日检索入口，不是假装固定的执行版本</strong>；官方网页和上述部分源码已实读。没有安装或运行这些新模块。</p>
+<h3 id="section-6">3.3 准备提出的增量</h3>
+<p>本项目不以发明新的平均公式、光流、注意力或状态空间层为目标。拟验证的设计是：</p>
+<ul>
+<li><strong>来源级的时空支持契约：</strong> 支持域同时拥有空间成员、时间有效期、运动映射、不确定性与版本，规则直接控制实际进入特征的内容。</li>
+<li><strong>贯穿解析和神经状态的撤回语义：</strong> 一次分裂或时间失效能够定位受影响的派生状态，重算后与指定的批量参考一致；缓存优化不能改变这一语义。</li>
+<li><strong>可靠性与期限共同约束的读出：</strong> 在同样到达的观测和同样总预算下，输出当前可用表征，显式计入等待、撤回、重建和动作延迟。</li>
+</ul>
+<p>每一项都要与直接近邻比较。若最终收益完全可由“DBSR + 标准变化检测 + 简单 reset”解释，就按已有方法组合报告；只有组合规则、可证明性质和跨任务增量形成共同证据，才讨论新的框架贡献。</p>
+<h2 id="section-7">4. 完整计算对象与组合规则</h2>
+<h3 id="section-8">4.1 测量、支持域、状态和读出分开定义</h3>
+<p>每个原始采样记为 <code>m_i = (id_i, y_i, x_i, t_i, camera_i, phase_i, R_i, validity_i)</code>。<code>id_i</code> 至少包含 episode、相机、帧身份和传感器采样位置。数值相同的两次真实曝光仍是两次测量；同一帧被重复传输或在不同窗口出现，只能登记一次。</p>
+<p>一个支持域不是单一半径或时间长度，而是以下对象：</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>必需内容</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MeasurementLedger</code></td>
+<td>原始测量、校准版本、唯一身份、可重放范围</td>
+<td>唯一可信测量账本；派生特征不回写为新测量</td>
+</tr>
+<tr>
+<td><code>SupportDomain</code></td>
+<td>结构键、参考坐标、来源集合、来源角色、时间分段、支持版本</td>
+<td>表示哪些测量共同支持哪个局部结构</td>
+</tr>
+<tr>
+<td><code>Correspondence</code></td>
+<td>原始坐标到参考坐标的映射、插值系数、可见性、误差模型</td>
+<td>解释位置变化；保留 CFA 相位及真实采样位置</td>
+</tr>
+<tr>
+<td><code>EvidenceState</code></td>
+<td>局部系数或统计量、协方差/代理类型、有效性、来源权重</td>
+<td>解析积分状态；精度与年龄分开表达</td>
+</tr>
+<tr>
+<td><code>FeatureState</code></td>
+<td>成熟骨干特征、神经缓存、参数版本、依赖集合</td>
+<td>承载学习表征；不把注意力当测量精度</td>
+</tr>
+<tr>
+<td><code>ReadoutSnapshot</code></td>
+<td>结构/令牌、有效 mask、测量时刻、状态版本、期限与代价</td>
+<td>下游一次读取的一致快照</td>
+</tr>
+</tbody>
+</table></div>
+<p>支持域可重叠，但重叠不产生额外独立信息。空间连通图仅用于提出成员候选；是否能合并，还要通过同一结构模型的域级一致性检查。这样避免 A 与 B、B 与 C 分别相似，却把明显不同的 A 与 C 沿一条链强行混合。</p>
+<h3 id="section-9">4.2 用局部结构模型替代“所有位置值相等”</h3>
+<p>解析参考先采用每个 CFA 相位独立的局部常数或仿射基，随后可扩展到方向结构系数。对一个固定支持域：</p>
+<pre><code class="language-text">y_i = φ_iᵀ θ + ε_i
+φ_i = φ(映射后的真实采样坐标, CFA 相位)
+Λ_D = Λ_prior + Σ_i φ_i R_i⁻¹ φ_iᵀ
+η_D = η_prior + Σ_i φ_i R_i⁻¹ y_i
+θ̂_D = solve(Λ_D, η_D)
+</code></pre>
+<p>这里 <code>θ</code> 是局部 RAW 结构的系数，不是 RGB。四个 CFA 平面的观测保持独立身份；可以共享结构边界假设，不能先把四平面的数值平均后再判断是否同源。含插值、共享黑电平误差或相关噪声时，使用成块的 <code>ΦᵀΣ⁻¹Φ</code>；独立标量公式只作为其特例。优先使用成熟 QR/Cholesky 求解与 GTSAM 小型参考，避免手写数值分解。[R04、R13]</p>
+<p><code>Λ_prior</code> 必须标记为先验，不能算成观测信息。无先验时要求设计矩阵满秩；秩不足就输出不可辨识方向及有效 mask，而非用一个未披露的小正则把它包装成确定估计。局部仿射模型也只是近似，其残差和适用尺度必须验证。</p>
+<h3 id="section-10">4.3 八种规则及其组合条件</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>规则</th>
+<th>实际操作</th>
+<th>必须保持的性质</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observe</code></td>
+<td>登记新的唯一测量；重复包只读取现有状态</td>
+<td>幂等，不因重读降低方差</td>
+</tr>
+<tr>
+<td><code>transport</code></td>
+<td>将某来源映射至当前参考坐标，生成显式采样系数</td>
+<td>不原地覆盖原始 RAW；不把重采样当新观测</td>
+</tr>
+<tr>
+<td><code>propose_support</code></td>
+<td>从空间邻接、对应及持续性提出来源候选</td>
+<td>“未发现冲突”与“已有共同支持”分开</td>
+</tr>
+<tr>
+<td><code>merge</code></td>
+<td>在同一参数/坐标版本中取来源集合的并集并重建状态</td>
+<td>去重、域级检验、跨域先验只计一次</td>
+</tr>
+<tr>
+<td><code>split</code></td>
+<td>形成不相容的空间子域或时间新版本</td>
+<td>子状态由来源重建，禁止直接把父均值平均分配</td>
+</tr>
+<tr>
+<td><code>retract</code></td>
+<td>将指定来源从指定结构支持中移除，传播失效标记</td>
+<td>删除内容、重算受影响权重与归一化，不能只改年龄</td>
+</tr>
+<tr>
+<td><code>retain / forget</code></td>
+<td>保留可信积累；按过程模型降低陈旧支持或过期归档</td>
+<td>缺失不等于反证；遗忘不伪造新样本</td>
+</tr>
+<tr>
+<td><code>readout</code></td>
+<td>读取同一支持版本的已提交状态</td>
+<td>因果、mask 正确、重复读出不推进测量时钟</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>merge</code> 对来源集合可交换、可结合，但仅限固定的模型、坐标映射与权重版本。根据新数据重新判定支持、重新估计运动或改变可靠性以后，结果通常不再与处理顺序无关。在线事件按时间和确定的冲突规则执行，禁止宣称所有非线性操作满足交换律。</p>
+<h3 id="section-11">4.4 时间支持必须直接表示，而不能借空间图代替</h3>
+<p>沿运动轨迹维护“当前结构持续了多久”的分段状态，初始解析基线采用 BOCPD；增加鲁棒 BOCPD 作为异常点对照。保留有限个候选变化时刻或等价来源权重，并登记被裁剪的后验质量和近似误差。[R10–R11]</p>
+<p>一个位置至少区分四种情况：持续相容；对应关系不确定；短时测量异常；结构持续改变。先使用多假设或暂缓接纳，避免一次大残差就清空历史。旧来源可退出当前结构，但仍保留在账本中供诊断或其原结构使用；不等同于删除磁盘数据。</p>
+<p><strong>速度不是撤回条件。</strong> 快速运动若对齐准确，应允许长期积分；真正应缩短有效历史的是错配、遮挡、形变和结构失效风险。实验必须同时包含“快而可准确对齐”和“慢但发生局部改变”，防止模型只学到速度阈值。</p>
+<h3 id="section-12">4.5 撤回要覆盖完整依赖，不能仅覆盖一个 mask</h3>
+<p>原始测量可以经过运动估计、来源特征、积分节点、融合权重预测器、递归缓存和读出影响最终结果。为这些派生对象建立版本化依赖图，至少记录源集合、参数版本、支持版本与参考坐标版本。</p>
+<p>对来源撤回定义两种验收，不能混写：</p>
+<ol>
+<li><strong>固定规则下的内容撤回：</strong> 固定已选映射和支持决策，将已撤回来源的内容置换后，重算读出不变。这证明内容通路已清除，允许“发现该来源失效”这条历史事件继续存在。</li>
+<li><strong>完整反事实重放：</strong> 将该来源从输入序列中删除，并重算受影响的运动、支持决策和状态，与批量重放参考一致。只有执行了这个更强的重放，才可声称最终输出完全不依赖该来源。</li>
+</ol>
+<p>非线性特征不能用减去旧特征的方式假装撤回。第一版从原始来源完整重算；优化版只允许重算可证明完整的受影响依赖。若卷积特征的感受野越过域边界，要重编码局部区域并使用声明的边界填充，或保守撤回整个特征节点。邻近上下文可以保留为独立上下文角色，但不能再声称它属于被隔离的同一结构测量证据。</p>
+<h3 id="section-13">4.6 状态保留、压缩与期限</h3>
+<p>保留有限 RAW 回放窗和周期性干净状态检查点。若采用长期摘要，必须记录其来源：无法从摘要中移除单个旧来源时，应作废整个摘要并重建，或明确宣布该摘要超出精确撤回范围。<strong>精确撤回范围与最长历史都要作为模型规格。</strong> 不允许只保存一个均值却承诺无限期、任意来源的精确撤回。</p>
+<p>读出采用版本事务：只有一个支持版本下所有依赖一致的结果才能提交。deadline 到来时，优先提供已完成的合法状态，必要时退回当前有效测量的成熟单帧通路；全无效时输出无效 mask，由预先定义的策略处理。不读一半旧状态、一半新状态。</p>
+<p>本项目研究的是表征读出期限。改变机器人重规划频率、提前中断动作块或主动增加曝光属于新的控制/采集协议，必须单独比较，不能悄悄混入 N01 的特征收益。</p>
+<h3 id="section-14">4.7 首版算法如何把这些规则串起来</h3>
+<p>首版使用可解释的候选生成与检验，不另训练一个小“支持预测网络”。在同一时刻，对每个局部结构依次执行：</p>
+<pre><code class="language-text">1. 从 t−1 的已提交状态形成持续结构、短时异常、结构变化三个假设。
+2. 登记 t 时刻的新测量；去重；建立运动映射及误差/有效性记录。
+3. 用实际采样坐标评估各假设的预测残差，更新时间分段与未决来源。
+4. 提出相邻域的 merge，或残差不相容区域的 spatial/temporal split。
+5. 对候选集合做域级检查，生成新版本的来源集合与来源角色。
+6. 使受影响的积分、特征、状态、读出依赖失效；按参考规则重建。
+7. 验证一致后原子提交；期限到达时只读已完成的合法快照。
+</code></pre>
+<p>合并判据的第一版是：坐标、结构基和时间版本兼容；两域在共同查询位置的结构预测差异，其有效置信上界低于预先声明的结构容差；合并后整个域的预测残差仍通过独立/顺序合法的一致性检查。容差使用传感器测量或几何任务单位，不能直接比较未归一化的斜率和截距。若只有学习模型的经验风险，没有有效区间，则按经验分支报告，不能借用 T3 的保证。</p>
+<p>分裂判据先定位时间分段的变化，再检验变化是否局部。局部残差簇生成空间子域候选，分别重估模型；没有足够测量支持分裂时，保留未决状态或缩小支持，而非强制选择一个物体解释。原始观测可同时用于互斥假设，但在单个已提交估计中不重复计数；多假设混合的不确定性包含假设间差异。</p>
+<p>同一时刻可有多个合法支持候选。首版按“满足风险与期限约束后，最小化声明任务方向上的估计误差代理”选择，不把历史长度作为独立追求目标。报告近似方差、结构偏差、对齐风险和实际计算成本四项原值；权重/阈值只在开发集锁定。统计主支路与使用当前数据估计运动/特征的经验支路分开标记，后者需校准验证。</p>
+<h2 id="section-15">5. 理论层面要保证什么</h2>
+<p>“有理论保证”应落实为<strong>写明假设的命题、证明和对应测试</strong>。以下一部分是已有估计理论的特例，一部分是本方案必须实现的程序不变量；它们不保证真实任务必然提升，也不预先宣称新的定理已经完成。理论文件在 P0/P1 建立，随算法变更一起评审。</p>
+<h3 id="section-16">5.1 T1：唯一来源与合并/分裂/撤回的一致性</h3>
+<p>假设每个来源因子有唯一 ID，模型与参数版本固定，所有有效因子被保留。令 <code>S(D)</code> 是域内因子的规范化集合，则 <code>S(A ∪ B)</code> 去重后决定同一个参考目标函数。使用同样数值求解规则时，合并顺序不改变该目标；分裂或撤回后，从剩余因子重建与直接在该集合上求解一致。</p>
+<p>证明依赖集合并集的幂等性和因子求和，而不是网络学习。浮点加法存在顺序误差，因此实现采用规范排序/归约与数值容差，不能承诺任意 GPU 核逐位一致。测试覆盖重复帧、重叠域、跨相机、删除—恢复、不同事件分块和部分 episode reset。非线性求解只保证目标一致；要保证解一致，需要固定初始化、迭代和确定性执行。</p>
+<p>相关噪声应按联合因子处理，不能拆成虚假的独立来源项。删除部分测量后，固定高斯参考使用剩余观测的协方差子块重新求逆；直接截取原精度矩阵通常对应不同的条件问题，不等价于撤回。该情形必须有单独手算与重建测试。</p>
+<h3 id="section-17">5.2 T2：固定支持条件下的估计与不确定性</h3>
+<p>对第 4.2 节的线性模型，若支持域与设计矩阵预先固定、噪声零均值且协方差 <code>Σ</code> 已知正定、模型正确并可辨识，无先验 GLS 是最佳线性无偏估计，协方差为 <code>(ΦᵀΣ⁻¹Φ)⁻¹</code>。独立等方差的常数结构退化为样本均值及 <code>σ²/n</code>。这给出解析实现必须达到的手算基准。</p>
+<p>若 <code>z = A y</code> 是插值或派生积分，噪声变为 <code>AΣAᵀ</code>。同一 RAW 帧产生的原始节点和积分节点不能被当成两组独立观测。对未知相关性的标量固定权重估计，可使用保守界 <code>Var(Σ a_i ε_i) ≤ (Σ |a_i| σ_i)²</code>；它可能很松，不应包装成高精度后验。</p>
+<p><strong>限制：</strong> 用当前数据选域、估计运动或预测权重后，以上固定设计结论不自动成立；把权重 <code>detach</code> 也不会消除统计选择偏差。理论测试使用预先固定或独立校准的选择规则。任务模型的方差若未通过覆盖检验，应标为代理；真实噪声校准误差、插值相关、饱和截断和结构偏差分别报告。[R04]</p>
+<h3 id="section-18">5.3 T3：顺序决策的误撤回控制</h3>
+<p>为统计参考支路构造非负过程 <code>E_t</code>，要求在“支持仍有效”的零假设下满足 <code>E[E_t | F_(t−1)] ≤ E_(t−1)</code>、<code>E_0 = 1</code>。则使用阈值 <code>1/α</code> 的首次越界撤回规则满足 <code>P_H0(存在 t: E_t ≥ 1/α) ≤ α</code>。可从满足条件的似然比混合或现成 confidence-sequence 方法构造，不把普通残差 sigmoid 改名为概率。[R12]</p>
+<p>运动、候选和下注参数若依赖待检验的同一测量，需给出合法的条件构造、独立留出或重新推导。多域、多候选和反复重启分配 <code>α_j</code>，使 <code>Σ α_j ≤ α_total</code>；单个域的保证不自动扩展到整段视频。合并使用“差异区间落入预先声明的结构容差”的等效性判断，不能用“没有拒绝不一致”代替“已经相容”。</p>
+<p>BOCPD 提供模型内的时间分段后验；鲁棒 BOCPD 的鲁棒性也有其模型条件。<strong>二者不自动满足上述误报界。</strong> 工程主支路可先用 BOCPD，统计保证支路独立验证；只有条件和实现都成立的部分获得保证标签。数据无信息或变化过小时，不承诺有限帧内必然检测。</p>
+<h3 id="section-19">5.4 T4：可变时间常数与局部交换的稳定边界</h3>
+<p>解析状态场可采用有依据的泄漏积分与非负局部交换：</p>
+<pre><code class="language-text">s_(t+1) = D_t P_t s_t + (I − D_t) u_t
+D_t = diag(exp(−Δt / τ_j,t))
+P_t ≥ 0，且每一行和为 1
+0 ≤ D_jj ≤ d_max &lt; 1
+</code></pre>
+<p>若 <code>||u_t||∞ ≤ U</code>，则 <code>||s_t||∞ ≤ max(||s_0||∞, U)</code>；相同输入及固定外生系数时，两条状态轨迹的差异至多按 <code>d_max</code> 收缩。证明来自凸组合与诱导范数。允许行和小于 1 时，应将缺失质量解释为泄漏到已声明的零/基准状态；不能无意中改变测量单位。</p>
+<p>若 <code>P_t</code>、<code>D_t</code> 依赖各自隐藏状态，上述两轨迹收缩证明不再直接成立，需要加入门控的 Lipschitz/small-gain 条件。Mamba 的负状态参数和正步长可支持其线性子状态的分析，但整个网络的门控、投影、残差与空间交换不自动获得同样保证。REN 是更严格稳定网络的参考，不能把它的结论外推到修改后的任意结构。[R15–R16、R20]</p>
+<p>稳定并不意味着证据正确；一个稳定状态也可能长期记着错东西。撤回仍按 T1/T5 检验。</p>
+<h3 id="section-20">5.5 T5：局部重建与全量重放等价</h3>
+<p>假设派生计算依赖图完整、算子版本固定、失效节点集合覆盖所有受影响后继。按拓扑顺序重算该集合，其他节点保持不变，则结果与同规则下全量计算一致。这是依赖闭包上的归纳证明，适用于非线性网络，不需要把特征假设为线性。</p>
+<p>对于递归网络，把有界时间窗展开成依赖图；从<strong>未受污染的检查点</strong>重放到当前时刻。若改变映射或状态门控，也要重放相关决策；只把旧隐状态乘一个零 mask 不等价于完整重建。P5 先做全量参考，再优化局部执行。不能用“缓存命中率高”替代等价性验收。[R13、R16]</p>
+<h3 id="section-21">5.6 T6：可中断执行与不确定性读出</h3>
+<p>可严格保证的第一层是操作预算和版本一致性：任意允许的中断点只读已提交快照，不生成新证据。若读出还依据 confidence sequence 提前停止，在 T3 的条件下允许停止时刻依赖已见数据而保持覆盖。[R12]</p>
+<p>GPU 的平均或 p95 时延不是硬实时保证。第二层是实际 deadline SLO：包含排队、传输、撤回、重算和 π0.5 推理的端到端超期比例。若要求确定的最坏执行时长，需要另做 WCET/资源隔离分析。状态估计误差界也不能直接当作机器人动作误差界；最终动作后果必须实测。</p>
+<h3 id="section-22">5.7 理论交付的最低内容</h3>
+<p>每项命题交付：定义、假设、推导、对应代码入口、数值精度要求、违反假设的反例和测试收据。T1/T5 是完整主线必须满足的语义；T2/T3/T4/T6 的统计或稳定性保证按具体分支标注。无法证明的学习策略可继续实验，但不得和已证明支路共用“有保证”标签。</p>
+<h2 id="section-23">6. 两类实现及它们如何共享规则</h2>
+<h3 id="section-24">6.1 非神经参考：来源可追溯的局部顺序估计</h3>
+<p>参考路线使用校准噪声、局部结构系数、显式运动映射、BOCPD/鲁棒变化检测和可删除来源因子；先在已知对应关系下做完整实现，再接实际对应。输出 <code>θ̂</code>、有效性、协方差类型、支持质量和结构版本，不生成 RGB。</p>
+<p>其目的有二：建立可手算、可重放的正确性基准；单独检验支持规则是否在没有网络优化干扰时改善误混合和恢复。必须同时比较固定历史 GLS、鲁棒固定历史估计、标准变化检测后 reset 和完整支持域规则，不能只胜过简单平均就称为新机制。</p>
+<h3 id="section-25">6.2 神经主线：成熟内容模型 + 显式支持契约</h3>
+<p>默认保留作者规模 DBSR，让被接纳的原始来源内容和域内结构内容直接生成特征。两条候选通路先受控比较：</p>
+<ul>
+<li><strong>来源特征通路：</strong> 每个唯一来源用共享 DBSR 骨干编码，按支持/对应汇入成熟融合器。撤回后重新计算依赖该来源的统计、权重和读出。</li>
+<li><strong>域内容通路：</strong> 每个域的 CFA 积分/结构系数在声明的坐标上形成测量内容节点，使用共享成熟骨干；原来源与派生节点的重叠依赖显式记录。注意力可以读取重叠描述，但它们不能作为独立精度项再次相加。</li>
+</ul>
+<p>方差、年龄、有效性和对齐风险作为独立元数据进入规则或已有融合接口。不得把“权重大”解释成“后验可靠”。采用哪条通路由配对验证决定，不预设额外节点必然有益；保留同节点数的当前内容控制。</p>
+<h3 id="section-26">6.3 神经状态场：在回放语义成立后引入</h3>
+<p>P5 才引入持久状态，第一候选使用官方 Mamba 模块及完整因果缓存；固定时间常数 S4/解析状态作为对照。一个正式配置候选为：继承 DBSR 的 512 维特征，4 个官方 Mamba block，<code>d_state=64</code>、<code>expand=2</code>。这是 N01 的待验收组合配置，<strong>不是作者已验证的 RAW 模型</strong>；最终层数及状态规模通过同容量、同计算预算试验锁定，不因 CPU smoke 而压缩成几维玩具。</p>
+<p>状态沿可靠运动轨迹或局部域传播，局部交换仅在当前允许的域之间进行。支持改变时，从干净检查点重放所有相关状态，包括短卷积和 SSM 缓存。第一版不实现“隐状态可直接相减”的假设性优化。</p>
+<p>状态规模先算后跑：上面配置若为每个空间位置保留四层 FP32 SSM 状态，单位置约 <code>4 × 1024 × 64 × 4 = 1 MiB</code>，还未计短卷积、梯度及 RAW 缓冲。因而必须评估较粗域网格、有限活跃域与状态共享；不能宣称线性复杂度就自然适合全分辨率。共享/压缩若破坏撤回，应退回可重放版本。</p>
+<h3 id="section-27">6.4 读出保持有来源、有容量控制</h3>
+<p>第一版复用现有 <code>VisualTokenPostprocessor</code>，作为对所有方法相同的接口。需要可变数量的域或任务查询时，再复用 Perceiver IO 的成熟 cross-attention 设计/实现；PyTorch 适配要与官方实现做数值和掩码契约核验，不另写小 MLP 代替结构建模。[R21]</p>
+<p>任务语言或反应期限可以改变读取哪些结构，但不能修改已经登记的测量值、捏造来源或把读出后的推断写回测量账本。学习层中的线性投影是必要接口，不单独包装为 N01 的研究贡献；所有可训练参数、预训练来源和更新范围完整计数。</p>
+<h2 id="section-28">7. 按阶段实现与验收</h2>
+<p>推荐顺序为 <strong>P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8</strong>。P0 起即可维护真实数据清单；P1/P2 后做一次已有 π0.5 桥的小批次回归，及早发现形状或训练接口问题。它不替代 P7 的充分动作训练。以下文件名中“拟新增”表示尚未实现，不把计划命令写成已经可运行的入口。</p>
+<h3 id="section-29">P0：冻结研究问题、数据与依赖</h3>
+<p><strong>目标。</strong> 将旧结果、数据、成熟模型和拟证明命题固定成可复现起点。</p>
+<p><strong>工作。</strong> 保留 <code>85790cc</code> 及全部负结果；整理独立 train/calibration/validation/test 清单；区分 CFA、合成 CFA 和 <code>rawvla_rgb3</code>；建立来源许可与版本清单。补齐 RAW 噪声单位、曝光/增益、坏点/饱和、采样坐标和跨相机规则。锁定新的测试命名空间，旧 offset=1000/2000 holdout 已经消费，不再用于新选型。</p>
+<p><strong>交付。</strong> 拟新增 <code>configs/encoders/n01_full/protocol_v1.json</code>、<code>research/theory/n01_support_contract_v1.md</code>、数据 manifest 和上游锁文件。负责人分别记录算法、数据、训练、评审职责，不预设必须多人并行。</p>
+<p><strong>验收。</strong> 给定一个序列能追溯每个唯一源、真实单位与拆分身份；正式模型的代码/许可/配方可获取；每个新保证有假设与反例；旧实验能够从收据识别，不重写历史结论。</p>
+<h3 id="section-30">P1：建立可组合、可撤回的解析参考</h3>
+<p><strong>目标。</strong> 先把支持域规则做对，不依赖大网络解释错误。</p>
+<p><strong>工作。</strong> 实现 source ledger、域级局部常数/仿射估计、去重合并、空间分裂、时间来源撤回、版本化重建与批量参考。已知对应关系下处理插值和相关噪声；保留原一维入口。先完整重算，建立精确撤回窗口。</p>
+<p><strong>交付。</strong> 拟新增 <code>frameworks/n01_full/{ledger,domains,statistics,replay}.py</code>；对应数值/性质测试；T1/T2/T5 第一版证明与源码映射。</p>
+<p><strong>验收。</strong> 手算解、随机小问题的独立稠密求解、任意重复/重叠/删除顺序、分裂后来源隔离、相关噪声方差和缺失输入均通过。FP64 参考与 FP32 误差分别记录。不能用邻接边开关次数作为本阶段验收。</p>
+<h3 id="section-31">P2：建立可靠的运动对应与传感器噪声模型</h3>
+<p><strong>目标。</strong> 能区分“运动可对齐”和“测量已经不对应”。</p>
+<p><strong>工作。</strong> 先复用 SEA-RAFT 完整模块适配 4 通道 CFA，再建立 <code>rawvla_rgb3</code> 的真实单位输入；使用已知 RAW 几何生成、传感器噪声及足够复杂的运动监督训练。显式处理遮挡、越界、分数位移、运动模糊和不同 CFA 相位。光流的 forward/backward 一致性只能使用当前及过去两帧，不引入未来帧。</p>
+<p><strong>交付。</strong> 拟新增 <code>backends/raw_correspondence.py</code>、RAW 运动训练配方、独立运动校准和误差报告。噪声模型按传感器/曝光建版本；一阶对齐方差 <code>∇fᵀΣ_flow∇f</code> 只作为近似，并用留出数据检验。</p>
+<p><strong>验收。</strong> 同时报告流误差、错配可识别性、风险覆盖、静态误拒与时延；对照无对齐、原简化对齐、实际模型、oracle。快速准确对齐不能被规则无差别丢弃。实际对齐不能接近 oracle 时，分别诊断对齐与支持机制，不把二者混成一个失败。</p>
+<h3 id="section-32">P3：完成空间与时间支持的共同组织</h3>
+<p><strong>目标。</strong> 直接解决同位置错误历史不能退出的问题。</p>
+<p><strong>工作。</strong> 在 P1 的源集合上建立时间分段，比较 BOCPD、鲁棒 BOCPD 和预注册顺序检验支路；空间域级相容与时间有效期共同决定成员。保留相容、未决、拒绝三态；区分噪声、当前异常、持续变化和无测量。对域合并、分裂、重开与测试重启分配统计预算。</p>
+<p><strong>交付。</strong> 拟新增 <code>frameworks/n01_full/{temporal_support,spatial_support,calibration}.py</code>；T3 条件表；源级漏拒/误拒、变化延迟、错误历史质量与恢复曲线。</p>
+<p><strong>验收。</strong> 独立静态长序列上的误撤回满足声明统计条件；局部持续变化能撤回旧时间来源；单帧异常不会无差别清空可靠历史；missing/saturated 与反证不同。必须胜过或明确解释与标准变化检测后 reset 的差别。若解析规则无收益，可保留正确的算子继续 P4，但不能把它标为性能已验收。</p>
+<h3 id="section-33">P4：接入成熟特征并进行匹配充分训练</h3>
+<p><strong>目标。</strong> 排除前一轮冻结干预的分布不匹配，独立检验完整规则的增量。</p>
+<p><strong>工作。</strong> 让支持域实际控制来源内容，并保留当前帧/额外节点容量控制；全部正式臂使用完整 DBSR、相同任务读出、同样因果信息与校准数据。分开做冻结算子干预和匹配重训，后者是主要性能结论。先证明 temporal-only，再加入 spatial，避免一次改变所有因素。</p>
+<p><strong>交付。</strong> 拟新增 <code>frameworks/n01_full/encoder.py</code>、<code>training/n01_full.py</code>、完整训练曲线、模型/源/参数哈希和第 9 节矩阵。</p>
+<p><strong>验收。</strong> 三种子达到预注册的验证平台；核心配对比较有逐帧和逐事件结果；候选较成熟融合以及“融合 + 标准变化检测/reset”显示实用增量，同时静态与当前异常条件不过度退化。若没有增量，明确归因到规则、容量、优化或数据；不以训练损失下降替代验收。</p>
+<h3 id="section-34">P5：长期状态、局部交换与期限读出</h3>
+<p><strong>目标。</strong> 把 N01 从有界窗口计算推进到有明确保留/遗忘语义的状态场。</p>
+<p><strong>工作。</strong> 建立解析泄漏/局部交换参考，再接官方 Mamba 的神经状态候选；与固定窗口充分训练 DBSR、同容量无撤回状态、简单 reset 状态比较。先整段回放，再做依赖闭包上的局部重算；支持域或参数变更使污染缓存失效。加入只读快照、操作预算、deadline 和当前帧回退。</p>
+<p><strong>交付。</strong> 拟新增 <code>frameworks/n01_full/{state_field,invalidation,deadline}.py</code>；T4/T5/T6 的分支适用性；状态/精确回放范围/缓存/时延 Pareto 报告。</p>
+<p><strong>验收。</strong> 流式与批量参考一致；撤回后残留影响受控；长序列不跨 episode 泄漏；有界状态的实际内存可接受；相同到达观测下比较延迟—误差曲线。局部执行只有在质量保持且端到端成本改善时采用。若神经状态无增量，保留完整显式支持版本进入 P6/P7，不强行把 Mamba 堆进最终模型。</p>
+<h3 id="section-35">P6：真实 RAW、规模和可复用表征</h3>
+<p><strong>目标。</strong> 不让结论停留在小格点定位任务。</p>
+<p><strong>工作。</strong> 使用许可核实后的真实 RAW burst/video，以及独立成像会话；CRVD/ReCRVD 可用于噪声与时间稳健性诊断，不能自动充当机器人动作数据。对同一骨干做 RAW 域任务预训练，使用定位/几何跟踪、结构边界或有真实标注的检测任务；至少两个不同下游读出。第二骨干优先 BSRT 的合规特征支路，检验规则是否依赖 DBSR。[R08–R09]</p>
+<p><strong>交付。</strong> 相机/场景/会话留出、噪声与曝光迁移、两个下游任务和至少两个成熟内容模块上的结果；分别报告 frozen-feature probe 与相同预算 fine-tuning。原生 CFA 和三通道 pseudo-RAW 的成绩始终分列。</p>
+<p><strong>验收。</strong> 规则不依赖隐藏事件标签、真实位姿或未来帧；真实 RAW 任务至少形成可解释的增量或明确限定适用域。扩展历史 8/16/32、空间尺寸 64/128/224 等候选轴时，记录吞吐、峰值显存、状态和数据量，而不是从一条曲线宣称 scaling law。缺少真实传感器数据时标为未完成，不以重新马赛克 RGB 补交。</p>
+<h3 id="section-36">P7：π0.5 接入、表征适配与充分动作训练</h3>
+<p><strong>目标。</strong> 让完整 N01 成为可训练的 π0.5 视觉前端，并将后端适配成本纳入比较。</p>
+<p><strong>工作。</strong> 复用 <code>RawVLASequenceDataset</code>、<code>RawVLAFeaturePolicy</code> 和既有真实接口，重新验收新编码器。先在已有冻结后端下训练特征桥/编码器；随后按统一方案逐步解冻相同范围的 π0.5。完全冻结后端可能不适应新表征，不能把它当作唯一终局；也不能只给 N01 更多后端训练。</p>
+<p><strong>交付。</strong> 两平台新模型的真实前向/反向、actual parameter update、独立服务；完整动作训练配方、参数组/优化器/数据流/检查点；开发集动作与闭环曲线。原图像塔退出主链，保留语言和 action expert；不用 RGB 特征蒸馏补回视觉语义。</p>
+<p><strong>验收。</strong> 动作/状态归一化、视角顺序、token mask、padding、episode reset、唯一帧和重复 flow denoising 均正确；同一观测只推进一次证据状态。至少完成三个训练种子的成熟 RAW 融合基线和完整 N01 的匹配训练平台，源消融按同一协议训练。服务跑通或单 batch 梯度不能替代本阶段训练结论。</p>
+<h3 id="section-37">P8：RawVLA-Bench 全量闭环验证</h3>
+<p><strong>目标。</strong> 完成最终任务验证，回答 N01 是否改善物理决策与恢复。</p>
+<p><strong>工作。</strong> 按第 11 节固定任务、照明域、权重初始化、动作协议和种子。完整比较强系统基线、同后端成熟 RAW 融合与 N01；附加动态历史干预以独立版本运行。训练与超参选择只用开发数据；正式 test 一次冻结后执行，不根据测试结果再选 best。</p>
+<p><strong>交付。</strong> LIBERO 10,000 与 RoboTwin 3,250 原协议身份完整覆盖；逐任务/照明域/训练种子、配对差值与置信区间；反应期限和端到端成本；正常失败、基础设施缺口与恢复日志。多训练种子时，每个检查点独立完整清单，不能把分母混加成一个模型的成绩。</p>
+<p><strong>验收。</strong> 分别给出机制、表征和闭环结论。若只有成像鲁棒性提高而真实状态变化反应变慢，必须披露；若整体没有优势，完整发布内部负结果与适用范围。完成全量执行不等于必须得出正结论，也不代表真实相机或实体机器人已经验证。</p>
+<h2 id="section-38">8. “训练充分”的操作定义</h2>
+<p>充分训练是本任务、数据和优化配方下经过检查的状态，无法预先用某个固定步数保证。上一轮 5,888–13,312 步的平台只适用于原小规模合成任务。完整分辨率、运动适配、长期状态和 π0.5 需要重新建立曲线。</p>
+<h3 id="section-39">8.1 三层训练安排</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>训练对象与监督</th>
+<th>初始资源规划值，非充分性保证</th>
+<th>停止与续训依据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>机制/匹配特征训练</td>
+<td>全尺寸 DBSR、支持规则相关参数、共同结构任务头</td>
+<td>每种子先预留 20k updates，必要时扩展至 100k；有效 batch 按显存与梯度累计固定</td>
+<td>最低训练量、至少两次有效 LR 调整、验证平台与分条件退化检查</td>
+</tr>
+<tr>
+<td>RAW/运动预训练</td>
+<td>完整运动模块与选定骨干，RAW 几何/任务及可选 RAW 自监督</td>
+<td>按作者配方和实际数据量建立 100k–300k updates 的候选预算，P0 后锁定</td>
+<td>实际运动误差、跨会话任务指标和域覆盖；平台前不消费正式测试</td>
+</tr>
+<tr>
+<td>π0.5 动作训练</td>
+<td>同一初始化的 RAW 融合与 N01、相同视觉桥和解冻范围</td>
+<td>每平台/种子先规划 30k–100k updates；桥接 warm-up 单列，不能当正式训练</td>
+<td>动作验证与开发闭环均跟踪；预算耗尽仍改善则保留未测 test 并续训</td>
+</tr>
+</tbody>
+</table></div>
+<p>上述范围用于估算资源，不是作者默认超参或已测耗时。P0 用真实分辨率的短 profiling 记录每步时间、数据吞吐、内存和有效样本数；按 <code>总 updates × 实测 step time</code> 给出 GPU 小时与日历时间。服务器同机竞争会影响耗时，不预先承诺几天完成。</p>
+<h3 id="section-40">8.2 统一的收敛与比较规则</h3>
+<ul>
+<li>预先固定主验证指标、最小实用差异和评估频率。默认每 1,000 updates 检查一次；小数据按 epoch 另定，防止反复看同一小验证集。</li>
+<li>至少经历计划中的学习率下降；在最终低学习率阶段，连续 8 次检查改善小于预先确定的 <code>δ_val</code>，且 best 不持续贴着预算末端，才能标记 <code>validation_plateau</code>。<code>δ_val</code> 由开发重测波动和任务精度共同确定，在正式矩阵前锁定。</li>
+<li>平台不等于优化可靠。先做小训练集可拟合诊断、梯度/来源利用诊断；使用相同的有限超参预算比较至少两档学习率或训练配方。若 train/val 同时过差，排除欠拟合与输入错误，不能仅因不再下降就宣布充分。</li>
+<li>各方法允许达到平台所需的不同步数，记录真实总成本；另做同更新量/样本量/计算预算比较。两种问题分别报告。</li>
+<li>核心比较至少 3 个训练种子。报告配对效应与区间，不能把帧当独立实验，也不能仅取三个 seed 的最佳者。</li>
+<li>checkpoint 保存模型、优化器、scheduler、AMP scaler、RNG、sampler、校准和支持规则版本。跨优化步骤不能继续使用旧参数产生的特征缓存；长序列训练需明确 burn-in、TBPTT 和状态重建。</li>
+<li>不把 RGB 恢复预训练伪装成 RAW-only 训练。若有外部权重，其数据/损失来源和是否允许用于主线单列；默认正式主线使用 RAW/动作任务训练，RGB 重建权重不作为必要前提。</li>
+</ul>
+<h3 id="section-41">8.3 预训练与辅助损失</h3>
+<p>任务损失是最终目标。RAW 预测辅助项仅用于确实可观测、支持相容的样本，允许参考 KPN 的训练退火思想。采用 Noise2Noise/Noise2Self 时，目标来源必须从输入、对齐估计和派生统计中正确排除，并检验独立噪声假设；不能只遮住最后一个张量位置就声称没有泄漏。[R05、R22–R23]</p>
+<p>不同时修改内容骨干、支持规则、状态模型和损失后只做一个总对比。先建立每个因素的单独结果，再训练最终组合。训练时 oracle flow、变化时刻或 clean RAW 可作为明确的监督标签；正式输入和评测必须去除这些隐藏信息，且所有对应基线享有同样训练监督。</p>
+<h2 id="section-42">9. 能分清增量的实验矩阵</h2>
+<h3 id="section-43">9.1 主矩阵：先固定成熟内容模块</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>组别</th>
+<th>时间来源规则</th>
+<th>空间支持</th>
+<th>状态撤回/重算</th>
+<th>主要回答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B0 当前帧</td>
+<td>无历史</td>
+<td>成熟骨干原计算</td>
+<td>无</td>
+<td>历史是否必要</td>
+</tr>
+<tr>
+<td>B1 同容量固定融合</td>
+<td>固定 8/16/32，等权融合；窗口由验证集选型</td>
+<td>原计算</td>
+<td>正常融合</td>
+<td>学习融合是否优于同容量固定融合</td>
+</tr>
+<tr>
+<td>B2 DBSR</td>
+<td>原学习融合</td>
+<td>原计算</td>
+<td>正常融合</td>
+<td>主要成熟基线</td>
+</tr>
+<tr>
+<td>B3 DBSR + 标准变化检测/reset</td>
+<td>BOCPD 或鲁棒方法，验证集锁定</td>
+<td>原计算</td>
+<td>整域 reset</td>
+<td>显式 N01 是否超出直接拼装</td>
+</tr>
+<tr>
+<td>N-T</td>
+<td>来源级时间支持</td>
+<td>空间支持关闭</td>
+<td>全量参考重算</td>
+<td>同坐标旧历史撤回是否有价值</td>
+</tr>
+<tr>
+<td>N-S</td>
+<td>固定时间支持</td>
+<td>域级合并/分裂</td>
+<td>全量参考重算</td>
+<td>空间规则独立作用</td>
+</tr>
+<tr>
+<td>N-TS</td>
+<td>时间与空间共同支持</td>
+<td>开启</td>
+<td>全量参考重算</td>
+<td>两类规则的组合效果</td>
+</tr>
+<tr>
+<td>N-stale</td>
+<td>与 N-TS 相同决策</td>
+<td>同上</td>
+<td>刻意保留旧依赖缓存</td>
+<td>撤回重建本身的增量与污染代价</td>
+</tr>
+<tr>
+<td>N-state</td>
+<td>同 N-TS</td>
+<td>同上</td>
+<td>成熟持久状态 + 可重放撤回</td>
+<td>状态压缩/长历史的额外价值</td>
+</tr>
+<tr>
+<td>N-state-reset</td>
+<td>同上</td>
+<td>同上</td>
+<td>同容量状态，简单 reset</td>
+<td>精确重建是否优于已有 reset</td>
+</tr>
+</tbody>
+</table></div>
+<p>其中 B0–B3、N-T、N-S、N-TS 是核心匹配训练组；N-stale 首先作为同权重因果诊断，若报告可部署性能也要匹配训练。N-state 组在 P5 才加入。N-TS 与 N-T、N-S 的差分别检验联合规则，不只拿完整模型与当前帧比较。</p>
+<p>若使用额外积分节点，必须加入相同节点数、同参数的当前内容复制控制。参数数目相近不代表 FLOPs、访存、历史信息或训练预算相同，各项单独报告。第二骨干以其完整基线重复 B2/B3/N-TS 的关键比较，不把骨干升级收益算给 N01。</p>
+<h3 id="section-44">9.2 至少覆盖的条件</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>条件</th>
+<th>固定/变化因素</th>
+<th>希望排除的错误解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>静态弱信号</td>
+<td>同结构，独立噪声和多种 SNR</td>
+<td>规则为了反应快而拒绝有用积累</td>
+</tr>
+<tr>
+<td>快速、准确对齐</td>
+<td>速度大，oracle 或高质量对应</td>
+<td>“快就忘”伪规则</td>
+</tr>
+<tr>
+<td>快速、实际对齐</td>
+<td>同运动，估计误差可测</td>
+<td>支持收益来自对齐信息不公平</td>
+</tr>
+<tr>
+<td>遮挡解除</td>
+<td>新结构在事件后才可见</td>
+<td>旧遮挡物继续支撑新结构</td>
+</tr>
+<tr>
+<td>局部真实变化</td>
+<td>少数位置改变，其余稳定</td>
+<td>全局 reset 掩盖局部规则缺陷</td>
+</tr>
+<tr>
+<td>当前帧异常</td>
+<td>短时脉冲、饱和、坏点</td>
+<td>错信当前帧，错误清空正确历史</td>
+</tr>
+<tr>
+<td>曝光/增益变化</td>
+<td>尽量保持物理结构不变</td>
+<td>把成像变化当结构变化</td>
+</tr>
+<tr>
+<td>缺失/重复/异步帧</td>
+<td>测量数量与到达时刻变化</td>
+<td>无数据被当反证、重复包降低方差</td>
+</tr>
+<tr>
+<td>非刚性/分数运动/相似物交叉</td>
+<td>对应歧义</td>
+<td>简单平移成功被外推到普遍运动</td>
+</tr>
+<tr>
+<td>长静态后突变、变化后恢复静态</td>
+<td>历史长度与变化间隔变化</td>
+<td>短片段看不到状态污染与重新积累</td>
+</tr>
+</tbody>
+</table></div>
+<p>事件在序列内的位置随机且留出，不全部固定在第 8 帧。需要包含不会发生事件的负例、长于训练窗口的事件间隔和低于可辨识阈值的变化；后一类应允许“尚不能确定”，而非要求神奇地马上识别。</p>
+<h3 id="section-45">9.3 指标与预注册判据</h3>
+<p>主报告同时给出静态误差、变化后 <code>1/2/4/8/16</code> 帧误差、前 8 帧误差面积、恢复时长、未恢复比例、错误历史残留质量和误撤回率。恢复时长包含删失样本；另报固定窗口内的受限平均恢复时间，不能只统计恢复成功者。</p>
+<p>第一轮可采用以下<strong>建议值</strong>作为开发门槛，在未看正式 holdout 前按实际任务单位锁定：事件后前 8 帧误差面积相对 B2/B3 改善至少 5%；静态误差及当前异常条件的退化上限 2%；未恢复率不增加；三种子配对效应和区间支持同一结论。单项越线不自动判定整体有效，需展示分条件权衡。若开发波动使 5% 不可识别，应先调整样本量，而非事后放宽门槛。</p>
+<p>区间以完整 episode/物体/场景为重采样单位，分层纳入训练种子。多主比较采用预注册顺序检验或 Holm 校正。正式样本数使用开发方差估算，并公布最小可检测差异；不能只用大量高度相关帧制造窄区间。</p>
+<h2 id="section-46">10. 数据路线与 RAW 身份</h2>
+<p>四种数据身份分别记录：</p>
+<ol>
+<li><strong>真实传感器原生 Bayer CFA：</strong> 来自真实相机的传感器采样，保留整数 RAW、相位、坐标、黑白电平和曝光。</li>
+<li><strong>合成/仿真 CFA：</strong> 用已知辐射/结构与噪声生成，或由明确记录的仿真传感器采样；适合理论与机制诊断，不冒称真实相机。</li>
+<li><strong>RawVLA-Bench <code>rawvla_rgb3</code>：</strong> 作者三通道 HDR-derived/pseudo-RAW，保留来源和实际单位；不填假的 CFA 元数据。</li>
+<li><strong>RGB 独立系统对照：</strong> 用于既有 π0.5 / ISP 系统比较和可视化，不进入 N01 主编码链。</li>
+</ol>
+<p>DBSR 现有正式支路为四平面。进入三通道基准时，应对同一成熟架构仅改输入 stem 的通道规格并匹配重训，记录参数差；不能把三通道复制成四通道后声称观测增加，或不加说明地合成 Bayer。</p>
+<p>数据按场景、物体、拍摄会话和原始轨迹划分。不同噪声/照明版本的同一基础轨迹必须进入同一 split；相邻时刻和同一 burst 不跨训练/验证。校准数据独立于 test，传感器未知参数使用验证过的估计或标记未知。新数据若只有 RAW 无动作标注，只用于相应表征/校准任务。</p>
+<p>“广泛应用”至少需要跨任务和跨传感器两类证据，分别报告零样本与适配结果。RawVLA-Bench 最终闭环可以支持具身任务结论，但其三通道数据本身不能完成原生 CFA 泛化这一项。</p>
+<h2 id="section-47">11. π0.5 与 RawVLA-Bench 的最终验证方案</h2>
+<h3 id="section-48">11.1 复用已部署接口，重新验收完整模型</h3>
+<p>现有 <a href="../src/owac/raw/rawvla_sequence.py">RAW 序列加载器</a>、<a href="../src/owac/backends/rawvla_features.py">特征桥</a>、<a href="../src/owac/training/n01_action.py">动作训练器</a>与<a href="../src/owac/runtime/n01_feature_service.py">独立服务</a>可复用。旧 N01 已有真实后端证据，本轮新模型仍需逐项验收，不能继承旧模型的全部 PASS。</p>
+<p>接入点保持 StarVLA <code>PI0.py::embed_prefix</code> 的视觉嵌入入口，替换图像塔及其预处理；语言、状态输入和动作专家继续复用。受控首版沿用每有效相机 256 个、宽度 2048 的令牌接口；若改变 token 数或 resampler，所有特征基线同步比较并计入参数和成本。</p>
+<p>每相机维护独立状态；时间信息、相机顺序、空间位置和 mask 一致。一帧多次被 flow-matching 去噪步骤读取，只产生一次证据更新。流式缓存必须随着 episode、相机标定、参数版本或不连续时间重置/重建。</p>
+<h3 id="section-49">11.2 系统对照与训练公平性</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>系统</th>
+<th>输入与前端</th>
+<th>后端训练</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S0 已冻结 Default</td>
+<td>作者 ISP / render RGB → 原视觉塔</td>
+<td>历史基线额外训练 0</td>
+<td>协议与系统参考；不冒充容量匹配对照</td>
+</tr>
+<tr>
+<td>S1 RawVLA 官方方法</td>
+<td>作者流式 neural ISP → 图像策略</td>
+<td>按作者方法复现并完整披露</td>
+<td>最近直接具身路线对照 [R24]</td>
+</tr>
+<tr>
+<td>S2 当前帧 RAW</td>
+<td>成熟骨干单帧 → 同特征桥</td>
+<td>与 S3/S4 相同</td>
+<td>历史必要性</td>
+</tr>
+<tr>
+<td>S3 成熟 RAW 融合</td>
+<td>DBSR → 同特征桥</td>
+<td>与 S4 相同</td>
+<td>核心因果比较</td>
+</tr>
+<tr>
+<td>S3+ 直接已有规则</td>
+<td>DBSR + 标准变化检测/reset</td>
+<td>与 S4 相同</td>
+<td>排除已有方法组合即可解释的收益</td>
+</tr>
+<tr>
+<td>S4 完整 N01</td>
+<td>同骨干 + 支持域、撤回/状态规则</td>
+<td>与 S3 相同</td>
+<td>N01 的独立增量</td>
+</tr>
+</tbody>
+</table></div>
+<p>S0/S1 是强系统基线，不能用它们不同的训练容量单独证明机制。核心比较必须是 S3/S3+/S4 的相同权重初始化、数据、读出、后端解冻、动作预算和超参搜索。若采用 LoRA，则使用项目固定后端已有的正式实现和同样 rank/模块范围；没有现成实现时使用相同全参数/分组微调配方，不在本任务再造适配网络。</p>
+<p>动作训练推荐两段：先训练 RAW 编码器和桥，建立稳定输入；再以较低学习率统一解冻视觉前缀相关后端及动作专家，比较冻结/解冻两档。具体参数组和 LR 在开发集选定后冻结。每种子保持可精确恢复的数据流；短 warm-up 不等于已经充分训练。</p>
+<h3 id="section-50">11.3 固定协议与新增动态验证分开</h3>
+<p>沿用<a href="decisions/0012-rawvla-pi05-protocol-freeze.md">冻结协议 0012</a>：LIBERO 四套 40 任务 × 50 初态 ×五照明域，共 10,000；RoboTwin 13 任务 × 50 dataset seed ×五照明域，共 3,250。LIBERO horizon=10、replan=5；RoboTwin horizon=50、replan=50，14 维绝对关节目标。632 条原缓存条件核查单独报告。</p>
+<p>历史 LIBERO Default 为 58.20%；本地已存冻结记录中的 RoboTwin 有缺口。<strong>本方案没有重新登录服务器核查最新成绩，正式执行前须读取实际 manifest/audit，不能把旧状态当当前事实或合并成总分。</strong> 现有冻结运行、源文件和环境不得被新实验覆盖。</p>
+<p>官方条件主要检验成像鲁棒性。为检验撤回，追加独立的历史干预协议：遮挡解除、局部视觉变化、临时传感器异常与错配历史。改变任务相关几何时，正确动作可能变化，需要有效的新示范/开发协议；不能机械沿用旧动作标签。人为注入错误历史只作为机制压力测试，与自然任务结果分列。</p>
+<p>每帧记录 RAW 来源时间、支持变更、特征提交时间、动作生成与执行时间。在固定观测节奏下比较“反应期限内能给出的结果”；若改变 replan 或动作中断，则新建控制协议并让所有基线使用同样节奏。</p>
+<h3 id="section-51">11.4 最终结论的口径</h3>
+<p>分别报告 clean/adverse、逐任务、逐照明域、任务宏平均和原协议平均；在相同初态配对成功差异，置信区间按原任务/初态结构计算。三个训练种子各自覆盖完整清单，先给出种子分布，再总结平均。</p>
+<p>正常超时/失败计入原分母；基础设施错误保留原身份及缺口，按冻结规则重试，不换种子、不挑最佳重跑。除成功率外，报告动作误差诊断、事件恢复、超期率、p50/p95/p99 总时延、显存/状态/数据传输及累计 GPU 小时。未测功耗写未测量。</p>
+<p>闭环收益可预先设为主要受损条件至少改善 3 个百分点、clean 退化不超过 2 个百分点的规划目标，并结合开发方差检查统计检验力；它不是承诺。完整 N01 的定位是更可靠的 RAW 表征；若只在部分条件有效，就据实限定范围。</p>
+<h2 id="section-52">12. 工程组织、资源与实施顺序</h2>
+<h3 id="section-53">12.1 现有资产和拟新增模块</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>位置</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/owac/frameworks/n01/</code></td>
+<td>作为历史原型与数值参考保留；修复或语义变更另记版本，不破坏既有证据</td>
+</tr>
+<tr>
+<td><code>src/owac/baselines/burst_features.py</code> 与 <code>_vendor/dbsr/</code></td>
+<td>保留成熟基线，新的支持模型用显式配置切换</td>
+</tr>
+<tr>
+<td><code>src/owac/frameworks/n01_dbsr.py</code>、<code>n01_dbsr_raw.py</code></td>
+<td>保留冻结干预入口，不能把旧 negative 结果改名成完整模型成绩</td>
+</tr>
+<tr>
+<td><strong>拟新增</strong> <code>src/owac/frameworks/n01_full/</code></td>
+<td>来源账本、域、统计、时间支持、失效传播、状态与读出契约</td>
+</tr>
+<tr>
+<td><strong>拟新增</strong> <code>src/owac/backends/raw_correspondence.py</code></td>
+<td>成熟运动模块适配及 source/version 说明</td>
+</tr>
+<tr>
+<td><strong>拟新增</strong> <code>src/owac/training/n01_full.py</code></td>
+<td>匹配训练、数据流恢复、校准/梯度边界；复用既有训练基础设施</td>
+</tr>
+<tr>
+<td><strong>拟新增</strong> <code>src/owac/evaluation/n01_full.py</code></td>
+<td>逐帧、事件、恢复、来源与成本评价</td>
+</tr>
+<tr>
+<td><strong>拟新增</strong> <code>configs/encoders/n01_full/</code>、<code>tests/encoders/n01_full/</code></td>
+<td>各阶段固定协议、性质测试、来源隔离和完整回放测试</td>
+</tr>
+<tr>
+<td><code>src/owac/backends/rawvla_features.py</code> 等既有桥</td>
+<td>复用并对新模型验收；候选服务使用独立复制/哈希清单</td>
+</tr>
+</tbody>
+</table></div>
+<p>所有拟新增路径均相对当前 checkout；外部接口延续现有测量/读出契约，模块实现不泄漏进冻结 runtime。优先在当前 worktree 延续版本历史；若需要新的执行 checkout，放在 <code>worktrees/&lt;task&gt;/</code>，分支沿用 <code>lzh/&lt;task&gt;</code>。</p>
+<h3 id="section-54">12.2 服务器与成本安排</h3>
+<p>训练推荐沿用用户指定服务器，通过 <code>ssh -p 44327 root@107.209.104.125</code> 访问；<code>-L 8080:localhost:8080</code> 只在需要本地看训练界面且端口可用时添加。本轮仅交付方案，没有启动新服务器任务。</p>
+<p>正式运行前读取服务器 <code>/etc/vast-agents-guide.md</code> 和实际资源/任务状态。为 v1.0 创建独立源码快照、环境、数据只读入口和输出目录，使用 supervisor；不修改原 RawVLA 冻结任务。已有 96 GB GPU 信息来自前次收据，资源余量要在执行前实测。</p>
+<p>资源按阶段释放：先 P0–P3 的数值与数据质量，再 P4 核心训练矩阵，再 P5/P6 扩展，最后 P7/P8 动作训练与全量评测。先完成少量开发任务闭环来检查优化和时序，再执行已经冻结的全量清单；开发成绩不混入最终测试。</p>
+<p>每次训练记录 code SHA+dirty diff、依赖、数据/拆分/校准/配置哈希、初始与最终参数、优化步骤、样本量、耗时与峰值资源。大 checkpoint 和 RAW 留服务器/批准存储，本地留数字与校验清单。重试、预算续训和失败各有独立身份，不覆盖旧输出。</p>
+<h3 id="section-55">12.3 每阶段的交付格式</h3>
+<p>每阶段交付四类材料：可复现实现和固定配置；理论/假设与源码映射；真实测试与训练收据；面向人的“做了什么、证据如何、哪里仍不成立”。<code>make check</code>、针对性测试与来源审计是工程门槛；训练平台、独立任务收益和闭环结果另行判断。</p>
+<p>如果阶段失败，允许依据证据修改算法和路线，但必须说明修改的是测量模型、支持规则、内容骨干还是训练。新选择使用开发数据，新正式结论使用未消费的测试命名空间。不能反复在同一失败样例上改阈值后宣称泛化。</p>
+<h2 id="section-56">13. v1.0 完成时应具备的成果</h2>
+<p>完整路线应形成三份可独立检验的成果：</p>
+<ol>
+<li><strong>一个计算契约和参考实现。</strong> 同一来源的合并、分裂、时间失效、撤回、保留与期限读出有明确语义；解析与神经版本可以接受相同的来源干预。</li>
+<li><strong>一套有边界的理论结果。</strong> 唯一信息、固定条件估计、顺序错误控制、状态有界与重建一致性各自有证明、反例和实现证据，不把这些保证混成任务成功保证。</li>
+<li><strong>一条充分训练的实证链。</strong> 成熟多帧融合 → 完整 N01 匹配训练 → 真实 RAW/跨任务表征 → π0.5 动作训练 → RawVLA-Bench 全量闭环。每个环节保留直接强基线与失败。</li>
+</ol>
+<p>优先实施 P0/P1，并同步准备 P2 的 RAW 运动训练数据。第一项关键研究判据是：<strong>在实际可观察的局部结构变化后，来源级时间撤回是否比成熟融合和标准 reset 更快恢复，同时不损害静态积累与当前异常鲁棒性。</strong> 这项证据成立之后，再由长期状态、空间组合和条件化读出扩展 N01 的适用范围。</p>
+<h2 id="section-57">14. 参考文献与官方实现</h2>
+<p>以下编号用于本方案的研究定位；代码链接不代表已经集成或验收。新增可执行模块均须在 P0 固定提交和许可。部分论文输出图像，本项目只借用其合适的算法、训练方法或中间特征模块。</p>
+<p><a id="ref-r01"></a>
+<strong>[R01]</strong> Bhat et al. <em>Deep Burst Super-Resolution</em>. CVPR 2021。<a href="https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278" rel="noopener noreferrer" target="_blank">已固定官方代码</a>。用途：当前成熟 RAW 内容基线。</p>
+<p class="reference" id="r02"><strong>[R02]</strong> Luo et al. <em>BSRT: Improving Burst Super-Resolution With Swin Transformer and Flow-Guided Deformable Alignment</em>. CVPR Workshops 2022。<a href="https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/html/Luo_BSRT_Improving_Burst_Super-Resolution_With_Swin_Transformer_and_Flow-Guided_Deformable_CVPRW_2022_paper.html" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/Algolzw/BSRT" rel="noopener noreferrer" target="_blank">官方代码</a>。用途：第二成熟骨干候选，须拆除不合规的图像链。</p>
+<p class="reference" id="r03"><strong>[R03]</strong> Wronski et al. <em>Handheld Multi-Frame Super-Resolution</em>. ACM TOG 2019。<a href="https://research.google/pubs/handheld-multi-frame-super-resolution/" rel="noopener noreferrer" target="_blank">作者机构页面与论文</a>。用途：CFA 跨帧采样、结构与鲁棒融合依据；不声称本项目已有其官方可运行代码。</p>
+<p class="reference" id="r04"><strong>[R04]</strong> Foi et al. <em>Practical Poissonian-Gaussian Noise Modeling and Fitting for Single-Image Raw-Data</em>. IEEE TIP 2008。<a href="https://webpages.tuni.fi/foi/sensornoise.html" rel="noopener noreferrer" target="_blank">作者论文/软件/数据页面</a>。用途：传感器噪声模型与校准；软件有单独限制许可，不默认 vendoring。</p>
+<p class="reference" id="r05"><strong>[R05]</strong> Mildenhall et al. <em>Burst Denoising with Kernel Prediction Networks</em>. CVPR 2018。<a href="https://bmild.github.io/kpn/" rel="noopener noreferrer" target="_blank">论文与作者页面</a>；<a href="https://github.com/google/burst-denoising" rel="noopener noreferrer" target="_blank">作者代码</a>。用途：来源内容利用与优化退火参考。</p>
+<p class="reference" id="r06"><strong>[R06]</strong> Teed and Deng. <em>RAFT: Recurrent All-Pairs Field Transforms for Optical Flow</em>. ECCV 2020。<a href="https://arxiv.org/abs/2003.12039" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/princeton-vl/RAFT" rel="noopener noreferrer" target="_blank">官方代码</a>。用途：成熟对应模块背景。</p>
+<p class="reference" id="r07"><strong>[R07]</strong> Wang, Lipson and Deng. <em>SEA-RAFT: Simple, Efficient, Accurate RAFT for Optical Flow</em>. ECCV 2024。<a href="https://arxiv.org/abs/2405.14793" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/princeton-vl/SEA-RAFT" rel="noopener noreferrer" target="_blank">官方代码</a>。用途：优先 RAW 适配候选；原输入为 RGB 风格接口。</p>
+<p class="reference" id="r08"><strong>[R08]</strong> Yue et al. <em>Supervised Raw Video Denoising with a Benchmark Dataset on Dynamic Scenes</em>. CVPR 2020。<a href="https://github.com/cao-cong/RViDeNet" rel="noopener noreferrer" target="_blank">官方代码与 CRVD 数据说明</a>。用途：真实 RAW 视频诊断，数据与动作任务分开。</p>
+<p class="reference" id="r09"><strong>[R09]</strong> Cao et al. <em>RViDeformer: Efficient Raw Video Denoising Transformer with a Larger Benchmark Dataset</em>. arXiv 2023，后续期刊版本见作者仓库。<a href="https://arxiv.org/abs/2305.00767" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/cao-cong/RViDeformer" rel="noopener noreferrer" target="_blank">官方代码与 ReCRVD</a>。用途：较复杂 RAW 数据与邻近架构，原 RGB/ISP 监督不能照搬。</p>
+<p class="reference" id="r10"><strong>[R10]</strong> Adams and MacKay. <em>Bayesian Online Changepoint Detection</em>. 2007。<a href="https://arxiv.org/abs/0710.3742" rel="noopener noreferrer" target="_blank">论文</a>。用途：时间支持分段的标准解析对照；不把社区实现冒称作者官方库。</p>
+<p class="reference" id="r11"><strong>[R11]</strong> Altamirano, Briol and Knoblauch. <em>Robust and Scalable Bayesian Online Changepoint Detection</em>. ICML 2023。<a href="https://arxiv.org/abs/2302.04759" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://jeremiasknoblauch.github.io/publication/rccp/" rel="noopener noreferrer" target="_blank">作者页面</a>；<a href="https://github.com/maltamiranomontero/DSM-bocd" rel="noopener noreferrer" target="_blank">官方代码 DSM-bocd</a>。用途：异常点与变化的鲁棒区分；<code>bocpd.py</code> / <code>models.py</code> 是参考入口。</p>
+<p class="reference" id="r12"><strong>[R12]</strong> Howard et al. <em>Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences</em>. Annals of Statistics 2021。<a href="https://arxiv.org/abs/1810.08240" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/gostevehoward/confseq" rel="noopener noreferrer" target="_blank">作者实现 confseq</a>。用途：有条件的长期错误控制和停止规则，不直接赋予神经置信度保证。</p>
+<p class="reference" id="r13"><strong>[R13]</strong> Kaess et al. <em>iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree</em>. IJRR 2012。<a href="https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html" rel="noopener noreferrer" target="_blank">作者页面与论文</a>；<a href="https://github.com/borglab/gtsam" rel="noopener noreferrer" target="_blank">GTSAM</a>；<a href="https://gtsam.org/doxygen/4.0.0/a03643.html" rel="noopener noreferrer" target="_blank">ISAM2 文档</a>。用途：因子、依赖、删除与重线性化参考，不作为实时 GPU 主线的既定实现。</p>
+<p class="reference" id="r14"><strong>[R14]</strong> Felzenszwalb and Huttenlocher. <em>Efficient Graph-Based Image Segmentation</em>. IJCV 2004。<a href="https://cs.brown.edu/people/pfelzens/segment/" rel="noopener noreferrer" target="_blank">作者论文与 C++ 实现</a>。用途：空间区域组织对照，非时空证据有效性的保证。</p>
+<p class="reference" id="r15"><strong>[R15]</strong> Gu, Goel and Ré. <em>Efficiently Modeling Long Sequences with Structured State Spaces</em>. ICLR 2022。<a href="https://arxiv.org/abs/2111.00396" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/state-spaces/s4" rel="noopener noreferrer" target="_blank">官方 S4</a>。用途：多时间尺度状态模型；教学精简代码不充当强性能基线。</p>
+<p class="reference" id="r16"><strong>[R16]</strong> Gu and Dao. <em>Mamba: Linear-Time Sequence Modeling with Selective State Spaces</em>. 2023 预印本 / COLM 2024。<a href="https://arxiv.org/abs/2312.00752" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/state-spaces/mamba" rel="noopener noreferrer" target="_blank">官方实现</a>。用途：可选择保留/遗忘的成熟神经模块，完整网络保证需另证。</p>
+<p class="reference" id="r17"><strong>[R17]</strong> Zhu et al. <em>Trajectory-aware Shifted State Space Models for Online Video Super-Resolution</em>. ICLR 2026，仓库所列论文版本 arXiv:2508.10453。<a href="https://arxiv.org/abs/2508.10453" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/QZ1-boy/TS-Mamba" rel="noopener noreferrer" target="_blank">官方 TS-Mamba</a>。用途：运动轨迹与状态结合的直接近邻，尚未做 RAW/因果源码验收。</p>
+<p class="reference" id="r18"><strong>[R18]</strong> Di et al. <em>QMambaBSR: Burst Image Super-Resolution with Query State Space Model</em>. CVPR 2025。<a href="https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html" rel="noopener noreferrer" target="_blank">论文</a>。用途：查询状态空间 burst 融合的创新边界；本轮未验收可运行模型代码。</p>
+<p class="reference" id="r19"><strong>[R19]</strong> Unal, Marty and Dai. <em>Keyframe-Centric State-Space Modeling for Burst Image Super-Resolution</em>，作者项目页标注 SIGGRAPH Asia 2026。<a href="https://ouenal.github.io/burstmamba/" rel="noopener noreferrer" target="_blank">作者页面</a>；<a href="https://arxiv.org/abs/2503.19634" rel="noopener noreferrer" target="_blank">相关预印本 Burst Image Super-Resolution with Mamba</a>。用途：近期思路跟踪；会议日期晚于本文日期，按公开项目资料引用，不声称已完成会议发表或代码验收。</p>
+<p class="reference" id="r20"><strong>[R20]</strong> Revay, Wang and Manchester. <em>Recurrent Equilibrium Networks: Flexible Dynamic Models with Guaranteed Stability and Robustness</em>. IEEE TAC 2023。<a href="https://arxiv.org/abs/2104.05942" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/imanchester/REN" rel="noopener noreferrer" target="_blank">作者 REN 仓库</a>。用途：严格稳定模型参考；作者实现为 Julia。</p>
+<p class="reference" id="r21"><strong>[R21]</strong> Jaegle et al. <em>Perceiver IO: A General Architecture for Structured Inputs &amp; Outputs</em>. ICLR 2022。<a href="https://arxiv.org/abs/2107.14795" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/google-deepmind/deepmind-research/tree/master/perceiver" rel="noopener noreferrer" target="_blank">官方实现</a>。用途：条件化查询读出；跨框架移植需单独验收。</p>
+<p class="reference" id="r22"><strong>[R22]</strong> Lehtinen et al. <em>Noise2Noise: Learning Image Restoration without Clean Data</em>. ICML 2018。<a href="https://proceedings.mlr.press/v80/lehtinen18a.html" rel="noopener noreferrer" target="_blank">论文</a>。用途：满足条件的独立噪声监督。</p>
+<p class="reference" id="r23"><strong>[R23]</strong> Batson and Royer. <em>Noise2Self: Blind Denoising by Self-Supervision</em>. ICML 2019。<a href="https://proceedings.mlr.press/v97/batson19a.html" rel="noopener noreferrer" target="_blank">论文</a>。用途：自监督的独立性与不变性要求，不能忽略对齐/共享来源泄漏。</p>
+<p class="reference" id="r24"><strong>[R24]</strong> Liu et al. <em>RawVLA: Embodied Neural Image Signal Processor for Robotic Manipulation</em>. arXiv 2026。<a href="https://arxiv.org/abs/2609.37530" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://shuhongll.github.io/rawvla/" rel="noopener noreferrer" target="_blank">作者项目/代码/数据入口</a>。用途：直接具身对照和 RawVLA-Bench；实际输入身份以本地固定数据审计为准。</p>
+<p class="reference" id="r25"><strong>[R25]</strong> Physical Intelligence et al. <em>π0.5: a Vision-Language-Action Model with Open-World Generalization</em>. 2025。<a href="https://arxiv.org/abs/2504.16054" rel="noopener noreferrer" target="_blank">论文</a>；<a href="https://github.com/Physical-Intelligence/openpi" rel="noopener noreferrer" target="_blank">官方 openpi</a>。用途：最终后端；本项目执行版本沿用已冻结 StarVLA/RawVLA 适配，不切换到浮动最新版本。</p>
+<h2 id="section-58">15. 版本记录</h2>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>版本</th>
+<th>日期</th>
+<th>内容与状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.0</td>
+<td>2026-10-14</td>
+<td>基于现有 DBSR 强基线与空间撤回负结果，提出来源级完整 N01、六项理论义务、P0–P8 开发顺序、充分训练及 π0.5 / RawVLA-Bench 最终验证；本次为方案交付，尚未执行新算法与训练</td>
+</tr>
+</tbody>
+</table></div>
+</article><footer class="footer">Markdown 为内容源；本 HTML 无外部脚本、字体或图像依赖，可离线阅读。<br>内容版本 v1.0 · 2026-10-14 · 源文件 SHA256：9e1132d283abde96df7d905af373ee7c730a2455769dc8b9176b9d4afff02289<br>设计与理论义务不代表已完成实现；历史结果及新方案的证据边界均在正文中说明。</footer></main><script id="markdown-source" type="application/json">"# N01 全量开发方案：自适应时空证据积分\n\n**版本：v1.0 · 日期：2026-10-14 · 负责人：lzh · 状态：待实施的研究与开发方案**\n\n代码依据：`lzh/n01-evidence-integration`，提交 `85790ccbd5661225a49ed95e02180902f9ca4d63`。文献检索截止本日期。本文提出后续设计、理论义务和验收标准，不表示新机制、训练或闭环实验已经完成。[HTML 阅读版](N01_full_development_plan_2026-10-14_v1.0.html)与本 Markdown 同源。\n\n## 1. 目标与路线判断\n\n设想机器人在暗处观察一个杯子的边缘。杯子不动时，前面几帧里很弱的线索可以共同支持当前判断；杯子移动但对应关系准确时，旧测量仍然有用；遮挡解除后，原来属于遮挡物的测量应当退出；如果只是当前一帧突然受到噪声干扰，又不应立即清空所有历史。N01 要解决的是这几种情况如何使用同一组规则处理，并在机器人必须行动时，给出当下最可靠的结构表征。\n\n**完整 N01 的核心对象应从“几个候选窗口”推进为“带来源、对应关系、有效时期和可撤回依赖的测量支持域”。** 成熟网络负责提取和融合内容；N01 负责规定哪些测量可以共同参与、何时应分开、哪些状态需要重建，以及当前预算允许读出什么。解析实现是可检验的参考，神经实现承担更丰富的表征能力，两者使用同一套来源和更新语义。\n\n本路线值得继续开发，但目前的依据是“研究问题仍未被完整实现和检验”，而不是“效果已被证明”。新的实现必须同时回答：\n\n1. **证据是否用对了：** 对齐后的旧测量确实属于当前结构吗？重复来源或共享噪声有没有被重复计为信息？\n2. **反证是否生效：** 来源失效后，其内容是否从积分、特征、递归状态和读出中退出？\n3. **规则是否有价值：** 在充分训练的成熟融合器之上，是否减少错误历史拖尾，并保留静态弱信号收益？\n4. **是否可复用：** 同一套规则能否用于不同 RAW 来源和任务，最终改善 π0.5 在 RawVLA-Bench 上的闭环表现？\n\n最终交付链为：**唯一 RAW 测量 → 运动对应与不确定性 → 时空支持域 → 可撤回积分/状态场 → 条件化非图像读出 → π0.5 动作。** 主链不生成 RGB/sRGB/XYZ，不使用 RGB 教师或 RGB 重建目标。输出可以是结构系数、局部状态或特征令牌。\n\n## 2. 当前已经做到哪里，下一步真正缺什么\n\n依据[完整 DBSR 实验记录](../research/experiments/2026-10-13_n01_dbsr_mechanism.md)、[此前真实后端验收](../research/experiments/2026-10-13_n01_source_repair.md)和当前源码，现状如下。\n\n| 已有事实 | 可以据此判断 | 仍不能据此判断 |\n| --- | --- | --- |\n| 9 个基线运行达到声明的验证平台，共 74,496 个优化步骤 | 已有可用的合成任务强对照和续训协议 | 16×16 packed CFA 上的平台不等于真实 RAW、复杂任务或 π0.5 的充分训练 |\n| 当前帧 / 同容量平均 / DBSR 的早期误差为 1.91848 / 1.75656 / 1.52998 packed 格点 | 成熟 DBSR 有可测的平均收益；同权重改均匀融合退化约 0.55570 | DBSR 并非每个种子均胜出，也不能从此推出 N01 有效 |\n| RAW 域动态旧缓存 / 动态重算为 1.55314 / 1.55214；原 DBSR 为 1.54597 | 原空间撤回执行正确，任务增量约 0.001 且方向不完全一致 | 不能把微小均值差写成机制已成立 |\n| CNN 每层硬图约束严重退化；原 RAW 域额外积分节点也未建立收益 | 接入位置、噪声尺度和特征分布是实际问题 | 冻结干预不能代替匹配重训，不能否定所有完整 N01 实现 |\n| 旧 N01 已跑过真实 NPZ、π0.5 动作反向和服务请求 | 已有可复用的真实特征桥和动作协议 | 作者三通道 pseudo-RAW 接线不等于新 DBSR/N01 全链验收或原生 Bayer 泛化 |\n\n当前实现的关键局限有六项：\n\n- `n01_dbsr_raw.py` 主要检验空间图；半径 2、历史 8 固定，**同坐标的旧时间来源不会因空间边关闭而撤回**。\n- 旧积分主要描述局部值的一致性；完整“共同支持一个结构”还需要带坐标的局部结构模型，不能把不同位置亮度相同当作充分条件。\n- 对应关系仍以简化运动和整数 oracle 对照为主，尚无适配本项目数据的强 RAW 运动模块及可信的不确定性。\n- 支持域变更后，来源、积分缓存、网络感受野、状态和读出的依赖还没有形成统一契约。\n- 新积分通路只进行了冻结权重干预；需要相同信息、容量和训练条件下的匹配重训。\n- 反应期限、长序列状态、真实传感器迁移和最终 π0.5 闭环尚未在完整路线中联合检验。\n\n因此，v1.0 保留已有负结果与强基线，**新增完整的时间支持和依赖撤回，再做匹配训练**。不继续仅调整历史档位，不再把支持图硬套到成熟骨干的所有卷积上。\n\n## 3. 文献依据与复用决策\n\n本次按六条线检索：RAW burst 内容融合、运动对应、噪声与顺序估计、图与增量重算、稳定状态模型、任务读出与 VLA。优先使用论文原文、作者项目页、官方仓库；不是穷尽所有相关工作，也不据检索结果宣称首创。完整链接见第 14 节，核查范围见[来源清单](../research/reviews/2026-10-14_n01_full_plan_sources.json)。\n\n### 3.1 哪些东西已有成熟答案\n\n| 方向 | 代表依据 | 对 N01 的作用 | 不能直接继承的结论 |\n| --- | --- | --- | --- |\n| 多帧 RAW 特征融合 | DBSR [R01]；BSRT [R02] | 保留完整特征层和融合层；BSRT 作为第二骨干候选 | 原图像恢复性能不等于非图像表征或机器人性能 |\n| RAW 统计与鲁棒融合 | Handheld MFSR [R03]；Foi 噪声模型 [R04] | 校准噪声、结构方向和错配风险 | 输出 RGB 的原管线不符合本项目主链边界 |\n| 历史内容利用与优化 | KPN [R05] | 研究来源分支训练、辅助损失退火 | 不能强迫遮挡前旧帧预测未见的新结构 |\n| 成熟运动对应 | RAFT / SEA-RAFT [R06–R07] | 复用相关体、迭代更新和运动训练方法 | RGB 输入与预训练不自动适配 CFA，预测尺度也不自动是校准概率 |\n| RAW 视频与真实噪声 | RViDeNet / CRVD、RViDeformer / ReCRVD [R08–R09] | 检验真实 RAW 噪声和跨场景适配 | 原训练可能包含 ISP/RGB 损失；数据许可和真实运动覆盖须分别核查 |\n| 时间支持变化 | BOCPD、鲁棒 BOCPD [R10–R11] | 不只选固定窗口，而是估计当前结构从何时开始有效；区分异常点和持续变化 | 模型内后验、鲁棒性与频率学误报保证不是同一件事 |\n| 任意时刻有效的统计判断 | Confidence sequences [R12] | 为反复观察后撤回或合并提供有条件的错误率控制 | 单帧 99% 阈值不能直接变成长期、全图 99% 保证 |\n| 依赖维护与重算 | iSAM2 / GTSAM [R13] | 来源因子、增量更新、删除和重线性化的参考 | 非线性局部最优不等于全局最优；已边缘化摘要不一定可任意撤回 |\n| 空间域组织 | 图分割 [R14] | 空间连通域的成熟对照与候选生成 | 图分割区域不自动等于同一物理结构，连通性也不自动证明可共同积分 |\n| 有选择的长期状态 | S4、Mamba [R15–R16] | 复用成熟状态空间模块，不手写小型 GRU 替代 | 稳定的线性状态矩阵不保证整个非线性网络稳定，更不保证撤回 |\n| 运动与状态结合 | TS-Mamba、QMambaBSR、BurstMamba [R17–R19] | 提醒我们运动轨迹上的状态传播和跨帧选择已有先例 | 新颖性不能只写“RAW + Mamba + 自适应时间常数” |\n| 稳定性与读出 | REN [R20]；Perceiver IO [R21] | 理论对照、基于查询的成熟读出候选 | 外加空间交换与门控后，要重新证明组合条件 |\n| RAW 自监督 | Noise2Noise、Noise2Self [R22–R23] | 可选的 RAW 域预训练依据 | 共享噪声、对齐泄漏或同源目标会破坏原假设 |\n| 具身终点 | RawVLA [R24]；π0.5 [R25] | 直接系统基线与最终训练后端 | RAW 接入、动作监督和时序状态本身均不是新贡献 |\n\n### 3.2 优先级和实际代码边界\n\n**第一优先：沿用已经运行过的全尺寸 DBSR。** 固定上游提交 `16f158e0553b6702cc1693c43f733c2830973278`，64 通道、9 个残差块、512 维局部特征，保留现有融合器。已有参数规模约 165 万，包含共同定位头。这是当前任务已经验证过的起点，不再另写一个小网络充当强基线。\n\n**运动模块首选 SEA-RAFT 的完整作者实现，作为需要适配和训练的候选。** 本次实读 [`core/raft.py`](https://github.com/princeton-vl/SEA-RAFT/blob/main/core/raft.py)：其原输入是 3 通道，双帧上下文入口为 6 通道，内部执行 `/255` 归一化。CFA 路线必须明确改为 4/8 通道测量入口，并更换数值归一化；三通道 RawVLA 路线仍需遵守其实际线性数据单位。保留作者特征提取、相关和更新模块。原代码中的 recurrent update 可以复用，这不等于另造一个简化 GRU。首版不直接把 RGB 权重当作已经可用的 RAW 模型。[R07]\n\n**第二骨干候选为 BSRT，后置到可复用性阶段。** 作者代码包含 Swin/变形对齐和既有 RGB 风格光流分支，本次实读的 [`bsrt.py`](https://github.com/Algolzw/BSRT/blob/main/code/synthetic/bsrt/model/bsrt.py)还包含去 Bayer 工具、SpyNet、图像归一化和预训练路径。可以提取成熟 RAW 特征与融合模块，不能原样执行整网并仍称 RAW-only。优先保留作者发布的 S/L 配方；正式采用哪档由 P0 的资源与源代码验收确定。[R02]\n\n**神经状态分支首选官方 Mamba 模块；S4 和 REN 用于结构/理论对照。** 本次实读 Mamba 的 [`mamba_simple.py`](https://github.com/state-spaces/mamba/blob/main/mamba_ssm/modules/mamba_simple.py)：流式缓存同时有短卷积状态和 SSM 状态，撤回不能只清其中一个。S4 仓库的 `models/s4/s4d.py` 明确是教学用精简版，不能拿它充当正式强网络；正式实验需作者完整实现及配置。REN 作者仓库为 Julia，保留为独立理论参考，不承诺直接接入当前 PyTorch 管线。[R15–R16、R20]\n\n**TS-Mamba 等近期方法先列近邻对照，不直接升级主线。** TS-Mamba 官方仓库已有在线视频超分辨率代码与配置，但本轮只核查仓库说明，未完成主干因果性、RAW 适配和 CUDA 兼容审计。QMambaBSR 和 BurstMamba 本轮核查到论文/作者页，未完成可运行模型代码验收。年份新不能代替可复用性证据。[R17–R19]\n\nDBSR 许可为 CC-BY-NC-SA-4.0，并有学术用途声明，现有派生代码须保持归属。新增模块在 P0 固定仓库提交、配置、许可证、依赖、预训练数据与权重哈希。本轮 GitHub API 限流、Git 直连超时，因此新增仓库的**分支链接只是本日检索入口，不是假装固定的执行版本**；官方网页和上述部分源码已实读。没有安装或运行这些新模块。\n\n### 3.3 准备提出的增量\n\n本项目不以发明新的平均公式、光流、注意力或状态空间层为目标。拟验证的设计是：\n\n- **来源级的时空支持契约：** 支持域同时拥有空间成员、时间有效期、运动映射、不确定性与版本，规则直接控制实际进入特征的内容。\n- **贯穿解析和神经状态的撤回语义：** 一次分裂或时间失效能够定位受影响的派生状态，重算后与指定的批量参考一致；缓存优化不能改变这一语义。\n- **可靠性与期限共同约束的读出：** 在同样到达的观测和同样总预算下，输出当前可用表征，显式计入等待、撤回、重建和动作延迟。\n\n每一项都要与直接近邻比较。若最终收益完全可由“DBSR + 标准变化检测 + 简单 reset”解释，就按已有方法组合报告；只有组合规则、可证明性质和跨任务增量形成共同证据，才讨论新的框架贡献。\n\n## 4. 完整计算对象与组合规则\n\n### 4.1 测量、支持域、状态和读出分开定义\n\n每个原始采样记为 `m_i = (id_i, y_i, x_i, t_i, camera_i, phase_i, R_i, validity_i)`。`id_i` 至少包含 episode、相机、帧身份和传感器采样位置。数值相同的两次真实曝光仍是两次测量；同一帧被重复传输或在不同窗口出现，只能登记一次。\n\n一个支持域不是单一半径或时间长度，而是以下对象：\n\n| 对象 | 必需内容 | 用途 |\n| --- | --- | --- |\n| `MeasurementLedger` | 原始测量、校准版本、唯一身份、可重放范围 | 唯一可信测量账本；派生特征不回写为新测量 |\n| `SupportDomain` | 结构键、参考坐标、来源集合、来源角色、时间分段、支持版本 | 表示哪些测量共同支持哪个局部结构 |\n| `Correspondence` | 原始坐标到参考坐标的映射、插值系数、可见性、误差模型 | 解释位置变化；保留 CFA 相位及真实采样位置 |\n| `EvidenceState` | 局部系数或统计量、协方差/代理类型、有效性、来源权重 | 解析积分状态；精度与年龄分开表达 |\n| `FeatureState` | 成熟骨干特征、神经缓存、参数版本、依赖集合 | 承载学习表征；不把注意力当测量精度 |\n| `ReadoutSnapshot` | 结构/令牌、有效 mask、测量时刻、状态版本、期限与代价 | 下游一次读取的一致快照 |\n\n支持域可重叠，但重叠不产生额外独立信息。空间连通图仅用于提出成员候选；是否能合并，还要通过同一结构模型的域级一致性检查。这样避免 A 与 B、B 与 C 分别相似，却把明显不同的 A 与 C 沿一条链强行混合。\n\n### 4.2 用局部结构模型替代“所有位置值相等”\n\n解析参考先采用每个 CFA 相位独立的局部常数或仿射基，随后可扩展到方向结构系数。对一个固定支持域：\n\n```text\ny_i = φ_iᵀ θ + ε_i\nφ_i = φ(映射后的真实采样坐标, CFA 相位)\nΛ_D = Λ_prior + Σ_i φ_i R_i⁻¹ φ_iᵀ\nη_D = η_prior + Σ_i φ_i R_i⁻¹ y_i\nθ̂_D = solve(Λ_D, η_D)\n```\n\n这里 `θ` 是局部 RAW 结构的系数，不是 RGB。四个 CFA 平面的观测保持独立身份；可以共享结构边界假设，不能先把四平面的数值平均后再判断是否同源。含插值、共享黑电平误差或相关噪声时，使用成块的 `ΦᵀΣ⁻¹Φ`；独立标量公式只作为其特例。优先使用成熟 QR/Cholesky 求解与 GTSAM 小型参考，避免手写数值分解。[R04、R13]\n\n`Λ_prior` 必须标记为先验，不能算成观测信息。无先验时要求设计矩阵满秩；秩不足就输出不可辨识方向及有效 mask，而非用一个未披露的小正则把它包装成确定估计。局部仿射模型也只是近似，其残差和适用尺度必须验证。\n\n### 4.3 八种规则及其组合条件\n\n| 规则 | 实际操作 | 必须保持的性质 |\n| --- | --- | --- |\n| `observe` | 登记新的唯一测量；重复包只读取现有状态 | 幂等，不因重读降低方差 |\n| `transport` | 将某来源映射至当前参考坐标，生成显式采样系数 | 不原地覆盖原始 RAW；不把重采样当新观测 |\n| `propose_support` | 从空间邻接、对应及持续性提出来源候选 | “未发现冲突”与“已有共同支持”分开 |\n| `merge` | 在同一参数/坐标版本中取来源集合的并集并重建状态 | 去重、域级检验、跨域先验只计一次 |\n| `split` | 形成不相容的空间子域或时间新版本 | 子状态由来源重建，禁止直接把父均值平均分配 |\n| `retract` | 将指定来源从指定结构支持中移除，传播失效标记 | 删除内容、重算受影响权重与归一化，不能只改年龄 |\n| `retain / forget` | 保留可信积累；按过程模型降低陈旧支持或过期归档 | 缺失不等于反证；遗忘不伪造新样本 |\n| `readout` | 读取同一支持版本的已提交状态 | 因果、mask 正确、重复读出不推进测量时钟 |\n\n`merge` 对来源集合可交换、可结合，但仅限固定的模型、坐标映射与权重版本。根据新数据重新判定支持、重新估计运动或改变可靠性以后，结果通常不再与处理顺序无关。在线事件按时间和确定的冲突规则执行，禁止宣称所有非线性操作满足交换律。\n\n### 4.4 时间支持必须直接表示，而不能借空间图代替\n\n沿运动轨迹维护“当前结构持续了多久”的分段状态，初始解析基线采用 BOCPD；增加鲁棒 BOCPD 作为异常点对照。保留有限个候选变化时刻或等价来源权重，并登记被裁剪的后验质量和近似误差。[R10–R11]\n\n一个位置至少区分四种情况：持续相容；对应关系不确定；短时测量异常；结构持续改变。先使用多假设或暂缓接纳，避免一次大残差就清空历史。旧来源可退出当前结构，但仍保留在账本中供诊断或其原结构使用；不等同于删除磁盘数据。\n\n**速度不是撤回条件。** 快速运动若对齐准确，应允许长期积分；真正应缩短有效历史的是错配、遮挡、形变和结构失效风险。实验必须同时包含“快而可准确对齐”和“慢但发生局部改变”，防止模型只学到速度阈值。\n\n### 4.5 撤回要覆盖完整依赖，不能仅覆盖一个 mask\n\n原始测量可以经过运动估计、来源特征、积分节点、融合权重预测器、递归缓存和读出影响最终结果。为这些派生对象建立版本化依赖图，至少记录源集合、参数版本、支持版本与参考坐标版本。\n\n对来源撤回定义两种验收，不能混写：\n\n1. **固定规则下的内容撤回：** 固定已选映射和支持决策，将已撤回来源的内容置换后，重算读出不变。这证明内容通路已清除，允许“发现该来源失效”这条历史事件继续存在。\n2. **完整反事实重放：** 将该来源从输入序列中删除，并重算受影响的运动、支持决策和状态，与批量重放参考一致。只有执行了这个更强的重放，才可声称最终输出完全不依赖该来源。\n\n非线性特征不能用减去旧特征的方式假装撤回。第一版从原始来源完整重算；优化版只允许重算可证明完整的受影响依赖。若卷积特征的感受野越过域边界，要重编码局部区域并使用声明的边界填充，或保守撤回整个特征节点。邻近上下文可以保留为独立上下文角色，但不能再声称它属于被隔离的同一结构测量证据。\n\n### 4.6 状态保留、压缩与期限\n\n保留有限 RAW 回放窗和周期性干净状态检查点。若采用长期摘要，必须记录其来源：无法从摘要中移除单个旧来源时，应作废整个摘要并重建，或明确宣布该摘要超出精确撤回范围。**精确撤回范围与最长历史都要作为模型规格。** 不允许只保存一个均值却承诺无限期、任意来源的精确撤回。\n\n读出采用版本事务：只有一个支持版本下所有依赖一致的结果才能提交。deadline 到来时，优先提供已完成的合法状态，必要时退回当前有效测量的成熟单帧通路；全无效时输出无效 mask，由预先定义的策略处理。不读一半旧状态、一半新状态。\n\n本项目研究的是表征读出期限。改变机器人重规划频率、提前中断动作块或主动增加曝光属于新的控制/采集协议，必须单独比较，不能悄悄混入 N01 的特征收益。\n\n### 4.7 首版算法如何把这些规则串起来\n\n首版使用可解释的候选生成与检验，不另训练一个小“支持预测网络”。在同一时刻，对每个局部结构依次执行：\n\n```text\n1. 从 t−1 的已提交状态形成持续结构、短时异常、结构变化三个假设。\n2. 登记 t 时刻的新测量；去重；建立运动映射及误差/有效性记录。\n3. 用实际采样坐标评估各假设的预测残差，更新时间分段与未决来源。\n4. 提出相邻域的 merge，或残差不相容区域的 spatial/temporal split。\n5. 对候选集合做域级检查，生成新版本的来源集合与来源角色。\n6. 使受影响的积分、特征、状态、读出依赖失效；按参考规则重建。\n7. 验证一致后原子提交；期限到达时只读已完成的合法快照。\n```\n\n合并判据的第一版是：坐标、结构基和时间版本兼容；两域在共同查询位置的结构预测差异，其有效置信上界低于预先声明的结构容差；合并后整个域的预测残差仍通过独立/顺序合法的一致性检查。容差使用传感器测量或几何任务单位，不能直接比较未归一化的斜率和截距。若只有学习模型的经验风险，没有有效区间，则按经验分支报告，不能借用 T3 的保证。\n\n分裂判据先定位时间分段的变化，再检验变化是否局部。局部残差簇生成空间子域候选，分别重估模型；没有足够测量支持分裂时，保留未决状态或缩小支持，而非强制选择一个物体解释。原始观测可同时用于互斥假设，但在单个已提交估计中不重复计数；多假设混合的不确定性包含假设间差异。\n\n同一时刻可有多个合法支持候选。首版按“满足风险与期限约束后，最小化声明任务方向上的估计误差代理”选择，不把历史长度作为独立追求目标。报告近似方差、结构偏差、对齐风险和实际计算成本四项原值；权重/阈值只在开发集锁定。统计主支路与使用当前数据估计运动/特征的经验支路分开标记，后者需校准验证。\n\n## 5. 理论层面要保证什么\n\n“有理论保证”应落实为**写明假设的命题、证明和对应测试**。以下一部分是已有估计理论的特例，一部分是本方案必须实现的程序不变量；它们不保证真实任务必然提升，也不预先宣称新的定理已经完成。理论文件在 P0/P1 建立，随算法变更一起评审。\n\n### 5.1 T1：唯一来源与合并/分裂/撤回的一致性\n\n假设每个来源因子有唯一 ID，模型与参数版本固定，所有有效因子被保留。令 `S(D)` 是域内因子的规范化集合，则 `S(A ∪ B)` 去重后决定同一个参考目标函数。使用同样数值求解规则时，合并顺序不改变该目标；分裂或撤回后，从剩余因子重建与直接在该集合上求解一致。\n\n证明依赖集合并集的幂等性和因子求和，而不是网络学习。浮点加法存在顺序误差，因此实现采用规范排序/归约与数值容差，不能承诺任意 GPU 核逐位一致。测试覆盖重复帧、重叠域、跨相机、删除—恢复、不同事件分块和部分 episode reset。非线性求解只保证目标一致；要保证解一致，需要固定初始化、迭代和确定性执行。\n\n相关噪声应按联合因子处理，不能拆成虚假的独立来源项。删除部分测量后，固定高斯参考使用剩余观测的协方差子块重新求逆；直接截取原精度矩阵通常对应不同的条件问题，不等价于撤回。该情形必须有单独手算与重建测试。\n\n### 5.2 T2：固定支持条件下的估计与不确定性\n\n对第 4.2 节的线性模型，若支持域与设计矩阵预先固定、噪声零均值且协方差 `Σ` 已知正定、模型正确并可辨识，无先验 GLS 是最佳线性无偏估计，协方差为 `(ΦᵀΣ⁻¹Φ)⁻¹`。独立等方差的常数结构退化为样本均值及 `σ²/n`。这给出解析实现必须达到的手算基准。\n\n若 `z = A y` 是插值或派生积分，噪声变为 `AΣAᵀ`。同一 RAW 帧产生的原始节点和积分节点不能被当成两组独立观测。对未知相关性的标量固定权重估计，可使用保守界 `Var(Σ a_i ε_i) ≤ (Σ |a_i| σ_i)²`；它可能很松，不应包装成高精度后验。\n\n**限制：** 用当前数据选域、估计运动或预测权重后，以上固定设计结论不自动成立；把权重 `detach` 也不会消除统计选择偏差。理论测试使用预先固定或独立校准的选择规则。任务模型的方差若未通过覆盖检验，应标为代理；真实噪声校准误差、插值相关、饱和截断和结构偏差分别报告。[R04]\n\n### 5.3 T3：顺序决策的误撤回控制\n\n为统计参考支路构造非负过程 `E_t`，要求在“支持仍有效”的零假设下满足 `E[E_t | F_(t−1)] ≤ E_(t−1)`、`E_0 = 1`。则使用阈值 `1/α` 的首次越界撤回规则满足 `P_H0(存在 t: E_t ≥ 1/α) ≤ α`。可从满足条件的似然比混合或现成 confidence-sequence 方法构造，不把普通残差 sigmoid 改名为概率。[R12]\n\n运动、候选和下注参数若依赖待检验的同一测量，需给出合法的条件构造、独立留出或重新推导。多域、多候选和反复重启分配 `α_j`，使 `Σ α_j ≤ α_total`；单个域的保证不自动扩展到整段视频。合并使用“差异区间落入预先声明的结构容差”的等效性判断，不能用“没有拒绝不一致”代替“已经相容”。\n\nBOCPD 提供模型内的时间分段后验；鲁棒 BOCPD 的鲁棒性也有其模型条件。**二者不自动满足上述误报界。** 工程主支路可先用 BOCPD，统计保证支路独立验证；只有条件和实现都成立的部分获得保证标签。数据无信息或变化过小时，不承诺有限帧内必然检测。\n\n### 5.4 T4：可变时间常数与局部交换的稳定边界\n\n解析状态场可采用有依据的泄漏积分与非负局部交换：\n\n```text\ns_(t+1) = D_t P_t s_t + (I − D_t) u_t\nD_t = diag(exp(−Δt / τ_j,t))\nP_t ≥ 0，且每一行和为 1\n0 ≤ D_jj ≤ d_max < 1\n```\n\n若 `||u_t||∞ ≤ U`，则 `||s_t||∞ ≤ max(||s_0||∞, U)`；相同输入及固定外生系数时，两条状态轨迹的差异至多按 `d_max` 收缩。证明来自凸组合与诱导范数。允许行和小于 1 时，应将缺失质量解释为泄漏到已声明的零/基准状态；不能无意中改变测量单位。\n\n若 `P_t`、`D_t` 依赖各自隐藏状态，上述两轨迹收缩证明不再直接成立，需要加入门控的 Lipschitz/small-gain 条件。Mamba 的负状态参数和正步长可支持其线性子状态的分析，但整个网络的门控、投影、残差与空间交换不自动获得同样保证。REN 是更严格稳定网络的参考，不能把它的结论外推到修改后的任意结构。[R15–R16、R20]\n\n稳定并不意味着证据正确；一个稳定状态也可能长期记着错东西。撤回仍按 T1/T5 检验。\n\n### 5.5 T5：局部重建与全量重放等价\n\n假设派生计算依赖图完整、算子版本固定、失效节点集合覆盖所有受影响后继。按拓扑顺序重算该集合，其他节点保持不变，则结果与同规则下全量计算一致。这是依赖闭包上的归纳证明，适用于非线性网络，不需要把特征假设为线性。\n\n对于递归网络，把有界时间窗展开成依赖图；从**未受污染的检查点**重放到当前时刻。若改变映射或状态门控，也要重放相关决策；只把旧隐状态乘一个零 mask 不等价于完整重建。P5 先做全量参考，再优化局部执行。不能用“缓存命中率高”替代等价性验收。[R13、R16]\n\n### 5.6 T6：可中断执行与不确定性读出\n\n可严格保证的第一层是操作预算和版本一致性：任意允许的中断点只读已提交快照，不生成新证据。若读出还依据 confidence sequence 提前停止，在 T3 的条件下允许停止时刻依赖已见数据而保持覆盖。[R12]\n\nGPU 的平均或 p95 时延不是硬实时保证。第二层是实际 deadline SLO：包含排队、传输、撤回、重算和 π0.5 推理的端到端超期比例。若要求确定的最坏执行时长，需要另做 WCET/资源隔离分析。状态估计误差界也不能直接当作机器人动作误差界；最终动作后果必须实测。\n\n### 5.7 理论交付的最低内容\n\n每项命题交付：定义、假设、推导、对应代码入口、数值精度要求、违反假设的反例和测试收据。T1/T5 是完整主线必须满足的语义；T2/T3/T4/T6 的统计或稳定性保证按具体分支标注。无法证明的学习策略可继续实验，但不得和已证明支路共用“有保证”标签。\n\n## 6. 两类实现及它们如何共享规则\n\n### 6.1 非神经参考：来源可追溯的局部顺序估计\n\n参考路线使用校准噪声、局部结构系数、显式运动映射、BOCPD/鲁棒变化检测和可删除来源因子；先在已知对应关系下做完整实现，再接实际对应。输出 `θ̂`、有效性、协方差类型、支持质量和结构版本，不生成 RGB。\n\n其目的有二：建立可手算、可重放的正确性基准；单独检验支持规则是否在没有网络优化干扰时改善误混合和恢复。必须同时比较固定历史 GLS、鲁棒固定历史估计、标准变化检测后 reset 和完整支持域规则，不能只胜过简单平均就称为新机制。\n\n### 6.2 神经主线：成熟内容模型 + 显式支持契约\n\n默认保留作者规模 DBSR，让被接纳的原始来源内容和域内结构内容直接生成特征。两条候选通路先受控比较：\n\n- **来源特征通路：** 每个唯一来源用共享 DBSR 骨干编码，按支持/对应汇入成熟融合器。撤回后重新计算依赖该来源的统计、权重和读出。\n- **域内容通路：** 每个域的 CFA 积分/结构系数在声明的坐标上形成测量内容节点，使用共享成熟骨干；原来源与派生节点的重叠依赖显式记录。注意力可以读取重叠描述，但它们不能作为独立精度项再次相加。\n\n方差、年龄、有效性和对齐风险作为独立元数据进入规则或已有融合接口。不得把“权重大”解释成“后验可靠”。采用哪条通路由配对验证决定，不预设额外节点必然有益；保留同节点数的当前内容控制。\n\n### 6.3 神经状态场：在回放语义成立后引入\n\nP5 才引入持久状态，第一候选使用官方 Mamba 模块及完整因果缓存；固定时间常数 S4/解析状态作为对照。一个正式配置候选为：继承 DBSR 的 512 维特征，4 个官方 Mamba block，`d_state=64`、`expand=2`。这是 N01 的待验收组合配置，**不是作者已验证的 RAW 模型**；最终层数及状态规模通过同容量、同计算预算试验锁定，不因 CPU smoke 而压缩成几维玩具。\n\n状态沿可靠运动轨迹或局部域传播，局部交换仅在当前允许的域之间进行。支持改变时，从干净检查点重放所有相关状态，包括短卷积和 SSM 缓存。第一版不实现“隐状态可直接相减”的假设性优化。\n\n状态规模先算后跑：上面配置若为每个空间位置保留四层 FP32 SSM 状态，单位置约 `4 × 1024 × 64 × 4 = 1 MiB`，还未计短卷积、梯度及 RAW 缓冲。因而必须评估较粗域网格、有限活跃域与状态共享；不能宣称线性复杂度就自然适合全分辨率。共享/压缩若破坏撤回，应退回可重放版本。\n\n### 6.4 读出保持有来源、有容量控制\n\n第一版复用现有 `VisualTokenPostprocessor`，作为对所有方法相同的接口。需要可变数量的域或任务查询时，再复用 Perceiver IO 的成熟 cross-attention 设计/实现；PyTorch 适配要与官方实现做数值和掩码契约核验，不另写小 MLP 代替结构建模。[R21]\n\n任务语言或反应期限可以改变读取哪些结构，但不能修改已经登记的测量值、捏造来源或把读出后的推断写回测量账本。学习层中的线性投影是必要接口，不单独包装为 N01 的研究贡献；所有可训练参数、预训练来源和更新范围完整计数。\n\n## 7. 按阶段实现与验收\n\n推荐顺序为 **P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8**。P0 起即可维护真实数据清单；P1/P2 后做一次已有 π0.5 桥的小批次回归，及早发现形状或训练接口问题。它不替代 P7 的充分动作训练。以下文件名中“拟新增”表示尚未实现，不把计划命令写成已经可运行的入口。\n\n### P0：冻结研究问题、数据与依赖\n\n**目标。** 将旧结果、数据、成熟模型和拟证明命题固定成可复现起点。\n\n**工作。** 保留 `85790cc` 及全部负结果；整理独立 train/calibration/validation/test 清单；区分 CFA、合成 CFA 和 `rawvla_rgb3`；建立来源许可与版本清单。补齐 RAW 噪声单位、曝光/增益、坏点/饱和、采样坐标和跨相机规则。锁定新的测试命名空间，旧 offset=1000/2000 holdout 已经消费，不再用于新选型。\n\n**交付。** 拟新增 `configs/encoders/n01_full/protocol_v1.json`、`research/theory/n01_support_contract_v1.md`、数据 manifest 和上游锁文件。负责人分别记录算法、数据、训练、评审职责，不预设必须多人并行。\n\n**验收。** 给定一个序列能追溯每个唯一源、真实单位与拆分身份；正式模型的代码/许可/配方可获取；每个新保证有假设与反例；旧实验能够从收据识别，不重写历史结论。\n\n### P1：建立可组合、可撤回的解析参考\n\n**目标。** 先把支持域规则做对，不依赖大网络解释错误。\n\n**工作。** 实现 source ledger、域级局部常数/仿射估计、去重合并、空间分裂、时间来源撤回、版本化重建与批量参考。已知对应关系下处理插值和相关噪声；保留原一维入口。先完整重算，建立精确撤回窗口。\n\n**交付。** 拟新增 `frameworks/n01_full/{ledger,domains,statistics,replay}.py`；对应数值/性质测试；T1/T2/T5 第一版证明与源码映射。\n\n**验收。** 手算解、随机小问题的独立稠密求解、任意重复/重叠/删除顺序、分裂后来源隔离、相关噪声方差和缺失输入均通过。FP64 参考与 FP32 误差分别记录。不能用邻接边开关次数作为本阶段验收。\n\n### P2：建立可靠的运动对应与传感器噪声模型\n\n**目标。** 能区分“运动可对齐”和“测量已经不对应”。\n\n**工作。** 先复用 SEA-RAFT 完整模块适配 4 通道 CFA，再建立 `rawvla_rgb3` 的真实单位输入；使用已知 RAW 几何生成、传感器噪声及足够复杂的运动监督训练。显式处理遮挡、越界、分数位移、运动模糊和不同 CFA 相位。光流的 forward/backward 一致性只能使用当前及过去两帧，不引入未来帧。\n\n**交付。** 拟新增 `backends/raw_correspondence.py`、RAW 运动训练配方、独立运动校准和误差报告。噪声模型按传感器/曝光建版本；一阶对齐方差 `∇fᵀΣ_flow∇f` 只作为近似，并用留出数据检验。\n\n**验收。** 同时报告流误差、错配可识别性、风险覆盖、静态误拒与时延；对照无对齐、原简化对齐、实际模型、oracle。快速准确对齐不能被规则无差别丢弃。实际对齐不能接近 oracle 时，分别诊断对齐与支持机制，不把二者混成一个失败。\n\n### P3：完成空间与时间支持的共同组织\n\n**目标。** 直接解决同位置错误历史不能退出的问题。\n\n**工作。** 在 P1 的源集合上建立时间分段，比较 BOCPD、鲁棒 BOCPD 和预注册顺序检验支路；空间域级相容与时间有效期共同决定成员。保留相容、未决、拒绝三态；区分噪声、当前异常、持续变化和无测量。对域合并、分裂、重开与测试重启分配统计预算。\n\n**交付。** 拟新增 `frameworks/n01_full/{temporal_support,spatial_support,calibration}.py`；T3 条件表；源级漏拒/误拒、变化延迟、错误历史质量与恢复曲线。\n\n**验收。** 独立静态长序列上的误撤回满足声明统计条件；局部持续变化能撤回旧时间来源；单帧异常不会无差别清空可靠历史；missing/saturated 与反证不同。必须胜过或明确解释与标准变化检测后 reset 的差别。若解析规则无收益，可保留正确的算子继续 P4，但不能把它标为性能已验收。\n\n### P4：接入成熟特征并进行匹配充分训练\n\n**目标。** 排除前一轮冻结干预的分布不匹配，独立检验完整规则的增量。\n\n**工作。** 让支持域实际控制来源内容，并保留当前帧/额外节点容量控制；全部正式臂使用完整 DBSR、相同任务读出、同样因果信息与校准数据。分开做冻结算子干预和匹配重训，后者是主要性能结论。先证明 temporal-only，再加入 spatial，避免一次改变所有因素。\n\n**交付。** 拟新增 `frameworks/n01_full/encoder.py`、`training/n01_full.py`、完整训练曲线、模型/源/参数哈希和第 9 节矩阵。\n\n**验收。** 三种子达到预注册的验证平台；核心配对比较有逐帧和逐事件结果；候选较成熟融合以及“融合 + 标准变化检测/reset”显示实用增量，同时静态与当前异常条件不过度退化。若没有增量，明确归因到规则、容量、优化或数据；不以训练损失下降替代验收。\n\n### P5：长期状态、局部交换与期限读出\n\n**目标。** 把 N01 从有界窗口计算推进到有明确保留/遗忘语义的状态场。\n\n**工作。** 建立解析泄漏/局部交换参考，再接官方 Mamba 的神经状态候选；与固定窗口充分训练 DBSR、同容量无撤回状态、简单 reset 状态比较。先整段回放，再做依赖闭包上的局部重算；支持域或参数变更使污染缓存失效。加入只读快照、操作预算、deadline 和当前帧回退。\n\n**交付。** 拟新增 `frameworks/n01_full/{state_field,invalidation,deadline}.py`；T4/T5/T6 的分支适用性；状态/精确回放范围/缓存/时延 Pareto 报告。\n\n**验收。** 流式与批量参考一致；撤回后残留影响受控；长序列不跨 episode 泄漏；有界状态的实际内存可接受；相同到达观测下比较延迟—误差曲线。局部执行只有在质量保持且端到端成本改善时采用。若神经状态无增量，保留完整显式支持版本进入 P6/P7，不强行把 Mamba 堆进最终模型。\n\n### P6：真实 RAW、规模和可复用表征\n\n**目标。** 不让结论停留在小格点定位任务。\n\n**工作。** 使用许可核实后的真实 RAW burst/video，以及独立成像会话；CRVD/ReCRVD 可用于噪声与时间稳健性诊断，不能自动充当机器人动作数据。对同一骨干做 RAW 域任务预训练，使用定位/几何跟踪、结构边界或有真实标注的检测任务；至少两个不同下游读出。第二骨干优先 BSRT 的合规特征支路，检验规则是否依赖 DBSR。[R08–R09]\n\n**交付。** 相机/场景/会话留出、噪声与曝光迁移、两个下游任务和至少两个成熟内容模块上的结果；分别报告 frozen-feature probe 与相同预算 fine-tuning。原生 CFA 和三通道 pseudo-RAW 的成绩始终分列。\n\n**验收。** 规则不依赖隐藏事件标签、真实位姿或未来帧；真实 RAW 任务至少形成可解释的增量或明确限定适用域。扩展历史 8/16/32、空间尺寸 64/128/224 等候选轴时，记录吞吐、峰值显存、状态和数据量，而不是从一条曲线宣称 scaling law。缺少真实传感器数据时标为未完成，不以重新马赛克 RGB 补交。\n\n### P7：π0.5 接入、表征适配与充分动作训练\n\n**目标。** 让完整 N01 成为可训练的 π0.5 视觉前端，并将后端适配成本纳入比较。\n\n**工作。** 复用 `RawVLASequenceDataset`、`RawVLAFeaturePolicy` 和既有真实接口，重新验收新编码器。先在已有冻结后端下训练特征桥/编码器；随后按统一方案逐步解冻相同范围的 π0.5。完全冻结后端可能不适应新表征，不能把它当作唯一终局；也不能只给 N01 更多后端训练。\n\n**交付。** 两平台新模型的真实前向/反向、actual parameter update、独立服务；完整动作训练配方、参数组/优化器/数据流/检查点；开发集动作与闭环曲线。原图像塔退出主链，保留语言和 action expert；不用 RGB 特征蒸馏补回视觉语义。\n\n**验收。** 动作/状态归一化、视角顺序、token mask、padding、episode reset、唯一帧和重复 flow denoising 均正确；同一观测只推进一次证据状态。至少完成三个训练种子的成熟 RAW 融合基线和完整 N01 的匹配训练平台，源消融按同一协议训练。服务跑通或单 batch 梯度不能替代本阶段训练结论。\n\n### P8：RawVLA-Bench 全量闭环验证\n\n**目标。** 完成最终任务验证，回答 N01 是否改善物理决策与恢复。\n\n**工作。** 按第 11 节固定任务、照明域、权重初始化、动作协议和种子。完整比较强系统基线、同后端成熟 RAW 融合与 N01；附加动态历史干预以独立版本运行。训练与超参选择只用开发数据；正式 test 一次冻结后执行，不根据测试结果再选 best。\n\n**交付。** LIBERO 10,000 与 RoboTwin 3,250 原协议身份完整覆盖；逐任务/照明域/训练种子、配对差值与置信区间；反应期限和端到端成本；正常失败、基础设施缺口与恢复日志。多训练种子时，每个检查点独立完整清单，不能把分母混加成一个模型的成绩。\n\n**验收。** 分别给出机制、表征和闭环结论。若只有成像鲁棒性提高而真实状态变化反应变慢，必须披露；若整体没有优势，完整发布内部负结果与适用范围。完成全量执行不等于必须得出正结论，也不代表真实相机或实体机器人已经验证。\n\n## 8. “训练充分”的操作定义\n\n充分训练是本任务、数据和优化配方下经过检查的状态，无法预先用某个固定步数保证。上一轮 5,888–13,312 步的平台只适用于原小规模合成任务。完整分辨率、运动适配、长期状态和 π0.5 需要重新建立曲线。\n\n### 8.1 三层训练安排\n\n| 层级 | 训练对象与监督 | 初始资源规划值，非充分性保证 | 停止与续训依据 |\n| --- | --- | --- | --- |\n| 机制/匹配特征训练 | 全尺寸 DBSR、支持规则相关参数、共同结构任务头 | 每种子先预留 20k updates，必要时扩展至 100k；有效 batch 按显存与梯度累计固定 | 最低训练量、至少两次有效 LR 调整、验证平台与分条件退化检查 |\n| RAW/运动预训练 | 完整运动模块与选定骨干，RAW 几何/任务及可选 RAW 自监督 | 按作者配方和实际数据量建立 100k–300k updates 的候选预算，P0 后锁定 | 实际运动误差、跨会话任务指标和域覆盖；平台前不消费正式测试 |\n| π0.5 动作训练 | 同一初始化的 RAW 融合与 N01、相同视觉桥和解冻范围 | 每平台/种子先规划 30k–100k updates；桥接 warm-up 单列，不能当正式训练 | 动作验证与开发闭环均跟踪；预算耗尽仍改善则保留未测 test 并续训 |\n\n上述范围用于估算资源，不是作者默认超参或已测耗时。P0 用真实分辨率的短 profiling 记录每步时间、数据吞吐、内存和有效样本数；按 `总 updates × 实测 step time` 给出 GPU 小时与日历时间。服务器同机竞争会影响耗时，不预先承诺几天完成。\n\n### 8.2 统一的收敛与比较规则\n\n- 预先固定主验证指标、最小实用差异和评估频率。默认每 1,000 updates 检查一次；小数据按 epoch 另定，防止反复看同一小验证集。\n- 至少经历计划中的学习率下降；在最终低学习率阶段，连续 8 次检查改善小于预先确定的 `δ_val`，且 best 不持续贴着预算末端，才能标记 `validation_plateau`。`δ_val` 由开发重测波动和任务精度共同确定，在正式矩阵前锁定。\n- 平台不等于优化可靠。先做小训练集可拟合诊断、梯度/来源利用诊断；使用相同的有限超参预算比较至少两档学习率或训练配方。若 train/val 同时过差，排除欠拟合与输入错误，不能仅因不再下降就宣布充分。\n- 各方法允许达到平台所需的不同步数，记录真实总成本；另做同更新量/样本量/计算预算比较。两种问题分别报告。\n- 核心比较至少 3 个训练种子。报告配对效应与区间，不能把帧当独立实验，也不能仅取三个 seed 的最佳者。\n- checkpoint 保存模型、优化器、scheduler、AMP scaler、RNG、sampler、校准和支持规则版本。跨优化步骤不能继续使用旧参数产生的特征缓存；长序列训练需明确 burn-in、TBPTT 和状态重建。\n- 不把 RGB 恢复预训练伪装成 RAW-only 训练。若有外部权重，其数据/损失来源和是否允许用于主线单列；默认正式主线使用 RAW/动作任务训练，RGB 重建权重不作为必要前提。\n\n### 8.3 预训练与辅助损失\n\n任务损失是最终目标。RAW 预测辅助项仅用于确实可观测、支持相容的样本，允许参考 KPN 的训练退火思想。采用 Noise2Noise/Noise2Self 时，目标来源必须从输入、对齐估计和派生统计中正确排除，并检验独立噪声假设；不能只遮住最后一个张量位置就声称没有泄漏。[R05、R22–R23]\n\n不同时修改内容骨干、支持规则、状态模型和损失后只做一个总对比。先建立每个因素的单独结果，再训练最终组合。训练时 oracle flow、变化时刻或 clean RAW 可作为明确的监督标签；正式输入和评测必须去除这些隐藏信息，且所有对应基线享有同样训练监督。\n\n## 9. 能分清增量的实验矩阵\n\n### 9.1 主矩阵：先固定成熟内容模块\n\n| 组别 | 时间来源规则 | 空间支持 | 状态撤回/重算 | 主要回答 |\n| --- | --- | --- | --- | --- |\n| B0 当前帧 | 无历史 | 成熟骨干原计算 | 无 | 历史是否必要 |\n| B1 同容量固定融合 | 固定 8/16/32，等权融合；窗口由验证集选型 | 原计算 | 正常融合 | 学习融合是否优于同容量固定融合 |\n| B2 DBSR | 原学习融合 | 原计算 | 正常融合 | 主要成熟基线 |\n| B3 DBSR + 标准变化检测/reset | BOCPD 或鲁棒方法，验证集锁定 | 原计算 | 整域 reset | 显式 N01 是否超出直接拼装 |\n| N-T | 来源级时间支持 | 空间支持关闭 | 全量参考重算 | 同坐标旧历史撤回是否有价值 |\n| N-S | 固定时间支持 | 域级合并/分裂 | 全量参考重算 | 空间规则独立作用 |\n| N-TS | 时间与空间共同支持 | 开启 | 全量参考重算 | 两类规则的组合效果 |\n| N-stale | 与 N-TS 相同决策 | 同上 | 刻意保留旧依赖缓存 | 撤回重建本身的增量与污染代价 |\n| N-state | 同 N-TS | 同上 | 成熟持久状态 + 可重放撤回 | 状态压缩/长历史的额外价值 |\n| N-state-reset | 同上 | 同上 | 同容量状态，简单 reset | 精确重建是否优于已有 reset |\n\n其中 B0–B3、N-T、N-S、N-TS 是核心匹配训练组；N-stale 首先作为同权重因果诊断，若报告可部署性能也要匹配训练。N-state 组在 P5 才加入。N-TS 与 N-T、N-S 的差分别检验联合规则，不只拿完整模型与当前帧比较。\n\n若使用额外积分节点，必须加入相同节点数、同参数的当前内容复制控制。参数数目相近不代表 FLOPs、访存、历史信息或训练预算相同，各项单独报告。第二骨干以其完整基线重复 B2/B3/N-TS 的关键比较，不把骨干升级收益算给 N01。\n\n### 9.2 至少覆盖的条件\n\n| 条件 | 固定/变化因素 | 希望排除的错误解释 |\n| --- | --- | --- |\n| 静态弱信号 | 同结构，独立噪声和多种 SNR | 规则为了反应快而拒绝有用积累 |\n| 快速、准确对齐 | 速度大，oracle 或高质量对应 | “快就忘”伪规则 |\n| 快速、实际对齐 | 同运动，估计误差可测 | 支持收益来自对齐信息不公平 |\n| 遮挡解除 | 新结构在事件后才可见 | 旧遮挡物继续支撑新结构 |\n| 局部真实变化 | 少数位置改变，其余稳定 | 全局 reset 掩盖局部规则缺陷 |\n| 当前帧异常 | 短时脉冲、饱和、坏点 | 错信当前帧，错误清空正确历史 |\n| 曝光/增益变化 | 尽量保持物理结构不变 | 把成像变化当结构变化 |\n| 缺失/重复/异步帧 | 测量数量与到达时刻变化 | 无数据被当反证、重复包降低方差 |\n| 非刚性/分数运动/相似物交叉 | 对应歧义 | 简单平移成功被外推到普遍运动 |\n| 长静态后突变、变化后恢复静态 | 历史长度与变化间隔变化 | 短片段看不到状态污染与重新积累 |\n\n事件在序列内的位置随机且留出，不全部固定在第 8 帧。需要包含不会发生事件的负例、长于训练窗口的事件间隔和低于可辨识阈值的变化；后一类应允许“尚不能确定”，而非要求神奇地马上识别。\n\n### 9.3 指标与预注册判据\n\n主报告同时给出静态误差、变化后 `1/2/4/8/16` 帧误差、前 8 帧误差面积、恢复时长、未恢复比例、错误历史残留质量和误撤回率。恢复时长包含删失样本；另报固定窗口内的受限平均恢复时间，不能只统计恢复成功者。\n\n第一轮可采用以下**建议值**作为开发门槛，在未看正式 holdout 前按实际任务单位锁定：事件后前 8 帧误差面积相对 B2/B3 改善至少 5%；静态误差及当前异常条件的退化上限 2%；未恢复率不增加；三种子配对效应和区间支持同一结论。单项越线不自动判定整体有效，需展示分条件权衡。若开发波动使 5% 不可识别，应先调整样本量，而非事后放宽门槛。\n\n区间以完整 episode/物体/场景为重采样单位，分层纳入训练种子。多主比较采用预注册顺序检验或 Holm 校正。正式样本数使用开发方差估算，并公布最小可检测差异；不能只用大量高度相关帧制造窄区间。\n\n## 10. 数据路线与 RAW 身份\n\n四种数据身份分别记录：\n\n1. **真实传感器原生 Bayer CFA：** 来自真实相机的传感器采样，保留整数 RAW、相位、坐标、黑白电平和曝光。\n2. **合成/仿真 CFA：** 用已知辐射/结构与噪声生成，或由明确记录的仿真传感器采样；适合理论与机制诊断，不冒称真实相机。\n3. **RawVLA-Bench `rawvla_rgb3`：** 作者三通道 HDR-derived/pseudo-RAW，保留来源和实际单位；不填假的 CFA 元数据。\n4. **RGB 独立系统对照：** 用于既有 π0.5 / ISP 系统比较和可视化，不进入 N01 主编码链。\n\nDBSR 现有正式支路为四平面。进入三通道基准时，应对同一成熟架构仅改输入 stem 的通道规格并匹配重训，记录参数差；不能把三通道复制成四通道后声称观测增加，或不加说明地合成 Bayer。\n\n数据按场景、物体、拍摄会话和原始轨迹划分。不同噪声/照明版本的同一基础轨迹必须进入同一 split；相邻时刻和同一 burst 不跨训练/验证。校准数据独立于 test，传感器未知参数使用验证过的估计或标记未知。新数据若只有 RAW 无动作标注，只用于相应表征/校准任务。\n\n“广泛应用”至少需要跨任务和跨传感器两类证据，分别报告零样本与适配结果。RawVLA-Bench 最终闭环可以支持具身任务结论，但其三通道数据本身不能完成原生 CFA 泛化这一项。\n\n## 11. π0.5 与 RawVLA-Bench 的最终验证方案\n\n### 11.1 复用已部署接口，重新验收完整模型\n\n现有 [RAW 序列加载器](../src/owac/raw/rawvla_sequence.py)、[特征桥](../src/owac/backends/rawvla_features.py)、[动作训练器](../src/owac/training/n01_action.py)与[独立服务](../src/owac/runtime/n01_feature_service.py)可复用。旧 N01 已有真实后端证据，本轮新模型仍需逐项验收，不能继承旧模型的全部 PASS。\n\n接入点保持 StarVLA `PI0.py::embed_prefix` 的视觉嵌入入口，替换图像塔及其预处理；语言、状态输入和动作专家继续复用。受控首版沿用每有效相机 256 个、宽度 2048 的令牌接口；若改变 token 数或 resampler，所有特征基线同步比较并计入参数和成本。\n\n每相机维护独立状态；时间信息、相机顺序、空间位置和 mask 一致。一帧多次被 flow-matching 去噪步骤读取，只产生一次证据更新。流式缓存必须随着 episode、相机标定、参数版本或不连续时间重置/重建。\n\n### 11.2 系统对照与训练公平性\n\n| 系统 | 输入与前端 | 后端训练 | 用途 |\n| --- | --- | --- | --- |\n| S0 已冻结 Default | 作者 ISP / render RGB → 原视觉塔 | 历史基线额外训练 0 | 协议与系统参考；不冒充容量匹配对照 |\n| S1 RawVLA 官方方法 | 作者流式 neural ISP → 图像策略 | 按作者方法复现并完整披露 | 最近直接具身路线对照 [R24] |\n| S2 当前帧 RAW | 成熟骨干单帧 → 同特征桥 | 与 S3/S4 相同 | 历史必要性 |\n| S3 成熟 RAW 融合 | DBSR → 同特征桥 | 与 S4 相同 | 核心因果比较 |\n| S3+ 直接已有规则 | DBSR + 标准变化检测/reset | 与 S4 相同 | 排除已有方法组合即可解释的收益 |\n| S4 完整 N01 | 同骨干 + 支持域、撤回/状态规则 | 与 S3 相同 | N01 的独立增量 |\n\nS0/S1 是强系统基线，不能用它们不同的训练容量单独证明机制。核心比较必须是 S3/S3+/S4 的相同权重初始化、数据、读出、后端解冻、动作预算和超参搜索。若采用 LoRA，则使用项目固定后端已有的正式实现和同样 rank/模块范围；没有现成实现时使用相同全参数/分组微调配方，不在本任务再造适配网络。\n\n动作训练推荐两段：先训练 RAW 编码器和桥，建立稳定输入；再以较低学习率统一解冻视觉前缀相关后端及动作专家，比较冻结/解冻两档。具体参数组和 LR 在开发集选定后冻结。每种子保持可精确恢复的数据流；短 warm-up 不等于已经充分训练。\n\n### 11.3 固定协议与新增动态验证分开\n\n沿用[冻结协议 0012](decisions/0012-rawvla-pi05-protocol-freeze.md)：LIBERO 四套 40 任务 × 50 初态 ×五照明域，共 10,000；RoboTwin 13 任务 × 50 dataset seed ×五照明域，共 3,250。LIBERO horizon=10、replan=5；RoboTwin horizon=50、replan=50，14 维绝对关节目标。632 条原缓存条件核查单独报告。\n\n历史 LIBERO Default 为 58.20%；本地已存冻结记录中的 RoboTwin 有缺口。**本方案没有重新登录服务器核查最新成绩，正式执行前须读取实际 manifest/audit，不能把旧状态当当前事实或合并成总分。** 现有冻结运行、源文件和环境不得被新实验覆盖。\n\n官方条件主要检验成像鲁棒性。为检验撤回，追加独立的历史干预协议：遮挡解除、局部视觉变化、临时传感器异常与错配历史。改变任务相关几何时，正确动作可能变化，需要有效的新示范/开发协议；不能机械沿用旧动作标签。人为注入错误历史只作为机制压力测试，与自然任务结果分列。\n\n每帧记录 RAW 来源时间、支持变更、特征提交时间、动作生成与执行时间。在固定观测节奏下比较“反应期限内能给出的结果”；若改变 replan 或动作中断，则新建控制协议并让所有基线使用同样节奏。\n\n### 11.4 最终结论的口径\n\n分别报告 clean/adverse、逐任务、逐照明域、任务宏平均和原协议平均；在相同初态配对成功差异，置信区间按原任务/初态结构计算。三个训练种子各自覆盖完整清单，先给出种子分布，再总结平均。\n\n正常超时/失败计入原分母；基础设施错误保留原身份及缺口，按冻结规则重试，不换种子、不挑最佳重跑。除成功率外，报告动作误差诊断、事件恢复、超期率、p50/p95/p99 总时延、显存/状态/数据传输及累计 GPU 小时。未测功耗写未测量。\n\n闭环收益可预先设为主要受损条件至少改善 3 个百分点、clean 退化不超过 2 个百分点的规划目标，并结合开发方差检查统计检验力；它不是承诺。完整 N01 的定位是更可靠的 RAW 表征；若只在部分条件有效，就据实限定范围。\n\n## 12. 工程组织、资源与实施顺序\n\n### 12.1 现有资产和拟新增模块\n\n| 位置 | 处理方式 |\n| --- | --- |\n| `src/owac/frameworks/n01/` | 作为历史原型与数值参考保留；修复或语义变更另记版本，不破坏既有证据 |\n| `src/owac/baselines/burst_features.py` 与 `_vendor/dbsr/` | 保留成熟基线，新的支持模型用显式配置切换 |\n| `src/owac/frameworks/n01_dbsr.py`、`n01_dbsr_raw.py` | 保留冻结干预入口，不能把旧 negative 结果改名成完整模型成绩 |\n| **拟新增** `src/owac/frameworks/n01_full/` | 来源账本、域、统计、时间支持、失效传播、状态与读出契约 |\n| **拟新增** `src/owac/backends/raw_correspondence.py` | 成熟运动模块适配及 source/version 说明 |\n| **拟新增** `src/owac/training/n01_full.py` | 匹配训练、数据流恢复、校准/梯度边界；复用既有训练基础设施 |\n| **拟新增** `src/owac/evaluation/n01_full.py` | 逐帧、事件、恢复、来源与成本评价 |\n| **拟新增** `configs/encoders/n01_full/`、`tests/encoders/n01_full/` | 各阶段固定协议、性质测试、来源隔离和完整回放测试 |\n| `src/owac/backends/rawvla_features.py` 等既有桥 | 复用并对新模型验收；候选服务使用独立复制/哈希清单 |\n\n所有拟新增路径均相对当前 checkout；外部接口延续现有测量/读出契约，模块实现不泄漏进冻结 runtime。优先在当前 worktree 延续版本历史；若需要新的执行 checkout，放在 `worktrees/<task>/`，分支沿用 `lzh/<task>`。\n\n### 12.2 服务器与成本安排\n\n训练推荐沿用用户指定服务器，通过 `ssh -p 44327 root@107.209.104.125` 访问；`-L 8080:localhost:8080` 只在需要本地看训练界面且端口可用时添加。本轮仅交付方案，没有启动新服务器任务。\n\n正式运行前读取服务器 `/etc/vast-agents-guide.md` 和实际资源/任务状态。为 v1.0 创建独立源码快照、环境、数据只读入口和输出目录，使用 supervisor；不修改原 RawVLA 冻结任务。已有 96 GB GPU 信息来自前次收据，资源余量要在执行前实测。\n\n资源按阶段释放：先 P0–P3 的数值与数据质量，再 P4 核心训练矩阵，再 P5/P6 扩展，最后 P7/P8 动作训练与全量评测。先完成少量开发任务闭环来检查优化和时序，再执行已经冻结的全量清单；开发成绩不混入最终测试。\n\n每次训练记录 code SHA+dirty diff、依赖、数据/拆分/校准/配置哈希、初始与最终参数、优化步骤、样本量、耗时与峰值资源。大 checkpoint 和 RAW 留服务器/批准存储，本地留数字与校验清单。重试、预算续训和失败各有独立身份，不覆盖旧输出。\n\n### 12.3 每阶段的交付格式\n\n每阶段交付四类材料：可复现实现和固定配置；理论/假设与源码映射；真实测试与训练收据；面向人的“做了什么、证据如何、哪里仍不成立”。`make check`、针对性测试与来源审计是工程门槛；训练平台、独立任务收益和闭环结果另行判断。\n\n如果阶段失败，允许依据证据修改算法和路线，但必须说明修改的是测量模型、支持规则、内容骨干还是训练。新选择使用开发数据，新正式结论使用未消费的测试命名空间。不能反复在同一失败样例上改阈值后宣称泛化。\n\n## 13. v1.0 完成时应具备的成果\n\n完整路线应形成三份可独立检验的成果：\n\n1. **一个计算契约和参考实现。** 同一来源的合并、分裂、时间失效、撤回、保留与期限读出有明确语义；解析与神经版本可以接受相同的来源干预。\n2. **一套有边界的理论结果。** 唯一信息、固定条件估计、顺序错误控制、状态有界与重建一致性各自有证明、反例和实现证据，不把这些保证混成任务成功保证。\n3. **一条充分训练的实证链。** 成熟多帧融合 → 完整 N01 匹配训练 → 真实 RAW/跨任务表征 → π0.5 动作训练 → RawVLA-Bench 全量闭环。每个环节保留直接强基线与失败。\n\n优先实施 P0/P1，并同步准备 P2 的 RAW 运动训练数据。第一项关键研究判据是：**在实际可观察的局部结构变化后，来源级时间撤回是否比成熟融合和标准 reset 更快恢复，同时不损害静态积累与当前异常鲁棒性。** 这项证据成立之后，再由长期状态、空间组合和条件化读出扩展 N01 的适用范围。\n\n## 14. 参考文献与官方实现\n\n以下编号用于本方案的研究定位；代码链接不代表已经集成或验收。新增可执行模块均须在 P0 固定提交和许可。部分论文输出图像，本项目只借用其合适的算法、训练方法或中间特征模块。\n\n<a id=\"ref-r01\"><\/a>\n**[R01]** Bhat et al. *Deep Burst Super-Resolution*. CVPR 2021。[论文](https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html)；[已固定官方代码](https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278)。用途：当前成熟 RAW 内容基线。\n\n**[R02]** Luo et al. *BSRT: Improving Burst Super-Resolution With Swin Transformer and Flow-Guided Deformable Alignment*. CVPR Workshops 2022。[论文](https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/html/Luo_BSRT_Improving_Burst_Super-Resolution_With_Swin_Transformer_and_Flow-Guided_Deformable_CVPRW_2022_paper.html)；[官方代码](https://github.com/Algolzw/BSRT)。用途：第二成熟骨干候选，须拆除不合规的图像链。\n\n**[R03]** Wronski et al. *Handheld Multi-Frame Super-Resolution*. ACM TOG 2019。[作者机构页面与论文](https://research.google/pubs/handheld-multi-frame-super-resolution/)。用途：CFA 跨帧采样、结构与鲁棒融合依据；不声称本项目已有其官方可运行代码。\n\n**[R04]** Foi et al. *Practical Poissonian-Gaussian Noise Modeling and Fitting for Single-Image Raw-Data*. IEEE TIP 2008。[作者论文/软件/数据页面](https://webpages.tuni.fi/foi/sensornoise.html)。用途：传感器噪声模型与校准；软件有单独限制许可，不默认 vendoring。\n\n**[R05]** Mildenhall et al. *Burst Denoising with Kernel Prediction Networks*. CVPR 2018。[论文与作者页面](https://bmild.github.io/kpn/)；[作者代码](https://github.com/google/burst-denoising)。用途：来源内容利用与优化退火参考。\n\n**[R06]** Teed and Deng. *RAFT: Recurrent All-Pairs Field Transforms for Optical Flow*. ECCV 2020。[论文](https://arxiv.org/abs/2003.12039)；[官方代码](https://github.com/princeton-vl/RAFT)。用途：成熟对应模块背景。\n\n**[R07]** Wang, Lipson and Deng. *SEA-RAFT: Simple, Efficient, Accurate RAFT for Optical Flow*. ECCV 2024。[论文](https://arxiv.org/abs/2405.14793)；[官方代码](https://github.com/princeton-vl/SEA-RAFT)。用途：优先 RAW 适配候选；原输入为 RGB 风格接口。\n\n**[R08]** Yue et al. *Supervised Raw Video Denoising with a Benchmark Dataset on Dynamic Scenes*. CVPR 2020。[官方代码与 CRVD 数据说明](https://github.com/cao-cong/RViDeNet)。用途：真实 RAW 视频诊断，数据与动作任务分开。\n\n**[R09]** Cao et al. *RViDeformer: Efficient Raw Video Denoising Transformer with a Larger Benchmark Dataset*. arXiv 2023，后续期刊版本见作者仓库。[论文](https://arxiv.org/abs/2305.00767)；[官方代码与 ReCRVD](https://github.com/cao-cong/RViDeformer)。用途：较复杂 RAW 数据与邻近架构，原 RGB/ISP 监督不能照搬。\n\n**[R10]** Adams and MacKay. *Bayesian Online Changepoint Detection*. 2007。[论文](https://arxiv.org/abs/0710.3742)。用途：时间支持分段的标准解析对照；不把社区实现冒称作者官方库。\n\n**[R11]** Altamirano, Briol and Knoblauch. *Robust and Scalable Bayesian Online Changepoint Detection*. ICML 2023。[论文](https://arxiv.org/abs/2302.04759)；[作者页面](https://jeremiasknoblauch.github.io/publication/rccp/)；[官方代码 DSM-bocd](https://github.com/maltamiranomontero/DSM-bocd)。用途：异常点与变化的鲁棒区分；`bocpd.py` / `models.py` 是参考入口。\n\n**[R12]** Howard et al. *Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences*. Annals of Statistics 2021。[论文](https://arxiv.org/abs/1810.08240)；[作者实现 confseq](https://github.com/gostevehoward/confseq)。用途：有条件的长期错误控制和停止规则，不直接赋予神经置信度保证。\n\n**[R13]** Kaess et al. *iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree*. IJRR 2012。[作者页面与论文](https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html)；[GTSAM](https://github.com/borglab/gtsam)；[ISAM2 文档](https://gtsam.org/doxygen/4.0.0/a03643.html)。用途：因子、依赖、删除与重线性化参考，不作为实时 GPU 主线的既定实现。\n\n**[R14]** Felzenszwalb and Huttenlocher. *Efficient Graph-Based Image Segmentation*. IJCV 2004。[作者论文与 C++ 实现](https://cs.brown.edu/people/pfelzens/segment/)。用途：空间区域组织对照，非时空证据有效性的保证。\n\n**[R15]** Gu, Goel and Ré. *Efficiently Modeling Long Sequences with Structured State Spaces*. ICLR 2022。[论文](https://arxiv.org/abs/2111.00396)；[官方 S4](https://github.com/state-spaces/s4)。用途：多时间尺度状态模型；教学精简代码不充当强性能基线。\n\n**[R16]** Gu and Dao. *Mamba: Linear-Time Sequence Modeling with Selective State Spaces*. 2023 预印本 / COLM 2024。[论文](https://arxiv.org/abs/2312.00752)；[官方实现](https://github.com/state-spaces/mamba)。用途：可选择保留/遗忘的成熟神经模块，完整网络保证需另证。\n\n**[R17]** Zhu et al. *Trajectory-aware Shifted State Space Models for Online Video Super-Resolution*. ICLR 2026，仓库所列论文版本 arXiv:2508.10453。[论文](https://arxiv.org/abs/2508.10453)；[官方 TS-Mamba](https://github.com/QZ1-boy/TS-Mamba)。用途：运动轨迹与状态结合的直接近邻，尚未做 RAW/因果源码验收。\n\n**[R18]** Di et al. *QMambaBSR: Burst Image Super-Resolution with Query State Space Model*. CVPR 2025。[论文](https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html)。用途：查询状态空间 burst 融合的创新边界；本轮未验收可运行模型代码。\n\n**[R19]** Unal, Marty and Dai. *Keyframe-Centric State-Space Modeling for Burst Image Super-Resolution*，作者项目页标注 SIGGRAPH Asia 2026。[作者页面](https://ouenal.github.io/burstmamba/)；[相关预印本 Burst Image Super-Resolution with Mamba](https://arxiv.org/abs/2503.19634)。用途：近期思路跟踪；会议日期晚于本文日期，按公开项目资料引用，不声称已完成会议发表或代码验收。\n\n**[R20]** Revay, Wang and Manchester. *Recurrent Equilibrium Networks: Flexible Dynamic Models with Guaranteed Stability and Robustness*. IEEE TAC 2023。[论文](https://arxiv.org/abs/2104.05942)；[作者 REN 仓库](https://github.com/imanchester/REN)。用途：严格稳定模型参考；作者实现为 Julia。\n\n**[R21]** Jaegle et al. *Perceiver IO: A General Architecture for Structured Inputs & Outputs*. ICLR 2022。[论文](https://arxiv.org/abs/2107.14795)；[官方实现](https://github.com/google-deepmind/deepmind-research/tree/master/perceiver)。用途：条件化查询读出；跨框架移植需单独验收。\n\n**[R22]** Lehtinen et al. *Noise2Noise: Learning Image Restoration without Clean Data*. ICML 2018。[论文](https://proceedings.mlr.press/v80/lehtinen18a.html)。用途：满足条件的独立噪声监督。\n\n**[R23]** Batson and Royer. *Noise2Self: Blind Denoising by Self-Supervision*. ICML 2019。[论文](https://proceedings.mlr.press/v97/batson19a.html)。用途：自监督的独立性与不变性要求，不能忽略对齐/共享来源泄漏。\n\n**[R24]** Liu et al. *RawVLA: Embodied Neural Image Signal Processor for Robotic Manipulation*. arXiv 2026。[论文](https://arxiv.org/abs/2609.37530)；[作者项目/代码/数据入口](https://shuhongll.github.io/rawvla/)。用途：直接具身对照和 RawVLA-Bench；实际输入身份以本地固定数据审计为准。\n\n**[R25]** Physical Intelligence et al. *π0.5: a Vision-Language-Action Model with Open-World Generalization*. 2025。[论文](https://arxiv.org/abs/2504.16054)；[官方 openpi](https://github.com/Physical-Intelligence/openpi)。用途：最终后端；本项目执行版本沿用已冻结 StarVLA/RawVLA 适配，不切换到浮动最新版本。\n\n## 15. 版本记录\n\n| 版本 | 日期 | 内容与状态 |\n| --- | --- | --- |\n| v1.0 | 2026-10-14 | 基于现有 DBSR 强基线与空间撤回负结果，提出来源级完整 N01、六项理论义务、P0–P8 开发顺序、充分训练及 π0.5 / RawVLA-Bench 最终验证；本次为方案交付，尚未执行新算法与训练 |\n"</script><script>
+document.getElementById('download-md').onclick=()=>{const t=JSON.parse(document.getElementById('markdown-source').textContent);const u=URL.createObjectURL(new Blob([t],{type:'text/markdown;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='N01_full_development_plan_2026-10-14_v1.0.md';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+document.getElementById('print').onclick=()=>window.print();
+document.getElementById('toggle-nav').onclick=()=>document.querySelector('.sidebar').classList.toggle('expanded');
+document.getElementById('toc-search').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('.toc a').forEach(a=>a.hidden=!a.textContent.toLowerCase().includes(q))};
+window.addEventListener('scroll',()=>{const h=document.documentElement;document.querySelector('.progress i').style.width=(100*h.scrollTop/Math.max(1,h.scrollHeight-h.clientHeight))+'%'},{passive:true});
+if('IntersectionObserver' in window){const o=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.toc a').forEach(a=>a.classList.toggle('active',a.hash==='#'+e.target.id))}})},{rootMargin:'-5% 0px -75% 0px'});document.querySelectorAll('h2,h3').forEach(h=>o.observe(h))}
+</script></body></html>

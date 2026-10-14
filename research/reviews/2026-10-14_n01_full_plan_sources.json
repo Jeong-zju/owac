@@ -1,0 +1,353 @@
+{
+  "version": "v1.0",
+  "checked_on": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "baseline_commit": "85790ccbd5661225a49ed95e02180902f9ca4d63",
+  "scope": "Literature/development plan only; no new model installed or trained. Primary paper/author/repository sources.",
+  "references": [
+    {
+      "id": "R01",
+      "description": "Bhat et al. *Deep Burst Super-Resolution*. CVPR 2021。[论文](https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html)；[已固定官方代码](https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278)",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html",
+        "https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278"
+      ],
+      "use": "当前成熟 RAW 内容基线。"
+    },
+    {
+      "id": "R02",
+      "description": "Luo et al. *BSRT: Improving Burst Super-Resolution With Swin Transformer and Flow-Guided Deformable Alignment*. CVPR Workshops 2022。[论文](https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/html/Luo_BSRT_Improving_Burst_Super-Resolution_With_Swin_Transformer_and_Flow-Guided_Deformable_CVPRW_2022_paper.html)；[官方代码](https://github.com/Algolzw/BSRT)",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/html/Luo_BSRT_Improving_Burst_Super-Resolution_With_Swin_Transformer_and_Flow-Guided_Deformable_CVPRW_2022_paper.html",
+        "https://github.com/Algolzw/BSRT"
+      ],
+      "use": "第二成熟骨干候选，须拆除不合规的图像链。"
+    },
+    {
+      "id": "R03",
+      "description": "Wronski et al. *Handheld Multi-Frame Super-Resolution*. ACM TOG 2019。[作者机构页面与论文](https://research.google/pubs/handheld-multi-frame-super-resolution/)",
+      "urls": [
+        "https://research.google/pubs/handheld-multi-frame-super-resolution/"
+      ],
+      "use": "CFA 跨帧采样、结构与鲁棒融合依据；不声称本项目已有其官方可运行代码。"
+    },
+    {
+      "id": "R04",
+      "description": "Foi et al. *Practical Poissonian-Gaussian Noise Modeling and Fitting for Single-Image Raw-Data*. IEEE TIP 2008。[作者论文/软件/数据页面](https://webpages.tuni.fi/foi/sensornoise.html)",
+      "urls": [
+        "https://webpages.tuni.fi/foi/sensornoise.html"
+      ],
+      "use": "传感器噪声模型与校准；软件有单独限制许可，不默认 vendoring。"
+    },
+    {
+      "id": "R05",
+      "description": "Mildenhall et al. *Burst Denoising with Kernel Prediction Networks*. CVPR 2018。[论文与作者页面](https://bmild.github.io/kpn/)；[作者代码](https://github.com/google/burst-denoising)",
+      "urls": [
+        "https://bmild.github.io/kpn/",
+        "https://github.com/google/burst-denoising"
+      ],
+      "use": "来源内容利用与优化退火参考。"
+    },
+    {
+      "id": "R06",
+      "description": "Teed and Deng. *RAFT: Recurrent All-Pairs Field Transforms for Optical Flow*. ECCV 2020。[论文](https://arxiv.org/abs/2003.12039)；[官方代码](https://github.com/princeton-vl/RAFT)",
+      "urls": [
+        "https://arxiv.org/abs/2003.12039",
+        "https://github.com/princeton-vl/RAFT"
+      ],
+      "use": "成熟对应模块背景。"
+    },
+    {
+      "id": "R07",
+      "description": "Wang, Lipson and Deng. *SEA-RAFT: Simple, Efficient, Accurate RAFT for Optical Flow*. ECCV 2024。[论文](https://arxiv.org/abs/2405.14793)；[官方代码](https://github.com/princeton-vl/SEA-RAFT)",
+      "urls": [
+        "https://arxiv.org/abs/2405.14793",
+        "https://github.com/princeton-vl/SEA-RAFT"
+      ],
+      "use": "优先 RAW 适配候选；原输入为 RGB 风格接口。"
+    },
+    {
+      "id": "R08",
+      "description": "Yue et al. *Supervised Raw Video Denoising with a Benchmark Dataset on Dynamic Scenes*. CVPR 2020。[官方代码与 CRVD 数据说明](https://github.com/cao-cong/RViDeNet)",
+      "urls": [
+        "https://github.com/cao-cong/RViDeNet"
+      ],
+      "use": "真实 RAW 视频诊断，数据与动作任务分开。"
+    },
+    {
+      "id": "R09",
+      "description": "Cao et al. *RViDeformer: Efficient Raw Video Denoising Transformer with a Larger Benchmark Dataset*. arXiv 2023，后续期刊版本见作者仓库。[论文](https://arxiv.org/abs/2305.00767)；[官方代码与 ReCRVD](https://github.com/cao-cong/RViDeformer)",
+      "urls": [
+        "https://arxiv.org/abs/2305.00767",
+        "https://github.com/cao-cong/RViDeformer"
+      ],
+      "use": "较复杂 RAW 数据与邻近架构，原 RGB/ISP 监督不能照搬。"
+    },
+    {
+      "id": "R10",
+      "description": "Adams and MacKay. *Bayesian Online Changepoint Detection*. 2007。[论文](https://arxiv.org/abs/0710.3742)",
+      "urls": [
+        "https://arxiv.org/abs/0710.3742"
+      ],
+      "use": "时间支持分段的标准解析对照；不把社区实现冒称作者官方库。"
+    },
+    {
+      "id": "R11",
+      "description": "Altamirano, Briol and Knoblauch. *Robust and Scalable Bayesian Online Changepoint Detection*. ICML 2023。[论文](https://arxiv.org/abs/2302.04759)；[作者页面](https://jeremiasknoblauch.github.io/publication/rccp/)；[官方代码 DSM-bocd](https://github.com/maltamiranomontero/DSM-bocd)",
+      "urls": [
+        "https://arxiv.org/abs/2302.04759",
+        "https://jeremiasknoblauch.github.io/publication/rccp/",
+        "https://github.com/maltamiranomontero/DSM-bocd"
+      ],
+      "use": "异常点与变化的鲁棒区分；`bocpd.py` / `models.py` 是参考入口。"
+    },
+    {
+      "id": "R12",
+      "description": "Howard et al. *Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences*. Annals of Statistics 2021。[论文](https://arxiv.org/abs/1810.08240)；[作者实现 confseq](https://github.com/gostevehoward/confseq)",
+      "urls": [
+        "https://arxiv.org/abs/1810.08240",
+        "https://github.com/gostevehoward/confseq"
+      ],
+      "use": "有条件的长期错误控制和停止规则，不直接赋予神经置信度保证。"
+    },
+    {
+      "id": "R13",
+      "description": "Kaess et al. *iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree*. IJRR 2012。[作者页面与论文](https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html)；[GTSAM](https://github.com/borglab/gtsam)；[ISAM2 文档](https://gtsam.org/doxygen/4.0.0/a03643.html)",
+      "urls": [
+        "https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html",
+        "https://github.com/borglab/gtsam",
+        "https://gtsam.org/doxygen/4.0.0/a03643.html"
+      ],
+      "use": "因子、依赖、删除与重线性化参考，不作为实时 GPU 主线的既定实现。"
+    },
+    {
+      "id": "R14",
+      "description": "Felzenszwalb and Huttenlocher. *Efficient Graph-Based Image Segmentation*. IJCV 2004。[作者论文与 C++ 实现](https://cs.brown.edu/people/pfelzens/segment/)",
+      "urls": [
+        "https://cs.brown.edu/people/pfelzens/segment/"
+      ],
+      "use": "空间区域组织对照，非时空证据有效性的保证。"
+    },
+    {
+      "id": "R15",
+      "description": "Gu, Goel and Ré. *Efficiently Modeling Long Sequences with Structured State Spaces*. ICLR 2022。[论文](https://arxiv.org/abs/2111.00396)；[官方 S4](https://github.com/state-spaces/s4)",
+      "urls": [
+        "https://arxiv.org/abs/2111.00396",
+        "https://github.com/state-spaces/s4"
+      ],
+      "use": "多时间尺度状态模型；教学精简代码不充当强性能基线。"
+    },
+    {
+      "id": "R16",
+      "description": "Gu and Dao. *Mamba: Linear-Time Sequence Modeling with Selective State Spaces*. 2023 预印本 / COLM 2024。[论文](https://arxiv.org/abs/2312.00752)；[官方实现](https://github.com/state-spaces/mamba)",
+      "urls": [
+        "https://arxiv.org/abs/2312.00752",
+        "https://github.com/state-spaces/mamba"
+      ],
+      "use": "可选择保留/遗忘的成熟神经模块，完整网络保证需另证。"
+    },
+    {
+      "id": "R17",
+      "description": "Zhu et al. *Trajectory-aware Shifted State Space Models for Online Video Super-Resolution*. ICLR 2026，仓库所列论文版本 arXiv:2508.10453。[论文](https://arxiv.org/abs/2508.10453)；[官方 TS-Mamba](https://github.com/QZ1-boy/TS-Mamba)",
+      "urls": [
+        "https://arxiv.org/abs/2508.10453",
+        "https://github.com/QZ1-boy/TS-Mamba"
+      ],
+      "use": "运动轨迹与状态结合的直接近邻，尚未做 RAW/因果源码验收。"
+    },
+    {
+      "id": "R18",
+      "description": "Di et al. *QMambaBSR: Burst Image Super-Resolution with Query State Space Model*. CVPR 2025。[论文](https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html)",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html"
+      ],
+      "use": "查询状态空间 burst 融合的创新边界；本轮未验收可运行模型代码。"
+    },
+    {
+      "id": "R19",
+      "description": "Unal, Marty and Dai. *Keyframe-Centric State-Space Modeling for Burst Image Super-Resolution*，作者项目页标注 SIGGRAPH Asia 2026。[作者页面](https://ouenal.github.io/burstmamba/)；[相关预印本 Burst Image Super-Resolution with Mamba](https://arxiv.org/abs/2503.19634)",
+      "urls": [
+        "https://ouenal.github.io/burstmamba/",
+        "https://arxiv.org/abs/2503.19634"
+      ],
+      "use": "近期思路跟踪；会议日期晚于本文日期，按公开项目资料引用，不声称已完成会议发表或代码验收。"
+    },
+    {
+      "id": "R20",
+      "description": "Revay, Wang and Manchester. *Recurrent Equilibrium Networks: Flexible Dynamic Models with Guaranteed Stability and Robustness*. IEEE TAC 2023。[论文](https://arxiv.org/abs/2104.05942)；[作者 REN 仓库](https://github.com/imanchester/REN)",
+      "urls": [
+        "https://arxiv.org/abs/2104.05942",
+        "https://github.com/imanchester/REN"
+      ],
+      "use": "严格稳定模型参考；作者实现为 Julia。"
+    },
+    {
+      "id": "R21",
+      "description": "Jaegle et al. *Perceiver IO: A General Architecture for Structured Inputs & Outputs*. ICLR 2022。[论文](https://arxiv.org/abs/2107.14795)；[官方实现](https://github.com/google-deepmind/deepmind-research/tree/master/perceiver)",
+      "urls": [
+        "https://arxiv.org/abs/2107.14795",
+        "https://github.com/google-deepmind/deepmind-research/tree/master/perceiver"
+      ],
+      "use": "条件化查询读出；跨框架移植需单独验收。"
+    },
+    {
+      "id": "R22",
+      "description": "Lehtinen et al. *Noise2Noise: Learning Image Restoration without Clean Data*. ICML 2018。[论文](https://proceedings.mlr.press/v80/lehtinen18a.html)",
+      "urls": [
+        "https://proceedings.mlr.press/v80/lehtinen18a.html"
+      ],
+      "use": "满足条件的独立噪声监督。"
+    },
+    {
+      "id": "R23",
+      "description": "Batson and Royer. *Noise2Self: Blind Denoising by Self-Supervision*. ICML 2019。[论文](https://proceedings.mlr.press/v97/batson19a.html)",
+      "urls": [
+        "https://proceedings.mlr.press/v97/batson19a.html"
+      ],
+      "use": "自监督的独立性与不变性要求，不能忽略对齐/共享来源泄漏。"
+    },
+    {
+      "id": "R24",
+      "description": "Liu et al. *RawVLA: Embodied Neural Image Signal Processor for Robotic Manipulation*. arXiv 2026。[论文](https://arxiv.org/abs/2609.37530)；[作者项目/代码/数据入口](https://shuhongll.github.io/rawvla/)",
+      "urls": [
+        "https://arxiv.org/abs/2609.37530",
+        "https://shuhongll.github.io/rawvla/"
+      ],
+      "use": "直接具身对照和 RawVLA-Bench；实际输入身份以本地固定数据审计为准。"
+    },
+    {
+      "id": "R25",
+      "description": "Physical Intelligence et al. *π0.5: a Vision-Language-Action Model with Open-World Generalization*. 2025。[论文](https://arxiv.org/abs/2504.16054)；[官方 openpi](https://github.com/Physical-Intelligence/openpi)",
+      "urls": [
+        "https://arxiv.org/abs/2504.16054",
+        "https://github.com/Physical-Intelligence/openpi"
+      ],
+      "use": "最终后端；本项目执行版本沿用已冻结 StarVLA/RawVLA 适配，不切换到浮动最新版本。"
+    }
+  ],
+  "verified_code_readings": [
+    {
+      "repo": "goutamgmb/deep-burst-sr",
+      "commit": "16f158e0553b6702cc1693c43f733c2830973278",
+      "level": "existing pinned vendored implementation and local experiment records",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "princeton-vl/SEA-RAFT",
+      "path": "core/raft.py",
+      "url": "https://github.com/princeton-vl/SEA-RAFT/blob/main/core/raft.py",
+      "commit": null,
+      "level": "web source read, 3/6-channel inputs and /255 preprocessing checked",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "Algolzw/BSRT",
+      "path": "code/synthetic/bsrt/model/bsrt.py",
+      "url": "https://github.com/Algolzw/BSRT/blob/main/code/synthetic/bsrt/model/bsrt.py",
+      "commit": null,
+      "level": "web source read, author S/L dimensions and image-style motion path checked",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "state-spaces/mamba",
+      "path": "mamba_ssm/modules/mamba_simple.py",
+      "url": "https://github.com/state-spaces/mamba/blob/main/mamba_ssm/modules/mamba_simple.py",
+      "commit": null,
+      "level": "web source read, conv_state/ssm_state and step/cache interfaces checked",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "state-spaces/s4",
+      "path": "models/s4/s4d.py",
+      "url": "https://github.com/state-spaces/s4/blob/main/models/s4/s4d.py",
+      "commit": null,
+      "level": "web source read; explicitly pedagogical minimal version, excluded as formal strong baseline",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "QZ1-boy/TS-Mamba",
+      "commit": null,
+      "level": "official repository README only; no causal/RAW implementation acceptance",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "maltamiranomontero/DSM-bocd",
+      "commit": null,
+      "level": "author-linked repository README and paper methodology; no runtime acceptance",
+      "runtime_this_turn": false
+    },
+    {
+      "repo": "imanchester/REN",
+      "commit": null,
+      "level": "author repository/language and paper guarantee scope; no runtime acceptance",
+      "runtime_this_turn": false
+    }
+  ],
+  "access_limitations": [
+    "GitHub unauthenticated API returned 403 rate limit for new commit/tree retrieval.",
+    "git ls-remote for new repositories timed out. Branch links are retrieval pointers, not pinned execution identities.",
+    "Web source excerpt retrieval is not a complete raw-source archive.",
+    "No claim that all discovered modules are directly compatible with CFA, causal streaming, or current CUDA."
+  ],
+  "local_evidence": [
+    "research/experiments/2026-10-13_n01_dbsr_mechanism.md",
+    "research/experiments/2026-10-13_n01_source_repair.md",
+    "docs/decisions/0012-rawvla-pi05-protocol-freeze.md",
+    "src/owac/frameworks/n01_dbsr_raw.py",
+    "src/owac/backends/rawvla_features.py"
+  ],
+  "excerpt_snapshots": [
+    {
+      "path": "outputs/n01-full-plan-20261014/upstream-source-excerpts.txt",
+      "retrieval_text_sha256": "eae466687e11afeb68ee689b4979ad3b7af4e13a69aa2ea5605d47e3726ca198",
+      "is_complete_source": false
+    },
+    {
+      "path": "outputs/n01-full-plan-20261014/theory-source-excerpts.txt",
+      "retrieval_text_sha256": "30348f56b52f00e6db0a044179bcc7fd97560cb6bdb1c6beaa2ab9a40a6e3b7a",
+      "is_complete_source": false
+    }
+  ],
+  "document_validation": {
+    "version": "v1.0",
+    "checked_on": "2026-10-14",
+    "source_sha256": "9e1132d283abde96df7d905af373ee7c730a2455769dc8b9176b9d4afff02289",
+    "html_sha256": "1235dcb24d2e116ffb383146b02456e42d20f7f49388b792cdf1fcd0c16edb98",
+    "markdown_lines": 612,
+    "references": 25,
+    "stages": 9,
+    "toc_entries": 58,
+    "tables": 10,
+    "local_links": [
+      "docs/N01_full_development_plan_2026-10-14_v1.0.html",
+      "docs/decisions/0012-rawvla-pi05-protocol-freeze.md",
+      "research/experiments/2026-10-13_n01_dbsr_mechanism.md",
+      "research/experiments/2026-10-13_n01_source_repair.md",
+      "research/reviews/2026-10-14_n01_full_plan_sources.json",
+      "src/owac/backends/rawvla_features.py",
+      "src/owac/raw/rawvla_sequence.py",
+      "src/owac/runtime/n01_feature_service.py",
+      "src/owac/training/n01_action.py"
+    ],
+    "checks": {
+      "embedded_markdown_identical": true,
+      "source_hash_match": true,
+      "unique_html_ids": true,
+      "anchor_targets_exist": true,
+      "local_link_targets_exist": true,
+      "heading_table_counts_match": true,
+      "offline_no_external_render_dependencies": true,
+      "javascript_syntax": true,
+      "source_excerpt_hashes": true
+    },
+    "scope": "Document consistency only; no new algorithm execution or training.",
+    "browser_checks": {
+      "desktop_render_visually_checked": true,
+      "toc_filter_p7": true,
+      "toc_navigation_p7": true,
+      "download_matches_source_bytes": true,
+      "console_warnings_errors": 0,
+      "mobile_viewport_tested": false
+    }
+  }
+}
