@@ -15,14 +15,19 @@ import ast
 import hashlib
 import inspect
 import json
+import pickle
+import random
+import re
 from pathlib import Path
 
+import numpy as np
 import pytest
 import torch
 import torch.nn as nn
 
 from owac.backends.raw_correspondence import (
     CFA_PHASE_OFFSETS,
+    MOTION_CHECKPOINT_SCHEMA,
     CorrespondenceEstimator,
     RawNormalization,
     RawSensorFrame,
@@ -52,10 +57,10 @@ class ConstantFlow(nn.Module):
 
     def forward(self, image1, image2, iters=None, flow_gt=None, test_mode=False):
         n, _, h, w = image1.shape
-        flow = torch.zeros(n, 2, h, w)
+        flow = torch.zeros(n, 2, h, w, device=image1.device, dtype=image1.dtype)
         flow[:, 0] = self.dy
         flow[:, 1] = self.dx
-        info = torch.zeros(n, 4, h, w)
+        info = torch.zeros(n, 4, h, w, device=image1.device, dtype=image1.dtype)
         info[:, 0] = self.weight[0]
         info[:, 1] = self.weight[1]
         info[:, 2] = self.log_scale[0]
@@ -294,6 +299,59 @@ def test_emitted_taps_match_the_documented_flat_layout():
                     expected_weights.append(pytest.approx(weight))
     assert list(mapping.tap_source_ids) == expected_ids
     assert list(mapping.tap_weights) == expected_weights
+
+
+# --- device semantics ----------------------------------------------------------------------
+
+
+def test_validity_mask_is_moved_onto_the_compute_device_before_indexing():
+    """The CUDA failure was a CPU validity mask indexed by CUDA indices.
+
+    The ``to`` call is observed on the frame's own mask, so an implementation that
+    indexes the mask where it finds it fails this test even on a CPU-only machine.
+    """
+    moves: list[tuple[tuple, dict]] = []
+
+    class _MoveSpy(torch.Tensor):
+        @staticmethod
+        def __new__(cls, data):
+            return torch.Tensor._make_subclass(cls, data)
+
+        def to(self, *args, **kwargs):
+            moves.append((args, kwargs))
+            return torch.Tensor.to(self, *args, **kwargs)
+
+    validity = _MoveSpy(torch.ones(4, 4, 4, dtype=torch.bool))
+    mapping = estimator().estimate(cfa_frame(1, validity=validity), cfa_frame(0, validity=validity))
+    assert moves, "the validity mask was indexed without being moved to the compute device"
+    targets = [kwargs.get("device", args[0] if args else None) for args, kwargs in moves]
+    assert all(target == torch.device("cpu") for target in targets)
+    for value in (
+        mapping.source_xy,
+        mapping.valid,
+        mapping.packed_flow,
+        mapping.visibility,
+        mapping.flow_risk,
+    ):
+        assert value.device == torch.device("cpu")
+    for key in mapping.tap_source_ids:
+        assert isinstance(key.sensor_y, int) and isinstance(key.sensor_x, int)
+
+
+@pytest.mark.gpu
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="needs an actual CUDA device")
+def test_cuda_flow_with_a_cpu_validity_mask_matches_the_cpu_result():
+    validity = torch.ones(4, 4, 4, dtype=torch.bool)  # deliberately left on CPU
+    reference, source = cfa_frame(1, validity=validity), cfa_frame(0, validity=validity)
+    cuda = CorrespondenceEstimator(mode="cfa4", model=ConstantFlow(0.5, -0.25), device="cuda")
+    mapping = cuda.estimate(reference, source)
+    assert mapping.source_xy.device.type == "cuda"
+    assert mapping.valid.device.type == "cuda"
+    cpu = estimator(0.5, -0.25).estimate(reference, source)
+    assert torch.equal(mapping.source_xy.cpu(), cpu.source_xy)
+    assert torch.equal(mapping.valid.cpu(), cpu.valid)
+    assert torch.equal(mapping.packed_flow.cpu(), cpu.packed_flow)
+    assert list(mapping.tap_source_ids) == list(cpu.tap_source_ids)
 
 
 # --- causality, frames and normalization ---------------------------------------------------
@@ -712,14 +770,99 @@ def test_pretrained_files_are_an_independent_explicit_input(tmp_path):
     assert report is not None and report["loaded_tensors"] > 0
     assert loaded.pretrained_report["path"] == str(checkpoint)
 
+    assert loaded.pretrained_report["weights_only_fallback"] is False
+    assert loaded.pretrained_report["schema"] == "plain_state_dict"
+    assert loaded.pretrained_report["sha256"] == hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+
     with pytest.raises(FileNotFoundError):
         CorrespondenceEstimator(
             mode="cfa4", depth="resnet18", pretrained_checkpoint=tmp_path / "missing.pth"
         )
     garbage = tmp_path / "garbage.pth"
     garbage.write_bytes(b"not a checkpoint")
-    with pytest.raises(torch.serialization.pickle.UnpicklingError):
+    with pytest.raises(pickle.UnpicklingError):
+        torch.load(garbage, map_location="cpu", weights_only=True)
+    with pytest.raises(ValueError, match="refused"):
         CorrespondenceEstimator(mode="cfa4", depth="resnet18", pretrained_checkpoint=garbage)
+
+
+def _motion_training_payload(model):
+    """A payload shaped like ``MotionTrainer.checkpoint_payload`` (NumPy RNG included)."""
+    return {
+        "schema": MOTION_CHECKPOINT_SCHEMA,
+        "update": 128,
+        "model": model.state_dict(),
+        "optimizer": {},
+        "scheduler": {"kind": "motion_absolute_drops", "update": 128},
+        "scaler": {},
+        "rng": {
+            "python": random.getstate(),
+            "numpy": np.random.get_state(),
+            "torch": torch.get_rng_state(),
+        },
+        "sampler": {},
+        "train_samples": 4096,
+        "core_fingerprint": "a" * 64,
+        "mode": "cfa4",
+        "depth": "resnet18",
+        "iters": 2,
+        "parameter_hash": "b" * 64,
+    }
+
+
+def test_motion_training_checkpoint_with_numpy_rng_loads_through_the_schema_gate(tmp_path):
+    est = CorrespondenceEstimator(mode="cfa4", depth="resnet18", iters=2)
+    checkpoint = tmp_path / "motion-best.pt"
+    torch.save(_motion_training_payload(est.model), checkpoint)
+
+    # the strict loader really refuses this payload: NumPy RNG state is in it
+    with pytest.raises(pickle.UnpicklingError):
+        torch.load(checkpoint, map_location="cpu", weights_only=True)
+
+    loaded = CorrespondenceEstimator(
+        mode="cfa4", depth="resnet18", iters=2, pretrained_checkpoint=checkpoint
+    )
+    report = loaded.pretrained_report
+    assert report["weights_only_fallback"] is True
+    assert report["schema"] == MOTION_CHECKPOINT_SCHEMA
+    assert report["sha256"] == hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    assert report["core_fingerprint"] == "a" * 64
+    assert report["checkpoint_update"] == 128
+    assert report["checkpoint_mode"] == "cfa4" and report["checkpoint_depth"] == "resnet18"
+    assert report["loaded_tensors"] > 0
+    for name, value in loaded.model.state_dict().items():
+        assert torch.equal(value, est.model.state_dict()[name])
+
+
+def test_foreign_checkpoint_payloads_are_refused_without_a_permissive_load(tmp_path):
+    est = CorrespondenceEstimator(mode="cfa4", depth="resnet18", iters=2)
+    foreign = tmp_path / "foreign.pt"
+    payload = {
+        "schema": "some.third_party.checkpoint.v9",
+        "model": est.model.state_dict(),
+        "rng": {"numpy": np.random.get_state()},
+    }
+    torch.save(payload, foreign)
+    with pytest.raises(pickle.UnpicklingError):
+        torch.load(foreign, map_location="cpu", weights_only=True)
+    with pytest.raises(ValueError, match="permissive"):
+        CorrespondenceEstimator(mode="cfa4", depth="resnet18", pretrained_checkpoint=foreign)
+
+    # our schema marker but no usable model/fingerprint: the post-validation refuses it
+    truncated = tmp_path / "truncated.pt"
+    torch.save(
+        {"schema": MOTION_CHECKPOINT_SCHEMA, "rng": {"numpy": np.random.get_state()}},
+        truncated,
+    )
+    with pytest.raises(ValueError, match="no 'model' state dict"):
+        CorrespondenceEstimator(mode="cfa4", depth="resnet18", pretrained_checkpoint=truncated)
+
+
+def test_motion_checkpoint_schema_constant_matches_the_trainer():
+    source = (REPO_ROOT / "src/owac/training/n01_motion.py").read_text()
+    match = re.search(r'^CHECKPOINT_SCHEMA = "([^"]+)"$', source, flags=re.MULTILINE)
+    assert match is not None
+    assert match.group(1) == MOTION_CHECKPOINT_SCHEMA
 
 
 def test_declared_config_and_stem_choices_are_enforced():

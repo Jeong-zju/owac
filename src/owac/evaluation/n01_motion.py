@@ -26,6 +26,16 @@ The four comparison arms
 supervision's valid mask) are diagnostic labels on the same numbers, not
 inference inputs.  Risk calibration is fitted on the ``calibration`` region only,
 validated on ``validation`` and reported on ``test`` (four-way split contract).
+
+Device contract
+---------------
+The supervision tensors are built on CPU by the generator and define the metric
+device of a pair.  Model outputs may live on ``cuda``; every combination of a
+model output with the supervision goes through :func:`_align_to` (moved to the
+reference tensor's device), never through a dtype-only ``.to(torch.float32)``,
+which keeps the source device and fails with a cross-device error.  The
+calibration sampling path aligns the supervision to the model's own output
+device instead, so no call site assumes ``torch.cuda.current_device()``.
 """
 
 from __future__ import annotations
@@ -109,6 +119,20 @@ class EvaluationConfigError(ValueError):
 # ---------------------------------------------------------------------------
 # pure metric helpers
 # ---------------------------------------------------------------------------
+
+
+def _align_to(tensor: torch.Tensor, reference: torch.Tensor) -> torch.Tensor:
+    """Move ``tensor`` onto ``reference``'s device, keeping its dtype.
+
+    ``.to(torch.float32)`` alone keeps the source device; combining a CUDA model
+    output with the CPU supervision therefore raises a cross-device error.  Every
+    such combination goes through this helper, and the device is taken from a
+    tensor that is already in the expression (the supervision or the model
+    output), never from ``torch.cuda.current_device()``.
+    """
+    if tensor.device != reference.device:
+        return tensor.to(device=reference.device)
+    return tensor
 
 
 def roc_auc(scores: Any, labels: Any) -> float:
@@ -293,11 +317,14 @@ class ErrorCoverageTable:
         if flow_risk.shape != visibility.shape:
             raise ValueError("flow_risk and visibility must share one packed grid")
         rows, cols = self.shape
+        device = flow_risk.device
         risk_index = torch.bucketize(
-            flow_risk.detach().to(torch.float64), torch.tensor(self.risk_edges)
+            flow_risk.detach().to(torch.float64),
+            torch.tensor(self.risk_edges, device=device),
         )
         visibility_index = torch.bucketize(
-            visibility.detach().to(torch.float64), torch.tensor(self.visibility_edges)
+            visibility.detach().to(torch.float64),
+            torch.tensor(self.visibility_edges, device=device),
         )
         risk_index = risk_index.clamp(0, rows - 1)
         visibility_index = visibility_index.clamp(0, cols - 1)
@@ -553,6 +580,9 @@ class MotionEvaluator:
         *,
         table: ErrorCoverageTable | None,
     ) -> GroupMap:
+        # the supervision defines the metric device of this pair; every arm's
+        # tensors are moved onto it before they are combined with the truth
+        metric = target.channel_flow
         if arm == "sea_raft":
             estimator = self.estimators["sea_raft"]
             self._maybe_calibrate(estimator, table)
@@ -567,10 +597,12 @@ class MotionEvaluator:
                 result.calibrated_risk if result.calibrated_risk is not None else result.flow_risk
             )
             return GroupMap(
-                flow=result.packed_flow.to(torch.float32),
-                valid=result.valid.all(dim=0),
-                risk=None if risk is None else risk.detach().to(torch.float32),
-                coverage=None if result.coverage is None else result.coverage.to(torch.float32),
+                flow=_align_to(result.packed_flow, metric).to(torch.float32),
+                valid=_align_to(result.valid.all(dim=0), metric),
+                risk=None if risk is None else _align_to(risk.detach(), metric).to(torch.float32),
+                coverage=None
+                if result.coverage is None
+                else _align_to(result.coverage, metric).to(torch.float32),
                 risk_kind=result.risk_kind,
                 latency_ms=latency,
             )
@@ -578,8 +610,8 @@ class MotionEvaluator:
             estimator = self.estimators["no_alignment"]
             result = estimator.estimate(reference, source, iters=0, taps=False)
             return GroupMap(
-                flow=result.packed_flow.to(torch.float32),
-                valid=result.valid.all(dim=0),
+                flow=_align_to(result.packed_flow, metric).to(torch.float32),
+                valid=_align_to(result.valid.all(dim=0), metric),
                 risk_kind="unavailable",
             )
         if arm == "old_simplified":
@@ -595,8 +627,8 @@ class MotionEvaluator:
             flow = torch.zeros(2, rows, cols, dtype=torch.float32)
             flow[0] = float(dy)
             flow[1] = float(dx)
-            valid = _inside_mask(rows, cols, dy, dx, device=torch.device("cpu"))
-            return GroupMap(flow=flow, valid=valid, risk_kind="unavailable")
+            valid = _inside_mask(rows, cols, dy, dx, device=metric.device)
+            return GroupMap(flow=_align_to(flow, metric), valid=valid, risk_kind="unavailable")
         if arm == "oracle":
             channel_flow = target.channel_flow.to(torch.float32)
             return GroupMap(
@@ -730,12 +762,13 @@ def _pair_error(
     """Per-channel EPE (sensor px and packed), the combined mask and the invalid label."""
     channel_flow = target.channel_flow.to(torch.float32)
     channel_valid = target.channel_valid
+    predicted_valid = _align_to(predicted_valid, channel_flow)
     if group_map.channel_flow is not None:
-        error_packed = torch.linalg.vector_norm(
-            group_map.channel_flow.to(torch.float32) - channel_flow, dim=1
-        )
+        predicted = _align_to(group_map.channel_flow, channel_flow).to(torch.float32)
+        error_packed = torch.linalg.vector_norm(predicted - channel_flow, dim=1)
     else:
-        error_packed = torch.linalg.vector_norm(predicted_flow.unsqueeze(0) - channel_flow, dim=1)
+        predicted = _align_to(predicted_flow, channel_flow).to(torch.float32)
+        error_packed = torch.linalg.vector_norm(predicted.unsqueeze(0) - channel_flow, dim=1)
     mask = channel_valid & predicted_valid.unsqueeze(0)
     error_sensor = packed_to_sensor(error_packed, int(target.sensor_per_packed))
     invalid_label = ~channel_valid
@@ -749,7 +782,9 @@ def _cfa_phase_consistency(
     if target.channel_valid.shape[0] != 4:
         return None
     channel_flow = target.channel_flow.to(torch.float32)
-    differences = predicted_flow.unsqueeze(0) - channel_flow
+    differences = (
+        _align_to(predicted_flow, channel_flow).to(torch.float32).unsqueeze(0) - channel_flow
+    )
     result = 0.0
     for channel in range(4):
         valid = target.channel_valid[channel]
@@ -962,11 +997,13 @@ def _collect_calibration_samples(
         )
         predicted_valid = result.valid.all(dim=0)
         flow = result.packed_flow.to(torch.float32)
-        error_packed = torch.linalg.vector_norm(
-            flow.unsqueeze(0) - target.channel_flow.to(torch.float32), dim=1
-        )
+        # the model output owns the device here; the CPU supervision is moved onto
+        # it rather than assuming the output is on the CPU (or on cuda:current)
+        channel_flow = _align_to(target.channel_flow, flow).to(torch.float32)
+        channel_valid = _align_to(target.channel_valid, flow)
+        error_packed = torch.linalg.vector_norm(flow.unsqueeze(0) - channel_flow, dim=1)
         error_sensor = error_packed * float(evaluator.sensor_per_packed)
-        valid = target.channel_valid & predicted_valid.unsqueeze(0)
+        valid = channel_valid & predicted_valid.unsqueeze(0)
         samples.append(
             {
                 "flow_risk": result.flow_risk,
@@ -1063,9 +1100,11 @@ def _risk_radius_coverage(
     """Observed vs predicted coverage of the calibrated risk radius on this pair."""
     if not bool(mask.any()):
         return {"coverage_observed": float("nan")}
+    risk = _align_to(risk, error_sensor)
     observed = (error_sensor[mask] <= risk[mask]).to(torch.float64)
     result = {"coverage_observed": float(observed.mean())}
     if fitted_coverage is not None:
+        fitted_coverage = _align_to(fitted_coverage, error_sensor)
         result["coverage_predicted"] = float(fitted_coverage[mask].to(torch.float64).mean())
     return result
 

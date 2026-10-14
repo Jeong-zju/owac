@@ -39,7 +39,7 @@ import json
 import platform
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -214,6 +214,80 @@ def _measurement_frame(
     )
 
 
+def _window_unique_counts(window: Any, batch_size: int) -> dict[str, list[int]]:
+    """Per-member unique-frame counts of a collated ``MeasurementWindowBatch``.
+
+    The batch type in ``owac.raw.rawvla_sequence`` has **no**
+    ``unique_frame_count()`` helper (only the single-window ``MeasurementWindow``
+    does), so the count is rebuilt from the identity arrays it really exposes:
+    ``episode_ids``/``frame_ids``/``new_measurement`` with shape ``[B, T]``.
+
+    Two explicit numbers are reported:
+
+    * ``identities``: distinct ``(episode_id, frame_id)`` pairs across the window.
+      A re-sent exposure counts once and the same ``frame_id`` in another episode
+      counts twice, because identity is the pair, never the timestamp.
+    * ``new_arrivals``: the same rule the adapter's ``step`` applies -- the first
+      occurrence of an identity is registered only when ``new_measurement`` is
+      True (absent flag means True).  This is what ``FullState.unique_arrivals``
+      counts, so a match check compares like with like.
+
+    Without identity arrays the count falls back to the declared
+    ``new_measurement`` flags and the fallback is recorded by the caller.
+    """
+    if int(batch_size) < 1:
+        raise ValueError("batch_size must be positive")
+    values = getattr(window, "values", None)
+    if values is None or int(values.shape[0]) != int(batch_size):
+        raise ValueError(
+            f"window batch {None if values is None else int(values.shape[0])} does not match "
+            f"batch_size {int(batch_size)}"
+        )
+    length = int(values.shape[1])
+    episodes = getattr(window, "episode_ids", None)
+    frame_ids = getattr(window, "frame_ids", None)
+    new_measurement = getattr(window, "new_measurement", None)
+    flags: list[list[bool]]
+    if new_measurement is None:
+        flags = [[True] * length for _ in range(batch_size)]
+    else:
+        reshaped = new_measurement.reshape(batch_size, length)
+        flags = [[bool(value) for value in row] for row in reshaped.tolist()]
+    if episodes is None or frame_ids is None:
+        fallback = [sum(1 for value in row if value) for row in flags]
+        return {
+            "identities": fallback,
+            "new_arrivals": fallback,
+            "identity_rule": "new_measurement_fallback",
+        }
+    episode_rows = episodes.reshape(batch_size, length).tolist()
+    frame_rows = frame_ids.reshape(batch_size, length).tolist()
+    identities: list[int] = []
+    new_arrivals: list[int] = []
+    for member in range(batch_size):
+        seen: set[tuple[str, Any]] = set()
+        observed: set[tuple[str, Any]] = set()
+        identity_count = 0
+        arrival_count = 0
+        for step in range(length):
+            identity = (str(episode_rows[member][step]), frame_rows[member][step])
+            if identity not in seen:
+                seen.add(identity)
+                identity_count += 1
+            # Mirror the adapter's arrival rule exactly: register a flagged first
+            # occurrence, never a duplicate of an already-registered identity.
+            if flags[member][step] and identity not in observed:
+                observed.add(identity)
+                arrival_count += 1
+        identities.append(identity_count)
+        new_arrivals.append(arrival_count)
+    return {
+        "identities": identities,
+        "new_arrivals": new_arrivals,
+        "identity_rule": "(episode_id, frame_id)",
+    }
+
+
 def _adapter_encode_batch(adapter: Any, batch: dict[str, Any], device: Any, *, tbptt: int = 4):
     """Feed a loader batch through the adapter's external interface, one arrival per step."""
     from owac.core.encoder_contract import ComputeBudget
@@ -237,17 +311,21 @@ def _adapter_encode_batch(adapter: Any, batch: dict[str, Any], device: Any, *, t
             state = output.state
             if tbptt and (step + 1) % tbptt == 0 and step + 1 < length:
                 state = adapter.detach_state(state)
+        counts = _window_unique_counts(window, batch_size)
+        adapter_unique = [int(value) for value in state.unique_arrivals[camera].tolist()]
         feed[camera] = {
             "window_frames": int(length),
-            "unique_frames_window": int(window.unique_frame_count()),
+            "unique_frames_window": counts["identities"],
+            "unique_new_measurements_window": counts["new_arrivals"],
+            "unique_frame_identity_rule": counts["identity_rule"],
             "adapter_arrivals_lifetime": [int(value) for value in state.arrivals[camera].tolist()],
-            "adapter_unique_lifetime": [
-                int(value) for value in state.unique_arrivals[camera].tolist()
-            ],
+            "adapter_unique_lifetime": adapter_unique,
             "unique_matches_window": [
-                int(value) for value in state.unique_arrivals[camera].tolist()
-            ]
-            == [int(window.unique_frame_count())] * batch_size,
+                adapter_value == window_value
+                for adapter_value, window_value in zip(
+                    adapter_unique, counts["new_arrivals"], strict=True
+                )
+            ],
         }
         entry = state.correspondence.get(camera)
         feed[camera]["p2_motion_status"] = output.diagnostics.get("p2_motion_status")
@@ -853,6 +931,102 @@ def _distinct_samples(dataset: Any, crop: int, count: int) -> list[Any]:
     raise ValueError(f"raw_adapter needs {count} distinct train episodes, found {len(samples)}")
 
 
+#: ``(fnet, cnet)`` first-convolution input channels of the two motion stems.
+MOTION_STEM_CHANNELS = {"cfa4": (4, 8), "rgb3": (3, 6)}
+
+
+def _motion_checkpoint_stem(checkpoint: Any) -> dict[str, Any]:
+    """Infer a motion checkpoint's stem from its ``fnet``/``cnet`` input channels.
+
+    The motion core owns checkpoint loading (its guarded loader accepts the
+    versioned P2 checkpoint schema and a plain tensor state dict), so this reads
+    the state dict through that loader instead of re-implementing it, then reads
+    the two first-convolution input widths the protocol pairs as ``C`` and ``2C``.
+    """
+    import torch
+
+    from owac.backends import raw_correspondence as motion_core
+
+    path = Path(checkpoint)
+    if not path.is_file():
+        raise FileNotFoundError(f"motion checkpoint not found: {path}")
+    loader = getattr(motion_core, "_load_pretrained_payload", None)
+    extractor = getattr(motion_core, "_pretrained_state_dict", None)
+    if loader is None or extractor is None:  # pragma: no cover - interface drift
+        raise RuntimeError(
+            "this checkout's motion core does not expose the guarded checkpoint loader "
+            "(_load_pretrained_payload/_pretrained_state_dict); cannot inspect the stem"
+        )
+    raw = path.read_bytes()
+    payload, weights_only_fallback = loader(raw, path)
+    state, schema, declared = extractor(payload, path)
+
+    def first_conv_channels(key: str) -> int:
+        value = state.get(key)
+        if not isinstance(value, torch.Tensor) or value.dim() < 2:
+            raise ValueError(
+                f"motion checkpoint {path} has no usable {key!r} tensor; cannot infer its stem"
+            )
+        return int(value.shape[1])
+
+    fnet = first_conv_channels("fnet.conv1.weight")
+    cnet = first_conv_channels("cnet.conv1.weight")
+    inferred = next(
+        (name for name, pair in MOTION_STEM_CHANNELS.items() if pair == (fnet, cnet)), None
+    )
+    declared_mode = declared.get("mode") if isinstance(declared, Mapping) else None
+    if inferred is None:
+        raise ValueError(
+            f"motion checkpoint {path} has fnet input {fnet} and cnet input {cnet} channels; "
+            f"the two accepted stems are cfa4 fnet/cnet {MOTION_STEM_CHANNELS['cfa4']} and rgb3 "
+            f"{MOTION_STEM_CHANNELS['rgb3']}"
+        )
+    if declared_mode is not None and str(declared_mode) != inferred:
+        raise ValueError(
+            f"motion checkpoint {path} declares mode {declared_mode!r} but its tensors carry the "
+            f"{inferred} stem (fnet {fnet} / cnet {cnet}); the declaration and the weights disagree"
+        )
+    return {
+        "checkpoint": str(path),
+        "schema": schema,
+        "weights_only_fallback": bool(weights_only_fallback),
+        "declared_mode": None if declared_mode is None else str(declared_mode),
+        "fnet_channels": fnet,
+        "cnet_channels": cnet,
+        "inferred_mode": inferred,
+        "expected_pairs": {name: list(pair) for name, pair in MOTION_STEM_CHANNELS.items()},
+    }
+
+
+def _require_matching_motion_stem(
+    checkpoint: Any, adapter_config: Any, protocol: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Refuse a checkpoint whose stem differs from the windows this run feeds.
+
+    The measurement channels come from the adapter/window configuration, never
+    from the checkpoint: the protocol pairs a ``C``-channel measurement with a
+    ``C``/``2C`` motion stem, and a mismatch is reported with both sides and the
+    rule instead of torch's raw ``load_state_dict`` size error.  Nothing is
+    switched or adapted implicitly.
+    """
+    actual_mode = "cfa4" if adapter_config.is_cfa else "rgb3"
+    actual_channels = int(adapter_config.input_channels)
+    stem = _motion_checkpoint_stem(checkpoint)
+    rule = str(protocol.get("coordinate_units", {}).get("input_channels_multiple_rule", ""))
+    if stem["inferred_mode"] != actual_mode or stem["cnet_channels"] != 2 * actual_channels:
+        recommendation = "cfa4 (4/8)" if actual_mode == "cfa4" else "rawvla_rgb3 (3/6)"
+        raise ValueError(
+            "motion checkpoint stem mismatch: "
+            f"{stem['checkpoint']} is a {stem['inferred_mode']} checkpoint "
+            f"(fnet {stem['fnet_channels']} input channels, cnet {stem['cnet_channels']} "
+            f"channels), but this run feeds {actual_mode} windows with {actual_channels} "
+            f"measured channels (a matching cnet needs {2 * actual_channels}). "
+            f"Protocol rule: {rule or 'n/a'}. Use a {recommendation} motion checkpoint for this "
+            "input mode; the stem is never switched or adapted implicitly."
+        )
+    return stem
+
+
 def _raw_adapter_real(args: argparse.Namespace) -> dict[str, Any]:
     import numpy as np
     import torch
@@ -949,6 +1123,11 @@ def _raw_adapter_real(args: argparse.Namespace) -> dict[str, Any]:
             from owac.backends.raw_correspondence import CorrespondenceEstimator
             from owac.frameworks.n01_full.motion_builders import WindowMotionProvider
 
+            # Refuse a stem mismatch with the protocol rule before torch's raw
+            # ``load_state_dict`` error can surface; the mode is never switched.
+            stem_report = _require_matching_motion_stem(
+                args.motion_checkpoint, adapter_config, protocol
+            )
             mode = "cfa4" if adapter_config.is_cfa else "rgb3"
             cfa_pattern = adapter_config.cfa_pattern if adapter_config.is_cfa else "rgb3"
             channel_phase = (0, 1, 2, 3) if adapter_config.is_cfa else ()
@@ -972,6 +1151,7 @@ def _raw_adapter_real(args: argparse.Namespace) -> dict[str, Any]:
                 "checkpoint": str(args.motion_checkpoint),
                 "checkpoint_sha256": sha256_file(args.motion_checkpoint),
                 "mode": mode,
+                "checkpoint_stem": stem_report,
                 "iters": int(args.motion_iters),
                 "calibration_version": str(args.motion_calibration_version),
                 "mapping_version": estimator.mapping_version,

@@ -9,6 +9,7 @@ oracle arm is driven with estimators that fail the test if they are ever called.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 from pathlib import Path
@@ -27,10 +28,14 @@ from owac.evaluation.n01_motion import (
     EvaluationConfigError,
     GroupMap,
     MotionEvaluator,
+    _align_to,
     _bucket_report,
+    _cfa_phase_consistency,
+    _collect_calibration_samples,
     _latency_report,
     _load_checkpoint,
     _pair_error,
+    _risk_radius_coverage,
     _simplified_global_shift,
     _static_false_rejection,
     _validate_buckets,
@@ -39,7 +44,11 @@ from owac.evaluation.n01_motion import (
     run_evaluation,
 )
 from owac.raw.n01_motion_data import MotionDataGenerator
-from owac.training.n01_motion import MotionTrainingConfig, flow_target_from_supervision
+from owac.training.n01_motion import (
+    MotionTrainingConfig,
+    flow_target_from_supervision,
+    load_motion_training_config,
+)
 
 torch.set_num_threads(1)
 
@@ -341,6 +350,142 @@ def test_region_cap_keeps_every_case_so_no_bucket_disappears():
     assert len(full) == len(config.data.test.specs("test"))
     with pytest.raises(EvaluationConfigError, match="unknown region"):
         evaluator.specs("fitting", limit=1)
+
+
+def test_align_to_moves_only_the_device():
+    reference = torch.zeros(2, 2)
+    other = torch.zeros(2, 2, dtype=torch.float64)
+    moved = _align_to(other, reference)
+    assert moved.device == reference.device
+    assert moved.dtype == torch.float64  # dtype is the caller's business
+    assert _align_to(reference, reference) is reference
+
+
+def test_calibration_sampling_aligns_to_the_model_output_device(monkeypatch):
+    """The reported CUDA defect: a device-only ``.to(dtype)`` kept the supervision on CPU.
+
+    ``meta`` is the only second device a CPU-only machine has; a meta model output
+    with a CPU supervision reproduces exactly the cross-device failure class seen
+    with ``cuda:0`` and fails on the unfixed sampling path.
+    """
+    evaluator = MotionEvaluator(tiny_config(), device="cpu")
+    evaluator._build_estimators()
+    spec = evaluator.specs("calibration", limit=1)[0]
+    original = evaluator.estimator.estimate
+
+    def estimate_on_meta(reference, source, **kwargs):
+        result = original(reference, source, **kwargs)
+        return dataclasses.replace(
+            result,
+            packed_flow=result.packed_flow.to("meta"),
+            valid=result.valid.to("meta"),
+            flow_risk=result.flow_risk.to("meta"),
+            visibility=result.visibility.to("meta"),
+        )
+
+    monkeypatch.setattr(evaluator.estimator, "estimate", estimate_on_meta)
+    samples = _collect_calibration_samples(evaluator, [spec])
+    assert samples
+    devices = {tensor.device.type for sample in samples for tensor in sample.values()}
+    assert devices == {"meta"}
+    # every value the table will consume is on one device (the fit itself moves this
+    # device to the host with .cpu()); meta cannot be copied to the host by design,
+    # so the table fit is exercised on the real CPU path in the test above
+
+
+def test_metric_paths_align_foreign_tensors_to_the_supervision(monkeypatch):
+    """Every metric combination must ask for alignment onto the supervision device."""
+    import owac.evaluation.n01_motion as motion_eval
+
+    geometry = MotionDataGenerator.from_config_path(DATA_CONFIG).geometry()
+    pair = MotionDataGenerator.from_config_path(DATA_CONFIG).sample_pair(
+        split="train", case="layered_occlusion", sequence="s0"
+    )
+    target = flow_target_from_supervision(pair.supervision, geometry, mode="cfa4")
+    prediction = target.flow + 1.0
+    mask = torch.ones_like(target.valid)
+
+    calls: list[tuple[torch.device, torch.device]] = []
+    real = motion_eval._align_to
+
+    def spy(tensor, reference):
+        calls.append((tensor.device, reference.device))
+        return real(tensor, reference)
+
+    monkeypatch.setattr(motion_eval, "_align_to", spy)
+    error_sensor, error_packed, _, _ = _pair_error(
+        prediction,
+        target,
+        predicted_valid=mask,
+        group_map=GroupMap(flow=prediction, valid=mask),
+    )
+    assert len(calls) == 2  # the shared flow and the validity mask
+    assert all(reference == target.channel_flow.device for _tensor, reference in calls)
+    assert error_packed.device == target.channel_flow.device
+    assert error_sensor.device == target.channel_flow.device
+
+    calls.clear()
+    _cfa_phase_consistency(prediction, target, sensor_per_packed=2)
+    assert len(calls) == 1
+    assert calls[0][1] == target.channel_flow.device
+
+    calls.clear()
+    per_cell = error_sensor.mean(dim=0)
+    _risk_radius_coverage(
+        per_cell,
+        torch.ones_like(per_cell),
+        mask,
+        fitted_coverage=torch.ones_like(per_cell),
+    )
+    assert len(calls) == 2  # the calibrated risk and the fitted coverage map
+    assert all(reference == per_cell.device for _tensor, reference in calls)
+
+
+def test_map_proxy_builds_bucket_boundaries_on_the_input_device(monkeypatch):
+    risk = torch.tensor([[0.1, 0.2, 0.3, 0.4]] * 4, dtype=torch.float64)
+    visibility = torch.full((4, 4), 0.5, dtype=torch.float64)
+    table = ErrorCoverageTable.fit(
+        [
+            {
+                "flow_risk": risk,
+                "visibility": visibility,
+                "error": risk * 2,
+                "valid": torch.ones_like(risk, dtype=torch.bool),
+            }
+        ],
+        split=FITTING_SPLIT,
+        bins=4,
+        nominal_coverage=0.9,
+    )
+    seen: list[tuple[torch.device, torch.device]] = []
+    real_bucketize = torch.bucketize
+
+    def spy(input, boundaries, **kwargs):
+        seen.append((input.device, boundaries.device))
+        return real_bucketize(input, boundaries, **kwargs)
+
+    monkeypatch.setattr(torch, "bucketize", spy)
+    mapped, coverage = table.map_proxy(flow_risk=risk, visibility=visibility)
+    assert len(seen) == 2
+    assert all(input_device == boundary_device for input_device, boundary_device in seen)
+    assert mapped.device == risk.device and coverage.device == risk.device
+
+
+@pytest.mark.gpu
+def test_cuda_evaluation_runs_end_to_end(tmp_path):
+    """The real evaluation path on CUDA: the defect fixed here surfaced here first."""
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA runtime is not available")
+    config = load_motion_training_config(CONFIG_PATH)
+    receipt = run_evaluation(config, output=tmp_path / "eval-cuda", device="cuda", max_pairs=8)
+    assert receipt["latency"]["measured"] is True
+    assert receipt["latency"]["device"] == "cuda"
+    assert receipt["latency"]["peak_device_bytes"] > 0
+    assert set(receipt["regions_report"]["test"]["arms"]) == set(GROUP_ORDER)
+    assert receipt["regions_report"]["test"]["arms"]["oracle"]["epe_sensor_px"] == 0.0
+    assert receipt["risk_calibration"]["fitted_split"] == "calibration"
+    assert set(receipt["buckets"]) == set(BUCKET_LABELS)
+    assert receipt["static_false_rejection"]["test"]["pairs"] >= 1
 
 
 def test_static_pairs_are_bit_identical_and_the_zero_flow_arm_rejects_nothing():

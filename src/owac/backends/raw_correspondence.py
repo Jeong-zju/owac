@@ -51,7 +51,10 @@ representable and are refused.
 
 from __future__ import annotations
 
+import hashlib
+import io
 import math
+import pickle
 from collections.abc import Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -150,6 +153,72 @@ def _packed_pull_geometry(
     tap_cols = (j0, j0 + 1, j0, j0 + 1)
     tap_weights = ((1 - fy) * (1 - fx), (1 - fy) * fx, fy * (1 - fx), fy * fx)
     return finite, tap_rows, tap_cols, tap_weights
+
+
+#: Schema of the P2 motion training checkpoint written by ``owac.training.n01_motion``
+#: (``CHECKPOINT_SCHEMA`` there; a test keeps the two constants in step).  Such a
+#: checkpoint carries NumPy RNG state, which torch's strict ``weights_only=True``
+#: loader refuses, so the loader below has exactly two accepted payloads: this
+#: schema, or a plain tensor state dict.
+MOTION_CHECKPOINT_SCHEMA = "owac.n01_full.p2_motion_checkpoint.v1"
+
+_MOTION_SCHEMA_BYTES = MOTION_CHECKPOINT_SCHEMA.encode("utf-8")
+
+
+def _load_pretrained_payload(raw: bytes, path: Path) -> tuple[Any, bool]:
+    """Load a checkpoint: strict first, permissive only behind the schema gate.
+
+    The permissive branch is reachable only when the file's own bytes carry the
+    ``MOTION_CHECKPOINT_SCHEMA`` marker, and the loaded object is re-validated
+    afterwards, so an arbitrary third-party payload is rejected without a
+    permissive load.  Returns ``(payload, weights_only_fallback)``.
+    """
+    try:
+        return torch.load(io.BytesIO(raw), map_location="cpu", weights_only=True), False
+    except (pickle.UnpicklingError, RuntimeError, ValueError, EOFError, OSError) as strict_error:
+        if _MOTION_SCHEMA_BYTES not in raw:
+            raise ValueError(
+                f"{path} is not a {MOTION_CHECKPOINT_SCHEMA} checkpoint and cannot be loaded "
+                "with weights_only=True; permissive loading of an unknown payload is refused"
+            ) from strict_error
+    payload = torch.load(io.BytesIO(raw), map_location="cpu", weights_only=False)
+    return payload, True
+
+
+def _pretrained_state_dict(
+    payload: Any, path: Path
+) -> tuple[Mapping[str, torch.Tensor], str, Mapping[str, Any]]:
+    """Return ``(state_dict, schema, declared)`` or refuse an unaccepted payload."""
+    if isinstance(payload, Mapping) and payload.get("schema") == MOTION_CHECKPOINT_SCHEMA:
+        state = payload.get("model")
+        if not isinstance(state, Mapping) or not state:
+            raise ValueError(
+                f"{path} declares {MOTION_CHECKPOINT_SCHEMA} but carries no 'model' state dict"
+            )
+        if not all(isinstance(value, torch.Tensor) for value in state.values()):
+            raise ValueError(
+                f"{path} declares {MOTION_CHECKPOINT_SCHEMA} but its 'model' entry is not a "
+                "tensor state dict"
+            )
+        fingerprint = payload.get("core_fingerprint")
+        if not isinstance(fingerprint, str) or not fingerprint:
+            raise ValueError(
+                f"{path} declares {MOTION_CHECKPOINT_SCHEMA} but no 'core_fingerprint'"
+            )
+        return state, MOTION_CHECKPOINT_SCHEMA, payload
+    if (
+        isinstance(payload, Mapping)
+        and payload
+        and all(
+            isinstance(key, str) and isinstance(value, torch.Tensor)
+            for key, value in payload.items()
+        )
+    ):
+        return payload, "plain_state_dict", {}
+    raise ValueError(
+        f"{path} is neither a {MOTION_CHECKPOINT_SCHEMA} checkpoint nor a plain tensor state "
+        "dict; refusing to guess at its contents"
+    )
 
 
 @dataclass(frozen=True)
@@ -726,14 +795,23 @@ class CorrespondenceEstimator:
         return values.unsqueeze(0)
 
     def _load_pretrained(self, checkpoint: str | Path) -> Mapping[str, Any]:
+        """Load an explicit weight file into the model and report exactly what happened.
+
+        Accepted payloads are a P2 motion training checkpoint (schema
+        ``MOTION_CHECKPOINT_SCHEMA``, loaded through the guarded permissive
+        fallback because it carries NumPy RNG state) and a plain tensor state
+        dict (loaded strictly).  A stem mismatch surfaces from
+        ``load_state_dict`` itself.  The report records the file sha256, whether
+        the strict loader had to be bypassed, and the checkpoint's own
+        schema/update/mode/depth declarations.
+        """
         path = Path(checkpoint)
         if not path.is_file():
             raise FileNotFoundError(f"pretrained checkpoint not found: {path}")
-        state = torch.load(path, map_location="cpu", weights_only=True)
-        if isinstance(state, Mapping) and "state_dict" in state:
-            state = state["state_dict"]
-        if not isinstance(state, Mapping):
-            raise TypeError(f"checkpoint {path} does not hold a tensor state dict")
+        raw = path.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        payload, weights_only_fallback = _load_pretrained_payload(raw, path)
+        state, schema, declared = _pretrained_state_dict(payload, path)
         report = self._model.load_state_dict(state, strict=False)
         loaded = len(state) - len(report.unexpected_keys)
         if loaded <= 0:
@@ -743,9 +821,18 @@ class CorrespondenceEstimator:
             )
         return {
             "path": str(path),
+            "sha256": digest,
+            "weights_only_fallback": weights_only_fallback,
+            "schema": schema,
+            "core_fingerprint": declared.get("core_fingerprint"),
+            "checkpoint_update": declared.get("update"),
+            "checkpoint_mode": declared.get("mode"),
+            "checkpoint_depth": declared.get("depth"),
             "loaded_tensors": int(loaded),
-            "missing_keys": tuple(report.missing_keys),
-            "unexpected_keys": tuple(report.unexpected_keys),
+            "missing_key_count": len(report.missing_keys),
+            "missing_keys": tuple(report.missing_keys[:16]),
+            "unexpected_key_count": len(report.unexpected_keys),
+            "unexpected_keys": tuple(report.unexpected_keys[:16]),
         }
 
     # -- estimation ---------------------------------------------------------------------
@@ -793,6 +880,13 @@ class CorrespondenceEstimator:
         flow = self._extract_flow(outputs, reference.packed_shape)
         proxy = self._proxy_scores(outputs, flow.shape[1:])
 
+        # One compute device for the whole post-processing path, taken from the tensor
+        # the network actually returned.  The frames' own tensors may live anywhere (a
+        # CPU validity mask indexed by CUDA indices was a real failure); every mask,
+        # index and coordinate is normalized onto this device.
+        device = flow.device
+        if proxy is not None:
+            proxy = {name: value.to(device) for name, value in proxy.items()}
         channels = reference.channels
         finite, tap_rows, tap_cols, tap_weights = _packed_pull_geometry(flow)
         contributing = tuple(weight > 0.0 for weight in tap_weights)
@@ -802,7 +896,7 @@ class CorrespondenceEstimator:
         )
         spatial_ok = torch.stack(in_frame).all(dim=0) & finite
 
-        validity = source.validity
+        validity = None if source.validity is None else source.validity.to(device)
         if validity is None:
             valid = spatial_ok.unsqueeze(0).expand(channels, hp, wp).clone()
         else:
@@ -816,7 +910,7 @@ class CorrespondenceEstimator:
         origins = torch.tensor(
             [source.phase_offset(channel) for channel in range(channels)],
             dtype=torch.float64,
-            device=self._device,
+            device=device,
         )
         step = source.sensor_per_packed
         y0, x0 = source.sensor_origin_xy
@@ -824,7 +918,7 @@ class CorrespondenceEstimator:
             y0
             + step
             * (
-                torch.arange(hp, device=self._device, dtype=torch.float64).view(-1, 1)
+                torch.arange(hp, device=device, dtype=torch.float64).view(-1, 1)
                 + flow[0].to(torch.float64)
             )
         ).unsqueeze(0) + origins[:, 0].view(-1, 1, 1)
@@ -832,7 +926,7 @@ class CorrespondenceEstimator:
             x0
             + step
             * (
-                torch.arange(wp, device=self._device, dtype=torch.float64).view(1, -1)
+                torch.arange(wp, device=device, dtype=torch.float64).view(1, -1)
                 + flow[1].to(torch.float64)
             )
         ).unsqueeze(0) + origins[:, 1].view(-1, 1, 1)
@@ -887,13 +981,20 @@ class CorrespondenceEstimator:
         forward = self.estimate(reference, source, iters=iters, taps=taps)
         backward = self.estimate(source, reference, iters=iters, taps=taps)
         forward_flow = forward.packed_flow
+        device = forward_flow.device
         hp, wp = forward.packed_shape
-        rows = torch.arange(hp, device=self._device, dtype=torch.float64).view(-1, 1)
-        cols = torch.arange(wp, device=self._device, dtype=torch.float64).view(1, -1)
+        rows = torch.arange(hp, device=device, dtype=torch.float64).view(-1, 1)
+        cols = torch.arange(wp, device=device, dtype=torch.float64).view(1, -1)
         mapped_y = rows + forward_flow[0].to(torch.float64)
         mapped_x = cols + forward_flow[1].to(torch.float64)
-        coords = torch.stack([mapped_x, mapped_y], dim=-1).unsqueeze(0).to(forward_flow.dtype)
-        sampled = bilinear_sampler(backward.packed_flow.unsqueeze(0), coords)[0].to(torch.float64)
+        coords = (
+            torch.stack([mapped_x, mapped_y], dim=-1)
+            .unsqueeze(0)
+            .to(device=device, dtype=forward_flow.dtype)
+        )
+        sampled = bilinear_sampler(backward.packed_flow.to(device).unsqueeze(0), coords)[0].to(
+            torch.float64
+        )
         cycle = forward_flow.to(torch.float64) + sampled
         cycle_error = torch.linalg.vector_norm(cycle, dim=0)
         inside = (
