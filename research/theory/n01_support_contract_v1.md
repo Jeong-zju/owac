@@ -7,7 +7,7 @@
 | 工作流 | P0 workflow D（共享任务板 `task-4`，执行者 `wf-theory`） |
 | 实现基线 | 分支 `lzh/n01-evidence-integration`，HEAD `429591e`（父研究结果 `85790cc`） |
 | 依据 | 方案 `docs/N01_full_development_plan_2026-10-14_v1.0.md`（§4、§5、§7–§12）；`docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md`（§3–§4）；P0/P1/P3/P5 阶段提示词；`docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md` |
-| 状态 | P0 交付草案。**本文不含任何已完成证明、实现或性能结论；T1–T6 的每一项当前状态均为「未证明」。** |
+| 状态 | P0 交付草案 + **P1 更新（2026-10-14）**：T1/T2/T5 的代码入口、反例测试与 `analytic` 评估入口已落地并实际执行（见各节「P1 实现状态」）。**本文不含任何已完成证明；T1–T6 的每一项命题状态仍为「未证明」**，P1 只新增实现与数值/行为反例证据。 |
 
 **用途。** 把方案 §5 的六项理论义务写成可判定的定义、逐条假设、可检验命题（标明未证明）、反例/失效条件与代码测试映射，作为 P0–P8 各阶段验收与交接的共同依据。理论文件在 P0/P1 建立、随算法变更一起评审（方案 §5）。
 
@@ -51,8 +51,8 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
 | 角色字段与互斥检查 | `src/owac/frameworks/n01_full/contracts.py::SupportDomain`（`evidence_source_ids` / `context_source_ids`） | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 只由 evidence 构造统计 | `src/owac/frameworks/n01_full/statistics.py::fit_structure` | P1 待实现 |
-| 角色覆盖隔离测试 | `tests/encoders/n01_full/test_replay.py`（建议 `test_isolation_covers_declared_roles`） | P1 待实现 |
+| 只由 evidence 构造统计 | `src/owac/frameworks/n01_full/statistics.py::fit_structure` | P1 已实现（只读 `evidence_source_ids`；`diagnostics.context_used_as_evidence=False`；`tests/encoders/n01_full/test_statistics.py::test_missing_bad_saturated_never_enter_the_design_and_context_never_does_either`） |
+| 角色覆盖隔离测试 | `tests/encoders/n01_full/test_replay.py::test_isolation_covers_declared_roles` | P1 已实现（撤回 evidence 与 context 两个角色后替换其内容，读出不变） |
 | 旧实现中掩码/有效性分离的回归参照 | `tests/encoders/n01/test_acceptance_regressions.py::test_cfa_stem_consumes_actual_sampling_offsets_and_quality_masks` | 已存在（旧语义，不构成新契约验收） |
 
 ### 1.2 `validity_kind` 四态，与「拒绝是支持关系状态」
@@ -83,8 +83,8 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
 | 四态字段与不变式检查 | `contracts.py::MeasurementRecord.validity_kind` | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 记录不可变 + 状态分离审计 | `ledger.py::MeasurementLedger.get_sources` / `observe` | P1 待实现 |
-| 缺测/饱和不参与估计 | `statistics.py::fit_structure`、`tests/encoders/n01_full/test_ledger.py`（建议 `test_missing_is_not_zero_observation`） | P1 待实现 |
+| 记录不可变 + 状态分离审计 | `ledger.py::MeasurementLedger.get_sources` / `observe` / `with_content` | P1 已实现（`test_ledger.py::test_content_replacement_is_a_view_and_never_rewrites_the_raw_record`） |
+| 缺测/饱和不参与估计 | `statistics.py::fit_structure`、`tests/encoders/n01_full/test_ledger.py::test_validity_precedence_and_values`、`test_statistics.py::test_missing_bad_saturated_never_enter_the_design_and_context_never_does_either` | P1 已实现 |
 | P0 契约字段行为（四态与身份守恒） | `tests/encoders/n01_full/test_foundation.py` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 旧实现把 bad/saturated 折进 `valid` 的现行行为 | `src/owac/frameworks/n01/state.py::push`（`valid = valid & ~bad_mask & ~saturated_mask`，代码注释自述 "bad/saturated removed"）与 `src/owac/frameworks/n01_dbsr_raw.py::RawDomainHistory.step`（其后只消费 `state.valid[0]`） | 已存在；作为"旧语义"反例参照 |
 
@@ -109,9 +109,9 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
 | 字段与标签 | `contracts.py::EvidenceEstimate` | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 秩/可辨识子空间 + 先验处理 | `statistics.py::fit_structure` | P1 待实现 |
-| 独立 dense oracle | `src/owac/frameworks/n01_full/reference.py`（建议 `dense_gls_reference`） | P1 待实现 |
-| 数值/秩亏测试 | `tests/encoders/n01_full/test_statistics.py` | P1 待实现 |
+| 秩/可辨识子空间 + 先验处理 | `statistics.py::fit_structure` | P1 已实现（SVD 行空间 leverage；秩亏 → `uncertainty_kind="none"` 且无协方差；`test_statistics.py::test_rank_deficiency_reports_the_identifiable_subspace_without_fake_precision`） |
+| 独立 dense oracle | `src/owac/frameworks/n01_full/reference.py::dense_gls`（eigh 白化 + 显式稠密逆） | P1 已实现（不调用 `statistics.py`） |
+| 数值/秩亏测试 | `tests/encoders/n01_full/test_statistics.py` | P1 已实现（手算、随机异方差、FP32、病态条件数单报、先验、保守界） |
 | 旧实现的唯一帧计数回归 | `tests/encoders/n01/test_acceptance_regressions.py::test_repeated_id_and_padding_preserve_all_eight_unique_frames`、`test_fractional_overlap_uses_each_original_source_once` | 已存在（历史语义，非新契约验收） |
 
 ### 1.4 `DependencyNode` 四版本与「参数更新后旧派生缓存失效」
@@ -159,10 +159,10 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
 | 快照字段与提交语义 | `contracts.py::ReadoutSnapshot` | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 精确窗口/摘要边界 | `replay.py::full_replay`、`src/owac/frameworks/n01_full/state_field.py` | P1/P5 待实现 |
+| 精确窗口/摘要边界 | `replay.py::full_replay`（P1 已实现 32 帧精确窗口、`ReplayRange`、历史损失与 `ReadoutSnapshot`）、`state_field.py`（P5 待实现） | P1/P5 待实现 |
 | 唯一帧与窗口语义的现有实现 | `src/owac/frameworks/n01/state.py::push`（"repeated frames do not create extra independent observations"）、`reset`、`detach` | 已存在（旧语义） |
 | 旧 8 帧唯一性回归 | `tests/encoders/n01/test_acceptance_regressions.py::test_repeated_id_and_padding_preserve_all_eight_unique_frames` | 已存在 |
-| 32 帧边界测试 | `tests/encoders/n01_full/test_replay.py`（建议 `test_exact_range_boundary_and_history_loss`） | P1 待实现 |
+| 32 帧边界测试 | `tests/encoders/n01_full/test_replay.py::test_exact_window_boundary_records_history_loss_and_rebuild_claim`（8 帧声明窗口 + 10 次曝光） | P1 已实现 |
 
 ### 1.6 两个测试接口：`fixed_decision_replay` 与 `counterfactual_replay`
 
@@ -187,11 +187,11 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 两个接口与 manifest | `replay.py::fixed_decision_replay` / `counterfactual_replay` | P1 待实现 |
-| 独立批量参考 | `reference.py`（独立 NumPy FP64 稠密实现） | P1 待实现 |
-| 冻结决策依赖标注 | `replay.py` manifest 字段（建议 `frozen_decision_deps`） | P1 待实现 |
-| 接口测试 | `tests/encoders/n01_full/test_replay.py`（建议 `test_fixed_decision_replay_is_conditional`、`test_counterfactual_replay_matches_batch_reference`） | P1 待实现 |
-| 依赖闭包的玩具非线性算子 | P1_ANALYTIC_REFERENCE §3（两层非线性算子性质测试） | P1 待实现 |
+| 两个接口与 manifest | `replay.py::fixed_decision_replay` / `counterfactual_replay` | P1 已实现（manifest 记录替换内容、比较量、容差与 `not_claimed`） |
+| 独立批量参考 | `reference.py`（独立 NumPy FP64 稠密实现） | P1 已实现（`counterfactual_replay(reference_fn=...)` 由调用方注入 oracle；`replay.py` 不导入它） |
+| 冻结决策依赖标注 | `replay.py::fixed_decision_replay(frozen_decision_deps=...)` → `FixedDecisionReplayResult.conditional_on` | P1 已实现 |
+| 接口测试 | `tests/encoders/n01_full/test_replay.py::test_fixed_decision_replay_is_falsifiable`（含泄漏负对照）、`test_counterfactual_replay_matches_independent_batch_reference` | P1 已实现 |
+| 依赖闭包的玩具非线性算子 | `replay.py::ToyProgram` + `recompute_successor_closure` | P1 已实现（`test_replay.py::test_dependency_closure_recomputation_matches_full_retraction`） |
 
 ---
 
@@ -242,13 +242,20 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 义务 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
 | 来源身份/字段 | `contracts.py::SourceKey` | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 账本与幂等登记 | `ledger.py::MeasurementLedger.observe / get_sources`、部分 episode reset | P1 待实现 |
-| 合并/分裂/撤回 | `domains.py::make_domain / merge_domains / split_domain / retract_sources` | P1 待实现 |
-| GLS 求解与秩 | `statistics.py::fit_structure` | P1 待实现 |
-| 独立 FP64 oracle | `reference.py` | P1 待实现 |
+| 账本与幂等登记 | `ledger.py::MeasurementLedger.observe / get_sources / reset / without` | P1 已实现（`test_ledger.py`） |
+| 合并/分裂/撤回 | `domains.py::make_domain / merge_domains / split_domain / retract_sources / restore_sources` | P1 已实现（`evaluation/n01_full.py analytic --case set_algebra`） |
+| GLS 求解与秩 | `statistics.py::fit_structure` | P1 已实现 |
+| 独立 FP64 oracle | `reference.py` | P1 已实现 |
 | 数值与性质测试 | `tests/encoders/n01_full/test_ledger.py`、`test_statistics.py`、`test_replay.py` | P1 待实现 |
-| 评估入口 | `src/owac/evaluation/n01_full.py`（`analytic` 子命令） | P1 待实现 |
+| 评估入口 | `src/owac/evaluation/n01_full.py`（`analytic` 子命令，9 个 case） | P1 已实现 |
 | 旧去重/重叠语义回归 | `tests/encoders/n01/test_acceptance_regressions.py::test_fractional_overlap_uses_each_original_source_once` | 已存在（历史参照） |
+
+### 2.6 P1 实现状态与证据（2026-10-14）
+
+- **代码入口。** `ledger.py::MeasurementLedger`（身份去重、部分 reset、`without` 反事实视图、`with_content` 派生内容视图）、`domains.py::make_domain / merge_domains / split_domain / retract_sources / restore_sources`（`content_digest` 与血缘版本 `support_version` 分离）、`statistics.py::fit_structure`、`reference.py::dense_gls`、`replay.py::full_replay / fixed_decision_replay / counterfactual_replay`。
+- **已执行的反例。** X-T1-i（截取旧精度矩阵）由 `test_statistics.py::test_correlated_observations_and_precision_slice_counterexample` 与 `analytic` case `correlated_two_observation` 固定：正确撤回方差 1.0、错误版本 0.75，二者被判别；X-T1-ii（重复包计两次）由 `test_ledger.py::test_duplicate_packet_does_not_advance_counts_or_precision` 与 case `duplicate_then_new_id` 固定（重放不增加测量数；数值相同的新曝光仍然登记）。
+- **集合代数。** 交换/结合与规范排序、split 再 merge、retract 再 restore、同一事件流的不同分块由 `analytic --case set_algebra` 固定；比较只在声明版本固定时进行（`content_digest` 相同，`support_version` 因血缘不同而不同）。
+- **仍未证明。** P-T1-a…e 仍是命题；P1 只提供有限小问题上的数值与行为证据，不含任意域/任意事件图的一般证明。
 
 ---
 
@@ -294,13 +301,21 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 义务 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| GLS 实现 | `statistics.py::fit_structure` | P1 待实现 |
-| 独立参考 | `reference.py` | P1 待实现 |
+| GLS 实现 | `statistics.py::fit_structure`（`solve_triangular` + `lstsq` + Cholesky 逆） | P1 已实现 |
+| 独立参考 | `reference.py`（`eigh` 白化路线） | P1 已实现 |
 | 先验/秩/标签字段 | `contracts.py::EvidenceEstimate` | P0 已实现（契约字段/行为，不表示理论已证明） |
-| 数值测试（手算 + 随机 + 病态） | `tests/encoders/n01_full/test_statistics.py` | P1 待实现 |
+| 数值测试（手算 + 随机 + 病态） | `tests/encoders/n01_full/test_statistics.py` | P1 已实现（病态问题单报条件数，不靠放大全局容差） |
 | 现有解析统计入口（旧语义） | `src/owac/frameworks/n01/support.py::SupportDomainIntegrator.domain_statistics` | 已存在（旧实现，非新契约验收） |
 | 噪声模型与校准 | `src/owac/frameworks/n01_full/calibration.py` | P3 待实现 |
 | 运动方差近似 | `src/owac/backends/raw_correspondence.py`（`∇fᵀΣ_flow∇f` 只作近似，需留出数据检验） | P2 待实现 |
+
+### 3.6 P1 实现状态与证据（2026-10-14）
+
+- **代码入口。** `statistics.py::fit_structure`（逐相位 `cholesky` → `solve_triangular` → `lstsq`；满秩协方差由 `Lambda` 的 Cholesky 求逆；先验以 `Lambda_prior/eta_prior` 单列一次）与 `reference.py::dense_gls`（独立 `eigh` 白化 + 显式稠密逆，**不导入** `statistics.py`）。
+- **已执行的数值验证。** 手算（y=[1,3]、σ²=[1,1] → 均值 2、方差 0.5；Σ=[[1,0.5],[0.5,1]] → 0.75，撤回第二观测后 1.0）；随机异方差仿射问题与 oracle 的预测一致（FP64 `atol=1e-10, rtol=1e-8`）；FP32 良态问题（`atol=1e-5, rtol=1e-4`）；病态设计单报条件数（>1e6，且不比较没有有效数字的预测方差）；秩亏掩码与标签；先验单列不计入独立观测数；未知相关性下固定权重保守界 `(Σ|aᵢ|σᵢ)²` 的数值保守性（等相关 0.5 噪声下经验方差小于该界，且严格大于独立观测公式）。
+- **标签分离。** `covariance`（已知 Σ 的精确协方差或后验）、`proxy`（未知相关性的保守界，PSD 形式 `(|C|σ)(|C|σ)ᵀ`）、`none`（秩亏且无先验）由 `EvidenceEstimate.uncertainty_kind` 区分并分别测试。
+- **限制（必须带入后续阶段）。** 自适应选域、由数据估计 flow/对应或数据依赖权重之后，**固定设计 GLS 的 BLUE/协方差不再自动成立**（X-T2-i）；把权重 `detach` 不消除统计选择偏差。P2/P3 引入这些步骤时必须另建合法条件构造（独立留出或重新推导），不得直接复用本节结论。
+- **仍未证明。** P-T2-a…e 仍是命题；"生产 = 独立参考"只在声明的小问题上成立。
 
 ---
 
@@ -450,13 +465,20 @@ P_t ≥ 0，且每一行和为 1
 
 | 义务 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 全量/两种回放接口 | `replay.py::full_replay / fixed_decision_replay / counterfactual_replay` | P1 待实现 |
-| 独立批量参考 | `reference.py` | P1 待实现 |
+| 全量/两种回放接口 | `replay.py::full_replay / fixed_decision_replay / counterfactual_replay` | P1 已实现 |
+| 独立批量参考 | `reference.py` | P1 已实现（由 `reference_fn` 注入，不与生产共享代码路径） |
 | 失效传播与依赖图 | `invalidation.py`、`contracts.py::DependencyNode` | P5 / P0 已实现（契约字段/行为，不表示理论已证明） |
-| 依赖闭包玩具算子 | P1_ANALYTIC_REFERENCE §3（两层非线性算子） | P1 待实现 |
-| 重放测试 | `tests/encoders/n01_full/test_replay.py`（P1）、`test_state_replay.py`（P5） | P1/P5 待实现 |
+| 依赖闭包玩具算子 | `replay.py::ToyProgram`（sources → normalization → centering → tanh → quadratic → readout） | P1 已实现 |
+| 重放测试 | `tests/encoders/n01_full/test_replay.py`（P1 已实现）、`test_state_replay.py`（P5 待实现） | P1/P5 待实现 |
 | 现有唯一帧/重复帧实现 | `src/owac/frameworks/n01/state.py::push / reset / detach` | 已存在（旧语义参照） |
 | 现有内容重算基线 | `src/owac/baselines/burst_features.py::BurstFeatureEncoder.encode_frames`、`MaskedDbsrFusion.forward` | 已存在 |
+
+### 6.6 P1 实现状态与证据（2026-10-14）
+
+- **代码入口。** `replay.py::full_replay`（一次完整求解、`ReadoutSnapshot` 提交、32 帧精确窗口与历史损失）、`fixed_decision_replay`（冻结决策 + 内容替换，输出 `conditional_on`）、`counterfactual_replay`（删除来源、重算全部决策、可由 `reference_fn` 注入独立 oracle 比较）、`ToyProgram` / `recompute_successor_closure`（依赖闭包）。
+- **已执行的性质测试。** 依赖闭包重算 = 从零重算（两层非线性算子，差 ≤1e-12）；"只把被撤回输入置零"的错误版本被固定为不等价（差 >1e-6）；固定决策回放的可满足性与泄漏负对照；越界撤回只声明"从合法边界重建 + 历史损失"。
+- **依赖图与版本。** `DependencyNode.is_stale_against` 由 `test_replay.py::test_version_changes_trigger_recomputation` 固定：support/parameter 版本变化使派生节点失效；`ContentReplacement` 是版本化派生视图，不重写原始记录。
+- **仍未证明。** P-T5-a…d 仍是命题；P1 的玩具算子只作**性质测试**，不是正式内容骨干；卷积感受野跨界、递归网络双缓存、从未污染检查点重放等仍属 P4/P5。
 
 ---
 

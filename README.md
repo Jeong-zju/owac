@@ -1,5 +1,7 @@
 # OWAC
 
+2026-10-14 N01 v1.0 **P1（可组合与可撤回的解析参考）完成**：交付身份账本、版本化支持域、逐相位 GLS（秩/可辨识掩码/先验单列/未知相关性保守界）、两套回放接口与 32 帧精确窗口、独立 NumPy FP64 oracle 和一维同语义例子；`analytic` 子命令 9/9、新增 34 项测试、本地全仓 473 passed、`make check` 通过。远程源包 152/152 hash 一致、`verify` 22/22、125 passed，真实两平台唯一来源计数与 `mode=contract` 桥接/冻结证据（后端梯度 0、validation 参数漂移 0.0）通过；检查中修复 7 个缺陷。**未开始 P2/长训练，无机制效果结论**。见 [P1 报告](research/experiments/n01_full/P1_report.md)与[收据](research/experiments/results/n01_full/P1/receipt.json)。
+
 2026-10-14 P0 独立验收修补完成：修正 RoboTwin 协议归一化键、可执行 profiling、严格数据身份检查、GPU 环境路径/依赖、任务层统计与完整预算。两平台四区真实 loader、远程 55/55 checks、139/139 源包、91 项 P0 测试通过；本地全仓 439 passed。仅接受 P0 工程起点，未开始 P1/长训练。 见[独立验收报告](research/experiments/n01_full/P0_acceptance_report.md)。
 
 2026-10-14 N01 v1.0 **P0（问题、数据与依赖）完成**：交付内部契约与阶段配置、四区数据 manifest、上游锁与冻结协议、`n01_full_preflight` 四子命令、T1–T6 理论义务目录；在用户服务器新建独立 encoder GPU 环境（Python 3.11.16 / torch 2.9.1+cu128 / RTX PRO 6000 Blackwell），完成全尺寸 DBSR 64/9/512 profiling（首选起点 128/8：step p50 46.1 ms、峰值 reserved 4.4 GiB）与两平台真实 batch 读取；远程源包 227/227 hash 一致、`inventory --strict` 36/36 checks 通过。本地 `make check` 通过、全仓 434 passed（历史基线 348 + 新增 86）。**未开始 P1 算法、未启动任何长训练、无机制效果结论**。见 [P0 报告](research/experiments/n01_full/P0_report.md)与[收据](research/experiments/results/n01_full/P0/receipt.json)。
