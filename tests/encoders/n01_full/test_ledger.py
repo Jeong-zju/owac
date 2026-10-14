@@ -6,6 +6,7 @@ checked against the independent NumPy FP64 oracle rather than against production
 output.
 """
 
+import pytest
 import torch
 
 from owac.core.encoder_contract import MeasurementFrame
@@ -154,7 +155,10 @@ def test_content_replacement_is_a_view_and_never_rewrites_the_raw_record():
     assert "content-replacement" in replaced.get_source(target).value_units
     # The raw ledger and its record are untouched.
     assert ledger.get_source(target).raw_value == 3.0
-    assert replaced.get_frame("e0", "c0", 0).values[0, 0, 1] == 3.0
+    # Every public read on the derived view must see replaced content; the base
+    # ledger is the immutable raw record and remains unchanged.
+    assert replaced.get_frame("e0", "c0", 0).values[0, 0, 1] == 1234.0
+    assert ledger.get_frame("e0", "c0", 0).values[0, 0, 1] == 3.0
 
 
 def test_counterfactual_view_removes_only_the_listed_sources():
@@ -206,7 +210,8 @@ def test_loader_style_per_channel_offsets_expand_to_sample_coordinates():
     assert grid[0, 2, 0, 0].tolist() == [0.0, 1.0]
     # No declaration, or a shape that is not one offset per channel, is not guessed.
     assert _sample_grid(values, None) is None
-    assert _sample_grid(values, torch.zeros((2, 2))) is None
+    with pytest.raises(ValueError, match="channel count"):
+        _sample_grid(values, torch.zeros((2, 2)))
 
     ledger = MeasurementLedger("ds")
     ledger.observe(

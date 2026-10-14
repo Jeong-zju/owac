@@ -115,7 +115,7 @@ def dense_gls(
     largest = float(singular_values[0]) if singular_values.size else 0.0
     if rank_rtol is None:
         rank_rtol = max(whitened.shape) * float(np.finfo(_FLOAT).eps)
-    tolerance = rank_rtol * max(largest, 1.0)
+    tolerance = rank_rtol * largest
     rank = int(np.sum(singular_values > tolerance))
 
     lambda_matrix = whitened.T @ whitened
@@ -135,7 +135,7 @@ def dense_gls(
         lambda_matrix = lambda_matrix + lambda_prior
         eta = eta + lambda_prior @ mean
 
-    if rank == phi.shape[1]:
+    if rank == phi.shape[1] or prior_covariance is not None:
         # Cholesky is the positive-definiteness test; ``matrix_rank`` on the normal
         # matrix would square the condition number and wrongly declare a genuinely
         # full-rank but ill-conditioned design rank deficient.

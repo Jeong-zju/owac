@@ -69,12 +69,12 @@ def _sample_grid(values: Any, offsets: Any) -> Any:
         return None
     tensor = offsets if hasattr(offsets, "shape") else None
     if tensor is None or tensor.ndim != 2 or tensor.shape[1] != 2:
-        return None
+        raise ValueError("sample_xy must declare per-channel (row, col) offsets")
     import torch
 
     channels, height, width = values.shape[1], values.shape[2], values.shape[3]
     if tensor.shape[0] != channels:
-        return None
+        raise ValueError("sample_xy channel count differs from the measurement")
     rows = (
         torch.arange(height, dtype=torch.float64).view(1, height, 1).expand(channels, height, width)
     )

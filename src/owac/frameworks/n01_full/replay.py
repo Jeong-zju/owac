@@ -46,7 +46,7 @@ from owac.frameworks.n01_full.contracts import (
     ReplayRange,
     SourceKey,
 )
-from owac.frameworks.n01_full.domains import VersionedDomain
+from owac.frameworks.n01_full.domains import VersionedDomain, retract_sources
 from owac.frameworks.n01_full.ledger import (
     ContentReplacement,
     FrameIdentity,
@@ -177,10 +177,11 @@ class StructureReadout:
     domain_versions: tuple[str, ...]
 
     def max_abs_diff(self, other: StructureReadout) -> float:
-        """Largest absolute mean difference; NaN on one side only is infinite."""
+        """Largest readout difference; mismatched validity/uncertainty is infinite."""
         if self.labels != other.labels:
             return float("inf")
-        left, right = self.means, other.means
+        left = torch.cat([self.means, self.variances])
+        right = torch.cat([other.means, other.variances])
         finite = torch.isfinite(left) & torch.isfinite(right)
         if not bool(torch.equal(torch.isfinite(left), torch.isfinite(right))):
             return float("inf")
@@ -255,10 +256,10 @@ def _exact_window(
     return tuple(selected), tuple(dropped)
 
 
-def _frame_order(frame_id: int | str) -> tuple[int, float, str]:
+def _frame_order(frame_id: int | str) -> tuple[int, int, str]:
     if isinstance(frame_id, int) and not isinstance(frame_id, bool):
-        return (0, float(frame_id), "")
-    return (1, 0.0, str(frame_id))
+        return (0, frame_id, "")
+    return (1, 0, str(frame_id))
 
 
 def _calibration_version(ledger: MeasurementLedger) -> str:
@@ -292,6 +293,8 @@ def full_replay(
     stream = events if isinstance(events, EventStream) else EventStream("ledger", tuple(events))
     replay = replay_config or ReplayConfig()
     ledger, receipts = consume(stream)
+    exact_frames, history_loss = _exact_window(ledger, replay.exact_window_unique_frames)
+    ledger = ledger.retain_frames(exact_frames)
     if domain_builder is not None and domains is not None:
         raise ValueError("pass either a domain_builder or explicit domains, not both")
     if domain_builder is not None:
@@ -300,10 +303,16 @@ def full_replay(
         built = tuple(domains)
     else:
         built = ()
+    # Explicit domains also lose expired support; the resulting version must change.
+    built = tuple(
+        retract_sources(domain, [key for key in domain.members() if not ledger.has_source(key)])
+        if any(not ledger.has_source(key) for key in domain.members())
+        else domain
+        for domain in built
+    )
     fits = tuple(fit_structure(domain, ledger, correspondence, noise_model) for domain in built)
     grid = readout_grid or ReadoutGrid(())
     readout = structure_readout(fits, grid)
-    exact_frames, history_loss = _exact_window(ledger, replay.exact_window_unique_frames)
     frame_ids = [identity.frame_id for identity in exact_frames]
     exact_range = ReplayRange(
         oldest_frame_id=frame_ids[0] if frame_ids else "none",
@@ -341,7 +350,7 @@ def full_replay(
         "dataset_id": stream.dataset_id,
         "events": len(stream),
         "registered_frames": ledger.frame_count(),
-        "unique_sources": sum(fit.estimate.independent_observation_count for fit in fits),
+        "unique_sources": len({key for fit in fits for key in fit.estimate.evidence_source_ids}),
         "domains": [
             {
                 "domain_id": domain.domain_id,
@@ -414,6 +423,14 @@ def fixed_decision_replay(
     stream = events if isinstance(events, EventStream) else EventStream("ledger", tuple(events))
     ledger, _ = consume(stream)
     grid = readout_grid or ReadoutGrid(())
+    if not grid.points:
+        raise ValueError("fixed replay needs a nonempty query grid")
+    if not retracted_ids or set(replacement.values) != set(retracted_ids):
+        raise ValueError("replacement must cover exactly the nonempty retracted source set")
+    if any(not ledger.has_source(key) for key in retracted_ids):
+        raise ValueError("replacement targets must have been observed")
+    if any(replacement.values[key] == ledger.get_source(key).raw_value for key in retracted_ids):
+        raise ValueError("replacement must actually change every target's content")
     baseline = structure_readout(
         [fit_structure(domain, ledger, correspondence, noise_model) for domain in frozen_domains],
         grid,
@@ -436,7 +453,7 @@ def fixed_decision_replay(
         "retracted_ids": [list(key.identity()) for key in retracted_ids],
         "replaced_sources": len(replacement.values),
         "frozen_domain_versions": [domain.support_version for domain in frozen_domains],
-        "compared": "readout means at the declared query grid",
+        "compared": "readout means, variances and validity at the declared query grid",
         "tolerance": tolerance,
         "max_abs_diff": diff,
         "unchanged": diff <= tolerance,
@@ -495,6 +512,8 @@ def counterfactual_replay(
     parameter_version: str | int = "analytic-p1",
     mapping_version: str | int = "identity",
     commit_time: str | int = "p1-analytic",
+    correspondence_builder: Callable[[MeasurementLedger], Any] | None = None,
+    noise_model_builder: Callable[[MeasurementLedger], Any] | None = None,
 ) -> CounterfactualReplayResult:
     """Delete the sources, recompute every decision, and compare to the reference.
 
@@ -514,7 +533,17 @@ def counterfactual_replay(
         if FrameIdentity(full.dataset_id, key.episode_id, key.camera_id, key.frame_id)
         not in window_keys
     ]
-    view = full.without(retracted)
+    if any(not full.has_source(key) for key in retracted):
+        raise ValueError("counterfactual retraction targets must have been observed")
+    view = full.retain_frames(window_frames).without(retracted)
+    if correspondence_builder is not None:
+        if correspondence is not None:
+            raise ValueError("pass correspondence or its recomputation builder, not both")
+        correspondence = correspondence_builder(view)
+    if noise_model_builder is not None:
+        if noise_model is not None:
+            raise ValueError("pass noise_model or its recomputation builder, not both")
+        noise_model = noise_model_builder(view)
     domains = tuple(domain_builder(view))
     fits = tuple(fit_structure(domain, view, correspondence, noise_model) for domain in domains)
     grid = readout_grid or ReadoutGrid(())
@@ -573,6 +602,8 @@ def counterfactual_replay(
             raise ValueError("the independent reference returned no comparable values")
         atol, rtol = reference_tolerance
         observed_vector = readout.as_vector()
+        if set(reference) != set(observed_vector):
+            raise ValueError("reference must cover the entire query grid")
         worst = 0.0
         inside = True
         for label, value in reference.items():
@@ -606,6 +637,10 @@ def counterfactual_replay(
         "beyond_exact_sources": [list(key.identity()) for key in untouched],
         "history_loss": [tuple(item.frame) for item in window_loss],
         "invalidated_summary": bool(untouched),
+        "history_policy": "discard expired raw and summaries; rebuild from retained boundary",
+        "decision_scope": "analytic callbacks recomputed on redacted bounded ledger",
+        "correspondence_recomputed": correspondence_builder is not None,
+        "noise_recomputed": noise_model_builder is not None,
         "claim": claim,
         "not_claimed": []
         if not beyond

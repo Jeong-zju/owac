@@ -27,6 +27,7 @@ records both hashes.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import sys
@@ -77,6 +78,57 @@ def parser() -> argparse.ArgumentParser:
     return top
 
 
+def tensor_hash(tensor: Any) -> str:
+    """Hash actual tensor bytes, including BF16, plus dtype and shape."""
+    import torch
+
+    value = tensor.detach().cpu().contiguous()
+    digest = hashlib.sha256(str((tuple(value.shape), value.dtype)).encode())
+    digest.update(value.reshape(-1).view(torch.uint8).numpy().tobytes())
+    return digest.hexdigest()
+
+
+def model_hash(module: Any) -> str:
+    digest = hashlib.sha256()
+    for name, value in module.state_dict().items():
+        digest.update(name.encode())
+        digest.update(tensor_hash(value).encode())
+    return digest.hexdigest()
+
+
+def gradient_receipt(parameters: Any) -> dict[str, Any]:
+    import torch
+
+    gradients = [p.grad for p in parameters if p.grad is not None]
+    return {
+        "total": sum(float(g.norm()) for g in gradients),
+        "finite": bool(gradients) and all(bool(torch.isfinite(g).all()) for g in gradients),
+        "tensors": len(gradients),
+    }
+
+
+def batch_hashes(batch: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "windows": {
+            camera: {
+                name: tensor_hash(getattr(window, name))
+                for name in (
+                    "values",
+                    "valid_mask",
+                    "bad_mask",
+                    "saturated_mask",
+                    "frame_ids",
+                    "new_measurement",
+                )
+            }
+            for camera, window in batch["windows"].items()
+        },
+        "actions": tensor_hash(batch["action"]),
+        "action_mask": tensor_hash(batch["action_mask"]),
+        "state": tensor_hash(batch["state"]),
+    }
+
+
 def contract(args: argparse.Namespace) -> dict[str, Any]:
     import numpy as np
     import torch
@@ -94,6 +146,10 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
         observation_from_batch,
     )
 
+    if not 2 <= args.steps <= 200:
+        raise ValueError("P1 contract requires 2..200 train updates per platform")
+    if args.validation_batches < 1:
+        raise ValueError("P1 contract requires a validation batch")
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     protocol = json.loads(args.protocol.read_text())
@@ -115,6 +171,9 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
             "device": args.device,
         },
         "protocol": str(args.protocol),
+        "protocol_sha256": sha256_file(args.protocol),
+        "encoder_config_sha256": sha256_file(args.encoder_config),
+        "runtime_sha256": sha256_file(Path(__file__)),
         "platforms": {},
     }
     for name in platforms:
@@ -126,6 +185,10 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
             "tokenizer": str(tokenizer),
             "tokenizer_sha256": sha256_file(tokenizer),
         }
+        if entry["weights_sha256"] != backend["weights"][name]["sha256"]:
+            raise ValueError("checkpoint hash differs from the frozen protocol")
+        if entry["tokenizer_sha256"] != backend["tokenizer"]["sha256"]:
+            raise ValueError("tokenizer hash differs from the frozen protocol")
         train_set = dataset_from_protocol(protocol, name, "train", repo_root=args.repo_root)
         validation_set = dataset_from_protocol(
             protocol, name, "validation", repo_root=args.repo_root
@@ -141,11 +204,22 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
         first = train_set[0]
         camera_order = list(first.windows)
         encoder, bridge = build_bridge(policy, config, camera_order, args.device, args.method, name)
-        parameters = [p for p in encoder.parameters() if p.requires_grad]
-        parameters += [p for p in bridge.postprocessor.parameters() if p.requires_grad]
+        encoder_parameters = [p for p in encoder.parameters() if p.requires_grad]
+        bridge_parameters = [p for p in bridge.postprocessor.parameters() if p.requires_grad]
+        parameters = encoder_parameters + bridge_parameters
+        backend_before = model_hash(policy)
+        entry["initial_model_hashes"] = {
+            "encoder": model_hash(encoder),
+            "bridge": model_hash(bridge.postprocessor),
+            "backend": backend_before,
+        }
         optimizer = torch.optim.AdamW(parameters, lr=args.lr)
         before = {name_: p.detach().clone() for name_, p in encoder.named_parameters()}
+        bridge_before = {
+            key: p.detach().clone() for key, p in bridge.postprocessor.named_parameters()
+        }
         rows = []
+        episodes = set()
         if args.crop > 0:
             entry["crop"] = args.crop
         # Spread the requested real batches across the train region so two steps are
@@ -155,6 +229,11 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
             sample = train_set[(step * stride) % len(train_set)]
             batch = collate_sequence_samples([sample])
             _crop_batch(batch, args.crop)
+            episode = batch["meta"][0]["episode_key"]
+            if episode in episodes:
+                raise ValueError("contract requires distinct train episodes")
+            episodes.add(episode)
+            update_before = [p.detach().clone() for p in parameters]
             tick = time.perf_counter()
             encoder.train()
             optimizer.zero_grad(set_to_none=True)
@@ -172,14 +251,10 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
                 train_set.protocol.action_dim,
             )
             loss.backward()
-            encoder_grads = {
-                "total": float(
-                    sum(float(p.grad.detach().norm()) for p in parameters if p.grad is not None)
-                ),
-                "finite": all(
-                    bool(torch.isfinite(p.grad).all()) for p in parameters if p.grad is not None
-                ),
-            }
+            encoder_grads = gradient_receipt(encoder_parameters)
+            bridge_grads = gradient_receipt(bridge_parameters)
+            if bridge_grads["total"] <= 0 or not bridge_grads["finite"]:
+                raise RuntimeError(f"invalid bridge gradient: {bridge_grads}")
             backend_gradients = sum(1 for p in policy.parameters() if p.grad is not None)
             if backend_gradients:
                 raise RuntimeError("the frozen backend accumulated a parameter gradient")
@@ -187,6 +262,23 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
                 raise RuntimeError(f"invalid encoder gradient: {encoder_grads}")
             torch.nn.utils.clip_grad_norm_(parameters, 1.0)
             optimizer.step()
+            deltas = [
+                float((p - old).abs().sum())
+                for p, old in zip(parameters, update_before, strict=True)
+            ]
+            update = {
+                "encoder": sum(deltas[: len(encoder_parameters)]),
+                "bridge": sum(deltas[len(encoder_parameters) :]),
+            }
+            if not all(value > 0 for value in update.values()):
+                raise RuntimeError(f"encoder/bridge did not both update: {update}")
+            count = result["visual_prefix_tokens"]
+            prefix_shape = list(result["prefix_embs"][:, :count].shape)
+            prefix_mask = result["pad_masks"][:, :count]
+            if prefix_shape != [1, len(camera_order) * 256, 2048]:
+                raise RuntimeError(f"unexpected actual visual prefix: {prefix_shape}")
+            if not bool(torch.equal(prefix_mask, tokens.mask)):
+                raise RuntimeError("visual prefix mask differs from encoder mask")
             if args.device.startswith("cuda"):
                 torch.cuda.synchronize()
             rows.append(
@@ -197,6 +289,12 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
                     "action_loss": float(loss.detach()),
                     "valid_actions": int(batch["action_mask"].sum()),
                     "encoder_gradient": encoder_grads,
+                    "bridge_gradient": bridge_grads,
+                    "parameter_updates_l1": update,
+                    "input_hashes": batch_hashes(batch),
+                    "actual_visual_prefix_shape": prefix_shape,
+                    "actual_visual_prefix_dtype": str(result["prefix_embs"].dtype),
+                    "actual_visual_prefix_mask_sha256": tensor_hash(prefix_mask),
                     "backend_gradients": backend_gradients,
                     "wall_ms": (time.perf_counter() - tick) * 1000.0,
                     "prefix_tokens": list(tokens.values.shape),
@@ -216,10 +314,10 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
             "frozen_backend_parameters": sum(1 for _ in policy.parameters()),
         }
         # Validation batches: forward only, and the parameters must not move.
-        validation_snapshot = {
-            key: value.detach().clone()
-            for key, value in encoder.named_parameters()
-            if "stem" in key
+        validation_snapshot = [p.detach().clone() for p in parameters]
+        validation_hashes = {
+            "encoder": model_hash(encoder),
+            "bridge": model_hash(bridge.postprocessor),
         }
         validation_rows = []
         encoder.eval()
@@ -251,16 +349,21 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
                         "updated": False,
                     }
                 )
-        parameter_drift = float(
-            sum(
-                float((p - validation_snapshot[name_]).abs().sum())
-                for name_, p in encoder.named_parameters()
-                if name_ in validation_snapshot
-            )
+        parameter_drift = sum(
+            float((p - old).abs().sum())
+            for p, old in zip(parameters, validation_snapshot, strict=True)
         )
+        validation_after = {
+            "encoder": model_hash(encoder),
+            "bridge": model_hash(bridge.postprocessor),
+        }
+        if parameter_drift != 0 or validation_hashes != validation_after:
+            raise RuntimeError("validation changed encoder/bridge state")
         entry["validation"] = {
             "rows": validation_rows,
             "parameter_drift_after_validation": parameter_drift,
+            "before_hashes": validation_hashes,
+            "after_hashes": validation_after,
         }
         entry["encoder_parameter_update"] = float(
             sum(
@@ -269,6 +372,14 @@ def contract(args: argparse.Namespace) -> dict[str, Any]:
                 if name_ in before
             )
         )
+        entry["bridge_parameter_update"] = sum(
+            float((p - bridge_before[key]).abs().sum())
+            for key, p in bridge.postprocessor.named_parameters()
+        )
+        backend_after = model_hash(policy)
+        entry["backend_parameter_hashes"] = {"before": backend_before, "after": backend_after}
+        if backend_before != backend_after:
+            raise RuntimeError("frozen backend changed")
         entry["load_audit"] = audit if isinstance(audit, (dict, list, str)) else str(type(audit))
         entry["ledger_source_check"] = ledger_source_check(
             train_set, name, batches=args.ledger_batches, crop=args.crop

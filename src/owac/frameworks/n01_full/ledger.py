@@ -29,7 +29,9 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from copy import deepcopy
+from dataclasses import dataclass, field, replace
+from types import MappingProxyType
 from typing import Any, NamedTuple
 
 import numpy as np
@@ -189,6 +191,7 @@ class ContentReplacement:
             raise ValueError("ContentReplacement.replacement_id must be declared")
         if not isinstance(self.values, Mapping):
             raise TypeError("ContentReplacement.values must be a mapping of SourceKey")
+        object.__setattr__(self, "values", MappingProxyType(dict(self.values)))
         for key in self.values:
             if not isinstance(key, SourceKey):
                 raise TypeError("ContentReplacement keys must be SourceKey instances")
@@ -305,10 +308,17 @@ class MeasurementLedger:
 
     # -- queries ------------------------------------------------------------
     def get_frame(self, episode_id: str, camera_id: str, frame_id: int | str) -> LedgerFrame | None:
-        return self._frames.get(FrameIdentity(self.dataset_id, episode_id, camera_id, frame_id))
+        frame = self._frames.get(FrameIdentity(self.dataset_id, episode_id, camera_id, frame_id))
+        return None if frame is None else self._public_frame(frame)
 
     def has_source(self, key: SourceKey) -> bool:
         if key in self._removed:
+            return False
+        if (
+            self._overlay is not None
+            and key in self._overlay.values
+            and self._overlay.values[key] is None
+        ):
             return False
         frame = self._frame_for(key)
         if frame is None:
@@ -378,6 +388,8 @@ class MeasurementLedger:
         if overlay is None:
             overlay = self._overlay
         for index, key in enumerate(ids):
+            if not self.has_source(key):
+                continue
             if overlay is not None and key in overlay.values:
                 value = overlay.value_of(key)
                 if value is not None:
@@ -417,7 +429,35 @@ class MeasurementLedger:
 
     # -- lifecycle ----------------------------------------------------------
     def frames(self) -> tuple[LedgerFrame, ...]:
-        return tuple(self._frames[identity] for identity in self._arrival)
+        return tuple(self._public_frame(self._frames[identity]) for identity in self._arrival)
+
+    def _public_frame(self, frame: LedgerFrame) -> LedgerFrame:
+        """Detached snapshots prevent callers from mutating the immutable raw store."""
+        values = frame.values.clone()
+        validity = frame.validity.clone()
+        if self._overlay is not None:
+            for key, value in self._overlay.values.items():
+                if self._frame_for(key) is frame and key not in self._removed:
+                    index = (int(key.channel_or_phase), key.sensor_y, key.sensor_x)
+                    values[index] = 0 if value is None else value
+                    if value is None:
+                        validity[index] = MISSING
+        return replace(
+            frame,
+            values=values,
+            validity=validity,
+            checksum=_content_checksum(values, validity),
+            sample_offset=None if frame.sample_offset is None else frame.sample_offset.clone(),
+            metadata=deepcopy(dict(frame.metadata)),
+        )
+
+    def retain_frames(self, identities: Iterable[FrameIdentity]) -> MeasurementLedger:
+        """A bounded replay view; discarded RAW stays in the caller's event archive."""
+        selected = set(identities)
+        view = self.copy()
+        view._arrival = [identity for identity in view._arrival if identity in selected]
+        view._frames = {identity: view._frames[identity] for identity in view._arrival}
+        return view
 
     def frame_count(self) -> int:
         return len(self._arrival)
@@ -493,8 +533,29 @@ class MeasurementLedger:
         view._frames = dict(self._frames)
         view._arrival = list(self._arrival)
         view._counters = dict(self._counters)
-        view._removed = self._removed | frozenset(ids)
+        removed = frozenset(ids)
+        view._removed = self._removed | removed
         view._overlay = self._overlay
+        # Physically redact deleted content before ANY downstream decision callback.
+        # A has_source-only filter leaves frames()/get_frame() as a leakage channel.
+        grouped: dict[FrameIdentity, list[SourceKey]] = {}
+        for key in removed:
+            frame = self._frame_for(key)
+            if frame is not None and self.has_source(key):
+                grouped.setdefault(frame.identity, []).append(key)
+        for identity, keys in grouped.items():
+            frame = view._frames[identity]
+            values, validity = frame.values.clone(), frame.validity.clone()
+            for key in keys:
+                index = (int(key.channel_or_phase), key.sensor_y, key.sensor_x)
+                values[index] = 0
+                validity[index] = MISSING
+            view._frames[identity] = replace(
+                frame,
+                values=values,
+                validity=validity,
+                checksum=_content_checksum(values, validity),
+            )
         return view
 
     def with_content(self, replacement: ContentReplacement) -> MeasurementLedger:
@@ -549,13 +610,13 @@ def _mask(mask: Any, shape: Sequence[int], batch: int, name: str) -> torch.Tenso
     if mask is None:
         return None
     tensor = _to_tensor(mask, name=name)
-    if tensor.ndim == shape[1:]:
+    if tuple(tensor.shape) == tuple(shape[1:]):
         tensor = tensor[None]
     if tuple(tensor.shape) != tuple(shape):
         raise ValueError(f"{name} shape {tuple(tensor.shape)} does not match values {tuple(shape)}")
     if batch < 1:  # pragma: no cover - defensive
         raise ValueError("a measurement frame needs at least one batch member")
-    return tensor.to(torch.bool)
+    return tensor.to(device="cpu", dtype=torch.bool)
 
 
 def _validity_codes(

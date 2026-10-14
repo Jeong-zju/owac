@@ -65,15 +65,15 @@ def canonical_source_key(source: SourceKey) -> tuple[Any, ...]:
     have a total order because the type tag precedes the value.
     """
 
-    def frame_part(value: int | str) -> tuple[int, float, str]:
+    def frame_part(value: int | str) -> tuple[int, int, str]:
         if isinstance(value, int) and not isinstance(value, bool):
-            return (0, float(value), "")
-        return (1, 0.0, str(value))
+            return (0, value, "")
+        return (1, 0, str(value))
 
-    def phase_part(value: int | str) -> tuple[int, float, str]:
+    def phase_part(value: int | str) -> tuple[int, int, str]:
         if isinstance(value, int) and not isinstance(value, bool):
-            return (0, float(value), "")
-        return (1, 0.0, str(value))
+            return (0, value, "")
+        return (1, 0, str(value))
 
     return (
         source.dataset_id,

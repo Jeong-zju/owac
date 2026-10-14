@@ -21,7 +21,8 @@ failure mode:
 * ``covariance`` -- exact GLS/posterior covariance under the declared ``Sigma``;
 * ``proxy`` -- the conservative fixed-weight bound
   ``(sum |a_i| sigma_i)^2`` used when the correlation is unknown; it is stored as
-  the PSD matrix ``(|C| sigma)(|C| sigma)^T`` so any linear readout can be bounded;
+  a diagonal PSD envelope; query bounds are computed from the actual raw-source
+  weights, never from an outer product that can cancel for signed queries;
 * ``none`` -- rank-deficient without a prior: coordinates are marked
   unidentifiable and no covariance is returned.
 
@@ -194,7 +195,7 @@ class NoiseModel:
             tolerance = (
                 max(self.matrix.shape)
                 * float(torch.finfo(torch.float64).eps)
-                * max(float(eigenvalues.max()), 1.0)
+                * float(eigenvalues.max())
             )
             if float(eigenvalues.min()) <= tolerance:
                 raise ValueError(
@@ -300,8 +301,11 @@ class GaussianPrior:
     prior_id: str
     mean: torch.Tensor
     covariance: torch.Tensor
+    transform: CoordinateTransform | None = None
 
     def __post_init__(self) -> None:
+        if self.mean.numel() > 1 and self.transform is None:
+            raise ValueError("an affine prior requires an explicit coordinate transform")
         if not self.prior_id:
             raise ValueError("GaussianPrior.prior_id must be declared")
         if self.mean.ndim != 1:
@@ -347,13 +351,23 @@ class BlockFit:
     observation_count: int
     source_ids: tuple[SourceKey, ...]
     transform: CoordinateTransform
+    row_projector: torch.Tensor
+    prior_supplied: bool
+    raw_noise_weights: torch.Tensor | None = None
+    raw_estimator_weights: torch.Tensor | None = None
 
     def predict(self, xy: tuple[float, float]) -> tuple[float, float]:
         phi = torch.tensor(
             _basis_row(self.parameter_names, self.transform, xy, dtype=self.theta.dtype),
             dtype=self.theta.dtype,
         )
+        if not self.prior_supplied and not torch.allclose(
+            phi @ self.row_projector, phi, atol=1e-8, rtol=1e-8
+        ):
+            return float("nan"), float("nan")
         mean = float(phi @ self.theta)
+        if self.raw_noise_weights is not None:
+            return mean, float((phi @ self.raw_noise_weights).abs().sum().square())
         if self.covariance is None:
             return mean, float("nan")
         return mean, float(phi @ self.covariance @ phi)
@@ -437,6 +451,13 @@ def fit_structure(
     else:
         raise TypeError("fit_structure expects a SupportDomain or VersionedDomain")
 
+    if isinstance(domain, VersionedDomain):
+        bound_noise = domain.binding("noise_version")
+        if bound_noise is not None and (noise_model is None or noise_model.version != bound_noise):
+            raise ValueError("noise version differs from the committed domain binding")
+        bound_prior = domain.binding("prior_id")
+        if bound_prior is not None and (prior is None or prior.prior_id != bound_prior):
+            raise ValueError("prior differs from the committed domain binding")
     basis_kind = basis or support.basis
     terms = _basis_terms(basis_kind, dimension)
     evidence, duplicates = canonical_sources(support.evidence_source_ids)
@@ -555,7 +576,27 @@ def fit_structure(
     covariance = (
         torch.block_diag(*covariances) if all(item is not None for item in covariances) else None
     )
+    if covariance is not None and noise.kind == "dense" and len(blocks) > 1:
+        # Separate phase fits still have correlated errors when raw noise crosses phases.
+        sigma = noise.covariance_for(used, dtype=dtype)
+        if prior is not None:
+            cross_phase = torch.tensor([[a != b for b in phases] for a in phases])
+            if bool((sigma[cross_phase] != 0).any()):
+                raise ValueError("cross-phase correlated priors require a joint posterior solve")
+        else:
+            operators = []
+            for block in blocks.values():
+                operator = torch.zeros((len(terms), len(used)), dtype=dtype)
+                for column, source in enumerate(block.source_ids):
+                    operator[:, used.index(source)] = block.raw_estimator_weights[:, column]
+                operators.append(operator)
+            operator = torch.cat(operators)
+            covariance = operator @ sigma @ operator.T
     if noise.kind == "unknown_correlation":
+        if covariance is not None:
+            # Arbitrary correlation also spans phase blocks; the global PSD envelope
+            # needs the total parameter dimension, not each phase's dimension alone.
+            covariance = covariance * len(blocks)
         uncertainty_kind = "proxy" if covariance is not None else "none"
     else:
         uncertainty_kind = "covariance" if covariance is not None else "none"
@@ -604,6 +645,8 @@ class _BlockRows:
     source_ids: tuple[SourceKey, ...]
     source_ids_per_row: tuple[tuple[SourceKey, ...], ...]
     transform: CoordinateTransform
+    raw_operator: torch.Tensor  # rows from original independent-identity raw values
+    raw_variances: torch.Tensor
 
 
 def _build_rows(
@@ -652,6 +695,7 @@ def _build_rows(
     try:
         return _interpolated_rows(
             spec=spec,
+            reference_chart=support.reference_chart,
             used=used,
             values=values,
             coordinates=coordinates,
@@ -716,6 +760,10 @@ def _direct_rows(
             source_ids=tuple(block_sources),
             source_ids_per_row=tuple((key,) for key in block_sources),
             transform=transform,
+            raw_operator=torch.eye(len(indices), dtype=dtype),
+            raw_variances=torch.tensor(
+                [noise.variance_of(key) for key in block_sources], dtype=dtype
+            ),
         )
     return rows
 
@@ -723,6 +771,7 @@ def _direct_rows(
 def _interpolated_rows(
     *,
     spec: InterpolationSpec,
+    reference_chart: str,
     used: Sequence[SourceKey],
     values: Sequence[float],
     coordinates: Sequence[tuple[float, float]],
@@ -741,7 +790,7 @@ def _interpolated_rows(
     # declared tolerance and the documented fallback keeps the raw observations.
     eigenvalues = torch.linalg.eigvalsh(row_covariance)
     largest = float(eigenvalues.max()) if eigenvalues.numel() else 0.0
-    tolerance = max(row_covariance.shape) * float(torch.finfo(dtype).eps) * max(largest, 1.0)
+    tolerance = max(row_covariance.shape) * float(torch.finfo(dtype).eps) * largest
     if float(eigenvalues.min()) <= tolerance:
         raise torch.linalg.LinAlgError(
             "interpolated row covariance is singular "
@@ -766,7 +815,7 @@ def _interpolated_rows(
     value_tensor = torch.tensor(values, dtype=dtype)
     for phase, row_index in grouped.items():
         positions = tuple(spec.row_positions[row] for row in row_index)
-        transform = _make_transform(positions, "interpolated", dimension)
+        transform = _make_transform(positions, reference_chart, dimension)
         evidence_basis = torch.tensor(
             [_basis_row(terms, transform, xy, dtype=dtype) for xy in coordinates], dtype=dtype
         )
@@ -781,11 +830,11 @@ def _interpolated_rows(
             values=row_values,
             covariance=block_covariance,
             row_variances=torch.diagonal(block_covariance),
-            source_ids=tuple(
-                key for row in row_index for key in _nonzero_sources(weights[row], used)
-            ),
+            source_ids=tuple(used),
             source_ids_per_row=tuple(_nonzero_sources(weights[row], used) for row in row_index),
             transform=transform,
+            raw_operator=block_weights,
+            raw_variances=torch.tensor([noise.variance_of(key) for key in used], dtype=dtype),
         )
     return rows
 
@@ -843,12 +892,10 @@ def _solve_block(
     cholesky = torch.linalg.cholesky(covariance)
     whitened = torch.linalg.solve_triangular(cholesky, design, upper=False)
     target = torch.linalg.solve_triangular(cholesky, values.unsqueeze(1), upper=False).squeeze(1)
-    lambda_matrix = whitened.T @ whitened
-    eta = whitened.T @ target
 
     singular_values = torch.linalg.svdvals(whitened)
     largest = float(singular_values[0]) if singular_values.numel() else 0.0
-    tolerance = (rank_rtol or max(design.shape) * float(torch.finfo(dtype).eps)) * max(largest, 1.0)
+    tolerance = (rank_rtol or max(design.shape) * float(torch.finfo(dtype).eps)) * largest
     rank = int((singular_values > tolerance).sum())
     condition_number = (
         float("inf")
@@ -857,30 +904,46 @@ def _solve_block(
     )
 
     full_rank = rank == len(terms)
+    raw_noise_weights = None
+    # Use the same rank tolerance for the coefficient estimate and identifiability.
+    rcond = rank_rtol if rank_rtol is not None else max(design.shape) * torch.finfo(dtype).eps
+    theta = torch.linalg.lstsq(whitened, target, rcond=rcond, driver="gelsd").solution
     if noise.kind == "unknown_correlation":
-        theta, covariance_matrix = _conservative_bound_solution(
-            design=design,
-            values=values,
-            variances=data.row_variances,
-            dtype=dtype,
+        # Compose weights all the way back to RAW before applying the scalar bound.
+        inverse_cholesky = torch.linalg.solve_triangular(
+            cholesky, torch.eye(len(values), dtype=dtype), upper=False
         )
+        raw_weights = torch.linalg.pinv(whitened, rtol=rcond) @ inverse_cholesky @ data.raw_operator
+        if full_rank:
+            raw_noise_weights = raw_weights * data.raw_variances.sqrt()[None, :]
+            scale = raw_noise_weights.abs().sum(dim=1)
+            # Cauchy-Schwarz: (sum_j |q_j| s_j)^2 <= p sum_j q_j^2 s_j^2.
+            covariance_matrix = len(terms) * torch.diag(scale.square())
+        else:
+            covariance_matrix = None
+    elif prior is not None:
+        prior_mean, prior_covariance = _prior_in_chart(prior, data.transform, terms, dtype)
+        prior_factor = torch.linalg.cholesky(prior_covariance)
+        prior_whitener = torch.linalg.solve_triangular(
+            prior_factor, torch.eye(len(terms), dtype=dtype), upper=False
+        )
+        augmented = torch.cat([whitened, prior_whitener])
+        augmented_target = torch.cat([target, prior_whitener @ prior_mean])
+        theta = torch.linalg.lstsq(augmented, augmented_target, driver="gelsd").solution
+        _, triangular = torch.linalg.qr(augmented, mode="reduced")
+        inverse_triangular = torch.linalg.solve_triangular(
+            triangular, torch.eye(len(terms), dtype=dtype), upper=True
+        )
+        covariance_matrix = inverse_triangular @ inverse_triangular.T
+    elif full_rank:
+        # QR triangular solves avoid squaring the design condition number in Lambda.
+        _, triangular = torch.linalg.qr(whitened, mode="reduced")
+        inverse_triangular = torch.linalg.solve_triangular(
+            triangular, torch.eye(len(terms), dtype=dtype), upper=True
+        )
+        covariance_matrix = inverse_triangular @ inverse_triangular.T
     else:
-        if prior is not None:
-            prior_covariance = prior.covariance.to(dtype)
-            lambda_prior = torch.linalg.inv(prior_covariance)
-            lambda_matrix = lambda_matrix + lambda_prior
-            eta = eta + lambda_prior @ prior.mean.to(dtype)
-        theta = torch.linalg.lstsq(whitened, target).solution
-        if prior is not None:
-            # A prior can still determine directions the design leaves open; keep
-            # the posterior available but never claim observation identifiability.
-            theta = torch.linalg.solve(lambda_matrix, eta)
-        posterior_possible = bool(torch.all(torch.linalg.eigvalsh(lambda_matrix) > 0))
-        covariance_matrix = (
-            torch.cholesky_inverse(torch.linalg.cholesky(lambda_matrix))
-            if (full_rank or (prior is not None and posterior_possible))
-            else None
-        )
+        covariance_matrix = None
 
     _, _, right_vectors = torch.linalg.svd(whitened, full_matrices=False)
     # Coordinate j is identifiable iff the unit vector e_j lies in the row space of
@@ -900,37 +963,30 @@ def _solve_block(
         observation_count=int(design.shape[0]),
         source_ids=tuple(dict.fromkeys(data.source_ids)),
         transform=data.transform,
+        row_projector=right_vectors[:rank].T @ right_vectors[:rank],
+        prior_supplied=prior is not None,
+        raw_noise_weights=raw_noise_weights,
+        raw_estimator_weights=(
+            torch.linalg.pinv(whitened, rtol=rcond)
+            @ torch.linalg.solve_triangular(cholesky, data.raw_operator, upper=False)
+        ),
     )
 
 
-def _conservative_bound_solution(
-    *,
-    design: torch.Tensor,
-    values: torch.Tensor,
-    variances: torch.Tensor,
-    dtype: torch.dtype,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Fixed-weight point estimate plus the PSD conservative covariance bound.
-
-    Weights are the diagonal-covariance GLS weights ``C = (Phi^T D^-1 Phi)^-1
-    Phi^T D^-1`` with ``D = diag(sigma^2)``.  For any noise correlation with unit
-    variances the covariance of ``a^T theta_hat`` is bounded by
-    ``(sum_i |a^T C_i| sigma_i)^2``, i.e. by ``(|C| sigma)(|C| sigma)^T``.
-    """
-    precision = torch.diag(1.0 / variances)
-    lambda_matrix = design.T @ precision @ design
-    eta = design.T @ precision @ values
-    theta = torch.linalg.lstsq(design, values).solution
-    if int(torch.linalg.matrix_rank(lambda_matrix)) == design.shape[1]:
-        theta = torch.linalg.solve(lambda_matrix, eta)
-        weights = torch.linalg.solve(lambda_matrix, design.T @ precision)
-    else:
-        theta = torch.linalg.lstsq(design, values).solution
-        weights = torch.linalg.pinv(lambda_matrix) @ design.T @ precision
-    sigma = torch.sqrt(variances)
-    scale = (weights.abs() @ sigma).reshape(-1, 1)
-    bound = scale @ scale.T
-    return theta.to(dtype), bound.to(dtype)
+def _prior_in_chart(prior, transform, terms, dtype):
+    """Re-express a fixed physical prior when support centering/scaling changes."""
+    change = torch.eye(len(terms), dtype=dtype)
+    if len(terms) > 1:
+        declared = prior.transform
+        if declared.chart != transform.chart or declared.units != transform.units:
+            raise ValueError("prior and observations must use the same physical coordinate chart")
+        for column, name in enumerate(terms[1:], 1):
+            axis = 0 if name == "bx" else 1
+            change[0, column] = (transform.center[axis] - declared.center[axis]) / declared.scale[
+                axis
+            ]
+            change[column, column] = transform.scale[axis] / declared.scale[axis]
+    return change @ prior.mean.to(dtype), change @ prior.covariance.to(dtype) @ change.T
 
 
 def interpolation_from_correspondence(
