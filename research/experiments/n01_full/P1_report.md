@@ -109,7 +109,7 @@ uv run --locked python -m owac.evaluation.n01_full analytic --output <dir>   # 9
 | --- | --- | --- |
 | 1 | y=[1,3]、方差 1：均值 2、方差 1/2；重放第一个 ID 后不变；真正新 ID 按三观测 | 均值 2.0、方差 0.5；重放后方差仍 0.5 且 `duplicate_new_samples=0`；新曝光（数值相同）登记为第 3 个观测 → 均值 5/3、方差 1/3 |
 | 2 | Σ=[[1,0.5],[0.5,1]]、Φ=ones：均值 2、方差 0.75；撤回第二观测后方差 1；截取旧 precision 的错误版本必须被识别 | 2.0 / 0.75；撤回后 1.0；错误版本给出 0.75，被判别（`wrong_version_detected=true`） |
-| 3 | 已知仿射场、分数坐标、同相位值、异方差小问题：生产 vs 独立 whitened LS，记录条件数 | 2 相位 × 3×4 网格、分数采样坐标（+0.4）、逐样本方差：`max|Δmean| = 0`、`max|Δvar| = 0`（FP64 `atol=1e-10, rtol=1e-8`）；条件数 2.47/2.47；另有一维仿射例（cond 2.78） |
+| 3 | 已知仿射场、分数坐标、同相位值、异方差小问题：生产 vs 独立 whitened LS，记录条件数 | 2 相位 × 3×4 网格、分数采样坐标（+0.4）、逐样本方差：`max|Δmean| ≤ 1.8e-15`、`max|Δvar| = 0`（FP64 `atol=1e-10, rtol=1e-8`；差异来自求值顺序，远低于容差）；条件数 2.47/2.47；另有一维仿射例（cond 2.78） |
 | 4 | 重叠 merge、不同顺序、split 再 merge、retract 再恢复、同事件不同分块 | `merge(A,B)` 与 `merge(B,A)` 版本相同；合并后证据 3 条（去重）；split 再 merge 的 `content_digest` 相同；retract 再 restore 的 `content_digest` 相同而 `support_version` 不同（血缘）；分块与单次事件流一致；声明版本变化改变摘要 |
 | 5 | missing/bad/saturated 不作为零观测；全无效返回无效 mask；无先验秩亏不获得虚假 confidence | 5 个样本中 3 个无效 → 只用 2 个，均值 2.0，原因分别为 missing/bad/saturated；全无效：`rank=0`、掩码全 False、`uncertainty_kind=none`、`theta=None`；秩亏（仿射、x 退化）：`rank=2<3`、掩码 `[True,False,True]`、无协方差 |
 | 6 | 两个 camera 同 frame ID、两个 episode 同 frame ID 不冲突；reset 第一个成员不影响第二个 | 三组同 frame_id 各自独立取值；`c0` 2 帧 / `c1` 1 帧；部分 reset 后另一成员 raw 值不变 |
