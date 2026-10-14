@@ -45,7 +45,7 @@
     "tests/encoders/n01_full/test_contracts_config.py": "6c641f6afce5aba0dfe8ba8878de0f8c82fd094477424980259ccfdd9cce8ca5",
     "tests/encoders/n01_full/test_manifest.py": "c8d766b79e8c88ba2fb57abe42f916338f437d7304a82d504987f971d8bdae8b",
     "tests/encoders/n01_full/test_preflight.py": "e53530feafcf1504913ef42f0ba6c6b4e1efcb6658235711940013ea8ceeb5ae",
-    "tests/encoders/n01_full/test_foundation.py": "21b58eebda54e7c70cd5320f44708388ee73c7f512dd05e7b0664a49fe4ccd11"
+    "tests/encoders/n01_full/test_foundation.py": "8848b30dd63a3aa766cf30aa6697787ab9998ceff8ef19df599e1e9be45ad1b8"
   },
   "data_manifests": {
     "dir": "data/manifests/n01-full-v1/",
@@ -121,9 +121,10 @@
   },
   "checks": {
     "make_check": "exit 0 (ruff check / ruff format --check 233 files / compileall)",
-    "full_pytest": "433 passed, 1 warning",
+    "full_pytest": "434 passed, 1 warning (measured on the committed state)",
     "baseline_pytest": "348 passed (unchanged historical baseline)",
-    "n01_full_pytest": "85 passed",
+    "n01_full_pytest": "86 passed",
+    "commit_state_regression_caught_and_fixed": "test_foundation's bundle-closure test asserted 'the worktree is dirty' and failed after the P0 commit (432/1); reworked into a self-contained tmp_path git fixture with a git archive HEAD control, so it passes in both committed and uncommitted states and discriminates harder",
     "remote_snapshot_pytest": "3 failed / 80 passed - all three are host-environment assumptions of the tests (git-less snapshot, data root expected absent, fake-factory signature), not deliverable defects; not skipped, not relaxed",
     "upstream_provenance_ast_test": "fails on Python 3.11, passes on 3.12 (type_params added to the AST dump); file hashes proven identical"
   },

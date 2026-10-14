@@ -10,7 +10,7 @@ the worktree:
    B's own ``verify_manifest``/``assert_manifest_partition``;
 3. the real loader (``RawVLASequenceDataset``) asked for each region in turn;
 4. ``protocol_v1.json`` against the mandatory items of A's config module;
-5. the ``bundle`` artifact carrying the new P0 sources that HEAD does not have.
+5. the ``bundle`` artifact carrying new sources without relying on ``git archive HEAD``.
 
 The multi-hundred-gigabyte RAW caches live on the remote server only.  This machine
 holds B's ``loader-evidence-*.json`` (a recorded run of the real loader against the real
@@ -18,6 +18,10 @@ cache) plus the manifests, so nothing here downloads data or fabricates NPZ inpu
 expectation below is a decidable absolute value -- a count, an empty intersection, an
 exact path set, a refusal -- never "equal to B's own report", because two sides sharing
 one mistake would still agree.
+
+No test here reads the git state of this worktree: whether P0 is committed or still
+sitting untracked must not change a single result.  The packaging property is decided on
+a self-contained fixture repository instead.
 """
 
 from __future__ import annotations
@@ -25,7 +29,9 @@ from __future__ import annotations
 import ast
 import hashlib
 import inspect
+import io
 import json
+import shutil
 import subprocess
 import tarfile
 from pathlib import Path
@@ -51,9 +57,8 @@ REGIONS = ("train", "calibration", "validation", "test")
 SPLIT_VERSION = "n01-full-v1"
 #: The frozen pool sizes of the P0 split (acceptance numbers, not a re-read of B).
 FROZEN_POOL_FILES = {"libero": 1771, "robotwin2": 632}
-#: P0 sources created in this wave and absent from HEAD: a bundle built by
-#: ``git archive HEAD`` would drop exactly these files.
-P0_NEW_SOURCES = (
+#: The P0 deliverables of this wave that the packaged source must contain.
+P0_DELIVERABLES = (
     "src/owac/frameworks/n01_full/contracts.py",
     "src/owac/frameworks/n01_full/config.py",
     "src/owac/raw/n01_full_manifest.py",
@@ -673,44 +678,154 @@ def test_protocol_pins_the_manifests_it_declares() -> None:
 
 
 # ---------------------------------------------------------------------------------------
-# (5) packaging closure: the bundle carries the new P0 sources
+# (5) packaging closure: the bundle carries new sources without git's tracked list
 # ---------------------------------------------------------------------------------------
 
 
-def test_bundle_packages_new_sources_that_head_does_not_carry(tmp_path: Path) -> None:
-    """The bundle is walked from the filesystem, so P0's new files survive packaging.
+def _git(root: Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", "-C", str(root), *args], check=True, capture_output=True, text=True
+    ).stdout
 
-    A bundle built by ``git archive HEAD`` (or by any tracked-files-only listing) drops
-    every source of this wave: the files below are absent from HEAD, so they can only be
-    present here if the artifact really walks the worktree, and their absence is a
-    failure rather than a warning.
+
+def _git_archive_members(root: Path) -> set[str]:
+    """Files ``git archive HEAD`` would ship: the control the bundle must not be."""
+    archived = subprocess.run(
+        ["git", "-C", str(root), "archive", "HEAD"], check=True, capture_output=True
+    ).stdout
+    with tarfile.open(fileobj=io.BytesIO(archived)) as archive:
+        return {member.name for member in archive.getmembers() if member.isfile()}
+
+
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _mini_source(root: Path) -> tuple[str, ...]:
+    """A minimal source tree that satisfies ``preflight.bundle``'s include closure.
+
+    ``src/owac/pkg/tracked_baseline.py`` is the only file the fixture repository commits;
+    everything returned here stands for the new work of this wave and stays untracked in
+    the first state of the test.
+    """
+    _write_text(root / "src/owac/pkg/__init__.py", "")
+    _write_text(root / "src/owac/pkg/tracked_baseline.py", "TRACKED = 1\n")
+    targets = (
+        "src/owac/frameworks/n01_full/contracts.py",
+        "src/owac/raw/n01_full_manifest.py",
+        "src/owac/runtime/n01_full_preflight.py",
+        "configs/encoders/n01_full/protocol_v1.json",
+        "configs/encoders/n01_full/upstream_lock.json",
+        "tests/encoders/n01_full/test_foundation.py",
+    )
+    for relative in targets:
+        _write_text(root / relative, f"# new source {relative}\n")
+    _write_text(root / "configs/backends/n01-full-runtime/requirements-gpu.txt", "torch==2.9.1\n")
+    _write_text(root / "data/manifests/n01-full-v1/n01-full-v1-index.json", "{}\n")
+    _write_text(root / "docs/prompts/n01_v1_0/source_manifest.json", '{"repositories": []}\n')
+    return targets
+
+
+def _assert_bundle_contains(
+    bundle_dir: Path, root: Path, targets: tuple[str, ...], *, untracked_targets: bool
+) -> None:
+    """One built bundle carries every target in the manifest, the report and the archive."""
+    manifest = _read_json(bundle_dir / preflight.MANIFEST_NAME)
+    files = manifest["files"]
+    assert set(targets) <= set(files)
+    for relative in targets:
+        assert (
+            files[relative]["sha256"] == hashlib.sha256((root / relative).read_bytes()).hexdigest()
+        )
+    untracked = manifest["untracked_inclusion"]
+    assert untracked["available"] is True
+    if untracked_targets:
+        assert set(targets) <= set(untracked["included"])
+    else:
+        assert untracked["included"] == []
+        assert set(targets) <= _git_archive_members(root)
+    assert not set(targets) & set(untracked["denied"])
+    assert untracked["missing"] == []
+    with tarfile.open(bundle_dir / preflight.ARCHIVE_NAME, "r:gz") as archive:
+        members = {member.name for member in archive.getmembers() if member.isfile()}
+    assert set(targets) <= members
+    assert preflight.MANIFEST_NAME in members
+
+
+def test_bundle_is_walked_from_the_filesystem_not_from_git_archive(tmp_path: Path) -> None:
+    """New sources ride in the bundle whether or not HEAD already tracks them.
+
+    The fixture repository is self-contained, so this decides the tool's property and not
+    the state of the surrounding worktree.  ``git archive HEAD`` is produced from the very
+    same repository as the control: it cannot contain the new sources while they are
+    untracked, and the bundle must contain them in both states below.  Any implementation
+    that packages ``git archive HEAD`` (or another tracked-files-only listing) fails.
+    """
+    if shutil.which("git") is None:
+        pytest.skip("git is not available to produce the archive control")
+    root = tmp_path / "source"
+    targets = _mini_source(root)
+    _git(root, "init", "-q")
+    _git(root, "add", "src/owac/pkg/tracked_baseline.py")
+    _git(
+        root,
+        "-c",
+        "user.email=test@example.com",
+        "-c",
+        "user.name=test",
+        "commit",
+        "-q",
+        "-m",
+        "baseline",
+    )
+
+    tracked = _git_archive_members(root)
+    assert "src/owac/pkg/tracked_baseline.py" in tracked
+    assert set(targets).isdisjoint(tracked), "the control must not already carry the new work"
+
+    # state A: the new sources exist on disk and are untracked, as during development
+    untracked_bundle = tmp_path / "bundle-untracked"
+    preflight.bundle(root, untracked_bundle, include_upstream=False)
+    _assert_bundle_contains(untracked_bundle, root, targets, untracked_targets=True)
+
+    # state B: the same sources are committed; the packaged set must not shrink
+    _git(root, "add", "-A")
+    _git(
+        root,
+        "-c",
+        "user.email=test@example.com",
+        "-c",
+        "user.name=test",
+        "commit",
+        "-q",
+        "-m",
+        "deliver",
+    )
+    assert set(targets) <= _git_archive_members(root)
+    tracked_bundle = tmp_path / "bundle-tracked"
+    preflight.bundle(root, tracked_bundle, include_upstream=False)
+    _assert_bundle_contains(tracked_bundle, root, targets, untracked_targets=False)
+
+
+def test_bundle_carries_the_p0_deliverables_from_the_real_worktree(tmp_path: Path) -> None:
+    """The real P0 bundle contains every deliverable of this wave, tracked or not.
+
+    This reads only files that exist on disk, so it holds before and after the P0 commit;
+    the discriminating filesystem-vs-archive property is decided in the fixture above.
     """
     output = tmp_path / "bundle"
     result = preflight.bundle(REPO_ROOT, output, include_upstream=False)
     manifest = _read_json(output / preflight.MANIFEST_NAME)
-    bundled = set(manifest["files"])
-    tracked_at_head = set(
-        subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "ls-tree", "-r", "--name-only", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.splitlines()
-    )
-    new_sources = bundled - tracked_at_head
-    assert new_sources, "the bundle equals HEAD's tree; a git-archive bundle would pass silently"
-    assert set(P0_NEW_SOURCES) <= bundled
-    assert set(P0_NEW_SOURCES) <= new_sources
-
-    untracked = manifest["untracked_inclusion"]
-    assert untracked["available"] is True
-    assert set(P0_NEW_SOURCES) <= set(untracked["included"])
-    assert not set(P0_NEW_SOURCES) & set(untracked["denied"])
-    assert untracked["missing"] == []
-
+    files = manifest["files"]
+    assert set(P0_DELIVERABLES) <= set(files)
+    for relative in P0_DELIVERABLES:
+        assert (
+            files[relative]["sha256"]
+            == hashlib.sha256((REPO_ROOT / relative).read_bytes()).hexdigest()
+        )
+    assert not set(P0_DELIVERABLES) & set(manifest["untracked_inclusion"]["denied"])
     with tarfile.open(result["archive"], "r:gz") as archive:
-        archived = set(archive.getnames())
-    assert set(P0_NEW_SOURCES) <= archived
+        archived = {member.name for member in archive.getmembers() if member.isfile()}
+    assert set(P0_DELIVERABLES) <= archived
     assert preflight.MANIFEST_NAME in archived
-    for relative, entry in manifest["files"].items():
-        assert hashlib.sha256((REPO_ROOT / relative).read_bytes()).hexdigest() == entry["sha256"]

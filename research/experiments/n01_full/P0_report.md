@@ -9,7 +9,7 @@
 
 | 字段 | 取值 | 依据 |
 | --- | --- | --- |
-| `implementation_status` | **PASS（限 P0 范围）** | P0 文件职责表的 10 个路径全部交付并通过独立复核；`make check` 干净；全仓 433 passed（历史基线 348 + 新增 85）。不代表 P1+ 已实现。 |
+| `implementation_status` | **PASS（限 P0 范围）** | P0 文件职责表的 10 个路径全部交付并通过独立复核；`make check` 干净；全仓 434 passed（历史基线 348 + 新增 86）。不代表 P1+ 已实现。 |
 | `training_status` | **NOT_STARTED** | P0 不含收敛训练。只做了真实尺寸 profiling（吞吐/显存）与两平台真实 batch 读取。 |
 | `effect_status` | **NOT_APPLICABLE** | 本阶段不产生机制效果结论，也不得从此报告推导任何 N01 增量。所有 profiling 数字是成本，不是性能。 |
 
@@ -31,9 +31,9 @@
 | `configs/backends/n01-full-runtime/` | `requirements-gpu.txt` `70849ec9…`、`README.md` `bbcf6896…`、`owac-n01-v1.supervisor.conf` `57da091c…` | — |
 | `data/manifests/n01-full-v1/` | 7 个小型 JSON（见 §3.3） | 见 §3.3 |
 | `research/theory/n01_support_contract_v1.md` | T1–T6 定义/假设/待证明/反例/映射 | `d75f0cfeeaaea6f5bdb76623e6c6b0c999850ecf3f45a8a3ca285d855eba99ee` |
-| `tests/encoders/n01_full/test_foundation.py` | 跨模块行为 + 独立 oracle | `21b58eebda54e7c70cd5320f44708388ee73c7f512dd05e7b0664a49fe4ccd11` |
+| `tests/encoders/n01_full/test_foundation.py` | 跨模块行为 + 独立 oracle | `8848b30dd63a3aa766cf30aa6697787ab9998ceff8ef19df599e1e9be45ad1b8` |
 
-成员各自的定向测试：`test_contracts_config.py` `6c641f6a…`（20 passed）、`test_manifest.py` `c8d766b7…`（16 passed）、`test_preflight.py` `e53530fe…`（33 passed）、`test_foundation.py` `21b58eeb…`（16 passed），合计 **85 passed**。
+成员各自的定向测试：`test_contracts_config.py` `6c641f6a…`（20 passed）、`test_manifest.py` `c8d766b7…`（16 passed）、`test_preflight.py` `e53530fe…`（33 passed）、`test_foundation.py` `8848b30d…`（17 passed，含自包含的 `git archive HEAD` 判别测试），合计 **86 passed**。
 
 ### 1.2 数据流
 
@@ -78,11 +78,13 @@ dirty  M README.md / M docs/OWAC_academic_research_proposal_2026-10-09.md /
 ### 2.2 本地命令（实际执行）
 
 ```
-make check                                     → exit 0（ruff check / ruff format --check 233 files / compileall src）
-uv run --locked --extra encoder pytest -q tests/            → 433 passed, 1 warning
-uv run --locked --extra encoder pytest -q tests/encoders/n01_full → 85 passed
+make check                                     → exit 0（ruff check / ruff format --check 234 files / compileall src）
+uv run --locked --extra encoder pytest -q tests/            → 434 passed, 1 warning
+uv run --locked --extra encoder pytest -q tests/encoders/n01_full → 86 passed
 uv run --locked python -m owac.runtime.n01_full_preflight {inventory,profile,bundle,verify} --help → 5/5 exit 0
 ```
+
+以上为 **P0 提交后（HEAD `dab6800` + 测试修正提交）** 在干净工作树上的数字。提交前工作树是「未提交」状态，其中 `test_foundation.py` 曾因断言「工作树是否脏」在提交后失败（432 passed / 1 failed）；该测试已改为**自包含**（在 `tmp_path` 自建 git 仓库与 `git archive HEAD` 对照），现在两种状态下均通过，判别力反而更强。
 
 ### 2.3 远程环境与资源
 
