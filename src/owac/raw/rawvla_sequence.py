@@ -595,6 +595,8 @@ class NormalisationStats:
     source_path: str = ""
     sha256: str = ""
     stats_key: str = ""
+    epsilon: float = 1e-6
+    epsilon_mode: str = "floor"
 
     @classmethod
     def from_json(
@@ -605,6 +607,8 @@ class NormalisationStats:
         stats_key: str = "",
         action_stats_key: str = "actions",
         state_stats_key: str = "state",
+        epsilon: float = 1e-6,
+        epsilon_mode: str = "floor",
     ) -> NormalisationStats:
         stats_path = Path(path)
         if not stats_path.is_file():
@@ -628,7 +632,21 @@ class NormalisationStats:
             source_path=str(stats_path),
             sha256=hashlib.sha256(raw_bytes).hexdigest(),
             stats_key=stats_key,
+            epsilon=epsilon,
+            epsilon_mode=epsilon_mode,
         )
+
+
+def _std_denominator(std: np.ndarray, stats: NormalisationStats) -> np.ndarray:
+    if not np.isfinite(stats.epsilon) or stats.epsilon <= 0:
+        raise ValueError("epsilon must be positive and finite")
+    if np.any(std < 0) or not np.isfinite(std).all():
+        raise ValueError("standard deviations must be finite and nonnegative")
+    if stats.epsilon_mode == "add":
+        return std + np.float32(stats.epsilon)
+    if stats.epsilon_mode == "floor":
+        return np.maximum(std, np.float32(stats.epsilon))
+    raise ValueError(f"unknown epsilon mode {stats.epsilon_mode!r}")
 
 
 def _as_stat_array(values: Any, dim: int, name: str) -> np.ndarray:
@@ -710,14 +728,16 @@ def normalise_actions(
             raise ValueError(f"{mode} needs declared action statistics")
         mean = _as_stat_array(stats.action["mean"], block.shape[-1], "action.mean")
         std = _as_stat_array(stats.action["std"], block.shape[-1], "action.std")
-        block = (block - mean) / np.maximum(std, 1.0e-6)
+        block = (block - mean) / _std_denominator(std, stats)
         normalised_state = None
         if state is not None and stats.state is not None:
             state_mean = _as_stat_array(stats.state["mean"], state.shape[-1], "state.mean")
             state_std = _as_stat_array(stats.state["std"], state.shape[-1], "state.std")
-            normalised_state = ((state - state_mean) / np.maximum(state_std, 1.0e-6)).astype(
+            normalised_state = ((state - state_mean) / _std_denominator(state_std, stats)).astype(
                 np.float32
             )
+        metadata["epsilon"] = stats.epsilon
+        metadata["epsilon_mode"] = stats.epsilon_mode
         metadata["delta_action_indices"] = list(indices)
         return block.astype(np.float32), normalised_state, metadata
 
@@ -770,7 +790,7 @@ def normalise_state(
         mean = _as_stat_array(stats.state["mean"], array.size, "state.mean")
         std = _as_stat_array(stats.state["std"], array.size, "state.std")
         return (
-            ((array - mean) / np.maximum(std, 1.0e-6)).astype(np.float32),
+            ((array - mean) / _std_denominator(std, stats)).astype(np.float32),
             {"state_normalisation": mode, "state_stats_source": stats.source_path},
         )
     if mode == "quantile":

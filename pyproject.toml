@@ -40,6 +40,9 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+# Vendored upstream reference sources (pinned commits, byte-for-byte copies) are
+# never linted or reformatted; only the project's own adaptation code is checked.
+extend-exclude = ["src/owac/frameworks/n02_full/components/upstream"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

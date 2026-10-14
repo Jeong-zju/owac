@@ -1,0 +1,60 @@
+{
+  "version": "n02-full-v1.1",
+  "seeds": [
+    1103,
+    2207,
+    3301
+  ],
+  "worlds": 8,
+  "slots": 16,
+  "slot_dim": 512,
+  "depths": [
+    3,
+    3,
+    27,
+    3
+  ],
+  "dims": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "input_size": 256,
+  "scales": [
+    "stride8",
+    "stride16"
+  ],
+  "partitions": {
+    "train": 0.8,
+    "dev": 0.1,
+    "calibration": 0.1
+  },
+  "data": {
+    "cache_root": null,
+    "dataset_format": null,
+    "protocol_verified": false,
+    "notes": ""
+  },
+  "runtime": {
+    "dtype": "float32",
+    "device": "cpu",
+    "amp": false,
+    "acceptance_budgets": {
+      "decision_p95_ms_per_episode": 200,
+      "persistent_state_bytes_per_episode": 268435456,
+      "scope": "development budget; full integrated decision and retained state must be measured at P1/P2, no full-model profile claimed",
+      "frozen_date": "2026-10-14"
+    }
+  },
+  "profile": {
+    "updates": 200,
+    "warmup_updates": 20,
+    "batch_size": 2,
+    "sequence_length": 8,
+    "operation": "train_step"
+  },
+  "paths": {
+    "output_root": "outputs/n02-full"
+  }
+}
