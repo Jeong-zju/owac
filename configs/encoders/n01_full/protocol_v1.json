@@ -10,18 +10,17 @@
     "docs/prompts/n01_v1_0/source_manifest.json"
   ],
   "stage_status": {
-    "state": "preflight_backfilled_pending_remote_strict_run",
+    "state": "p0_accepted_after_independent_repair",
     "frozen": false,
     "frozen_required_before": "start of the P4 formal matrix",
-    "note": "remaining pending fields are P3 calibration thresholds, the P4 encoder factory and the two statistics settings; all data/platform/backend hashes and the profiling budget are filled",
+    "note": "Only P3 thresholds and statistics calibration remain pending. P0 profiling factory is executable.",
     "pending_fields": [
       "metrics.planned_gates.*.value",
-      "profiling.encoder_factory",
       "statistics.alpha",
       "statistics.min_paired_units",
       "thresholds.fields.*"
     ],
-    "state_note": "本地回填与预检已通过；远程独立环境 inventory --strict 的结论由 P0 报告记录"
+    "state_note": "P0 engineering acceptance only; see research/experiments/n01_full/P0_acceptance_report.md and results/n01_full/P0/acceptance.json."
   },
   "input_identity": {
     "source_key_fields": [
@@ -397,11 +396,12 @@
       },
       "robotwin2": {
         "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
-        "stats_key": "policy_norm_stats",
-        "action_stats_key": "action",
+        "stats_key": "",
+        "action_stats_key": "actions",
         "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
         "value_status": "measured_by_lead_2026-10-14",
-        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策"
+        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策",
+        "selection_note": "Explicit empty stats_key selects norm_stats; action key is actions. Verified against real loader in P0 independent audit."
       }
     },
     "official_closed_loop_identities": 13250,
@@ -771,7 +771,7 @@
     "seed_execution": "seeds may run serially; one resource-checked job at a time",
     "remote_root": "/workspace/owac/rawvla/research/n01-v1",
     "remote_layout": {
-      "encoder_env": "envs/encoder",
+      "encoder_env": "/workspace/owac/rawvla/envs/encoder",
       "policy_env": "envs/policy",
       "run_source": "runs/<run_id>/source",
       "run_outputs": "runs/<run_id>/outputs",
@@ -860,6 +860,107 @@
         "source": "P0 首选起点 128/history=8；机制通路 20k 起、上限 100k（共同契约第 5 节规划候选，非充分训练证据）"
       },
       "gpu_hours": {
+        "twenty_k": 215.0073,
+        "hundred_k": 1075.0367,
+        "three_hundred_k": 3225.11,
+        "value_status": "estimated_from_measured_step_time",
+        "basis": "128/8, microbatch=1, accumulation=8, 7 arms x 3 seeds x 2 platforms, cameras=2/3",
+        "runs": {
+          "total": 42,
+          "libero_runs": 21,
+          "robotwin2_runs": 21
+        },
+        "gradient_accumulation": 8,
+        "excludes": [
+          "policy/action head",
+          "optimizer",
+          "评测",
+          "checkpoint",
+          "loader I/O",
+          "SEA-RAFT/Mamba"
+        ],
+        "source": "Original P0 measurement; corrected matrix and optimizer-update accounting in independent audit"
+      },
+      "io_mib_per_second": {
+        "throughput": "measured",
+        "scope": "single process, warmed decoded episode cache, 20 real loader samples per split; throughput of returned RAW value tensors, not physical disk bandwidth",
+        "historical_wall_time": {
+          "libero": 0.0812,
+          "robotwin2": 0.0344
+        },
+        "source": "runs/p0-audit-20261014/outputs/inventory-v2/inventory.json",
+        "measurements": {
+          "libero": {
+            "train": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 2.1173003129661083,
+              "p50_seconds": 0.07068441715091467,
+              "p95_seconds": 0.22492255084216595,
+              "decoded_raw_mib_per_second": 113.35189369701929
+            },
+            "calibration": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 1.9565359046682715,
+              "p50_seconds": 0.07471744529902935,
+              "p95_seconds": 0.1639982715714723,
+              "decoded_raw_mib_per_second": 122.6657785463394
+            },
+            "validation": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 2.4071224331855774,
+              "p50_seconds": 0.0791170746088028,
+              "p95_seconds": 0.21490986798889938,
+              "decoded_raw_mib_per_second": 99.70411005741192
+            },
+            "test": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 1.6666450081393123,
+              "p50_seconds": 0.08178561413660645,
+              "p95_seconds": 0.08653061371296646,
+              "decoded_raw_mib_per_second": 144.00187132108147
+            }
+          },
+          "robotwin2": {
+            "train": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.7053910680115223,
+              "p50_seconds": 0.03509713523089886,
+              "p95_seconds": 0.038653918216004966,
+              "decoded_raw_mib_per_second": 598.0725006757654
+            },
+            "calibration": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.7492476124316454,
+              "p50_seconds": 0.037701903842389584,
+              "p95_seconds": 0.03900816515088081,
+              "decoded_raw_mib_per_second": 563.0648573317784
+            },
+            "validation": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.694366286508739,
+              "p50_seconds": 0.03472835896536708,
+              "p95_seconds": 0.036113024782389404,
+              "decoded_raw_mib_per_second": 607.5683802581773
+            },
+            "test": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.6617661919444799,
+              "p50_seconds": 0.03294250322505832,
+              "p95_seconds": 0.03387186783365905,
+              "decoded_raw_mib_per_second": 637.4985684300324
+            }
+          }
+        }
+      },
+      "historical_30run_cost_estimate": {
         "twenty_k": 19.2,
         "hundred_k": 95.99,
         "three_hundred_k": 287.96,
@@ -896,26 +997,23 @@
           "SEA-RAFT/Mamba"
         ],
         "source": "runs/p0-20261014/receipts/06_cost_estimate.md（由实测 step time 推算）"
-      },
-      "io_mib_per_second": {
-        "loader_wall_time_p50_seconds": {
-          "libero": 0.0812,
-          "robotwin2": 0.0344
-        },
-        "throughput": "derived_pending",
-        "derivation": "declared tensor bytes / measured wall time; not separately instrumented",
-        "scope": "single process, page-cache warm, window=8"
       }
     }
   },
   "statistics": {
-    "paired_unit": "episode / scene",
-    "resampling": "paired bootstrap over the paired unit, including the training seed",
+    "paired_unit": "platform / task_template / source_group, crossed with training seed",
+    "resampling": "Within each platform resample task clusters, then source trajectories within tasks; resample training seed as a crossed factor shared across tasks. Reuse identical resampling indices for every arm; never bootstrap frames/cameras as independent units.",
     "alpha": "pending_calibration",
     "alpha_planned": 0.05,
     "min_paired_units": "pending_calibration",
     "variance_source": "P0/P3 development variance determines detectability",
-    "report": "effect sizes with the paired uncertainty, censored/unrecovered cases retained in the table"
+    "report": "effect sizes with the paired uncertainty, censored/unrecovered cases retained in the table",
+    "estimand": "In-distribution held-out trajectories within the observed task pool. Task templates are shared across splits; no unseen-task/scene generalization claim.",
+    "task_groups": {
+      "path": "data/manifests/n01-full-v1/n01-full-v1-task-groups.json",
+      "sha256": "55d8c14e5a4e98279b8788cd9aa8f973c3b55e7cfcdb37287b40f2927dad7f66",
+      "source": "All 2403 real NPZ metadata records re-read during independent P0 audit"
+    }
   },
   "multi_comparison": {
     "correction": "Holm",
@@ -965,9 +1063,9 @@
   "profiling": {
     "device_required": "cuda",
     "local_cpu_policy": "refuse with an explicit error; never report a CPU fallback as a GPU profile",
-    "encoder_factory": "pending_P4",
+    "encoder_factory": "owac.runtime.n01_full_profile:dbsr_factory",
     "encoder_contract": {
-      "factory_call": "factory(protocol=..., point=..., device=...) -> callable encoder or object with forward()",
+      "factory_call": "factory(protocol=..., point=..., device=..., backbone=...)",
       "step_output": "tensor or a dict/list of tensors (backward uses the sum)"
     },
     "points": [
@@ -1021,44 +1119,65 @@
     "cost_model": {
       "units": [
         {
-          "id": "p4_mechanism_matrix",
+          "id": "p4_libero_20000",
           "updates": 20000,
           "max_updates": 100000,
-          "runs": 21
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
         },
         {
-          "id": "p4_mechanism_matrix_extended",
+          "id": "p4_robotwin2_20000",
+          "updates": 20000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_libero_100000",
           "updates": 100000,
           "max_updates": 100000,
-          "runs": 21
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
         },
         {
-          "id": "p2_motion",
+          "id": "p4_robotwin2_100000",
           "updates": 100000,
-          "max_updates": 300000,
-          "runs": null,
-          "value_status": "planned_envelope_from_shared_contract",
-          "note": "motion budget 100k-300k updates; the run count was not priced in P0"
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
         },
         {
-          "id": "p7_action",
-          "updates": 30000,
+          "id": "p4_libero_300000",
+          "updates": 300000,
           "max_updates": 100000,
-          "runs": null,
-          "value_status": "planned_envelope_from_shared_contract",
-          "note": "action budget 30k-100k updates per platform per seed; the run count was not priced in P0"
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_robotwin2_300000",
+          "updates": 300000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
         }
       ],
       "excluded_from_estimate": [
         "SEA-RAFT adaptation and support-replay costs not yet executable",
         "evaluation and I/O costs unless measured"
       ],
-      "note": "planning grid only; the authoritative priced estimate is budget.pending_profiling.gpu_hours"
+      "note": "21 runs per platform = 7 declared arms x 3 seeds; 42 total. Costs include 8 microsteps and per-platform cameras. 300k is an extrapolation, not P4 authorization.",
+      "basis_point_id": "p128-h8"
     },
     "gpu_hours": {
-      "twenty_k": 19.2,
-      "hundred_k": 95.99,
-      "three_hundred_k": 287.96,
+      "twenty_k": 215.0073,
+      "hundred_k": 1075.0367,
+      "three_hundred_k": 3225.11,
       "value_status": "estimated_from_measured_step_time",
       "detail": "budget.pending_profiling.gpu_hours"
     },
@@ -1078,6 +1197,6 @@
     "backbone_override_rule": "non-full-size DBSR profiling is refused; an explicit profiling.backbone / --backbone override selects a different backbone (the P6 BSRT backbone) instead of silently relaxing the full-size contract",
     "measurement_channels": 4,
     "channel_multiple_rule": "encoder input_channels must be a whole multiple of the measurement channels (CFA 4/8, rawvla_rgb3 3/6)",
-    "encoder_factory_status": "P0 owns no src/owac/frameworks/n01_full/encoder.py (the file-responsibility table excludes it); the external N01FullEncoder adapter is P4. The CLI refuses to import a pending_* factory instead of pretending a profile ran."
+    "encoder_factory_status": "Executable P0 probe of existing DBSR, not N01FullEncoder; four-channel synthetic CFA only. history>8 uses direct backbone/fusion modules."
   }
 }

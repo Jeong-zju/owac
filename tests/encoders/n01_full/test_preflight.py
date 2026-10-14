@@ -137,8 +137,15 @@ def _fixture_protocol(
 def _write_npz_tree(root: Path, platform: str, kind: str, size: int) -> None:
     directory = root / f"{platform}/{kind}"
     directory.mkdir(parents=True, exist_ok=True)
-    for index in range(size):
-        (directory / f"{kind}-{index}.npz").write_bytes(b"npz")
+    paths = [
+        f"{region}/{platform}-{i}.npz"
+        for region, n in DEFAULT_COUNTS[platform].items()
+        for i in range(n)
+    ]
+    for rel in paths[:size]:
+        target = directory / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"npz")
 
 
 def _build_mini_source(root: Path) -> None:
@@ -313,7 +320,7 @@ def test_inventory_counts_raw_roots_only_and_reports_rgb_mirror(tmp_path: Path) 
 
     # a 2x counting bug would make the raw count 16 here; drop one mirror file to prove
     # the mirror is checked separately from the raw measurement count
-    (data_root / "libero/rgb/rgb-0.npz").unlink()
+    (data_root / "libero/rgb/train/libero-0.npz").unlink()
     result = preflight.inventory(config, tmp_path / "out2", repo_root=root, data_root=data_root)
     by_id = {check["id"]: check for check in result["checks"]}
     assert by_id["data_root:libero:raw_npz_count"]["ok"] is True
@@ -399,7 +406,7 @@ def test_inventory_against_the_frozen_platform_manifests(tmp_path: Path) -> None
     if not MANIFEST_DIR.is_dir():
         pytest.skip("frozen platform manifests are not present in this checkout")
     result = preflight.inventory(
-        PROTOCOL_PATH, tmp_path / "out", repo_root=REPO_ROOT, data_root=None
+        PROTOCOL_PATH, tmp_path / "out", repo_root=REPO_ROOT, data_root=tmp_path / "absent-data"
     )
     assert result["summary"]["failures"] == [], result["summary"]["failures"]
     assert result["platform_manifests"]["libero"]["region_counts"] == {
@@ -435,8 +442,10 @@ def test_inventory_against_the_frozen_platform_manifests(tmp_path: Path) -> None
 # ---------------------------------------------------------------------------------------
 
 
-def test_profile_collect_refuses_pending_p4_factory(tmp_path: Path) -> None:
+def test_profile_collect_refuses_pending_factory(tmp_path: Path) -> None:
     protocol = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+    protocol["profiling"]["encoder_factory"] = "pending_P4"
+    config_path = _write_json(tmp_path / "pending.json", protocol)
     output = tmp_path / "profile"
     with pytest.raises(preflight.PreflightUnavailable) as excinfo:
         preflight.profile_collect(protocol, output, raw_dir=output / "raw")
@@ -447,7 +456,7 @@ def test_profile_collect_refuses_pending_p4_factory(tmp_path: Path) -> None:
         [
             "profile",
             "--config",
-            str(PROTOCOL_PATH),
+            str(config_path),
             "--output",
             str(tmp_path / "profile-cli"),
             "--mode",
@@ -457,7 +466,10 @@ def test_profile_collect_refuses_pending_p4_factory(tmp_path: Path) -> None:
     assert exit_code == preflight.EXIT_UNAVAILABLE
 
 
-def test_profile_collect_refuses_cpu_with_explicit_factory(tmp_path: Path) -> None:
+def test_profile_collect_refuses_cpu_with_explicit_factory(tmp_path: Path, monkeypatch) -> None:
+    import torch
+
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     protocol = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
     output = tmp_path / "profile"
     with pytest.raises((preflight.PreflightRefused, preflight.PreflightUnavailable)) as excinfo:
@@ -497,10 +509,17 @@ def test_profile_summarize_aggregates_known_points(tmp_path: Path) -> None:
         "profiling": {
             "measurement_channels": 4,
             "cost_model": {
+                "basis_point_id": "p-1",
                 "units": [
-                    {"id": "with_runs", "updates": 1000, "runs": 2},
+                    {
+                        "id": "with_runs",
+                        "updates": 1000,
+                        "runs": 2,
+                        "camera_count": 1,
+                        "gradient_accumulation": 1,
+                    },
                     {"id": "pending_runs", "updates": 1000, "runs": "pending_profiling"},
-                ]
+                ],
             },
         }
     }
@@ -608,8 +627,8 @@ def test_protocol_carries_required_contract_fields() -> None:
         assert entry["counts"] and entry["cross_platform_total"]
         assert set(entry["platform_manifests"]) == {"libero", "robotwin2"}
 
-    assert protocol["profiling"]["encoder_factory"] == "pending_P4"
-    assert protocol["stage_status"]["state"] == "preflight_backfilled_pending_remote_strict_run"
+    assert callable(preflight.resolve_factory(protocol["profiling"]["encoder_factory"]))
+    assert protocol["stage_status"]["state"].startswith("p0_")
     assert protocol["stage_status"]["state_note"]
     serialized = json.dumps(protocol)
     assert "pending_manifest_hash_" not in serialized
@@ -619,7 +638,6 @@ def test_protocol_carries_required_contract_fields() -> None:
     assert "pending_calibration" in serialized
     assert protocol["stage_status"]["pending_fields"] == [
         "metrics.planned_gates.*.value",
-        "profiling.encoder_factory",
         "statistics.alpha",
         "statistics.min_paired_units",
         "thresholds.fields.*",
@@ -637,7 +655,7 @@ def test_protocol_carries_required_contract_fields() -> None:
         profiling_budget["effective_batch"]["value_status"] == "planned_from_measured_micro_batch"
     )
     assert profiling_budget["max_steps"]["value"] == 100000
-    assert profiling_budget["io_mib_per_second"]["throughput"] == "derived_pending"
+    assert profiling_budget["io_mib_per_second"]["throughput"] == "measured"
     for asset in (
         protocol["data"]["stats"]["libero"],
         protocol["data"]["stats"]["robotwin2"],
@@ -658,22 +676,12 @@ def test_protocol_gpu_hours_estimate_is_internally_consistent() -> None:
     step = budget["step_time_seconds"]["value"]
     hours = budget["gpu_hours"]
     runs = hours["runs"]
-    per_update = step * (runs["libero_runs"] * 2 + runs["robotwin2_runs"] * 3)
+    per_update = step * (runs["libero_runs"] * 2 + runs["robotwin2_runs"] * 3) * 8
     for updates, key in ((20000, "twenty_k"), (100000, "hundred_k"), (300000, "three_hundred_k")):
         assert hours[key] == pytest.approx(per_update * updates / 3600.0, rel=1e-3), key
     assert hours["value_status"] == "estimated_from_measured_step_time"
-    variants = hours["variants"]
-    six = variants["six_run_minimum_start"]
-    per_update_six = step * (3 * 2 + 3 * 3)
-    for updates, key in ((20000, "twenty_k"), (100000, "hundred_k"), (300000, "three_hundred_k")):
-        assert six[key] == pytest.approx(per_update_six * updates / 3600.0, rel=1e-3), key
-    batch_eight = variants["effective_batch_8"]
-    assert batch_eight["hundred_k"] == pytest.approx(hours["hundred_k"] * 8, rel=1e-3)
-    assert batch_eight["three_hundred_k"] == pytest.approx(hours["three_hundred_k"] * 8, rel=1e-3)
-    autocast = variants["bf16_autocast"]
-    assert autocast["measured_step_time_seconds"] == pytest.approx(
-        step * autocast["speedup_factor"], rel=1e-3
-    )
+    assert runs == {"total": 42, "libero_runs": 21, "robotwin2_runs": 21}
+    assert hours["gradient_accumulation"] == 8
     assert hours["excludes"]
     mirror = protocol["profiling"]["gpu_hours"]
     for key in ("twenty_k", "hundred_k", "three_hundred_k"):

@@ -1,5 +1,7 @@
 # N01 v1.0 · P0 阶段报告（问题、数据与依赖）
 
+> 后续独立复核发现协议、可复跑入口、成本及版本一致性缺口；已修补。当前结论见 [P0_acceptance_report.md](P0_acceptance_report.md)。下文保留为原始交付记录。
+
 日期 2026-10-14。工作树 `/home/jeong/zeno/owac/worktrees/n01-evidence-integration`，分支 `lzh/n01-evidence-integration`。
 本阶段只执行 P0；未开始 P1 算法、未启动任何正式长训练。
 

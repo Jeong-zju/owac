@@ -1,0 +1,110 @@
+{
+  "schema": "owac.n01_full.p0_independent_acceptance.v1",
+  "date": "2026-10-14",
+  "reviewed_commit": "57e0551",
+  "original_verdict": "REPAIR_REQUIRED",
+  "status": {
+    "implementation_status": "PASS_P0_AFTER_REPAIR",
+    "training_status": "NOT_STARTED",
+    "effect_status": "NOT_APPLICABLE"
+  },
+  "requirements": [
+    "docs/prompts/n01_v1_0/P0_FOUNDATION.md",
+    "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+    "docs/N01_full_development_plan_2026-10-14_v1.0.md"
+  ],
+  "findings_fixed": [
+    "RoboTwin protocol statistics keys could not load actual norm_stats/actions; added protocol-bound dataset adapter and real four-region reads.",
+    "P0 profile default pending_P4 was not executable; added existing DBSR probe factory with explicit four-channel scope and direct history>8 path.",
+    "Strict inventory accepted same-count replacement and source-group leakage; checks now bind path sets, row membership, source groups, auxiliary hashes and live size/mtime.",
+    "GPU requirements/supervisor environment disagreed with the actual Python 3.11 / torch 2.9.1+cu128 environment; pinned direct dependencies and recorded all installed packages.",
+    "Task-level bootstrap rule was only in prose; added complete task identity map and crossed-seed / hierarchical-task paired statistics protocol.",
+    "Costs used fastest resolution and omitted cameras/accumulation; corrected explicit 128/8 basis, 7 arms x 3 seeds x 2 platforms and accumulation 8.",
+    "Warm real-loader tensor throughput was pending; measured bytes / elapsed time for all eight region/platform combinations.",
+    "Old v5 self-hash check did not establish equality with final commit: README and test_foundation differed. New 139-file source bundle verified against repaired checkout."
+  ],
+  "checks": {
+    "local_make_check": "PASS",
+    "local_full_pytest": 439,
+    "remote_p0_pytest": 91,
+    "remote_inventory": {
+      "passed": 55,
+      "failures": [],
+      "pending": []
+    },
+    "remote_bundle": {
+      "files": 139,
+      "status": "passed",
+      "sha256": "2587a7e728c091a591be04f2cecc8b19106452cb34d3a468631a5c435f07c357"
+    },
+    "gpu_points": 5,
+    "gpu_iterations_per_point": 20,
+    "gpu_warmup_per_point": 3,
+    "gpu_parameters": 1497056,
+    "gpu_all_gradients_finite": true,
+    "gpu_any_gradient_nonzero": true,
+    "zero_gradient_explanation": "The first offset convolution weight has zero gradient for all-zero offset inputs; original acceptance checked grad_any_nonzero, not every parameter nonzero.",
+    "asset_hashes": [
+      {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+        "sha256": "7e596e50c00c5407daed5809f6cc55b57877903bbadcd39ac30f13bb821411a9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "matches": true
+      },
+      {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+        "sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+        "matches": true
+      },
+      {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+        "sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+        "matches": true
+      },
+      {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+        "sha256": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+        "matches": true
+      }
+    ],
+    "frozen_default_files_readable": true
+  },
+  "remote": {
+    "run": "/workspace/owac/rawvla/research/n01-v1/runs/p0-audit-20261014",
+    "source": "source-v3",
+    "environment": "/workspace/owac/rawvla/envs/encoder",
+    "services_after": "owac-rawvla-full-libero-policy        RUNNING   pid 48102, uptime 3 days, 18:56:08\nowac-rawvla-full-robotwin-policy      RUNNING   pid 47920, uptime 3 days, 18:56:33\nowac-rawvla-libero-policy             RUNNING   pid 47080, uptime 3 days, 19:31:54\nowac-rawvla-robotwin-policy           RUNNING   pid 47002, uptime 3 days, 19:31:57\nmemory.used [MiB], memory.free [MiB]\n51198 MiB, 46052 MiB\npid, process_name, used_gpu_memory [MiB]\n47080, /workspace/owac/rawvla/envs/starvla/bin/python, 7720 MiB\n47002, /workspace/owac/rawvla/envs/starvla/bin/python, 8100 MiB\n47920, /workspace/owac/rawvla/envs/starvla/bin/python, 8100 MiB\n48102, /workspace/owac/rawvla/envs/starvla/bin/python, 8100 MiB\n1705636, /workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python, 19146 MiB\n",
+    "note": "Four existing policy PIDs unchanged. Another N02 process uses GPU memory; no N01 acceptance process remains. Shared GPU occupancy is not a dedicated allocation."
+  },
+  "commands": [
+    "make check",
+    "uv run --locked pytest -q",
+    "PYTHONPATH=src OMP_NUM_THREADS=2 /workspace/owac/rawvla/envs/encoder/bin/python -m pytest -q tests/encoders/n01_full",
+    "python -m owac.runtime.n01_full_preflight inventory --strict --check-loader --output ../outputs/inventory-v3",
+    "python -m owac.runtime.n01_full_preflight profile --mode collect --output ../outputs/profile-v3",
+    "python -m owac.runtime.n01_full_preflight verify --bundle . --source-root . --report ../outputs/bundle-verify-v3.json"
+  ],
+  "test_warnings": [
+    "Existing local tensor-to-scalar warning in old N01 test_support.py; no failure.",
+    "Remote standalone bundle lacks pytest marker registration: integration warning only; 91 passed."
+  ],
+  "retained_failed_attempts": [
+    "remote-checks.log: 90/91, host-dependent absent-data assumption; repaired with explicit missing fixture path.",
+    "remote-profile-v2.log: refused by an overstrict all-parameter-nonzero assertion; real zero-offset gradient diagnosed and acceptance corrected to finite gradients / nonzero total norm, with zero parameters reported."
+  ],
+  "limits": [
+    "No P1 algorithm, long training, P4 complete encoder, or policy capability accepted.",
+    "Three-channel model/SEA-RAFT/support replay/Mamba costs remain unknown.",
+    "Original nine-point + bf16 historical sweep retained; this audit reran the five declared CLI points.",
+    "Task templates shared across splits: in-distribution trajectory evaluation only, not unseen-task/scene/camera generalization.",
+    "Data inventory uses size/mtime fingerprints, not full content hashes of hundreds of GB; all metadata/actions were read for task mapping and duplicate checks.",
+    "P3 calibration placeholders remain; no formal matrix may start before freeze.",
+    "Unknown upstream licences remain not_retrieved; do not vendor/publish those modules before checking."
+  ],
+  "next_stage": "P1 may start only on the next explicit stage instruction; this run stops at P0.",
+  "preserved_user_change": "docs/OWAC_academic_research_proposal_2026-10-09.md headings; untouched and excluded from the repair commit."
+}

@@ -725,6 +725,27 @@ def loader_split_manifest(manifest: dict[str, Any], raw_cache_root: str | Path) 
     }
 
 
+def dataset_from_protocol(protocol, platform, region, *, repo_root, **overrides):
+    """Bind the real loader to the frozen partition and normalization parameters."""
+    data = protocol["data"]
+    manifest = json.loads(
+        (Path(repo_root) / data["platform_manifests"][platform]["manifest_path"]).read_text()
+    )
+    assert_manifest_partition(manifest)
+    root = Path(data["data_root"]) / data["raw_roots"][platform]
+    stats = data["stats"][platform]
+    return _rawvla_sequence().RawVLASequenceDataset(
+        dataset_format=platform,
+        raw_cache_root=root,
+        stats_path=stats["path"],
+        stats_key=stats["stats_key"],
+        action_stats_key=stats["action_stats_key"],
+        split=region,
+        split_manifest=loader_split_manifest(manifest, root),
+        **overrides,
+    )
+
+
 def manifest_digest(manifest: dict[str, Any]) -> str:
     """Canonical digest binding downstream receipts to one manifest revision."""
     return _canonical_digest(manifest)

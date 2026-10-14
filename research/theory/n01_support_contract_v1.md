@@ -50,7 +50,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 角色字段与互斥检查 | `src/owac/frameworks/n01_full/contracts.py::SupportDomain`（`evidence_source_ids` / `context_source_ids`） | P0 待实现 |
+| 角色字段与互斥检查 | `src/owac/frameworks/n01_full/contracts.py::SupportDomain`（`evidence_source_ids` / `context_source_ids`） | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 只由 evidence 构造统计 | `src/owac/frameworks/n01_full/statistics.py::fit_structure` | P1 待实现 |
 | 角色覆盖隔离测试 | `tests/encoders/n01_full/test_replay.py`（建议 `test_isolation_covers_declared_roles`） | P1 待实现 |
 | 旧实现中掩码/有效性分离的回归参照 | `tests/encoders/n01/test_acceptance_regressions.py::test_cfa_stem_consumes_actual_sampling_offsets_and_quality_masks` | 已存在（旧语义，不构成新契约验收） |
@@ -62,7 +62,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | 取值 | 可判定语义 | 是否提供测量信息 |
 | --- | --- | --- |
 | `valid` | 采样存在且未越界/未损坏，可用作观测证据 | 是（在对应噪声模型成立时） |
-| `missing` | 没有测量（未到达、被移除、无 metadata） | 否；**不是零值，也不是反证** |
+| `missing` | 没有测量（未到达或原始采样缺失；metadata 缺失不等于测量缺失） | 否；**不是零值，也不是反证** |
 | `bad` | 采样存在但已知不可用（坏点、已知污染、掩码标记） | 否；必须记录检测来源与版本 |
 | `saturated` | 采样存在但被位深/满阱截断，数值只能解释为区间 | 不按普通高斯观测使用；首版排除或显式截断模型 |
 
@@ -82,10 +82,10 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 四态字段与不变式检查 | `contracts.py::MeasurementRecord.validity_kind` | P0 待实现 |
+| 四态字段与不变式检查 | `contracts.py::MeasurementRecord.validity_kind` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 记录不可变 + 状态分离审计 | `ledger.py::MeasurementLedger.get_sources` / `observe` | P1 待实现 |
 | 缺测/饱和不参与估计 | `statistics.py::fit_structure`、`tests/encoders/n01_full/test_ledger.py`（建议 `test_missing_is_not_zero_observation`） | P1 待实现 |
-| P0 契约字段行为（四态与身份守恒） | `tests/encoders/n01_full/test_foundation.py` | P0 待实现 |
+| P0 契约字段行为（四态与身份守恒） | `tests/encoders/n01_full/test_foundation.py` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 旧实现把 bad/saturated 折进 `valid` 的现行行为 | `src/owac/frameworks/n01/state.py::push`（`valid = valid & ~bad_mask & ~saturated_mask`，代码注释自述 "bad/saturated removed"）与 `src/owac/frameworks/n01_dbsr_raw.py::RawDomainHistory.step`（其后只消费 `state.valid[0]`） | 已存在；作为"旧语义"反例参照 |
 
 ### 1.3 `identifiable_mask` 与先验单列
@@ -108,7 +108,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 字段与标签 | `contracts.py::EvidenceEstimate` | P0 待实现 |
+| 字段与标签 | `contracts.py::EvidenceEstimate` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 秩/可辨识子空间 + 先验处理 | `statistics.py::fit_structure` | P1 待实现 |
 | 独立 dense oracle | `src/owac/frameworks/n01_full/reference.py`（建议 `dense_gls_reference`） | P1 待实现 |
 | 数值/秩亏测试 | `tests/encoders/n01_full/test_statistics.py` | P1 待实现 |
@@ -134,7 +134,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 版本字段与图结构 | `contracts.py::DependencyNode` | P0 待实现 |
+| 版本字段与图结构 | `contracts.py::DependencyNode` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 失效传播 | `src/owac/frameworks/n01_full/invalidation.py` | P5 待实现 |
 | 版本变更测试 | `tests/encoders/n01_full/test_state_replay.py` | P5 待实现 |
 | 参数版本进入 checkpoint/续训 | `src/owac/training/n01_full.py`、`src/owac/runtime/n01_burst_budget.py`（现有续训机制） | P4 待实现 / 现有机制复用 |
@@ -158,7 +158,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 机制 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 快照字段与提交语义 | `contracts.py::ReadoutSnapshot` | P0 待实现 |
+| 快照字段与提交语义 | `contracts.py::ReadoutSnapshot` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 精确窗口/摘要边界 | `replay.py::full_replay`、`src/owac/frameworks/n01_full/state_field.py` | P1/P5 待实现 |
 | 唯一帧与窗口语义的现有实现 | `src/owac/frameworks/n01/state.py::push`（"repeated frames do not create extra independent observations"）、`reset`、`detach` | 已存在（旧语义） |
 | 旧 8 帧唯一性回归 | `tests/encoders/n01/test_acceptance_regressions.py::test_repeated_id_and_padding_preserve_all_eight_unique_frames` | 已存在 |
@@ -241,7 +241,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 
 | 义务 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 来源身份/字段 | `contracts.py::SourceKey` | P0 待实现 |
+| 来源身份/字段 | `contracts.py::SourceKey` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 账本与幂等登记 | `ledger.py::MeasurementLedger.observe / get_sources`、部分 episode reset | P1 待实现 |
 | 合并/分裂/撤回 | `domains.py::make_domain / merge_domains / split_domain / retract_sources` | P1 待实现 |
 | GLS 求解与秩 | `statistics.py::fit_structure` | P1 待实现 |
@@ -296,7 +296,7 @@ T1–T6 建立在这些不变量之上。每项给出一条可判定的检查规
 | --- | --- | --- |
 | GLS 实现 | `statistics.py::fit_structure` | P1 待实现 |
 | 独立参考 | `reference.py` | P1 待实现 |
-| 先验/秩/标签字段 | `contracts.py::EvidenceEstimate` | P0 待实现 |
+| 先验/秩/标签字段 | `contracts.py::EvidenceEstimate` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 数值测试（手算 + 随机 + 病态） | `tests/encoders/n01_full/test_statistics.py` | P1 待实现 |
 | 现有解析统计入口（旧语义） | `src/owac/frameworks/n01/support.py::SupportDomainIntegrator.domain_statistics` | 已存在（旧实现，非新契约验收） |
 | 噪声模型与校准 | `src/owac/frameworks/n01_full/calibration.py` | P3 待实现 |
@@ -452,7 +452,7 @@ P_t ≥ 0，且每一行和为 1
 | --- | --- | --- |
 | 全量/两种回放接口 | `replay.py::full_replay / fixed_decision_replay / counterfactual_replay` | P1 待实现 |
 | 独立批量参考 | `reference.py` | P1 待实现 |
-| 失效传播与依赖图 | `invalidation.py`、`contracts.py::DependencyNode` | P5 / P0 待实现 |
+| 失效传播与依赖图 | `invalidation.py`、`contracts.py::DependencyNode` | P5 / P0 已实现（契约字段/行为，不表示理论已证明） |
 | 依赖闭包玩具算子 | P1_ANALYTIC_REFERENCE §3（两层非线性算子） | P1 待实现 |
 | 重放测试 | `tests/encoders/n01_full/test_replay.py`（P1）、`test_state_replay.py`（P5） | P1/P5 待实现 |
 | 现有唯一帧/重复帧实现 | `src/owac/frameworks/n01/state.py::push / reset / detach` | 已存在（旧语义参照） |
@@ -504,7 +504,7 @@ P_t ≥ 0，且每一行和为 1
 
 | 义务 | 目标路径与符号 | 状态 |
 | --- | --- | --- |
-| 快照字段与提交语义 | `contracts.py::ReadoutSnapshot` | P0 待实现 |
+| 快照字段与提交语义 | `contracts.py::ReadoutSnapshot` | P0 已实现（契约字段/行为，不表示理论已证明） |
 | 期限与回退策略 | `src/owac/frameworks/n01_full/deadline.py` | P5 待实现 |
 | deadline/快照测试 | `tests/encoders/n01_full/test_deadline.py` | P5 待实现 |
 | 统一读出接口（复用并重新验收） | `src/owac/backends/rawvla_features.py::VisualTokenPostprocessor`、`VisualPrefix`、`RawVLAFeaturePolicy` | 已存在；P7 重新验收 |

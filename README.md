@@ -1,5 +1,7 @@
 # OWAC
 
+2026-10-14 P0 独立验收修补完成：修正 RoboTwin 协议归一化键、可执行 profiling、严格数据身份检查、GPU 环境路径/依赖、任务层统计与完整预算。两平台四区真实 loader、远程 55/55 checks、139/139 源包、91 项 P0 测试通过；本地全仓 439 passed。仅接受 P0 工程起点，未开始 P1/长训练。 见[独立验收报告](research/experiments/n01_full/P0_acceptance_report.md)。
+
 2026-10-14 N01 v1.0 **P0（问题、数据与依赖）完成**：交付内部契约与阶段配置、四区数据 manifest、上游锁与冻结协议、`n01_full_preflight` 四子命令、T1–T6 理论义务目录；在用户服务器新建独立 encoder GPU 环境（Python 3.11.16 / torch 2.9.1+cu128 / RTX PRO 6000 Blackwell），完成全尺寸 DBSR 64/9/512 profiling（首选起点 128/8：step p50 46.1 ms、峰值 reserved 4.4 GiB）与两平台真实 batch 读取；远程源包 227/227 hash 一致、`inventory --strict` 36/36 checks 通过。本地 `make check` 通过、全仓 434 passed（历史基线 348 + 新增 86）。**未开始 P1 算法、未启动任何长训练、无机制效果结论**。见 [P0 报告](research/experiments/n01_full/P0_report.md)与[收据](research/experiments/results/n01_full/P0/receipt.json)。
 
 2026-10-14：[N01 v1.0 DeepSeek 阶段交接包](docs/prompts/n01_v1_0/README.md)已准备，包含 P0–P8、早期策略预检、代码审计、固定参考实现和远程训练路径。正式开发从 P0 开始；本次仅准备提示词与只读核查，没有启动新训练。

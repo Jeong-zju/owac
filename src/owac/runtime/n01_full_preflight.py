@@ -373,7 +373,14 @@ def declared_platform_expected(data_section: dict, platform: str) -> Any:
     return spec.get("expected_npz_frozen", spec.get("expected_npz"))
 
 
-def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Path | None) -> dict:
+def inventory(
+    config_path: Path,
+    output: Path,
+    *,
+    repo_root: Path,
+    data_root: Path | None,
+    check_loader: bool = False,
+) -> dict:
     config_path = Path(config_path)
     repo_root = Path(repo_root)
     resolved_config = config_path if config_path.is_absolute() else repo_root / config_path
@@ -441,6 +448,16 @@ def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Pa
                     }
                 )
                 loaded[platform] = {"regions": regions, "rows": rows, "payload": payload}
+        # Bind every auxiliary evidence file, not just the top-level manifest.
+        for kind in ("inventory", "loader_evidence"):
+            if spec.get(f"{kind}_path"):
+                auxiliary = repo_root / spec[f"{kind}_path"]
+                check(
+                    f"manifest:{platform}:{kind}_sha256",
+                    auxiliary.is_file()
+                    and hash_status(spec.get(f"{kind}_sha256"), sha256_file(auxiliary)) == "match",
+                    str(auxiliary),
+                )
         platform_reports[platform] = report
         check(f"manifest:{platform}:present", report["exists"], str(rel))
         if not report["exists"]:
@@ -524,6 +541,29 @@ def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Pa
             ok = ok and row_paths == union
             parts.append(f"rows={len(row_paths)}")
         check(f"regions:{platform}:union", ok, "; ".join(parts))
+        group_sides: dict[str, set[str]] = {}
+        row_sides = {region: [] for region in REQUIRED_SPLITS}
+        for row in rows:
+            group_sides.setdefault(str(row.get("source_group")), set()).add(row.get("split"))
+            if row.get("split") in row_sides:
+                row_sides[row["split"]].append(row["relative_path"])
+        check(
+            f"regions:{platform}:source_groups_disjoint",
+            bool(rows)
+            and all(len(tags) == 1 for tags in group_sides.values())
+            and all(row.get("source_group") for row in rows),
+            "source identities may not cross partition boundaries",
+        )
+        check(
+            f"regions:{platform}:rows_match_sides",
+            len(rows) == len(row_paths)
+            and set(loaded[platform]["payload"].get("sides", {})) == set(REQUIRED_SPLITS)
+            and all(
+                sorted(row_sides[r]) == sorted(loaded[platform]["payload"]["sides"][r])
+                for r in REQUIRED_SPLITS
+            ),
+            "exact row membership and duplicate-free sides",
+        )
 
     # --- cross-platform region report ------------------------------------------------
     regions_report: dict[str, dict] = {}
@@ -638,6 +678,51 @@ def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Pa
         )
     else:
         check("data_root:present", True, str(root_report.get("path")))
+        check("data_root:complete_scan", not root_report.get("truncated"), "scan limit")
+        for platform, payload in loaded.items():
+            base = Path(declared_root) / (raw_roots or {}).get(platform, "")
+            observed_paths = {
+                p.relative_to(base).as_posix() for p in base.rglob("*.npz") if p.is_file()
+            }
+            expected_paths = {row["relative_path"] for row in payload["rows"]}
+            check(
+                f"data_root:{platform}:exact_paths",
+                observed_paths == expected_paths,
+                f"missing={len(expected_paths - observed_paths)}, "
+                f"extra={len(observed_paths - expected_paths)}",
+            )
+            drift = []
+            missing_fingerprints = []
+            for row in payload["rows"]:
+                if not {"size_bytes", "mtime_ns", "inventory_hash"} <= row.keys():
+                    missing_fingerprints.append(row["relative_path"])
+                    continue
+                path = base / row["relative_path"]
+                if not path.is_file():
+                    drift.append(row["relative_path"])
+                    continue
+                stat = path.stat()
+                if stat.st_size != row["size_bytes"] or stat.st_mtime_ns != row["mtime_ns"]:
+                    drift.append(row["relative_path"])
+            check(
+                f"data_root:{platform}:inventory_fingerprint",
+                False if drift else (None if missing_fingerprints else True),
+                f"stat drift={len(drift)}, undeclared={len(missing_fingerprints)}; "
+                "not a content hash",
+            )
+            mirror_path = (mirror_roots or {}).get(platform)
+            if mirror_path:
+                mirror_base = Path(declared_root) / mirror_path
+                mirror_paths = {
+                    p.relative_to(mirror_base).as_posix()
+                    for p in mirror_base.rglob("*.npz")
+                    if p.is_file()
+                }
+                check(
+                    f"data_root:{platform}:rgb_mirror_paths",
+                    mirror_paths == observed_paths,
+                    "relative path sets must match, not only counts",
+                )
         for platform, scanned in sorted(root_report.get("raw_counts", {}).items()):
             observed = scanned.get("count")
             expected = declared_platform_expected(data_section, platform)
@@ -661,6 +746,46 @@ def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Pa
                     f"raw={observed}, rgb_mirror={mirror.get('count')}",
                 )
 
+    task_spec = protocol.get("statistics", {}).get("task_groups")
+    if task_spec:
+        task_path = repo_root / task_spec["path"]
+        task_ok = task_path.is_file() and sha256_file(task_path) == task_spec["sha256"]
+        check("statistics:task_groups_hash", task_ok, str(task_path))
+        if task_ok:
+            task_map = read_json(task_path)["platforms"]
+            for platform, payload in loaded.items():
+                task_rows = task_map.get(platform, {}).get("rows", [])
+                check(
+                    f"statistics:{platform}:task_groups_coverage",
+                    len(task_rows) == len(payload["rows"])
+                    and {r["relative_path"] for r in task_rows}
+                    == {r["relative_path"] for r in payload["rows"]}
+                    and all(r.get("task_id") for r in task_rows),
+                    "one task cluster per frozen source path",
+                )
+
+    loader_result = None
+    if check_loader:
+        from owac.runtime.n01_full_profile import probe_loaders
+
+        try:
+            loader_protocol = json.loads(json.dumps(protocol))
+            if data_root is not None:
+                loader_protocol["data"]["data_root"] = str(data_root)
+            loader_result = probe_loaders(loader_protocol, repo_root)
+            check(
+                "loader:four_regions",
+                all(
+                    row["paths_equal"] and row["action_finite"]
+                    for regions in loader_result.values()
+                    for row in regions.values()
+                ),
+                "real batches using frozen manifest and protocol statistics",
+            )
+        except (ValueError, KeyError, OSError, RuntimeError) as exc:
+            loader_result = {"error": str(exc)}
+            check("loader:four_regions", False, str(exc))
+
     failures = [item for item in checks if item["ok"] is False]
     pending = [item for item in checks if item["ok"] is None]
     region_totals = {region: regions_report[region]["file_count"] for region in REQUIRED_SPLITS}
@@ -680,6 +805,7 @@ def inventory(config_path: Path, output: Path, *, repo_root: Path, data_root: Pa
     result = {
         "format": FORMAT,
         "kind": "inventory",
+        "loader_probe": loader_result,
         "generated_at": now_iso(),
         "config": {
             "path": str(resolved_config),
@@ -785,15 +911,15 @@ def resolve_factory(spec: str):
 
 def scalar_from_output(output: Any, torch_module: Any):
     if torch_module.is_tensor(output):
-        return output.float().sum()
+        return output.float().square().mean()
     if isinstance(output, dict):
         tensors = [value for value in output.values() if torch_module.is_tensor(value)]
         if tensors:
-            return sum(tensor.float().sum() for tensor in tensors)
+            return sum(tensor.float().square().mean() for tensor in tensors)
     if isinstance(output, (list, tuple)):
         tensors = [value for value in output if torch_module.is_tensor(value)]
         if tensors:
-            return sum(tensor.float().sum() for tensor in tensors)
+            return sum(tensor.float().square().mean() for tensor in tensors)
     raise PreflightRefused(
         "encoder output exposes no tensor to differentiate; profile collect needs a "
         "tensor or a dict/list of tensors"
@@ -803,6 +929,7 @@ def scalar_from_output(output: Any, torch_module: Any):
 def run_point_step(encoder: Any, tensor: Any, torch_module: Any) -> None:
     output = encoder(tensor) if callable(encoder) else encoder.forward(tensor)
     scalar_from_output(output, torch_module).backward()
+    tensor.grad = None
     zero_grad = getattr(encoder, "zero_grad", None)
     if callable(zero_grad):
         zero_grad(set_to_none=True)
@@ -905,6 +1032,8 @@ def profile_collect(
         )
         warm = int(warmup if warmup is not None else point.get("warmup", 3))
         count = int(iterations if iterations is not None else point.get("iterations", 20))
+        torch.manual_seed(int(profiling.get("seed", 101)))
+        torch.cuda.empty_cache()
         encoder = factory(
             protocol=protocol,
             point=point,
@@ -912,11 +1041,36 @@ def profile_collect(
             backbone=point_backbone["backbone"],
         )
         shape = (batch, history, channels, resolution, resolution)
-        tensor = torch.randn(*shape, device=device, dtype=torch.float32)
-        tensor.requires_grad_(True)
+        tensor = torch.rand(*shape, device=device, dtype=torch.float32)
+        # RAW is an input, not a trained parameter. Do not allocate its gradient.
 
-        for _ in range(max(warm, 0)):
+        if count < 20 or warm < 1:
+            raise PreflightRefused("P0 profiling requires warmup >= 1 and iterations >= 20")
+        for _ in range(warm):
             run_point_step(encoder, tensor, torch)
+        # Check real parameter gradients outside the timed loop.
+        scalar_from_output(encoder(tensor), torch).backward()
+        gradients = [p.grad for p in encoder.parameters() if p.requires_grad]
+        finite = all(g is not None and bool(torch.isfinite(g).all()) for g in gradients)
+        nonzero = any(g is not None and bool(g.abs().sum() > 0) for g in gradients)
+        zero_gradients = [
+            name
+            for name, p in encoder.named_parameters()
+            if p.grad is not None and not bool(p.grad.abs().sum() > 0)
+        ]
+        if not gradients or not finite or not nonzero:
+            raise PreflightRefused("profile gradients must all be finite with nonzero total norm")
+        encoder.zero_grad(set_to_none=True)
+        del gradients
+        forward_timings = []
+        with torch.no_grad():
+            for _ in range(count):
+                torch.cuda.synchronize()
+                started = time.perf_counter()
+                forward_output = encoder(tensor)
+                torch.cuda.synchronize()
+                forward_timings.append((time.perf_counter() - started) * 1e3)
+                del forward_output
         torch.cuda.synchronize()
         torch.cuda.reset_peak_memory_stats()
         timings = []
@@ -938,6 +1092,21 @@ def profile_collect(
             "warmup": max(warm, 0),
             "device_name": device_name,
             "encoder_factory": spec,
+            "entry": getattr(encoder, "entry", "external_factory"),
+            "camera_count": 1,
+            "gradients": {
+                "all_finite": finite,
+                "any_nonzero": nonzero,
+                "zero_gradient_parameters": zero_gradients,
+            },
+            "forward_ms": {
+                "p50": percentile(forward_timings, 0.5),
+                "p95": percentile(forward_timings, 0.95),
+            },
+            "parameters": sum(p.numel() for p in encoder.parameters()),
+            "torch": torch.__version__,
+            "input_time_order": "oldest_first",
+            "scope": "four-channel CFA backbone/fusion only; no P4 support/replay or policy",
             "timings_ms": {
                 "p50": percentile(timings, 0.5),
                 "p95": percentile(timings, 0.95),
@@ -949,6 +1118,7 @@ def profile_collect(
                 "allocated": int(torch.cuda.memory_allocated()),
                 "reserved": int(torch.cuda.memory_reserved()),
                 "peak_allocated": int(torch.cuda.max_memory_allocated()),
+                "peak_reserved": int(torch.cuda.max_memory_reserved()),
             },
             "input_elements": int(math.prod(shape)),
             "output_bytes": None,
@@ -956,6 +1126,8 @@ def profile_collect(
         }
         write_json(raw_dir / f"{point_id}.json", record)
         records.append(record)
+        del encoder, tensor
+        torch.cuda.empty_cache()
     io_report = probe_io(io_root, raw_dir, io_sample, torch) if io_root is not None else None
     summary = profile_summarize(protocol, raw_dir, Path(output), io_report=io_report)
     return {"records": records, "summary": summary}
@@ -1008,9 +1180,12 @@ def profile_summarize(
                 "step_seconds": (percentile(p50s, 0.5) or 0.0) / 1e3,
             }
         )
-    fastest = min(points, key=lambda item: item["timings_ms"]["p50"] or float("inf"))
     cost_model = protocol.get("profiling", {}).get("cost_model", {})
     units = cost_model.get("units", []) if isinstance(cost_model, dict) else []
+    basis_id = cost_model.get("basis_point_id")
+    basis = next((p for p in points if p["point_id"] == basis_id), None)
+    if basis is None:
+        raise PreflightUnavailable(f"cost basis point {basis_id!r} was not measured")
     estimates = []
     for unit in units:
         unit_id = str(unit.get("id"))
@@ -1019,7 +1194,20 @@ def profile_summarize(
         note = None
         gpu_hours = None
         if isinstance(updates, (int, float)) and isinstance(runs, (int, float)):
-            gpu_hours = float(fastest["step_seconds"]) * float(updates) * float(runs) / 3600.0
+            cameras = unit.get("camera_count")
+            accumulation = unit.get("gradient_accumulation")
+            if not isinstance(cameras, (int, float)) or not isinstance(accumulation, (int, float)):
+                raise PreflightRefused(
+                    "cost estimates require explicit camera_count and gradient_accumulation"
+                )
+            gpu_hours = (
+                float(basis["step_seconds"])
+                * float(updates)
+                * float(runs)
+                * cameras
+                * accumulation
+                / 3600.0
+            )
         else:
             note = "updates or runs still pending; estimate deferred"
         estimates.append(
@@ -1029,6 +1217,9 @@ def profile_summarize(
                 "max_updates": unit.get("max_updates"),
                 "runs": runs,
                 "gpu_hours": gpu_hours,
+                "basis_point_id": basis_id,
+                "camera_count": unit.get("camera_count"),
+                "gradient_accumulation": unit.get("gradient_accumulation"),
                 "note": note,
             }
         )
@@ -1038,7 +1229,7 @@ def profile_summarize(
         "generated_at": now_iso(),
         "raw_dir": str(raw_dir),
         "basis": (
-            "forward+backward p50 of the fastest profiling point (encoder step only); "
+            "forward+backward p50 of the explicitly selected profiling point; "
             "motion, support, replay, I/O and eval costs are excluded unless measured"
         ),
         "points": points,
@@ -1046,7 +1237,10 @@ def profile_summarize(
         "gpu_hours_estimate": {
             "status": "estimate",
             "estimates": estimates,
-            "note": "GPU hours stay a pending number until the remote collect overwrites this file",
+            "note": (
+                "backbone-only estimate; multiply measured microsteps by cameras, "
+                "accumulation and runs"
+            ),
         },
         "status": "collected",
     }
@@ -1516,6 +1710,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--data-root", type=Path, default=None, help="override data.data_root from the protocol"
     )
     inventory_parser.add_argument(
+        "--check-loader",
+        action="store_true",
+        help="read real batches from all four regions; requires torch",
+    )
+    inventory_parser.add_argument(
         "--strict", action="store_true", help="exit 1 when a check fails or stays pending"
     )
 
@@ -1609,7 +1808,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "inventory":
             result = inventory(
-                args.config, args.output, repo_root=args.repo_root, data_root=args.data_root
+                args.config,
+                args.output,
+                repo_root=args.repo_root,
+                data_root=args.data_root,
+                check_loader=args.check_loader,
             )
             emit(result)
             if args.strict and result["summary"]["status"] != "ok":
