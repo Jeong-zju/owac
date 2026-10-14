@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-10-13T17:43:02.742270+00:00",
+  "inventory": {
+    "status": "not_run"
+  },
+  "parity": {
+    "fail_count": 0,
+    "not_run_count": 5,
+    "pass_count": 11,
+    "status": "pass"
+  },
+  "profile": {
+    "status": "ok",
+    "targets": [
+      {
+        "mean_seconds_per_update": 0.004395887594509987,
+        "name": "convnext_raw4",
+        "p95_seconds_per_update": 0.004604925993044162,
+        "parameter_count": 87694848,
+        "peak_allocated_bytes": 847439872,
+        "peak_reserved_bytes": 872415232,
+        "throughput_per_second": 227.4853436309194
+      },
+      {
+        "mean_seconds_per_update": 0.0043858363448089225,
+        "name": "convnext_raw3",
+        "p95_seconds_per_update": 0.0045699591493757906,
+        "parameter_count": 87692800,
+        "peak_allocated_bytes": 847169536,
+        "peak_reserved_bytes": 872415232,
+        "throughput_per_second": 228.0066836473733
+      },
+      {
+        "mean_seconds_per_update": 1.7933084891410544e-05,
+        "name": "fcmae_patchify_unpatchify",
+        "p95_seconds_per_update": 1.8509895744500676e-05,
+        "parameter_count": 0,
+        "peak_allocated_bytes": 12713984,
+        "peak_reserved_bytes": 25165824,
+        "throughput_per_second": 55762.854302829546
+      },
+      {
+        "mean_seconds_per_update": 0.00020966306947229897,
+        "name": "fcmae_mask_decoder",
+        "p95_seconds_per_update": 0.00023590545752085745,
+        "parameter_count": 4756992,
+        "peak_allocated_bytes": 32678400,
+        "peak_reserved_bytes": 48234496,
+        "throughput_per_second": 4769.557187715033
+      },
+      {
+        "mean_seconds_per_update": 0.016596768544841326,
+        "name": "fcmae_full",
+        "p95_seconds_per_update": 0.01704904885700671,
+        "parameter_count": 92449792,
+        "peak_allocated_bytes": 967302656,
+        "peak_reserved_bytes": 985661440,
+        "throughput_per_second": 60.25269300455624
+      }
+    ],
+    "targets_measured": 5,
+    "updates": 200
+  },
+  "stage": "report",
+  "stage_decision": {
+    "behavior": "not_run",
+    "closed_loop": "not_run",
+    "config_hash": "6a2b7fe078740f201fc35f2f6007d3bf911d98993b71f583da7fe63f49ac433a",
+    "data_hash": null,
+    "evidence_paths": [
+      "outputs/n02-full/p0/report/stage_decision.json",
+      "outputs/n02-full/p0/report/metrics.json",
+      "outputs/n02-full/p0/report/report.json",
+      "outputs/n02-full/p0/report/run_manifest.json",
+      "outputs/n02-full/p0/inventory/inventory.json",
+      "outputs/n02-full/p0/parity/parity.json",
+      "outputs/n02-full/p0/profile/profile.json"
+    ],
+    "git_sha": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+    "implementation": "incomplete",
+    "notes": [
+      "stages with real evidence: parity, profile",
+      "numerical verdict taken from the parity_suite status 'pass' (pass_count=11, fail_count=0, not_run_count=5)",
+      "no behavior evidence in P0 (behavior gates start at P1)",
+      "P0 runs no closed loop; P7 owns closed-loop evidence"
+    ],
+    "numerical": "pass"
+  }
+}

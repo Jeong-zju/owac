@@ -1,5 +1,7 @@
 # OWAC
 
+2026-10-14 N02 v1.1 P0 **经独立修补后通过**：原交付存在部分 parity 被误判通过、任务划分、冻结窗口、归一化、训练 profile 和 FCMAE 稀疏数学缺陷，已修复并实跑。现在17项上游检查全部通过，2403集真实元数据与10个实际窗口核验完成，正式宽度模块200次训练更新已测；全仓640 passed / 6 skipped，目标运行时257 passed / 1 skipped，make check通过。仅P0 implementation/numerical通过，行为和闭环仍not_run；未启动P1或100k训练。见[独立验收报告](research/experiments/2026-10-14_n02_p0_independent_acceptance.md)。
+
 2026-10-13 后续路线已执行：重新训练的官方CNN测量基线加RAW首帧差分，在三个种子新留出均通过配对/保先验/强错纠正门槛；条件调度比较中，N02与简单事件缓存的每帧状态逐位相同、纠错及漂移相同，端到端约慢4%，独有收益0/3。按用户退出条件归档当前局部调度，保留测量基线和全部资产；本轮由用户授权提交。见[测量结果](research/experiments/2026-10-13_n02_retrained.md)、[机制比较](research/experiments/2026-10-13_n02_revision_comparison.md)与[0014决定](docs/decisions/0014-n02-scheduler-archive.md)。
 
 2026-10-13 NRE／BNRE 独立评分对照完成：复用原版损失，冻结 tiny RAW stem，三种子×两方法各训练新头 200 步。新留出配对均为 0/16、两方向强错先验纠正均为 0/16，无信息保持均为 16/16；后者在初始头和零证据参考中也通过，不能视为学习收益。两方法开发/留出均 0/3 种子合格，不进入共用评分器的滤波／N02 对比。原核心及绝对拟合/局部反证检查保留，修改已获用户提交授权。见[协议、结果与复现](research/experiments/2026-10-13_n02_ratio.md)。

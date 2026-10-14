@@ -1,0 +1,524 @@
+{
+  "config_hash": "6a2b7fe078740f201fc35f2f6007d3bf911d98993b71f583da7fe63f49ac433a",
+  "config_path": "configs/encoders/n02_full/p0.json",
+  "data": {
+    "cache_root": null,
+    "dataset_format": null,
+    "protocol_verified": false
+  },
+  "dataset": null,
+  "device": "cpu",
+  "generated_at": "2026-10-13T17:43:00.170852+00:00",
+  "git_sha": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+  "interpreter": {
+    "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+    "version": "3.10.19 (main, Jan 14 2026, 19:36:24) [Clang 21.1.4 ]",
+    "version_info": [
+      3,
+      10,
+      19
+    ]
+  },
+  "reason": "config data.cache_root is not configured",
+  "runtime_probe": {
+    "available": true,
+    "file_sha256": "9a374e65c02a223eeedd65bded3190b0f4c5b47be22a2e1d3a86c5c776de9748",
+    "payload": {
+      "cuda": {
+        "available": true,
+        "bf16_supported": true,
+        "cudnn_enabled": true,
+        "cudnn_version": 91900,
+        "current_device": 0,
+        "device_count": 1,
+        "devices": [
+          {
+            "capability": [
+              12,
+              0
+            ],
+            "free_memory_bytes_at_probe": 31823429632,
+            "index": 0,
+            "multi_processor_count": 170,
+            "name": "NVIDIA GeForce RTX 5090",
+            "sm": "sm_120",
+            "total_memory_bytes": 33647230976,
+            "total_memory_bytes_from_mem_get_info": 33647230976
+          }
+        ],
+        "memory_allocated_bytes": 8519680
+      },
+      "generated_epoch_s": 1791912427.6817904,
+      "generated_utc": "2026-10-13T17:27:07Z",
+      "operators": {
+        "conv2d_bf16": {
+          "device": "cuda:0",
+          "dtype": "bfloat16",
+          "elapsed_ms": 12.49602300231345,
+          "input_recipe": {
+            "draw_dtype": "float32",
+            "draw_order": "input,weight,bias",
+            "seed": 1103,
+            "shapes": {
+              "bias": [
+                8
+              ],
+              "input": [
+                2,
+                4,
+                48,
+                64
+              ],
+              "padding": 1,
+              "stride": 1,
+              "weight": [
+                8,
+                4,
+                3,
+                3
+              ]
+            }
+          },
+          "max_abs_error_vs_fp64": 0.1485816382803442,
+          "mean_abs_error_vs_fp64": 0.015474629761762435,
+          "op": "conv2d",
+          "output_fingerprint": {
+            "abs_max": 26.875,
+            "dtype": "float32",
+            "numel": 49152,
+            "sha256": "a309791969656e595a9b9f4e03e1da065e4f76bb2df139317f785808315ecddf",
+            "sum": -35951.09326171875
+          },
+          "reason": null,
+          "reference": {
+            "device": "cpu",
+            "dtype": "float64",
+            "kind": "float64 evaluation of the same float32 operands"
+          },
+          "status": "measured"
+        },
+        "conv2d_fp32": {
+          "device": "cuda:0",
+          "dtype": "float32",
+          "elapsed_ms": 68.26119701145217,
+          "input_recipe": {
+            "draw_dtype": "float32",
+            "draw_order": "input,weight,bias",
+            "seed": 1103,
+            "shapes": {
+              "bias": [
+                8
+              ],
+              "input": [
+                2,
+                4,
+                48,
+                64
+              ],
+              "padding": 1,
+              "stride": 1,
+              "weight": [
+                8,
+                4,
+                3,
+                3
+              ]
+            }
+          },
+          "max_abs_error_vs_fp64": 5.722513670036733e-06,
+          "mean_abs_error_vs_fp64": 4.747994622669868e-07,
+          "op": "conv2d",
+          "output_fingerprint": {
+            "abs_max": 26.837814331054688,
+            "dtype": "float32",
+            "numel": 49152,
+            "sha256": "7d69083f69417d325c60ee63a85f54740c502e936a9be68e671dc9d2064b2c85",
+            "sum": -35950.81585831195
+          },
+          "reason": null,
+          "reference": {
+            "device": "cpu",
+            "dtype": "float64",
+            "kind": "float64 evaluation of the same float32 operands"
+          },
+          "status": "measured"
+        },
+        "matmul_bf16": {
+          "device": "cuda:0",
+          "dtype": "bfloat16",
+          "elapsed_ms": 76.35768000909593,
+          "input_recipe": {
+            "draw_dtype": "float32",
+            "draw_order": "lhs,rhs",
+            "seed": 1103,
+            "shapes": {
+              "lhs": [
+                256,
+                256
+              ],
+              "rhs": [
+                256,
+                256
+              ]
+            }
+          },
+          "max_abs_error_vs_fp64": 0.22438744898990137,
+          "mean_abs_error_vs_fp64": 0.036097471445119045,
+          "op": "matmul",
+          "output_fingerprint": {
+            "abs_max": 72.0,
+            "dtype": "float32",
+            "numel": 65536,
+            "sha256": "71f6a8ec792c11cbabb21cd3b2e10c015462475f9de5410dd5d6388a2b5f87a3",
+            "sum": -324.45737648010254
+          },
+          "reason": null,
+          "reference": {
+            "device": "cpu",
+            "dtype": "float64",
+            "kind": "float64 evaluation of the same float32 operands"
+          },
+          "status": "measured"
+        },
+        "matmul_fp32": {
+          "device": "cuda:0",
+          "dtype": "float32",
+          "elapsed_ms": 67.3808010033099,
+          "input_recipe": {
+            "draw_dtype": "float32",
+            "draw_order": "lhs,rhs",
+            "seed": 1103,
+            "shapes": {
+              "lhs": [
+                256,
+                256
+              ],
+              "rhs": [
+                256,
+                256
+              ]
+            }
+          },
+          "max_abs_error_vs_fp64": 2.1247239388344497e-05,
+          "mean_abs_error_vs_fp64": 2.092323352261023e-06,
+          "op": "matmul",
+          "output_fingerprint": {
+            "abs_max": 72.05009460449219,
+            "dtype": "float32",
+            "numel": 65536,
+            "sha256": "057d70145f0bc044c144faef5b2d9ea1d4c28c509d7472ee4b2fb8b5b4b56d98",
+            "sum": -322.4114624373615
+          },
+          "reason": null,
+          "reference": {
+            "device": "cpu",
+            "dtype": "float64",
+            "kind": "float64 evaluation of the same float32 operands"
+          },
+          "status": "measured"
+        }
+      },
+      "packages": {
+        "torch": {
+          "cuda_version": "12.8",
+          "debug_build": false,
+          "git_version": "70d99e998b4955e0049d13a98d77ae1b14db1f45",
+          "num_interop_threads": 24,
+          "num_threads": 24,
+          "version": "2.11.0+cu128"
+        },
+        "torchvision": {
+          "cuda_version": 12080,
+          "version": "0.26.0+cu128"
+        }
+      },
+      "platform": {
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "release": "6.8.0-146-generic",
+        "system": "Linux"
+      },
+      "probe": "owac-n02-full-runtime-probe",
+      "python": {
+        "base_prefix": "/home/jeong/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu",
+        "compiler": "Clang 21.1.4 ",
+        "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "implementation": "CPython",
+        "in_virtualenv": true,
+        "prefix": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128",
+        "version": "3.10.19",
+        "version_info": [
+          3,
+          10,
+          19
+        ]
+      },
+      "requested_device": "cuda",
+      "resolved_device": "cuda:0",
+      "schema_version": 1,
+      "tf32": {
+        "cudnn_allow_tf32": true,
+        "cudnn_conv_fp32_precision": "tf32",
+        "matmul_allow_tf32": false,
+        "matmul_fp32_precision": "none",
+        "note": "flags read before the smoke tests; the probe does not modify them"
+      },
+      "unavailable": {}
+    },
+    "reason": "",
+    "source": "outputs/n02-full/p0/runtime/probe.json"
+  },
+  "stage": "inventory",
+  "status": "not_run",
+  "upstream_lock": {
+    "available": true,
+    "canonical_sha256": "d0d4f73ec04ab11bca703a088b007a1b6c33f86b8b7e97c9924f0636bca16a6c",
+    "entries": [
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#models/convnextv2.py",
+        "index": 0,
+        "sha256": "c553af39d6ed5e89d1ceec4598fb48001c3757f7a547c535812291ecb6fc2f1a"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#models/convnextv2_sparse.py",
+        "index": 1,
+        "sha256": "32b048337f973bb1685fecc3a3b62d73936e611f37b05fd3dcd90620c5a18881"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#models/fcmae.py",
+        "index": 2,
+        "sha256": "b544d909cb2eb5693bab7732078b7548f0c6d6c50266cee0c30c5c15aaa22cd1"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#utils.py",
+        "index": 3,
+        "sha256": "8cdebe62f86b4d808cd90964b0f7a797943736f97f1b7093805dbb4d3031e800"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#TRAINING.md",
+        "index": 4,
+        "sha256": "bbc8e95409ff9869d4259739e87cdf5325f8cc4b04f1b08195702d3c6ed65a2b"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#INSTALL.md",
+        "index": 5,
+        "sha256": "a1bd90dd29b04338e446feadc6666db5eae0279d8bc82e082c81b834bcf71393"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#engine_pretrain.py",
+        "index": 6,
+        "sha256": "4572f5b5dff205851459466a3bf283935b94fa157274026ae28083bc35893ff6"
+      },
+      {
+        "commit": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+        "id": "facebookresearch/ConvNeXt-V2#LICENSE",
+        "index": 7,
+        "sha256": "9ab7947f327be897e841ce58b90996c4b814c35127897b383f17616510115b9b"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/modules/attention.py",
+        "index": 8,
+        "sha256": "f02c9960e9d7cff5490ac60e263fef4b31d4b011b7809d5f556d67d957052ec5"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/modules/video.py",
+        "index": 9,
+        "sha256": "795736e117b0d893aadf72c6ff603b7d5f6b2f34df4f34a355a027632168d4d1"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/modules/misc.py",
+        "index": 10,
+        "sha256": "ee22ff57ded792602a0b48db2f580db8d89bb0cb95ec45a97c5f38b66fa56c06"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/modules/decoders.py",
+        "index": 11,
+        "sha256": "eb9a56c9f2cd90a9109ee24d3d3fd217e0c631baf46cba2e77972021f8e29ee6"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/modules/initializers.py",
+        "index": 12,
+        "sha256": "448b9d0afcea0aa00916200bbd7785f8e97774d2770e9de773073258a0532eca"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#savi/configs/movi/savi++_conditional.py",
+        "index": 13,
+        "sha256": "e35ce4672c9baaa5e5afb64e44accb0ee4134994e695c9a6eff9386496c8e729"
+      },
+      {
+        "commit": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+        "id": "google-research/slot-attention-video#LICENSE",
+        "index": 14,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "commit": "c8583de41824613fb135ee9bad0e930ded6be404",
+        "id": "facebookresearch/theseus#theseus/optimizer/nonlinear/levenberg_marquardt.py",
+        "index": 15,
+        "sha256": "f44a7226a56db3722b374c044005eb8dce4fcee6a8e3b19df7e2008f736f7e01"
+      },
+      {
+        "commit": "c8583de41824613fb135ee9bad0e930ded6be404",
+        "id": "facebookresearch/theseus#theseus/theseus_layer.py",
+        "index": 16,
+        "sha256": "6edd73eff47a2aa408a0f6ddd9d73b2879648eefd652d3f35b52eae22b1a0f44"
+      },
+      {
+        "commit": "c8583de41824613fb135ee9bad0e930ded6be404",
+        "id": "facebookresearch/theseus#LICENSE",
+        "index": 17,
+        "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+      },
+      {
+        "commit": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+        "id": "cgraber/cvpr_dNRI#dnri/models/dnri.py",
+        "index": 18,
+        "sha256": "f6f53aeef56d93ecef67a63b910195240ee21a899b213f7ed29900a588f9a62b"
+      },
+      {
+        "commit": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+        "id": "cgraber/cvpr_dNRI#dnri/models/encoders.py",
+        "index": 19,
+        "sha256": "22bd9f0e0e75ab77d43216a9bea01541158e1d2ea30236621a4324b8bab1960a"
+      },
+      {
+        "commit": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+        "id": "cgraber/cvpr_dNRI#dnri/models/decoders.py",
+        "index": 20,
+        "sha256": "267192500c6416fbc6b1f22092be9a545f3f38ce526835c68ca9c821c1d479db"
+      },
+      {
+        "commit": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+        "id": "cgraber/cvpr_dNRI#dnri/training/train.py",
+        "index": 21,
+        "sha256": "ad3f69cb8ebde464d9a91eec345088dfc339d2b8987826d4e775bbe866cc8fbb"
+      },
+      {
+        "commit": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+        "id": "cgraber/cvpr_dNRI#LICENSE",
+        "index": 22,
+        "sha256": "eb07a59f211e265b0c177ce951abd016a4f39b46bc0cd2278f34afc45deecede"
+      },
+      {
+        "commit": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+        "id": "JindongJiang/SCALOR#discovery.py",
+        "index": 23,
+        "sha256": "b29ecca7221d61171ae49d38fa13b40c3db2bf96b36e719a7f4cc0cadcd99d98"
+      },
+      {
+        "commit": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+        "id": "JindongJiang/SCALOR#propagation.py",
+        "index": 24,
+        "sha256": "8ed3dc959a61abc689ab3636117b14722966a5ac18fa7b9540e449ed47b84aab"
+      },
+      {
+        "commit": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+        "id": "JindongJiang/SCALOR#scalor.py",
+        "index": 25,
+        "sha256": "f680b3d564d3cc07a4f722cd7cde1c48afce5bb8191b09e65f8bcd66933a40d5"
+      },
+      {
+        "commit": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+        "id": "JindongJiang/SCALOR#modules.py",
+        "index": 26,
+        "sha256": "ef6894e8e60a4be107665da13ea1117d1cb1c0d091529f812d1eb764da966648"
+      },
+      {
+        "commit": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+        "id": "JindongJiang/SCALOR#LICENSE",
+        "index": 27,
+        "sha256": "37b8297161023bf13efed2e20ed9658b2a4fa9b1065bd88e468b5dc50ed9d0de"
+      },
+      {
+        "commit": "3388c4bd30ab9acc5a27c970089230f93610b627",
+        "id": "nchopin/particles#particles/core.py",
+        "index": 28,
+        "sha256": "1c99eb9884fc49a45c7e02e24d0d897c92e2300111385160628b97fe313ffb3c"
+      },
+      {
+        "commit": "3388c4bd30ab9acc5a27c970089230f93610b627",
+        "id": "nchopin/particles#particles/resampling.py",
+        "index": 29,
+        "sha256": "6657f40f1a7cafecdfe958bdd0fb2403b3f06cc31ced294abc1eebcfc0f24e18"
+      },
+      {
+        "commit": "3388c4bd30ab9acc5a27c970089230f93610b627",
+        "id": "nchopin/particles#particles/state_space_models.py",
+        "index": 30,
+        "sha256": "ad4d554ce73f52b19aa355f6888c23b3159d5d1f38dc6244b5ce843d5329d7bc"
+      },
+      {
+        "commit": "3388c4bd30ab9acc5a27c970089230f93610b627",
+        "id": "nchopin/particles#LICENSE",
+        "index": 31,
+        "sha256": "7041b2a83481d2855d4c3e7b9b4c4c9a462dd8ba9f143cd5e746e439bda082a0"
+      },
+      {
+        "commit": "2a27298b392e89fa67837f8871b624a41d901d19",
+        "id": "probcomp/Gen.jl#src/inference/particle_filter.jl",
+        "index": 32,
+        "sha256": "ed864d31c9017cca815f4d3c688bab8a970155509f1f1e21cdc5297c8ab93aeb"
+      },
+      {
+        "commit": "2a27298b392e89fa67837f8871b624a41d901d19",
+        "id": "probcomp/Gen.jl#src/inference/mh.jl",
+        "index": 33,
+        "sha256": "ba00dd1661a07e13fa16d83ae9b48151f950c1eae407c7ce32a68ccefed23cf7"
+      },
+      {
+        "commit": "2a27298b392e89fa67837f8871b624a41d901d19",
+        "id": "probcomp/Gen.jl#src/inference/trace_translators.jl",
+        "index": 34,
+        "sha256": "04177b08c2473dcd917eeb0a8b818a6a87b9879f4e3c78bb848eb5ab41051313"
+      },
+      {
+        "commit": "2a27298b392e89fa67837f8871b624a41d901d19",
+        "id": "probcomp/Gen.jl#docs/src/ref/inference/trace_translators.md",
+        "index": 35,
+        "sha256": "c35f088f9e0c194268a374bfe2452a83f1e32554383e64170f5783d58471779f"
+      },
+      {
+        "commit": "2a27298b392e89fa67837f8871b624a41d901d19",
+        "id": "probcomp/Gen.jl#LICENSE",
+        "index": 36,
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      },
+      {
+        "commit": "f5de0ede8430809180254ee957abf36ed62579ef",
+        "id": "google-deepmind/deepmind-research#perceiver/perceiver.py",
+        "index": 37,
+        "sha256": "b68017bf5fd20f0de77b2068a2fee2548eb0b6f24c938bf21fcf35f56aa7b6ef"
+      },
+      {
+        "commit": "f5de0ede8430809180254ee957abf36ed62579ef",
+        "id": "google-deepmind/deepmind-research#perceiver/position_encoding.py",
+        "index": 38,
+        "sha256": "09e7f90a6c6bca67cdd58ecb8c84cf3a726dae711213692ea426635bc493a4aa"
+      },
+      {
+        "commit": "f5de0ede8430809180254ee957abf36ed62579ef",
+        "id": "google-deepmind/deepmind-research#LICENSE",
+        "index": 39,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    ],
+    "entries_truncated": true,
+    "entry_count": 52,
+    "file_sha256": "e528f1823db2d0034a79cd1e7d7ff875d5474eea8400bc6e4eb3bf76b482ab54",
+    "path": "configs/encoders/n02_full/third_party.lock.json",
+    "reason": ""
+  }
+}

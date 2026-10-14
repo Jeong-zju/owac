@@ -1,0 +1,2301 @@
+{
+  "dataset_format": "libero",
+  "checked_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+  "evidence_kind": "real_cache",
+  "real_cache_evidence": true,
+  "expected_fields": {
+    "measurement_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ],
+    "camera_ids": [
+      "libero_agentview",
+      "libero_wrist"
+    ],
+    "conversion": "float32 / 255.0, no per-frame rescaling",
+    "state_source_key": "robot_states",
+    "state_source_width": 8,
+    "state_source_expression": "robot_states[t]",
+    "action_supervision_expression": "actions[t:t+10]",
+    "loader_default_action_normalisation": "quantile",
+    "formal_statistics": "quantile and the author gripper rule",
+    "executed_action_window": 5,
+    "required_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8",
+      "robot_states",
+      "actions",
+      "metadata_json"
+    ]
+  },
+  "search_pattern": "data/libero/raw/**/*.npz",
+  "status": "ok",
+  "files_total": 1771,
+  "files_checked": 8,
+  "truncated": true,
+  "files": [
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+      "sha256": "9dd7479f290841d04809889c2024323fcf0ad895e5471113e6f2e2bc28af23e7",
+      "file_bytes": 115527320,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 293,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            293,
+            256,
+            256,
+            3
+          ],
+          "size": 57606144,
+          "frames": 293,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 8.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 1.0,
+            "q99": 3.0
+          },
+          "quantile_kind": "strided_subsample(stride=55)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            293,
+            256,
+            256,
+            3
+          ],
+          "size": 57606144,
+          "frames": 293,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 8.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 1.0,
+            "q99": 3.0
+          },
+          "quantile_kind": "strided_subsample(stride=55)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            293,
+            8
+          ],
+          "size": 2344,
+          "min": -0.461204469203949,
+          "max": 3.2716658115386963,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.34273771941661835,
+            "q50": 0.02939980011433363,
+            "q99": 3.250147163867951
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            293,
+            123
+          ],
+          "size": 36039,
+          "min": -2.6477978456324145,
+          "max": 15.350000000001796,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.4966764310472726,
+            "q50": 1.6621391126763348e-14,
+            "q99": 2.466264170933539
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          293,
+          7
+        ],
+        "size": 2051,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 293,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 293,
+          "columns": 7,
+          "min": [
+            -0.4151785671710968,
+            -0.6589285731315613,
+            -0.6401785612106323,
+            -0.09428571164608002,
+            -0.2110714316368103,
+            -0.08571428805589676,
+            -1.0
+          ],
+          "max": [
+            0.4044642746448517,
+            0.7982142567634583,
+            0.9375,
+            0.07607142627239227,
+            0.13285714387893677,
+            0.0503571443259716,
+            1.0
+          ],
+          "mean": [
+            0.014087639997773661,
+            0.07579534413267576,
+            -0.028714650962183907,
+            0.004113846826812081,
+            -0.004282057344112481,
+            -0.009087030734126249,
+            0.06484641638225255
+          ],
+          "std": [
+            0.19777500609433735,
+            0.3505036632880348,
+            0.37911855873946865,
+            0.03217194321700879,
+            0.0657362257968556,
+            0.028569617912669407,
+            0.9978952561678909
+          ],
+          "q01": [
+            -0.35035715460777284,
+            -0.6177856898307801,
+            -0.6041785931587219,
+            -0.08310000330209732,
+            -0.20687142372131348,
+            -0.07757142871618271,
+            -1.0
+          ],
+          "q50": [
+            0.02142857201397419,
+            0.0,
+            -0.05089285597205162,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "q99": [
+            0.39171429395675644,
+            0.7982142567634583,
+            0.9274285650253294,
+            0.07285714149475098,
+            0.12784285545349114,
+            0.04714285582304001,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "7903fb0c10b66f2ed106ad0b953cd04abcb617cc396de857f32cc97d7c8950e8",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+      "sha256": "6e60d15b64126ea7420701a1fe7921b8bd0cabafa857a9187e50699bc558e5d7",
+      "file_bytes": 95026004,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 241,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            241,
+            256,
+            256,
+            3
+          ],
+          "size": 47382528,
+          "frames": 241,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 185.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 13.0,
+            "q99": 79.0
+          },
+          "quantile_kind": "strided_subsample(stride=46)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            241,
+            256,
+            256,
+            3
+          ],
+          "size": 47382528,
+          "frames": 241,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 1.0,
+            "q50": 14.0,
+            "q99": 97.0
+          },
+          "quantile_kind": "strided_subsample(stride=46)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            241,
+            8
+          ],
+          "size": 1928,
+          "min": -0.8305038213729858,
+          "max": 3.3114843368530273,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.5610616666078567,
+            "q50": 0.03681552596390247,
+            "q99": 3.2748545837402343
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            241,
+            123
+          ],
+          "size": 29643,
+          "min": -4.149565487952763,
+          "max": 12.750000000000927,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6133929828203958,
+            "q50": 1.2411471098295822e-14,
+            "q99": 2.4520921880384297
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          241,
+          7
+        ],
+        "size": 1687,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 241,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 241,
+          "columns": 7,
+          "min": [
+            -0.46339285373687744,
+            -0.8330357074737549,
+            -0.7553571462631226,
+            -0.12535713613033295,
+            -0.17142857611179352,
+            -0.13607142865657806,
+            -1.0
+          ],
+          "max": [
+            0.5544642806053162,
+            0.84375,
+            0.9375,
+            0.14571428298950195,
+            0.12857143580913544,
+            0.0835714265704155,
+            1.0
+          ],
+          "mean": [
+            -0.010058535950807121,
+            0.08435832744336753,
+            -0.04983698884875386,
+            0.0008624778501109772,
+            0.0005912863252359864,
+            -0.018498814600535294,
+            -0.02074688796680498
+          ],
+          "std": [
+            0.26295340148241875,
+            0.44062898355439534,
+            0.4443505569431881,
+            0.053127943571326455,
+            0.04997918755203138,
+            0.04903199131797557,
+            0.9997847601557505
+          ],
+          "q01": [
+            -0.4435714423656464,
+            -0.8089285492897034,
+            -0.7382142782211304,
+            -0.1165714293718338,
+            -0.15107143223285674,
+            -0.11957142800092697,
+            -1.0
+          ],
+          "q50": [
+            0.0,
+            0.0,
+            -0.10178571194410324,
+            0.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "q99": [
+            0.5480357050895691,
+            0.8410714268684387,
+            0.9375,
+            0.13821429014205933,
+            0.10757142603397367,
+            0.08142857253551483,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "bae47b3af91deba579bc6b0cca682fd34671c6a98fa70f631ca6f1b943abc175",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000005/variant_00.npz",
+      "sha256": "af203a074050000ef6733dab68cbc07c15896ce391eacb467167ae15aa8516e0",
+      "file_bytes": 121047448,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 307,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            307,
+            256,
+            256,
+            3
+          ],
+          "size": 60358656,
+          "frames": 307,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 34.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=58)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            307,
+            256,
+            256,
+            3
+          ],
+          "size": 60358656,
+          "frames": 307,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 3.0,
+            "q50": 35.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=58)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            307,
+            8
+          ],
+          "size": 2456,
+          "min": -1.1807223558425903,
+          "max": 3.180535078048706,
+          "finite": true,
+          "quantiles": {
+            "q01": -1.0877202987670898,
+            "q50": 0.021361567080020905,
+            "q99": 3.156755757331848
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            307,
+            123
+          ],
+          "size": 37761,
+          "min": -5.363170159569666,
+          "max": 16.050000000001983,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.483473693911492,
+            "q50": 2.2407005033655023e-14,
+            "q99": 2.581019310125679
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          307,
+          7
+        ],
+        "size": 2149,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 307,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 307,
+          "columns": 7,
+          "min": [
+            -0.23035714030265808,
+            -0.7232142686843872,
+            -0.5303571224212646,
+            -0.07607142627239227,
+            -0.0803571417927742,
+            -0.11249999701976776,
+            -1.0
+          ],
+          "max": [
+            0.4928571283817291,
+            0.8116071224212646,
+            0.9375,
+            0.034285712987184525,
+            0.14142857491970062,
+            0.04285714402794838,
+            1.0
+          ],
+          "mean": [
+            0.029525360661325217,
+            0.054156002572643594,
+            -0.026305840561524373,
+            0.0012808283013579851,
+            0.001922987398072616,
+            -0.02013029313702379,
+            -0.035830618892508145
+          ],
+          "std": [
+            0.15552184059212107,
+            0.3720473810968991,
+            0.3918006927818986,
+            0.015965363512452903,
+            0.053735071380207264,
+            0.03773866603057201,
+            0.9993578772140521
+          ],
+          "q01": [
+            -0.22499999403953552,
+            -0.7145356917381287,
+            -0.5219999742507935,
+            -0.05659285679459572,
+            -0.07815000191330909,
+            -0.10821428894996643,
+            -1.0
+          ],
+          "q50": [
+            0.0,
+            0.0,
+            -0.06428571790456772,
+            0.0,
+            0.0,
+            -0.004285714123398066,
+            -1.0
+          ],
+          "q99": [
+            0.4895357275009155,
+            0.808607120513916,
+            0.9375,
+            0.031007142476737498,
+            0.13922142803668974,
+            0.04285714402794838,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "ee294efb2474e081c9187d4ff5776c35e86445698de3559e4664acaa9fdd497e",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000006/variant_00.npz",
+      "sha256": "196b5e6b00f05982f2183c48ba8c4ba6fbb9bff45c0d4f6a451738402d0689bc",
+      "file_bytes": 98574498,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 250,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            250,
+            256,
+            256,
+            3
+          ],
+          "size": 49152000,
+          "frames": 250,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 49.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=47)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            250,
+            256,
+            256,
+            3
+          ],
+          "size": 49152000,
+          "frames": 250,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 8.0,
+            "q50": 49.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=47)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            250,
+            8
+          ],
+          "size": 2000,
+          "min": -0.558978259563446,
+          "max": 3.2122087478637695,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.5043239164352417,
+            "q50": 0.025910143740475178,
+            "q99": 3.2018081307411195
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            250,
+            123
+          ],
+          "size": 30750,
+          "min": -2.735428984914704,
+          "max": 13.200000000001078,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.4655932507855459,
+            "q50": 2.17824763505122e-14,
+            "q99": 2.4884610565127647
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          250,
+          7
+        ],
+        "size": 1750,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 250,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 250,
+          "columns": 7,
+          "min": [
+            -0.375,
+            -0.8758928775787354,
+            -0.6696428656578064,
+            -0.08142857253551483,
+            -0.08464285731315613,
+            -0.07392857223749161,
+            -1.0
+          ],
+          "max": [
+            0.5839285850524902,
+            0.8276785612106323,
+            0.9375,
+            0.061071429401636124,
+            0.07392857223749161,
+            0.035357143729925156,
+            1.0
+          ],
+          "mean": [
+            0.024471428081393243,
+            0.09537856994383037,
+            -0.019682142797857523,
+            0.003784285754431039,
+            0.0039042857144959272,
+            -0.0116057143881917,
+            -0.08
+          ],
+          "std": [
+            0.20771677203493588,
+            0.43350308229614326,
+            0.42692175956299294,
+            0.024486795682590552,
+            0.03139043027821968,
+            0.022200139141133373,
+            0.9967948635501687
+          ],
+          "q01": [
+            -0.36029463350772856,
+            -0.8534196490049362,
+            -0.6549910706281662,
+            -0.06699642643332482,
+            -0.07508571349084377,
+            -0.06697500161826611,
+            -1.0
+          ],
+          "q50": [
+            0.0,
+            0.0,
+            -0.03750000149011612,
+            0.0,
+            0.0,
+            -0.0,
+            -1.0
+          ],
+          "q99": [
+            0.5638660722970962,
+            0.8183303409814834,
+            0.9375,
+            0.05947499942034482,
+            0.06804642856121063,
+            0.034285712987184525,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "0f53122018db4bfd4559d62f457003ca5da83ce2699055b8b159b4f781f8cad4",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000007/variant_00.npz",
+      "sha256": "20c734d43dad8e113581510a07e3d34edbb39dd49d3ed273e75801c01e652ef3",
+      "file_bytes": 117893344,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 299,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            299,
+            256,
+            256,
+            3
+          ],
+          "size": 58785792,
+          "frames": 299,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 41.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=57)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            299,
+            256,
+            256,
+            3
+          ],
+          "size": 58785792,
+          "frames": 299,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 255.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 17.0,
+            "q50": 41.0,
+            "q99": 255.0
+          },
+          "quantile_kind": "strided_subsample(stride=57)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            299,
+            8
+          ],
+          "size": 2392,
+          "min": -0.5827023983001709,
+          "max": 3.2149770259857178,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.5769470477104187,
+            "q50": 0.026072719134390354,
+            "q99": 3.2084512209892275
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            299,
+            123
+          ],
+          "size": 36777,
+          "min": -2.6006688745654736,
+          "max": 15.650000000001896,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.4411370420969272,
+            "q50": 1.2409951503297496e-14,
+            "q99": 2.5808883966761877
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          299,
+          7
+        ],
+        "size": 2093,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 299,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 299,
+          "columns": 7,
+          "min": [
+            -0.3723214268684387,
+            -0.6937500238418579,
+            -0.5732142925262451,
+            -0.04285714402794838,
+            -0.14785714447498322,
+            -0.07928571105003357,
+            -1.0
+          ],
+          "max": [
+            0.5625,
+            0.7714285850524902,
+            0.9375,
+            0.051428571343421936,
+            0.14142857491970062,
+            0.03321428596973419,
+            1.0
+          ],
+          "mean": [
+            0.021088151107028275,
+            0.07220496901273603,
+            -0.02642737666026605,
+            0.002694696624043793,
+            0.0006700907767684912,
+            -0.009521022450683458,
+            -0.0033444816053511705
+          ],
+          "std": [
+            0.17541061949252493,
+            0.357683880418072,
+            0.3627809040987182,
+            0.013781940171333659,
+            0.061325603620973,
+            0.02240347985880537,
+            0.9999944072057547
+          ],
+          "q01": [
+            -0.3404464358091354,
+            -0.6673392927646637,
+            -0.570589290857315,
+            -0.039664284139871595,
+            -0.1425857126712799,
+            -0.07821428775787354,
+            -1.0
+          ],
+          "q50": [
+            0.0,
+            0.0,
+            -0.04285714402794838,
+            0.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "q99": [
+            0.5545714235305785,
+            0.7633928656578064,
+            0.9375,
+            0.048235715106129624,
+            0.13821429014205933,
+            0.0279214291274547,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "b1758f694e65aad928aad26052d40441f998e0e0171473b01e63d99c89bc996e",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000008/variant_00.npz",
+      "sha256": "30b94d560945c7561a284643633afaf6a42495cf551b66de276094928cbde8bf",
+      "file_bytes": 111190658,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 282,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            282,
+            256,
+            256,
+            3
+          ],
+          "size": 55443456,
+          "frames": 282,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 136.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 11.0,
+            "q99": 67.0
+          },
+          "quantile_kind": "strided_subsample(stride=53)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            282,
+            256,
+            256,
+            3
+          ],
+          "size": 55443456,
+          "frames": 282,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 211.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 1.0,
+            "q50": 13.0,
+            "q99": 64.0
+          },
+          "quantile_kind": "strided_subsample(stride=53)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            282,
+            8
+          ],
+          "size": 2256,
+          "min": -0.5390426516532898,
+          "max": 3.1850857734680176,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.48040711134672165,
+            "q50": 0.033992936834692955,
+            "q99": 3.1674389362335202
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            282,
+            123
+          ],
+          "size": 34686,
+          "min": -3.6666878402425214,
+          "max": 14.800000000001612,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.45059715321140653,
+            "q50": 1.2436891183702086e-14,
+            "q99": 2.419556871309809
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          282,
+          7
+        ],
+        "size": 1974,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 282,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 282,
+          "columns": 7,
+          "min": [
+            -0.5651785731315613,
+            -0.9294642806053162,
+            -0.7017857432365417,
+            -0.07392857223749161,
+            -0.1307142823934555,
+            -0.19285714626312256,
+            -1.0
+          ],
+          "max": [
+            0.7017857432365417,
+            0.8383928537368774,
+            0.9375,
+            0.1339285671710968,
+            0.14142857491970062,
+            0.15964286029338837,
+            1.0
+          ],
+          "mean": [
+            0.013725304555028994,
+            0.0701082811826272,
+            -0.0038183890662902426,
+            0.0009042552427936953,
+            -0.0002507599378632157,
+            -0.01145516737308089,
+            -0.11347517730496454
+          ],
+          "std": [
+            0.2585057717419397,
+            0.4080081253153496,
+            0.40203617247053625,
+            0.03881430703109465,
+            0.049012414406502204,
+            0.06883468920422067,
+            0.9935408316398535
+          ],
+          "q01": [
+            -0.5442589169740677,
+            -0.8737232333421707,
+            -0.6797143006324768,
+            -0.07112142972648144,
+            -0.11056071482598781,
+            -0.19112142845988273,
+            -1.0
+          ],
+          "q50": [
+            0.0,
+            0.0053571430034935474,
+            -0.0,
+            0.0,
+            0.0,
+            -0.003214285708963871,
+            -1.0
+          ],
+          "q99": [
+            0.6404196327924728,
+            0.8233392727375031,
+            0.9375,
+            0.12321428209543228,
+            0.1273928517103195,
+            0.14846785858273506,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "21e245c2862f7a6a950c176e6b0c81d04d1b67310d8a93ae4e446d25a0d52d4c",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000011/variant_00.npz",
+      "sha256": "da462e6a3786f618df3d4eac27ec95922bd87172d4b1b79a54cb7d053cffa7ae",
+      "file_bytes": 94631606,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 240,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            240,
+            256,
+            256,
+            3
+          ],
+          "size": 47185920,
+          "frames": 240,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 14.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 2.0,
+            "q99": 5.0
+          },
+          "quantile_kind": "strided_subsample(stride=45)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            240,
+            256,
+            256,
+            3
+          ],
+          "size": 47185920,
+          "frames": 240,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 16.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 2.0,
+            "q99": 5.0
+          },
+          "quantile_kind": "strided_subsample(stride=45)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            240,
+            8
+          ],
+          "size": 1920,
+          "min": -1.0213276147842407,
+          "max": 3.2680649757385254,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.7420739161968231,
+            "q50": 0.03405914455652237,
+            "q99": 3.243596749305725
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            240,
+            123
+          ],
+          "size": 29520,
+          "min": -7.751635772805858,
+          "max": 12.70000000000091,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6646367459711097,
+            "q50": 1.2300685903927894e-14,
+            "q99": 2.6623146253648864
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          240,
+          7
+        ],
+        "size": 1680,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 240,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 240,
+          "columns": 7,
+          "min": [
+            -0.4392857253551483,
+            -0.7419642806053162,
+            -0.7151785492897034,
+            -0.0535714291036129,
+            -0.09214285761117935,
+            -0.1103571429848671,
+            -1.0
+          ],
+          "max": [
+            0.4312500059604645,
+            0.824999988079071,
+            0.9375,
+            0.08464285731315613,
+            0.1039285734295845,
+            0.031071428209543228,
+            1.0
+          ],
+          "mean": [
+            0.020424106799570532,
+            0.08856026720410834,
+            -0.0277232148500237,
+            0.003013392940435248,
+            -0.005709821458246249,
+            -0.021468750087175675,
+            -0.10833333333333334
+          ],
+          "std": [
+            0.2058581523856048,
+            0.4268478900026794,
+            0.4271379014136982,
+            0.023704430502406382,
+            0.04591517295736331,
+            0.030883101025857812,
+            0.9941146256286978
+          ],
+          "q01": [
+            -0.43138393461704255,
+            -0.7187142890691757,
+            -0.6895714497566223,
+            -0.046071428805589676,
+            -0.09172499962151051,
+            -0.10523571439087391,
+            -1.0
+          ],
+          "q50": [
+            0.005357143119908869,
+            0.0,
+            -0.014732143376022577,
+            0.0,
+            0.0,
+            -0.013928571715950966,
+            -1.0
+          ],
+          "q99": [
+            0.41681249678134913,
+            0.8169642686843872,
+            0.9375,
+            0.07850357241928567,
+            0.09136071152985085,
+            0.027857143431901932,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "7a112333ae5eb9b8575a14a9b5aaa3d6c53afa079823088839592bd2f0184fab",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    },
+    {
+      "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000012/variant_00.npz",
+      "sha256": "9f2d6b8ecedca9f71edf4ff7b63b54267344d1e6eca13c6456f71f31fba1b7f5",
+      "file_bytes": 97391324,
+      "keys": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8",
+        "actions",
+        "states",
+        "robot_states",
+        "rewards",
+        "dones",
+        "metadata_json"
+      ],
+      "num_frames": 247,
+      "missing_required_keys": [],
+      "measurements": {
+        "agentview_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            247,
+            256,
+            256,
+            3
+          ],
+          "size": 48562176,
+          "frames": 247,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 10.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 1.0,
+            "q99": 4.0
+          },
+          "quantile_kind": "strided_subsample(stride=47)"
+        },
+        "wrist_raw_uint8": {
+          "present": true,
+          "dtype": "uint8",
+          "shape": [
+            247,
+            256,
+            256,
+            3
+          ],
+          "size": 48562176,
+          "frames": 247,
+          "resolution_hw": [
+            256,
+            256
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 10.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 1.0,
+            "q99": 4.0
+          },
+          "quantile_kind": "strided_subsample(stride=47)"
+        }
+      },
+      "file_measurement_key_order": [
+        "agentview_raw_uint8",
+        "wrist_raw_uint8"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "put both the alphabet soup and the tomato sauce in the basket",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            247,
+            8
+          ],
+          "size": 1976,
+          "min": -0.9409617781639099,
+          "max": 3.2299437522888184,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.8979942202568054,
+            "q50": 0.024014487862586975,
+            "q99": 3.189425528049469
+          },
+          "quantile_kind": "exact"
+        },
+        "states": {
+          "dtype": "float64",
+          "shape": [
+            247,
+            123
+          ],
+          "size": 30381,
+          "min": -3.0474291755612515,
+          "max": 13.050000000001027,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.610272138183039,
+            "q50": 1.6697968657505742e-14,
+            "q99": 2.494950891013172
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "robot_states",
+      "state_source_present": true,
+      "state_source_width": 8,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          247,
+          7
+        ],
+        "size": 1729,
+        "min": -1.0,
+        "max": 1.0,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.0,
+          "q50": 0.0,
+          "q99": 1.0
+        },
+        "quantile_kind": "exact",
+        "rows": 247,
+        "columns": 7,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 247,
+          "columns": 7,
+          "min": [
+            -0.6160714030265808,
+            -0.7875000238418579,
+            -0.6857143044471741,
+            -0.046071428805589676,
+            -0.21535713970661163,
+            -0.08892857283353806,
+            -1.0
+          ],
+          "max": [
+            0.7741071581840515,
+            0.7633928656578064,
+            0.9375,
+            0.10178571194410324,
+            0.18321429193019867,
+            0.03750000149011612,
+            1.0
+          ],
+          "mean": [
+            0.046262289665126605,
+            0.07524942145079586,
+            0.015323163735065684,
+            0.0008849045478546547,
+            0.007066223295763708,
+            -0.019819259875442696,
+            -0.044534412955465584
+          ],
+          "std": [
+            0.26049669629619304,
+            0.407176776918261,
+            0.41957563693887723,
+            0.026955780196358876,
+            0.07308723986682564,
+            0.03406961934301481,
+            0.9990078508513892
+          ],
+          "q01": [
+            -0.5823214411735534,
+            -0.7782321608066559,
+            -0.6539999985694885,
+            -0.04030714228749275,
+            -0.2038285666704178,
+            -0.08307857185602188,
+            -1.0
+          ],
+          "q50": [
+            0.0053571430034935474,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "q99": [
+            0.7557857179641723,
+            0.7607142925262451,
+            0.9375,
+            0.09914999976754188,
+            0.17892856895923615,
+            0.03379285655915736,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "861e05d5d560160931b49ca31adae017292cd60e645d98c68f0c7c340bab4689",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "agentview_stats",
+        "agentview_table_flood",
+        "benchmark",
+        "dataset_name",
+        "demo_index",
+        "demo_key",
+        "hdf5_path",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_rig",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "noise_seed",
+        "noops_filtered",
+        "npz_relpath",
+        "num_frames",
+        "paired_rgb_render_order",
+        "raw_shape",
+        "render_order",
+        "replay_mode",
+        "representation",
+        "rgb_npz_relpath",
+        "sensor_saturation_ev",
+        "source_shape",
+        "suite",
+        "task_description",
+        "task_id",
+        "task_name",
+        "trajectory_id",
+        "variant_index",
+        "wrist_stats"
+      ]
+    }
+  ],
+  "protocol_checks": [
+    {
+      "id": "raw_measurement_keys",
+      "item": "RAW key names and camera order",
+      "expected": {
+        "keys": [
+          "agentview_raw_uint8",
+          "wrist_raw_uint8"
+        ],
+        "camera_ids": [
+          "libero_agentview",
+          "libero_wrist"
+        ],
+        "order_matters": true
+      },
+      "observed": {
+        "files": 8,
+        "present_files": {
+          "agentview_raw_uint8": 8,
+          "wrist_raw_uint8": 8
+        },
+        "file_measurement_key_order": [
+          [
+            "agentview_raw_uint8",
+            "wrist_raw_uint8"
+          ]
+        ]
+      },
+      "verdict": "match",
+      "note": "the frozen format spec declares exactly these keys; a present-but-reordered cache is reported as a mismatch because camera order is part of the protocol"
+    },
+    {
+      "id": "measurement_dtype_conversion",
+      "item": "storage dtype and the declared conversion rule",
+      "expected": {
+        "dtypes": [
+          "uint8"
+        ],
+        "rule": "float32 / 255.0, no per-frame rescaling"
+      },
+      "observed": {
+        "dtypes": {
+          "agentview_raw_uint8": [
+            "uint8"
+          ],
+          "wrist_raw_uint8": [
+            "uint8"
+          ]
+        }
+      },
+      "verdict": "match",
+      "note": "the frozen loader keys the conversion off the stored dtype: uint8 -> float32/255 and floating -> unchanged (rawvla_sequence.RawVLAWindowDataset._calibrate)"
+    },
+    {
+      "id": "current_proprio_source",
+      "item": "current proprio source and width",
+      "expected": {
+        "key": "robot_states",
+        "expression": "robot_states[t]",
+        "width": 8,
+        "note": "the 8-dim proprio read at the same step as the observation; the cached 92-dim `states` array is simulator state and is never used as a policy input"
+      },
+      "observed": {
+        "files_with_key": 8,
+        "files": 8,
+        "widths": [
+          8
+        ],
+        "companion_keys": [
+          "states"
+        ]
+      },
+      "verdict": "match",
+      "note": "a companion 16-dim robot_states array may exist on RoboTwin; it is recorded but is not the joint state"
+    },
+    {
+      "id": "action_supervision_window",
+      "item": "action supervision window",
+      "expected": {
+        "expression": "actions[t:t+10]",
+        "offset": 0,
+        "horizon": 10
+      },
+      "observed": {
+        "loader_default": {
+          "action_offset": 0,
+          "action_horizon": 10
+        },
+        "files_with_actions": 8,
+        "files": 8,
+        "num_frames": [
+          293,
+          241,
+          307,
+          250,
+          299,
+          282,
+          240,
+          247
+        ],
+        "files_with_horizon_plus_offset_rows": 8
+      },
+      "verdict": "match",
+      "note": "the window rule is a declared protocol; the audit can only confirm that the loader default agrees and that each file has enough action rows"
+    },
+    {
+      "id": "formal_normalisation_statistics",
+      "item": "formal pi0.5 normalisation statistics",
+      "expected": {
+        "formal_statistics": "quantile and the author gripper rule",
+        "expected_loader_default": "quantile"
+      },
+      "observed": {
+        "loader_default": "quantile"
+      },
+      "verdict": "match",
+      "note": "the loader default is the declared formal statistics for this platform"
+    },
+    {
+      "id": "executed_action_window",
+      "item": "actually executed actions per inference",
+      "expected": {
+        "actions_executed": 5
+      },
+      "observed": {
+        "npz_field": null
+      },
+      "verdict": "declared_only",
+      "note": "the NPZ records no executed-action trace, so the number of actions the frozen policy executed per inference is a protocol constant, not an audited field"
+    },
+    {
+      "id": "camera_order",
+      "item": "camera key order in each file",
+      "expected": {
+        "order": [
+          "agentview_raw_uint8",
+          "wrist_raw_uint8"
+        ]
+      },
+      "observed": {
+        "files_matching": 8,
+        "files": 8
+      },
+      "verdict": "match",
+      "note": "streams are synchronised; the order identifies which camera is which"
+    },
+    {
+      "id": "measurement_timestamp",
+      "item": "timestamp key and its unit",
+      "expected": {
+        "timestamp_key": true,
+        "unit_declared": true
+      },
+      "observed": {
+        "files_with_timestamp_key": 0,
+        "files": 8,
+        "declared_units": [
+          "unknown"
+        ]
+      },
+      "verdict": "not_declared",
+      "note": "a frame-index-only cache cannot support exposure-time reasoning; the loader reports time_unit='frame' and timestamp=None in that case"
+    },
+    {
+      "id": "noise_availability",
+      "item": "declared noise / variance source",
+      "expected": {
+        "noise_arrays_or_metadata": true
+      },
+      "observed": {
+        "files_with_noise_declaration": 8,
+        "files": 8,
+        "arrays": []
+      },
+      "verdict": "match",
+      "note": "without a declared noise model no variance may be fabricated; an estimated scale stays an estimate and any energy built from it is not a posterior"
+    },
+    {
+      "id": "language_keys",
+      "item": "task instruction / language text",
+      "expected": {
+        "task_text": true
+      },
+      "observed": {
+        "files_with_task_text": 8,
+        "files": 8
+      },
+      "verdict": "match",
+      "note": "language is declared context, never a hidden-truth channel"
+    },
+    {
+      "id": "action_units",
+      "item": "action units and normalisation statistics fingerprint",
+      "expected": {
+        "units": "declared cache units or UNKNOWN",
+        "stats_hash": true
+      },
+      "observed": {
+        "units": [
+          "unknown"
+        ],
+        "stats_hashes": [
+          "0f53122018db4bfd4559d62f457003ca5da83ce2699055b8b159b4f781f8cad4",
+          "21e245c2862f7a6a950c176e6b0c81d04d1b67310d8a93ae4e446d25a0d52d4c",
+          "7903fb0c10b66f2ed106ad0b953cd04abcb617cc396de857f32cc97d7c8950e8",
+          "7a112333ae5eb9b8575a14a9b5aaa3d6c53afa079823088839592bd2f0184fab",
+          "861e05d5d560160931b49ca31adae017292cd60e645d98c68f0c7c340bab4689",
+          "b1758f694e65aad928aad26052d40441f998e0e0171473b01e63d99c89bc996e",
+          "bae47b3af91deba579bc6b0cca682fd34671c6a98fa70f631ca6f1b943abc175",
+          "ee294efb2474e081c9187d4ff5776c35e86445698de3559e4664acaa9fdd497e"
+        ]
+      },
+      "verdict": "match",
+      "note": "the hash covers the empirical per-column statistics of the file's own action array, not the author's normalisation constants"
+    }
+  ],
+  "checks_summary": {
+    "match": 9,
+    "declared_only": 1,
+    "not_declared": 1
+  },
+  "problems": [],
+  "limits": [
+    "each file is read fully to measure min/max; quantiles use an evenly strided subsample of at most 1048576 elements and report quantile_kind",
+    "the executed-action window and the author's normalisation constants are not stored in the NPZ, so those checks are declared-only",
+    "max_files=8; 8 of 1771 discovered files were read"
+  ],
+  "notes": [
+    "evidence_kind='real_cache' was declared by the caller; this audit reports measured facts and never infers that a root is the deployed cache",
+    "FORMAT_SPECS['libero'] default action normalisation is 'quantile'"
+  ]
+}
