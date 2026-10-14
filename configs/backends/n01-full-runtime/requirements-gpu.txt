@@ -1,0 +1,32 @@
+# N01 v1.0 independent GPU runtime requirements (remote encoder/state environment).
+#
+# This file is a SEPARATE lock from the local worktree uv.lock:
+#   * local uv.lock + pyproject encoder extra pin CPU torch==2.9.1 for code, FP64
+#     numerical reference and regression tests only;
+#   * this file pins the CUDA build for the remote GPU environment.
+# Never install the local CPU index over this environment and never install this
+# file into the local .venv. See README.md in this directory.
+
+--extra-index-url https://download.pytorch.org/whl/cu128
+
+# Candidate pin copied from the verified remote runtime (StarVLA env measured
+# 2026-10-14: Python 3.10.21 / torch 2.7.1+cu128 / CUDA available on RTX PRO 6000
+# Blackwell). The final pin is recorded after the P0 GPU forward/backward
+# acceptance, not before.
+torch==2.7.1+cu128
+
+numpy>=2.3,<3
+einops>=0.8
+huggingface_hub>=0.30
+
+# Numerical/reference-only dependencies of later stages.
+scipy>=1.14          # DSM-bocd prefix reference (P3)
+pybind11>=2.13       # confseq boundary extension build (P1/P3); the source is
+                     # retrieved by upstream_lock.json, not installed in P0
+
+# P5/P6 only, deliberately NOT part of the P0 environment. Both need a CUDA
+# build record (nvcc version, CUDA_HOME, arch flags) before they are added:
+#   mamba-ssm     -> compiled selective-scan kernels; record build command + flags
+#   causal-conv1d -> kernel dependency of mamba-ssm
+#   timm/torchvision -> only if a stage actually needs them; SEA-RAFT torchvision
+#                       is used by the ImageNet branch we explicitly disable

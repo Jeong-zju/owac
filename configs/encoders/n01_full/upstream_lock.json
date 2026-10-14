@@ -1,0 +1,765 @@
+{
+  "format": "owac-n01-full-upstream-lock-v1",
+  "locked_on": "2026-10-14",
+  "scope": "P0 source/licence/dependency lock; retrieving bytes is not upstream runtime validation",
+  "source_manifest": {
+    "path": "docs/prompts/n01_v1_0/source_manifest.json",
+    "sha256": "12018ea7cf2a14bd0e14724556d1e98a73ecf28423eed2148ad42a40b02f99b3"
+  },
+  "local_upstream_cache": {
+    "path": "outputs/n01-v1-prompt-preparation/upstream",
+    "present": true,
+    "note": "ignored preparation cache; not an install directory"
+  },
+  "hash_verification": {
+    "verified_on": "2026-10-14",
+    "method": "sha256 of the local upstream cache recomputed against the declared source_manifest.json values",
+    "declared_hash_entries": 24,
+    "recomputed_matches": 24,
+    "mismatches": 0,
+    "not_recomputed": [
+      {
+        "repository": "gostevehoward/confseq",
+        "path": "src/confseq/boundaries.py",
+        "status": "unavailable",
+        "note": "404 during retrieval; no sha256 declared"
+      },
+      {
+        "repository": "state-spaces/s4",
+        "path": "src/models/sequence/ss/s4.py",
+        "status": "unavailable",
+        "note": "404 during retrieval; the real path models/s4/s4.py was retrieved and verified"
+      }
+    ],
+    "cache_absent_policy": "if the ignored cache is absent, all hash_source values degrade to transcribed_source_manifest_json; re-fetch before use"
+  },
+  "licence_coverage": {
+    "license_file_retrieved": [
+      "princeton-vl/SEA-RAFT",
+      "maltamiranomontero/DSM-bocd",
+      "state-spaces/mamba",
+      "Algolzw/BSRT",
+      "goutamgmb/deep-burst-sr"
+    ],
+    "license_not_retrieved": [
+      "gostevehoward/confseq",
+      "state-spaces/s4",
+      "cao-cong/RViDeNet",
+      "cao-cong/RViDeformer",
+      "google-deepmind/deepmind-research"
+    ],
+    "rule": "a repository whose licence is not retrieved must not be vendored or redistributed before the licence check"
+  },
+  "repositories": [
+    {
+      "repository": "princeton-vl/SEA-RAFT",
+      "kind": "upstream_git_repository",
+      "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "motion_correspondence_primary",
+      "p0_decision": "fixed",
+      "integration_stage": "P2",
+      "license": {
+        "spdx": "BSD-3-Clause",
+        "evidence": [
+          "retrieved LICENSE file (BSD 3-Clause License, Copyright (c) 2024, Princeton Vision & Learning Lab)",
+          "core/raft.py declares PyTorchModelHubMixin metadata license=\"bsd-3-clause\""
+        ]
+      },
+      "files": [
+        {
+          "path": "core/raft.py",
+          "sha256": "4bb02c831f04b16a27fd016c8bb4ecfcf5834ea88f40e84fac9d2555864d5979",
+          "bytes": 6868,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/raft.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "core/extractor.py",
+          "sha256": "684cfe479ef6cbe5796397749939676c79626f0c3fcbc033c8fb5cab9475bc7a",
+          "bytes": 3722,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/extractor.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "core/update.py",
+          "sha256": "978dc580e4ebd394b29894f5d5460153a2fe5a7d4c50e5e83823330298133f69",
+          "bytes": 1992,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/update.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "core/corr.py",
+          "sha256": "e89bc770f1e6712447d90b8a8c75fd136c98816726d4338972f8ea5d7d6d24fb",
+          "bytes": 8332,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/corr.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "train.py",
+          "sha256": "c1d578eb8f58415d9f127c03c0fbf9bcd3e403f2e15e813de85abeefc859b09d",
+          "bytes": 3333,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/train.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+          "bytes": 1518,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/LICENSE",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "torch",
+          "numpy",
+          "einops",
+          "huggingface_hub"
+        ],
+        "repo_local_not_retrieved": [
+          "config.parser",
+          "datasets",
+          "utils.utils",
+          "layer",
+          "loss",
+          "ddp_utils"
+        ],
+        "pending": [
+          "actual install/test matrix not verified in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "reuse core/raft.py, core/extractor.py, core/corr.py, core/update.py; the authors' training harness is read for reference only",
+        "channel_adaptation": "CFA 4/8 channels and pseudo-RAW 3/6 channels; remove the /255 RGB-style normalisation",
+        "imagenet_download_must_be_disabled": {
+          "evidence": "core/extractor.py:52-65 loads ResNet18_Weights.IMAGENET1K_V1 / ResNet34_Weights.IMAGENET1K_V1 when self.init_weight is True; core/raft.py:31,48 construct cnet and fnet with init_weight=True",
+          "requirement": "construct ResNetFPN with init_weight=False explicitly (or patch out the torchvision branch); no ImageNet download or weight load on the main line; random / RAW-task initialisation"
+        },
+        "depth_vs_weights": "args.pretrain selects resnet18/resnet34 depth; it must be separated from actual pretrained weight loading",
+        "retained": "author feature extractor, correlation pyramid and iterative update",
+        "channel_multiple_rule": "correspondence input_channels must be a whole multiple of the measurement channels (CFA 4/8, rawvla_rgb3 3/6); the adapter declares the exact stem it builds",
+        "truth_source": "core/extractor.py:39-65 and core/raft.py:31,48 in the pinned commit are the evidence for the ImageNet weight-loading branch and the init_weight=True construction"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_downloaded",
+        "source": "HuggingFace Hub via PyTorchModelHubMixin (from_pretrained) and --restore_ckpt/load_ckpt checkpoints",
+        "note": "P0 retrieved source only; any P2 initialisation must be recorded with its own hash"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "maltamiranomontero/DSM-bocd",
+      "kind": "upstream_git_repository",
+      "commit": "9d05117bc8c6e971c836ee1df0c49e2d2950862b",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "robust_changepoint_reference",
+      "p0_decision": "fixed",
+      "integration_stage": "P3",
+      "license": {
+        "spdx": "MIT",
+        "evidence": [
+          "retrieved LICENSE file (MIT License, Copyright (c) 2023 Matias Altamirano)"
+        ]
+      },
+      "files": [
+        {
+          "path": "bocpd.py",
+          "sha256": "24c30df9e7b9f808779c4ae97b216a7b5971780b6bb9b3bf391213e9f5e53cb1",
+          "bytes": 1669,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/maltamiranomontero/DSM-bocd/9d05117bc8c6e971c836ee1df0c49e2d2950862b/bocpd.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "models.py",
+          "sha256": "5fde6652682d1eab8eee22377bc66d795fae01c05d0d4b44dcf728b160c5de00",
+          "bytes": 21501,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/maltamiranomontero/DSM-bocd/9d05117bc8c6e971c836ee1df0c49e2d2950862b/models.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "README.md",
+          "sha256": "42255ab215a142711fb8b9f85deaf4c1a173cd1f7e3f234196e0330133e5fcba",
+          "bytes": 931,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/maltamiranomontero/DSM-bocd/9d05117bc8c6e971c836ee1df0c49e2d2950862b/README.md",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "8d4bf96f8cf97bb566e33eff1b8f8e625f194df056d6f15c7c8a8c322096ce7d",
+          "bytes": 1075,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/maltamiranomontero/DSM-bocd/9d05117bc8c6e971c836ee1df0c49e2d2950862b/LICENSE",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "numpy",
+          "scipy.stats",
+          "scipy.special.logsumexp",
+          "local utils.truncated_mvn_sampler"
+        ],
+        "pending": [
+          "the author environment pins are older NumPy/SciPy and JAX per the stage notes; not verified in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "bocpd.py and models.py are the numerical reference for GaussianUnknownMean / DSMGaussianUnknownMean and the prefix recursion",
+        "acceptance": "compare transplanted prefix outputs item by item against the author code; do not claim the author implementation when an explicit outlier mixture is added (name it bocpd_outlier_mixture)"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_applicable",
+        "source": null,
+        "note": "statistical reference; no learned weights"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "state-spaces/mamba",
+      "kind": "upstream_git_repository",
+      "commit": "e9594ce1c732d97440f0332fdc43170a2294dbfa",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "state_sequence_model_source_lock",
+      "p0_decision": "source_and_dependency_availability_only",
+      "integration_stage": "P5",
+      "license": {
+        "spdx": "Apache-2.0",
+        "evidence": [
+          "retrieved LICENSE file (Apache License 2.0)"
+        ]
+      },
+      "files": [
+        {
+          "path": "mamba_ssm/modules/mamba_simple.py",
+          "sha256": "a17e4c51b582dc0d4d690a649eba521cd0c1ee3dc8f0473a0967cdc9ec0874e3",
+          "bytes": 11710,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/state-spaces/mamba/e9594ce1c732d97440f0332fdc43170a2294dbfa/mamba_ssm/modules/mamba_simple.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "mamba_ssm/utils/generation.py",
+          "sha256": "ae59067ba50941640e34129149daa55dd13b98c25db47d8e2cc432d876ba34f4",
+          "bytes": 15331,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/state-spaces/mamba/e9594ce1c732d97440f0332fdc43170a2294dbfa/mamba_ssm/utils/generation.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "760939b000194d04548ede6a857bbe735d1695d8422ec85955c8e2bd7f4b95c5",
+          "bytes": 11348,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/state-spaces/mamba/e9594ce1c732d97440f0332fdc43170a2294dbfa/LICENSE",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "torch",
+          "einops",
+          "transformers.generation",
+          "mamba_ssm.ops.selective_scan_interface (CUDA extension built from this repo)"
+        ],
+        "pending": [
+          "the causal-conv1d kernel dependency is not verified in P0",
+          "GPU build compatibility (Blackwell) accepted only in P5"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "mamba_ssm/modules/mamba_simple.py plus mamba_ssm/utils/generation.py; official Mamba is connected only at P5",
+        "state_replay": "Mamba.step updates conv_state and ssm_state together; both caches are replayed",
+        "config": "use the author complete configuration, not a reduced teaching variant"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "no upstream pretrained weights retrieved in P0"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "Algolzw/BSRT",
+      "kind": "upstream_git_repository",
+      "commit": "da8d5154478a1214bccdf7a54c716dad3a015985",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "second_backbone_source_lock",
+      "p0_decision": "source_and_dependency_availability_only",
+      "integration_stage": "P6",
+      "license": {
+        "spdx": "MIT",
+        "evidence": [
+          "retrieved LICENSE file (MIT License, Copyright (c) 2022 Megvii Inc.)"
+        ]
+      },
+      "files": [
+        {
+          "path": "code/synthetic/bsrt/model/bsrt.py",
+          "sha256": "d78852ae718865a0b26928fa528c1c859527a34d4b1c589cb55afba18fb7afad",
+          "bytes": 25969,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/Algolzw/BSRT/da8d5154478a1214bccdf7a54c716dad3a015985/code/synthetic/bsrt/model/bsrt.py",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "README.md",
+          "sha256": "5a299f6a039334a42046354aa3b0a6b02f5b8422a32347bd2f43287c9e399032",
+          "bytes": 5434,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/Algolzw/BSRT/da8d5154478a1214bccdf7a54c716dad3a015985/README.md",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "776216f23ede900b084c5dbc7339204a33b86a3ec494152102da92c954b6645d",
+          "bytes": 1068,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/Algolzw/BSRT/da8d5154478a1214bccdf7a54c716dad3a015985/LICENSE",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "torch",
+          "torchvision.utils"
+        ],
+        "repo_local_not_retrieved": [
+          "model.arch_util",
+          "model.swin_util",
+          "datasets.burstsr_dataset",
+          "utils.debayer"
+        ],
+        "pending": [
+          "the retrieved sub-file alone is not importable; full dependency graph not verified in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "make_model provides the author S/L scales; the RAW-legal feature subnet is the only P6 target",
+        "audit_required": [
+          "SpyNet",
+          "debayer",
+          "RGB mean",
+          "checkpoint paths inside the constructor and forward"
+        ],
+        "claim_boundary": "after changing flow/input, declare a BSRT-derived RAW feature baseline instead of whole-network paper reproduction"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "no author pretrained weights retrieved in P0"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "gostevehoward/confseq",
+      "kind": "upstream_git_repository",
+      "commit": "5ffe733ca2447a2e28c2c91f3b00086173f2ab2c",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "sequential_test_boundary_reference",
+      "p0_decision": "candidate_reference",
+      "integration_stage": "P1/P3",
+      "license": {
+        "spdx": "not_retrieved",
+        "evidence": [
+          "no LICENSE entry in source_manifest.json as of 2026-10-14; repository-level license not verified in P0"
+        ]
+      },
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "3b14f7070d8613dde8efc59ba4d77a62eaedab60d34410cff02fbb7ad02a838a",
+          "bytes": 7655,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/gostevehoward/confseq/5ffe733ca2447a2e28c2c91f3b00086173f2ab2c/README.md",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "src/confseq/boundaries.cpp",
+          "sha256": "75818453e7b2ad9d5019aefcc3e52fd073244d2e9459a427661bbc688ef45d7b",
+          "bytes": 4895,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": null,
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "src/confseq/uniform_boundaries.h",
+          "sha256": "2dd72cbfbee7110a49c67d142a58db83750fd653b189e310156d60d65685e21e",
+          "bytes": 28473,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": null,
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [
+        {
+          "path": "src/confseq/boundaries.py",
+          "status": "unavailable",
+          "error": "<urlopen error [Errno 104] Connection reset by peer>",
+          "sha256": null
+        }
+      ],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "pybind11",
+          "numpy (C++ extension boundaries.cpp / uniform_boundaries.h)"
+        ],
+        "pending": [
+          "Python packaging/build plan not verified in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "there is no boundaries.py; the real entry points are src/confseq/boundaries.cpp and src/confseq/uniform_boundaries.h",
+        "guarantee_boundary": "conditional sequential error control only; never transferred to a neural confidence guarantee"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_applicable",
+        "source": null,
+        "note": "statistical reference; no learned weights"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "state-spaces/s4",
+      "kind": "upstream_git_repository",
+      "commit": "e757cef57d89e448c413de7325ed5601aceaac13",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "structured_state_reference",
+      "p0_decision": "source_and_dependency_availability_only",
+      "integration_stage": "P5",
+      "license": {
+        "spdx": "not_retrieved",
+        "evidence": [
+          "no LICENSE entry in source_manifest.json as of 2026-10-14; repository-level license not verified in P0"
+        ]
+      },
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "a9f27287f594e161a50a44afe8af7dadec757cb7d0fbe5a46bef79c0a7965d2f",
+          "bytes": 12512,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/state-spaces/s4/e757cef57d89e448c413de7325ed5601aceaac13/README.md",
+          "retrieval": "github_contents_api"
+        },
+        {
+          "path": "models/s4/s4.py",
+          "sha256": "9f3418b396ec9ccbea30d1f1de92b55e631a3380ebbb19257a73f0219e2a23a6",
+          "bytes": 76217,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": null,
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [
+        {
+          "path": "src/models/sequence/ss/s4.py",
+          "status": "unavailable",
+          "error": "<urlopen error [Errno 104] Connection reset by peer>",
+          "sha256": null
+        }
+      ],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "torch",
+          "numpy",
+          "scipy",
+          "einops",
+          "pytorch_lightning"
+        ],
+        "pending": [
+          "install matrix not verified in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "the full model lives in models/s4/s4.py; s4d.py is a teaching simplification and is not the strong baseline",
+        "state_replay": "both caches replayed; the fixed-coefficient analytic branch is the only one with the current T4 proof"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "no upstream pretrained weights retrieved in P0"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "cao-cong/RViDeNet",
+      "kind": "upstream_git_repository",
+      "commit": "4615032b010e70eebe038be46a5d5820d43e2ef4",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "real_raw_data_source_reference",
+      "p0_decision": "candidate_reference",
+      "integration_stage": "P6",
+      "license": {
+        "spdx": "not_retrieved",
+        "evidence": [
+          "README-only retrieval; no LICENSE entry in source_manifest.json as of 2026-10-14"
+        ]
+      },
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "a09ee51d89d8ca91dad9ab750878e2114b3de3e2b13772fc5b5f96df56aee0f0",
+          "bytes": 5834,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/cao-cong/RViDeNet/4615032b010e70eebe038be46a5d5820d43e2ef4/README.md",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [],
+        "pending": [
+          "code boundary not retrieved in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "README-only; the CRVD real RAW source, phase/black level and official split are the reference",
+        "prohibited": "the author RGB/ISP supervision and inverse-processed synthetic training are not on the main chain"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "data-source reference; dataset license and download terms must be checked before use"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "cao-cong/RViDeformer",
+      "kind": "upstream_git_repository",
+      "commit": "4b3f2744f5d19707e718e735c12f2e531fa64dda",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "reals_raw_dataset_reference",
+      "p0_decision": "candidate_reference",
+      "integration_stage": "P6",
+      "license": {
+        "spdx": "not_retrieved",
+        "evidence": [
+          "README-only retrieval; no LICENSE entry in source_manifest.json as of 2026-10-14"
+        ]
+      },
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "fabdd6fdcba8144b77ddd358aea511793a9de109a248321284acc7f7d558aae4",
+          "bytes": 2877,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/cao-cong/RViDeformer/4b3f2744f5d19707e718e735c12f2e531fa64dda/README.md",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [],
+        "pending": [
+          "code boundary not retrieved in P0"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "README-only; ReCRVD is re-photographed display content",
+        "scope": "keep the source scope and the 90/30 scene split; do not claim natural dynamics or cross-sensor generality"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "data-source reference; dataset license and download terms must be checked before use"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "google-deepmind/deepmind-research",
+      "kind": "upstream_git_repository",
+      "commit": "f5de0ede8430809180254ee957abf36ed62579ef",
+      "commit_source": "docs/prompts/n01_v1_0/source_manifest.json (pinned by the preparation turn)",
+      "role": "optional_readout_reference",
+      "p0_decision": "candidate_reference",
+      "integration_stage": "P7/P8 optional",
+      "license": {
+        "spdx": "not_retrieved",
+        "evidence": [
+          "no LICENSE entry in source_manifest.json as of 2026-10-14; repository-level license not verified in P0"
+        ]
+      },
+      "files": [
+        {
+          "path": "perceiver/perceiver.py",
+          "sha256": "b68017bf5fd20f0de77b2068a2fee2548eb0b6f24c938bf21fcf35f56aa7b6ef",
+          "bytes": 30254,
+          "hash_source": "recomputed_from_local_upstream_cache",
+          "url": "https://raw.githubusercontent.com/google-deepmind/deepmind-research/f5de0ede8430809180254ee957abf36ed62579ef/perceiver/perceiver.py",
+          "retrieval": "github_contents_api"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "docs/prompts/n01_v1_0/source_manifest.json",
+      "dependencies": {
+        "evidenced_from_retrieved_files": [
+          "jax",
+          "haiku"
+        ],
+        "pending": [
+          "cross-framework port needs its own acceptance"
+        ]
+      },
+      "recipe": {
+        "code_boundary": "CrossAttention, make_cross_attention_mask and BasicDecoder are reading references",
+        "default": "stay with the existing VisualTokenPostprocessor; no unaccepted query network is introduced"
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "no upstream pretrained weights retrieved in P0"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 retrieved source bytes only; no upstream model was installed or run"
+    },
+    {
+      "repository": "goutamgmb/deep-burst-sr",
+      "kind": "vendored_pinned_dependency",
+      "commit": "16f158e0553b6702cc1693c43f733c2830973278",
+      "commit_source": "src/owac/baselines/_vendor/dbsr/provenance.json",
+      "role": "content_backbone_64_9_512",
+      "p0_decision": "fixed",
+      "integration_stage": "P0/P4",
+      "license": {
+        "spdx": "CC-BY-NC-SA-4.0",
+        "upstream_restriction": "upstream academic research use restriction",
+        "evidence": [
+          "vendored LICENSE sha256=6d8ccb8e1a6833fb5093754d598cf8ea0c7b6d238760de1439e5c9204ba7eb16",
+          "provenance.json records license and the relative-import/formatting-only change list"
+        ],
+        "attribution_kept": true
+      },
+      "files": [
+        {
+          "path": "models/layers/blocks.py",
+          "vendored_path": "src/owac/baselines/_vendor/dbsr/blocks.py",
+          "sha256": "b258e8751a448f51d40c4299b05352128db887827269c6c8f98a07e4298618fa",
+          "definition_ast_sha256": "4fdc8dfae5ff95133506e95fb090af796d70fe798b17bad95b65e1d9e3207407",
+          "executable_ast_sha256": "4fdc8dfae5ff95133506e95fb090af796d70fe798b17bad95b65e1d9e3207407",
+          "hash_source": "transcribed_from_local_provenance_record"
+        },
+        {
+          "path": "models/dbsr/merging.py",
+          "vendored_path": "src/owac/baselines/_vendor/dbsr/merging.py",
+          "sha256": "e23cbf19920c572ac170ae01844133dad8b9c7ad359754f058004a53fb499d2a",
+          "definition_ast_sha256": "c3dde0dfc71e728804cba55fded3385c33573e894e8c6ea5f4804bd8a22c9612",
+          "executable_ast_sha256": "1f9fe1fb32d2b06b5342863341eaab21865c3f506c2e2d8f0485a97c583f9a26",
+          "hash_source": "transcribed_from_local_provenance_record"
+        },
+        {
+          "path": "models/dbsr/encoders.py",
+          "vendored_path": "src/owac/baselines/_vendor/dbsr/encoders.py",
+          "sha256": "4c3c678e406dd00f588fd4da18f83519083d3caf4acdd0388be36ea27c977657",
+          "definition_ast_sha256": "92c2c31aacafc940822a026e1472b4ea556f9343e45296bce60f90c85d3aeeff",
+          "executable_ast_sha256": "85c9ce3c16c257c6b17b40c3ceed43e5d537a0230d5811ab5e4619ae26ff494b",
+          "hash_source": "transcribed_from_local_provenance_record"
+        },
+        {
+          "path": "models/layers/warp.py",
+          "vendored_path": "src/owac/baselines/_vendor/dbsr/warp.py",
+          "sha256": "ec80952b0beeb46b725e070c5aa1964535a1618e0f40dae8df23cfa87dec2be0",
+          "definition_ast_sha256": "af8e40c0c26b3f9726290d951e992f6f2e4f7d30fd2fb3f3bc17f02e72001ea4",
+          "executable_ast_sha256": "f3a1feea25c26e678c68f76e5a3b1d117ab72d82e8903da32b07329f75f3d657",
+          "hash_source": "transcribed_from_local_provenance_record"
+        }
+      ],
+      "unavailable_files": [],
+      "file_list_source": "src/owac/baselines/_vendor/dbsr/provenance.json",
+      "vendored_provenance": {
+        "path": "src/owac/baselines/_vendor/dbsr/provenance.json",
+        "sha256": "1fe6b370e9d165f777e900cf263340db521bbeacd46e6cf16b959360d4aa83ae",
+        "changes": "Relative imports, unused imports, formatting and docstring whitespace only; executable definition ASTs unchanged. OWAC adapters are outside this directory."
+      },
+      "dependencies": {
+        "evidenced_from_local_vendor": [
+          "torch"
+        ],
+        "note": "the vendored copy is importable through src/owac/baselines/burst_features.py; no extra dependency was added"
+      },
+      "recipe": {
+        "code_boundary": "keep the vendored definitions and attribution; OWAC adapters live outside the vendor directory",
+        "channels": "replace the 4-channel / 3-channel stems in a documented adapter; C=3 does not duplicate a fourth channel",
+        "parameters": {
+          "channels": 64,
+          "residual_blocks": 9,
+          "feature_width": 512
+        },
+        "readout": "512-dimensional features project explicitly into a 2048-wide readout with 256 tokens; never default 512 -> 2048 implicitly",
+        "full_size_contract": {
+          "backbone": "dbsr",
+          "channels": 64,
+          "num_blocks": 9,
+          "feature_width": 512,
+          "readout_tokens": 256,
+          "readout_width": 2048,
+          "bridge_in_dim": "must equal feature_width (=512)",
+          "bridge_width": "must equal readout_width (=2048)",
+          "rule": "the first version uses the full-size DBSR only; ContentConfig.validate refuses a non-full-size dbsr and any readout other than 256x2048; an explicit backbone field change (BSRT at P6) replaces relaxing the contract"
+        },
+        "time_order_contract": {
+          "window": "[B, T, C, H, W] always oldest_first (uniform across the corpus)",
+          "fusion_entry": "newest_first",
+          "adapter": "oldest_first_to_newest_first",
+          "rule": "only the single named adapter converts; no implicit flips anywhere else"
+        }
+      },
+      "weights_and_pretraining": {
+        "used": false,
+        "status": "not_retrieved",
+        "source": null,
+        "note": "the content backbone is trained in-project from common initialisation (P4); no upstream pretrained weights are loaded"
+      },
+      "runtime_verified": false,
+      "runtime_verified_note": "P0 pinned the vendored source and licence; training/runtime acceptance happens in P4"
+    }
+  ],
+  "runtime_verified": false,
+  "runtime_verified_note": "no upstream model was installed, executed or numerically accepted in P0",
+  "interface_alignment": {
+    "aligned_with": "src/owac/frameworks/n01_full/{contracts,config}.py (workflow A, 2026-10-14)",
+    "identity_naming": "dataset_id/episode_id/camera_id are non-empty; metadata-free uses \"unknown_metadata\", a known single camera uses its real camera key",
+    "coordinate_convention": "pull",
+    "time_order_adapter": "oldest_first_to_newest_first",
+    "bridge_dimensions": "bridge_in_dim=feature_width=512; bridge_width=readout_width=2048",
+    "seeds": "model seeds 101/211/307; data seeds listed separately by protocol_v1.json and disjoint"
+  }
+}

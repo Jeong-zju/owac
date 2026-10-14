@@ -1,0 +1,156 @@
+{
+  "schema": "owac.n01_full.p0_receipt.v1",
+  "stage": "P0",
+  "date": "2026-10-14",
+  "status": {
+    "implementation_status": "PASS_P0_SCOPE",
+    "training_status": "NOT_STARTED",
+    "effect_status": "NOT_APPLICABLE",
+    "note": "P0 only. No convergence training, no mechanism-effect claim, no closed loop. Profiling numbers are cost, not performance."
+  },
+  "checkout": {
+    "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+    "branch": "lzh/n01-evidence-integration",
+    "head": "429591eb1308454b019eebcac6501f84cdb27fcd",
+    "dirty_documents": [
+      "README.md",
+      "docs/OWAC_academic_research_proposal_2026-10-09.md",
+      "docs/prompts/README.md",
+      "docs/status.md"
+    ],
+    "untracked_preserved": "docs/prompts/n01_v1_0/ (19 files, previous prompt-preparation round)",
+    "commit": "local commit only, no push"
+  },
+  "prior_deliverable_verification": {
+    "local_source_audit_hashes": "10/10 recomputed match",
+    "dbsr_mechanism_protocol_lock_files": "4/4 recomputed match",
+    "dbsr_mechanism_recorded_tests": "348 passed (historical, not re-run)",
+    "note": "no re-run of the old 74k-update matrix; checkpoints keep their original identity",
+    "observed_anomaly_preserved": "docs/OWAC_academic_research_proposal_2026-10-09.md has pre-existing uncommitted heading edits ('5.1 ...N01'/'5.2 ...N02'/'5.3 ...N04'), suspected mis-edit; preserved, not reverted, escalated"
+  },
+  "deliverables": {
+    "src/owac/frameworks/n01_full/__init__.py": "1e1a4a20c411427dd67113cda7ee7d9b9b163588e7d3120b3a2166f49d2806e8",
+    "src/owac/frameworks/n01_full/contracts.py": "e67ced38f0bb869392ee7cd7940c37fc9b2dbef8f7daa32bb58f492d1c454503",
+    "src/owac/frameworks/n01_full/config.py": "9a8f7b0268680c153c7fea9397a4b1980ca35757461c93ae3f01b247582d53b2",
+    "src/owac/raw/n01_full_manifest.py": "16c103293cb9b7685edd37bf0bc585b639856175e066bd460c924d673f035a66",
+    "src/owac/runtime/n01_full_preflight.py": "96858a07daedff74fcb6765aaaee48256a697b1daaa010f99149bb9eb83c9b8f",
+    "configs/encoders/n01_full/protocol_v1.json": "7d0fa9e7cf992c2d24aca2585f93c82062fcf821e2e25d9f9e5f2ac68b82bfb2",
+    "configs/encoders/n01_full/upstream_lock.json": "7879e9c6b7da550b7f52f4955193061c9ce17c1b5a78d9a77d689f6d729338bf",
+    "configs/backends/n01-full-runtime/requirements-gpu.txt": "70849ec9d1c56e23dea0427a26b07bf257e0535206291a392209a06539ccbd93",
+    "configs/backends/n01-full-runtime/README.md": "bbcf6896631cb56152d1d9e4faceb20146add7e6f0cc312882b5921eabcb5c4c",
+    "configs/backends/n01-full-runtime/owac-n01-v1.supervisor.conf": "57da091c0b791ba84649a74ded5b3b5f57301376126e63ec54f18c63f7ad2f3b",
+    "research/theory/n01_support_contract_v1.md": "d75f0cfeeaaea6f5bdb76623e6c6b0c999850ecf3f45a8a3ca285d855eba99ee",
+    "research/experiments/n01_full/P0_report.md": "see file on disk",
+    "tests/encoders/n01_full/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/encoders/n01_full/test_contracts_config.py": "6c641f6afce5aba0dfe8ba8878de0f8c82fd094477424980259ccfdd9cce8ca5",
+    "tests/encoders/n01_full/test_manifest.py": "c8d766b79e8c88ba2fb57abe42f916338f437d7304a82d504987f971d8bdae8b",
+    "tests/encoders/n01_full/test_preflight.py": "e53530feafcf1504913ef42f0ba6c6b4e1efcb6658235711940013ea8ceeb5ae",
+    "tests/encoders/n01_full/test_foundation.py": "21b58eebda54e7c70cd5320f44708388ee73c7f512dd05e7b0664a49fe4ccd11"
+  },
+  "data_manifests": {
+    "dir": "data/manifests/n01-full-v1/",
+    "n01-full-v1-index.json": "33de7d02c86f993a562686037271f540ac5d850ddebed0c9e8641475d2e4e30d",
+    "n01-full-v1-libero-manifest.json": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9",
+    "n01-full-v1-libero-inventory.json": "a3cbefe59421c811d04f8451940a010c8d08e37bb51570fe339ea4451af01129",
+    "n01-full-v1-loader-evidence-libero.json": "24a7f1aeb4fc896bb73caac86fecfb39a32867e9374d875e5a70b5133a23543b",
+    "n01-full-v1-robotwin2-manifest.json": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97",
+    "n01-full-v1-robotwin2-inventory.json": "1e176c61d2b36ec17211ee81837ab079f9b9063e57844998f39486476374a98a",
+    "n01-full-v1-loader-evidence-robotwin2.json": "034a476be16be38c3533dad46c8433e713ce0994527ec40bbc4270de3d11cf33"
+  },
+  "splits": {
+    "rule": "source_group(relative path) -> rawvla_sequence.assign_side at cumulative thresholds 0.70/0.80/0.90; split_version n01-full-v1",
+    "official_split": "absent",
+    "official_split_evidence": "RawVLA-Bench README: 'This release contains training trajectories only. It does not define a held-out test split or a leaderboard metric.'; no split/manifest JSON under benchmark_data",
+    "libero": {"train": 1228, "calibration": 175, "validation": 206, "test": 162, "pool": 1771, "groups": 1771},
+    "robotwin2": {"train": 450, "calibration": 48, "validation": 58, "test": 76, "pool": 632, "groups": 632},
+    "cross_platform_total": 2403,
+    "zero_overlap_confirmations": 4,
+    "rgb_mirror": {"libero": 1771, "robotwin2": 632, "status": "1:1 relative path sets, excluded from the sides so no trajectory is counted twice"}
+  },
+  "data_integrity_findings": {
+    "libero": {
+      "files": 1771,
+      "distinct_hdf5_path_task_templates": 40,
+      "rollouts_per_template": "27-50",
+      "same_template_initial_states_identical": false,
+      "same_template_initial_state_max_abs_diff": "0.043-0.123 on states[0] (123-dim sim state)",
+      "same_template_actions_identical": false,
+      "demo_key_usable_as_identity": false,
+      "conclusion": "each file is its own source trajectory; file-level grouping equals trajectory-level grouping"
+    },
+    "robotwin2": {
+      "files": 632,
+      "tasks": 13,
+      "source_trajectory_is_per_task_name": true,
+      "pairs_vs_files": "~1:1",
+      "conclusion": "each file is its own source trajectory"
+    },
+    "lighting": "5 domains per platform, roughly balanced; lighting is a per-rollout attribute, so the pool contains NO same-trajectory lighting-variant files",
+    "disclosure_required": "the 40 LIBERO task templates and 13 RoboTwin tasks are shared across all four regions; P3 paired bootstrap must resample at the task/template level, not episodes only"
+  },
+  "remote": {
+    "host": "ssh -p 44327 root@107.209.104.125",
+    "env": "/workspace/owac/rawvla/envs/encoder",
+    "env_versions": {"python": "3.11.16", "torch": "2.9.1+cu128", "torch_cuda": "12.8", "cudnn": "91002", "triton": "3.5.1", "numpy": "2.4.6", "pytest": "9.1.1"},
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition, capability 12.0, 97249.5 MiB",
+    "gpu_forward_backward": "PASS (real fwd+bwd, 1497056 params, all grads finite and non-zero)",
+    "snapshot": {
+      "final": "v5",
+      "path": "runs/p0-20261014/source-v5-20261014T1217/",
+      "files": 227,
+      "tar_sha256": "8a378c935eaa805d2942d70383ad1ed8402cf570d1649800e709e73ea51cdbad",
+      "hash_verify": "227/227 OK, 0 mismatches, exit 0",
+      "lead_independent_recheck": "tar sha256 and the three post-snapshot-changed files re-hashed by the report author, all match",
+      "lineage": "v1..v5 kept on the server; CURRENT_SNAPSHOT.txt records v1->v5 with per-version tar sha256",
+      "version_skew_closed": "v4 (e9013a41...) predated the protocol finish-up round; v5 matches the local final state file by file"
+    },
+    "inventory_strict": {"exit": 0, "status": "ok", "checks_ok": "36/36", "failures": [], "pending": [], "reran_on_v5": true, "failed_v2_era_result_kept": "outputs/p0-inventory-strict-v2-era"},
+    "bundle_verify": {"exit": 0, "status": "passed", "files": 135, "upstream_included": true, "upstream_files": 24, "manifest_closure_files": 7, "failures": [], "archive_sha256": "1b687a2628890bc1b01433fd0110c4b7efe522b3443cac316bb98a8cf64aa8b2"},
+    "services_untouched": "4 other-project policy services RUNNING with unchanged pids; GPU back to baseline 32047 MiB; no residual processes"
+  },
+  "profiling": {
+    "source_file": "runs/p0-20261014/outputs/profile_dbsr_p0-20261014.json",
+    "backbone": "full DBSR 64ch/9blocks/512d + MaskedDbsrFusion, batch=1, single camera, fp32",
+    "protocol": "3 warmup + 20 synchronised forward + 20 synchronised forward+backward per point",
+    "preferred_start": {"cells": 128, "history": 8, "step_p50_seconds": 0.046073, "peak_reserved_mib": 4378.0},
+    "history_gt_8_note": "rejected by the existing BurstFeatureEncoder entry (unique-frame cap); 16/32 measured with the same backbone/fusion modules directly and labelled entry=direct; not relaxed",
+    "io_wall_time_p50_seconds": {"libero": 0.0812, "robotwin2": 0.0344},
+    "io_throughput": "derived_pending (wall time measured; MiB/s not instrumented, deliberately not fabricated)",
+    "cost_estimate_gpu_hours_30runs": {"20k": 19.2, "100k": 95.99, "300k": 287.96, "value_status": "estimated_from_measured_step_time"},
+    "not_measured": ["SEA-RAFT adaptation", "support replay", "3-channel entry", "Mamba", "policy/action head", "optimizer", "evaluation", "checkpoint"]
+  },
+  "checks": {
+    "make_check": "exit 0 (ruff check / ruff format --check 233 files / compileall)",
+    "full_pytest": "433 passed, 1 warning",
+    "baseline_pytest": "348 passed (unchanged historical baseline)",
+    "n01_full_pytest": "85 passed",
+    "remote_snapshot_pytest": "3 failed / 80 passed - all three are host-environment assumptions of the tests (git-less snapshot, data root expected absent, fake-factory signature), not deliverable defects; not skipped, not relaxed",
+    "upstream_provenance_ast_test": "fails on Python 3.11, passes on 3.12 (type_params added to the AST dump); file hashes proven identical"
+  },
+  "pending_fields_in_protocol": [
+    "metrics.planned_gates.*.value (2, pending_calibration)",
+    "profiling.encoder_factory (pending_P4)",
+    "statistics.alpha, statistics.min_paired_units (2, pending_calibration)",
+    "thresholds.fields.* (6, pending_calibration)"
+  ],
+  "evidence_locations": {
+    "report": "research/experiments/n01_full/P0_report.md",
+    "theory": "research/theory/n01_support_contract_v1.md",
+    "protocol": "configs/encoders/n01_full/protocol_v1.json",
+    "upstream_lock": "configs/encoders/n01_full/upstream_lock.json",
+    "manifests": "data/manifests/n01-full-v1/",
+    "remote_receipts": "/workspace/owac/rawvla/research/n01-v1/runs/p0-20261014/receipts/ (01..12)",
+    "remote_outputs": "/workspace/owac/rawvla/research/n01-v1/runs/p0-20261014/outputs/"
+  },
+  "next_stage": {
+    "stage": "P1",
+    "blocked_on": "research review of this P0 handoff",
+    "must_carry": [
+      "task-level sharing of the 40 LIBERO templates / 13 RoboTwin tasks in the paired statistics",
+      "input_mode vs model_input_mode two-layer semantics",
+      "history>8 requires a P4 implementation change",
+      "encoder env actually lives at /workspace/owac/rawvla/envs/encoder",
+      "DBSR licence is CC-BY-NC-SA-4.0 (non-commercial); licences marked not_retrieved must not be vendored"
+    ]
+  }
+}

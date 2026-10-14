@@ -1,5 +1,9 @@
 # OWAC
 
+2026-10-14 N01 v1.0 **P0（问题、数据与依赖）完成**：交付内部契约与阶段配置、四区数据 manifest、上游锁与冻结协议、`n01_full_preflight` 四子命令、T1–T6 理论义务目录；在用户服务器新建独立 encoder GPU 环境（Python 3.11.16 / torch 2.9.1+cu128 / RTX PRO 6000 Blackwell），完成全尺寸 DBSR 64/9/512 profiling（首选起点 128/8：step p50 46.1 ms、峰值 reserved 4.4 GiB）与两平台真实 batch 读取；远程源包 227/227 hash 一致、`inventory --strict` 36/36 checks 通过。本地 `make check` 通过、全仓 433 passed（历史基线 348 + 新增 85）。**未开始 P1 算法、未启动任何长训练、无机制效果结论**。见 [P0 报告](research/experiments/n01_full/P0_report.md)与[收据](research/experiments/results/n01_full/P0/receipt.json)。
+
+2026-10-14：[N01 v1.0 DeepSeek 阶段交接包](docs/prompts/n01_v1_0/README.md)已准备，包含 P0–P8、早期策略预检、代码审计、固定参考实现和远程训练路径。正式开发从 P0 开始；本次仅准备提示词与只读核查，没有启动新训练。
+
 2026-10-14：[N01 全量开发方案 v1.0](docs/N01_full_development_plan_2026-10-14_v1.0.md)（[HTML 阅读版](docs/N01_full_development_plan_2026-10-14_v1.0.html)）已形成；覆盖支持域规则、理论保证的适用条件、成熟模块复用、充分训练及最终 π0.5 / RawVLA-Bench 全量验证。方案尚未实施。
 
 2026-10-13 完成 DBSR 三种子收敛基线（9 组，含 3 组保持训练状态的预算续训）和两层独立冻结干预（CNN 硬拓扑 / 原 RAW 支持域，各 21 组）。基线早期误差：DBSR 1.52998、同容量固定平均 1.75656；同权重强制平均退化 0.55570。原 RAW 域撤回与重算的来源隔离通过，但动态重算仅比旧缓存改善约 0.000995，恢复失败数不变，N01 增量未建立。全仓 348 passed；无新增网络、原核心未改、未改冻结服务器基线。见[完整记录与边界](research/experiments/2026-10-13_n01_dbsr_mechanism.md)。

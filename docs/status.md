@@ -1,5 +1,9 @@
 # OWAC 当前状态
 
+2026-10-14 **N01 v1.0 P0（问题、数据与依赖）完成并停在交接点**。新增 `src/owac/frameworks/n01_full/{contracts,config}.py`（SourceKey / MeasurementRecord / CorrespondenceMap / SupportDomain / EvidenceEstimate / DependencyNode / ReadoutSnapshot）、`src/owac/raw/n01_full_manifest.py`（2,403 条源轨迹 → train/calibration/validation/test 四区，零重叠，真实 loader 可精确消费 `sides`）、`src/owac/runtime/n01_full_preflight.py`（inventory/profile/bundle/verify）、`configs/encoders/n01_full/{protocol_v1.json,upstream_lock.json}`、`research/theory/n01_support_contract_v1.md`（T1–T6）与 4 个测试文件（85 passed）。远程新建独立编码器环境 `envs/encoder` 并完成真实 GPU forward/backward 与全尺寸 DBSR profiling；远程源包 227/227 hash 一致、`inventory --strict` 36/36 通过、bundle/verify passed（含上游许可；DBSR 为 CC-BY-NC-SA-4.0）。全仓 433 passed、`make check` 通过。**未开始 P1 算法、未启动长训练、无机制效果结论**；`training_status=NOT_STARTED`、`effect_status=NOT_APPLICABLE`。已记录待研究负责人处置的前序异常（研究方案文档三个标题的既有未提交误编辑）与任务级共享披露义务（40 个 LIBERO 任务模板 / 13 个 RoboTwin 任务出现在全部四区，P3 配对重采样须含任务层）。见 [P0 报告](../research/experiments/n01_full/P0_report.md)与[收据](../research/experiments/results/n01_full/P0/receipt.json)。
+
+2026-10-14 已准备 [N01 v1.0 DeepSeek 分阶段提示词](prompts/n01_v1_0/README.md)：P0–P8 九阶段、共同实现契约、当前代码审计、上游逐文件导航、远程执行说明及 P1/P2 早期策略预检。只读核查用户服务器的实际数据、权重、环境与服务；新模型/训练尚未执行。主 checkout 已有完整 Default 基线报告，旧条目的 RoboTwin 未完成状态按历史保留，后续以新完整报告和实际审计为准。
+
 2026-10-14 已交付 [N01 全量开发方案 v1.0](N01_full_development_plan_2026-10-14_v1.0.md)（[HTML](N01_full_development_plan_2026-10-14_v1.0.html)）：基于当前 DBSR 与撤回实验，定义来源级时空支持、六项理论义务、P0–P8 实施与充分训练、π0.5 / RawVLA-Bench 最终验证。核查 25 项论文/官方来源；这是后续研究方案，未执行新模型训练，历史负结果保持。
 
 2026-10-13 完成 DBSR 三种子收敛基线（9 组，含 3 组保持训练状态的预算续训）和两层独立冻结干预（CNN 硬拓扑 / 原 RAW 支持域，各 21 组）。基线早期误差：DBSR 1.52998、同容量固定平均 1.75656；同权重强制平均退化 0.55570。原 RAW 域撤回与重算的来源隔离通过，但动态重算仅比旧缓存改善约 0.000995，恢复失败数不变，N01 增量未建立。全仓 348 passed；无新增网络、原核心未改、未改冻结服务器基线。见[完整记录与边界](../research/experiments/2026-10-13_n01_dbsr_mechanism.md)。
