@@ -1,0 +1,71 @@
+{
+  "phase": "expert_check_only",
+  "entry": {
+    "base_seed": 39,
+    "base_seed_id": 38,
+    "benchmark": "rawvla-bench-light-robotwin2-v1",
+    "dataset_episode_index": 38,
+    "dataset_relative_dir": "grab_roller/aloha-agilex_clean_50",
+    "dataset_seed": 39,
+    "episode_idx": 38,
+    "extra_light_intensity": 0.0,
+    "lighting_domain": "Over",
+    "lighting_ev": 1.3087645746225411,
+    "lighting_sample_unit": 0.6175291492450822,
+    "lighting_scale": 2.477293106901919,
+    "lighting_strategy": "environment_only",
+    "noise_seed": 3516632229,
+    "raw_sensor_noise_enabled": true,
+    "raw_sensor_read_noise": 3.90625e-08,
+    "raw_sensor_shot_noise": 2.5e-05,
+    "raw_white_level": 3.5,
+    "sensor_saturation_ev": 0.0,
+    "task_id": 0,
+    "task_name": "grab_roller"
+  },
+  "setup_identity": {
+    "task": "grab_roller",
+    "actors": {
+      "roller/0": {
+        "p": [
+          0.1286349594593048,
+          -0.14412443339824677,
+          0.7415024638175964
+        ],
+        "q": [
+          0.2655012905597687,
+          0.2756344974040985,
+          0.6552941203117371,
+          0.6512483954429626
+        ]
+      }
+    },
+    "attributes": {
+      "model_id": 0
+    }
+  },
+  "patches": [
+    {
+      "function": "Base_Task.grasp_actor",
+      "source_sha256": "f27659d205b9fa067bce10014b7a1be96c3270da723cb415dbfd2cba47eea7ce",
+      "guarded_ast_sha256": "cf413df44351fb0c72e9067fa2bc813e46381ec1bcea62b9c389f0903ebcbde7",
+      "guards": 1
+    }
+  ],
+  "events": [
+    "empty_grasp_plan"
+  ],
+  "expert_plan_success": false,
+  "episode_info": {
+    "cluttered_table_info": [],
+    "texture_info": {
+      "wall_texture": null,
+      "table_texture": null
+    },
+    "info": {
+      "{A}": "102_roller/base0"
+    }
+  },
+  "exception": null,
+  "methods_restored_before_policy_setup": true
+}

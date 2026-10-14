@@ -1,0 +1,124 @@
+{
+  "phase": "expert_check_only",
+  "entry": {
+    "base_seed": 51,
+    "base_seed_id": 34,
+    "benchmark": "rawvla-bench-light-robotwin2-v1",
+    "dataset_episode_index": 34,
+    "dataset_relative_dir": "put_bottles_dustbin/aloha-agilex_clean_50",
+    "dataset_seed": 51,
+    "episode_idx": 34,
+    "extra_light_intensity": 0.0,
+    "lighting_domain": "Normal",
+    "lighting_ev": -0.49189839820715786,
+    "lighting_sample_unit": 0.008101601792842139,
+    "lighting_scale": 0.7110887819550937,
+    "lighting_strategy": "environment_only",
+    "noise_seed": 2858402229,
+    "raw_sensor_noise_enabled": true,
+    "raw_sensor_read_noise": 3.90625e-08,
+    "raw_sensor_shot_noise": 2.5e-05,
+    "raw_white_level": 3.5,
+    "sensor_saturation_ev": 0.0,
+    "task_id": 9,
+    "task_name": "put_bottles_dustbin"
+  },
+  "setup_identity": {
+    "task": "put_bottles_dustbin",
+    "actors": {
+      "dustbin/0": {
+        "p": [
+          -0.44999998807907104,
+          0.0,
+          0.0
+        ],
+        "q": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "bottles/0": {
+        "p": [
+          0.10571005195379257,
+          0.07996629178524017,
+          0.740000307559967
+        ],
+        "q": [
+          0.7071058750152588,
+          0.7071077823638916,
+          -3.8779871829319745e-06,
+          4.001566594524775e-06
+        ]
+      },
+      "bottles/1": {
+        "p": [
+          -0.22375079989433289,
+          0.09470966458320618,
+          0.7400003671646118
+        ],
+        "q": [
+          0.7071102261543274,
+          0.7071034908294678,
+          -2.8958747861906886e-06,
+          3.5765515349339694e-06
+        ]
+      },
+      "bottles/2": {
+        "p": [
+          0.25679510831832886,
+          0.1599099189043045,
+          0.739948034286499
+        ],
+        "q": [
+          0.7074488997459412,
+          0.7067408561706543,
+          0.004156238399446011,
+          -0.004042093642055988
+        ]
+      }
+    },
+    "attributes": {
+      "bottle_id": [
+        1,
+        2,
+        3
+      ],
+      "bottle_num": 3
+    }
+  },
+  "patches": [
+    {
+      "function": "Base_Task.grasp_actor",
+      "source_sha256": "f27659d205b9fa067bce10014b7a1be96c3270da723cb415dbfd2cba47eea7ce",
+      "guarded_ast_sha256": "cf413df44351fb0c72e9067fa2bc813e46381ec1bcea62b9c389f0903ebcbde7",
+      "guards": 1
+    },
+    {
+      "function": "put_bottles_dustbin.play_once",
+      "source_sha256": "8cbf6cbd5514e7074d394afd80ae158f26c7242d4acde944d142234c387da3eb",
+      "guarded_ast_sha256": "9321b3cce91c3e840a87b5e7aea0274fee38114f679a1e32feb6969bb420678d",
+      "guards": 2
+    }
+  ],
+  "events": [
+    "empty_bottle_actions:right_action"
+  ],
+  "expert_plan_success": false,
+  "episode_info": {
+    "cluttered_table_info": [],
+    "texture_info": {
+      "wall_texture": null,
+      "table_texture": null
+    },
+    "info": {
+      "{A}": "114_bottle/base1",
+      "{B}": "114_bottle/base2",
+      "{C}": "114_bottle/base3",
+      "{D}": "011_dustbin/base0"
+    }
+  },
+  "exception": null,
+  "methods_restored_before_policy_setup": true
+}

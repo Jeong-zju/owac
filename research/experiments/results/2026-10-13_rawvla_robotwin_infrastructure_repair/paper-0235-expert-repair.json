@@ -1,0 +1,77 @@
+{
+  "phase": "expert_check_only",
+  "entry": {
+    "base_seed": 42,
+    "base_seed_id": 36,
+    "benchmark": "rawvla-bench-light-robotwin2-v1",
+    "dataset_episode_index": 36,
+    "dataset_relative_dir": "open_laptop/aloha-agilex_clean_50",
+    "dataset_seed": 42,
+    "episode_idx": 36,
+    "extra_light_intensity": 0.0,
+    "lighting_domain": "Low",
+    "lighting_ev": -6.335177749637377,
+    "lighting_sample_unit": 0.6648222503626234,
+    "lighting_scale": 0.012385726036588348,
+    "lighting_strategy": "environment_only",
+    "noise_seed": 1211728581,
+    "raw_sensor_noise_enabled": true,
+    "raw_sensor_read_noise": 3.90625e-08,
+    "raw_sensor_shot_noise": 2.5e-05,
+    "raw_white_level": 3.5,
+    "sensor_saturation_ev": 0.0,
+    "task_id": 4,
+    "task_name": "open_laptop"
+  },
+  "setup_identity": {
+    "task": "open_laptop",
+    "actors": {
+      "laptop/0": {
+        "p": [
+          0.011748150922358036,
+          -0.008252025581896305,
+          0.7732939720153809
+        ],
+        "q": [
+          0.7776375412940979,
+          -2.765048066066811e-06,
+          -3.733196990651777e-06,
+          0.6287128329277039
+        ],
+        "qpos": [
+          -1.2868564128875732
+        ]
+      }
+    },
+    "attributes": {
+      "model_id": 4,
+      "model_name": "015_laptop",
+      "arm_tag": "left"
+    }
+  },
+  "patches": [
+    {
+      "function": "Base_Task.grasp_actor",
+      "source_sha256": "f27659d205b9fa067bce10014b7a1be96c3270da723cb415dbfd2cba47eea7ce",
+      "guarded_ast_sha256": "cf413df44351fb0c72e9067fa2bc813e46381ec1bcea62b9c389f0903ebcbde7",
+      "guards": 1
+    }
+  ],
+  "events": [
+    "empty_grasp_plan"
+  ],
+  "expert_plan_success": false,
+  "episode_info": {
+    "cluttered_table_info": [],
+    "texture_info": {
+      "wall_texture": null,
+      "table_texture": null
+    },
+    "info": {
+      "{A}": "015_laptop/base4",
+      "{a}": "left"
+    }
+  },
+  "exception": null,
+  "methods_restored_before_policy_setup": true
+}
