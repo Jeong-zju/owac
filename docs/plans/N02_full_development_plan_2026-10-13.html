@@ -1,0 +1,825 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="N02完整开发方案：论文依据、理论条件、八阶段实现、充分训练及π0.5/RawVLA-Bench闭环验证。"><meta name="source-sha256" content="09961ee9ef8b3abc765a9241e27049d0de755b398af05fdcd9710de277193352"><title>N02 · 测量约束的循环补全 | 完整开发方案</title><style>
+:root{--bg:#f4f5f2;--paper:#fff;--ink:#1e2c32;--muted:#607078;--line:#dce4df;--accent:#146956;--blue:#2d567b}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:32px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#084b3b}aside{position:fixed;inset:0 auto 0 0;width:258px;background:#142b31;color:#d2e0df;padding:32px 22px;overflow:auto}aside .brand{font:700 28px/1.2 sans-serif;letter-spacing:2px;color:#fff;margin-bottom:8px}aside .caption{font-size:12px;color:#9ebbb9;margin-bottom:28px}nav a{display:block;color:#c6d7d5;text-decoration:none;padding:8px 9px;border-radius:5px;font-size:13px;line-height:1.7;margin-bottom:3px}nav a:hover,nav a.active{color:white;background:#285047}aside .bottom{font-size:12px;border-top:1px solid #355052;margin-top:24px;padding-top:18px;line-height:1.8}aside .bottom a{color:#b8ded1}
+main{margin-left:258px;padding:44px clamp(24px,5vw,76px) 90px;max-width:1500px}.hero{max-width:1060px;margin:0 auto 30px;background:linear-gradient(115deg,#e2eee7,#edf1f1);border:1px solid #cfddd5;border-radius:12px;padding:34px 38px}.eyebrow{font-size:12px;letter-spacing:2px;font-weight:700;color:var(--accent)}.hero h1{font-size:clamp(27px,3vw,40px);line-height:1.35;margin:15px 0}.hero p{max-width:780px;margin:10px 0;color:#486159}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.chip{font-size:12px;background:#fff9;padding:4px 10px;border:1px solid #cbded2;border-radius:4px}.road{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:25px}.phase{text-decoration:none;background:#fffc;border:1px solid #cfddd5;border-radius:5px;font-size:13px;padding:11px}.phase span{display:block;font-size:11px;font-weight:bold;letter-spacing:1px;color:#738b7e}.toolbar{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}.toolbar a,button{font:inherit;font-size:13px;line-height:1.5;padding:8px 14px;border:1px solid #b8cec4;border-radius:5px;background:white;color:var(--accent);cursor:pointer;text-decoration:none}
+article{max-width:1060px;margin:0 auto;background:var(--paper);padding:40px clamp(20px,3.2vw,50px);border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 30px #142b3106}article img{display:block;width:100%;height:auto;margin:24px 0;border:1px solid var(--line);border-radius:6px}article>h1{font-size:25px;line-height:1.45;margin:0 0 24px}h2{font-size:25px;line-height:1.45;margin:64px 0 22px;padding-top:18px;border-top:2px solid var(--accent)}h3{font-size:19px;line-height:1.5;margin:35px 0 14px;color:#254b44}p{margin:14px 0}strong{font-weight:650}blockquote{margin:22px 0;background:#f2f7f4;border-left:4px solid #82ac97;padding:9px 20px;font-size:14px;color:#4a6259}blockquote p{margin:9px 0}.table-wrap{max-width:100%;overflow:auto;margin:24px 0;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.8;min-width:670px}th{background:#eaf1ed;font-weight:650;text-align:left;padding:13px 12px;vertical-align:top;color:#284e40}td{padding:12px;border-top:1px solid var(--line);vertical-align:top}tr:nth-child(even) td{background:#fafcfb}td:first-child{font-weight:550;min-width:90px}pre{background:#162d35;color:#d5e7e4;border-radius:6px;padding:22px;overflow:auto;font-size:12.5px;line-height:1.9}code{font-family:ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono CJK SC",monospace;font-size:.86em;overflow-wrap:anywhere}p code,td code,li code{background:#edf2ef;padding:2px 4px;border-radius:3px}pre code{font-size:inherit;overflow-wrap:normal;white-space:pre}ul,ol{padding-left:24px}li{margin:9px 0}footer{max-width:1060px;margin:25px auto;color:var(--muted);font-size:12px;overflow-wrap:anywhere}.progress{position:fixed;top:0;left:258px;height:3px;background:#57a884;width:0;z-index:20}
+@media(max-width:1000px){aside{width:220px;padding:25px 16px}main{margin-left:220px;padding:25px 22px 60px}.progress{left:220px}.road{grid-template-columns:repeat(2,1fr)}article{padding:30px 24px}.hero{padding:26px}}
+@media(max-width:720px){aside{position:relative;width:100%;padding:22px}aside nav{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}aside .caption{margin-bottom:10px}aside .bottom{display:none}main{margin-left:0;padding:18px 12px 40px}.hero{padding:23px 20px}article{padding:25px 18px}article>h1{font-size:23px}h2{font-size:22px;margin-top:45px}.progress{left:0}table{min-width:640px}body{font-size:15px}.road{grid-template-columns:repeat(2,1fr)}pre{padding:15px}}
+@media print{body{background:white;font-size:10pt}aside,.hero,.progress{display:none}main{margin:0;padding:0;max-width:none}article{max-width:none;border:0;box-shadow:none;padding:0}h2{break-before:page;margin:0 0 18px}h3{break-after:avoid}p{orphans:3;widows:3}table{min-width:0;font-size:8.5pt}.table-wrap{overflow:visible}tr{break-inside:avoid}pre{white-space:pre-wrap;background:#f2f5f3;color:#233}pre code{white-space:pre-wrap}a{color:inherit;text-decoration:none}footer{font-size:8pt}}
+</style></head><body><div class="progress"></div><aside><div class="brand">N02</div><div class="caption">测量约束的循环补全<br>完整开发方案 · v1.1</div><nav aria-label="章节目录"><a href="#section-37">1. 目标、判断与当前起点</a><a href="#section-203">2. 文献检索结论：复用什么，研究什么</a><a href="#section-498">3. 下一代N02的统一状态与计算过程</a><a href="#section-665">4. 网络与开源实现的具体使用方案</a><a href="#section-920">5. 理论保证：明确对象、假设、证明和失效条件</a><a href="#section-996">6. 创新假设与最接近方法的区分</a><a href="#section-1070">7. 分阶段实现与验收</a><a href="#section-1193">8. 数据、损失和“充分训练”的判据</a><a href="#section-1432">9. π0.5 / RawVLA-Bench的具体协议与比较矩阵</a><a href="#section-1637">10. 工程结构、交付与阶段状态</a><a href="#section-1653">11. 最先执行的开发包与最终研究判断</a><a href="#section-1684">12. 参考文献与可复用实现</a></nav><div class="bottom">30组文献与实现来源<br>8个实施阶段 · 7项理论性质<br><a href="N02_full_development_plan_2026-10-13.md">Markdown 源文档</a></div></aside><main><header class="hero"><div class="eyebrow">OWAC / RESEARCH DEVELOPMENT PLAN</div><h1>发现新的解释，<br>有依据地撤回旧判断。</h1><p>以成熟网络提出候选，以测量与约束检验解释，以可追溯依赖修订状态。最终让完整机制进入 π0.5 与 RawVLA-Bench 的训练和闭环。</p><div class="chips"><span class="chip">公开架构 · Base级网络</span><span class="chip">条件明确的理论保证</span><span class="chip">机制与任务双重验收</span></div><div class="road"><a class="phase" href="#phase-0"><span>P0</span>约定与复现</a><a class="phase" href="#phase-1"><span>P1</span>可靠测量</a><a class="phase" href="#phase-2"><span>P2</span>循环实体</a><a class="phase" href="#phase-3"><span>P3</span>未知解释</a><a class="phase" href="#phase-4"><span>P4</span>依赖与撤回</a><a class="phase" href="#phase-5"><span>P5</span>机制审计</a><a class="phase" href="#phase-6"><span>P6</span>π0.5适配</a><a class="phase" href="#phase-7"><span>P7</span>全量闭环</a></div><div class="toolbar"><a href="N02_full_development_plan_2026-10-13.md">阅读 / 保存 Markdown</a><button type="button" onclick="window.print()">打印阅读版</button><span style="font-size:12px;color:#597168">方案版本：v1.1 · 2026-10-13 · 尚未启动全量训练</span></div></header><article><h1 id="section-0">N02：测量约束的循环补全——完整开发方案</h1>
+<blockquote>
+<p>版本：v1.1 · 2026-10-13。研究目标：发现当前假设集合之外的解释，学习可用于预测和修订的依赖，撤回已失去证据支持的推断链。最终在 π0.5 与 RawVLA-Bench 上完成训练和闭环验证。</p>
+<p>本文是下一代 N02 的开发设计，尚未实现或证明其总体效果。已有局部调度实现的归档与负结果继续保留。用户本次明确启动完整路线规划，取代此前“仅做边界诊断、不再扩展”的后续安排；新的大规模训练须按本文阶段准入执行。本文同时提供<a href="N02_full_development_plan_2026-10-13.html">HTML 阅读版</a>。</p>
+</blockquote>
+<blockquote>
+<p><strong>v1.1 路线决定：</strong> 保留多尺度 RAW 证据与对象级多假设主架构；先建立正确的全局求解、结构修订和状态重建，再检验局部传播是否值得启用。固定分块与旧 propagate 不作为必须继承的形式。P1 后增加 π0.5 早期适配预检，正式充分适配和全量闭环仍在 P6/P7。详见第1.1节。</p>
+</blockquote>
+<h3 id="section-16">先看两张框架图</h3>
+<p>图中 P0—P7 表示开发阶段。P0 为数据与复现准备，P5 为集成机制审计，P7 为闭环验证；它们不是八个串联神经层。彩色物体和场景小图是解释内容的示意，不代表主链路生成 RGB 图像。两张图保留为总体能力示意；图1中的“仅重算受影响部分”属于 P5 需要证明收益的可选执行方式，P2—P4 先用全局求解与重建建立参考；图2的正式 P6 不包含本版提前加入的 P1 后接口预检。</p>
+<p><img src="../../outputs/n02-framework-illustrations-20261013/n02-raw-encoder-final-v1.png" alt="图1：N02 新版 RAW 编码器及 P0—P5 阶段" /></p>
+<p><strong>图1怎么读。</strong> 先沿上排从左到右：RAW 观测编码 → 循环实体 → 多个完整世界解释 → 候选内约束求解，再与真实测量比较。配对标记 <strong>A</strong> 表示“结构不足，转入下排提出新解释”；下排的关系学习 G 与推断来源 J 分工不同，验证并采用修订后，撤回失效支持并重建受影响状态。配对标记 <strong>B</strong> 表示“返回上排候选集合，在同一测量集合上重新求解”。G 与 J 在运行中持续维护，下排是修订时的概念分工，不要求每次触发后才重新学习整张图。证据不足时保留歧义；P5 审计整个搜索、求解、检验和修订闭环。图中单通道噪声块是测量示意，原生 CFA 与三通道伪 RAW 仍按正文分别适配。</p>
+<p><img src="../../outputs/n02-framework-illustrations-20261013/n02-pi05-system-final-v1.png" alt="图2：N02 接入 π0.5 后的整体框架及 P0—P7 阶段" /></p>
+<p><strong>图2怎么读。</strong> N02 替换原 RGB 视觉塔，一个自洽世界经过 Perceiver IO 读出为视觉 tokens，与任务语言、本体状态一起进入 π0.5 语言—动作后端。机器人执行动作后，环境产生下一时刻的新 RAW 观测；这是跨时间的机器人闭环，与图1同一测量上的内循环不同。P6 的专家动作只用于离线训练，P7 分别验收原基准和机制扩展任务。图中架构、训练和指标都是目标方案，不表示已经完成。</p>
+<p>两张图由内置 imagegen 生成并审校，原图保存在项目 <code>outputs/n02-framework-illustrations-20261013/</code>；<a href="N02_framework_image_prompts_2026-10-13.json">完整生成与修订提示词</a>随方案保存。图片用于理解，精确状态、概率规则、梯度方法及验收条件以正文为准。</p>
+<h2 id="section-37">1. 目标、判断与当前起点</h2>
+<p>N02 要解决的问题是：<strong>一个已经形成的场景解释，怎样在后续测量的约束下被保留、补充、替换或撤回，并改变后续动作。</strong> 例如，系统最初把一段被遮挡的轮廓解释为一个物体；新观测说明那里其实有两个物体，原来的身份关联、接触关系和抓取目标随之失效。系统应能提出两个实体的解释，找出哪些判断使用了原来的错误关联，并重新推断这些判断。</p>
+<p>这条路线有足够的学术基础，值得开展完整研究；但<strong>成熟组件的组合本身不构成新机制，网络规模和训练时长也不能代替机制证据</strong>。建议把研究主张集中为：测量支持的结构修订，如何与可追溯的神经状态、可检验的局部求解结合，从而比成熟的多假设推断与增量计算更可靠或更节省代价。最终是否成立，依赖新阶段的证据。</p>
+<p>当前已经建立的基础与缺口如下。数字来自本分支的实验记录，不是外部论文性能。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>现有证据</th>
+<th>能支持什么</th>
+<th>还不能支持什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>重训 sbi CNN 加首帧 RAW 差分，三个种子留出配对均13/16、无信息均16/16；95%错先验纠正为10/5、5/5、11/8，各方向分母16</td>
+<td>测量差异可以学习，原冻结 stem 不是充分入口</td>
+<td>一般场景下的可靠观测模型、完全纠错</td>
+</tr>
+<tr>
+<td>共用评分器、固定二候选、已知单跳依赖时，N02与事件缓存逐帧状态相同，N02约慢4%</td>
+<td>旧调度没有表现出独有收益</td>
+<td>未知结构、多跳错误链和新候选发现的最终结论</td>
+</tr>
+<tr>
+<td>新诊断中双亮点未被绝对拟合拒绝；末帧平移2像素，方向正确降至8/11/8（各16）</td>
+<td>当前评分对配准敏感，平均残差会漏掉局部结构不足</td>
+<td>“残差大就是语义反证”或“残差小就解释正确”</td>
+</tr>
+<tr>
+<td>RAW序列 loader、唯一观测ID、候选读出、π0.5特征桥已有实现和历史连通性证据</td>
+<td>可以复用工程接口和历史回归</td>
+<td>新模型已经通过真实数据训练或机器人闭环</td>
+</tr>
+</tbody>
+</table></div>
+<p>本地依据：<a href="../../research/experiments/2026-10-13_n02_retrained.md">测量基线</a>、<a href="../../research/experiments/2026-10-13_n02_revision_comparison.md">调度对照</a>、<a href="../../research/experiments/2026-10-13_n02_refutation_boundary.md">反证边界</a>、<a href="../decisions/0014-n02-scheduler-archive.md">旧实现归档</a>。旧模型与新模型分版本、分结果表，不能把后续新成绩回填为旧模型成功。</p>
+<h3 id="section-113">1.1 以目标为导向的路线决定（v1.1）</h3>
+<p>用户明确不要求保留某种分块形式或传播算子，以最终效果决定实现。本版选择<strong>多尺度测量表示 + 对象级候选状态 + 显式约束与来源维护</strong>作为首条开发主线。这个选择是工程与研究判断，尚无新实验能证明它优于分块状态；选择原因是当前核心任务包含实体出生、身份重关联、关系改写和替代支持，对这些变量进行显式操作更容易定义与验收。成熟对象模型提供实现起点 <a href="#r02">R02</a>、<a href="#r04">R04</a>，其原论文监督与数据条件仍须按正文处理。</p>
+<p>不将上一轮讨论中的“先恢复完整分块循环，再叠加对象”作为必经顺序。它会在尚无收益证据时，同时引入网格隐状态和对象隐状态两套持续记忆，增加同步、归因和重建负担。也不将纯对象压缩天然更好作为前提：相同编码器的直接 RAW 特征策略基线从 P1 开始保留，P2/P6检查对象化是否损失动作相关细节。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>决策</th>
+<th>本轮确定的做法</th>
+<th>由什么结果改变决定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>测量空间</td>
+<td>保留带坐标、采样支持和有效性的多尺度特征网格；分块可用于测量定位与数值计算，不默认切成独立世界</td>
+<td>局部证据遗漏、配准误判或跨块边界失真时调整尺度/支持域</td>
+</tr>
+<tr>
+<td>循环状态</td>
+<td>首选有来源的 SAVi 式对象状态，完整假设保存对象配置、关联和关系；不强制每个图像块再维护独立 GRU</td>
+<td>充分训练后对象表示仍持续损害细节或行为，暂停结构扩展，做一次有记录的表示重选</td>
+</tr>
+<tr>
+<td>传播</td>
+<td>区分预测消息传播与推断失效传播；前者服务状态估计，后者由实际输入依赖与版本决定</td>
+<td>学习图不能覆盖实际依赖时扩大重建范围，不用预测边冒充完整来源</td>
+</tr>
+<tr>
+<td>求解执行</td>
+<td>P2—P4首先全局求解/重建，P5再比较全局、精确缓存和学习区域选择</td>
+<td>局部版本达到相同质量且真实成本下降才启用；否则使用全局/精确缓存版本</td>
+</tr>
+<tr>
+<td>系统风险</td>
+<td>P1合格后立刻做一次π0.5小规模适配预检，P2末再检查对象读出</td>
+<td>适配不通或细节损失明显时先定位接口/表示问题，不等到完整机制训练完才发现</td>
+</tr>
+</tbody>
+</table></div>
+<p>初版继续贡献唯一测量账本、测量/推断支持分离、循环内不重复计数、绝对拟合检查、依赖方向和局部修订的反例测试，以及 RAW loader/策略桥。旧四邻域共享兼容表、旧小型 cell、全场计算后掩码写回不作为新版本必须保留的模块。此前固定候选、已知单跳条件的缓存等价结果只限定该实现与实验条件，既不证明对象方案更优，也不否定所有局部推断。</p>
+<p>开发顺序固定为：<strong>可靠测量 → 早期策略适配预检 → 全局对象推断 → 新结构发现 → 依赖学习与正确撤回 → 局部执行的增益检验 → 正式策略适配与全量闭环</strong>。此顺序只有一条正式主线，不同时全面训练多个互不兼容的架构。定点对照用于回答具体问题。</p>
+<p>三个结论分别验收：机器人任务效果、发现/依赖/撤回机制、局部计算效率。局部提速失败时允许保留有独立行为收益的全局机制；完整机制不优于共用表示的成熟强基线时归档机制；仅更强 RAW 表示有效时单独报告表示收益。不会把后两种结果重命名为“完整 N02 成立”。</p>
+<h2 id="section-203">2. 文献检索结论：复用什么，研究什么</h2>
+<p>检索截止于2026-10-13，围绕对象级循环表征、结构学习、粒子推断、能量求解、真值维护、序贯统计和RAW具身控制查阅论文、作者项目和源码入口。关键论文查看正文或方法说明；部分近期工作仅查摘要及作者公开材料，核对层级见参考文献和来源清单。以下是与方案直接相关的比较，完整链接见文末。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>方法与来源</th>
+<th>已有能力</th>
+<th>N02可复用的部分</th>
+<th>不能直接继承的结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ConvNeXt V2 / FCMAE，CVPR 2023 <a href="#r01">R01</a></td>
+<td>具有公开规模配方的卷积编码与掩码预训练</td>
+<td>Base编码器、GRN、训练配置；改为RAW观测与目标</td>
+<td>ImageNet成绩不是RAW或低光成绩</td>
+</tr>
+<tr>
+<td>SAVi / SAVi++，ICLR/NeurIPS 2022 <a href="#r02">R02</a></td>
+<td>对象槽的预测—校正、视频跟踪</td>
+<td>循环实体表示、Slot Attention校正和时序预测</td>
+<td>SAVi++依赖深度训练信号，主要实验使用首帧框条件；不能宣称无监督开箱发现</td>
+</tr>
+<tr>
+<td>IODINE，ICML 2019 <a href="#r03">R03</a></td>
+<td>迭代变分推断、多对象和歧义表示</td>
+<td>多次修订与生成解释的结构参照</td>
+<td>神经迭代不保证每次能量下降或收敛至真实场景</td>
+</tr>
+<tr>
+<td>SCALOR，ICLR 2020 <a href="#r04">R04</a></td>
+<td>对象传播、发现和存在性建模</td>
+<td>birth/death提议及身份生命周期基线</td>
+<td>对象增删本身不是N02创新，简单视频结果不等于操作场景表现</td>
+</tr>
+<tr>
+<td>NRI / dNRI，ICML 2018 / CVPR 2020 <a href="#r05">R05</a>、<a href="#r06">R06</a></td>
+<td>从动态轨迹推断交互图，dNRI允许逐时变化</td>
+<td>关系编码器、图预测器、动态边提议</td>
+<td>预测边、注意力边不是已辨识的因果关系</td>
+</tr>
+<tr>
+<td>DPF / PF-net，RSS / CoRL 2018 <a href="#r07">R07</a>、<a href="#r08">R08</a></td>
+<td>学习运动和观测模型，维护粒子状态</td>
+<td>标准粒子滤波、重采样、观测评分对照</td>
+<td>有限粒子不保证保留真模式，软重采样改变算法性质</td>
+</tr>
+<tr>
+<td>Theseus，NeurIPS 2022 <a href="#r09">R09</a></td>
+<td>可微非线性最小二乘</td>
+<td>LM/GN、稀疏线性求解、隐式或截断反传</td>
+<td>调用库不自动得到全局最优或可靠隐式梯度</td>
+</tr>
+<tr>
+<td>DeepInverse <a href="#r10">R10</a></td>
+<td>成像算子、噪声、数据保真、迭代求解</td>
+<td>RAW物理算子接口和数值参考</td>
+<td>RGB去噪器与demosaicing示例不进入主链路</td>
+</tr>
+<tr>
+<td>iSAM2 / GTSAM，IJRR 2012 <a href="#r11">R11</a></td>
+<td>已知因子图上的增量重线性化与求解</td>
+<td>必须保留的增量优化强基线</td>
+<td>局部更新不是新机制；非线性局部解不是全局真值</td>
+</tr>
+<tr>
+<td>ATMS / 真值维护，1986 <a href="#r12">R12</a></td>
+<td>记录假设支持、处理不一致和替代解释</td>
+<td>支持集合、失效传播、重算语义</td>
+<td>不负责从RAW学习语义，也不保证神经隐状态可逆</td>
+</tr>
+<tr>
+<td>Gen，PLDI 2019 <a href="#r13">R13</a></td>
+<td>可编程推断、结构变化、增量执行轨迹</td>
+<td>结构搜索及trace更新的独立基线</td>
+<td>“神经提议+结构搜索+增量执行”已存在，不能整体宣称首创</td>
+</tr>
+<tr>
+<td>RJMCMC / SMC <a href="#r14">R14</a>、<a href="#r15">R15</a></td>
+<td>变维模型搜索、序贯多假设推断</td>
+<td>正确的提议概率、权重和接受规则</td>
+<td>漏掉反向概率/Jacobian后不再继承后验正确性</td>
+</tr>
+<tr>
+<td>PALM / monDEQ <a href="#r16">R16</a>、<a href="#r17">R17</a></td>
+<td>特定条件下的驻点收敛或唯一平衡点</td>
+<td>求解层的可证明子问题；monDEQ作替代对照</td>
+<td>任意GRU、非凸场景和动态结构不满足其全部假设</td>
+</tr>
+<tr>
+<td>序贯e-process / Robust BOCPD <a href="#r18">R18</a>、<a href="#r19">R19</a></td>
+<td>合法条件下的持续检验、鲁棒变化检测</td>
+<td>反证累积和变化检测基线</td>
+<td>学习残差/BNRE logit并非天然e-value；场景变化也不等于语义归因</td>
+</tr>
+<tr>
+<td>Perceiver IO，ICLR 2022 <a href="#r20">R20</a></td>
+<td>用查询将结构化状态读成固定输出</td>
+<td>到π0.5视觉token的查询读出结构</td>
+<td>需要适配训练；将互斥世界混在同一前缀未必保持歧义</td>
+</tr>
+<tr>
+<td>DreamerV3 <a href="#r21">R21</a></td>
+<td>强循环随机状态和充分训练配方</td>
+<td>非对象式RSSM对照、训练稳定性参考</td>
+<td>本项目不同时叠加完整Dreamer策略与π0.5策略</td>
+</tr>
+<tr>
+<td>Invariant Slot Attention，ICML 2023 <a href="#r22">R22</a></td>
+<td>对象坐标系中的姿态等变归纳偏置</td>
+<td>位移/尺度干扰与实体属性分离的对照</td>
+<td>不能直接解决所有遮挡、噪声或身份错误</td>
+</tr>
+<tr>
+<td>Dyn-O 2025 / ObjectZero 2026 <a href="#r23">R23</a>、<a href="#r24">R24</a></td>
+<td>近期对象世界模型与规划路线</td>
+<td>更新相关工作和对象模型强度的参照</td>
+<td>Dyn-O使用Cosmos/SAM2先验，不能原样成为无RGB教师主方法</td>
+</tr>
+<tr>
+<td>RawVLA / π0.5 <a href="#r25">R25</a>、<a href="#r26">R26</a></td>
+<td>RAW成像适配、现成策略和操作基准</td>
+<td>作者环境、数据、动作损失、闭环协议</td>
+<td>原RawVLA输出RGB，N02替换视觉塔的比较必须另披露适配预算</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>选型结论。</strong> 主线保留多尺度测量特征，分阶段引入 ConvNeXt V2-Base、SAVi式对象循环、Theseus全局参考求解、多假设结构搜索与dNRI式关系提议。局部执行由P5实测决定，不将这些组件一次性全部叠加后才开始验证。Gen、iSAM2、SCALOR、标准SMC承担不可省略的强对照。DreamerV3、monDEQ和ISA作为定点对照，不在首版一次性堆入主链路。sbi NRE/BNRE保留为观测相对评分对照 <a href="#r27">R27</a>。</p>
+<h2 id="section-498">3. 下一代N02的统一状态与计算过程</h2>
+<h3 id="section-501">3.1 三项核心能力的操作定义</h3>
+<p><strong>发现未知解释</strong>：正确结构起初不在活动候选集中，后续证据促使系统生成新实体、拆分/合并实体、改变身份关联或替换关系，而不是只对预置标签重新排序。“未知”限于模型定义的实体与关系组合空间；发现任意新物理定律、新概念不在本阶段的可保证范围。</p>
+<p><strong>学习依赖</strong>：从历史观测、已执行动作及可用训练监督中估计哪些实体状态能够预测另一个实体的变化，保留不确定关系候选。还要记录每条实际推断使用了哪些证据和假设。前者是学到的交互结构，后者是计算来源，两者不可混为一张注意力图。</p>
+<p><strong>撤回错误推理链</strong>：当某假设或测量解释失效，所有仅靠该支持成立的下游判断被标记失效并重新求解；仍有独立有效支持的判断继续保留。受污染的循环隐状态、边际化摘要和π0.5前缀缓存也必须回滚或重建。不能只把某个候选权重调低，仍继续使用由它生成的旧隐状态。</p>
+<h3 id="section-513">3.2 数据结构</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>内容</th>
+<th>生命周期和限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>测量账本 M</td>
+<td>episode/camera/frame/burst ID、原始值、时间、标定、噪声、有效性</td>
+<td>同一ID只能提供一次统计证据；纠正标定产生版本，不复制观测</td>
+</tr>
+<tr>
+<td>测量特征 X</td>
+<td>带相机/时间/空间坐标与采样支持的多尺度网格、有效掩码</td>
+<td>是观测的派生表示，不额外贡献独立证据；区域可重叠，不能将重叠块似然直接相乘</td>
+</tr>
+<tr>
+<td>实体集合 Z</td>
+<td>对象ID、存在概率、姿态/形状/属性、对象槽隐状态及协方差或分布参数</td>
+<td>支持出生、暂时遮挡、重现、合并/拆分；ID不按槽下标永久绑定</td>
+</tr>
+<tr>
+<td>世界候选 H</td>
+<td>每个候选的实体集合、关联、关系图、成像干扰参数、来源与权重</td>
+<td>每个粒子是一套自洽解释；不逐实体独立拼接互相矛盾的MAP</td>
+</tr>
+<tr>
+<td>物理/预测图 G</td>
+<td>接触、共同运动、遮挡等关系的分布</td>
+<td>可有环；主要是预测关系，因果主张另做干预验证</td>
+</tr>
+<tr>
+<td>因子图 F</td>
+<td>测量、时序、约束和先验因子</td>
+<td>可有环；以因子ID与测量账本关联，显式记录边界因子</td>
+</tr>
+<tr>
+<td>推断来源图 J</td>
+<td>某版本结论使用的父假设、测量、模型版本和计算节点</td>
+<td>按版本/迭代展开成DAG；记录替代支持集，不用G代替J</td>
+</tr>
+<tr>
+<td>缓存 C</td>
+<td>网络特征、局部解、边际化信息、策略前缀和动作chunk版本</td>
+<td>每项缓存携带依赖版本；来源变化后不能静默复用</td>
+</tr>
+</tbody>
+</table></div>
+<p>循环神经状态用于提出候选和预测下一状态，不承担“不可检查的唯一事实库”。事实的当前接受状态由候选、因子和来源记录共同定义。</p>
+<h3 id="section-624">3.3 主计算流</h3>
+<pre><code class="language-text">RAW / 标定 / 已执行动作
+        ↓
+唯一测量账本 → 标准RAW编码器 → 循环实体预测与校正
+        ↓                         ↓
+RAW条件生成模型              多候选：实体、关联、关系
+        ↓                         ↓
+先检验曝光/噪声/配准等干扰能否解释残差
+        ↓
+候选内连续求解 → 独立预测检查 → 保留 / 暂缓 / 结构不足
+                                              ↓
+                         新实体、拆分/合并、关系改写提议
+                                              ↓
+                         同一数据上的受约束比较与接受
+                                              ↓
+                         撤回失效支持 → 重建受影响状态
+                                              ↓
+                    单个自洽候选的结构化读出 → π0.5
+</code></pre>
+<p>一次新观测可以触发多次计算，但这些计算始终针对同一个观测集合和同一版本目标。曝光或配准无法确定时，结果应为“不确定/模型不足”；不能自动宣布某条物体关系错误。</p>
+<h3 id="section-631">3.4 测量模型与目标</h3>
+<p>主模型直接预测传感器表示中的测量分布。Bayer数据输出四个有真实采样坐标的平面；RawVLA-Bench数据输出其作者定义的三通道伪RAW。两者分别建模、分别标定。网络不生成RGB/sRGB/XYZ中间图像供策略使用，也不通过RGB教师蒸馏 <a href="../../AGENTS.md">本地RAW边界</a>。</p>
+<p>在固定时间窗、模型版本和观测集合下，目标可写为：</p>
+<pre><code class="language-text">E(Z,G,η ; M) = Σ唯一测量因子 ℓraw(y | Z,G,η,c)
+              + Σ时序因子 ℓdyn(Zt | Zt−1,at−1,G)
+              + Σ有效物理约束 ψ(Z,G)
+              − log p_initial(Z,G,η) 。
+</code></pre>
+<p>其中先验项只包含尚未计入时序因子的初始状态与结构/干扰先验，避免重复计算动态转移。η包含曝光、响应偏差、噪声尺度和相机运动等可解释干扰；c为已知标定。RAW似然要保留方差归一化项、相关噪声结构、量化/饱和的区间概率，不能任意截断残差后仍称严格似然。无法得到可信RAW生成密度时，相关目标明确称为经验能量，禁用其精确后验与误报保证。</p>
+<p>共享首帧差分只是对照表示。它使不同时间的误差共享参考噪声，不能把各差分视为独立观测直接相乘。主线优先对原始帧条件建模；若采用差分，须显式使用联合协方差或条件创新。</p>
+<p>绝对拟合与候选相对偏好分开输出：相对偏好回答哪个解释更好；绝对检查回答当前解释族能否说明局部测量。局部标准化残差、空间最大统计量和后验预测检查都要在独立校准集上定阈值，包含多区域和多次查看的误报控制。拟合与检验复用同一像素会产生乐观偏差；采用独立帧预测或有明确条件独立依据的测量划分，相关像素不能简单当独立样本。</p>
+<h3 id="section-650">3.5 结构提议、后验维护与撤回</h3>
+<p>结构提议采用有来源的SCALOR发现/传播与dNRI关系推断思想，加入残差区域和动作后观测作为输入。至少保留三类竞争解释：原结构加成像干扰、新实体/新关联、旧关系失效。对象增删必须同时付出存在性或复杂度先验代价，避免模型仅靠增加自由度降低训练拟合误差。</p>
+<p>多假设参考算法采用标准SMC；变维动作先在可枚举小系统中用Gen或RJMCMC独立验证。任何学习提议都记录正向概率、反向概率和必要的变量变换Jacobian。若确定性拆分、top-k筛选或隐式神经提议无法计算这些量，主算法标为近似搜索，与概率正确的参考分开报告。不能以优化后的softmax能量直接冒充包含连续体积因素的模型后验。</p>
+<p>同时维护两个输出：用于点估计的最好已见可行解，以及用于不确定性的样本/候选分布。点估计可执行单调接受；MCMC采样允许上坡以保持目标分布，二者不能混用同一个“只降能量”规则。</p>
+<p>撤回依据J中的实际支持。物理图G只提供修订区域的提议，最终区域需要用边界因子残差或完整支持遍历核验。P2—P4允许对当前候选的全部状态重新求解或从检查点重放，以先确保撤回语义正确；只处理局部区域是P5的可选执行优化。模型参数在线更新会影响大量派生状态，首版推理时冻结参数；图/实体结构可以变，网络权重不在线自适应。</p>
+<h2 id="section-665">4. 网络与开源实现的具体使用方案</h2>
+<h3 id="section-668">4.1 主模型规模</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>正式起点</th>
+<th>来源与改动</th>
+<th>初期不承担的职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAW观测编码</td>
+<td>ConvNeXt V2-Base，公开模型约89M参数；256×256输入</td>
+<td><a href="https://github.com/facebookresearch/ConvNeXt-V2">官方实现</a>，替换输入通道与RAW预训练目标；实际参数数重新统计</td>
+<td>不用旧85k CNN承担完整视觉能力</td>
+</tr>
+<tr>
+<td>多尺度读出</td>
+<td>使用编码器1/8、1/16层特征及标准投影</td>
+<td>官方特征层加有记录的接口适配；局部弱线索不能只靠最后粗网格</td>
+<td>不把任意resize当成保真RAW操作</td>
+</tr>
+<tr>
+<td>实体循环</td>
+<td>SAVi预测—校正；16个活动槽起步，宽度512，4层标准交互块</td>
+<td><a href="https://github.com/google-research/slot-attention-video">作者实现</a>做算子来源；宽度和层数为本方案配置，不冒充原论文配方</td>
+<td>不把GRU状态当成可直接减去旧证据的概率量</td>
+</tr>
+<tr>
+<td>关系提议</td>
+<td>dNRI编码/预测结构，与对象槽共享特征</td>
+<td><a href="https://github.com/cgraber/cvpr_dNRI">作者实现</a>；旧PyTorch代码先独立复现，再适配现代环境</td>
+<td>不由一张注意力矩阵宣布因果图</td>
+</tr>
+<tr>
+<td>RAW生成与对象组合</td>
+<td>SAVi/SCALOR对象解码结构，RAW输出及深度/几何辅助头</td>
+<td>逐项保留来源；成像算子使用DeepInverse接口</td>
+<td>不用任意高容量逐帧decoder吸收所有错误关系</td>
+</tr>
+<tr>
+<td>连续求解</td>
+<td>Theseus LM全局参考求解，FP32起步，参考问题FP64；稀疏局部执行在P5评估</td>
+<td>原库调用并增加接受/回退检查</td>
+<td>不宣称非凸全局求解</td>
+</tr>
+<tr>
+<td>策略读出</td>
+<td>Perceiver IO式查询读出，每相机256×2048</td>
+<td><a href="https://github.com/google-deepmind/deepmind-research/tree/master/perceiver">官方结构来源</a>，与现有桥契约匹配</td>
+<td>不将不同世界候选简单取均值</td>
+</tr>
+</tbody>
+</table></div>
+<p>89M只表示观测编码器的公开规模，完整模型参数量和显存须在P0实际统计。SAVi、dNRI与Perceiver的迁移允许实现接口适配，但核心块必须对应原始代码、配置和差异说明，不重新发明一个几层小CNN替代。官方ConvNeXt V2的“Tiny”是28.6M模型，可用于资源对照或集成验证；它与旧实验中85k参数的tiny模型不是一回事，正式主结果以Base为起点 <a href="#r01">R01</a>。</p>
+<p>首选从RAW数据预训练观测网络，使用公开架构及训练实现；默认不加载RGB预训练权重，以保持来源与RAW学习效果清楚。另设有完整披露的预训练初始化系统基线时，不与从RAW训练的主结果混合。深度、对象ID或关系标签若来自仿真，只在训练/评价端使用，并设置共享该监督的对照。</p>
+<h3 id="section-795">4.2 兼容性与来源锁定</h3>
+<p>本轮已解析九个关键仓库HEAD。完整SHA见<a href="N02_full_development_sources_2026-10-13.json">来源清单</a>；以下短SHA用于定位阅读版本，不表示已经完成移植或训练复现。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>仓库</th>
+<th>阅读快照</th>
+<th>接入方式与风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ConvNeXt-V2</td>
+<td><code>255389575332</code></td>
+<td>官方PyTorch；仓库已归档，FCMAE涉及稀疏算子依赖，先做环境复现</td>
+</tr>
+<tr>
+<td>slot-attention-video</td>
+<td><code>ba8f15ee1947</code></td>
+<td>官方JAX，仓库已归档；保留JAX参考，PyTorch移植做逐层前向/梯度/训练轨迹对照</td>
+</tr>
+<tr>
+<td>theseus</td>
+<td><code>c8583de41824</code></td>
+<td>PyTorch/C++依赖，单独锁定兼容矩阵与线性求解精度</td>
+</tr>
+<tr>
+<td>cvpr_dNRI</td>
+<td><code>96c94694608f</code></td>
+<td>旧PyTorch配方；先原始系统复现，禁止只复制小MLP后称复现</td>
+</tr>
+<tr>
+<td>SCALOR</td>
+<td><code>8d116c0459d3</code></td>
+<td>原发现/传播模型独立基线；训练数据与图像输出边界需改为RAW</td>
+</tr>
+<tr>
+<td>particles</td>
+<td><code>3388c4bd30ab</code></td>
+<td>独立CPU/NumPy数值参考；不放入高频GPU路径 <a href="#r28">R28</a></td>
+</tr>
+<tr>
+<td>Gen.jl</td>
+<td><code>2a27298b392e</code></td>
+<td>Julia参考运行时，验证变维提议与trace修订；不强行嵌进策略进程</td>
+</tr>
+<tr>
+<td>deepmind-research</td>
+<td><code>f5de0ede8430</code></td>
+<td>Perceiver结构参考；提取必要范围并保留许可证</td>
+</tr>
+<tr>
+<td>dreamerv3</td>
+<td><code>e01491fad643</code></td>
+<td>作者维护的JAX重实现；仅作为RSSM强对照</td>
+</tr>
+</tbody>
+</table></div>
+<p>许可证以固定文件及权重单独声明为准。ConvNeXt V2说明代码与ImageNet权重许可不同；本方案不下载或发布这些权重。P0生成 <code>third_party.lock.json</code>，记录论文、代码SHA、许可证、实际读取文件、改动和环境，不将网页可访问当作可运行证据。</p>
+<h2 id="section-920">5. 理论保证：明确对象、假设、证明和失效条件</h2>
+<p>“有理论保证”应落到可检查的算法性质。本方案要求正式实现至少完成T1、T2、T3、T5的证明与程序对应验证；T4、T6、T7作为有条件的统计或近似性质。现有N02代码尚未满足下列全部要求。引用相关定理只是起点，必须逐条核查新算法是否满足假设。</p>
+<h3 id="section-926">T1. 同一测量重复计算不增加证据</h3>
+<p>目标按唯一测量ID集合定义，而非按solver调用次数定义。对固定模型和静态状态问题，重复插入已有ID不改变目标函数及其定义的后验；在同一组候选状态上，能量与归一化权重也不变。推导只需集合并的幂等性。额外求解可改善近似解，重采样可改变经验粒子集合，这些计算变化不等于新增证据。动态状态可随真实时间预测，但重复帧本身仍不产生新似然因子。时序前缀评分只能整体替换，或采用严格条件增量，不能将重叠前缀似然反复相乘。</p>
+<p>验证：重复帧、重试、断点恢复和多次内循环在固定候选上的目标/权重一致，并检查实际求解变化未重复加入因子；不同时间的新独立测量正常累积。该保证不依赖编码器训练是否成功。</p>
+<h3 id="section-935">T2. 固定问题的接受步骤保持能量下降</h3>
+<p>对固定测量集合、固定参数、固定结构以及下界有限的连续目标E，学习网络只提出候选步d。若候选不满足充分下降条件，则回退到带回溯线搜索的梯度/近端步；最终接受必须满足：</p>
+<pre><code class="language-text">E(z_next) ≤ E(z) − c ||z_next − z||²，c &gt; 0。
+</code></pre>
+<p>因此接受能量单调且收敛，步长平方和有限。<strong>仅此不保证迭代点收敛或梯度趋零</strong>；若进一步满足相对误差条件、局部Lipschitz、迭代有界和KL性质，可沿PALM类证明得到驻点收敛 <a href="#r16">R16</a>。这些是新实现待核查的充分条件，不是默认事实。网络权重更新、新测量加入、离散结构改变后，必须重新开始对应的固定问题计数。</p>
+<p>有限预算可能在尚未收敛时结束，输出最好已见可行解和剩余残差。每个结构编辑若都使同一复杂度惩罚后的目标下降至少δ&gt;0，则一次固定问题的已接受编辑次数不超过 <code>(E0−Emin)/δ</code>；这只保证终止，不保证全局最优。采样模式不套用单调接受。</p>
+<h3 id="section-948">T3. 可追溯撤回相当于对受影响计算重新执行</h3>
+<p>假设J完整记录确定性计算节点的所有输入依赖，节点版本固定，受影响子图按拓扑顺序重算；随机计算须把随机种子或随机选择也记为输入。这里必须区分结论是否仍有支持与缓存数值是否仍然有效：结论只有失去全部有效支持才被撤回，但任何实际输入或支持集合发生变化的数值缓存都须失效并重算。即使另一条证据还能支持同一结论，其置信度、来源集合或神经隐状态也可能变化。对拓扑序归纳，可证明重算结果等于用更新后的叶节点、有效支持、固定程序及相同随机输入从头执行；实际输入均未变的节点可以复用。控制流或结构发生变化时，相应子轨迹必须重新生成并登记，不能沿用旧图假装已经覆盖新路径。</p>
+<p>这是<strong>计算一致性</strong>，不是世界事实正确性。如果神经全局注意力已经混合所有对象，实际依赖就可能是全局的；不能为了宣称局部性而漏记边。实体GRU历史、优化边际化因子和策略KV缓存均需纳入J。窗口外历史失效时，使用检查点加测量重放或重建摘要；不能直接从非线性隐状态“减去影响”。相关思想已有ATMS、Gen和增量求解基础 <a href="#r11">R11</a>、<a href="#r12">R12</a>、<a href="#r13">R13</a>。</p>
+<h3 id="section-957">T4. 有条件的序贯误撤回概率控制</h3>
+<p>在零假设H0下，若每一步非负检验因子e_t满足 <code>E[e_t | 历史] ≤ 1</code>，则 <code>E_t=Πe_t</code> 是非负超鞅；阈值 <code>1/α</code> 的任意时刻越界概率不超过α。该结论可用于“合法模型遭到错误拒绝”的控制 <a href="#r18">R18</a>。多对象、多假设、多次重启要分配α预算或使用合法组合规则，不能每次从头免费使用5%。</p>
+<p>适用的首个实现是已知条件测量模型的合成校准实验。学习生成模型、复合干扰参数和真实RAW通常不直接满足条件；必须有针对整个零假设族的合法构造，或明确退回固定窗口、独立校准的经验误报率。温度缩放、BNRE、把残差取指数都不能单独得到此保证。拒绝H0也只说明该模型族不足，不能自动定位哪条语义边错误。</p>
+<h3 id="section-966">T5. SMC与变维搜索的概率账目正确</h3>
+<p>标准重要性权重包含目标增量与提议分布之比，重采样保留祖先和概率记录。RJMCMC结构编辑需要可逆映射、正反向选择概率及Jacobian <a href="#r14">R14</a>。在目标/支持/可积性等条件成立时，采用相应SMC一致性或MCMC不变分布结论；有限粒子和有限时间仍有偏差、退化和模式遗漏风险。</p>
+<p>先在可枚举的实体—关系系统上，对照真实后验、Gen和particles实现，核查边际概率、模式质量和采样误差。部署的近似剪枝/学习搜索若不满足条件，只保留数值与工程保证，不继承“精确Bayes”。</p>
+<h3 id="section-975">T6. “发现新解释”的有限支持保证</h3>
+<p>若每次结构提议在给定历史下，以至少ε&gt;0概率落入目标结构的某个可接受邻域，则m次都未提出它的概率至多为 <code>(1−ε)^m</code>。不必假设各次独立，但必须有统一条件概率下界。提议中可混入具有明确支持的基础分布，避免学习提议完全排除某类结构。</p>
+<p>这只保证<strong>提出</strong>邻域候选的概率，不保证接受它、识别它为真实或覆盖模型空间之外的解释。连续高维情况下ε可能极小；本项目将通过枚举小系统和受控组合留出测量实际发现率，不把此弱保证包装成开放世界理解定理。</p>
+<h3 id="section-984">T7. 局部求解误差的可验证边界</h3>
+<p>局部更新必须包含跨边界因子。若某个固定、可微、无约束连续子问题在包含当前解z与参考极小点z*的凸区域内m强凸，且该完整子问题满足 <code>∇E(z*)=0</code>、<code>||∇E(z)||≤ε</code>，则解误差可界为 <code>||z−z*|| ≤ ε/m</code>。有约束问题须另用投影梯度或KKT残差推导，不能直接套用此式；只检查选中局部坐标的梯度，也不足以得到相对全局解的界。一般非凸神经能量无此全局保证；在不满足条件时，报告完整目标差、梯度残差与全局求解对照，不报告不存在的误差证书。</p>
+<p>研究方向是学习选择修订区域后，用廉价的边界残差检查判断是否需要扩张，直到满足停止标准或回退全局求解。该规则的代价也计入实际时延。若维护边界所需成本抵消局部收益，应接受全局算法更优的结果。</p>
+<p><strong>必须明确不作的承诺：</strong> 无条件发现任意未知解释；仅凭观测辨识真实因果图；非凸网络达到全局最优；无限时域无遗忘；上述数学性质直接推出π0.5任务成功率提高。理论保证须与其适用实验一起交付。</p>
+<h2 id="section-996">6. 创新假设与最接近方法的区分</h2>
+<p>建议只保留一个主机制主张和两项可拆分支撑，避免用模块数量代替贡献。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>待验证设计</th>
+<th>最近已有方法</th>
+<th>真正需要证明的额外价值</th>
+<th>决定性对照</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主机制：以经干扰解释后的测量不足为触发，在同一概率/能量账本中做结构编辑、撤回和再求解</td>
+<td>Gen结构推断、SCALOR发现、ATMS支持维护、SMC</td>
+<td>同预算下更快找到可解释新证据的结构，同时更少误撤回</td>
+<td>共用同一编码器、生成模型、提议集合的Gen/标准SMC+来源缓存</td>
+</tr>
+<tr>
+<td>可选支撑A：学习修订区域，并用实际因子边界残差校验、扩张或回退</td>
+<td>iSAM2增量优化、普通缓存</td>
+<td>未知/变化依赖下，达到相同解误差所需实际计算更低</td>
+<td>全局求解、iSAM2、精确依赖缓存、去掉边界校验</td>
+</tr>
+<tr>
+<td>支撑B：来源一致的神经状态重建</td>
+<td>循环状态、计算图重算、真值维护</td>
+<td>撤回后消除旧假设在循环/策略状态中的残留，保持独立支持</td>
+<td>只改权重、清空全部历史、来源重放、没有循环状态</td>
+</tr>
+</tbody>
+</table></div>
+<p>上述名称描述研究设计，不构成首创声明。阶段P5前必须做一次围绕Gen、神经符号真值维护、结构SMC和对象世界模型的补充检索；若新规则可直接归约为已有算法，仅保留其RAW/控制应用贡献并重新定位论文，不强行宣称新推断范式。</p>
+<p>创新检验要比较完整强基线，不能只与旧85k模型或dense更新比较。若完整候选仅靠更大的编码器或更多训练提升，消融后应将收益归于表示学习；若只减少无关状态写入而无真实时延/能耗收益，就不能宣称计算效率提升。</p>
+<h2 id="section-1070">7. 分阶段实现与验收</h2>
+<p>阶段从P0到P7推进。所有门槛是本方案提出的预注册目标，不是现有成绩或论文通用标准。P0可根据独立开发试验确定合理范围，随后冻结，不能看最终测试结果后降低门槛。每阶段至少交付代码、配置、数据/来源清单、模型、曲线、反例和中文结果记录；“完成实现”“通过数值性质”“通过行为”“通过闭环”分别标记。</p>
+<h3 id="phase-0">P0. 冻结新问题，复现成熟组件与建立数据约定</h3>
+<p><strong>实现。</strong> 建立 <code>n02_full</code> 独立命名空间、来源锁与GPU运行时；复现ConvNeXt V2、SAVi/dNRI原算子，验证Theseus和Gen数值参考。整理RAW噪声/标定、首帧参考相关性、光照和相机位移处理。审计RawVLA训练数据/相机/动作/语言的实际可用字段及现有基线最新状态，不能把本地历史快照当远端当前状态。</p>
+<p><strong>数据。</strong> 冻结训练、调参、校准和最终测试四个分区，以场景/物体/采集轨迹分组；同一轨迹的不同照明和连续帧不得跨区。构建曝光、噪声、位移、遮挡、实体进入/离开、双实体合并误解和关系变化的受控任务。新数据使用全新种子和生成器版本，旧16场景只保留为回归。</p>
+<p><strong>验收。</strong> 原版与移植模块的FP32前向/梯度在预定容差内相符，固定batch短训练方向一致；真实NPZ输入及动作对齐审计通过；没有未来帧、隐藏标签或重复计数进入推断。交付完整参数量、200步吞吐/峰值显存画像。200步仅用于估算资源和工程验证。</p>
+<p><strong>阶段决策。</strong> 若公开代码依赖不兼容，先保留原环境参考，修复移植；不能用未经核验的小网络代替后直接扩训。</p>
+<h3 id="phase-1">P1. 建立足够强的RAW观测与绝对拟合模型</h3>
+<p><strong>实现。</strong> ConvNeXt V2-Base在RAW域做掩码预训练，再训练相对评分、RAW条件预测和成像干扰推断。比较原始帧、显式条件创新、测量配准；采用多尺度局部预测检查而非全图均值。首版固定实体候选，暂不增加结构搜索。</p>
+<p><strong>关键对照。</strong> 相同Base编码器的NRE/BNRE、条件似然、标准判别评分；已知成像/几何oracle只作上界。所有学习方法使用相同RAW历史和训练监督。</p>
+<p><strong>行为门槛。</strong> 每类至少1000个独立场景，正式3种子：线索互换两侧正确≥90%；无信息条件中至少95%的序列后验漂移≤0.05；95%错先验在预定信息量条件下双方向纠正≥80%，且假设检验/已知模型上界表明确实可纠正；局部结构不足在≤5%正常误报下检出≥90%。每个噪声/位移/曝光组分别报告，不只给总平均。</p>
+<p><strong>提前的系统预检。</strong> P1行为合格后，在真实训练/开发分区上执行一次不超过2k更新的π0.5适配预检，使用同一Base RAW特征、读出和已冻结后端。核查实际动作loss、梯度、输入尺度、输出分布、episode reset和保存恢复；固定少量开发任务用于连通性与明显退化排查，不能查看正式P7测试集。此时对象/结构机制尚未接入，结果属于直接RAW特征基线。2k是排查接口风险的预算上限，不是充分适配或能力门槛；接口正常而短训收益不明显，仍按P6正式预算评估。P2末对对象读出做同协议预检，两次费用单列。</p>
+<p><strong>决策。</strong> 若评分失败，检查信息/表示/标定；若只有绝对检查失败，隔离修复预测和局部统计。完成充分训练判据后仍失败，则停止进入结构搜索，保留失败的能力边界。</p>
+<h3 id="phase-2">P2. 循环实体状态与候选内约束求解</h3>
+<p><strong>实现。</strong> 接入SAVi式对象槽与几何辅助训练，分离成像干扰和实体状态；在固定实体数/固定关系的第一阶段，用Theseus全局求解每个候选内的连续变量，先建立可对照的完整重算结果，不加入学习区域调度。显式区分时间递推与同一时刻的推断迭代。建立T1、T2的证明、回归和拒绝日志。</p>
+<p><strong>对照。</strong> 共用Base编码器的直接测量特征读出、标准循环对象模型、固定迭代次数、纯优化、学习提议加接受/回退。对象状态是否有用与求解是否有用分别消融；完整网格循环仅在对象表示暴露明确瓶颈时作为定点对照，不同时建设第二条正式主线。加入已知输入位移与真正物体移动的成对任务；不能用配准把真实任务变化消除。</p>
+<p><strong>验收。</strong> 受控场景跟踪IDF1≥0.85、遮挡后重识别≥80%；相同观测多次循环不提升证据量；接受步能量上升次数为0；非收敛输出有残差与预算标志。学习循环相较同预算前馈须有可重复行为增益，否则保留求解基线并重新评估循环结构。对象化若持续损失局部测量或动作相关细节，在充分训练后暂停P3，针对表示做一次受控重选；不得仅因模块来自论文就强行保留。</p>
+<h3 id="phase-3">P3. 从固定标签走向新解释发现</h3>
+<p><strong>实现。</strong> 粒子包含完整实体配置与身份关联；接入出生、消失、拆分、合并、关联重置。由学习网络提议，标准SMC/变维接受规则管理。先处理实体数量与身份，再处理复杂关系，避免一次改变全部自由度。</p>
+<p><strong>任务。</strong> 真实结构起初不在候选集合；新物体从遮挡后出现；两物体初始被误并；一个物体初始被误分；相似物体身份交换；噪声亮点不应生成实体；重新出现不应重复出生。训练与测试分开留出组合、数量和遮挡模式。</p>
+<p><strong>验收。</strong> 简单可枚举系统与精确后验一致到Monte Carlo误差；新结构发现率≥80%，虚假出生≤5%，正确拆分/合并≥80%；预算内发现延迟、模式覆盖、有效样本数与粒子灭绝率完整报告。初始候选中暗藏真结构的结果不计为“发现”。有限实体类型之外的输入应能暂缓，而非强行解释。</p>
+<h3 id="phase-4">P4. 学习变化依赖与可追溯推断链</h3>
+<p><strong>实现。</strong> 接入dNRI关系分布；模型推断G，运行时记录实际J。构建至少3跳的推断链、多重独立支持、共享祖先、关系变化、遮挡和身份错配任务。让历史错误进入循环状态，再通过新证据撤回，检验污染是否消失。包括窗口外来源被撤回和边际化摘要失效的案例。先实现全局重放/重建得到可信参考，再实现依赖失效传播；预测消息传播与修订需求传播使用不同接口。此阶段要求正确撤回，不要求已经实现局部提速。</p>
+<p><strong>训练。</strong> 先在有真实结构的仿真中使用关系/身份监督，再降低监督比例并报告；以已执行动作和对照干预检验预测关系。最终RawVLA推断只使用观测、语言、本体和历史已执行动作。使用生成器真值的oracle边不作为学习结果。</p>
+<p><strong>验收。</strong> 在有可识别真实图的受控集合上关系F1≥0.85；多跳错误链撤回正确率≥90%，有独立有效支持的判断误撤回≤5%；确定性trace修订与全重算数值一致；无来源依据的假设不能被当作已测量事实。没有足够干预的数据只报告预测依赖，不报告真实因果恢复。</p>
+<h3 id="phase-5">P5. 集成机制、理论审计与可选局部执行</h3>
+<p><strong>实现。</strong> 将结构提议、连续求解、反证检验与trace修订组成闭环。先冻结全局正确性参考，再对比精确依赖缓存、学习修订区域与边界扩张。证明并验证T3/T5，明确T4/T6/T7适用子集。局部方案要记录真实感受野、全局注意力和边界因子；全局归一化或注意力导致全局依赖时不能只靠掩码声明局部计算。提议失败、局部求解不收敛或支持记录不完整时，输出暂缓/全局重算，不产生伪确定结论。</p>
+<p><strong>强对照。</strong> 使用同一编码器、测量模型、候选提议预算，比较标准SMC+精确缓存、Gen结构搜索、全局能量求解、iSAM2适用子问题、对象循环模型与N02；固定候选诊断仍保留普通事件缓存。Gen/CPU与PyTorch/GPU原生运行时分别披露，算法工作量和同硬件主实现时延分开，不能用语言开销制造性能差距。</p>
+<p><strong>机制准入。</strong> 五个训练种子，至少四个在独立测试上无关键行为退化；相对共用表示与训练预算的成熟强基线，满足以下之一：错误链恢复提升≥5个百分点且未受影响状态漂移不恶化；或恢复性能相差≤1个百分点而全链路p95代价降低≥20%。配对置信区间支持方向，所有候选发现、误撤回与漏检指标一起报告。P0同时冻结可接受的决策延迟与内存上限；质量收益若超出系统预算，不直接进入部署。</p>
+<p><strong>局部执行启用。</strong> 它单独接受验收：相对机制相同的全局/精确缓存参考，恢复不劣于1个百分点、未受影响状态漂移不恶化，且端到端p95代价降低≥20%，至少4/5种子方向一致并有配对区间支持。计算成本包含特征、候选搜索、因子评估、拒绝步、回滚和内存维护。未通过则使用表现最好的全局/精确缓存执行，不宣称局部效率收益，也不为保留propagate继续加模块。</p>
+<p><strong>退出规则。</strong> 数据/预算充分且机制准入增益不成立，归档该机制组合，不通过删除强基线或再加一个模块维持结论。表示学习部分若有效，可以独立继续；总体路线仍需承认机制主张未成立。</p>
+<h3 id="phase-6">P6. π0.5离线接入与充分适配训练</h3>
+<p><strong>实现。</strong> 复用现有<a href="../../src/owac/backends/rawvla_features.py">特征桥</a>，绕过RGB图像塔，将一个自洽世界解释读成每相机256×2048 tokens。保留原语言/本体输入、归一化、flow-matching动作头、动作维度和时间对齐。训练和<code>sample_actions</code>共享同一入口；一个前缀在同一次去噪中只建一次。修订版本变化必须使相关prefix KV失效。</p>
+<p>默认读出为整世界MAP，保留分布供诊断；若做多个候选的策略评估，每个候选独立调用策略，明确增加的成本。不同世界的tokens不能无掩码混合后仍声称保持多峰。动作平均也不能保证物理可行。</p>
+<p><strong>两种训练轨道。</strong> A：冻结π0.5语言/动作后端，所有RAW前端与读出获得相同动作监督；用于隔离前端贡献。B：共同适配预算，N02与强RAW视觉基线解冻同样的后端层或相同LoRA配置；用于充分能力比较。若A受特征分布不匹配限制，允许进入已预注册的B，不能为N02单独扩大后端预算。</p>
+<p><strong>离线验收。</strong> 实际NPZ完整训练批次、动作loss在声明可微的观测/实体/连续提议路径上产生有效梯度；离散提议按第8.2节单独核验训练信号；循环跨chunk状态、episode reset、重放和保存恢复通过。分别报告完整预测horizon与实际执行前缀误差、夹爪转换、低光/遮挡组误差、动作分布异常和机制保留。离线误差改善只是P7准入证据，不替代任务成功率。</p>
+<h3 id="phase-7">P7. RawVLA-Bench全量闭环与机制因果验证</h3>
+<p><strong>主评测。</strong> 使用固定作者任务清单与本地协议：LIBERO 40任务×50初态×5照明域=10000条；RoboTwin 13任务×50dataset seeds×5域=3250条。训练集、开发闭环和正式测试完全分开；每个平台至少3个独立训练种子，每个正式方法原则上完成全部13250条，即每方法39750条。基础设施异常保持原身份与分母，未补齐标为incomplete。</p>
+<p><strong>机制验证。</strong> 原基准主要检验成像鲁棒性，不能单独证明未知结构与错误链撤回。另设清楚标注的扩展任务：错误初始身份/关系、遮挡后新实体、动作相关关系变化、独立支持的撤回。修改物理目标或动力学后重新生成专家/成功判据，不能机械沿用原动作标签。扩展分数与官方原协议分数分表。</p>
+<p><strong>目标。</strong> 相对同预算强前端基线，总体成功率提升目标≥3个百分点，配对95%区间下界&gt;0；Normal域下降不超过2个百分点，低光和强光分别报告。无总体提升但机制有收益时，只报告限定任务结果，不能宣布全量优越。最终“完整N02成立”要求P3发现、P4撤回、P5独有增益和P7操作结果共同通过，不能由其中一项替代。</p>
+<p><strong>最终交付。</strong> 三种子模型、完整协议/版本、全部有效任务结果、失败身份、机制事件与动作轨迹、训练曲线、逐环节p50/p95时延/显存/状态字节、消融及论文主张—证据对应表。</p>
+<h2 id="section-1193">8. 数据、损失和“充分训练”的判据</h2>
+<h3 id="section-1196">8.1 数据规模与监督来源</h3>
+<p>建议P1起建立至少100万张独立条件覆盖的RAW训练帧，P2—P5建立至少10万条16—64帧的受控训练序列。优先在既定LIBERO/RoboTwin环境和专用机制生成器中产生原始测量表示，不恢复已经终止的Arena/PolaRiS路线。生成器要变化对象形状、布局、相机、成像干扰、交互结构和先验错误，避免只对旧圆弧模板扩增噪声。</p>
+<p>以上是首版建设目标，不声称当前已有这些资产。序列、独立场景、渲染帧、增广视图和重复训练曝光量分别计数；在线生成器记录种子、版本和资产清单。正式测试建议每机制类型1000个独立场景，校准集与开发集各至少5000条，困难条件分层配额事先固定。</p>
+<p>RawVLA现有训练NPZ按实际盘点冻结，历史记录的2403条训练轨迹不是13250条闭环测试样本。P0先核查任务、源轨迹和重复照明版本，以约80/10/10分组划分训练/开发/校准；正式仿真测试初态及新增机制测试单独封存。若某任务数据不足，优先报告数据限制，不跨区借用相邻帧。额外生成的专家、深度或关系监督必须给所有可用该监督的机制对照同等访问。</p>
+<p>无隐藏真值的正式推断输入只包括RAW、可用标定、本体状态、任务语言、历史已执行动作和声明先验。仿真器物体ID、深度、接触图可以作为训练标签或评价真值，但不可通过缓存、掩码、候选初始化或测试时solver偷偷进入主方法。无监督分解的可辨识性依赖归纳偏置和监督，不能承诺纯重建自然学出唯一语义 <a href="#r29">R29</a>。</p>
+<h3 id="section-1211">8.2 损失组织与优化</h3>
+<p>先完成RAW自监督预训练，再加入对象/关系/动态损失，最后接入动作监督。联合目标中的每个损失都记录实际激活样本、共享/专属分支梯度、范数和夹角。旧N02出现过背景拟合压制差异和几何—权重监督冲突，因此每个新增目标必须有单目标与联合目标对照。</p>
+<ul>
+<li>RAW预测：带已知/学习噪声的proper scoring目标，饱和和缺失使用相应观测模型；对共同背景与局部变化分别记录误差。</li>
+<li>实体学习：来源明确的深度/几何/存在性/时序一致性目标；有标签和无标签结果分报。</li>
+<li>提议学习：用小系统真实后验或高预算参考产生目标，记录其额外计算；防止只模仿当前单一MAP而丢失替代模式。</li>
+<li>依赖学习：多步预测损失加稀疏/结构先验，另以干预和边删除检验依赖效用。NRI已指出单步预测可能靠惯性忽略交互边 <a href="#r05">R05</a>；本项目比较1/5/10步预测与删边后的性能变化，不能只验收较低重建误差。</li>
+<li>行为学习：保留原π0.5 flow-matching目标，同时维持测量与结构约束；不直接沿用ISP亮度/色度损失到非图像tokens。</li>
+</ul>
+<p>离散结构搜索与可微训练分开规定。连续几何、噪声参数和读出使用重参数化或经过数值核验的求解器反传；SMC重采样、出生/拆分和硬接受不假装天然可微。首版离散提议使用可枚举/高预算参考后验的监督目标训练，并记录参考成本；若进一步使用score-function估计、连续松弛或straight-through，须分别报告方差、偏差及消融。训练时松弛梯度的性质不能用于宣称部署时粒子后验正确，也不能用一个非零代理梯度代替实际动作行为收益。</p>
+<p>优化器以公开配方为起点，P0在开发集确定学习率/权重衰减。预训练可参考FCMAE调度；后续以AdamW、warmup、cosine、梯度裁剪为起点，具体数值进入冻结配置。若采用CAGrad等冲突处理，仅增加独立对照，不能掩盖错误任务定义。预测方差不能无限增大来回避拟合，噪声校准、方差统计和平均预测误差同时验收。</p>
+<h3 id="section-1250">8.3 训练预算起点</h3>
+<p>下表是新实验的初始预算建议，<strong>不是论文原配置、已经执行的训练或收敛保证</strong>。达到行为门槛且曲线稳定可以停止；未充分覆盖数据不能只因达到步数就宣布失败。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>优化更新/种子</th>
+<th>全局有效batch与历史长度起点</th>
+<th>种子与扩展</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>200—1000</td>
+<td>正式架构的小batch</td>
+<td>工程和吞吐；不计行为结论</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>100k预训练 + 50k测量训练</td>
+<td>256帧；测量阶段32条×8帧</td>
+<td>3种子；训练数据≥20次等价曝光或明确记录不足</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>100k</td>
+<td>32条×16帧</td>
+<td>3种子，循环展开先4再8次</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>100k</td>
+<td>32条×16帧，K=8世界候选</td>
+<td>3种子；K=4/8/16做模式/成本曲线</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>100k</td>
+<td>16条×32帧，含多跳错误链</td>
+<td>3种子；长历史64/128帧留出</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>50k联合训练</td>
+<td>16条×32帧</td>
+<td>确认阶段扩至5个完整训练种子</td>
+</tr>
+<tr>
+<td>P1后/P2末预检</td>
+<td>各≤2k；不计能力验收</td>
+<td>有效8个动作锚点，训练/开发分区</td>
+<td>各1个工程seed；P2与P1使用匹配样本及初始化控制</td>
+</tr>
+<tr>
+<td>P6-A</td>
+<td>原预算2k参考 + 20k充分适配起点</td>
+<td>有效8个动作锚点；因果历史按冻结协议</td>
+<td>每平台3种子，强基线同样预算</td>
+</tr>
+<tr>
+<td>P6-B</td>
+<td>50k适配起点，上限预定100k</td>
+<td>有效64个动作锚点；跨GPU/累积实现</td>
+<td>每平台3种子，同样后端解冻范围</td>
+</tr>
+</tbody>
+</table></div>
+<p>按上述起点，P1—P5累计为每seed 500k次更新；五个完全独立的确认seed合计2.5M次更新，尚未包括强基线、调参和π0.5适配。各阶段每步成本不同，必须用P0实测分别累计资源，不能把这些更新都按图像预训练的吞吐估算。</p>
+<p>每个阶段从同seed上一阶段检查点续训，阶段新增步数与累计步数均记录；P5新增两个确认seed须补齐上游训练，不能只把同一预训练模型换两个末端随机种子称五个独立训练。早期可共享预训练做消融节约成本，但主表标注“共享预训练条件下的seed”，另保留完整独立确认。</p>
+<p>RawVLA论文的仿真ISP比较是2000步、A100 80GB、microbatch1、累积8，采用冻结策略；这只是参考协议 <a href="#r25">R25</a>。其历史采样、输入路径和视觉塔保留方式与N02不同。本文20k/50k训练是充分适配轨道，不能与论文2k数字直接宣称公平胜出；同时提供受控更新数、样本曝光量、训练GPU小时和可训练参数的比较。</p>
+<p><strong>充分训练须同时检查五件事：</strong> 训练数据有效覆盖；至少三个种子的完整行为曲线；梯度和优化健康；合理学习率/训练时长敏感性；开发行为与校准是否趋稳。每5000步做固定开发评测，在至少三个检查点窗口观察趋势。如果损失下降而行为无改善，立即开展因果诊断；若行为持续改善且未过拟合，可按预注册上限延长至2倍预算。最终留出不用于决定延长、调阈值或换配置。</p>
+<p>达到最大预算但仍在稳定改善时，结论为“尚未收敛、资源受限”，不把它写成机制无效；在合理配方和预算下平台化且强基线更优时，则执行阶段退出条件。足够训练与严格退出并不矛盾。</p>
+<h3 id="section-1417">8.4 统计与资源</h3>
+<p>场景/episode是主要独立单位，帧和同轨迹照明变体按簇处理；训练seed单独报告。对配对场景/初态给bootstrap区间或适当配对检验，多任务与多指标的选型顺序预注册。P5的“四个seed同方向”与总体区间同时检验，不能用海量相关帧制造很窄的置信区间。</p>
+<p>资源建议：4—8张80GB级GPU用于Base对象模型和长序列；π0.5阶段依据实际后端显存画像配置。单卡80GB可以通过梯度累积执行部分阶段，但吞吐和完整周期另算；现有服务器GPU型号、空闲量和磁盘本轮没有检查，不能把建议硬件当作可用资产。</p>
+<p>每个阶段先在正式架构上测200步：GPU小时 = 更新数 × 实测秒/更新 × GPU数 / 3600。例：100k步、8卡、1秒/步约222 GPU小时/seed；若5秒/步则约1111 GPU小时/seed。这里只是公式示例，不是本模型预测值。基线、5个确认seed、移植复现和39750条/方法的闭环费用要另计。训练和评测GPU分配隔离，保留失败日志和可恢复检查点。</p>
+<p>两次早期适配预检的训练与开发闭环单独计费，不复用其开发数据作为P7测试，不将工程seed并入三个正式训练seed。理论、数据、组件复现与训练各阶段需要连续评审。可按P0→P1→P2→P3→P4→P5→P6→P7作为里程碑，不预先承诺几周内完成全部研究；P0画像后给出真实资源与日程估计。</p>
+<h2 id="section-1432">9. π0.5 / RawVLA-Bench的具体协议与比较矩阵</h2>
+<h3 id="section-1435">9.1 固定工程入口</h3>
+<p>沿用作者RawVLA/StarVLA路线，官方OpenPI用于核对π0.5语义，不临时替换已部署后端。现有桥复用语言/动作专家和flow循环，替换视觉前缀。当前主仓库Python≥3.11与已部署StarVLA旧运行时分离；P0选定GPU兼容环境，不能把根目录CPU版torch锁文件直接当GPU训练环境。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>LIBERO现有冻结协议</th>
+<th>RoboTwin现有冻结协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>相机</td>
+<td>agentview、wrist，实际键由loader核查</td>
+<td>head、left wrist、right wrist</td>
+</tr>
+<tr>
+<td>动作维度</td>
+<td>7维环境动作</td>
+<td>14维关节/夹爪目标</td>
+</tr>
+<tr>
+<td>horizon / 执行窗口</td>
+<td>10 / 5</td>
+<td>50 / 50</td>
+</tr>
+<tr>
+<td>正常化</td>
+<td>π0.5 quantile</td>
+<td>原检查点MEAN_STD，epsilon按冻结配置</td>
+</tr>
+<tr>
+<td>本体/标签对齐</td>
+<td>使用原训练字段与实际action offset</td>
+<td>NPZ 16维末端状态不可当14维关节；沿用已审计state_source_key和action_offset</td>
+</tr>
+<tr>
+<td>正式分母</td>
+<td>10000</td>
+<td>3250</td>
+</tr>
+</tbody>
+</table></div>
+<p>来源：<a href="../../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md">本地冻结评测</a>、<a href="../../research/experiments/2026-10-10_rawvla_pi05_deployment.md">作者环境部署</a>、<a href="../prompts/DeepSeek_N02_implementation.md">来源固定提示</a>。该记录最后一次本地快照中LIBERO为5820/10000，RoboTwin未齐；本轮不将其当作实时服务器状态。</p>
+<p>文献正文的部分比较协议写LIBERO horizon=8，本地固定π0.5配置是10/5；两者不能混用。主要新实验沿用本地已验收协议，另列“作者逐项复现”轨道时必须连同全部配置重新固定。RoboTwin Default基线使用作者Color渲染，N02访问对应HDR派生RAW，两者记录各自输入来源。</p>
+<p><strong>输入声明。</strong> RawVLA-Bench的现成数据是三通道伪RAW/HDR派生信号，部分缓存已为uint8；不把它描述为原生Bayer或完整传感器位深。最终可以证明该基准上的RAW表示与机制价值；原生CFA结论需要独立采集/原生渲染证据，作为单列扩展而非伪装成当前基准属性。</p>
+<h3 id="section-1533">9.2 必须保留的系统基线</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>方法</th>
+<th>比较作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B0</td>
+<td>作者Default输入 + 原π0.5</td>
+<td>冻结系统参照；继承正确光照和动作协议</td>
+</tr>
+<tr>
+<td>B1</td>
+<td>作者RawVLA ISP + 原视觉塔 + 冻结π0.5</td>
+<td>最近任务方法；允许其RGB输出，独立基线边界清楚</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>同Base RAW编码器 + 相同读出 + 相同π0.5适配</td>
+<td>排除编码器/参数量/训练预算带来的收益</td>
+</tr>
+<tr>
+<td>B3</td>
+<td>同循环对象模型 + 标准SMC/全局求解 + 精确来源缓存</td>
+<td>最近完整机制基线；不把B2当唯一强对照</td>
+</tr>
+<tr>
+<td>N02</td>
+<td>完整测量约束结构修订</td>
+<td>与B3比较新规则，与B0/B1比较系统价值</td>
+</tr>
+</tbody>
+</table></div>
+<p>P5中Gen和iSAM2分别覆盖结构推断与连续增量子问题；进入P7时优先保留其中经开发选择最强的实现作为B3，不用测试结果挑一个较弱对手。B1保留作者2k复现，同时给出与N02动作训练充分预算可比的曲线。B2/B3/N02的数据、深度监督、预训练曝光、后端训练容量与调参次数对齐。</p>
+<p>闭环主表给每平台、每光照域、每任务和每训练seed的分数；LIBERO与RoboTwin首先分报。若给合并指标，预先定义任务宏平均与样本微平均并同时披露，不掩盖不同任务数量和控制频率。标准光照稳定性、最差组、机制触发次数、误触发动作后果、完整决策延迟共同报告。</p>
+<h3 id="section-1614">9.3 三组必须完成的因果消融</h3>
+<ol>
+<li><strong>发现是否必要：</strong> 固定初始候选、随机提议、SCALOR/Gen提议、N02提议，候选和计算预算一致。</li>
+<li><strong>撤回是否有效：</strong> 仅改权重、全部重置、精确trace重放、N02局部重建；检验实际历史污染和动作恢复。</li>
+<li><strong>依赖学习是否有用：</strong> oracle图、学习图、随机图、全连接图；oracle只作上界，全部计成本。对学习图比较有无边界校验。</li>
+</ol>
+<p>额外拆分干扰估计、绝对拟合、相对评分、循环深度和粒子数。禁止只报告“去掉模块后变差”却不给参数/训练/信息预算相同的强替代实现。</p>
+<h2 id="section-1637">10. 工程结构、交付与阶段状态</h2>
+<p>下一代代码建议在同项目独立分支/checkout内建立；已有历史代码保留。以下是<strong>计划目录</strong>，不是已实现的CLI或模块。</p>
+<pre><code class="language-text">src/owac/frameworks/n02_full/
+  state.py              # 世界候选、实体、版本和状态生命周期
+  observation.py        # 标准RAW编码与测量条件模型
+  entities.py           # SAVi式循环对象表示
+  relations.py          # dNRI式关系分布和提议
+  factors.py            # 唯一证据、物理/动态/先验因子
+  solver.py             # Theseus全局参考、接受/回退；P5可选局部执行
+  hypotheses.py         # SMC、结构提议和概率账目
+  provenance.py         # 支持集合、失效传播、重放
+  readout.py            # Perceiver式自洽世界读出
+  model.py              # 因果步进与预算控制
+src/owac/training/n02_full.py
+src/owac/evaluation/n02_full/  # 各阶段行为与成本审计
+configs/encoders/n02_full/    # 固定网络、训练、数据和评测协议
+research/theory/n02_full/    # 命题、假设、证明和实现对应表
+</code></pre>
+<p>复用现有 <code>raw/rawvla_sequence.py</code>、<code>backends/rawvla_features.py</code>、唯一观测与数值工具；避免复制后在两个目录各自修bug。每个源自外部项目的核心模块附来源、版本、许可证、接口变化和一致性测试。研究公式、训练目标和推理目标使用同一符号/配置来源。</p>
+<p>检查点包含网络、优化器、调度器、AMP、随机状态、采样器位置、模型/因子版本；流式快照另外保存实体ID、粒子祖先、推断支持、窗口与策略缓存版本。训练可恢复不等于推断证据正确，二者分别验收。</p>
+<p>每阶段结果文件至少包含：代码SHA与未提交差异哈希、依赖镜像、数据/分区哈希、参数/训练曝光量、种子、行为原始计数、置信区间、资源、失败与阶段决定。用户安排Git提交；本方案交付不自动提交、不启动GPU训练、不修改已冻结的基线进程。</p>
+<h2 id="section-1653">11. 最先执行的开发包与最终研究判断</h2>
+<p>首个开发包只做P0和P1的准备及正式启动：</p>
+<ol>
+<li>冻结全量模型与数据约定，保留旧tiny作为回归，不作为新路线能力代表。</li>
+<li>锁定公开网络/求解参考，完成移植一致性和GPU资源画像。</li>
+<li>建立独立成像干扰与结构变化数据，修复“局部双亮点漏检”和“两像素位移误判”的评价盲区。</li>
+<li>启动Base RAW预训练与观测模型充分训练，交付完整3种子行为曲线；通过后先完成早期π0.5适配预检，再进入P2全局对象推断。</li>
+</ol>
+<p>这次完整开发值得推进的依据是：观测学习已显示可修复的瓶颈，学界也提供了对象循环、结构推断、增量求解与真值维护的成熟起点。研究风险集中在三处：学到的结构是否可用于正确撤回；局部机制是否优于强增量基线；机制收益是否能穿过π0.5接口成为操作收益。分阶段方案的作用，是让这三项问题分别得到足够训练和可判定的证据。</p>
+<h2 id="section-1684">12. 参考文献与可复用实现</h2>
+<p>以下链接均在本次检索中核对到论文、出版方、作者项目或官方代码入口。A表示查看全文相关章节；B表示查看论文摘要/出版方摘要与项目说明；C表示库文档/源码仓库说明。代码HEAD核对不等于运行复现。没有找到原作者代码的理论文献只列论文，不把第三方实现冒充原版。</p>
+<h3 id="r01">R01</h3>
+<p>Woo et al. <strong>ConvNeXt V2: Co-designing and Scaling ConvNets with Masked Autoencoders</strong>，CVPR 2023。<a href="https://arxiv.org/abs/2301.00808">论文</a>；<a href="https://github.com/facebookresearch/ConvNeXt-V2">官方代码与模型表</a>；<a href="https://github.com/facebookresearch/ConvNeXt-V2/blob/main/TRAINING.md">训练配方</a>。核查B/C。用于正式编码器与预训练来源。</p>
+<h3 id="r02">R02</h3>
+<p>Kipf et al. <strong>Conditional Object-Centric Learning from Video</strong>，ICLR 2022；Elsayed et al. <strong>SAVi++: Towards End-to-End Object-Centric Learning from Real-World Videos</strong>，NeurIPS 2022。<a href="https://arxiv.org/abs/2111.12594">SAVi论文</a>；<a href="https://arxiv.org/html/2206.07764v1">SAVi++全文</a>；<a href="https://github.com/google-research/slot-attention-video">官方代码</a>。核查SAVi++ A/C、SAVi项目说明。用于实体循环，监督条件不能省略。</p>
+<h3 id="r03">R03</h3>
+<p>Greff et al. <strong>Multi-Object Representation Learning with Iterative Variational Inference</strong>，ICML 2019。<a href="https://proceedings.mlr.press/v97/greff19a.html">出版方论文页</a>。核查B。用于迭代推断与多对象表征边界，不作收敛保证来源。</p>
+<h3 id="r04">R04</h3>
+<p>Jiang et al. <strong>SCALOR: Generative World Models with Scalable Object Representations</strong>，ICLR 2020。<a href="https://arxiv.org/abs/1910.02384">论文</a>；<a href="https://github.com/JindongJiang/SCALOR">官方代码</a>。核查B/C。用于发现/传播与实体生命周期基线。</p>
+<h3 id="r05">R05</h3>
+<p>Kipf et al. <strong>Neural Relational Inference for Interacting Systems</strong>，ICML 2018。<a href="https://arxiv.org/html/1802.04687v2">全文</a>；<a href="https://github.com/tkipf/nri">作者代码</a>。核查A/C。用于图潜变量推断；不提供一般因果可辨识性保证。</p>
+<h3 id="r06">R06</h3>
+<p>Graber &amp; Schwing. <strong>Dynamic Neural Relational Inference</strong>，CVPR 2020。<a href="https://openaccess.thecvf.com/content_CVPR_2020/html/Graber_Dynamic_Neural_Relational_Inference_CVPR_2020_paper.html">出版方论文页</a>；<a href="https://github.com/cgraber/cvpr_dNRI">官方代码</a>。核查B/C。用于动态关系分布。</p>
+<h3 id="r07">R07</h3>
+<p>Jonschkowski, Rastogi &amp; Brock. <strong>Differentiable Particle Filters: End-to-End Learning with Algorithmic Priors</strong>，RSS 2018。<a href="https://arxiv.org/abs/1805.11122">论文</a>；<a href="https://github.com/tu-rbo/differentiable-particle-filters">官方代码</a>。核查B/C。原实现TensorFlow/Sonnet，与PF-net作者不同。</p>
+<h3 id="r08">R08</h3>
+<p>Karkus, Hsu &amp; Lee. <strong>Particle Filter Networks with Application to Visual Localization</strong>，CoRL 2018。<a href="https://proceedings.mlr.press/v87/karkus18a.html">出版方论文页</a>。核查B。独立相关基线，不与R07混引。</p>
+<h3 id="r09">R09</h3>
+<p>Pineda et al. <strong>Theseus: A Library for Differentiable Nonlinear Optimization</strong>，NeurIPS 2022。<a href="https://arxiv.org/abs/2207.09442">论文</a>；<a href="https://github.com/facebookresearch/theseus">官方代码与求解/反传接口</a>。核查B/C。用于连续约束求解。</p>
+<h3 id="r10">R10</h3>
+<p><strong>DeepInverse</strong>，逆问题开源库。<a href="https://github.com/deepinv/deepinv">官方代码</a>；<a href="https://deepinv.github.io/deepinv/user_guide/physics/physics.html">Physics接口</a>。核查C，结合本地前轮源码来源记录。只取与RAW兼容的算子/噪声/数据保真组件。</p>
+<h3 id="r11">R11</h3>
+<p>Kaess et al. <strong>iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree</strong>，IJRR 2012。<a href="https://publications.ri.cmu.edu/isam2-incremental-smoothing-and-mapping-using-the-bayes-tree">作者机构论文页</a>；<a href="https://borglab.github.io/gtsam/isam2/">GTSAM ISAM2官方文档</a>。核查B/C。增量因子图强对照。</p>
+<h3 id="r12">R12</h3>
+<p>de Kleer. <strong>An Assumption-based TMS</strong>，Artificial Intelligence 1986。<a href="https://doi.org/10.1016/0004-3702(86)90080-9">出版方</a>；<a href="https://www.dekleer.org/bib.htm">作者文献目录</a>。核查B。支持集合与替代解释的理论来源；本文T3仍需针对实际计算图证明。</p>
+<h3 id="r13">R13</h3>
+<p>Cusumano-Towner, Saad, Lew &amp; Mansinghka. <strong>Gen: A General-Purpose Probabilistic Programming System with Programmable Inference</strong>，PLDI 2019。<a href="https://github.com/probcomp/Gen.jl">官方项目/论文入口</a>；<a href="https://www.gen.dev/docs/v0.3/">官方文档</a>。核查C及论文摘要。结构搜索与增量trace的最近强基线。</p>
+<h3 id="r14">R14</h3>
+<p>Green. <strong>Reversible jump Markov chain Monte Carlo computation and Bayesian model determination</strong>，Biometrika 1995。<a href="https://doi.org/10.1093/biomet/82.4.711">出版方</a>；<a href="https://people.maths.bris.ac.uk/~mapjg/Cpt/">作者软件入口</a>。核查B。变维接受概率理论；P3需要专门证明本项目提议满足条件。</p>
+<h3 id="r15">R15</h3>
+<p>Andrieu, Doucet &amp; Holenstein. <strong>Particle Markov chain Monte Carlo methods</strong>，JRSS B 2010。<a href="https://www.stats.ox.ac.uk/~doucet/andrieu_doucet_holenstein_PMCMC.pdf">作者公开论文</a>。本轮核查摘要/来源；理论实现阶段须精读假设。SMC/MCMC理论背景，不直接赋予有限粒子正确性。</p>
+<h3 id="r16">R16</h3>
+<p>Bolte, Sabach &amp; Teboulle. <strong>Proximal alternating linearized minimization for nonconvex and nonsmooth problems</strong>，Mathematical Programming 2014。<a href="https://www.tse-fr.eu/publications/journal-article/proximal-alternating-linearized-method-nonconvex-and-nonsmooth">作者机构论文页</a>；<a href="https://bolte.perso.math.cnrs.fr/BST2013.pdf">作者公开稿</a>。核查摘要与定理适用条件说明；P2正式证明需要逐项展开，本文不称已完成定理移植。</p>
+<h3 id="r17">R17</h3>
+<p>Winston &amp; Kolter. <strong>Monotone operator equilibrium networks</strong>，NeurIPS 2020。<a href="https://arxiv.org/abs/2006.08591">论文</a>；<a href="https://github.com/locuslab/monotone_op_net">官方代码</a>。核查B/C。具有特定结构约束的平衡网络替代方案，非首版必选模块。</p>
+<h3 id="r18">R18</h3>
+<p>Ramdas et al. <strong>Game-theoretic statistics and safe anytime-valid inference</strong>，Statistical Science 2023。<a href="https://arxiv.org/abs/2210.01948">论文</a>；<a href="https://www.stat.cmu.edu/~aramdas/SAVI/savi20.html">作者教学与来源</a>。核查B及作者方法说明。用于序贯检验的条件性保证。</p>
+<h3 id="r19">R19</h3>
+<p>Altamirano, Briol &amp; Knoblauch. <strong>Robust and Scalable Bayesian Online Changepoint Detection</strong>，ICML 2023。<a href="https://arxiv.org/abs/2302.04759">论文</a>；<a href="https://github.com/maltamiranomontero/DSM-bocd">官方代码</a>。核查B/C及本地前轮源码记录。变化检测基线，不替代语义归因。</p>
+<h3 id="r20">R20</h3>
+<p>Jaegle et al. <strong>Perceiver IO: A General Architecture for Structured Inputs &amp; Outputs</strong>，ICLR 2022。<a href="https://arxiv.org/abs/2107.14795">论文</a>；<a href="https://github.com/google-deepmind/deepmind-research/tree/master/perceiver">官方实现</a>。核查B/C。固定查询读出结构。</p>
+<h3 id="r21">R21</h3>
+<p>Hafner et al. <strong>Mastering Diverse Domains through World Models</strong>，DreamerV3，2023预印本及后续版本。<a href="https://arxiv.org/abs/2301.04104">论文</a>；<a href="https://github.com/danijar/dreamerv3">作者维护代码</a>。核查B/C。仓库自述为基于DreamerV2的重实现；用于强循环状态基线，不称本轮已复现。</p>
+<h3 id="r22">R22</h3>
+<p>Biza et al. <strong>Invariant Slot Attention: Object Discovery with Slot-Centric Reference Frames</strong>，ICML 2023。<a href="https://proceedings.mlr.press/v202/biza23a.html">出版方论文页</a>；<a href="https://arxiv.org/abs/2302.04973">论文</a>。核查B。用于对象坐标系与位移鲁棒性定点对照。</p>
+<h3 id="r23">R23</h3>
+<p><strong>Dyn-O: Building Structured World Models with Object-Centric Representations</strong>，2025预印本。<a href="https://arxiv.org/html/2507.03298v1">全文</a>。核查A，尤其Cosmos/SAM2监督与对象表示的限制。用于近期相关工作；不原样导入RGB基础模型主链路。</p>
+<h3 id="r24">R24</h3>
+<p><strong>Object-Centric World Models Meet Monte Carlo Tree Search</strong>，2026预印本。<a href="https://arxiv.org/abs/2601.06604">论文</a>。核查B，未作源码/性能复现。用于近期对象世界模型与控制的检索边界，不将其结果等同于RAW操作。</p>
+<h3 id="r25">R25</h3>
+<p>Liu et al. <strong>RawVLA: Embodied Neural Image Signal Processor For Robotic Manipulation</strong>，2026预印本。<a href="https://arxiv.org/html/2609.37530v1">全文与附录D</a>；<a href="https://github.com/ShuhongLL/RawVLA">官方代码</a>；<a href="https://shuhongll.github.io/rawvla/">项目</a>。核查A/C。数据与后端沿用仓库已固定版本，协议差异逐项披露。</p>
+<h3 id="r26">R26</h3>
+<p>Physical Intelligence et al. <strong>π0.5: a Vision-Language-Action Model with Open-World Generalization</strong>，2025。<a href="https://arxiv.org/abs/2504.16054">论文</a>；<a href="https://github.com/Physical-Intelligence/openpi">官方OpenPI</a>。核查B/C及本地StarVLA特征桥。新模型继续使用既定RawVLA后端，不以最新仓库覆盖冻结协议。</p>
+<h3 id="r27">R27</h3>
+<p><strong>sbi / NRE / BNRE</strong>。<a href="https://github.com/sbi-dev/sbi">sbi官方代码</a>；<a href="https://github.com/montefiore-institute/balanced-nre">Balanced NRE作者代码</a>；<a href="../../research/reviews/2026-10-13_n02_external_methods.md">本地前轮论文与固定版本核查</a>。本轮沿用已核验来源与实测失败记录，作为相对评分对照，不能独立判断所有候选皆错。</p>
+<h3 id="r28">R28</h3>
+<p>Chopin等维护的 <strong>particles: Sequential Monte Carlo in Python</strong>。<a href="https://github.com/nchopin/particles">官方代码</a>。核查C与HEAD。独立数值参考，性能比较要披露CPU/NumPy与GPU实现差异。</p>
+<h3 id="r29">R29</h3>
+<p>Locatello et al. <strong>Challenging Common Assumptions in the Unsupervised Learning of Disentangled Representations</strong>，ICML 2019。<a href="https://proceedings.mlr.press/v97/locatello19a.html">出版方论文页</a>。核查B。用于说明归纳偏置、监督和可辨识性边界，不泛化为所有实体学习均不可能。</p>
+<h3 id="r30">R30</h3>
+<p>Teed &amp; Deng. <strong>DROID-SLAM: Deep Visual SLAM for Monocular, Stereo, and RGB-D Cameras</strong>，NeurIPS 2021。<a href="https://arxiv.org/abs/2108.10869">论文</a>；<a href="https://github.com/princeton-vl/DROID-SLAM">官方代码</a>。核查B/C。学习循环更新与几何优化的成熟组合参照；其RGB预训练与整套SLAM不直接进入N02主链路。</p>
+</article><footer>本HTML由同名Markdown生成，正文内容保持一致。样式与脚本内嵌，可离线阅读；外部文献需要网络。<br>源文件 SHA256：09961ee9ef8b3abc765a9241e27049d0de755b398af05fdcd9710de277193352</footer></main><script>const links=[...document.querySelectorAll('nav a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=0;sections.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<140)active=i});links.forEach((a,i)=>a.classList.toggle('active',i===active));const max=document.documentElement.scrollHeight-innerHeight;document.querySelector('.progress').style.width=(max?100*scrollY/max:0)+'%'}addEventListener('scroll',update,{passive:true});update();</script></body></html>

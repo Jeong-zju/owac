@@ -1,0 +1,299 @@
+{
+  "date": "2026-10-13",
+  "kind": "development_plan_source_review_not_runtime_reproduction",
+  "upstream_heads": [
+    {
+      "repository": "facebookresearch/ConvNeXt-V2",
+      "head": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "google-research/slot-attention-video",
+      "head": "ba8f15ee19472c6f9425c9647daf87910f17b605",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "facebookresearch/theseus",
+      "head": "c8583de41824613fb135ee9bad0e930ded6be404",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "cgraber/cvpr_dNRI",
+      "head": "96c94694608fcf2a2b372699a74e5c57be3c89f9",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "JindongJiang/SCALOR",
+      "head": "8d116c0459d3fb379b204cdc58e7a76a707b365f",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "nchopin/particles",
+      "head": "3388c4bd30ab9acc5a27c970089230f93610b627",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "probcomp/Gen.jl",
+      "head": "2a27298b392e89fa67837f8871b624a41d901d19",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "google-deepmind/deepmind-research",
+      "head": "f5de0ede8430809180254ee957abf36ed62579ef",
+      "status": "resolved",
+      "error": ""
+    },
+    {
+      "repository": "danijar/dreamerv3",
+      "head": "e01491fad6434b2245a3b8ca201dd7faedcc458c",
+      "status": "resolved",
+      "error": ""
+    }
+  ],
+  "references": [
+    {
+      "id": "R01",
+      "description": "Woo et al. **ConvNeXt V2: Co-designing and Scaling ConvNets with Masked Autoencoders**，CVPR 2023。[论文](https://arxiv.org/abs/2301.00808)；[官方代码与模型表](https://github.com/facebookresearch/ConvNeXt-V2)；[训练配方](https://github.com/facebookresearch/ConvNeXt-V2/blob/main/TRAINING.md)。核查B/C。用于正式编码器与预训练来源。",
+      "urls": [
+        "https://arxiv.org/abs/2301.00808",
+        "https://github.com/facebookresearch/ConvNeXt-V2",
+        "https://github.com/facebookresearch/ConvNeXt-V2/blob/main/TRAINING.md"
+      ]
+    },
+    {
+      "id": "R02",
+      "description": "Kipf et al. **Conditional Object-Centric Learning from Video**，ICLR 2022；Elsayed et al. **SAVi++: Towards End-to-End Object-Centric Learning from Real-World Videos**，NeurIPS 2022。[SAVi论文](https://arxiv.org/abs/2111.12594)；[SAVi++全文](https://arxiv.org/html/2206.07764v1)；[官方代码](https://github.com/google-research/slot-attention-video)。核查SAVi++ A/C、SAVi项目说明。用于实体循环，监督条件不能省略。",
+      "urls": [
+        "https://arxiv.org/abs/2111.12594",
+        "https://arxiv.org/html/2206.07764v1",
+        "https://github.com/google-research/slot-attention-video"
+      ]
+    },
+    {
+      "id": "R03",
+      "description": "Greff et al. **Multi-Object Representation Learning with Iterative Variational Inference**，ICML 2019。[出版方论文页](https://proceedings.mlr.press/v97/greff19a.html)。核查B。用于迭代推断与多对象表征边界，不作收敛保证来源。",
+      "urls": [
+        "https://proceedings.mlr.press/v97/greff19a.html"
+      ]
+    },
+    {
+      "id": "R04",
+      "description": "Jiang et al. **SCALOR: Generative World Models with Scalable Object Representations**，ICLR 2020。[论文](https://arxiv.org/abs/1910.02384)；[官方代码](https://github.com/JindongJiang/SCALOR)。核查B/C。用于发现/传播与实体生命周期基线。",
+      "urls": [
+        "https://arxiv.org/abs/1910.02384",
+        "https://github.com/JindongJiang/SCALOR"
+      ]
+    },
+    {
+      "id": "R05",
+      "description": "Kipf et al. **Neural Relational Inference for Interacting Systems**，ICML 2018。[全文](https://arxiv.org/html/1802.04687v2)；[作者代码](https://github.com/tkipf/nri)。核查A/C。用于图潜变量推断；不提供一般因果可辨识性保证。",
+      "urls": [
+        "https://arxiv.org/html/1802.04687v2",
+        "https://github.com/tkipf/nri"
+      ]
+    },
+    {
+      "id": "R06",
+      "description": "Graber & Schwing. **Dynamic Neural Relational Inference**，CVPR 2020。[出版方论文页](https://openaccess.thecvf.com/content_CVPR_2020/html/Graber_Dynamic_Neural_Relational_Inference_CVPR_2020_paper.html)；[官方代码](https://github.com/cgraber/cvpr_dNRI)。核查B/C。用于动态关系分布。",
+      "urls": [
+        "https://openaccess.thecvf.com/content_CVPR_2020/html/Graber_Dynamic_Neural_Relational_Inference_CVPR_2020_paper.html",
+        "https://github.com/cgraber/cvpr_dNRI"
+      ]
+    },
+    {
+      "id": "R07",
+      "description": "Jonschkowski, Rastogi & Brock. **Differentiable Particle Filters: End-to-End Learning with Algorithmic Priors**，RSS 2018。[论文](https://arxiv.org/abs/1805.11122)；[官方代码](https://github.com/tu-rbo/differentiable-particle-filters)。核查B/C。原实现TensorFlow/Sonnet，与PF-net作者不同。",
+      "urls": [
+        "https://arxiv.org/abs/1805.11122",
+        "https://github.com/tu-rbo/differentiable-particle-filters"
+      ]
+    },
+    {
+      "id": "R08",
+      "description": "Karkus, Hsu & Lee. **Particle Filter Networks with Application to Visual Localization**，CoRL 2018。[出版方论文页](https://proceedings.mlr.press/v87/karkus18a.html)。核查B。独立相关基线，不与R07混引。",
+      "urls": [
+        "https://proceedings.mlr.press/v87/karkus18a.html"
+      ]
+    },
+    {
+      "id": "R09",
+      "description": "Pineda et al. **Theseus: A Library for Differentiable Nonlinear Optimization**，NeurIPS 2022。[论文](https://arxiv.org/abs/2207.09442)；[官方代码与求解/反传接口](https://github.com/facebookresearch/theseus)。核查B/C。用于连续约束求解。",
+      "urls": [
+        "https://arxiv.org/abs/2207.09442",
+        "https://github.com/facebookresearch/theseus"
+      ]
+    },
+    {
+      "id": "R10",
+      "description": "**DeepInverse**，逆问题开源库。[官方代码](https://github.com/deepinv/deepinv)；[Physics接口](https://deepinv.github.io/deepinv/user_guide/physics/physics.html)。核查C，结合本地前轮源码来源记录。只取与RAW兼容的算子/噪声/数据保真组件。",
+      "urls": [
+        "https://github.com/deepinv/deepinv",
+        "https://deepinv.github.io/deepinv/user_guide/physics/physics.html"
+      ]
+    },
+    {
+      "id": "R11",
+      "description": "Kaess et al. **iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree**，IJRR 2012。[作者机构论文页](https://publications.ri.cmu.edu/isam2-incremental-smoothing-and-mapping-using-the-bayes-tree)；[GTSAM ISAM2官方文档](https://borglab.github.io/gtsam/isam2/)。核查B/C。增量因子图强对照。",
+      "urls": [
+        "https://publications.ri.cmu.edu/isam2-incremental-smoothing-and-mapping-using-the-bayes-tree",
+        "https://borglab.github.io/gtsam/isam2/"
+      ]
+    },
+    {
+      "id": "R12",
+      "description": "de Kleer. **An Assumption-based TMS**，Artificial Intelligence 1986。[出版方](https://doi.org/10.1016/0004-3702(86)90080-9)；[作者文献目录](https://www.dekleer.org/bib.htm)。核查B。支持集合与替代解释的理论来源；本文T3仍需针对实际计算图证明。",
+      "urls": [
+        "https://doi.org/10.1016/0004-3702(86",
+        "https://www.dekleer.org/bib.htm"
+      ]
+    },
+    {
+      "id": "R13",
+      "description": "Cusumano-Towner, Saad, Lew & Mansinghka. **Gen: A General-Purpose Probabilistic Programming System with Programmable Inference**，PLDI 2019。[官方项目/论文入口](https://github.com/probcomp/Gen.jl)；[官方文档](https://www.gen.dev/docs/v0.3/)。核查C及论文摘要。结构搜索与增量trace的最近强基线。",
+      "urls": [
+        "https://github.com/probcomp/Gen.jl",
+        "https://www.gen.dev/docs/v0.3/"
+      ]
+    },
+    {
+      "id": "R14",
+      "description": "Green. **Reversible jump Markov chain Monte Carlo computation and Bayesian model determination**，Biometrika 1995。[出版方](https://doi.org/10.1093/biomet/82.4.711)；[作者软件入口](https://people.maths.bris.ac.uk/~mapjg/Cpt/)。核查B。变维接受概率理论；P3需要专门证明本项目提议满足条件。",
+      "urls": [
+        "https://doi.org/10.1093/biomet/82.4.711",
+        "https://people.maths.bris.ac.uk/~mapjg/Cpt/"
+      ]
+    },
+    {
+      "id": "R15",
+      "description": "Andrieu, Doucet & Holenstein. **Particle Markov chain Monte Carlo methods**，JRSS B 2010。[作者公开论文](https://www.stats.ox.ac.uk/~doucet/andrieu_doucet_holenstein_PMCMC.pdf)。本轮核查摘要/来源；理论实现阶段须精读假设。SMC/MCMC理论背景，不直接赋予有限粒子正确性。",
+      "urls": [
+        "https://www.stats.ox.ac.uk/~doucet/andrieu_doucet_holenstein_PMCMC.pdf"
+      ]
+    },
+    {
+      "id": "R16",
+      "description": "Bolte, Sabach & Teboulle. **Proximal alternating linearized minimization for nonconvex and nonsmooth problems**，Mathematical Programming 2014。[作者机构论文页](https://www.tse-fr.eu/publications/journal-article/proximal-alternating-linearized-method-nonconvex-and-nonsmooth)；[作者公开稿](https://bolte.perso.math.cnrs.fr/BST2013.pdf)。核查摘要与定理适用条件说明；P2正式证明需要逐项展开，本文不称已完成定理移植。",
+      "urls": [
+        "https://www.tse-fr.eu/publications/journal-article/proximal-alternating-linearized-method-nonconvex-and-nonsmooth",
+        "https://bolte.perso.math.cnrs.fr/BST2013.pdf"
+      ]
+    },
+    {
+      "id": "R17",
+      "description": "Winston & Kolter. **Monotone operator equilibrium networks**，NeurIPS 2020。[论文](https://arxiv.org/abs/2006.08591)；[官方代码](https://github.com/locuslab/monotone_op_net)。核查B/C。具有特定结构约束的平衡网络替代方案，非首版必选模块。",
+      "urls": [
+        "https://arxiv.org/abs/2006.08591",
+        "https://github.com/locuslab/monotone_op_net"
+      ]
+    },
+    {
+      "id": "R18",
+      "description": "Ramdas et al. **Game-theoretic statistics and safe anytime-valid inference**，Statistical Science 2023。[论文](https://arxiv.org/abs/2210.01948)；[作者教学与来源](https://www.stat.cmu.edu/~aramdas/SAVI/savi20.html)。核查B及作者方法说明。用于序贯检验的条件性保证。",
+      "urls": [
+        "https://arxiv.org/abs/2210.01948",
+        "https://www.stat.cmu.edu/~aramdas/SAVI/savi20.html"
+      ]
+    },
+    {
+      "id": "R19",
+      "description": "Altamirano, Briol & Knoblauch. **Robust and Scalable Bayesian Online Changepoint Detection**，ICML 2023。[论文](https://arxiv.org/abs/2302.04759)；[官方代码](https://github.com/maltamiranomontero/DSM-bocd)。核查B/C及本地前轮源码记录。变化检测基线，不替代语义归因。",
+      "urls": [
+        "https://arxiv.org/abs/2302.04759",
+        "https://github.com/maltamiranomontero/DSM-bocd"
+      ]
+    },
+    {
+      "id": "R20",
+      "description": "Jaegle et al. **Perceiver IO: A General Architecture for Structured Inputs & Outputs**，ICLR 2022。[论文](https://arxiv.org/abs/2107.14795)；[官方实现](https://github.com/google-deepmind/deepmind-research/tree/master/perceiver)。核查B/C。固定查询读出结构。",
+      "urls": [
+        "https://arxiv.org/abs/2107.14795",
+        "https://github.com/google-deepmind/deepmind-research/tree/master/perceiver"
+      ]
+    },
+    {
+      "id": "R21",
+      "description": "Hafner et al. **Mastering Diverse Domains through World Models**，DreamerV3，2023预印本及后续版本。[论文](https://arxiv.org/abs/2301.04104)；[作者维护代码](https://github.com/danijar/dreamerv3)。核查B/C。仓库自述为基于DreamerV2的重实现；用于强循环状态基线，不称本轮已复现。",
+      "urls": [
+        "https://arxiv.org/abs/2301.04104",
+        "https://github.com/danijar/dreamerv3"
+      ]
+    },
+    {
+      "id": "R22",
+      "description": "Biza et al. **Invariant Slot Attention: Object Discovery with Slot-Centric Reference Frames**，ICML 2023。[出版方论文页](https://proceedings.mlr.press/v202/biza23a.html)；[论文](https://arxiv.org/abs/2302.04973)。核查B。用于对象坐标系与位移鲁棒性定点对照。",
+      "urls": [
+        "https://proceedings.mlr.press/v202/biza23a.html",
+        "https://arxiv.org/abs/2302.04973"
+      ]
+    },
+    {
+      "id": "R23",
+      "description": "**Dyn-O: Building Structured World Models with Object-Centric Representations**，2025预印本。[全文](https://arxiv.org/html/2507.03298v1)。核查A，尤其Cosmos/SAM2监督与对象表示的限制。用于近期相关工作；不原样导入RGB基础模型主链路。",
+      "urls": [
+        "https://arxiv.org/html/2507.03298v1"
+      ]
+    },
+    {
+      "id": "R24",
+      "description": "**Object-Centric World Models Meet Monte Carlo Tree Search**，2026预印本。[论文](https://arxiv.org/abs/2601.06604)。核查B，未作源码/性能复现。用于近期对象世界模型与控制的检索边界，不将其结果等同于RAW操作。",
+      "urls": [
+        "https://arxiv.org/abs/2601.06604"
+      ]
+    },
+    {
+      "id": "R25",
+      "description": "Liu et al. **RawVLA: Embodied Neural Image Signal Processor For Robotic Manipulation**，2026预印本。[全文与附录D](https://arxiv.org/html/2609.37530v1)；[官方代码](https://github.com/ShuhongLL/RawVLA)；[项目](https://shuhongll.github.io/rawvla/)。核查A/C。数据与后端沿用仓库已固定版本，协议差异逐项披露。",
+      "urls": [
+        "https://arxiv.org/html/2609.37530v1",
+        "https://github.com/ShuhongLL/RawVLA",
+        "https://shuhongll.github.io/rawvla/"
+      ]
+    },
+    {
+      "id": "R26",
+      "description": "Physical Intelligence et al. **π0.5: a Vision-Language-Action Model with Open-World Generalization**，2025。[论文](https://arxiv.org/abs/2504.16054)；[官方OpenPI](https://github.com/Physical-Intelligence/openpi)。核查B/C及本地StarVLA特征桥。新模型继续使用既定RawVLA后端，不以最新仓库覆盖冻结协议。",
+      "urls": [
+        "https://arxiv.org/abs/2504.16054",
+        "https://github.com/Physical-Intelligence/openpi"
+      ]
+    },
+    {
+      "id": "R27",
+      "description": "**sbi / NRE / BNRE**。[sbi官方代码](https://github.com/sbi-dev/sbi)；[Balanced NRE作者代码](https://github.com/montefiore-institute/balanced-nre)；[本地前轮论文与固定版本核查](../../research/reviews/2026-10-13_n02_external_methods.md)。本轮沿用已核验来源与实测失败记录，作为相对评分对照，不能独立判断所有候选皆错。",
+      "urls": [
+        "https://github.com/sbi-dev/sbi",
+        "https://github.com/montefiore-institute/balanced-nre"
+      ]
+    },
+    {
+      "id": "R28",
+      "description": "Chopin等维护的 **particles: Sequential Monte Carlo in Python**。[官方代码](https://github.com/nchopin/particles)。核查C与HEAD。独立数值参考，性能比较要披露CPU/NumPy与GPU实现差异。",
+      "urls": [
+        "https://github.com/nchopin/particles"
+      ]
+    },
+    {
+      "id": "R29",
+      "description": "Locatello et al. **Challenging Common Assumptions in the Unsupervised Learning of Disentangled Representations**，ICML 2019。[出版方论文页](https://proceedings.mlr.press/v97/locatello19a.html)。核查B。用于说明归纳偏置、监督和可辨识性边界，不泛化为所有实体学习均不可能。",
+      "urls": [
+        "https://proceedings.mlr.press/v97/locatello19a.html"
+      ]
+    },
+    {
+      "id": "R30",
+      "description": "Teed & Deng. **DROID-SLAM: Deep Visual SLAM for Monocular, Stereo, and RGB-D Cameras**，NeurIPS 2021。[论文](https://arxiv.org/abs/2108.10869)；[官方代码](https://github.com/princeton-vl/DROID-SLAM)。核查B/C。学习循环更新与几何优化的成熟组合参照；其RGB预训练与整套SLAM不直接进入N02主链路。",
+      "urls": [
+        "https://arxiv.org/abs/2108.10869",
+        "https://github.com/princeton-vl/DROID-SLAM"
+      ]
+    }
+  ],
+  "evidence_levels": "A: relevant full-text sections; B: abstract/publisher summary; C: official documentation or README. Per-reference description states actual scope."
+}

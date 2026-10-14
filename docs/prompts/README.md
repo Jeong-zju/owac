@@ -1,11 +1,13 @@
 # 三项编码器研究的 DeepSeek 使用入口
 
+2026-10-13：N02正式开发改用 **[v1.1分阶段提示词](n02_v1_1/README.md)**，覆盖P0—P7及P1后/P2末两次策略预检。当前N02代码审计、共同接口和固定参考实现均在该目录；从P0开始逐阶段交接。旧N02提示词保留为历史原型要求。
+
 三个 worktree 分别研究 N01、N02、N04，具有相同的部署基线、研究文档快照和提示词。每份提示词都可独立使用，包含核心更新规则、参考代码、文件职责、数据接口、训练顺序、π0.5 接入和验收实验。
 
 | 研究方向 | worktree | 分支 | 完整提示词 |
 | --- | --- | --- | --- |
 | N01 自适应时空证据积分 | `/home/jeong/zeno/owac/worktrees/n01-evidence-integration` | `lzh/n01-evidence-integration` | [N01 提示词](DeepSeek_N01_implementation.md) |
-| N02 测量约束的循环补全 | `/home/jeong/zeno/owac/worktrees/n02-measurement-completion` | `lzh/n02-measurement-completion` | [N02 提示词](DeepSeek_N02_implementation.md) |
+| N02 测量约束的循环补全 | `/home/jeong/zeno/owac/worktrees/n02-measurement-completion` | `lzh/n02-measurement-completion` | [N02 v1.1分阶段提示词](n02_v1_1/README.md)；[旧原型提示词](DeepSeek_N02_implementation.md) |
 | N04 自运动预测与变化分离 | `/home/jeong/zeno/owac/worktrees/n04-egomotion-separation` | `lzh/n04-egomotion-separation` | [N04 提示词](DeepSeek_N04_implementation.md) |
 
 在对应 worktree 中启动一个 DeepSeek 编程会话，让它读取对应提示词并开始实现；如果该会话不能读取文件，就把提示词全文粘贴进去。三个会话可分别推进，不必把三份提示词同时交给一个会话。
@@ -17,7 +19,7 @@
 ```
 
 ```text
-请进入 /home/jeong/zeno/owac/worktrees/n02-measurement-completion，完整读取 docs/prompts/DeepSeek_N02_implementation.md 和它要求阅读的仓库文档，然后按顺序实际实现 N02。先做两假设测量更新，再做局部反证修订、训练和后端接入。
+请进入 /home/jeong/zeno/owac/worktrees/n02-measurement-completion，完整读取 docs/prompts/n02_v1_1/README.md、00_SHARED_CONTRACT.md、01_CURRENT_IMPLEMENTATION.md 和 P0_FOUNDATION.md（后三个文件位于同一目录），以及其中要求阅读的仓库文档。本次只按 P0 提示词实际开发、验证和交付，完成后停在 P0 交接点。
 ```
 
 ```text
