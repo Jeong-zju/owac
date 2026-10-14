@@ -61,6 +61,7 @@ __all__ = [
     "InterpolationSpec",
     "BlockFit",
     "StructureFit",
+    "align_interpolation_sources",
     "fit_structure",
     "interpolation_from_correspondence",
 ]
@@ -322,11 +323,18 @@ class InterpolationSpec:
     ``canonical_sources(domain.evidence_source_ids)``.  Overlapping taps are
     allowed: the row covariance is ``A_interp Sigma A_interp^T``, which is exactly
     where duplicate information shows up as a singular block.
+
+    P2 addition (optional, default ``None`` keeps P1 behaviour): ``source_ids``
+    names the identity of every column, so a builder that recomputed its weights
+    from a redacted ledger view can declare *which* sources those columns are and
+    the fit re-indexes them onto its own canonical evidence order by identity
+    instead of trusting a positional convention.
     """
 
     row_positions: tuple[tuple[float, float], ...]
     weights: torch.Tensor
     version: str = "interp-v1"
+    source_ids: tuple[SourceKey, ...] | None = None
 
     def __post_init__(self) -> None:
         if not self.version:
@@ -335,6 +343,11 @@ class InterpolationSpec:
             raise ValueError("InterpolationSpec.weights must be [n_rows, n_evidence]")
         if self.weights.shape[0] != len(self.row_positions):
             raise ValueError("InterpolationSpec needs one declared position per row")
+        if self.source_ids is not None and len(self.source_ids) != self.weights.shape[1]:
+            raise ValueError(
+                f"InterpolationSpec.source_ids has {len(self.source_ids)} entries but weights "
+                f"has {self.weights.shape[1]} columns"
+            )
 
 
 @dataclass(frozen=True)
@@ -684,6 +697,13 @@ def _build_rows(
             )
         converted = interpolation_from_correspondence(spec, used, ledger)
         spec = converted
+    describe = getattr(correspondence, "describe", None)
+    if callable(describe):
+        diagnostics["correspondence_report"] = describe()
+    if spec.source_ids is not None:
+        # P2: name the columns by identity and let the fit place them in its own order.
+        spec = align_interpolation_sources(spec, used)
+        diagnostics["interpolation_sources_aligned"] = len(used)
     weights = spec.weights.to(dtype)
     if weights.shape[1] != len(used):
         raise ValueError(
@@ -987,6 +1007,46 @@ def _prior_in_chart(prior, transform, terms, dtype):
             ]
             change[column, column] = transform.scale[axis] / declared.scale[axis]
     return change @ prior.mean.to(dtype), change @ prior.covariance.to(dtype) @ change.T
+
+
+def align_interpolation_sources(
+    spec: InterpolationSpec, used: Sequence[SourceKey]
+) -> InterpolationSpec:
+    """Re-index ``spec`` columns onto ``used`` by source identity.
+
+    P2 builders name their columns explicitly (``source_ids``) because a redacted
+    ledger view can differ from the domain's evidence set.  A nonzero weight on a
+    column that the domain does not carry is refused rather than silently dropped
+    or renormalised: that would change what the row measures.
+    """
+    if spec.source_ids is None:
+        return spec
+    index = {key.identity(): position for position, key in enumerate(used)}
+    columns: list[int | None] = []
+    for key in spec.source_ids:
+        columns.append(index.get(key.identity()))
+    dropped_nonzero = [
+        key
+        for column, key in enumerate(spec.source_ids)
+        if columns[column] is None and bool(spec.weights[:, column].abs().max() > 0)
+    ]
+    if dropped_nonzero:
+        raise ValueError(
+            "interpolation rows carry nonzero weight on sources outside the domain's usable "
+            f"evidence set: {[key.identity() for key in dropped_nonzero]}"
+        )
+    weights = torch.zeros(
+        (spec.weights.shape[0], len(used)), dtype=spec.weights.dtype, device=spec.weights.device
+    )
+    for column, position in enumerate(columns):
+        if position is not None:
+            weights[:, position] = spec.weights[:, column]
+    return InterpolationSpec(
+        row_positions=spec.row_positions,
+        weights=weights,
+        version=spec.version,
+        source_ids=tuple(used),
+    )
 
 
 def interpolation_from_correspondence(

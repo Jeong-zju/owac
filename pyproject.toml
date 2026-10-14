@@ -25,6 +25,8 @@ where = ["src"]
 [tool.setuptools.package-data]
 "owac.runtime" = ["*.html"]
 "owac.baselines._vendor.dbsr" = ["LICENSE", "provenance.json"]
+"owac.baselines._vendor.sea_raft" = ["LICENSE", "provenance.json", "*.py"]
+"owac.baselines._vendor.sea_raft.utils" = ["*.py"]
 
 [tool.ruff]
 target-version = "py311"
@@ -35,6 +37,9 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/owac/baselines/_vendor/dbsr/*.py" = ["E501", "UP008", "UP032"] # Preserve upstream definitions.
+# Preserve upstream SEA-RAFT definitions: only the declared vendor changes apply.
+"src/owac/baselines/_vendor/sea_raft/*.py" = ["B007", "E501", "E712", "E722", "F401", "F811", "F841", "I001", "UP008", "UP034"]
+"src/owac/baselines/_vendor/sea_raft/utils/*.py" = ["B007", "E501", "E712", "E722", "F401", "F811", "F841", "I001", "UP008", "UP034"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,311 @@
+{
+  "schema": "owac.n01_full.p2_motion_train.v1",
+  "stage": "P2-dev-rgb3",
+  "seeds": [
+    101,
+    211,
+    307
+  ],
+  "model": {
+    "mode": "rgb3",
+    "depth": "resnet34",
+    "iters": 4,
+    "pretrained_checkpoint": null
+  },
+  "data": {
+    "config_path": "configs/encoders/n01_full/p2_motion_noise.json",
+    "input_mode": "rawvla_rgb3",
+    "geometry": null,
+    "pseudo_raw_geometry": {
+      "height": 128,
+      "width": 128,
+      "input_mode": "rawvla_rgb3",
+      "cfa_pattern": "rgb3",
+      "origin_yx": [
+        0,
+        0
+      ],
+      "channel_phase": [],
+      "value_units": "pseudo_raw_hdr"
+    },
+    "recipe_scale": 2.0,
+    "exposure_correction": "known_metadata_gain",
+    "batch_size": 4,
+    "cache_entries": 1024,
+    "train": {
+      "cases": {
+        "translation_subpixel": [
+          "x+0.25",
+          "x-0.25",
+          "x+0.50",
+          "x-0.50",
+          "x+0.75",
+          "x-0.75",
+          "y+0.25",
+          "y-0.25",
+          "y+0.50",
+          "y-0.50",
+          "y+0.75",
+          "y-0.75"
+        ],
+        "rotation": {
+          "prefix": "t",
+          "count": 96
+        },
+        "layered_occlusion": {
+          "prefix": "t",
+          "count": 96
+        },
+        "local_nonrigid": {
+          "prefix": "t",
+          "count": 96
+        },
+        "repeated_texture": {
+          "prefix": "t",
+          "count": 96
+        },
+        "exposure_gain": {
+          "prefix": "t",
+          "count": 96
+        },
+        "motion_blur": {
+          "prefix": "t",
+          "count": 96
+        },
+        "combined_hard": {
+          "prefix": "t",
+          "count": 96
+        }
+      },
+      "history_offsets": [
+        1,
+        2
+      ]
+    },
+    "calibration": {
+      "cases": {
+        "translation_subpixel": [
+          "x+0.25",
+          "x-0.25",
+          "x+0.50",
+          "x-0.50",
+          "x+0.75",
+          "x-0.75",
+          "y+0.25",
+          "y-0.25",
+          "y+0.50",
+          "y-0.50",
+          "y+0.75",
+          "y-0.75"
+        ],
+        "rotation": {
+          "prefix": "c",
+          "count": 16
+        },
+        "layered_occlusion": {
+          "prefix": "c",
+          "count": 16
+        },
+        "local_nonrigid": {
+          "prefix": "c",
+          "count": 16
+        },
+        "repeated_texture": {
+          "prefix": "c",
+          "count": 16
+        },
+        "exposure_gain": {
+          "prefix": "c",
+          "count": 16
+        },
+        "motion_blur": {
+          "prefix": "c",
+          "count": 16
+        },
+        "combined_hard": {
+          "prefix": "c",
+          "count": 16
+        }
+      },
+      "history_offsets": [
+        1
+      ]
+    },
+    "validation": {
+      "cases": {
+        "translation_subpixel": [
+          "x+0.25",
+          "x-0.25",
+          "x+0.50",
+          "x-0.50",
+          "x+0.75",
+          "x-0.75",
+          "y+0.25",
+          "y-0.25",
+          "y+0.50",
+          "y-0.50",
+          "y+0.75",
+          "y-0.75"
+        ],
+        "rotation": {
+          "prefix": "v",
+          "count": 2
+        },
+        "layered_occlusion": {
+          "prefix": "v",
+          "count": 2
+        },
+        "local_nonrigid": {
+          "prefix": "v",
+          "count": 2
+        },
+        "repeated_texture": {
+          "prefix": "v",
+          "count": 2
+        },
+        "exposure_gain": {
+          "prefix": "v",
+          "count": 2
+        },
+        "motion_blur": {
+          "prefix": "v",
+          "count": 2
+        },
+        "combined_hard": {
+          "prefix": "v",
+          "count": 2
+        }
+      },
+      "history_offsets": [
+        1
+      ]
+    },
+    "test": {
+      "cases": {
+        "translation_subpixel": [
+          "x+0.25",
+          "x-0.25",
+          "x+0.50",
+          "x-0.50",
+          "x+0.75",
+          "x-0.75",
+          "y+0.25",
+          "y-0.25",
+          "y+0.50",
+          "y-0.50",
+          "y+0.75",
+          "y-0.75"
+        ],
+        "rotation": {
+          "prefix": "e",
+          "count": 8
+        },
+        "layered_occlusion": {
+          "prefix": "e",
+          "count": 8
+        },
+        "local_nonrigid": {
+          "prefix": "e",
+          "count": 8
+        },
+        "repeated_texture": {
+          "prefix": "e",
+          "count": 8
+        },
+        "exposure_gain": {
+          "prefix": "e",
+          "count": 8
+        },
+        "motion_blur": {
+          "prefix": "e",
+          "count": 8
+        },
+        "combined_hard": {
+          "prefix": "e",
+          "count": 8
+        }
+      },
+      "history_offsets": [
+        1
+      ]
+    }
+  },
+  "selection": {
+    "lrs": [
+      0.00025,
+      5e-05
+    ],
+    "iters": [
+      4,
+      8
+    ],
+    "updates": 256
+  },
+  "budget": {
+    "updates": 100000,
+    "max_updates": 300000,
+    "validation_interval": 1000,
+    "plateau_checks": 8,
+    "delta_val": 0.002,
+    "monitor": "val_epe_sensor_px"
+  },
+  "schedule": {
+    "drops": [
+      [
+        50000,
+        0.1
+      ],
+      [
+        80000,
+        0.01
+      ]
+    ],
+    "min_drop_ratio": 0.1
+  },
+  "optimizer": {
+    "weight_decay": 0.0001,
+    "eps": 1e-08,
+    "clip_grad": 1.0,
+    "gamma": 0.8,
+    "max_flow_packed": 400.0,
+    "amp": "bf16"
+  },
+  "checkpoint": {
+    "every": 1000,
+    "keep_last": 1
+  },
+  "diagnostics": {
+    "fit_updates": 64,
+    "check_updates": 256,
+    "fit_batch": 2,
+    "fit_max_ratio": 0.5,
+    "fit_target": 12.0,
+    "input_limit": 8.0
+  },
+  "evaluation": {
+    "buckets": {
+      "translation_subpixel": "fast_alignable",
+      "exposure_gain": "fast_alignable",
+      "motion_blur": "fast_alignable",
+      "repeated_texture": "fast_hard",
+      "layered_occlusion": "fast_hard",
+      "local_nonrigid": "slow_structural_change",
+      "rotation": "slow_structural_change",
+      "combined_hard": "current_frame_anomaly"
+    },
+    "simplified_search_px": 12,
+    "risk_bins": 4,
+    "risk_quantile": 0.9,
+    "risk_margin_sensor_px": 1.0,
+    "risk_tolerance_sensor_px": 1.0,
+    "static_false_rejection_sensor_px": 0.5,
+    "latency_warmup": 2,
+    "latency_repeats": 5,
+    "max_calibration_pairs": 32,
+    "max_validation_pairs": 32,
+    "max_test_pairs": 32,
+    "display_batch": 4
+  },
+  "notes": "P2 pseudo-RAW (three collocated channels, no CFA phase) motion training arm, DEV SCALE. Same seeds, budget tier, validation interval, delta_val, schedule, optimizer and evaluation buckets as configs/encoders/n01_full/p2_motion_train.json (the cfa4 arm), so the two runs differ only by the stem input domain: synthetic CFA 4 phases (packed 2 sensor px per cell) vs rawvla_rgb3 three co-located channels (packed 1 sensor px per cell). The shipped pseudo_raw_geometry (128x128 sensor, channel_phase=[]) is used as-is and every pixel-valued recipe length is scaled by 2 to preserve the declared relative scene at that resolution. The authorised formal budget (three seeds x 100k) covers the cfa4 arm only; this arm is delivered at development scale (fit-check now, a 256-update dev run on the server) and its numbers are not a formal-budget result.",
+  "scale": "dev"
+}

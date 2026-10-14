@@ -1,0 +1,325 @@
+{
+  "schema": "owac.n01_full.p2_motion_noise.v1",
+  "config_version": "n01-full-v1-p2-motion-noise-v1",
+  "stage": "P2",
+  "created_on": "2026-10-14",
+  "source_documents": [
+    "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+    "docs/prompts/n01_v1_0/P2_RAW_MOTION.md",
+    "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md"
+  ],
+  "seed_rule": {
+    "namespace_template": "n01-full-v1/{split}/{case}/{sequence}",
+    "digest": "sha256",
+    "modulus": 9223372036854775808,
+    "data_seed_base": 1009,
+    "model_seeds": [
+      101,
+      211,
+      307
+    ],
+    "statement": "the data seed of a namespace is sha256('<data_seed_base>|<namespace>')[:8] as a big-endian integer modulo modulus; every per-frame sub-seed appends /scene, /noise or /motion plus the frame id, so frame k never reads frame k+1; the base 1009 is disjoint from the model seeds 101/211/307 and the generator refuses a collision"
+  },
+  "policy": {
+    "fitting_splits": [
+      "train",
+      "calibration"
+    ],
+    "selection_split": "validation",
+    "evaluation_split": "test",
+    "statement": "explicit_synthesis numbers are chosen and live in the synthesis pseudo-region; fitted numbers may come from train or calibration only. The test region never fits a parameter and never selects a checkpoint; the validation region selects checkpoints and is not a fitting input."
+  },
+  "regions": {
+    "train": "motion pairs that optimise the correspondence model; geometry, exposure and noise realisations are drawn from the declared recipes and the synthetic calibration",
+    "calibration": "fits the shot/read and shared-black-level parameters and the correspondence error/coverage tables that are reported as fitted provenance",
+    "validation": "selects checkpoints and the development learning rates; usable as generator input but never a source of fitted noise or risk parameters",
+    "test": "evaluation only: never fits a parameter, never selects a checkpoint, and is reported separately from the calibration and validation regions"
+  },
+  "geometry": {
+    "height": 64,
+    "width": 64,
+    "input_mode": "synthetic_cfa",
+    "cfa_pattern": "RGGB",
+    "origin_yx": [
+      0,
+      0
+    ],
+    "channel_phase": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "value_units": "raw_dn_12bit"
+  },
+  "pseudo_raw_geometry": {
+    "height": 64,
+    "width": 64,
+    "input_mode": "rawvla_rgb3",
+    "cfa_pattern": "rgb3",
+    "origin_yx": [
+      0,
+      0
+    ],
+    "channel_phase": [],
+    "value_units": "pseudo_raw_hdr"
+  },
+  "materials": {
+    "synthetic_cfa": "four-phase CFA samples of the analytic radiance field with a declared pattern and packed grid; a synthetic sensor, never reported as a real capture",
+    "rawvla_rgb3_hdr_derived": "three collocated channels at full sensor resolution with no CFA phase and no fourth measurement; this is the author HDR-derived pseudo-RAW identity and is listed separately from any real CFA material",
+    "inverted_rgb_capture": "not produced here: material recovered by inverting an sRGB pipeline is a separate entry with its own dataset_id and is never mixed into the synthetic CFA counts"
+  },
+  "cases": {
+    "translation_subpixel": {
+      "background": "sinusoid",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.0,
+        0.0
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 8.0,
+      "jitter_px": 0.0,
+      "sequence_convention": "the sequence token is the displacement itself, e.g. 'x+0.25' or 'y-0.75'; frame 1 is the reference and frame 0 the source, so the analytic displacement is exactly the token with no jitter; jitter_px is zero, so the truth is exactly the token",
+      "occluder_scale_reference": 1.0
+    },
+    "rotation": {
+      "background": "steps",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.0,
+        0.0
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.6,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 10.0,
+      "jitter_px": 0.0,
+      "sequence_convention": "sequence is an integer label; the rotation accumulates 0.6 degrees per frame about the sensor centre; jitter_px is zero, so the case is exactly the declared rotation and no translation",
+      "occluder_scale_reference": 1.0
+    },
+    "layered_occlusion": {
+      "background": "sinusoid",
+      "object_field": "blobs",
+      "occluder": true,
+      "occluder_radius": 6.0,
+      "background_step_px": [
+        0.5,
+        0.0
+      ],
+      "object_step_px": [
+        2.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 8.0,
+      "jitter_px": 0.25,
+      "sequence_convention": "sequence is an integer label; the disk moves 2 px per frame relative to the background, so both occlusion bands appear; the reference-side object is 0.9x in chart scale so its silhouette is larger than in the source, widening the newly exposed background ring that carries the occluded_in_source label; background content that the object moved onto is labelled occluded_in_source (pull covered by a nearer layer in the source), and the mirror case is structurally impossible for a rigid source layer",
+      "occluder_scale_reference": 0.9
+    },
+    "local_nonrigid": {
+      "background": "blobs",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.5,
+        0.25
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 1.5,
+      "warp_sigma_px": 6.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 12.0,
+      "jitter_px": 0.25,
+      "sequence_convention": "sequence is an integer label; frame 0 is undeformed and every later frame carries the full local warp, so the deformation is relative to the past and never depends on a future frame",
+      "occluder_scale_reference": 1.0
+    },
+    "repeated_texture": {
+      "background": "sinusoid",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.25,
+        0.0
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 6.0,
+      "jitter_px": 0.0,
+      "sequence_convention": "sequence is an integer label; the 6 px period is the declared repeated-texture ambiguity scale recorded in the supervision",
+      "occluder_scale_reference": 1.0
+    },
+    "exposure_gain": {
+      "background": "blobs",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.75,
+        0.0
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1890.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 0.0,
+      "blur_samples": 1,
+      "texture_period_px": 12.0,
+      "jitter_px": 0.25,
+      "sequence_convention": "sequence is an integer label; odd frames carry the 1890 DN-per-radiance exposure and even frames the 1400 one, so consecutive pairs change exposure in both directions",
+      "occluder_scale_reference": 1.0
+    },
+    "motion_blur": {
+      "background": "steps",
+      "object_field": "blobs",
+      "occluder": false,
+      "background_step_px": [
+        0.5,
+        0.0
+      ],
+      "object_step_px": [
+        0.0,
+        0.0
+      ],
+      "rotation_deg": 0.0,
+      "warp_amplitude_px": 0.0,
+      "warp_sigma_px": 4.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1400.0,
+      "gain_source": 1400.0,
+      "exposure_known": true,
+      "blur_length_px": 3.0,
+      "blur_samples": 9,
+      "texture_period_px": 10.0,
+      "jitter_px": 0.25,
+      "sequence_convention": "sequence is an integer label; reference-side frames integrate 9 samples over a 3 px exposure while the truth stays the exposure-centre mapping",
+      "occluder_scale_reference": 1.0
+    },
+    "combined_hard": {
+      "background": "sinusoid",
+      "object_field": "blobs",
+      "occluder": true,
+      "occluder_radius": 5.0,
+      "background_step_px": [
+        0.5,
+        0.0
+      ],
+      "object_step_px": [
+        2.0,
+        0.0
+      ],
+      "rotation_deg": 0.4,
+      "warp_amplitude_px": 1.2,
+      "warp_sigma_px": 5.0,
+      "warp_ramp_frames": 1,
+      "gain_reference": 1890.0,
+      "gain_source": 1400.0,
+      "exposure_known": false,
+      "blur_length_px": 2.5,
+      "blur_samples": 7,
+      "texture_period_px": 6.0,
+      "jitter_px": 0.25,
+      "sequence_convention": "sequence is an integer label; layered occlusion, a local warp, an unreported exposure change and motion blur are active together, and the missing exposure metadata is recorded as unknown; the reference-side object is 0.9x in chart scale so its silhouette is larger than in the source, widening the newly exposed background ring that carries the occluded_in_source label; background content that the object moved onto is labelled occluded_in_source (pull covered by a nearer layer in the source), and the mirror case is structurally impossible for a rigid source layer",
+      "occluder_scale_reference": 0.9
+    }
+  },
+  "noise": {
+    "schema": "owac.n01_full.noise.v1",
+    "calibration_version": "p2-synth-cfa-v1",
+    "noise_version": "n01-noise-p2-synth-cfa-v1",
+    "units": "raw_dn_12bit",
+    "formula": "Var(y | mu) = shot * max(mu - black_level, 0) + read_var",
+    "shot_read": {
+      "shot": 0.14,
+      "read_var": 4.0,
+      "units": "raw_dn_12bit",
+      "provenance": {
+        "kind": "explicit_synthesis",
+        "split": "synthesis",
+        "source": "configs/encoders/n01_full/p2_motion_noise.json",
+        "method": "chosen, not fitted: conversion gain 0.14 DN per electron on a 12-bit full well and a 2 DN read sigma, so the shot slope is 0.14 and the read variance is 4.0",
+        "parameters_known": true,
+        "notes": "a fitted replacement must declare kind='fitted' and split in [train, calibration] and is refused on any other region"
+      }
+    },
+    "black_level": {
+      "kind": "per_frame",
+      "id_template": "{dataset_id}/{camera_id}/frame_{frame_id}",
+      "variance": 2.25,
+      "upper_bound": null,
+      "provenance": {
+        "kind": "explicit_synthesis",
+        "split": "synthesis",
+        "source": "configs/encoders/n01_full/p2_motion_noise.json",
+        "method": "chosen, not fitted: one 1.5 DN shared black-level sigma per frame and camera, added to every sample of the block and carried as a rank-one term in the joint covariance",
+        "parameters_known": true,
+        "notes": "setting variance to null forces the unaudited path: an exact dense covariance is then refused and only the proxy-labelled unknown_correlation kind is allowed"
+      }
+    },
+    "black_level_dn": 64.0,
+    "white_level_dn": 4095.0,
+    "refused_structures": [
+      "a shared black-level block with an unaudited magnitude cannot be written as an exact diagonal or dense per-sample covariance; build_noise_model(correlation='declared') refuses it rather than dropping the shared block, and correlation='unknown' returns the proxy-labelled unknown_correlation kind instead"
+    ],
+    "notes": "the correlated black level stays a rank-one term on top of the per-sample shot/read variance, so a dense model over the small quotient set entering one fit carries the cross-phase correlation exactly; a full-frame dense matrix is refused above the declared source limit and must keep the block as a factor"
+  },
+  "notes": "P2 synthetic motion/noise configuration. Geometry follows motion-core's landing contract: channel k packed (i, j) is sensor (y0 + 2i + dy_k, x0 + 2j + dx_k) with dy/dx relative to channel 0, so one packed step is two sensor pixels and each phase keeps its own offset. The supervision flow is the pull mapping of the current reference frame into the older source frame, in full sensor (x, y) pixels."
+}
