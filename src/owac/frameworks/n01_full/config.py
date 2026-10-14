@@ -21,7 +21,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
-from typing import Any, Self, get_origin, get_type_hints
+from typing import Any, get_origin, get_type_hints
 
 __all__ = [
     "CFA_PATTERNS",
@@ -89,7 +89,9 @@ class InputIdentityConfig:
         return self.input_mode in ("bayer_cfa", "synthetic_cfa")
 
     @classmethod
-    def bayer_cfa(cls, dataset_id: str, cfa_pattern: str = "RGGB", **overrides: Any) -> Self:
+    def bayer_cfa(
+        cls, dataset_id: str, cfa_pattern: str = "RGGB", **overrides: Any
+    ) -> InputIdentityConfig:
         """Real or synthetic CFA identity: four phases, never a fourth fake measurement."""
         payload: dict[str, Any] = {
             "dataset_id": dataset_id,
@@ -101,7 +103,7 @@ class InputIdentityConfig:
         payload.update(overrides)
         return cls(**payload).validate()
 
-    def validate(self) -> Self:
+    def validate(self) -> InputIdentityConfig:
         if self.input_mode in FORBIDDEN_INPUT_MODES:
             raise ValueError(
                 f"input_mode {self.input_mode!r} is an RGB-space intermediate; the main "
@@ -145,7 +147,7 @@ class InputIdentityConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> InputIdentityConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -168,7 +170,7 @@ class BasisConfig:
     prior_shared_across_domains: bool = True
     rank_deficiency_policy: str = "identifiable_mask"
 
-    def validate(self) -> Self:
+    def validate(self) -> BasisConfig:
         if self.kind not in BASIS_KINDS:
             raise ValueError(f"Unknown basis kind {self.kind!r}; expected {BASIS_KINDS}")
         if not self.per_phase:
@@ -199,7 +201,7 @@ class BasisConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> BasisConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -211,7 +213,7 @@ class HistoryConfig:
     comparison_windows: tuple[int, ...] = (8, 16, 32)
     summary_keeps_provenance: bool = True
 
-    def validate(self) -> Self:
+    def validate(self) -> HistoryConfig:
         if self.max_history < 1:
             raise ValueError("HistoryConfig.max_history must be at least one unique frame")
         if not self.comparison_windows:
@@ -231,7 +233,7 @@ class HistoryConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> HistoryConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -254,7 +256,7 @@ class ReplayConfig:
     require_unique_frames: bool = True
     drop_derived_caches_on_parameter_update: bool = True
 
-    def validate(self) -> Self:
+    def validate(self) -> ReplayConfig:
         if set(self.modes) != set(REPLAY_MODES):
             raise ValueError(
                 f"both replay interfaces are required, got {self.modes!r}; expected {REPLAY_MODES}"
@@ -285,7 +287,7 @@ class ReplayConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> ReplayConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -308,7 +310,7 @@ class CorrespondenceConfig:
     forward_backward_check: bool = True
     backward_window_frames: int = 2
 
-    def validate(self) -> Self:
+    def validate(self) -> CorrespondenceConfig:
         if self.mapping_kind not in MAPPING_KINDS:
             raise ValueError(
                 f"Unknown mapping_kind {self.mapping_kind!r}; expected {MAPPING_KINDS}"
@@ -337,7 +339,7 @@ class CorrespondenceConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> CorrespondenceConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -367,7 +369,7 @@ class ContentConfig:
     fusion_time_order: str = "newest_first"
     time_order_adapter: str = "oldest_first_to_newest_first"
 
-    def validate(self) -> Self:
+    def validate(self) -> ContentConfig:
         if self.backbone not in BACKBONES:
             raise ValueError(f"Unknown backbone {self.backbone!r}; expected {BACKBONES}")
         if self.backbone == "dbsr":
@@ -419,7 +421,7 @@ class ContentConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> ContentConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -444,7 +446,7 @@ class TrainingBudgetConfig:
     data_seeds: tuple[int, ...] = ()
     data_seed_namespace: str = "n01-full-v1"
 
-    def validate(self) -> Self:
+    def validate(self) -> TrainingBudgetConfig:
         for name in (
             "mechanism_updates",
             "mechanism_updates_max",
@@ -486,7 +488,7 @@ class TrainingBudgetConfig:
         return _to_plain(self)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> TrainingBudgetConfig:
         return _from_plain(cls, data).validate()
 
 
@@ -507,7 +509,7 @@ class N01FullConfig:
         # Constructing the top-level object already means declaring a valid one.
         self.validate()
 
-    def validate(self) -> Self:
+    def validate(self) -> N01FullConfig:
         if not self.config_version:
             raise ValueError("N01FullConfig.config_version must be declared")
         self.input.validate()
@@ -548,11 +550,11 @@ class N01FullConfig:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=True)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: Mapping[str, Any]) -> N01FullConfig:
         return _from_plain(cls, data).validate()
 
     @classmethod
-    def from_json(cls, text: str) -> Self:
+    def from_json(cls, text: str) -> N01FullConfig:
         payload = json.loads(text)
         if not isinstance(payload, Mapping):
             raise TypeError("an N01FullConfig JSON document must be an object")
