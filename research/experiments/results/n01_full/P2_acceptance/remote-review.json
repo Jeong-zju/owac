@@ -1,0 +1,1306 @@
+{
+  "formal_training_started": false,
+  "parameter_updates": 0,
+  "runs": {
+    "seed-101": {
+      "old_status": "validation_plateau",
+      "stop_update": 82000,
+      "reviewed_status": "budget_exhausted",
+      "conditions": {
+        "validations": 82,
+        "observed_end_update": 82000,
+        "first_value": 0.7747213886334345,
+        "final_value": 0.06985233220844887,
+        "best_value": 0.06985233220844887,
+        "best_update": 82000,
+        "run_improvement": 0.7048690564249857,
+        "tail_drift": 0.0,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0005477207103887494
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": true,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": false,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": false,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "platform condition failed: final_low_lr_phase",
+        "platform condition failed: best_not_at_budget_end"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101/checkpoints/best.pt",
+          "sha256": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+          "update": 82000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101/checkpoints/last.pt",
+          "sha256": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09",
+          "update": 82000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-101/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 1.9213245910018784,
+            "epe_packed": 0.9606622955009392,
+            "valid_cells": 519497,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 1.8005873952060938,
+              "p90": 2.046138472855091,
+              "p95": 2.2425178728997706
+            },
+            "cfa_phase_consistency_sensor_px_max": 3.3904998302459717
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 2.9851755538204374,
+            "epe_packed": 1.4925877769102187,
+            "valid_cells": 513457,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 2.930452771484852,
+              "p90": 3.1745128719136115,
+              "p95": 3.3841387720778577
+            },
+            "cfa_phase_consistency_sensor_px_max": 12.534477233886719
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.08686394316440069,
+            "epe_packed": 0.04343197158220034,
+            "valid_cells": 513069,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.07607245333201718,
+              "p90": 0.11440423081803602,
+              "p95": 0.13278667606718952
+            },
+            "occlusion_auc_mean": 0.8264342909556308,
+            "coverage_mean": 0.8999982413511071,
+            "cfa_phase_consistency_sensor_px_max": 0.43629953265190125,
+            "latency_ms_p50": 7.342212997173192,
+            "latency_ms_p95": 7.75123249659373
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 519699,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.01861572265625,
+          "mean_predicted_displacement_sensor_px": 0.18831542491383169,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.01800537109375,
+          "mean_predicted_displacement_sensor_px": 0.18665186423376126,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.720860998029821,
+        "p95_ms": 6.732020997151267,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108712960,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    },
+    "seed-211": {
+      "old_status": "budget_exhausted",
+      "stop_update": 100000,
+      "reviewed_status": "budget_exhausted",
+      "conditions": {
+        "validations": 100,
+        "observed_end_update": 100000,
+        "first_value": 0.7345104022667959,
+        "final_value": 0.08987736757486485,
+        "best_value": 0.07585365341331524,
+        "best_update": 91000,
+        "run_improvement": 0.6586567488534807,
+        "tail_drift": 0.014023714161549614,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": false,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": true,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": true,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "platform condition failed: tail_within_delta_val_of_best"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-211/checkpoints/best.pt",
+          "sha256": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+          "update": 91000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-211/checkpoints/last.pt",
+          "sha256": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8",
+          "update": 100000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-211/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 1.9213245910018784,
+            "epe_packed": 0.9606622955009392,
+            "valid_cells": 519497,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 1.8005873952060938,
+              "p90": 2.046138472855091,
+              "p95": 2.2425178728997706
+            },
+            "cfa_phase_consistency_sensor_px_max": 3.3904998302459717
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 2.9851755538204374,
+            "epe_packed": 1.4925877769102187,
+            "valid_cells": 513457,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 2.930452771484852,
+              "p90": 3.1745128719136115,
+              "p95": 3.3841387720778577
+            },
+            "cfa_phase_consistency_sensor_px_max": 12.534477233886719
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.08929788923338652,
+            "epe_packed": 0.04464894461669326,
+            "valid_cells": 513173,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.07268448313698173,
+              "p90": 0.12438847197627184,
+              "p95": 0.17822480206523317
+            },
+            "occlusion_auc_mean": 0.8412852433768296,
+            "coverage_mean": 0.8999999761581421,
+            "cfa_phase_consistency_sensor_px_max": 0.376299649477005,
+            "latency_ms_p50": 7.528022997576045,
+            "latency_ms_p95": 7.851092000419158
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 519699,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.013671875,
+          "mean_predicted_displacement_sensor_px": 0.19483193011978686,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.014495849609375,
+          "mean_predicted_displacement_sensor_px": 0.19210874796494512,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.726812003762461,
+        "p95_ms": 6.742446997668594,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108469248,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    },
+    "seed-307": {
+      "old_status": "validation_plateau",
+      "stop_update": 99000,
+      "reviewed_status": "validation_plateau",
+      "conditions": {
+        "validations": 99,
+        "observed_end_update": 99000,
+        "first_value": 0.8813337878539012,
+        "final_value": 0.08334593675457515,
+        "best_value": 0.08289747539227112,
+        "best_update": 83000,
+        "run_improvement": 0.79843631246163,
+        "tail_drift": 0.0004484613623040312,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": true,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": true,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": true,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "all platform conditions satisfied"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-307/checkpoints/best.pt",
+          "sha256": "3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38",
+          "update": 83000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-307/checkpoints/last.pt",
+          "sha256": "de5410ebb7400209f4db94209d00f1796d188e4e3899c0bc034932675127d6ca",
+          "update": 99000,
+          "core_fingerprint": "2ba4a9d5f08667df2dec34f40963ceb51eaef64aba1f04b37ffb95a7d49c5922",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-307/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 1.9213245910018784,
+            "epe_packed": 0.9606622955009392,
+            "valid_cells": 519497,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 1.8005873952060938,
+              "p90": 2.046138472855091,
+              "p95": 2.2425178728997706
+            },
+            "cfa_phase_consistency_sensor_px_max": 3.3904998302459717
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 2.9851755538204374,
+            "epe_packed": 1.4925877769102187,
+            "valid_cells": 513457,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 2.930452771484852,
+              "p90": 3.1745128719136115,
+              "p95": 3.3841387720778577
+            },
+            "cfa_phase_consistency_sensor_px_max": 12.534477233886719
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.09497161297693085,
+            "epe_packed": 0.047485806488465426,
+            "valid_cells": 512994,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.08518947363700136,
+              "p90": 0.13147787503548897,
+              "p95": 0.14753661022987213
+            },
+            "occlusion_auc_mean": 0.8411379540525575,
+            "coverage_mean": 0.8999974342778102,
+            "cfa_phase_consistency_sensor_px_max": 0.40570154786109924,
+            "latency_ms_p50": 7.373672997346148,
+            "latency_ms_p95": 7.605580451490823
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 519699,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.018035888671875,
+          "mean_predicted_displacement_sensor_px": 0.20748025661871122,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.018524169921875,
+          "mean_predicted_displacement_sensor_px": 0.20568025170149679,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.710310997732449,
+        "p95_ms": 6.727324999519624,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108469248,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    },
+    "seed-101-rgb3": {
+      "old_status": "validation_plateau",
+      "stop_update": 85000,
+      "reviewed_status": "budget_exhausted",
+      "conditions": {
+        "validations": 85,
+        "observed_end_update": 85000,
+        "first_value": 0.359642862700499,
+        "final_value": 0.0408357289315273,
+        "best_value": 0.03944108240270557,
+        "best_update": 74000,
+        "run_improvement": 0.32020178029779345,
+        "tail_drift": 0.0013946465288217288,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": true,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": false,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": true,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "platform condition failed: final_low_lr_phase"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+          "sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+          "update": 74000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/last.pt",
+          "sha256": "de0a5732afc7ee571382d3298268956c1de3627bf798ca6a79b9acbea0e8b6c6",
+          "update": 85000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-101-rgb3/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 0.9844494025695183,
+            "epe_packed": 0.9844494025695183,
+            "valid_cells": 514494,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.923314755782485,
+              "p90": 1.0463301967829466,
+              "p95": 1.1447047097608445
+            }
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 8.708043215144912,
+            "epe_packed": 8.708043215144912,
+            "valid_cells": 471591,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 8.750050815287977,
+              "p90": 8.889190372265876,
+              "p95": 8.980870714597405
+            }
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.04552427966519593,
+            "epe_packed": 0.04552427966519593,
+            "valid_cells": 513048,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0396316825208487,
+              "p90": 0.06874951841746224,
+              "p95": 0.10060230946255613
+            },
+            "occlusion_auc_mean": 0.8430505731510411,
+            "coverage_mean": 0.899999788209934,
+            "latency_ms_p50": 7.2075675016094465,
+            "latency_ms_p95": 7.505968449549982
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 514570,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.014404296875,
+          "mean_predicted_displacement_sensor_px": 0.270383844571364,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.014434814453125,
+          "mean_predicted_displacement_sensor_px": 0.27015872723671075,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.7883609954151325,
+        "p95_ms": 6.811733801441733,
+        "parameter_count": 19663876,
+        "peak_device_bytes": 108169728,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    },
+    "seed-211-rgb3": {
+      "old_status": "validation_plateau",
+      "stop_update": 81000,
+      "reviewed_status": "budget_exhausted",
+      "conditions": {
+        "validations": 81,
+        "observed_end_update": 81000,
+        "first_value": 0.34978805339107144,
+        "final_value": 0.04113960836548358,
+        "best_value": 0.04011221194209961,
+        "best_update": 72000,
+        "run_improvement": 0.3096758414489718,
+        "tail_drift": 0.0010273964233839736,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": true,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": false,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": true,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "platform condition failed: final_low_lr_phase"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-211-rgb3/checkpoints/best.pt",
+          "sha256": "8b6bfa87a49498e9b92bfca7a20ac71987344cab46be587d7c13a7a1164c3e14",
+          "update": 72000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-211-rgb3/checkpoints/last.pt",
+          "sha256": "00bc357dc99b55216260defbf4217842bc759c352b2ade5d6e497acc391d8a5d",
+          "update": 81000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-211-rgb3/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 0.9844494025695183,
+            "epe_packed": 0.9844494025695183,
+            "valid_cells": 514494,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.923314755782485,
+              "p90": 1.0463301967829466,
+              "p95": 1.1447047097608445
+            }
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 8.708043215144912,
+            "epe_packed": 8.708043215144912,
+            "valid_cells": 471591,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 8.750050815287977,
+              "p90": 8.889190372265876,
+              "p95": 8.980870714597405
+            }
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.04254587166871258,
+            "epe_packed": 0.04254587166871258,
+            "valid_cells": 513586,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.03740068763727322,
+              "p90": 0.06353567498008489,
+              "p95": 0.09152206470462249
+            },
+            "occlusion_auc_mean": 0.8470534914153146,
+            "coverage_mean": 0.8999982446616859,
+            "latency_ms_p50": 7.227512502140598,
+            "latency_ms_p95": 7.426428499456961
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 514570,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.01556396484375,
+          "mean_predicted_displacement_sensor_px": 0.2428581752743587,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.01556396484375,
+          "mean_predicted_displacement_sensor_px": 0.2424030926751064,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.780400995921809,
+        "p95_ms": 6.786143204953987,
+        "parameter_count": 19663876,
+        "peak_device_bytes": 108169728,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    },
+    "seed-307-rgb3": {
+      "old_status": "validation_plateau",
+      "stop_update": 85000,
+      "reviewed_status": "budget_exhausted",
+      "conditions": {
+        "validations": 85,
+        "observed_end_update": 85000,
+        "first_value": 0.45512530809411633,
+        "final_value": 0.04199087259789499,
+        "best_value": 0.04054191820502568,
+        "best_update": 66000,
+        "run_improvement": 0.41458338988909066,
+        "tail_drift": 0.0014489543928693088,
+        "last_improvements": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lr_drops": 2,
+        "conditions": {
+          "real_improvement_over_run": true,
+          "tail_within_delta_val_of_best": true,
+          "two_effective_lr_drops": true,
+          "final_low_lr_phase": false,
+          "flat_tail_below_delta_val": true,
+          "best_not_at_budget_end": true,
+          "diagnostics_passed": true
+        },
+        "condition_descriptions": {
+          "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+          "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+          "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+          "final_low_lr_phase": "the run must be in the final low-LR phase",
+          "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+          "best_not_at_budget_end": "the best checkpoint must precede the observed stopping point by at least plateau_checks validation windows",
+          "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+        }
+      },
+      "reasons": [
+        "platform condition failed: final_low_lr_phase"
+      ],
+      "checkpoints": {
+        "best": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-307-rgb3/checkpoints/best.pt",
+          "sha256": "bead2fc901b9890e7622f0bb3dc0c2bc2550754860576510da802ff48dfcc255",
+          "update": 66000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        },
+        "last": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-307-rgb3/checkpoints/last.pt",
+          "sha256": "4628447f334870862d79af49c228c3e7d7e4fcae983618bf01ed4b1a4e51506a",
+          "update": 85000,
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "data_config": {
+            "path": "configs/encoders/n01_full/p2_motion_noise.json",
+            "sha256": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+            "config_version": "n01-full-v1-p2-motion-noise-v1",
+            "calibration_version": "p2-synth-cfa-v1",
+            "noise_version": "n01-noise-p2-synth-cfa-v1"
+          },
+          "persisted_fields": [
+            "model",
+            "optimizer",
+            "scheduler",
+            "scaler",
+            "rng",
+            "sampler",
+            "hashes",
+            "samples_consumed",
+            "diagnostics"
+          ],
+          "rng_fields": [
+            "numpy",
+            "python",
+            "torch",
+            "torch_cuda"
+          ],
+          "sampler_fields": [
+            "cursor",
+            "epoch",
+            "permutation",
+            "rng_state",
+            "spec_count"
+          ]
+        }
+      },
+      "evaluation": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015/evaluation-final/seed-307-rgb3/receipt.json",
+      "test": {
+        "pairs": 32,
+        "arms": {
+          "no_alignment": {
+            "pairs": 32,
+            "epe_sensor_px": 0.9844494025695183,
+            "epe_packed": 0.9844494025695183,
+            "valid_cells": 514494,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.923314755782485,
+              "p90": 1.0463301967829466,
+              "p95": 1.1447047097608445
+            }
+          },
+          "old_simplified": {
+            "pairs": 32,
+            "epe_sensor_px": 8.708043215144912,
+            "epe_packed": 8.708043215144912,
+            "valid_cells": 471591,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 8.750050815287977,
+              "p90": 8.889190372265876,
+              "p95": 8.980870714597405
+            }
+          },
+          "sea_raft": {
+            "pairs": 32,
+            "epe_sensor_px": 0.04190624220545046,
+            "epe_packed": 0.04190624220545046,
+            "valid_cells": 513252,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.03733969102540868,
+              "p90": 0.06154401516832876,
+              "p95": 0.08680354410607814
+            },
+            "occlusion_auc_mean": 0.8424900109206166,
+            "coverage_mean": 0.8999998124384637,
+            "latency_ms_p50": 7.132201997592347,
+            "latency_ms_p95": 7.422379999479745
+          },
+          "oracle": {
+            "pairs": 32,
+            "epe_sensor_px": 0.0,
+            "epe_packed": 0.0,
+            "valid_cells": 514570,
+            "cells": 524288,
+            "error_quantiles_sensor_px": {
+              "p50": 0.0,
+              "p90": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "calibration_coverage_on_validation": null
+      },
+      "static_false_rejection": {
+        "validation": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.012969970703125,
+          "mean_predicted_displacement_sensor_px": 0.17729924190036386,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        },
+        "test": {
+          "pairs": 2,
+          "tolerance_sensor_px": 0.5,
+          "false_rejection_rate": 0.013275146484375,
+          "mean_predicted_displacement_sensor_px": 0.17685732894323497,
+          "note": "zero motion and identical geometry; distinct frame ids and independent noise; denominator is valid sensor queries, including predicted rejections"
+        }
+      },
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.76894099888159,
+        "p95_ms": 6.779940998239908,
+        "parameter_count": 19663876,
+        "peak_device_bytes": 108169728,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      }
+    }
+  },
+  "first_order_coverage": {
+    "samples": 100000,
+    "seed": 20261015,
+    "flow_units": "sensor_px",
+    "sigma_flow": [
+      [
+        0.25,
+        0.0
+      ],
+      [
+        0.0,
+        0.25
+      ]
+    ],
+    "cases": {
+      "smooth_affine": {
+        "predicted_variance": 1.25,
+        "empirical_variance": 1.262656011163161,
+        "nominal_coverage": 0.95,
+        "observed_coverage": 0.94873
+      },
+      "strong_edge": {
+        "predicted_variance": 0.0,
+        "empirical_variance": 0.2436175879,
+        "nominal_coverage": 0.95,
+        "observed_coverage": 0.57989
+      },
+      "layer_occlusion": {
+        "predicted_variance": 0.0,
+        "empirical_variance": 3.900068145599998,
+        "nominal_coverage": 0.95,
+        "observed_coverage": 0.57903
+      }
+    },
+    "scope": "analytic counterexamples only; not SEA-RAFT posterior covariance"
+  }
+}

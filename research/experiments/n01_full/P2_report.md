@@ -1,5 +1,7 @@
 # N01 v1.0 P2 RAW 运动对应与噪声模型 — 阶段报告
 
+> 2026-10-15 独立复核更新：本报告保留为原交付历史。P2 未完全通过；停止条件与评测存在实质问题，现已修补，六组仅 CFA 307 的现有曲线满足全部平台条件。以 [P2 独立验收](P2_acceptance_report.md) 为当前结论；本轮未执行续训。
+
 2026-10-14；工作树 `/home/jeong/zeno/owac/worktrees/n01-evidence-integration`，分支 `lzh/n01-evidence-integration`。
 起点为 P1 修补提交 `2d82bbb` 与独立验收归档 `6fb3807`（本轮 HEAD 为 `01e0316`，其上是本阶段未提交改动）。
 本阶段只执行 P2 及其规定的 `mode=raw_adapter` 早期预检，完成后停在 P2 交接点；不进入 P3/P4，不执行 300k 续训。

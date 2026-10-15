@@ -1,0 +1,378 @@
+FFFFFFFFFF                                                               [100%]
+=================================== FAILURES ===================================
+___________ test_invalid_reference_sample_has_no_correspondence_taps ___________
+
+    def test_invalid_reference_sample_has_no_correspondence_taps():
+        valid = torch.ones(3, 4, 4, dtype=torch.bool)
+        valid[0, 1, 1] = False
+        result = CorrespondenceEstimator(mode="rgb3", model=ZeroFlow()).estimate(
+            frame(1, valid), frame(0, torch.ones_like(valid))
+        )
+>       assert not result.valid[0, 1, 1]
+E       assert not tensor(True)
+
+tests/encoders/n01_full/test_p2_review.py:38: AssertionError
+___________ test_unspent_budget_cannot_make_the_last_best_a_plateau ____________
+
+    def test_unspent_budget_cannot_make_the_last_best_a_plateau():
+        history = [
+            {"update": (i + 1) * 1000, "val_epe_sensor_px": v}
+            for i, v in enumerate([2.0, 1.0] + [1.0] * 8 + [0.999])
+        ]
+        decision = decide_platform(
+            val_history=history,
+            budget=300000,
+            interval=1000,
+            monitor="val_epe_sensor_px",
+            delta_val=0.002,
+            plateau_checks=8,
+            lr_drops=2,
+            final_phase=True,
+            diagnostics_passed=True,
+        )
+>       assert decision.status == "budget_exhausted"
+E       AssertionError: assert 'validation_plateau' == 'budget_exhausted'
+E         
+E         - budget_exhausted
+E         + validation_plateau
+
+tests/encoders/n01_full/test_p2_review.py:59: AssertionError
+_____________ test_occluded_queries_remain_in_detection_population _____________
+
+    def test_occluded_queries_remain_in_detection_population():
+        acc = _Accumulator()
+        # EPE exists only at the first two cells. The last two are occluded and
+        # have perfect detector scores. Filtering by EPE validity would erase them.
+        acc.add(
+            torch.zeros(4),
+            torch.zeros(4),
+            mask=torch.tensor([1, 1, 0, 0]).bool(),
+            risk=torch.tensor([0.0, 0.0, 2.0, 2.0]),
+            coverage=None,
+            invalid_label=torch.tensor([0, 0, 1, 1]).bool(),
+            supervision_valid=torch.tensor([1, 1, 0, 0]).bool(),
+            predicted_valid=torch.ones(4, dtype=torch.bool),
+        )
+        report = acc.summary()
+>       assert report["occlusion_auc"] == 1.0
+E       assert nan == 1.0
+
+tests/encoders/n01_full/test_p2_review.py:78: AssertionError
+___________ test_detection_report_survives_an_entirely_occluded_pair ___________
+
+    def test_detection_report_survives_an_entirely_occluded_pair():
+        acc = _Accumulator()
+        acc.add(
+            torch.zeros(2),
+            torch.zeros(2),
+            mask=torch.zeros(2).bool(),
+            risk=torch.ones(2) * 2,
+            coverage=None,
+            invalid_label=torch.ones(2).bool(),
+            supervision_valid=torch.zeros(2).bool(),
+            predicted_valid=torch.ones(2).bool(),
+        )
+        report = acc.summary()
+        assert report["valid_cells"] == 0
+>       assert report["occlusion_precision_recall"]["recall"] == 1.0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'occlusion_precision_recall'
+
+tests/encoders/n01_full/test_p2_review.py:97: KeyError
+________ test_static_false_rejection_counts_rejected_valid_sensor_cells ________
+
+    def test_static_false_rejection_counts_rejected_valid_sensor_cells():
+        from types import SimpleNamespace
+    
+        from owac.evaluation.n01_motion import MotionEvaluator
+        from owac.training.n01_motion import load_motion_training_config
+    
+        root = Path(__file__).resolve().parents[3]
+        config = load_motion_training_config(root / "configs/encoders/n01_full/p2_motion_train.json")
+        evaluator = MotionEvaluator(config)
+        specs = evaluator.specs("validation", limit=8)
+        calls = []
+    
+        class RejectAll:
+            def estimate(self, reference, source, **kwargs):
+                calls.append((reference, source))
+                return SimpleNamespace(packed_flow=torch.zeros(2, *reference.packed_shape), valid=False)
+    
+        evaluator.estimators = {"sea_raft": RejectAll()}
+>       report = _static_false_rejection(evaluator, "validation", specs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/encoders/n01_full/test_p2_review.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+evaluator = <owac.evaluation.n01_motion.MotionEvaluator object at 0x74e2add680b0>
+region = 'validation'
+specs = (MotionSampleSpec(split='validation', case='translation_subpixel', sequence='x+0.25', history_offset=1), MotionSampleS...', history_offset=1), MotionSampleSpec(split='validation', case='exposure_gain', sequence='v0', history_offset=1), ...)
+
+    def _static_false_rejection(
+        evaluator: MotionEvaluator, region: str, specs: Sequence[MotionSampleSpec]
+    ) -> dict[str, Any]:
+        """Static (zero-displacement) pairs must not be rejected as unreliable."""
+        if not specs:
+            return {"pairs": 0}
+        tolerance = float(evaluator.config.evaluation.static_false_rejection_sensor_px)
+        flags: list[float] = []
+        magnitudes: list[float] = []
+        for spec in specs[: max(1, min(2, len(specs)))]:
+            frames = evaluator.generator.frames(
+                split=spec.split,
+                case=spec.case,
+                sequence=spec.sequence,
+                length=2,
+                input_mode=evaluator.input_mode,
+            )
+            scene = frames[-1]
+            # rendering one scene state twice carries the same declared gain and the
+            # same noise realisation, so the pair is exactly static
+            reference = evaluator.generator.render(
+                scene,
+                split=spec.split,
+                case=spec.case,
+                sequence=spec.sequence,
+                input_mode=evaluator.input_mode,
+            )
+            source = evaluator.generator.render(
+                scene,
+                split=spec.split,
+                case=spec.case,
+                sequence=spec.sequence,
+                input_mode=evaluator.input_mode,
+            )
+            result = evaluator.estimators["sea_raft"].estimate(
+                reference, source, iters=evaluator.config.model.iters, taps=False
+            )
+            magnitude = torch.linalg.vector_norm(result.packed_flow, dim=0) * float(
+                evaluator.sensor_per_packed
+            )
+>           valid = result.valid.all(dim=0)
+                    ^^^^^^^^^^^^^^^^
+E           AttributeError: 'bool' object has no attribute 'all'
+
+src/owac/evaluation/n01_motion.py:1259: AttributeError
+____________ test_prior_seed_101_verdict_requires_more_observations ____________
+
+    def test_prior_seed_101_verdict_requires_more_observations():
+        import json
+    
+        root = Path(__file__).resolve().parents[3]
+        payload = json.loads(
+            (
+                root / "research/experiments/results/n01_full/P2/remote-runner-seed-101-receipt.json"
+            ).read_text()
+        )
+        decision = decide_platform(
+            val_history=payload["val_history"],
+            budget=payload["budget"],
+            interval=1000,
+            monitor="val_epe_sensor_px",
+            delta_val=0.002,
+            plateau_checks=8,
+            lr_drops=payload["lr_drops"],
+            final_phase=True,
+            diagnostics_passed=True,
+        )
+>       assert decision.status == "budget_exhausted"
+E       AssertionError: assert 'validation_plateau' == 'budget_exhausted'
+E         
+E         - budget_exhausted
+E         + validation_plateau
+
+tests/encoders/n01_full/test_p2_review.py:149: AssertionError
+______________ test_calibration_fit_and_lookup_use_identical_bins ______________
+
+    def test_calibration_fit_and_lookup_use_identical_bins():
+        from owac.evaluation.n01_motion import ErrorCoverageTable
+    
+        proxy = torch.arange(100, dtype=torch.float64)
+        table = ErrorCoverageTable.fit(
+            [
+                {
+                    "flow_risk": proxy,
+                    "visibility": proxy,
+                    "error": proxy,
+                    "valid": torch.ones(100, dtype=torch.bool),
+                }
+            ],
+            split="calibration",
+            bins=4,
+            nominal_coverage=0.9,
+        )
+>       assert len(table.risk_edges) == 3
+E       AssertionError: assert 4 == 3
+E        +  where 4 = len((19.8, 39.6, 59.400000000000006, 79.2))
+E        +    where (19.8, 39.6, 59.400000000000006, 79.2) = ErrorCoverageTable(version='p2-motion-error-coverage-v1', risk_edges=(19.8, 39.6, 59.400000000000006, 79.2), visibilit...oat64), margin_sensor_px=89.10000000000001, nominal_coverage=0.9, fitted_split='calibration', cells=100, empty_bins=12).risk_edges
+
+tests/encoders/n01_full/test_p2_review.py:169: AssertionError
+_________ test_generated_sequences_do_not_alias_raw_sample_identities __________
+
+    def test_generated_sequences_do_not_alias_raw_sample_identities():
+        from owac.raw.n01_motion_data import MotionDataGenerator
+    
+        root = Path(__file__).resolve().parents[3]
+        generator = MotionDataGenerator.from_config_path(
+            root / "configs/encoders/n01_full/p2_motion_noise.json"
+        )
+        pairs = [
+            generator.sample_pair(split="train", case="rotation", sequence=sequence)
+            for sequence in ("t0", "t1")
+        ]
+        first, second = [pair.visible.reference for pair in pairs]
+>       assert first.sample_key(0, 0, 0) != second.sample_key(0, 0, 0)
+E       AssertionError: assert SourceKey(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, channel_or_phase=0, sensor_y=0, sensor_x=0) != SourceKey(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, channel_or_phase=0, sensor_y=0, sensor_x=0)
+E        +  where SourceKey(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, channel_or_phase=0, sensor_y=0, sensor_x=0) = sample_key(0, 0, 0)
+E        +    where sample_key = RawSensorFrame(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, values=tensor..., True, True],\n         [True, True, True,  ..., True, True, True]]]), time=1.0, calibration_version='p2-synth-cfa-v1').sample_key
+E        +  and   SourceKey(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, channel_or_phase=0, sensor_y=0, sensor_x=0) = sample_key(0, 0, 0)
+E        +    where sample_key = RawSensorFrame(dataset_id='n01_synth_motion', episode_id='train/rotation', camera_id='cam0', frame_id=1, values=tensor..., True, True],\n         [True, True, True,  ..., True, True, True]]]), time=1.0, calibration_version='p2-synth-cfa-v1').sample_key
+
+tests/encoders/n01_full/test_p2_review.py:190: AssertionError
+________________ test_resume_refuses_a_changed_calibration_file ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jeong/pytest-574/test_resume_refuses_a_changed_0')
+
+    def test_resume_refuses_a_changed_calibration_file(tmp_path):
+        from types import SimpleNamespace
+    
+        import pytest
+    
+        from owac.training.n01_motion import CHECKPOINT_SCHEMA, MotionTrainer
+    
+        calibration = tmp_path / "calibration.json"
+        calibration.write_text('{"changed": true}')
+        checkpoint = tmp_path / "checkpoint.pt"
+        torch.save(
+            {
+                "schema": CHECKPOINT_SCHEMA,
+                "core_fingerprint": "fixed-config",
+                "seed": 101,
+                "iters": 4,
+                "base_lr": 0.001,
+                "hashes": {"data_config": {"sha256": "old-digest"}},
+            },
+            checkpoint,
+        )
+        holder = SimpleNamespace(
+            config=SimpleNamespace(
+                core_fingerprint="fixed-config", data=SimpleNamespace(config_path=calibration)
+            ),
+            seed=101,
+            iters=4,
+            base_lr=0.001,
+        )
+        with pytest.raises(ValueError, match="data/calibration file changed"):
+>           MotionTrainer.load_checkpoint(holder, checkpoint)
+
+tests/encoders/n01_full/test_p2_review.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = namespace(config=namespace(core_fingerprint='fixed-config', data=namespace(config_path=PosixPath('/tmp/pytest-of-jeong/pytest-574/test_resume_refuses_a_changed_0/calibration.json'))), seed=101, iters=4, base_lr=0.001)
+path = PosixPath('/tmp/pytest-of-jeong/pytest-574/test_resume_refuses_a_changed_0/checkpoint.pt')
+
+    def load_checkpoint(self, path: str | Path) -> int:
+        payload = torch.load(path, map_location="cpu", weights_only=False)
+        if not isinstance(payload, Mapping) or payload.get("schema") != CHECKPOINT_SCHEMA:
+            raise ValueError(f"{path} is not a {CHECKPOINT_SCHEMA} checkpoint")
+        if payload.get("core_fingerprint") != self.config.core_fingerprint:
+            raise ValueError(
+                "the checkpoint was written under a different run definition (model/data/"
+                "schedule/optimizer/selection); start a new run instead of continuing this one"
+            )
+        if int(payload.get("seed", -1)) != self.seed:
+            raise ValueError("the checkpoint seed differs from this run's seed")
+        if int(payload.get("iters", -1)) != self.iters:
+            raise ValueError("the checkpoint iteration count differs from this run's iters")
+        if abs(float(payload.get("base_lr", -1.0)) - self.base_lr) > 0.0:
+            raise ValueError("the checkpoint base learning rate differs from this run's")
+>       self.model.load_state_dict(payload["model"])
+        ^^^^^^^^^^
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'model'
+
+src/owac/training/n01_motion.py:2066: AttributeError
+___________________ test_all_rejected_arm_still_has_a_report ___________________
+
+    def test_all_rejected_arm_still_has_a_report():
+        from owac.evaluation.n01_motion import _aggregate_arm
+    
+>       report = _aggregate_arm(
+            [
+                {
+                    "epe_sensor_px": None,
+                    "valid_cells": 0,
+                    "cells": 100,
+                    "error_quantiles_sensor_px": {},
+                }
+            ]
+        )
+
+tests/encoders/n01_full/test_p2_review.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/owac/evaluation/n01_motion.py:1140: in _aggregate_arm
+    "epe_sensor_px": float(np.mean([record["epe_sensor_px"] for record in records])),
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3862: in mean
+    return _methods._mean(a, axis=axis, dtype=dtype,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [None], axis = None, dtype = None, out = None, keepdims = False
+where = True
+
+    def _mean(a, axis=None, dtype=None, out=None, keepdims=False, *, where=True):
+        arr = asanyarray(a)
+    
+        is_float16_result = False
+    
+        rcount = _count_reduce_items(arr, axis, keepdims=keepdims, where=where)
+        if rcount == 0 if where is True else umr_any(rcount == 0, axis=None):
+            warnings.warn("Mean of empty slice", RuntimeWarning, stacklevel=2)
+    
+        # Cast bool, unsigned int, and int to float64 by default
+        if dtype is None:
+            if issubclass(arr.dtype.type, (nt.integer, nt.bool)):
+                dtype = mu.dtype('f8')
+            elif issubclass(arr.dtype.type, nt.float16):
+                dtype = mu.dtype('f4')
+                is_float16_result = True
+    
+        ret = umr_sum(arr, axis, dtype, out, keepdims, where=where)
+        if isinstance(ret, mu.ndarray):
+            ret = um.true_divide(
+                    ret, rcount, out=ret, casting='unsafe', subok=False)
+            if is_float16_result and out is None:
+                ret = arr.dtype.type(ret)
+        elif hasattr(ret, 'dtype'):
+            if is_float16_result:
+                ret = arr.dtype.type(ret / rcount)
+            else:
+                ret = ret.dtype.type(ret / rcount)
+        else:
+>           ret = ret / rcount
+                  ^^^^^^^^^^^^
+E           TypeError: unsupported operand type(s) for /: 'NoneType' and 'int'
+
+../../../.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:144: TypeError
+=============================== warnings summary ===============================
+../../../.venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:469
+  /home/jeong/zeno/owac/worktrees/n01-evidence-integration/.venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:469: PytestCacheWarning: could not create cache path /dev/.pytest_cache/v/cache/nodeids: [Errno 13] Permission denied: '/dev/pytest-cache-files-ku1ucg2e'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../../../.venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:423
+  /home/jeong/zeno/owac/worktrees/n01-evidence-integration/.venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:423: PytestCacheWarning: could not create cache path /dev/.pytest_cache/v/cache/lastfailed: [Errno 13] Permission denied: '/dev/pytest-cache-files-5c95_q1r'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../../../../../../../../dev::test_invalid_reference_sample_has_no_correspondence_taps
+FAILED ../../../../../../../../../dev::test_unspent_budget_cannot_make_the_last_best_a_plateau
+FAILED ../../../../../../../../../dev::test_occluded_queries_remain_in_detection_population
+FAILED ../../../../../../../../../dev::test_detection_report_survives_an_entirely_occluded_pair
+FAILED ../../../../../../../../../dev::test_static_false_rejection_counts_rejected_valid_sensor_cells
+FAILED ../../../../../../../../../dev::test_prior_seed_101_verdict_requires_more_observations
+FAILED ../../../../../../../../../dev::test_calibration_fit_and_lookup_use_identical_bins
+FAILED ../../../../../../../../../dev::test_generated_sequences_do_not_alias_raw_sample_identities
+FAILED ../../../../../../../../../dev::test_resume_refuses_a_changed_calibration_file
+FAILED ../../../../../../../../../dev::test_all_rejected_arm_still_has_a_report
+10 failed, 2 warnings in 0.90s
