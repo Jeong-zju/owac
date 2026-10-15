@@ -4,7 +4,7 @@
 起点为 P1 修补提交 `2d82bbb` 与独立验收归档 `6fb3807`（本轮 HEAD 为 `01e0316`，其上是本阶段未提交改动）。
 本阶段只执行 P2 及其规定的 `mode=raw_adapter` 早期预检，完成后停在 P2 交接点；不进入 P3/P4，不执行 300k 续训。
 
-> 状态：本地实现、测试与内部独立验收已完成；远程 3 seeds × 100k 第一段全部结束（101 plateau@82k、211 budget_exhausted@100k、307 plateau@99k，经历一次 62 分钟实例失联后精确续训），三 seed GPU 评测与两平台 `raw_adapter` 真实预检均已通过并同步收据。P2 已停在交接点，未进入 P3/P4。
+> 状态：本地实现、测试与内部独立验收已完成；远程 CFA 三种子（101 plateau@82k、211 budget_exhausted@100k、307 plateau@99k，经历一次 62 分钟实例失联后精确续训）与 **pseudo-RAW（rgb3）正式臂三种子**（均 `validation_plateau`：85k/81k/85k）全部结束，两臂各自的 GPU 评测与两平台 `raw_adapter` 真实预检（正式 rgb3 模型 + identity 对照 + 故意错配诊断）均已通过并同步收据。P2 已停在交接点，未进入 P3/P4。
 
 ## 1. 实际修改文件、入口、数据流与要求对应
 
@@ -138,7 +138,7 @@
 | 吞吐分解（20 步） | 数据/渲染 p50 75.4 ms（15.6%）+ 前向反向 407.1 ms（84%）→ 0.47–0.48 s/update；设备被其他项目共享（util 91–99%，free 12.4–15.6 GiB） |
 | rgb3 dev 臂（256 updates，`source-v3`） | fit-check passed（18.746 → 2.429，88.7 s，六项诊断全 True，六组梯度非零）；train 256 updates：loss 8.462 → 4.438，peak 723.9 MiB，`platform=budget_exhausted`（reasons: fewer than two validation points，符合 dev 规模预期）；`stem-report` 参数差 −9,408 与解析逐项相等 |
 
-正式段（待回填）：
+正式段（`source-v3`/`source-v6`，`--max-updates 100000`）：
 
 | seed | 状态（修复后判据） | wall / GPU 小时 | 平台判定与理由 | val EPE best / final（sensor px） | best checkpoint sha256 |
 | --- | --- | --- | --- | --- | --- |
@@ -146,25 +146,37 @@
 | 211 | **完成** | 4,749.3 s / **1.319** | `budget_exhausted` @ 100,000（reason: `tail_within_delta_val_of_best`） | 0.0758537 @91k / 0.089877 @100k | `8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4` |
 | 307 | **完成**（断点续训） | ~4,686 s / **1.302** | `validation_plateau` @ 99,000（reasons: all satisfied） | 0.082897 @83k / 0.083346 @99k | `3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38` |
 
+pseudo-RAW（rgb3）正式臂，同一配方、**自己的**两档 LR 开发搜索（winner `lr=5e-5, iters=4`，与 CFA 臂的 2.5e-4/4 不同，符合"各臂各自搜索"）：
+
+| seed | 状态（修复后判据） | wall / GPU 小时 | 平台判定 | val EPE best / final | test EPE（sea_raft） |
+| --- | --- | --- | --- | --- | --- |
+| 101 | **完成** | 3,557.6 s / **0.988** | `validation_plateau` @ 85,000 | 0.039441 @74k / 0.040836 | 0.04553 |
+| 211 | **完成** | 3,414.3 s / **0.948** | `validation_plateau` @ 81,000 | 0.040112 @72k / 0.041140 | 0.04255 |
+| 307 | **完成** | 3,605.4 s / **1.001** | `validation_plateau` @ 85,000 | 0.040542 @66k / 0.041991 | 0.04191 |
+
+rgb3 臂三种子全部到平台、无 OOM；吞吐约 **0.042 s/update（23.8 updates/s）**。**两臂 EPE 不可直接比较**：rgb3 是三通道共址 128×128 packed，CFA 是四相位 256×256 传感器，输入体制与几何都不同，只在各自协议内陈述。
+
 seed 101 是 D1 修复价值的直接证据：source-v2 旧判据在 **81,000** 判 `validation_plateau`；source-v3 重算判 `budget_exhausted`（尾部漂离 best）→ 按授权 `--resume last.pt --max-updates 100000` 续训 1,000 updates 到 82,000，修复后判据方才接受 plateau。旧 receipt 保留为 `seed-101-receipt-pre-continuation.json`。
 
-三种子均以 `--max-updates 100000` 上限运行；101/211 全程无 OOM、无进程被杀。吞吐：清理竞争前 0.41–0.70 s/update，清理后 **0.0475 s/update（21.06 updates/s）**；seed 101 总均 0.171 s/update（含被争用时段）。
+CFA 三种子均以 `--max-updates 100000` 上限运行；101/211 全程无 OOM、无进程被杀。吞吐：清理竞争前 0.41–0.70 s/update，清理后 **0.0475 s/update（21.06 updates/s）**；seed 101 总均 0.171 s/update（含被争用时段）。
 
 ### 3.5 评测与两平台 `mode=raw_adapter` 预检
 
 | 项 | 结果 |
 | --- | --- |
-| 三 seed **GPU** 评测（`--device cuda`，test 32 pairs） | sea_raft EPE **0.08689 / 0.08930 / 0.09497**；`no_alignment` 1.92132、`old_simplified` 2.98518（三 seed 逐位一致，不依赖权重）、`oracle` 0.0（单列 `used_as_inference_input=false`） |
-| GPU 时延与显存（end-to-end `estimate()` 单对已到达帧，iters=4，19,673,284 参数，repeats=5） | p50 **6.790 / 6.840 / 6.803 ms**；p95 **6.811 / 6.895 / 6.816 ms**；peak device **108,712,960 B = 103.7 MiB** |
+| 三 seed **GPU** 评测（CFA，`--device cuda`，test 32 pairs） | sea_raft EPE **0.08689 / 0.08930 / 0.09497**；`no_alignment` 1.92132、`old_simplified` 2.98518（三 seed 逐位一致，不依赖权重）、`oracle` 0.0（单列 `used_as_inference_input=false`） |
+| 三 seed **GPU** 评测（rgb3 正式臂，同协议） | sea_raft EPE **0.04553 / 0.04255 / 0.04191**；`no_alignment` 0.98445、`old_simplified` 8.70804、`oracle` 0.0（各臂在各输入体制内比较，跨臂不可直接比） |
+| GPU 时延与显存（end-to-end `estimate()` 单对已到达帧，iters=4，repeats=5） | CFA：p50 **6.790 / 6.840 / 6.803 ms**、p95 **6.811 / 6.895 / 6.816 ms**、peak 103.7 MiB；rgb3：p50 **7.799 / 7.730 / 6.764 ms**、peak 108.4 MB；参数 19,673,284（cfa4）/ 19,663,876（rgb3） |
 | 设备自洽 | CPU 与 CUDA 的 sea_raft EPE 只差 3e-5–7e-5；CPU p50 41.9 ms 仅作历史对照，不作 GPU 指标 |
-| 风险分档 | 四个 bucket 齐全（fast_hard 最好 0.027–0.032；current_frame_anomaly 0.067–0.074；slow_structural_change 0.051–0.099；fast_alignable 0.111–0.125） |
-| 静态误拒 | validation、容差 0.5 px：三 seed 均 rate 0.0，mean predicted displacement 0.188/0.196/0.208 px |
+| 风险分档 | 四个 bucket 齐全（CFA：fast_hard 最好 0.027–0.032；current_frame_anomaly 0.067–0.074；slow_structural_change 0.051–0.099；fast_alignable 0.111–0.125） |
+| 静态误拒 | validation、容差 0.5 px：CFA 三 seed 均 rate 0.0，mean predicted displacement 0.188/0.196/0.208 px |
 | 风险校准表分区 | `fitted_split=calibration`；`regions={fitted_on: calibration, validated_on: validation, reported_on: test, test_used_only_for_reporting: true}` |
-| motion 路径预检（两平台，`--crop 128`，rgb3 dev checkpoint） | exit 0；`p2_motion_status="motion_provider"`；`offsets_shape=[1,8,2,128,128]`；图像塔 0 调用；`p3_support_applied=false`；`unique_frames_window`/`unique_new_measurements_window`/`adapter_unique_lifetime` 为按成员列表、`unique_matches_window` 全 True、`unique_frame_identity_rule="(episode_id, frame_id)"`；`weights_only_fallback=true`、schema 正确、checkpoint sha256 `133eb47d…` |
-| identity 对照 | crop-128 exit 0；crop-32 历史版保留（两版并列） |
+| motion 路径预检（两平台，`--crop 128`，**正式 rgb3 checkpoint**） | exit 0；checkpoint `update=74000`、`mode=rgb3`、sha256 `ecd3c1b6…`、`weights_only_fallback=true`、schema 正确、missing/unexpected 0；图像塔 0 调用；`offsets_shape=[1,8,2,128,128]`；unique 三字段为按成员列表且 `unique_matches_window` 全 True、identity rule 正确 |
+| motion 路径预检（dev 对照，crop=128，256-update 臂） | exit 0，同字段；保留为历史对照（sha256 `133eb47d…`） |
+| identity 对照 | crop-128 exit 0；crop-32 历史版保留（两档并列） |
 | 故意错配诊断 | cfa4 checkpoint + rgb3 窗口 → 加载前明确报错（含两侧通道、协议规则与建议），**输出目录 0 文件** |
 
-披露：预检用的 rgb3 motion 模型是 **256-update dev 臂**（`run_scale=dev`、`budget_exhausted`、update=256），只证明接口/梯度/单次到达语义连通，**不构成对齐质量结论**；正式质量证据是上表 CFA 三 seed 评测，两者分别陈述。motion 路径需要 `crop≥128`（rgb3 下 128×128 packed），这是 vendored 4 层金字塔的**几何下限**（训练配置 notes 早已声明、rgb3 臂训练几何即 128×128），不是为通过检查而放宽；`crop=32` 在 rgb3 下几何上不可能满足。是否用正式预算补一条 rgb3 臂（当前吞吐约 4 GPU 小时）留待研究负责人决定。
+披露：预检走的是**真实三通道平台窗口**，因此按协议配对规则（`input_channels_multiple_rule`）使用 **rgb3 stem 的 motion 模型**；正式 rgb3 臂完成前的那次预检用的是 256-update dev 臂（保留为对照），现在的正式收据用 `seed-101-rgb3` 的正式 checkpoint（update 74,000）。预检结果只证明接口/梯度/单次到达/来源计数一致，**不构成闭环或任务效果结论**。motion 路径需要 `crop≥128`（rgb3 下 128×128 packed），这是 vendored 4 层金字塔的**几何下限**（训练配置 notes 早已声明、rgb3 臂训练几何即 128×128），不是为通过检查而放宽；`crop=32` 在 rgb3 下几何上不可能满足。
 
 ### 3.6 基础设施事件
 
@@ -185,7 +197,7 @@ seed 101 是 D1 修复价值的直接证据：source-v2 旧判据在 **81,000** 
 
 ## 5. 状态字段
 
-- `implementation_status`：**PASS_P2**（全部模块、配置、测试、内部独立反例验收（53 项 + 16 变异）、D1/D2 与远程 A–E 修复回测，以及两平台 `raw_adapter` 真实预检与故意错配诊断均通过；本地全仓 709 passed / 2 skipped，`make check` 通过）
-- `training_status`：**P2_FIRST_SEGMENT_COMPLETE**（远程 256 拟合 + 两档 LR 选择 winner `lr=2.5e-4/iters=4`；第一段三种子全部结束：101 plateau@82k、211 budget_exhausted@100k（尾部漂移）、307 plateau@99k；**非**充分训练结论，续训与 rgb3 正式臂未授权）
-- `effect_status`：**NOT_APPLICABLE**（本阶段不产生 N01 机制增量或闭环结论；对齐质量只在合成 CFA test 分区报告，真实数据只证明接口连通）
-- 资源：P2 远程 GPU 时间合计 **约 6.88 小时**（训练 6.507 = 101 3.886 + 211 1.319 + 307 1.302；select+fit-check 0.159；rgb3 dev 臂 0.057；显存探针 0.064；评测/预检/回归验证约 0.09）。设备为 RTX PRO 6000 Blackwell 单卡（共享）。
+- `implementation_status`：**PASS_P2**（全部模块、配置、测试、内部独立反例验收（53 项 + 16 变异）、D1/D2 与远程 A–E 修复回测，以及两平台 `raw_adapter` 真实预检与故意错配诊断均通过；本地全仓 711 passed / 2 skipped，`make check` 通过。本轮由调度者另做了一次独立对抗探针：A 的 schema 门控 5 种伪造/外来 payload 全被拒、真 payload 与 plain state dict 正常接受；E 的 stem 门控两个方向正确且非法组合被拒；B 的唯一帧计数「重复到达计一次、跨 episode 同 id 计两次」实测为 3/3，缺身份数组走声明 fallback；D 的 `_align_to` 在异设备上正确搬运）
+- `training_status`：**P2_SEGMENT_COMPLETE**（远程 256 拟合 + 两档 LR 选择（CFA winner `lr=2.5e-4/iters=4`、rgb3 臂各自搜索得 `lr=5e-5/iters=4`）；第一段 CFA 三种子：101 plateau@82k、211 budget_exhausted@100k（尾部漂移）、307 plateau@99k；pseudo-RAW 正式臂三种子：101 plateau@85k、211 plateau@81k、307 plateau@85k；**非**充分训练结论，300k 续训未授权）
+- `effect_status`：**NOT_APPLICABLE**（本阶段不产生 N01 机制增量或闭环结论；对齐质量只在各输入体制的合成/真实分区内报告，真实数据预检只证明接口连通）
+- 资源：P2 远程 GPU 时间合计 **约 9.9 小时**（CFA 训练 6.507 = 101 3.886 + 211 1.319 + 307 1.302；rgb3 正式训练 2.937 = 0.988 + 0.948 + 1.001；select 与 fit-check 0.177；rgb3 dev 臂 0.057；显存探针 0.064；评测/预检/回归验证约 0.16）。设备为 RTX PRO 6000 Blackwell 单卡（共享）。

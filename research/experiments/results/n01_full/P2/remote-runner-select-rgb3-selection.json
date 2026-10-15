@@ -1,0 +1,130 @@
+{
+  "run_mode": "select",
+  "schema": "owac.n01_full.p2_motion_train.v1",
+  "git_sha": "unknown",
+  "config_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+  "config_path": "configs/encoders/n01_full/p2_motion_train_rgb3_formal.json",
+  "run_scale": "formal",
+  "device": "cuda",
+  "seed": 101,
+  "budget_per_candidate": 256,
+  "same_budget": true,
+  "selection_split": "validation",
+  "fitting_split": "train",
+  "test_split_used": false,
+  "candidates": [
+    {
+      "lr": 0.00025,
+      "iters": 4,
+      "updates": 256,
+      "val_loss": 4.298487498210027,
+      "val_epe_packed": 1.356740486736481,
+      "val_epe_sensor_px": 1.356740486736481,
+      "train_loss_first": 20.062332153320312,
+      "train_loss_last": 3.659564971923828,
+      "parameter_update": {
+        "total_abs_update": 229616.98292423785,
+        "per_group": {
+          "cnet": 146127.76426249743,
+          "init_conv": 1149.8315036296844,
+          "upsample_weight": 3196.4928863048553,
+          "flow_head": 737.4430789873004,
+          "fnet": 74140.51495596021,
+          "update_block": 4264.936236858368
+        },
+        "updates": 256
+      },
+      "samples_consumed": 1024,
+      "wall_seconds": 16.516374500999518
+    },
+    {
+      "lr": 0.00025,
+      "iters": 8,
+      "updates": 256,
+      "val_loss": 5.785383838873643,
+      "val_epe_packed": 1.297644375035396,
+      "val_epe_sensor_px": 1.297644375035396,
+      "train_loss_first": 46.759521484375,
+      "train_loss_last": 4.7317376136779785,
+      "parameter_update": {
+        "total_abs_update": 229332.65315343812,
+        "per_group": {
+          "cnet": 128495.31572793424,
+          "init_conv": 1210.8827810287476,
+          "upsample_weight": 3689.1173207759857,
+          "flow_head": 746.8853591866791,
+          "fnet": 89879.93602888286,
+          "update_block": 5310.515935629606
+        },
+        "updates": 256
+      },
+      "samples_consumed": 1024,
+      "wall_seconds": 17.52400656199461
+    },
+    {
+      "lr": 5e-05,
+      "iters": 4,
+      "updates": 256,
+      "val_loss": 4.244145741829505,
+      "val_epe_packed": 1.2503128189306993,
+      "val_epe_sensor_px": 1.2503128189306993,
+      "train_loss_first": 20.062332153320312,
+      "train_loss_last": 4.194547653198242,
+      "parameter_update": {
+        "total_abs_update": 87366.91407210054,
+        "per_group": {
+          "cnet": 40366.892553862184,
+          "init_conv": 253.439272031188,
+          "upsample_weight": 1916.5543311834335,
+          "flow_head": 174.57131355302408,
+          "fnet": 43504.32049307227,
+          "update_block": 1151.1361083984375
+        },
+        "updates": 256
+      },
+      "samples_consumed": 1024,
+      "wall_seconds": 14.875905704997422
+    },
+    {
+      "lr": 5e-05,
+      "iters": 8,
+      "updates": 256,
+      "val_loss": 6.360490624721233,
+      "val_epe_packed": 3.1220612709338846,
+      "val_epe_sensor_px": 3.1220612709338846,
+      "train_loss_first": 46.759521484375,
+      "train_loss_last": 5.2617950439453125,
+      "parameter_update": {
+        "total_abs_update": 84213.97779838555,
+        "per_group": {
+          "cnet": 39826.61616189033,
+          "init_conv": 253.53376245498657,
+          "upsample_weight": 1618.7956757545471,
+          "flow_head": 178.70410497672856,
+          "fnet": 41256.34014282003,
+          "update_block": 1079.987950488925
+        },
+        "updates": 256
+      },
+      "samples_consumed": 1024,
+      "wall_seconds": 17.126374738996674
+    }
+  ],
+  "winner": {
+    "lr": 5e-05,
+    "iters": 4
+  },
+  "selection_metric": "(val_epe_sensor_px, val_loss)",
+  "input_hashes": {
+    "training/n01_motion.py": "c06c158fd1184343719940bdae77766d4c0daeb0c68fcf2e067adbd852c13085",
+    "evaluation/n01_motion.py": "bc54d161d00a0e7ccca02144c08b1073fcf7f059089c618289584fce8085e241",
+    "backends/raw_correspondence.py": "a276b816198c15f7da4e999a53d43acbd75dade10e93305ce0c0deb0889efc79",
+    "raw/n01_motion_data.py": "27e44636087fd03cd57d425faeaa76c6dbd56723afbd45280a41082cc0861795",
+    "raw/n01_noise.py": "44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d",
+    "frameworks/n01_full/statistics.py": "d24107dbdf42b3c60f4aad0cdcc9b6158ffeda76614ee785ea258d1539e85d50",
+    "vendor/sea_raft/raft.py": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+    "vendor/sea_raft/provenance.json": "4cb19842fa49c5c145cb886be4e3bdcc314480a4a7a543a2494341f57132e4a7",
+    "config": "52351c5c06cdf08dac82a37cbfdb81b3b72bde2c69fefbd21c7535daab36d48e"
+  },
+  "wall_seconds": 66.04266150698822
+}
