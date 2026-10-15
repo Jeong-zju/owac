@@ -2486,17 +2486,26 @@ STEM_GROUPS = ("cnet", "fnet", "init_conv", "update_block", "flow_head", "upsamp
 STEM_CONV_KERNEL = 7
 STEM_CONV_OUT_CHANNELS = 64
 
-#: Configuration paths that may differ between the two stem arms, each for a
-#: declared reason (label, stem domain, input geometry/resolution).  Anything
-#: else differing is a hidden difference and is refused.
-STEM_CONFIG_EXPECTED_DIFFERENCES = (
+#: Configuration paths that must differ for a pair to be a CFA vs RGB3 stem pair.
+STEM_CONFIG_REQUIRED_DIFFERENCES = (
+    "model.mode",
+    "data.input_mode",
+)
+#: Configuration paths that may differ, each for a declared reason (evidence
+#: label, input geometry/resolution).  Anything else differing is a hidden
+#: difference and is refused.  The label paths are optional because two formal
+#: arms carry the same ``scale`` ("formal") and may share a stage name.
+STEM_CONFIG_ALLOWED_DIFFERENCES = (
     "scale",
     "stage",
     "notes",
-    "model.mode",
-    "data.input_mode",
     "data.geometry",
+    "data.pseudo_raw_geometry",
     "data.recipe_scale",
+)
+#: Every tolerated difference path (required + allowed), for reporting.
+STEM_CONFIG_EXPECTED_DIFFERENCES = (
+    STEM_CONFIG_REQUIRED_DIFFERENCES + STEM_CONFIG_ALLOWED_DIFFERENCES
 )
 
 
@@ -2616,13 +2625,13 @@ def run_stem_report(
             f"hidden configuration difference beyond the declared stem switch: {unexpected}"
         )
     missing = tuple(
-        expected
-        for expected in STEM_CONFIG_EXPECTED_DIFFERENCES
-        if not any(_matches_expected_path(expected, key) for key in observed_differences)
+        required
+        for required in STEM_CONFIG_REQUIRED_DIFFERENCES
+        if not any(_matches_expected_path(required, key) for key in observed_differences)
     )
     if missing:
         raise ValueError(
-            "the two arms were expected to differ on "
+            "the two arms were expected to differ on the input-domain path(s) "
             f"{missing}; they are not a CFA vs RGB3 stem pair"
         )
 
@@ -2756,6 +2765,8 @@ def run_stem_report(
         "differing_parameter_names": list(differing),
         "only_stem_input_channels_differ": bool(only_stem),
         "config_difference": {
+            "required_paths": list(STEM_CONFIG_REQUIRED_DIFFERENCES),
+            "allowed_paths": list(STEM_CONFIG_ALLOWED_DIFFERENCES),
             "expected_paths": list(STEM_CONFIG_EXPECTED_DIFFERENCES),
             "observed_paths": list(observed_differences),
             "matches_expected": True,

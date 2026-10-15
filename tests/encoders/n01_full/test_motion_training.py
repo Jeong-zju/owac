@@ -48,6 +48,7 @@ torch.set_num_threads(1)
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONFIG_PATH = REPO_ROOT / "configs/encoders/n01_full/p2_motion_train.json"
 RGB3_CONFIG_PATH = REPO_ROOT / "configs/encoders/n01_full/p2_motion_train_rgb3.json"
+RGB3_FORMAL_CONFIG_PATH = REPO_ROOT / "configs/encoders/n01_full/p2_motion_train_rgb3_formal.json"
 DATA_CONFIG = REPO_ROOT / "configs/encoders/n01_full/p2_motion_noise.json"
 CASES = (
     "rotation",
@@ -763,6 +764,99 @@ def test_stem_report_matches_the_analytic_stem_difference(tmp_path):
     assert roots == {"scale", "stage", "notes", "model", "data"}
     assert "budget" not in roots and "schedule" not in roots
     assert (tmp_path / "stem" / "stem_report.json").is_file()
+
+
+def _config_differences(left: dict, right: dict, prefix: str = "") -> set[str]:
+    """Dotted paths whose values differ; a dict-vs-scalar difference stops at the parent."""
+    diffs: set[str] = set()
+    for key in set(left) | set(right):
+        left_value, right_value = left.get(key), right.get(key)
+        path = f"{prefix}{key}"
+        if isinstance(left_value, dict) and isinstance(right_value, dict):
+            diffs |= _config_differences(left_value, right_value, prefix=f"{path}.")
+        elif left_value != right_value:
+            diffs.add(path)
+    return diffs
+
+
+def test_rgb3_formal_config_matches_cfa_except_the_input_domain():
+    cfa = load_motion_training_config(CONFIG_PATH)
+    formal = load_motion_training_config(RGB3_FORMAL_CONFIG_PATH)
+    dev = load_motion_training_config(RGB3_CONFIG_PATH)
+
+    # the formal arm keeps the formal label and does not inherit the dev marker
+    assert cfa.scale == "formal" and formal.scale == "formal"
+    assert dev.scale == "dev"
+    assert formal.stage != dev.stage and dev.stage == "P2-dev-rgb3"
+    assert _config_differences(dev.as_dict(), formal.as_dict()) == {"scale", "stage", "notes"}
+
+    # exactly the declared input-domain and label differences against the CFA arm
+    assert _config_differences(cfa.as_dict(), formal.as_dict()) == {
+        "stage",
+        "notes",
+        "model.mode",
+        "data.input_mode",
+        "data.geometry",
+        "data.recipe_scale",
+    }
+    assert "scale" not in _config_differences(cfa.as_dict(), formal.as_dict())
+
+    # same formal budget, schedule, seeds, criteria and evaluation as the CFA arm
+    assert formal.seeds == cfa.seeds == (101, 211, 307)
+    assert formal.budget == cfa.budget
+    assert formal.budget.updates == 100_000 and formal.budget.max_updates == 300_000
+    assert formal.budget.validation_interval == 1_000
+    assert formal.budget.delta_val == 0.002
+    assert formal.budget.monitor == cfa.budget.monitor
+    assert formal.schedule.drops == cfa.schedule.drops == ((50_000, 0.1), (80_000, 0.01))
+    assert formal.optimizer == cfa.optimizer
+    assert formal.checkpoint == cfa.checkpoint
+    assert formal.diagnostics == cfa.diagnostics
+    assert formal.selection == cfa.selection
+    assert formal.evaluation.buckets == cfa.evaluation.buckets
+    assert formal.data.batch_size == cfa.data.batch_size
+    assert formal.data.cache_entries == cfa.data.cache_entries
+    assert formal.data.exposure_correction == cfa.data.exposure_correction
+    assert formal.data.train.cases == cfa.data.train.cases
+    assert formal.data.validation.cases == cfa.data.validation.cases
+    assert formal.data.test.cases == cfa.data.test.cases
+
+    # the input domain is the pseudo-RAW three-channel one
+    assert formal.model.mode == "rgb3"
+    data_config = formal.data.resolved_data_config()
+    geometry = data_config.geometry_for(formal.data.input_mode)
+    assert formal.data.input_mode == "rawvla_rgb3"
+    assert geometry.input_mode == "rawvla_rgb3"
+    assert geometry.cfa_pattern == "rgb3" and geometry.channel_phase == ()
+    assert geometry.packed_shape == (128, 128) and geometry.sensor_shape == (128, 128)
+    assert formal.data.recipe_scale == 2.0 and cfa.data.recipe_scale == 4.0
+
+
+def test_rgb3_formal_stem_report_matches_the_analytic_difference(tmp_path):
+    cfa = load_motion_training_config(CONFIG_PATH)
+    formal = load_motion_training_config(RGB3_FORMAL_CONFIG_PATH)
+    receipt = run_stem_report(
+        cfa,
+        formal,
+        output=tmp_path / "stem-formal",
+        device="cpu",
+        config_path=CONFIG_PATH,
+        compare_config_path=RGB3_FORMAL_CONFIG_PATH,
+    )
+    assert receipt["total_trainable"]["delta"] == -9408
+    assert receipt["total_trainable"]["matches_analytic"] is True
+    assert receipt["scale"] == {"cfa4": "formal", "rgb3": "formal"}
+    assert receipt["differing_parameter_names"] == ["cnet.conv1.weight", "fnet.conv1.weight"]
+    assert receipt["only_stem_input_channels_differ"] is True
+    assert receipt["verdict"]["analytic_matches_measured"] is True
+    assert receipt["config_difference"]["matches_expected"] is True
+    observed = set(receipt["config_difference"]["observed_paths"])
+    assert "scale" not in observed  # both arms are formal: no label difference at all
+    assert {"model.mode", "data.input_mode"} <= observed
+    assert receipt["geometries"]["rgb3"]["channel_phase"] == [] and receipt["geometries"]["rgb3"][
+        "packed_shape"
+    ] == [128, 128]
+    assert (tmp_path / "stem-formal" / "stem_report.json").is_file()
 
 
 def test_stem_report_refuses_a_hidden_depth_difference(tmp_path):
