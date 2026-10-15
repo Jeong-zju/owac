@@ -136,7 +136,7 @@ def test_error_coverage_table_fits_on_calibration_only_and_is_a_protocol():
     mapped, coverage = table.map_proxy(
         flow_risk=torch.tensor([[0.15, 0.35]]), visibility=torch.tensor([[0.5, 0.5]])
     )
-    assert mapped.tolist() == [[pytest.approx(0.4), pytest.approx(0.8)]]
+    assert mapped.tolist() == [[pytest.approx(0.2), pytest.approx(0.8)]]
     assert coverage.tolist() == [[1.0, 1.0]]
     assert mapped.shape == coverage.shape == (1, 2)
 

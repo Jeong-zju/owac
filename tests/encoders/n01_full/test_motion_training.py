@@ -473,13 +473,15 @@ def test_platform_delta_val_boundary_is_strict():
     assert drifting.details["tail_drift"] > 0.25
     assert drifting.reasons == ("platform condition failed: tail_within_delta_val_of_best",)
 
-    # slow but persistent improvement below delta_val: still a plateau (literal contract)
+    # Sub-delta progress passes the flatness check, but a best at the actual
+    # stopping point still fails the separate observed-tail requirement.
     slow = [10.0 - 0.125 * index for index in range(12)]  # 0.5 * delta_val per validation
     slow_decision = _decide(_history(slow), delta_val=0.25)
     assert slow_decision.details["conditions"]["flat_tail_below_delta_val"] is True
     assert slow_decision.details["conditions"]["real_improvement_over_run"] is True
     assert slow_decision.details["conditions"]["tail_within_delta_val_of_best"] is True
-    assert slow_decision.status == "validation_plateau"
+    assert slow_decision.status == "budget_exhausted"
+    assert slow_decision.details["conditions"]["best_not_at_budget_end"] is False
 
     # tail improvements of exactly delta_val do not count (the test is strictly below)
     at_threshold = _decide(

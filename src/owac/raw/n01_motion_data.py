@@ -1748,7 +1748,7 @@ class MotionDataGenerator:
             geometry,
             self.calibration,
             dataset_id=self.dataset_id,
-            episode_id=f"{split}/{case}",
+            episode_id=f"{geometry.input_mode}/{split}/{case}/{sequence}",
             camera_id=self.camera_id,
             add_noise=add_noise,
             noise_seed=self.config.seed_rule.frame_seed(namespace, "noise", scene.frame_id),
@@ -1850,7 +1850,7 @@ class MotionDataGenerator:
     ) -> Mapping[str, Any]:
         material = CFA_MATERIAL_CLASS if geometry.is_cfa else PSEUDO_RAW_MATERIAL_CLASS
         template = self.calibration.black_level.id_template
-        episode_id = f"{split}/{case}"
+        episode_id = f"{geometry.input_mode}/{split}/{case}/{sequence}"
         exposure_known = bool(reference_scene.exposure_known and source_scene.exposure_known)
         packed_step = 2 if geometry.is_cfa else 1
         return {

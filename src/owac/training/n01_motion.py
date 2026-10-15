@@ -1527,7 +1527,7 @@ def decide_platform(
     * ``two_effective_lr_drops`` and ``final_low_lr_phase`` -- at least two
       effective LR drops were applied and the run is in the final low-LR phase.
     * ``best_not_at_budget_end`` -- the best checkpoint is not inside the last
-      ``plateau_checks`` validation windows of the budget.
+      ``plateau_checks`` validation windows of the observations actually completed.
     * ``diagnostics_passed`` -- the small-set fit / input / gradient diagnostics
       passed.
 
@@ -1557,7 +1557,11 @@ def decide_platform(
     flat_tail = len(tail) >= plateau_checks and all(
         improvement < float(delta_val) for improvement in tail[-plateau_checks:]
     )
-    best_not_at_end = (int(budget) - best_update) >= plateau_checks * int(interval)
+    # An unspent budget is not evidence observed after the best checkpoint.
+    observed_end = int(val_history[-1]["update"])
+    best_not_at_end = (min(int(budget), observed_end) - best_update) >= plateau_checks * int(
+        interval
+    )
     # D1: an improvement of exactly zero (constant curve, or one that only gets
     # worse) is not an improvement, and a tail that moved away from its best is
     # drift, not a plateau.  Both reuse the locked delta_val.
@@ -1574,6 +1578,7 @@ def decide_platform(
     }
     details = {
         "validations": len(values),
+        "observed_end_update": observed_end,
         "first_value": values[0],
         "final_value": values[-1],
         "best_value": best_value,
@@ -1596,8 +1601,8 @@ def decide_platform(
                 "the last plateau_checks improvements must each be below delta_val"
             ),
             "best_not_at_budget_end": (
-                "the best checkpoint must not sit inside the last plateau_checks validation "
-                "windows of the budget"
+                "the best checkpoint must precede the observed stopping point by at least "
+                "plateau_checks validation windows"
             ),
             "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass",
         },
@@ -2063,6 +2068,12 @@ class MotionTrainer:
             raise ValueError("the checkpoint iteration count differs from this run's iters")
         if abs(float(payload.get("base_lr", -1.0)) - self.base_lr) > 0.0:
             raise ValueError("the checkpoint base learning rate differs from this run's")
+        data_identity = payload.get("hashes", {}).get("data_config", {})
+        if data_identity.get("sha256") != _sha256_file(self.config.data.config_path):
+            raise ValueError(
+                "the data/calibration file changed since the checkpoint; use the frozen "
+                "original file for exact resume or declare a new parented run"
+            )
         self.model.load_state_dict(payload["model"])
         self.optimizer.load_state_dict(payload["optimizer"])
         self.scaler.load_state_dict(payload["scaler"])
@@ -2282,7 +2293,11 @@ def run_training(
                 delta_val=float(config.budget.delta_val),
                 plateau_checks=int(config.budget.plateau_checks),
                 lr_drops=trainer.lr_drops,
-                final_phase=config.schedule.is_final_phase(max(0, budget - 1)),
+                final_phase=config.schedule.is_final_phase(
+                    max(
+                        0, budget - config.budget.plateau_checks * config.budget.validation_interval
+                    )
+                ),
                 diagnostics_passed=bool((trainer.diagnostics or {}).get("passed", False)),
             )
             return _finish_train(
@@ -2319,7 +2334,9 @@ def run_training(
                 delta_val=float(config.budget.delta_val),
                 plateau_checks=int(config.budget.plateau_checks),
                 lr_drops=trainer.lr_drops,
-                final_phase=config.schedule.is_final_phase(update),
+                final_phase=config.schedule.is_final_phase(
+                    max(0, completed - config.budget.plateau_checks * interval)
+                ),
                 diagnostics_passed=bool(trainer.diagnostics["passed"]),
             )
         if completed % int(config.checkpoint.every) == 0 or is_last:
@@ -2336,7 +2353,9 @@ def run_training(
             delta_val=float(config.budget.delta_val),
             plateau_checks=int(config.budget.plateau_checks),
             lr_drops=trainer.lr_drops,
-            final_phase=config.schedule.is_final_phase(max(0, budget - 1)),
+            final_phase=config.schedule.is_final_phase(
+                max(0, budget - config.budget.plateau_checks * config.budget.validation_interval)
+            ),
             diagnostics_passed=bool(trainer.diagnostics["passed"]),
         )
     trainer.save_checkpoint(checkpoint_dir / "last.pt", update=completed_update, platform=platform)

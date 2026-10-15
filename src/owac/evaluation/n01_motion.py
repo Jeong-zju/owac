@@ -46,7 +46,7 @@ import json
 import math
 import time
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -133,6 +133,14 @@ def _align_to(tensor: torch.Tensor, reference: torch.Tensor) -> torch.Tensor:
     if tensor.device != reference.device:
         return tensor.to(device=reference.device)
     return tensor
+
+
+def _valid_grid(valid: Any, flow: torch.Tensor) -> torch.Tensor:
+    """Normalize CorrespondenceMap's bool or per-channel validity contract."""
+    if isinstance(valid, bool):
+        return torch.full(flow.shape[-2:], valid, dtype=torch.bool, device=flow.device)
+    valid = valid.to(device=flow.device, dtype=torch.bool)
+    return valid.all(dim=0) if valid.ndim == 3 else valid
 
 
 def roc_auc(scores: Any, labels: Any) -> float:
@@ -271,7 +279,7 @@ class ErrorCoverageTable:
         risk_values = np.concatenate(risks)
         visibility_values = np.concatenate(visibilities)
         error_values = np.concatenate(errors)
-        quantile_grid = np.linspace(0.0, 1.0, int(bins) + 2)[1:-1]
+        quantile_grid = np.linspace(0.0, 1.0, int(bins) + 1)[1:-1]
         risk_edges = tuple(
             float(value) for value in np.unique(np.quantile(risk_values, quantile_grid))
         )
@@ -320,11 +328,11 @@ class ErrorCoverageTable:
         device = flow_risk.device
         risk_index = torch.bucketize(
             flow_risk.detach().to(torch.float64),
-            torch.tensor(self.risk_edges, device=device),
+            torch.tensor(self.risk_edges, device=device, dtype=torch.float64),
         )
         visibility_index = torch.bucketize(
             visibility.detach().to(torch.float64),
-            torch.tensor(self.visibility_edges, device=device),
+            torch.tensor(self.visibility_edges, device=device, dtype=torch.float64),
         )
         risk_index = risk_index.clamp(0, rows - 1)
         visibility_index = visibility_index.clamp(0, cols - 1)
@@ -598,7 +606,7 @@ class MotionEvaluator:
             )
             return GroupMap(
                 flow=_align_to(result.packed_flow, metric).to(torch.float32),
-                valid=_align_to(result.valid.all(dim=0), metric),
+                valid=_align_to(_valid_grid(result.valid, result.packed_flow), metric),
                 risk=None if risk is None else _align_to(risk.detach(), metric).to(torch.float32),
                 coverage=None
                 if result.coverage is None
@@ -611,7 +619,7 @@ class MotionEvaluator:
             result = estimator.estimate(reference, source, iters=0, taps=False)
             return GroupMap(
                 flow=_align_to(result.packed_flow, metric).to(torch.float32),
-                valid=_align_to(result.valid.all(dim=0), metric),
+                valid=_align_to(_valid_grid(result.valid, result.packed_flow), metric),
                 risk_kind="unavailable",
             )
         if arm == "old_simplified":
@@ -667,6 +675,7 @@ class _Accumulator:
     errors_sensor: list[np.ndarray] = field(default_factory=list)
     errors_packed: list[np.ndarray] = field(default_factory=list)
     risks: list[np.ndarray] = field(default_factory=list)
+    detection_risks: list[np.ndarray] = field(default_factory=list)
     coverages: list[np.ndarray] = field(default_factory=list)
     labels: list[np.ndarray] = field(default_factory=list)
     cells: int = 0
@@ -689,6 +698,12 @@ class _Accumulator:
         self.cells += int(mask.numel())
         self.supervision_valid += int(supervision_valid.sum())
         self.predicted_valid += int(predicted_valid.sum())
+        if risk is not None:
+            # Detection must include occluded/out-of-bounds queries. EPE validity
+            # deliberately excludes these positives and is a different population.
+            detection_mask = torch.isfinite(risk)
+            self.detection_risks.append(_sample_cells(risk[detection_mask]))
+            self.labels.append(_sample_cells(invalid_label[detection_mask].to(torch.float64)))
         if not bool(mask.any()):
             return
         self.errors_sensor.append(_sample_cells(error_sensor[mask]))
@@ -697,28 +712,34 @@ class _Accumulator:
             self.risks.append(_sample_cells(risk[mask]))
         if coverage is not None:
             self.coverages.append(_sample_cells(coverage[mask]))
-        self.labels.append(_sample_cells(invalid_label[mask].to(torch.float64)))
 
     def summary(self) -> dict[str, Any]:
-        if not self.errors_sensor:
-            return {"cells": self.cells, "valid_cells": 0, "epe_sensor_px": None}
-        errors = np.concatenate(self.errors_sensor)
-        packed = np.concatenate(self.errors_packed)
-        labels = np.concatenate(self.labels).astype(bool)
         summary = {
             "cells": int(self.cells),
-            "valid_cells": int(errors.size),
+            "valid_cells": 0,
+            "epe_sensor_px": None,
+            "epe_packed": None,
+            "error_quantiles_sensor_px": {},
             "supervision_valid_cells": int(self.supervision_valid),
             "predicted_valid_cells": int(self.predicted_valid),
-            "epe_sensor_px": float(errors.mean()),
-            "epe_packed": float(packed.mean()),
-            "error_quantiles_sensor_px": error_quantiles(errors),
         }
+        if self.errors_sensor:
+            errors = np.concatenate(self.errors_sensor)
+            packed = np.concatenate(self.errors_packed)
+            summary.update(
+                valid_cells=int(errors.size),
+                epe_sensor_px=float(errors.mean()),
+                epe_packed=float(packed.mean()),
+                error_quantiles_sensor_px=error_quantiles(errors),
+            )
         if self.risks:
-            risks = np.concatenate(self.risks)
-            summary["risk_mean_sensor_px"] = float(risks.mean())
+            summary["risk_mean_sensor_px"] = float(np.concatenate(self.risks).mean())
+        if self.detection_risks:
+            risks = np.concatenate(self.detection_risks)
+            labels = np.concatenate(self.labels).astype(bool)
             summary["occlusion_auc"] = roc_auc(risks, labels)
-            summary["invalid_label_fraction"] = float(labels.mean())
+            summary["detection_cells"] = int(labels.size)
+            summary["invalid_label_fraction"] = float(labels.mean()) if labels.size else None
             summary["occlusion_precision_recall"] = _precision_recall(
                 risks, labels, threshold=float(self.threshold)
             )
@@ -995,7 +1016,7 @@ def _collect_calibration_samples(
         result = evaluator.estimator.estimate(
             reference, source, iters=evaluator.config.model.iters, taps=False
         )
-        predicted_valid = result.valid.all(dim=0)
+        predicted_valid = _valid_grid(result.valid, result.packed_flow)
         flow = result.packed_flow.to(torch.float32)
         # the model output owns the device here; the CPU supervision is moved onto
         # it rather than assuming the output is on the CPU (or on cuda:current)
@@ -1135,16 +1156,23 @@ def _aggregate_arm(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     if not records:
         return {"pairs": 0}
     quantiles = ("p50", "p90", "p95")
+    measured = [record for record in records if record.get("epe_sensor_px") is not None]
     result: dict[str, Any] = {
         "pairs": len(records),
-        "epe_sensor_px": float(np.mean([record["epe_sensor_px"] for record in records])),
-        "epe_packed": float(np.mean([record["epe_packed"] for record in records])),
+        "epe_sensor_px": float(np.mean([record["epe_sensor_px"] for record in measured]))
+        if measured
+        else None,
+        "epe_packed": float(np.mean([record["epe_packed"] for record in measured]))
+        if measured
+        else None,
         "valid_cells": int(sum(record["valid_cells"] for record in records)),
         "cells": int(sum(record["cells"] for record in records)),
         "error_quantiles_sensor_px": {
             quantile: float(
-                np.mean([record["error_quantiles_sensor_px"][quantile] for record in records])
+                np.mean([record["error_quantiles_sensor_px"][quantile] for record in measured])
             )
+            if measured
+            else None
             for quantile in quantiles
         },
     }
@@ -1234,8 +1262,8 @@ def _static_false_rejection(
             input_mode=evaluator.input_mode,
         )
         scene = frames[-1]
-        # rendering one scene state twice carries the same declared gain and the
-        # same noise realisation, so the pair is exactly static
+        # The geometry is identical; different exposure identities give independent
+        # sensor noise. Reusing a frame id would reproduce exactly the same noise.
         reference = evaluator.generator.render(
             scene,
             split=spec.split,
@@ -1244,7 +1272,7 @@ def _static_false_rejection(
             input_mode=evaluator.input_mode,
         )
         source = evaluator.generator.render(
-            scene,
+            replace(scene, frame_id=scene.frame_id - 1, time=scene.time - 1.0),
             split=spec.split,
             case=spec.case,
             sequence=spec.sequence,
@@ -1256,12 +1284,17 @@ def _static_false_rejection(
         magnitude = torch.linalg.vector_norm(result.packed_flow, dim=0) * float(
             evaluator.sensor_per_packed
         )
-        valid = result.valid.all(dim=0)
-        if not bool(valid.any()):
+        valid = _valid_grid(result.valid, result.packed_flow)
+        eligible = torch.ones(reference.packed_shape, dtype=torch.bool, device=magnitude.device)
+        for sensor_frame in (reference, source):
+            if sensor_frame.validity is not None:
+                eligible &= sensor_frame.validity.to(magnitude.device).all(dim=0)
+        if not bool(eligible.any()):
             continue
-        rejected = (magnitude > tolerance) | ~valid
-        flags.append(float(rejected[valid].to(torch.float64).mean()))
-        magnitudes.append(float(magnitude[valid].mean()))
+        rejected = (magnitude > tolerance) | ~valid | ~torch.isfinite(magnitude)
+        flags.append(float(rejected[eligible].to(torch.float64).mean()))
+        finite = eligible & torch.isfinite(magnitude)
+        magnitudes.append(float(magnitude[finite].mean()) if bool(finite.any()) else float("nan"))
     if not flags:
         return {"pairs": 0, "note": "no static cell was valid"}
     return {
@@ -1270,7 +1303,8 @@ def _static_false_rejection(
         "false_rejection_rate": float(np.mean(flags)),
         "mean_predicted_displacement_sensor_px": float(np.mean(magnitudes)),
         "note": (
-            "a static pair is rendered twice from the same scene state; the declared truth is zero"
+            "zero motion and identical geometry; distinct frame ids and independent noise; "
+            "denominator is valid sensor queries, including predicted rejections"
         ),
     }
 

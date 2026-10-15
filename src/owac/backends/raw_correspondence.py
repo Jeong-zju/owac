@@ -587,6 +587,11 @@ class RawCorrespondenceMap(CorrespondenceMap):
         hp, wp = self.packed_shape
         if not (0 <= channel < MODE_CHANNELS[self.mode] and 0 <= row < hp and 0 <= col < wp):
             raise IndexError(f"query ({channel}, {row}, {col}) is outside the packed grid")
+        if isinstance(self.valid, bool):
+            if not self.valid:
+                return ()
+        elif not bool(self.valid[channel, row, col]):
+            return ()
         finite, tap_rows, tap_cols, tap_weights = _packed_pull_geometry(self.packed_flow)
         phase = self.phase_of_channel(channel)
         channel_or_phase: int | str = channel if phase is None else phase
@@ -906,6 +911,9 @@ class CorrespondenceEstimator:
                 jj = cols.clamp(0, wp - 1).long()
                 per_tap.append(validity[:, ii, jj] | ~contributes)
             valid = torch.stack(per_tap).all(dim=0) & spatial_ok.unsqueeze(0)
+
+        if reference.validity is not None:
+            valid &= reference.validity.to(device)
 
         origins = torch.tensor(
             [source.phase_offset(channel) for channel in range(channels)],

@@ -1700,6 +1700,8 @@ def test_missing_frozen_assets_fail_hard_without_writing_a_receipt(tmp_path):
                 str(PROTOCOL),
                 "--platform",
                 "libero",
+                "--weights",
+                str(tmp_path / "absent-model.safetensors"),
                 "--output",
                 str(output),
             ]
