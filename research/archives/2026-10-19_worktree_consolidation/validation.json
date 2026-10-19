@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-19T18:33:12+08:00",
+  "scope": "local code integration and evidence preservation; no experiment training or remote recovery",
+  "tested_code_commit": "2908e7471ad2d4109096c3f34863b94977cb2416",
+  "original_main": "54bad2df5ff2c76d2d49320417a4dc00a7fd5aed",
+  "target_branch": "main",
+  "tests": {
+    "passed": 2641,
+    "skipped": 25,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 187.931,
+    "command": "OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 uv run --locked --all-extras pytest -q --junitxml=outputs/worktree-consolidation-20261019/final-tests.xml",
+    "skips": [
+      {
+        "test": "tests.encoders.n01_full.test_motion::test_cuda_flow_with_a_cpu_validity_mask_matches_the_cpu_result",
+        "reason": "needs an actual CUDA device"
+      },
+      {
+        "test": "tests.encoders.n01_full.test_motion::test_vendored_hashes_match_the_recorded_provenance",
+        "reason": "pinned upstream cache is absent in this checkout"
+      },
+      {
+        "test": "tests.encoders.n01_full.test_motion_eval::test_cuda_evaluation_runs_end_to_end",
+        "reason": "CUDA runtime is not available"
+      },
+      {
+        "test": "tests.encoders.n02.test_raw_dataset::test_real_libero_cache_matches_the_recorded_evidence",
+        "reason": "Real RawVLA-Bench NPZ cache is not present on this workstation: /workspace does not exist and no NPZ exists under /home/jeong. The real files live on the deployed server at /workspace/owac/rawvla/data/libero/raw (LIBERO) and /workspace/owac/rawvla/data/robotwin2/raw (RoboTwin), per research/experiments/results/2026-10-10_rawvla_pi05_deployment/dataset-check.json."
+      },
+      {
+        "test": "tests.encoders.n02.test_raw_dataset::test_real_robotwin_cache_matches_the_recorded_evidence",
+        "reason": "Real RoboTwin RawVLA-Bench NPZ cache is not present on this workstation; it is on the deployed server at /workspace/owac/rawvla/data/robotwin2/raw (632 files)."
+      },
+      {
+        "test": "tests.encoders.n02.test_rawvla_features::test_real_pi05_single_batch_forward_backward",
+        "reason": "requires the external π0.5 runtime and the author checkpoint; missing assets here: python package 'starVLA' (importable=False), checkpoint /workspace/owac/rawvla/pi05_libero (exists=False), tokenizer /workspace/owac/rawvla/paligemma_tokenizer.model (exists=False)"
+      },
+      {
+        "test": "tests.encoders.n02.test_rawvla_features::test_real_pi05_predict_runs_encoder_once",
+        "reason": "requires the external π0.5 runtime and the author checkpoint; missing assets here: python package 'starVLA' (importable=False), checkpoint /workspace/owac/rawvla/pi05_libero (exists=False), tokenizer /workspace/owac/rawvla/paligemma_tokenizer.model (exists=False)"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_components_core::test_smc_reference_runs_when_numba_is_available",
+        "reason": "particles.resampling imports numba at module scope"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_p1_model::test_full_measurement_step_runs_on_cuda",
+        "reason": "requires a CUDA device"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_p1_model::test_mixed_device_measurement_step_scores_cpu_measurements",
+        "reason": "requires a CUDA device"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_p1_model::test_score_hot_path_makes_no_synchronization_on_cuda",
+        "reason": "requires a CUDA device"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_p1_observation::test_cuda_pretraining_mask_is_device_consistent_and_forces_unsupported_patches",
+        "reason": "requires a CUDA device"
+      },
+      {
+        "test": "tests.encoders.n02_full.test_p1_observation::test_cuda_encoder_levels_keep_coordinates_on_the_feature_device",
+        "reason": "requires a CUDA device"
+      },
+      {
+        "test": "tests.encoders.n04_full.test_measurement_gpu::test_cuda_measure_uses_model_device",
+        "reason": "需要可用的 CUDA 设备"
+      },
+      {
+        "test": "tests.encoders.n04_full.test_measurement_gpu::test_cuda_training_step_and_evaluate",
+        "reason": "需要可用的 CUDA 设备"
+      },
+      {
+        "test": "tests.encoders.n04_full.test_measurement_gpu::test_cuda_export_matches_online",
+        "reason": "需要可用的 CUDA 设备"
+      },
+      {
+        "test": "tests.encoders.n04_v11.test_data_training::test_compiled_gradient_layout_allows_real_fused_update[cuda]",
+        "reason": "requires CUDA"
+      },
+      {
+        "test": "tests.encoders.n04_v11.test_n04_v11_server::test_websocket_round_trip_with_metadata",
+        "reason": "需要 msgpack_numpy（starVLA deployment.model_server.tools 或 pip 包）"
+      },
+      {
+        "test": "tests.encoders.n04_v11.test_readout_encoder::test_cuda_bfloat16_autocast_keeps_geometry_fp32",
+        "reason": "需要 CUDA 才能复现 BF16 autocast 下的几何 dtype 边界（远端 LIBERO smoke 现场）"
+      },
+      {
+        "test": "tests.integration.test_n01_v12_frozen_isp::test_transcription_matches_upstream[libero-starVLA/examples/simBenchmarks/LIBERO/eval_files/raw_rgb10_unprocessing.py-_raw10_to_rgb8]",
+        "reason": "OWAC_RAWVLA_SOURCE is not set; author checkout unavailable"
+      },
+      {
+        "test": "tests.integration.test_n01_v12_frozen_isp::test_transcription_matches_upstream[robotwin2-third_party/FastWAM/third_party/RoboTwin/envs/camera/raw_rgb10.py-raw10_to_rgb8]",
+        "reason": "OWAC_RAWVLA_SOURCE is not set; author checkout unavailable"
+      },
+      {
+        "test": "tests.integration.test_n01_v12_frozen_isp::test_uint8_cache_quantisation_is_bounded_and_reported",
+        "reason": "OWAC_RAWVLA_SOURCE is not set; author checkout unavailable"
+      },
+      {
+        "test": "tests.integration.test_n01_v12_training_acceptance::test_interrupted_training_matches_uninterrupted_across_epoch[cuda]",
+        "reason": "CUDA resume checked on the remote GPU"
+      },
+      {
+        "test": "tests.test_n02_r7_repair::test_inactive_auxiliary_group_norm_is_device_independent[cuda]",
+        "reason": "requires CUDA"
+      },
+      {
+        "test": "tests.unit.test_n02_full_probe::test_gpu_report_matches_torch_device_facts",
+        "reason": "no CUDA device in this interpreter"
+      }
+    ]
+  },
+  "make_check": "passed",
+  "environment": {
+    "python": "3.12.12",
+    "torch": "2.9.1+cpu",
+    "scipy": "1.18.1",
+    "cuda_available": false
+  },
+  "tested_source_manifest_sha256": "d104a038e97cb9280753c2090201275e83ab553c56cfeed66bdce390b13df2ab",
+  "logs": {
+    "full-tests.log": "e43d9d35b4315cc3ccf1a5f703e837ab38d21bca0d67294176cc0ab2c0b8a931",
+    "final-tests.xml": "fd74564460284f15948dab44dc1b2e932d5a40120e45002d0c8817ef6bb71c20",
+    "final-check.log": "763453ed4b66e1025720c18fb98e67ea272ef3bbd2e6b5d68122b1b42e499eb4",
+    "full-tests-attempt1.log": "f43f34712a4e811badba15fac78117c86a8bdb03e56d1aa1cc61dcc72829a930",
+    "full-tests-attempt2.log": "db4c330049449d85bd9dc2256d854fbdf76d01031cfea848d99b1920f6d8c8d0",
+    "conflict-regressions.log": "be89406dee0196885d80f52ad6c60180b751a85639d0202c6926418142798faa",
+    "fixture-and-profile-regressions.log": "862d6558e4164973db27c1a621cd6db6c9ed3a3bc0d690a62f202d4d51b552bd"
+  },
+  "local_evidence": {
+    "files": 91270,
+    "payload_bytes": 28288067665,
+    "archive_bytes": 13959188530,
+    "all_members_verified": true,
+    "source_removed": false
+  },
+  "remote": {
+    "accessible": false,
+    "source": "user report; no remote connection attempted during consolidation",
+    "remote_only_weights_and_data_recovered": false
+  },
+  "delivery_verification_path": "outputs/worktree-consolidation-20261019/main-verification.json",
+  "pushed": false
+}
