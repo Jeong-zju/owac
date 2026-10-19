@@ -1,0 +1,41 @@
+{
+  "scope": "three fixed-seed r11 RAW development episodes; no training or P4",
+  "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-task-r11-task-s1103-a1/checkpoint_0000850.pt",
+  "checkpoint_sha256": "a660f0a0c6dc3d7006f1cda391de27c2b35d31fb7b1d51163e7f480e16b0068c",
+  "config": "/workspace/owac/worktrees/n02-measurement-completion/research/experiments/n02_v1_2/training_r11_20261017/task_config.json",
+  "config_sha256": "32ab43a007e7ce196e01410e4031860e1a10238590b65a9a66b326732bdadeb4",
+  "runner_sha256": "ab8fc1df4760a4d871ad580176e2c7d5f0a93e5fde517c68d7eb64d01961f3d0",
+  "max_steps_per_case": 400,
+  "timeout_seconds_per_case": 1800,
+  "execution": {
+    "version": "n02-control-r11-v1",
+    "horizon": 50,
+    "replan_interval": 50,
+    "max_joint_delta": null,
+    "max_gripper_delta": null,
+    "clip_grippers": false
+  },
+  "cases": [
+    {
+      "domain": "Normal",
+      "gpu": 0,
+      "port": 18220,
+      "case": "r11-task850-normal-a1",
+      "supervisor": "owac-n02-r11-closed-normal-a1"
+    },
+    {
+      "domain": "Low",
+      "gpu": 1,
+      "port": 18221,
+      "case": "r11-task850-low-a1",
+      "supervisor": "owac-n02-r11-closed-low-a1"
+    },
+    {
+      "domain": "ExtremeLow",
+      "gpu": 0,
+      "port": 18220,
+      "case": "r11-task850-extremelow-a1",
+      "supervisor": "owac-n02-r11-closed-extremelow-a1"
+    }
+  ]
+}

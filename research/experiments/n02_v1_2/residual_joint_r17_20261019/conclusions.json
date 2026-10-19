@@ -1,0 +1,163 @@
+{
+  "completed": true,
+  "audit": "audit-a2 passed all10 runs x3budgets x selected/last weights; exact prediction/metric and baseline equality",
+  "actual_updates": 7168,
+  "accepted_matrix_updates": 6144,
+  "rejected_joint_updates": 1024,
+  "pi_updates": 0,
+  "learned_policy_closed_loops": 0,
+  "collection": {
+    "attempted": 20,
+    "accepted": 19,
+    "train": 11,
+    "val": 4,
+    "test": 4,
+    "excluded": 19,
+    "windows": {
+      "train": 244,
+      "val": 89,
+      "test": 90
+    }
+  },
+  "joint_rms_deg": {
+    "baseline": {
+      "train": 7.070164679212737,
+      "val": 9.66734847500971,
+      "test": 8.168458164898123
+    },
+    "state": {
+      "train": 6.8088467599658475,
+      "val": 9.600585769701318,
+      "test": 7.8999314923493
+    },
+    "raw": {
+      "train": 0.7987738800113355,
+      "val": 7.626113918374641,
+      "test": 6.3939045269771455
+    },
+    "native": {
+      "train": 1.6317476297678792,
+      "val": 5.867583387071717,
+      "test": 4.357884820182001
+    },
+    "joint": {
+      "train": 0.7395620898440329,
+      "val": 7.702686331120199,
+      "test": 6.49240838997142
+    }
+  },
+  "primary_result": "新场景上冻结RAW残差提供可泛化动作增益，但此次联合适配没有额外收益；原生视觉参照仍明显更好。",
+  "stage_finding": "旧Normal接近24窗口：首步6.80→6.39、前十步7.65→7.24，完整50步11.14→11.62；不能以短期修正收益替代长动作块验收。",
+  "interpretation": [
+    "相同初态但不同正确动作的新示范，较旧近似固定场景更适合检验视觉；当前结果反驳RAW信息完全不可用。",
+    "联合训练拟合更低却未改善留出，不支持单纯继续当前联合训练就能解决问题；不能由一个局部更新范围/预算推出骨干设计有硬伤。",
+    "原生视觉的预训练、输入成像和表征与RAW不同；差距不能单独归因于噪声或网络结构。",
+    "旧数据与新数据场景及分布不同，跨轮误差下降不能当作只增加示范数量的因果结果。",
+    "相同初态留出：冻结RAW前十步6.46→1.13度，完整50步10.24→7.26度；原生视觉前十步2.65度、完整6.10度。RAW不是所有范围都弱，完整未来仍明显更难；联合home完整7.14略改善，但总体留出6.49逊冻结6.39，收益不均。"
+  ],
+  "next_recommendation": "保留冻结RAW残差为参照，优先按阶段定位长动作块后半段，并核对采集帧到控制步的时间映射；若开启下一轮，预先固定短执行前缀/完整块的对照与场景验收，先检验动作时域和控制接口，再决定是否扩大联合更新范围或回接π，不同时更换骨干和损失。",
+  "limits": [
+    "仅Normal、同一物体型号/背景、11训练4验证4新留出，两个训练种子；未验证新光照/新物体。",
+    "RAW是HDR派生带噪3通道，不是原生Bayer；没有RGB教师或运行时隐藏物体/接触真值。",
+    "抓取/抬升窗口均没有完整50步有效未来，实际mask支持已披露；home窗口均有50有效未来。",
+    "专家19/20成功不能算作学习策略成功；本轮π更新0、闭环0。",
+    "联合只更新骨干后6块、投影、空间融合及小残差头；不是全骨干或π充分训练。"
+  ],
+  "repair": "PI0构造函数污染全局矩阵精度，导致原联合组基线输出偏移；已隔离，全基线输出逐位相同、RAW初始化缓存差0；两个原512步联合组保留并重跑。",
+  "checks": {
+    "targeted_tests": 70,
+    "make_check": "passed466files",
+    "exact_fixed_baseline_predictions": true,
+    "initial_raw_cache_parity": 0.0,
+    "full_weight_reload": "passed",
+    "source_hashes_match": 16
+  },
+  "test_gripper_mae": {
+    "baseline": 0.10354030393490668,
+    "state": 0.0959974076282564,
+    "raw": 0.04424053500587517,
+    "native": 0.041307200775051234,
+    "joint": 0.043816400227753884
+  },
+  "test_normalized_control_mse": {
+    "baseline": 0.050931377336382866,
+    "state": 0.04651757702231407,
+    "raw": 0.02642530482262373,
+    "native": 0.014152280986309052,
+    "joint": 0.02698503900319338
+  },
+  "learning_curve": "冻结RAW预算128/256/512留出6.599/6.400/6.394度，后半程训练拟合继续改善而留出收益趋缓；此次局部联合适配两种子的关节留出均略逊冻结。",
+  "home_test": {
+    "baseline": {
+      "normalized_control_mse": 0.05882946960628033,
+      "joint_rms_deg": 10.238386585315492,
+      "gripper_mae": 0.04910835332750273,
+      "gripper_max_error": 0.09080359236177671,
+      "valid_action_steps": 200.0,
+      "windows": 4.0,
+      "first_joint_rms_deg": 2.4974978124645313,
+      "first_joint_max_deg": 5.4926102064824285,
+      "first_gripper_mae": 0.009133978912466034,
+      "first10_joint_rms_deg": 6.455113884361458,
+      "first10_joint_max_deg": 17.8522575905513,
+      "first10_gripper_mae": 0.029940752771522392
+    },
+    "state": {
+      "normalized_control_mse": 0.05375019647181034,
+      "joint_rms_deg": 9.864679516584502,
+      "gripper_mae": 0.0406248116596965,
+      "gripper_max_error": 0.07178379360649245,
+      "valid_action_steps": 200.0,
+      "windows": 4.0,
+      "first_joint_rms_deg": 1.1196008323052182,
+      "first_joint_max_deg": 2.9463383558020806,
+      "first_gripper_mae": 0.014743124242686534,
+      "first10_joint_rms_deg": 5.260923732094623,
+      "first10_joint_max_deg": 16.596090694722395,
+      "first10_gripper_mae": 0.01788573150411512
+    },
+    "raw": {
+      "normalized_control_mse": 0.03209793567657471,
+      "joint_rms_deg": 7.255879398745394,
+      "gripper_mae": 0.013435784174643327,
+      "gripper_max_error": 0.04068877564296436,
+      "valid_action_steps": 200.0,
+      "windows": 4.0,
+      "first_joint_rms_deg": 0.6421328686263228,
+      "first_joint_max_deg": 1.8458108145670087,
+      "first_gripper_mae": 0.0062247531769701325,
+      "first10_joint_rms_deg": 1.1336347333933106,
+      "first10_joint_max_deg": 5.13462609425226,
+      "first10_gripper_mae": 0.010891864177809362
+    },
+    "native": {
+      "normalized_control_mse": 0.021917586214840412,
+      "joint_rms_deg": 6.100084637662476,
+      "gripper_mae": 0.011454443370430174,
+      "gripper_max_error": 0.0736646524303417,
+      "valid_action_steps": 200.0,
+      "windows": 4.0,
+      "first_joint_rms_deg": 1.0404923158834667,
+      "first_joint_max_deg": 3.4147099717876044,
+      "first_gripper_mae": 0.009181904955313014,
+      "first10_joint_rms_deg": 2.647592253341897,
+      "first10_joint_max_deg": 13.24577835277887,
+      "first10_gripper_mae": 0.008493438616310977
+    },
+    "joint": {
+      "normalized_control_mse": 0.03068238403648138,
+      "joint_rms_deg": 7.137275005786115,
+      "gripper_mae": 0.011178857143726698,
+      "gripper_max_error": 0.04000404569244864,
+      "valid_action_steps": 200.0,
+      "windows": 4.0,
+      "first_joint_rms_deg": 0.6570613000778349,
+      "first_joint_max_deg": 1.810710345700103,
+      "first_gripper_mae": 0.00742940432313266,
+      "first10_joint_rms_deg": 1.172995654030713,
+      "first10_joint_max_deg": 5.280267641198337,
+      "first10_gripper_mae": 0.010016627204503116
+    }
+  },
+  "residual_cap_diagnostic": "用隐藏目标构造的有界oracle只作误差下界诊断：当前新留出的关节误差可接近0，约0.2%控制元素触界；不支持上调残差幅度就能消除现有误差，也不证明这些修正能由视觉学出。"
+}

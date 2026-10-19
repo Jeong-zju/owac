@@ -1,0 +1,60 @@
+{
+  "version": "r13-frozen-information-v1",
+  "policy_updates": 0,
+  "closed_loops": 0,
+  "primary": "r11-task850",
+  "supplement": "r12-one256",
+  "seed": 13019,
+  "controlled": {
+    "scenes": 48,
+    "frames_per_scene": 8,
+    "split": [
+      32,
+      8,
+      8
+    ],
+    "light": "Normal",
+    "scope": "static diagnostic snapshots, not expert trajectories; arms from disjoint cached episodes, independently varied object pose and physical gripper openness; no action execution"
+  },
+  "cached": {
+    "frames_per_episode": 4,
+    "scope": "original RAW frames and stored endposes/openness; object labels unavailable"
+  },
+  "representations": [
+    "shallow_stride4",
+    "deep_stride16",
+    "spatial_fusion",
+    "pre_pi_actual",
+    "pre_pi_fixed_state"
+  ],
+  "readout": {
+    "spatial_grid": 8,
+    "channel_bottleneck": 8,
+    "hidden": 64,
+    "seeds": [
+      13019,
+      13020,
+      13021
+    ],
+    "max_updates": 600,
+    "validation_every": 100,
+    "selection": "validation normalized MSE only",
+    "heads": [
+      "linear_bottleneck",
+      "mlp"
+    ]
+  },
+  "controls": [
+    "training_mean",
+    "proprio_only",
+    "phase_only",
+    "shuffled_training_labels"
+  ],
+  "boundaries": [
+    "all backbone/adapter weights frozen and hashed before/after",
+    "labels never policy inputs",
+    "independent scene/episode groups; no adjacent-frame split",
+    "poor small-probe performance cannot prove information absent",
+    "good decoding is not closed-loop success"
+  ]
+}

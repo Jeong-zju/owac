@@ -1,0 +1,36 @@
+{
+  "stage": "N02 v1.1 P1 independent acceptance",
+  "date": "2026-10-15",
+  "timezone": "Asia/Shanghai",
+  "overall": "fail",
+  "complete": false,
+  "implementation": "fail",
+  "numerical": "incomplete",
+  "behavior": "fail",
+  "closed_loop": "not_run",
+  "behavior_claim_boundary": "The P1 acceptance gate has not passed. Existing behavioral measurements include invalid instrumentation and do not establish failure of a correct, sufficiently trained architecture.",
+  "host": "154.59.156.22:16724",
+  "remote_source_root": "/workspace/owac/worktrees/n02-measurement-completion",
+  "checkpoint_scope": "p1-measurement-seed1103-formal-cfa4-meas-5k-true/checkpoints/final.pt; updates=5000; 405/405 tensors independently loaded",
+  "e1_p2_entry_criteria_satisfied": false,
+  "blockers": [
+    "WindowedCalibrator is not called by the actual step/evaluation; every normal and insufficiency verdict is None",
+    "declared_prior is dropped before inference; opposite legal 95-percent priors produce bit-identical scores and softmax",
+    "empirical energy softmax is reported as posterior; no-information task is an ordinary first-frame evaluation",
+    "train/evaluation use the same train partition and seed; 16/16 generated sequence RAW hashes overlap",
+    "cue_swap changes dictionary order instead of measurement cues; nuisance groups repeat the same task",
+    "log_exposure field identifies the correct candidate without measurements: 32/32 diagnostic dictionaries",
+    "single model seed, 961 scenes per class, incomplete training and unmatched baseline budgets",
+    "sparse oracle has genuine sampling blind spots; this cannot explain away the proven integration defects"
+  ],
+  "evidence_paths": [
+    "../../2026-10-15_n02_p1_independent_acceptance.md",
+    "remote_receipt.json",
+    "wiring_probe.json",
+    "remote_tests.txt",
+    "audit_remote.py",
+    "probe_wiring.py",
+    "reproduce.sh"
+  ],
+  "changes_in_this_audit": "Independent receipts, probes, report and status pointers only; no production fixes, training, threshold changes, commits or pushes"
+}

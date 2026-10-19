@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+policy-rpc = ["msgpack==1.1.2", "websockets==15.0.1"]
 identity = ["h5py>=3"]
 visualization = ["matplotlib>=3.9", "pillow>=11", "imageio>=2.36", "imageio-ffmpeg>=0.5"]
 simulation-data = ["numpy>=2.3,<3"]
@@ -26,6 +27,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "owac.runtime" = ["*.html"]
+"owac.baselines" = ["sbi_embedding.LICENSE.txt"]
 "owac.baselines._vendor.dbsr" = ["LICENSE", "provenance.json"]
 "owac.baselines._vendor.sea_raft" = ["LICENSE", "provenance.json", "*.py"]
 "owac.baselines._vendor.sea_raft.utils" = ["*.py"]
@@ -33,6 +35,7 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+extend-exclude = ["src/owac/frameworks/n02_full/components/upstream", "outputs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,213 @@
+{
+  "stage": "p1",
+  "version": "n02-full-v1.1",
+  "date": "2026-10-14",
+  "host": {
+    "active": "154.59.156.22:16724 (2x RTX PRO 6000 Blackwell, 迁移后)",
+    "previous": "107.209.104.125:44327 (与冻结 π0.5 基线共用 GPU)"
+  },
+  "implementation": "pass",
+  "numerical": "pass",
+  "behavior": "fail",
+  "closed_loop": "not_run",
+  "evidence_paths": {
+    "report": "research/experiments/2026-10-14_n02_p1_observation.md",
+    "dev_grid_selection": "outputs/n02-full/p1-dev-grid/SELECTION_RULE.md + SELECTION_DECISION.md",
+    "parity_receipt": "outputs/n02-full/p0/parity/parity.json",
+    "precision_checks": "outputs/n02-full/p1-precision/",
+    "stage_ledger": "outputs/n02-full/p1-bootstrap-receipts/DISPATCH_LEDGER.md",
+    "runs": "outputs/n02-full/p1-formal/",
+    "acceptance": "outputs/n02-full/p1-acceptance-interim/"
+  },
+  "code_hash_sha256_first16": {
+    "src/owac/frameworks/n02_full/observation.py": "660998df54ac741f",
+    "src/owac/frameworks/n02_full/sensor.py": "6d590d64973fd2f2",
+    "src/owac/frameworks/n02_full/checks.py": "b4c99a4db7fa2738",
+    "src/owac/frameworks/n02_full/factors.py": "d1c068a6e55aeb58",
+    "src/owac/frameworks/n02_full/model.py": "287139f949e9c693",
+    "src/owac/frameworks/n02_full/synthetic.py": "d26e66a5d9dbfce4",
+    "src/owac/frameworks/n02_full/config.py": "e790ea6a703a4760",
+    "src/owac/training/n02_full.py": "669037fd5ea2ed37",
+    "src/owac/evaluation/n02_full/p1.py": "98b13090f0430830"
+  },
+  "budget": {
+    "plan_100k_pretrain_50k_measurement": "infeasible at measured rates (>=45 GPU-days)",
+    "user_ruling": "C: run seed 1103 first, then decide the remaining seeds",
+    "pretrain_updates": 25000,
+    "pretrain_equivalent_exposures": 19.97,
+    "interim_measurement_updates": 1000,
+    "target_measurement_updates": 5000,
+    "arm_updates": 2000,
+    "arms": [
+      "nre",
+      "bnre",
+      "candidate_discrimination",
+      "conditional_likelihood"
+    ],
+    "arms_not_run": [
+      "raw_frame",
+      "conditional_innovation",
+      "registration"
+    ]
+  },
+  "notes": [
+    "behavior=incomplete: interim CFA4 measurement chain in flight (stem -> 1k -> acceptance -> 5k -> arms) on the migrated host",
+    "closed_loop not in P1 scope",
+    "no commit/push; all deliverables are uncommitted working-tree changes + ignored run artifacts",
+    "behavior=fail is an informational-insufficiency verdict on the frozen controlled task; it is not a numeric/implementation defect. Next-round decision (user): densify query sampling / enlarge candidate geometry deltas / refine the dictionary, or accept the finding.",
+    "Correction (2026-10-15): the interim run never died; the harness counted inherited pretrain updates into this stage's budget (start=resume.updates+--updates), so it ran on toward 3000. Fixed with budget_start() (inherited counts recorded as source_updates; --updates strictly means this-stage updates) + test; the in-flight acceptance used the valid update-0001000.pt with interim_budget=1000. Earlier OOM/silent-exit narrative is withdrawn.",
+    "Final-scope (cumulative 5000) acceptance completed 2026-10-15 00:29 UTC: oracle 0.8293 fail (identical to the interim; 961/961 ties persist), cue_swap 0.0177 fail (worse than the interim), wrong_prior 0.0687/0.7471 fail, checks fail (no insufficiency detection, no normal false alarms), no_information metric passes but 961<1000 -> incomplete. Same information-insufficiency mechanism; continued training on an uninformative task degrades discrimination. No thresholds/scenes/dictionary changed.",
+    "Budget-accounting wiring defect found and fixed 2026-10-15: run_pretrain/run_measurement passed the wrong stage to budget_start() (strings swapped), so the '5k' measurement run stopped at cumulative 4000 and one ablation arm over-runs its declared 2000; fixed with a wiring guard test (inspect.getsource). Labels corrected; a true-5000 extension is queued.",
+    "True cumulative-5000 acceptance (2026-10-15) reproduces the fail with the same information-insufficiency mechanism; the 5k-true numbers replace the mislabelled 4000 scope as the final口径, with both retained side by side.",
+    "User requested a stop of all training on 2026-10-15; the three acceptance scopes and three of the four arms had already completed, so the phase verdict is unaffected."
+  ],
+  "behavior_mechanism": "interim oracle (analytic, generator truth, frozen 0.95 threshold): 797/961 = 0.8293 [Wilson 0.8043,0.8518] -> fail; dispatcher recount: 961/961 records have exactly tied candidate scores and the correct count equals the map_index==0 count, i.e. the 0.829 is an argmin tie-break artefact, not discrimination. Mechanism = the candidate hypotheses produce identical expected signals at the sampled query points -> INFORMATION INSUFFICIENCY of the frozen controlled task, per P1 §6 ('if the oracle also fails, report insufficient information'). No threshold/dictionary/scenario was changed.",
+  "behavior_families_interim_1k_seed1103": {
+    "cue_swap_both_correct": {
+      "value": "127/961 = 0.1322",
+      "wilson95": [
+        0.1122,
+        0.155
+      ],
+      "threshold": 0.9,
+      "verdict": "fail",
+      "note": "below the 4-candidate chance level 0.25"
+    },
+    "no_information_drift": {
+      "rate_in_threshold": "961/961 = 1.0000",
+      "drift_mean": 0.0004,
+      "drift_max": 0.0017,
+      "threshold": 0.05,
+      "verdict": "incomplete",
+      "note": "metric passes; 961 < frozen floor 1000"
+    },
+    "wrong_prior_correction": {
+      "direction_a": "630/961 = 0.6556",
+      "direction_b": "287/961 = 0.2986",
+      "threshold": 0.8,
+      "verdict": "fail"
+    },
+    "checks_normal_false_alarm": {
+      "value": "0.0 (0/961)",
+      "threshold": 0.05,
+      "verdict": "pass"
+    },
+    "checks_insufficiency_detection": {
+      "value": "0.0 (0/961)",
+      "wilson95": [
+        0.0,
+        0.004
+      ],
+      "threshold": 0.9,
+      "verdict": "fail"
+    }
+  },
+  "behavior_verdict": "P1 behaviour gate NOT passed at every budget scope measured (interim 1000, cumulative 4000, true cumulative 5000). The oracle is 0.8293 at all three scopes (fail vs 0.95) and the tie structure is unchanged (true unique minimum 1/961), i.e. the frozen controlled task is information-insufficient; the measurement model's cue_swap falls to 0.011-0.017 (below the 4-candidate chance 0.25) and it never detects insufficiency while never false-alarming. No threshold, scene set or dictionary was changed. Per P1 contract §6 the failure is kept and P2/E1 is not started.",
+  "next_round_options_for_user": [
+    "densify query sampling / enlarge candidate geometry deltas / refine the candidate dictionary so the controlled task carries discriminative information",
+    "then re-run the frozen-threshold acceptance on the cumulative 5k checkpoint (final口径) and the four arms"
+  ],
+  "behavior_families_final_5k_seed1103": {
+    "claim_scope": "full evaluation",
+    "interim_budget": 5000,
+    "checkpoint": "formal-cfa4-meas-5k/checkpoints/final.pt",
+    "seeds_run": [
+      1103
+    ],
+    "scenarios": 1000,
+    "valid_scenarios_per_class": 961,
+    "wall_seconds": 1426.7,
+    "oracle": {
+      "rate": 0.8293,
+      "successes": 797,
+      "total": 961,
+      "wilson95": [
+        0.8043,
+        0.8518
+      ],
+      "threshold": 0.95,
+      "verdict": "fail"
+    },
+    "cue_swap_both_correct": {
+      "value": "17/961 = 0.0177",
+      "wilson95": [
+        0.0111,
+        0.0281
+      ],
+      "threshold": 0.9,
+      "verdict": "fail",
+      "note": "worse than the 1000-update interim (0.1322); below chance for 4 candidates (0.25)"
+    },
+    "no_information_drift": {
+      "within_threshold": "961/961 = 1.0",
+      "drift_mean": 0.0081,
+      "drift_max": 0.0397,
+      "threshold": 0.05,
+      "verdict": "incomplete",
+      "note": "metric passes; 961 < frozen floor 1000"
+    },
+    "wrong_prior_correction": {
+      "direction_a": "66/961 = 0.0687",
+      "direction_b": "718/961 = 0.7471",
+      "threshold": 0.8,
+      "verdict": "fail"
+    },
+    "checks": {
+      "normal_false_alarm": "0.0 (0/961)",
+      "insufficiency_detection": "0.0 (0/961)",
+      "status": "fail"
+    },
+    "verdict": "overall fail (same information-insufficiency mechanism; the oracle is unchanged at 0.8293 and 961/961 records tie)",
+    "records_path": "outputs/n02-full/p1-acceptance-5k/scenario_records.jsonl (11532 rows: oracle 961 + cue_swap 1922 + no_information 961 + wrong_prior 1922 + normal 2883 + insufficiency 2883)"
+  },
+  "acceptance_budget_correction": "The final-scope acceptance labelled '5k' actually ran on the cumulative-4000 state (budget_start stage strings swapped in run_pretrain/run_measurement). Numbers unchanged; label corrected to 4000. Fix + wiring guard test landed; a true cumulative-5000 extension and its own acceptance are queued. This is a bookkeeping defect, not a numeric/semantic one.",
+  "behavior_families_final_true5000_seed1103": {
+    "claim_scope": "full evaluation",
+    "cumulative_updates": 5000,
+    "new_updates": 1000,
+    "resumed_from": "p1-measurement-seed1103-formal-cfa4-meas-5k/checkpoints/final.pt (cumulative 4000)",
+    "code_hash": "training/n02_full.py 4f20d98b4d2bfb70 (budget_start wiring fixed)",
+    "seed": 1103,
+    "valid_scenarios_per_class": 961,
+    "oracle": {
+      "value": "797/961 = 0.8293",
+      "wilson95": [
+        0.8043,
+        0.8518
+      ],
+      "threshold": 0.95,
+      "verdict": "fail",
+      "note": "bit-identical to the 4000 and interim scopes (the analytic oracle does not depend on training weights)"
+    },
+    "cue_swap_both_correct": {
+      "value": "11/961 = 0.0114",
+      "wilson95": [
+        0.0064,
+        0.0204
+      ],
+      "threshold": 0.9,
+      "verdict": "fail"
+    },
+    "wrong_prior_correction": {
+      "direction_a": "0.0791",
+      "direction_b": "0.7232",
+      "threshold": 0.8,
+      "verdict": "fail"
+    },
+    "checks": {
+      "normal_false_alarm": 0.0,
+      "insufficiency_detection": 0.0,
+      "status": "fail"
+    },
+    "no_information_drift": {
+      "within_threshold": "961/961 = 1.0",
+      "drift_mean": 0.0089,
+      "drift_max": 0.0457,
+      "threshold": 0.05,
+      "verdict": "incomplete",
+      "note": "metric passes; 961 < frozen floor 1000"
+    },
+    "trend_vs_4000": "cue_swap 0.0177 -> 0.0114, wrong_prior a 0.0687 -> 0.0791, drift max 0.0397 -> 0.0457: 1000 extra updates produce no usable capability"
+  },
+  "stopped_by_user": "2026-10-15: training stopped on the user's instruction. raw3 25k stopped at update 6500/25000 (partial checkpoint update-0005000.pt kept); conditional_likelihood arm stopped at 850/2000. All three acceptance scopes and three of four arms had already completed, so the P1 verdict is unaffected."
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-10-19T03:27:23.022333+00:00",
+  "regression": "client_history_owns_frames_when_a_camera_reuses_its_buffer",
+  "before_fix": "reproduced failure: first stored frame changed from zeros to ones when the camera buffer was mutated",
+  "after_fix": "41 targeted tests passed",
+  "scope": "history snapshots own their pixels; no training objective or update-budget change",
+  "cause_boundary": "deployed RoboTwin camera code creates fresh float32 arrays; no claim that aliasing caused earlier failed episodes",
+  "sha256": {
+    "src/owac/runtime/n02_v12_robotwin.py": "9bbca535b5b27587e91962a21c94df21b5d8d419334428eeb34326a1dd477d36",
+    "tests/test_n02_closed_loop.py": "ad0d0c1de0e7793fb0637e1f563a58710b69d35084538154c8e9b6eebb6cde31"
+  }
+}

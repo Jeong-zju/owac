@@ -1,0 +1,41 @@
+import json
+from pathlib import Path
+import torch
+from owac.evaluation.n02_gradients import clone_with_optimizer, training_objective, tree_digest
+from owac.evaluation.n02_joint_training import objective, compute_gradients, optimizer_step, make_batch
+
+torch.set_num_threads(1)
+rows=[]
+for seed in range(3):
+    payload=torch.load(f'outputs/n02-contracts-20261013/seed{seed}/checkpoint200.pt',weights_only=False)
+    payload_digest=tree_digest(payload)
+    model,optimizer=clone_with_optimizer(payload)
+    reference,reference_optimizer=clone_with_optimizer(payload)
+    balanced,_=clone_with_optimizer(payload)
+    batch=make_batch(model.config,920,920)
+    total,weighted,_=objective(model,batch,balanced=False)
+    reference_loss,_,_=training_objective(reference,batch)
+    assert torch.equal(total,reference_loss)
+    gradients,geometry,projection=compute_gradients(model,total,weighted,project=False)
+    reference_loss.backward()
+    for a,p in zip(gradients,reference.parameters(),strict=True):
+        assert (a is None)==(p.grad is None)
+        if a is not None: assert torch.equal(a,p.grad)
+    optimizer_step(model,optimizer,gradients,geometry,clip=payload['run']['grad_clip'])
+    torch.nn.utils.clip_grad_norm_(reference.parameters(),payload['run']['grad_clip'])
+    reference_optimizer.step()
+    assert tree_digest(model.state_dict())==tree_digest(reference.state_dict())
+    assert tree_digest(optimizer.state_dict())==tree_digest(reference_optimizer.state_dict())
+    balanced_loss,_,_=objective(balanced,batch,balanced=True,contrast_weight=1)
+    decomposition_gradients=torch.autograd.grad(balanced_loss,list(balanced.parameters()),allow_unused=True)
+    assert [(g is None) for g in gradients]==[(g is None) for g in decomposition_gradients]
+    a=torch.cat([g.flatten().double() for g in gradients if g is not None])
+    b=torch.cat([g.flatten().double() for g in decomposition_gradients if g is not None])
+    relative=float((a-b).norm()/a.norm())
+    assert relative<2e-5
+    assert torch.allclose(total,balanced_loss,rtol=3e-6,atol=3e-6)
+    assert payload_digest==tree_digest(payload)
+    rows.append({'seed':seed,'production_total_and_all_gradients_bit_identical':True,'production_one_step_parameters_and_full_adam_state_bit_identical':True,'lambda1_full_objective_loss_error':float((total-balanced_loss).detach().abs()),'lambda1_all_connected_parameters_relative_gradient_error':relative,'same_none_pattern':True,'baseline_intervention_applied':projection['applied'],'weighted_geometry_mixture_dot_before':projection['mixture_geometry_dot_before'],'weighted_geometry_mixture_dot_after':projection['mixture_geometry_dot_after'],'original_payload_unchanged':True})
+report={'passed':True,'scope':'Real saved checkpoint200 Adam states and production first8-frame training batch; disposable single step only.','disposable_optimizer_steps':6,'results':rows}
+Path('outputs/n02-joint-controls-20261013/independent/preflight_b.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2))

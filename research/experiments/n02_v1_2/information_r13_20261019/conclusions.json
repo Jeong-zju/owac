@@ -1,0 +1,36 @@
+{
+  "completed": true,
+  "policy_updates": 0,
+  "new_policy_closed_loops": 0,
+  "diagnostic_heads": 226,
+  "actual_head_optimizer_updates": 135600,
+  "primary_checkpoint": "r11-task850",
+  "supplement": "r12-one256",
+  "conclusions": [
+    "Basic object/gripper geometry and opening information remain readable in RAW features on independent diagnostic groups.",
+    "Original-cache gripper position decoding worsens shallow4.53cm to deep5.13cm, then improves to fusion4.04cm; pre-pi4.04cm.",
+    "Controlled object decoding improves deep6.84cm to fusion5.96cm; relative-displacement decoding does not show a reliable fusion gain.",
+    "Fusion and pre-pi decoding are nearly identical. Current data do not identify fusion compression as a major information-loss point.",
+    "RAW gripper geometry decoding remains weaker than native RGB reference6.15cm vs3.45cm in controlled snapshots, with identical final-stage head capacity.",
+    "Additional post-fusion context contribution is mostly sample-invariant, and adds no clear decoding benefit in these targets; inspect this branch.",
+    "Fewshot256 does not materially improve held-out geometry readability under these fixed probes."
+  ],
+  "limits": [
+    "Only small-head decodability measured; fixed8x8 pooling can hide information and failures do not prove absence.",
+    "Controlled snapshots can float/intersect objects and are a separate diagnostic distribution, not physical closed-loop rollouts.",
+    "Cached labels contain world EE positions and gripper-command proxies, not object positions; controlled data contain world TCP/object ground truth.",
+    "Probe test groups were not used for head training/selection, but frozen parent saw some cached source episodes.",
+    "Native RGB also has about5.2cm object probe error despite prior policy success; probe errors are not a closed-loop acceptance threshold.",
+    "No evidence here separates architecture from representation training adequacy or identifies sensor noise as the primary cause.",
+    "No hidden labels enter runtime policy inputs, no RGB teacher, no policy optimizer steps."
+  ],
+  "next_diagnostic_priorities": [
+    "inspect image dependence and training of additional N02 context/readout branch",
+    "compare the same frozen visual tokens with a direct action diagnostic head and pi backend, under a separately declared bounded protocol"
+  ],
+  "evidence": {
+    "summary": "summary.json",
+    "context": "context_scope_audit.json",
+    "cold_recheck": "capture_cold_recheck.json"
+  }
+}

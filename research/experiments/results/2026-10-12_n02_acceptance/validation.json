@@ -1,0 +1,32 @@
+{
+  "audited_commits": [
+    "19ecc65",
+    "dfece06"
+  ],
+  "engineering_checks": {
+    "make_check": "passed",
+    "make_check_output": "uv run --locked ruff check .\nAll checks passed!\nuv run --locked ruff format --check .\n154 files already formatted\nuv run --locked python -m compileall -q src\n",
+    "pytest_summary": "300 passed, 4 skipped, 1 warning in 21.13s",
+    "local_skips": [
+      "SKIPPED [1] tests/encoders/n02/test_raw_dataset.py:1043: Real RawVLA-Bench NPZ cache is not present on this workstation: /workspace does not exist and no NPZ exists under /home/jeong. The real files live on the deployed server at /workspace/owac/rawvla/data/libero/raw (LIBERO) and /workspace/owac/rawvla/data/robotwin2/raw (RoboTwin), per research/experiments/results/2026-10-10_rawvla_pi05_deployment/dataset-check.json.",
+      "SKIPPED [1] tests/encoders/n02/test_raw_dataset.py:1062: Real RoboTwin RawVLA-Bench NPZ cache is not present on this workstation; it is on the deployed server at /workspace/owac/rawvla/data/robotwin2/raw (632 files).",
+      "SKIPPED [1] tests/encoders/n02/test_rawvla_features.py:762: requires the external \u03c00.5 runtime and the author checkpoint; missing assets here: python package 'starVLA' (importable=False), checkpoint /workspace/owac/rawvla/pi05_libero (exists=False), tokenizer /workspace/owac/rawvla/paligemma_tokenizer.model (exists=False)",
+      "SKIPPED [1] tests/encoders/n02/test_rawvla_features.py:785: requires the external \u03c00.5 runtime and the author checkpoint; missing assets here: python package 'starVLA' (importable=False), checkpoint /workspace/owac/rawvla/pi05_libero (exists=False), tokenizer /workspace/owac/rawvla/paligemma_tokenizer.model (exists=False)"
+    ],
+    "python310_compile": "passed on pinned server runtime after final baseline reset repair; subsequent probe calibration changes only tensor data"
+  },
+  "learned_mechanism": "not accepted",
+  "real_offline_integration": {
+    "libero": "20 valid batches + 10 actual policy calls, passed",
+    "robotwin": "20 valid batches + 10 actual policy calls, passed",
+    "libero_resume": "20 to 21 steps, optimizer/RNG/cursor restored, passed"
+  },
+  "closed_loop": "not run",
+  "full_geometric_coverage": "not validated; +/-1 semantic proxy only",
+  "pi05_grouped_ambiguity": "not validated; real smoke used MAP",
+  "cpu_token_probe": "explicit incompatible-field fixture; actual 256x2048 token decoder",
+  "preserved_frozen_benchmark": true,
+  "cross_machine_bitwise_determinism": "not measured",
+  "captured_utc": "2026-10-12T08:12:07.010930+00:00",
+  "implementation_git_sha": "7b9ae26a567f162fa8dd1800ee88edad346f987a"
+}

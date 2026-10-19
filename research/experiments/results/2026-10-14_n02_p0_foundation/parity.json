@@ -1,0 +1,538 @@
+{
+  "checks": {
+    "convnext_base_block": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/convnext_block.pt",
+      "max_abs_err": 0.0,
+      "max_rel_err": 0.0,
+      "metrics": {
+        "grad_atol": 1e-05,
+        "grad_rtol": 0.001,
+        "input_grad_max_abs": 0.0,
+        "input_grad_max_rel": 0.0,
+        "state_dict_missing": [],
+        "state_dict_unexpected": []
+      },
+      "name": "convnext_base_block",
+      "reason": "upstream models.convnextv2.Block vs port Block on non-square (2,32,5,7); input-grad max_abs=0.000e+00 max_rel=0.000e+00",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "convnext_base_multiscale": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures",
+      "max_abs_err": 0.0,
+      "max_rel_err": 0.0,
+      "metrics": {
+        "per_case": {
+          "convnext_3ch_square": {
+            "in_chans": 3,
+            "input_shape": [
+              1,
+              3,
+              32,
+              32
+            ],
+            "logits_err": [
+              0.0,
+              0.0
+            ],
+            "max_abs": 0.0,
+            "max_rel": 0.0,
+            "pooled_max_abs": 0.0,
+            "shapes": [
+              [
+                1,
+                16,
+                8,
+                8
+              ],
+              [
+                1,
+                32,
+                4,
+                4
+              ],
+              [
+                1,
+                64,
+                2,
+                2
+              ],
+              [
+                1,
+                128,
+                1,
+                1
+              ]
+            ]
+          },
+          "convnext_4ch_rect": {
+            "in_chans": 4,
+            "input_shape": [
+              1,
+              4,
+              32,
+              48
+            ],
+            "logits_err": [
+              0.0,
+              0.0
+            ],
+            "max_abs": 0.0,
+            "max_rel": 0.0,
+            "pooled_max_abs": 0.0,
+            "shapes": [
+              [
+                1,
+                16,
+                8,
+                12
+              ],
+              [
+                1,
+                32,
+                4,
+                6
+              ],
+              [
+                1,
+                64,
+                2,
+                3
+              ],
+              [
+                1,
+                128,
+                1,
+                1
+              ]
+            ]
+          }
+        }
+      },
+      "name": "convnext_base_multiscale",
+      "reason": "upstream ConvNeXtV2 stage outputs (stride 4/8/16/32) and pooled features vs the RAW port for 3-channel 32x32 and 4-channel 32x48 inputs; stride 8/16 shapes=[[1, 32, 4, 6], [1, 64, 2, 3]]",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "convnext_grn_global": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/convnext_grn.pt",
+      "max_abs_err": 0.0,
+      "max_rel_err": 0.0,
+      "metrics": {
+        "far_pixel_effect_abs": 6.396443843841553,
+        "upstream_far_pixel_delta": 6.396443843841553
+      },
+      "name": "convnext_grn_global",
+      "reason": "GRN statistics are taken over the whole spatial extent: perturbing one distant pixel changes the output by max_abs=6.396e+00 (upstream far_pixel_delta=6.396e+00)",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "dnri_one_step_causal": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/dnri_one_step.pt",
+      "max_abs_err": 5.960464477539063e-08,
+      "max_rel_err": 7.213654004299338e-06,
+      "metrics": {
+        "decoder_hidden_max_abs": 0.0,
+        "decoder_load": {
+          "missing": [],
+          "unexpected": []
+        },
+        "decoder_max_abs": 0.0,
+        "encoder_load": {
+          "missing": [],
+          "unexpected": []
+        },
+        "future_outputs_changed": true,
+        "grad_tolerance": {
+          "atol": 1e-05,
+          "rtol": 0.001
+        },
+        "online_vs_batched_prior_max_abs": 5.960464477539063e-08,
+        "past_outputs_bitwise_identical": true,
+        "posterior_max_abs": 5.960464477539063e-08,
+        "prior_max_abs": 5.960464477539063e-08,
+        "single_step_max_abs": 5.960464477539063e-08
+      },
+      "name": "dnri_one_step_causal",
+      "reason": "upstream dnri.DNRI_Encoder/DNRI_Decoder (verbatim PyTorch) vs port: prior max_abs=5.960e-08, posterior max_abs=5.960e-08, single_step max_abs=5.960e-08, decoder step max_abs=0.000e+00; online-only causality: past outputs bitwise unchanged when future frames are replaced (True), future outputs do change (True)",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "fcmae_mask_aware_dense": {
+      "atol": 1e-05,
+      "evidence_path": null,
+      "max_abs_err": 5.587935447692871e-09,
+      "max_rel_err": null,
+      "metrics": {
+        "grad_at_masked_pixels": 0.0,
+        "grad_finite": true,
+        "grn_stat_error": 5.587935447692871e-09,
+        "leakage": 0.0,
+        "plain_zero_fill_difference": 0.928113579750061,
+        "support_mismatch": 0.0
+      },
+      "name": "fcmae_mask_aware_dense",
+      "reason": "mask-aware dense port (naming reference, dense compute): support sets match explicit coordinate dilation (mismatch=0.0e+00); masked-pixel leakage=0.0e+00; GRN valid-only statistic error=5.588e-09; grads finite=True (max |grad| at masked pixels=0.000e+00); plain zero-fill control differs by 9.281e-01",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "fcmae_patchify_roundtrip": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/fcmae_geometry_3ch.pt",
+      "max_abs_err": 0.0,
+      "max_rel_err": null,
+      "metrics": {
+        "per_case": {
+          "3ch_rect_240x320_p16": {
+            "expected_patches": 300,
+            "num_patches": 300,
+            "patch_shape": [
+              2,
+              300,
+              768
+            ],
+            "roundtrip_max_abs": 0.0
+          },
+          "3ch_rect_256x320_p32": {
+            "expected_patches": 80,
+            "num_patches": 80,
+            "patch_shape": [
+              2,
+              80,
+              3072
+            ],
+            "roundtrip_max_abs": 0.0
+          },
+          "3ch_square_64x64_p32": {
+            "expected_patches": 4,
+            "num_patches": 4,
+            "patch_shape": [
+              2,
+              4,
+              3072
+            ],
+            "roundtrip_max_abs": 0.0
+          },
+          "4ch_rect_240x320_p16": {
+            "expected_patches": 300,
+            "num_patches": 300,
+            "patch_shape": [
+              2,
+              300,
+              1024
+            ],
+            "roundtrip_max_abs": 0.0
+          },
+          "4ch_rect_256x320_p32": {
+            "expected_patches": 80,
+            "num_patches": 80,
+            "patch_shape": [
+              2,
+              80,
+              4096
+            ],
+            "roundtrip_max_abs": 0.0
+          },
+          "4ch_square_64x64_p32": {
+            "expected_patches": 4,
+            "num_patches": 4,
+            "patch_shape": [
+              2,
+              4,
+              4096
+            ],
+            "roundtrip_max_abs": 0.0
+          }
+        },
+        "upstream_comparison": {
+          "patchify_vs_upstream_max_abs": 0.0,
+          "unpatchify_vs_upstream_max_abs": 0.0
+        }
+      },
+      "name": "fcmae_patchify_roundtrip",
+      "reason": "patchify/unpatchify round-trip is exact for 3/4 channels and square/rectangular inputs (worst |x - unpatchify(patchify(x))| = 0.000e+00); mask keeps exactly int(L*(1-ratio)) patches; compared against upstream models.fcmae.FCMAE methods",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "fcmae_sparse_upstream": {
+      "atol": null,
+      "evidence_path": "outputs/n02-full/p0/parity/logs/14_minkowski_install_attempt.log",
+      "max_abs_err": null,
+      "max_rel_err": null,
+      "metrics": {
+        "dependency": "MinkowskiEngine"
+      },
+      "name": "fcmae_sparse_upstream",
+      "reason": "upstream models/convnextv2_sparse.py needs MinkowskiEngine + MinkowskiOps (SparseTensor, MinkowskiConvolution, to_sparse); the install attempt is recorded in outputs/n02-full/p0/parity/logs/14_minkowski_install_attempt.log and no receipt exists for the upstream sparse operator in P0",
+      "rtol": null,
+      "status": "not_run"
+    },
+    "genjl_particle_filter": {
+      "atol": null,
+      "evidence_path": "outputs/n02-full/p0/parity/logs/40_genjl_semantics.md",
+      "max_abs_err": null,
+      "max_rel_err": null,
+      "metrics": {},
+      "name": "genjl_particle_filter",
+      "reason": "Julia is not installed in this environment (julia not on PATH), so Gen.jl src/inference/{particle_filter,trace_translators,mh}.jl could not be executed; only a source-level semantic reading was recorded",
+      "rtol": null,
+      "status": "not_run"
+    },
+    "savi_gru": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/savi_gru.npz",
+      "max_abs_err": 2.9802322387695312e-08,
+      "max_rel_err": 9.324359983701018e-07,
+      "metrics": {
+        "param_paths": [
+          "params/GRUCell_0/ir/kernel",
+          "params/GRUCell_0/ir/bias",
+          "params/GRUCell_0/hr/kernel",
+          "params/GRUCell_0/iz/kernel",
+          "params/GRUCell_0/iz/bias",
+          "params/GRUCell_0/hz/kernel",
+          "params/GRUCell_0/in/kernel",
+          "params/GRUCell_0/in/bias",
+          "params/GRUCell_0/hn/kernel",
+          "params/GRUCell_0/hn/bias"
+        ]
+      },
+      "name": "savi_gru",
+      "reason": "upstream flax.linen.GRUCell (0.6.11 semantics: gates r,z,n; reset multiplies the hidden pre-activation) vs port GRUCell: max_abs=2.980e-08",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "savi_masked_extension": {
+      "atol": 1e-05,
+      "evidence_path": null,
+      "max_abs_err": 0.0,
+      "max_rel_err": null,
+      "metrics": {
+        "leakage": 0.0,
+        "renorm_gap": 0.0,
+        "upstream_gap": 0.0
+      },
+      "name": "savi_masked_extension",
+      "reason": "NEW mask path (not upstream): invalid keys removed from softmax and value aggregation, renormalised by valid mass; masked-content leakage=0.0e+00, zero-fill equivalence=0.000e+00, all-valid degenerates to upstream path (0.000e+00)",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "savi_processor": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/logs/30_savi_jax_export.log",
+      "max_abs_err": null,
+      "max_rel_err": null,
+      "metrics": {},
+      "name": "savi_processor",
+      "reason": "the upstream Processor reference export failed: AttributeError: module 'jax.api_util' has no attribute 'debug_info' (flax's nn.scan path is incompatible with the reference jax build, so no upstream Processor fixture exists; the port is covered by its own consistency test only)",
+      "rtol": 0.0001,
+      "status": "not_run"
+    },
+    "savi_slot_attention": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/savi_slot_attention.npz",
+      "max_abs_err": 8.344650268554688e-07,
+      "max_rel_err": 4.225598357932478e-06,
+      "metrics": {
+        "flax_kwargs": {
+          "mlp_size": 24,
+          "num_heads": 1,
+          "num_iterations": 3,
+          "qkv_size": 16
+        },
+        "input_grad_max_abs": 2.86102294921875e-06,
+        "input_grad_max_rel": 1.4293920188568432e-05,
+        "param_grad_count": 23,
+        "param_grad_violations": [],
+        "param_grad_worst_abs": 1.52587890625e-05,
+        "param_grad_worst_rel": 0.00022883295605424792
+      },
+      "name": "savi_slot_attention",
+      "reason": "upstream Flax SlotAttention (verbatim, jax reference) vs torch port with identical parameters: forward max_abs=8.345e-07, input-grad max_abs=2.861e-06; per-parameter grads compared for 23 tensors (worst abs=1.526e-05)",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "short_train_trend": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/fixtures/train_trend.pt",
+      "max_abs_err": 0.0,
+      "max_rel_err": 0.0,
+      "metrics": {
+        "max_stepwise_abs": 0.0,
+        "port_losses": [
+          0.9775444865226746,
+          0.0429731048643589,
+          0.020368272438645363,
+          0.01484186202287674,
+          0.017341623082756996,
+          0.015628991648554802,
+          0.0058889915235340595,
+          0.005787144880741835,
+          0.007945763878524303,
+          0.0067318761721253395,
+          0.006491356063634157,
+          0.005547836422920227,
+          0.0038745361380279064,
+          0.0044235484674572945,
+          0.004406481049954891,
+          0.002472102176398039,
+          0.0018513014074414968,
+          0.002437711926177144,
+          0.0022109639830887318,
+          0.002121229888871312
+        ],
+        "rel_change_port": 0.9978300426035679,
+        "rel_change_upstream": 0.9978300426035679,
+        "upstream_losses": [
+          0.9775444865226746,
+          0.0429731048643589,
+          0.020368272438645363,
+          0.01484186202287674,
+          0.017341623082756996,
+          0.015628991648554802,
+          0.0058889915235340595,
+          0.005787144880741835,
+          0.007945763878524303,
+          0.0067318761721253395,
+          0.006491356063634157,
+          0.005547836422920227,
+          0.0038745361380279064,
+          0.0044235484674572945,
+          0.004406481049954891,
+          0.002472102176398039,
+          0.0018513014074414968,
+          0.002437711926177144,
+          0.0022109639830887318,
+          0.002121229888871312
+        ]
+      },
+      "name": "short_train_trend",
+      "reason": "20 real AdamW steps on the upstream implementation and on the port with identical init/batch/seed: losses 0.977544 -> 0.002121 (port) vs 0.977544 -> 0.002121 (upstream); trend direction matches=True, relative-change gap=0.000e+00",
+      "rtol": 0.0001,
+      "status": "pass"
+    },
+    "smc_ref": {
+      "atol": 1e-05,
+      "evidence_path": "outputs/n02-full/p0/parity/smc/smc_reference.json",
+      "max_abs_err": null,
+      "max_rel_err": null,
+      "metrics": {},
+      "name": "smc_ref",
+      "reason": "particles.resampling imports numba at module scope; numba is not installed in this environment. The measured run is outputs/n02-full/p0/parity/smc/smc_reference.json (reference venv, numba 0.61.2)",
+      "rtol": 0.0001,
+      "status": "not_run"
+    },
+    "theseus_lm_quadratic": {
+      "atol": 1e-08,
+      "evidence_path": "outputs/n02-full/p0/parity/theseus/theseus_lm_reference.json",
+      "max_abs_err": 3.9745984281580604e-14,
+      "max_rel_err": null,
+      "metrics": {
+        "finite_difference_sweep": [
+          {
+            "grad_norm": 2.9331945451844375e-15,
+            "step": 0.0001
+          },
+          {
+            "grad_norm": 2.9331945452288748e-15,
+            "step": 1e-05
+          },
+          {
+            "grad_norm": 2.933194545557292e-15,
+            "step": 1e-06
+          },
+          {
+            "grad_norm": 2.9331945437371893e-15,
+            "step": 1e-07
+          }
+        ],
+        "iterations": 12,
+        "outer_acceptance": {
+          "full_objective_final": 16.60873500122663,
+          "full_objective_initial": 81.0234753823789,
+          "monotone_non_increasing": true,
+          "n_accepted": 2,
+          "n_rejected": 23,
+          "outer_x_final": [
+            0.5920861012293446,
+            0.501523820766289,
+            -1.9517735161183491,
+            0.9156794933684924,
+            0.5910169756726535
+          ],
+          "prior_weight": 5.0,
+          "rejected_steps_that_lowered_residual": 23,
+          "residual_cost_initial": 77.8984753823789,
+          "x_prior": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      },
+      "name": "theseus_lm_quadratic",
+      "reason": "reference LM (written here, not upstream) on a linear least-squares problem: max error vs analytic solution=3.975e-14 (<=1e-8); outer full-objective acceptance is monotone non-increasing with 23 residual-decreasing proposals rejected by the complete objective",
+      "rtol": 0.0,
+      "status": "pass"
+    },
+    "theseus_upstream_simple_example": {
+      "atol": null,
+      "evidence_path": "outputs/n02-full/p0/parity/logs/13_theseus_install_attempt.log",
+      "max_abs_err": null,
+      "max_rel_err": null,
+      "metrics": {},
+      "name": "theseus_upstream_simple_example",
+      "reason": "theseus-ai is not installed in this environment; the install attempt output is in outputs/n02-full/p0/parity/logs/13_theseus_install_attempt.log",
+      "rtol": null,
+      "status": "not_run"
+    }
+  },
+  "config_hash": "6a2b7fe078740f201fc35f2f6007d3bf911d98993b71f583da7fe63f49ac433a",
+  "config_path": "configs/encoders/n02_full/p0.json",
+  "device": "cpu",
+  "dtype": "float32",
+  "elapsed_seconds": 2.188,
+  "fail_count": 0,
+  "generated_at": "2026-10-13T17:43:00.244632+00:00",
+  "git_sha": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+  "not_run_count": 5,
+  "parity_version": "n02-full-components-v1",
+  "pass_count": 11,
+  "paths": {
+    "fixture_dir": "outputs/n02-full/p0/parity/fixtures",
+    "output_dir": "outputs/n02-full/p0/parity"
+  },
+  "run_at": "2026-10-14T01:43:02+0800",
+  "stage": "parity",
+  "status": "pass",
+  "tolerances": {
+    "fp32_forward": {
+      "atol": 1e-05,
+      "rtol": 0.0001
+    },
+    "fp32_grad": {
+      "atol": 1e-05,
+      "rtol": 0.001
+    },
+    "fp64_analytic": {
+      "atol": 1e-08,
+      "rtol": 0.0
+    }
+  },
+  "versions": {
+    "flax": "not_available: ModuleNotFoundError",
+    "jax": "not_available: ModuleNotFoundError",
+    "numba": "not_available: ModuleNotFoundError",
+    "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+    "python": "3.10.19",
+    "theseus": "not_available: ModuleNotFoundError",
+    "timm": "not_available: ModuleNotFoundError",
+    "torch": "2.11.0+cu128"
+  }
+}

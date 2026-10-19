@@ -1,0 +1,610 @@
+{
+  "run_id": "raw-n02-robotwin-r5-s1103",
+  "stage": "P2",
+  "execution_revision": "n02-v12-p2-train-r5",
+  "arm": "raw_n02",
+  "platform": "robotwin",
+  "seed": 1103,
+  "config_path": "configs/encoders/n02_v12/raw_n02_robotwin.json",
+  "config": {
+    "version": "n02-v12-p2-v1",
+    "run_id": "raw-n02-robotwin-r5-s1103",
+    "stage": "P2",
+    "arm": "raw_n02",
+    "platform": "robotwin",
+    "representation": {
+      "kind": "raw3",
+      "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+      "isp": null
+    },
+    "model": {
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "input_mode": "RAW3",
+      "in_chans": 3,
+      "input_size": [
+        256,
+        320
+      ],
+      "dims": [
+        128,
+        256,
+        512,
+        1024
+      ],
+      "depths": [
+        3,
+        3,
+        27,
+        3
+      ],
+      "d_model": 512,
+      "alignment": 32,
+      "k": 4,
+      "n_slots": 16,
+      "slot_dim": 512,
+      "tau": 1.0,
+      "rounds": 4,
+      "history": 8,
+      "query_stride": 1,
+      "max_queries_per_camera": 0,
+      "n_latents": 128,
+      "n_queries": 256,
+      "out_dim": 2048,
+      "decoder_hidden": 256,
+      "measurement_channels": 3,
+      "channel_reduction": "select",
+      "saturation_level": null,
+      "units": "sensor_units",
+      "min_variance": null,
+      "max_variance": null,
+      "action_dim": 0,
+      "action_horizon": 50,
+      "strict_check": true,
+      "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core",
+      "batch_cameras": true,
+      "group_camera_queries": true,
+      "checkpoint_decoder": true
+    },
+    "data": {
+      "dataset_format": "robotwin",
+      "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+      "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+      "manifest_seed": 1103,
+      "partitions": {
+        "train": 0.8,
+        "dev": 0.1,
+        "calibration": 0.1
+      },
+      "history": 8,
+      "declared_prior": null,
+      "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+      "protocol": {
+        "cameras": 3,
+        "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+        "offset": 1,
+        "horizon": 50,
+        "action_mask": "the loader's per-action padding mask",
+        "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+      }
+    },
+    "policy": {
+      "suite": "robotwin",
+      "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "token_dim": 2048,
+      "tokens_per_camera": 256,
+      "freeze_backend": true
+    },
+    "aux": {
+      "lambda_raw": 1.0,
+      "lambda_pred": 1.0,
+      "lambda_noise": 0.0,
+      "noise_note": "the official RoboTwin cache declares no sensor noise model, so the noise term stays off and no target is invented",
+      "mask_ratio": 0.6,
+      "patch_size": 32,
+      "decoder_embed_dim": 512,
+      "decoder_depth": 1,
+      "grn_scope": "sparse"
+    },
+    "optim": {
+      "lr": 0.00015,
+      "lr_head": 0.0003,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "weight_decay": 0.01,
+      "warmup_updates": 50,
+      "grad_clip": 1.0
+    },
+    "loop": {
+      "seed": 1103,
+      "max_updates": 1000,
+      "profile_updates": 200,
+      "batch_size": 2,
+      "grad_accum": 1,
+      "validate_every": 50,
+      "save_every": 100,
+      "dev_windows": 4,
+      "calibration_windows": 4,
+      "previews": 1,
+      "profile_note": "r5: paired actual-update throughput pilots; one CPU prefetch worker, depth 2; grouped-camera backbone, TF32 matrix ops, FP32 RAW targets/variance/energy. AdamW update timing includes CUDA synchronisation. Two GPUs run independent RAW/RGB arms. Decoder activation checkpointing enables microbatch 2 with accumulation 1; effective batch remains 2.",
+      "bptt_steps": 2
+    },
+    "runtime": {
+      "device": "cuda",
+      "dtype": "float32",
+      "amp": false,
+      "threads": 4,
+      "gpu_note": "one process per GPU: CUDA_VISIBLE_DEVICES=0 for this RAW arm, in-process device cuda:0",
+      "performance": {
+        "tf32": true,
+        "batch_cameras": true,
+        "cudnn_benchmark": true,
+        "fused_adam": true,
+        "gradient_stats_every": 50,
+        "prefetch": 2,
+        "group_camera_queries": true
+      }
+    },
+    "paths": {
+      "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+    },
+    "execution_revision": "n02-v12-p2-train-r5"
+  },
+  "assets": {
+    "starvla_importable": true,
+    "omegaconf_importable": true,
+    "safetensors_importable": true,
+    "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+    "checkpoint_exists": true,
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "tokenizer_exists": true,
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "data_root_exists": true,
+    "real_backend_available": true
+  },
+  "parameters": {
+    "bridge_added": {
+      "tensors": 0,
+      "parameters": 0,
+      "names": [],
+      "disclosure": "no projection needed: the OWAC token width already equals the π0.5 prefix width"
+    },
+    "token_source_trainable": {
+      "tensors": 6,
+      "parameters": 106321611,
+      "names": [
+        "token_source.model.encoder",
+        "token_source.model.decoder",
+        "token_source.model.readout",
+        "token_source.model.proposal",
+        "token_source.model.corrector",
+        "token_source.model.predictor"
+      ],
+      "count_complete": true,
+      "uninitialized_names": []
+    },
+    "frozen_backend_parameters": 3201953824,
+    "frozen_backend_tensors": 373
+  },
+  "trained_parameters": {
+    "encoder": 88153088,
+    "decoder": 1243851,
+    "readout": 7173632,
+    "proposals_corrector": 9754112,
+    "masked_branch": 4231680,
+    "bridge_projection": 0
+  },
+  "frozen": {
+    "backend_parameters": 3616757520,
+    "backend_parameters_with_grad": []
+  },
+  "overview": {
+    "updates_this_run": 1000,
+    "final_step": 1000,
+    "wall_seconds": 6613.150816927664,
+    "step_seconds_mean": 6.613150816927664,
+    "step_seconds_p50": 5.709223716054112,
+    "step_seconds_p95": 13.397315154550574,
+    "last_terms": {
+      "action": 0.126583,
+      "masked_raw": 0.079554,
+      "causal_raw": -1.536037
+    },
+    "final_loss_mean_last10": -0.22014455124735832,
+    "peak_gpu_bytes": 32031276544,
+    "skipped_all_padding_anchors": 0,
+    "loss_is_not_a_capability_score": true
+  },
+  "final": {
+    "checkpoint": "outputs/n02-v12/P2/raw-n02-robotwin-r5-s1103/checkpoint_0001000.pt",
+    "checkpoint_bytes": 1327367889,
+    "dev_action_error": 0.202883068472147,
+    "previews": {
+      "status": "written",
+      "files": [
+        "preview/raw_robotwin_head.svg",
+        "preview/attention_robotwin_head.svg",
+        "preview/rounds_robotwin_head.svg"
+      ],
+      "display_white_level": 1.0
+    }
+  },
+  "checks": {
+    "units_and_shapes": {
+      "dataset_format": "robotwin",
+      "partition": "train",
+      "cameras": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "camera_count": 3,
+      "rows": 16,
+      "history": 8,
+      "anchors": 2,
+      "frame_index": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "current_frame_indices": [
+        0,
+        1
+      ],
+      "channel_values": {
+        "robotwin_head": {
+          "shape": [
+            16,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.004552071448415518,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        },
+        "robotwin_left": {
+          "shape": [
+            16,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.004731595516204834,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        },
+        "robotwin_right": {
+          "shape": [
+            16,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.004605733789503574,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        }
+      },
+      "action_shape_unpadded": [
+        100,
+        14
+      ],
+      "action_control_dim": 14,
+      "action_offset": 1,
+      "action_mask_valid": 100,
+      "action_mask_shape": [
+        100
+      ],
+      "normalisation": "official loader statistics only; the training entry never normalises or de-normalises (prepare_control_targets pads to 32 dims)",
+      "finite": true
+    },
+    "causality": {
+      "windows_checked": 12,
+      "all_checks_passed": true,
+      "meaning": "history rows are earlier-or-equal real frame indices of their anchor and never a future frame"
+    },
+    "partition_isolation": {
+      "train_dev_overlap": 0,
+      "train_calibration_overlap": 0,
+      "dev_calibration_overlap": 0,
+      "train_measurements": 18,
+      "dev_measurements": 18,
+      "calibration_measurements": 18
+    },
+    "episode_reset": {
+      "selected_rows_zeroed": true,
+      "unselected_rows_bit_identical": true,
+      "version_incremented": true
+    },
+    "calibration": {
+      "status": "fitted",
+      "sequences": 4,
+      "threshold": 0.40799103222895206,
+      "quantile": 0.95,
+      "version": "n02-v12-windowed-check-v1",
+      "partition": "calibration",
+      "viewing_rule_hash": "c77a261ead1e57b379016797b75b54cf20e8b183790a0c1a7bd1c59e30372973",
+      "frame_axis_note": "relative check axis 0; actual decoder source time is unchanged",
+      "prediction_version": "causal_pre_locked",
+      "execution_revision": "n02-v12-p2-train-r5",
+      "scale": "sensor_stride1",
+      "regions": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "verdicts": {
+        "calibration": {
+          "sequences": 4,
+          "by_status": {
+            "compatible": 4
+          },
+          "invalid_no_prefix": 0,
+          "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+        },
+        "dev": {
+          "sequences": 4,
+          "by_status": {
+            "compatible": 3,
+            "model_inadequate": 1
+          },
+          "invalid_no_prefix": 0,
+          "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+        },
+        "per_step_check": "uncalibrated on purpose: see the comment in calibration_pass; an uncalibrated check returns AbsoluteCheckResult.invalid and is never counted as a zero"
+      }
+    },
+    "prior_wiring": {
+      "max_abs_log_p0_difference": 2.014903,
+      "max_abs_q_difference": 0.499551,
+      "prior_reaches_log_p0": true,
+      "prior_changes_support": true,
+      "note": "same real window, same weights; only the declared prior differs",
+      "runs": {
+        "uniform": {
+          "log_p0": [
+            -1.386294,
+            -1.386294,
+            -1.386294,
+            -1.386294
+          ],
+          "q": [
+            0.456286,
+            0.402671,
+            0.079291,
+            0.061752
+          ],
+          "check_status": "insufficient_information",
+          "check_valid": false,
+          "calibration_version": "uncalibrated"
+        },
+        "biased": {
+          "log_p0": [
+            -0.10536,
+            -3.401197,
+            -3.401197,
+            -3.401197
+          ],
+          "q": [
+            0.955837,
+            0.032707,
+            0.00644,
+            0.005016
+          ],
+          "check_status": "insufficient_information",
+          "check_valid": false,
+          "calibration_version": "uncalibrated"
+        }
+      }
+    },
+    "gradient_wiring": {
+      "roles": {
+        "encoder": {
+          "l1": 55694.778394705616,
+          "finite": true,
+          "tensors_with_grad": 382,
+          "tensors": 384
+        },
+        "decoder": {
+          "l1": 57.1047038653234,
+          "finite": true,
+          "tensors_with_grad": 29,
+          "tensors": 33
+        },
+        "readout": {
+          "l1": 80958.51700748321,
+          "finite": true,
+          "tensors_with_grad": 72,
+          "tensors": 72
+        },
+        "proposals_corrector": {
+          "l1": 376.8088580067897,
+          "finite": true,
+          "tensors_with_grad": 59,
+          "tensors": 59
+        },
+        "masked_branch": {
+          "l1": 98.49199503473938,
+          "finite": true,
+          "tensors_with_grad": 15,
+          "tensors": 15
+        }
+      },
+      "roles_with_nonzero_gradient": [
+        "encoder",
+        "decoder",
+        "readout",
+        "proposals_corrector",
+        "masked_branch"
+      ],
+      "frozen_parameters_with_grad": [],
+      "hard_paths": {
+        "differentiable": [
+          "encoder",
+          "decoder",
+          "measurement_energy",
+          "corrector_predictor",
+          "readout"
+        ],
+        "hard_choice": [
+          "candidate_argmax_selection",
+          "accept_reject_decision"
+        ],
+        "note": "the discrete candidate selection and the accept/reject decision are hard; their gradient is not the gradient of the search, only of the selected values"
+      }
+    },
+    "previews": [
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      },
+      {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      }
+    ],
+    "profile": {
+      "updates": 200,
+      "wall_seconds": 1090.8383857281879,
+      "step_seconds_mean": 5.454191928640939,
+      "step_seconds_p50": 5.32777629699558,
+      "step_seconds_p95": 6.212672095652668,
+      "microbatch_anchors": 2,
+      "grad_accum": 1,
+      "effective_anchors": 2,
+      "peak_gpu_bytes": 32031276544,
+      "loss": 1.216332346200943,
+      "terms": {
+        "action": 0.817913,
+        "masked_raw": 0.097705,
+        "causal_raw": 0.300714
+      },
+      "run_stats": {
+        "prefix_builds": 1,
+        "encoder_calls": 1,
+        "token_source_calls": 1,
+        "denoise_steps": 0
+      }
+    },
+    "final": {
+      "checkpoint": "outputs/n02-v12/P2/raw-n02-robotwin-r5-s1103/checkpoint_0001000.pt",
+      "checkpoint_bytes": 1327367889,
+      "dev_action_error": 0.202883068472147,
+      "previews": {
+        "status": "written",
+        "files": [
+          "preview/raw_robotwin_head.svg",
+          "preview/attention_robotwin_head.svg",
+          "preview/rounds_robotwin_head.svg"
+        ],
+        "display_white_level": 1.0
+      }
+    }
+  },
+  "eval": {
+    "planned_closed_loop": 100,
+    "completed": 0,
+    "note": "the 100-episode closed loop belongs to P4; nothing ran here"
+  }
+}

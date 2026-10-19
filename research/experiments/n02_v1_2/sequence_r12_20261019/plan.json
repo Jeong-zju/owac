@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-10-19T02:18:34.503707+00:00",
+  "authorization": "user requested sequential execution of continuity diagnosis, small RAW demonstration fitting, then Normal closed loop",
+  "scope": "bounded development work, not P3/P4; preserve all attempts; no RGB teacher or expert-action policy replay",
+  "source_checkpoint": "outputs/n02-v12/P2/raw-task-r11-task-s1103-a1/checkpoint_0000850.pt",
+  "source_sha256": "a660f0a0c6dc3d7006f1cda391de27c2b35d31fb7b1d51163e7f480e16b0068c",
+  "stages": [
+    {
+      "stage": 1,
+      "optimizer_updates": 0,
+      "diagnostics": [
+        "fixed observation x four flow seeds",
+        "visual/proprio factorization on dev t0/t10",
+        "independent native RGB reference"
+      ],
+      "next_candidate": "fixed flow noise, unchanged native50 execution; native reference must pass before RAW closed-loop candidate",
+      "max_new_rollouts": 3
+    },
+    {
+      "stage": 2,
+      "enabled_after": "stage 1 findings and execution witness recorded",
+      "training_pool": "lexicographically selected 1 or 3 Normal train episodes; seed0 and dev/calibration remain excluded",
+      "max_total_optimizer_updates": 512,
+      "fit_measure": "fully sampled control actions on declared training landmarks, joints and grippers separately, multiple predeclared flow seeds",
+      "stop": "nonfinite gradients/loss or inability to fit training landmarks after bounded budget; do not silently extend"
+    },
+    {
+      "stage": 3,
+      "enabled_after": "training sample fit gate passes",
+      "task": "grab_roller",
+      "seed": 0,
+      "domain": "Normal",
+      "max_steps": 400,
+      "max_new_rollouts": 3,
+      "acceptance": "unchanged two-hand contact, no table contact, z >= 0.83m, continuous 1s then passive 2s"
+    }
+  ]
+}

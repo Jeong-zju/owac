@@ -1,0 +1,63 @@
+[03:38:28] run pilot-sampling-b2 (stage P2, arm raw_n02, platform robotwin, seed 1103), output outputs/n02-v12/P2/pilot-sampling-b2-robotwin-20261016
+[03:38:28] representation arm: raw3 - RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP
+[03:38:29] building window sources (frozen P0 partitions, frozen anchors)
+[03:38:40] sources: train=116117 anchors, dev=15414 anchors, calibration=15413 anchors
+[03:38:44] model: 106324683 parameters; mask-aware branch shares 376 backbone tensors (unbound: 0)
+`torch_dtype` is deprecated! Use `dtype` instead!
+[03:39:15] π0.5 backend loaded: frozen=True frozen_parameters=3616757520 active_missing=0 replaced_vision_present=439
+[03:39:15] ZERO-update profile window 1/2, train anchor 38705
+[03:39:25] run failed: OutOfMemoryError: CUDA out of memory. Tried to allocate 320.00 MiB. GPU 0 has a total capacity of 95.01 GiB of which 219.06 MiB is free. Including non-PyTorch memory, this process has 94.79 GiB memory in use. Of the allocated memory 93.84 GiB is allocated by PyTorch, and 267.06 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Traceback (most recent call last):
+  File "/.uv/python_install/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/.uv/python_install/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/training/n02_v12.py", line 2158, in <module>
+    raise SystemExit(main())
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/training/n02_v12.py", line 2092, in main
+    profile_fresh(trainer, batches=args.profile_batches)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/training/n02_v12_profile.py", line 104, in profile_fresh
+    result = trainer.microbatch(
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/training/n02_v12.py", line 934, in microbatch
+    result = self.bridge.forward(
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/backends/rawvla_features.py", line 1298, in forward
+    tokens = self.visual_tokens(observation)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/backends/rawvla_features.py", line 1182, in visual_tokens
+    tokens = self.token_source(observation)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/backends/n02_v12_tokens.py", line 169, in __call__
+    replays = [
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/backends/n02_v12_tokens.py", line 170, in <listcomp>
+    replay_inputs(
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/sequence_v12.py", line 116, in replay_inputs
+    output = model.step(inp, state)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/model_v12.py", line 300, in step
+    output = self.inference.step(inference_input, state)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/inference_v12.py", line 685, in step
+    mean_p, variance_p, valid_p, _ = self._decode(spatial, proposal, frame_index, queries)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/inference_v12.py", line 1124, in _decode
+    result = self.decoder(**arguments)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/decoder_v12.py", line 818, in forward
+    fields, _alphas = self.broadcast_decoder(
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/decoder_v12.py", line 434, in forward
+    channels = self.target_readout(features)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/decoder_v12.py", line 327, in forward
+    outputs[key] = self.heads[key](source)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/workspace/owac/worktrees/n02-measurement-completion/src/owac/frameworks/n02_full/decoder_v12.py", line 344, in forward
+    return self.out_proj(F.gelu(self.in_proj(x)))
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 320.00 MiB. GPU 0 has a total capacity of 95.01 GiB of which 219.06 MiB is free. Including non-PyTorch memory, this process has 94.79 GiB memory in use. Of the allocated memory 93.84 GiB is allocated by PyTorch, and 267.06 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

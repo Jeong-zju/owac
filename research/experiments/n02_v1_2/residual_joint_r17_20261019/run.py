@@ -1,0 +1,424 @@
+"""Controlled-scene state baseline, paired frozen residuals and joint RAW residual."""
+
+import argparse
+import fcntl
+import gc
+import hashlib
+import json
+import runpy
+import shutil
+import time
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from owac.evaluation.n02_full.action_learning import fit_action_head, selected_splits
+from owac.evaluation.n02_full.action_residual import fit_action_residual, matmul_precision_scope
+from owac.evaluation.n02_full.action_stage import action_stages
+from owac.frameworks.n02_full.task_chain import SmallActionHead, SpatialTaskEncoder, state_digest
+
+ROOT = Path(__file__).resolve().parents[4]
+HERE = Path(__file__).resolve().parent
+OUT = ROOT / "outputs/n02-v12/residual-joint-r17"
+H14 = runpy.run_path(str(HERE.parent / "task_chain_r14_20261019/run.py"))
+write = H14["write"]
+save = H14["torch_save"]
+observation = H14["observation"]
+BUDGETS = (128, 256, 512)
+
+
+def sha(path):
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for b in iter(lambda: f.read(8 * 1024 * 1024), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def status(name, **fields):
+    p = OUT / name / "status.json"
+    v = json.loads(p.read_text()) if p.exists() else dict(run_id=name)
+    v.update(fields, updated_at=time.time())
+    write(p, v)
+
+
+def publish():
+    with (OUT / "publish.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        rs = [json.loads(p.read_text()) for p in sorted(OUT.glob("*/report.json"))]
+        write(
+            OUT / "progress.json",
+            dict(reports=rs, planned_runs=10, completed_runs=len(rs), audited=False),
+        )
+
+
+def norm_stats():
+    c = json.loads(H14["CONFIG"].read_text())
+    return json.loads(Path(c["data"]["stats_path"]).read_text())["norm_stats"]
+
+
+def load_spatial(name):
+    with matmul_precision_scope():
+        policy = H14["load_policy"](OUT / "loaders" / name)
+    spatial = SpatialTaskEncoder(
+        policy.trainer.model.inference.encoder, policy.trainer.model.inference.readout
+    )
+    spatial.set_joint_training(False)
+    del policy
+    gc.collect()
+    torch.cuda.empty_cache()
+    return spatial
+
+
+def spatial_values(spatial, raw, state, cameras):
+    # Original caches were extracted after PI0 set global precision to highest.
+    # Keep that representation while matching head/baseline arithmetic across arms.
+    with matmul_precision_scope("highest"):
+        return spatial(observation(raw, state, cameras))
+
+
+def prepare():
+    torch.set_num_threads(4)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    if (OUT / "dataset.pt").exists():
+        raise FileExistsError("preserve dataset")
+    plan = json.loads((HERE / "plan.json").read_text())
+    stats = norm_stats()
+    raw = []
+    rgb = []
+    states = []
+    actions = []
+    masks = []
+    records = []
+    sources = []
+    initial = []
+    action_mean = np.asarray(stats["actions"]["mean"][:14])
+    action_std = np.asarray(stats["actions"]["std"][:14])
+    state_mean = np.asarray(stats["state"]["mean"][:14])
+    state_std = np.asarray(stats["state"]["std"][:14])
+    for row in plan["scenes"]:
+        receipt = OUT / "receipts" / f"scene_{row['scene']:03}.json"
+        v = json.loads(receipt.read_text())
+        if not v["accepted"]:
+            continue
+        p = OUT / "episodes" / f"scene_{row['scene']:03}.npz"
+        assert sha(p) == v["sha256"]
+        with np.load(p) as a:
+            q = a["state"]
+            n = len(q)
+            initial.append(q[0].copy())
+            stage = action_stages(q, a["left"], a["right"])
+            times = {0, 10, *np.linspace(0, n - 11, 16).astype(int).tolist()}
+            for phase in ("grasp", "lift"):
+                k = np.flatnonzero(stage == phase)
+                if len(k):
+                    times.update([max(0, int(k[0]) - 1), int(k[0]), min(n - 2, int(k[0]) + 2)])
+            raw_series, rgb_series = a["raw"], a["rgb"]
+            for t in sorted(times):
+                if t < 0 or t > n - 2:
+                    continue
+                raw.append(raw_series[t].transpose(0, 3, 1, 2).copy())
+                rgb.append(rgb_series[t].copy())
+                states.append(((q[t] - state_mean) / (state_std + 1e-8)).astype(np.float32))
+                future = np.zeros((50, 14), np.float32)
+                valid = np.zeros(50, bool)
+                count = min(50, n - t - 1)
+                future[:count] = (
+                    (q[t + 1 : t + 1 + count] - action_mean) / (action_std + 1e-8)
+                ).astype(np.float32)
+                valid[:count] = True
+                actions.append(future)
+                masks.append(valid)
+                records.append(
+                    dict(
+                        group=f"scene_{row['scene']:03}",
+                        split=row["split"],
+                        t=t,
+                        frames=n,
+                        phase=str(stage[t]),
+                        light="Normal",
+                        scene=row["scene"],
+                    )
+                )
+        sources.append(dict(**v, path=str(p)))
+        status(
+            "prepare",
+            state="running",
+            activity="dataset assembly",
+            step=len(sources),
+            max_updates=20,
+        )
+    accepted_counts = {s: sum(r["split"] == s for r in sources) for s in ("train", "val", "test")}
+    if any(accepted_counts[s] < plan["minimum_accepted_scenes"][s] for s in accepted_counts):
+        raise ValueError("insufficient physically accepted expert scenes: " + str(accepted_counts))
+    data = dict(
+        raw=np.asarray(raw, np.float32),
+        state=np.asarray(states, np.float32),
+        actions=np.asarray(actions, np.float32),
+        mask=np.asarray(masks, bool),
+        records=records,
+        cameras=("robotwin_head", "robotwin_left", "robotwin_right"),
+    )
+    groups = sorted({r["group"] for r in records if r["split"] == "train"})
+    splits = selected_splits(records, groups)
+    home_difference = float(np.max(np.abs(np.asarray(initial) - initial[0])))
+    assert home_difference < 1e-5
+    # Verify that identical initial robot inputs require different full expert futures.
+    home_ids = [i for i, r in enumerate(records) if r["t"] == 0]
+    target_spread = float(np.max(np.ptp(data["actions"][home_ids], axis=0)))
+    assert target_spread > 0.1
+    save(OUT / "dataset.pt", data)
+    save(OUT / "rgb.pt", torch.from_numpy(np.asarray(rgb)))
+    write(
+        HERE / "selection.json",
+        dict(
+            train_groups=groups,
+            accepted_scene_counts=accepted_counts,
+            attempted_scenes=20,
+            excluded_scenes=[
+                r["scene"]
+                for r in plan["scenes"]
+                if r["scene"] not in {v["scene"] for v in sources}
+            ],
+            counts={s: len(i) for s, i in splits.items()},
+            records=records,
+            sources=sources,
+            identical_home_max_difference=home_difference,
+            home_future_max_normalized_spread=target_spread,
+            paired_raw_rgb_same_physics=True,
+            raw_source="renderer HDR-derived linear3; notBayer",
+            targets="future measured expert states at captured frames; offset1; full50 mask",
+            phase_support={
+                split: {
+                    phase: {
+                        str(h): sum(
+                            r["split"] == split and r["phase"] == phase and int(m.sum()) >= h
+                            for r, m in zip(records, masks, strict=True)
+                        )
+                        for h in (1, 10, 50)
+                    }
+                    for phase in ("approach", "grasp", "lift")
+                }
+                for split in ("train", "val", "test")
+            },
+            diagnostic_hidden_labels_not_network_inputs=True,
+        ),
+    )
+    spatial = load_spatial("prepare")
+    before = state_digest(spatial)
+    features = []
+    with torch.no_grad():
+        for i in range(0, len(raw), 8):
+            features.append(
+                spatial_values(
+                    spatial, data["raw"][i : i + 8], data["state"][i : i + 8], data["cameras"]
+                )
+                .float()
+                .cpu()
+            )
+            status(
+                "prepare",
+                state="running",
+                activity="RAW extraction",
+                step=min(i + 8, len(raw)),
+                max_updates=len(raw),
+            )
+    assert state_digest(spatial) == before
+    save(OUT / "raw_tokens.pt", torch.cat(features))
+    del spatial, features
+    gc.collect()
+    torch.cuda.empty_cache()
+    h15 = runpy.run_path(str(HERE.parent / "learning_r15_20261019/run.py"))
+    f = h15["extract_native"]
+    f.__globals__["OUT"] = OUT
+    f.__globals__["status"] = lambda name, **kw: status(name, state="running", **kw)
+    native = f(np.asarray(rgb))
+    native["disclosure"] = (
+        "simultaneous RAW/RGB physics; independently pretrained native tower; no teacher"
+    )
+    write(
+        HERE / "extraction.json",
+        dict(
+            raw_sha=before,
+            native=native,
+            dataset_sha=sha(OUT / "dataset.pt"),
+            raw_features_sha=sha(OUT / "raw_tokens.pt"),
+            native_features_sha=sha(OUT / "native_tokens.pt"),
+        ),
+    )
+    status("prepare", state="completed", activity="ready", step=len(raw), max_updates=len(raw))
+
+
+def train(seed, joint_only=False):
+    if seed not in (17019, 17020):
+        raise ValueError("predeclared seeds only")
+    torch.set_num_threads(4)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    data = torch.load(OUT / "dataset.pt", weights_only=False)
+    stats = norm_stats()
+    std = stats["actions"]["std"][:14]
+    groups = json.loads((HERE / "selection.json").read_text())["train_groups"]
+    caches = {
+        m: torch.load(OUT / f"{m}_tokens.pt", weights_only=False).cuda() for m in ("raw", "native")
+    }
+    baseline = None
+    if joint_only:
+        saved = torch.load(OUT / f"baseline-s{seed}/checkpoint_1024.pt", weights_only=False)
+        baseline = SmallActionHead().cuda()
+        baseline.load_state_dict(saved["selected"], strict=True)
+        baseline.requires_grad_(False).eval()
+        old = OUT / f"joint-s{seed}"
+        rejected = OUT / "rejected" / f"joint-s{seed}-a1-baseline-drift"
+        rejected.parent.mkdir(exist_ok=True)
+        if rejected.exists():
+            raise FileExistsError("repair already attempted; preserve evidence")
+        shutil.move(str(old), str(rejected))
+        report = HERE / f"joint-s{seed}_report.json"
+        shutil.copy2(report, HERE / f"rejected-joint-s{seed}-a1_report.json")
+        publish()
+    for mode in ("joint",) if joint_only else ("baseline", "state", "raw", "native", "joint"):
+        name = f"{mode}-s{seed}"
+        directory = OUT / name
+        directory.mkdir(exist_ok=False)
+        status(
+            name,
+            state="running",
+            modality=mode,
+            seed=seed,
+            step=0,
+            max_updates=1024 if mode == "baseline" else 512,
+        )
+
+        def callback(row, name=name, directory=directory):
+            with (directory / "history.jsonl").open("a") as f:
+                f.write(json.dumps(row) + chr(10))
+            if row["step"] % 16 == 0:
+                status(
+                    name,
+                    state="running",
+                    **{k: v for k, v in row.items() if k not in ("val", "candidates")},
+                )
+
+        def checkpoint(budget, payload, directory=directory):
+            save(directory / f"checkpoint_{budget:04}.pt", payload)
+
+        spatial = None
+        if mode == "baseline":
+            report, pred = fit_action_head(
+                caches["raw"],
+                data["state"],
+                data["actions"],
+                data["mask"],
+                data["records"],
+                groups,
+                std,
+                seed=seed,
+                state_only=True,
+                callback=callback,
+                checkpoint=checkpoint,
+            )
+            base_saved = torch.load(directory / "checkpoint_1024.pt", weights_only=False)
+            baseline = SmallActionHead().cuda()
+            baseline.load_state_dict(base_saved["selected"], strict=True)
+            baseline.requires_grad_(False).eval()
+        else:
+            options = {}
+            if mode == "joint":
+                # Drop native cache before full-policy load; retain only spatial modules.
+                del caches["native"]
+                gc.collect()
+                torch.cuda.empty_cache()
+                spatial = load_spatial(name)
+                before = state_digest(spatial)
+                spatial.set_joint_training(True)
+                params = {n: p for n, p in spatial.named_parameters() if p.requires_grad}
+                raw = data["raw"]
+                state = data["state"]
+                cameras = data["cameras"]
+
+                def values(indices, spatial=spatial, raw=raw, state=state, cameras=cameras):
+                    return spatial_values(spatial, raw[indices], state[indices], cameras)
+
+                def snapshot(params=params):
+                    return {n: p.detach().cpu().clone() for n, p in params.items()}
+
+                def restore(values, params=params):
+                    with torch.no_grad():
+                        for n, v in values.items():
+                            params[n].copy_(v)
+
+                with torch.no_grad():
+                    parity = float((values(list(range(8))) - caches["raw"][:8]).abs().max())
+                if parity > 1e-5:
+                    raise ValueError("joint initial representation does not match frozen cache")
+                options = dict(
+                    feature_provider=values,
+                    feature_parameters=params.values(),
+                    feature_snapshot=snapshot,
+                    feature_restore=restore,
+                )
+            torch.cuda.reset_peak_memory_stats()
+            report, pred = fit_action_residual(
+                baseline,
+                caches["native" if mode == "native" else "raw"],
+                data["state"],
+                data["actions"],
+                data["mask"],
+                data["records"],
+                groups,
+                std,
+                seed=seed,
+                state_only=mode == "state",
+                budgets=BUDGETS,
+                callback=callback,
+                checkpoint=checkpoint,
+                **options,
+            )
+            report["peak_memory_gib"] = torch.cuda.max_memory_allocated() / 1024**3
+            if mode == "joint":
+                report.update(
+                    spatial_sha_before=before,
+                    spatial_sha_after=state_digest(spatial),
+                    initial_cache_parity=parity,
+                    head_matmul_precision=torch.get_float32_matmul_precision(),
+                    spatial_forward_matmul_precision="highest",
+                    corrective_attempt=2 if joint_only else 1,
+                    trainable_names=list(params),
+                    spatial_parameters=sum(p.numel() for p in params.values()),
+                )
+                assert report["spatial_sha_before"] != report["spatial_sha_after"]
+                del options, spatial, params
+                gc.collect()
+                torch.cuda.empty_cache()
+        np.savez_compressed(directory / "predictions.npz", **pred)
+        write(directory / "sample_order.json", report.pop("order"))
+        report.update(run_id=name, modality=mode, seed=seed, completed=True)
+        write(directory / "report.json", report)
+        write(HERE / (name + "_report.json"), report)
+        status(
+            name,
+            state="completed",
+            step=report["actual_updates"],
+            actual_updates=report["actual_updates"],
+            seconds_per_update=report["elapsed_s"] / report["actual_updates"],
+        )
+        publish()
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("command", choices=["prepare", "train", "repair-joint"])
+    p.add_argument("--seed", type=int, default=17019)
+    a = p.parse_args()
+    try:
+        if a.command == "prepare":
+            prepare()
+        else:
+            train(a.seed, joint_only=a.command == "repair-joint")
+    except Exception as exc:
+        write(
+            OUT / f"{a.command}-{a.seed}-error.json",
+            dict(failure_type=type(exc).__name__, message=str(exc), updated_at=time.time()),
+        )
+        raise

@@ -1,0 +1,21 @@
+{
+  "title": "r11 RAW重新训练",
+  "phase": "task_adaptation",
+  "phase_detail": "RAW任务臂学习深层表征、多尺度融合、状态与动作适配；对照冻结前端，仅学习动作LoRA。各1000步，B12上限；按实际样本计速度。当前为离线训练，尚未证明新RAW抓持成功。",
+  "runs": [
+    {
+      "run_id": "raw-task-r11-task-s1103-a1",
+      "stage": "P2",
+      "label": "RAW表征＋动作适配",
+      "effective_batch_size": 12,
+      "target": 1000
+    },
+    {
+      "run_id": "raw-task-r11-control-s1103-a1",
+      "stage": "P2",
+      "label": "冻结RAW前端对照",
+      "effective_batch_size": 12,
+      "target": 1000
+    }
+  ]
+}

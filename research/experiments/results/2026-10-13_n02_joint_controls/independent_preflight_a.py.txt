@@ -1,0 +1,35 @@
+import json
+from pathlib import Path
+import torch
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.model import N02Encoder
+from owac.frameworks.n02.measurement import gaussian_nll
+from owac.evaluation.n02_measurement_isolation import FixedGeometryHead,class_predictions
+from owac.evaluation.n02_joint_head import joint_components,weighted_objective
+
+torch.set_num_threads(1)
+rows=[]
+for seed in range(3):
+    payload=torch.load(f'outputs/n02-contracts-20261013/seed{seed}/checkpoint200.pt',weights_only=False)
+    model=N02Encoder(N02Config.from_dict(payload['config']))
+    model.load_state_dict(payload['model'])
+    head=FixedGeometryHead(model.measurement.head)
+    cache=torch.load(f'outputs/n02-isolation-20261013/measurement/cache_seed{seed}.pt',weights_only=False)['train']
+    # All128 cachedframes, not a selected successful example.
+    predicted=class_predictions(head(cache['fields']))
+    v=cache['total_variance'][:,None]
+    direct=gaussian_nll(predicted-cache['templates'],v.log(),robust='gaussian').mean()
+    decomposed=weighted_objective(joint_components(head,cache),1.)
+    params=[p for p in head.parameters() if p.requires_grad]
+    g1=torch.autograd.grad(direct,params,allow_unused=True)
+    g2=torch.autograd.grad(decomposed,params,allow_unused=True)
+    assert [(g is None) for g in g1]==[(g is None) for g in g2]
+    a=torch.cat([x.flatten().double() for x in g1 if x is not None])
+    b=torch.cat([x.flatten().double() for x in g2 if x is not None])
+    err=float((a-b).norm()/a.norm().clamp_min(1e-20))
+    loss_error=abs(float(direct.detach())-float(decomposed.detach()))
+    assert err<1e-5 and loss_error<1e-6
+    rows.append({'seed':seed,'all128_fit_frames':True,'loss_absolute_error':loss_error,'all_connected_gradient_relative_l2_error':err,'max_gradient_absolute_error':float((a-b).abs().max()),'trainable_parameter_tensors':len(params),'connected_parameter_tensors':sum(g is not None for g in g1),'none_pattern_matches':True})
+report={'passed':True,'scope':'Real checkpoints and full cached training fields; lambda1 full GaussianNLL vs decomposition, every trainable head tensor; no optimization.','results':rows}
+Path('outputs/n02-joint-controls-20261013/independent/preflight_a.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2))

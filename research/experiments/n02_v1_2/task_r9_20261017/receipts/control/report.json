@@ -1,0 +1,738 @@
+{
+  "run_id": "raw-task-r9-control-s1103-a1",
+  "stage": "P2",
+  "execution_revision": "n02-v12-p2-spatial-r7",
+  "arm": "raw_n02",
+  "platform": "robotwin",
+  "seed": 1103,
+  "config_path": "configs/encoders/n02_v12/raw_task_r9_control_robotwin.json",
+  "config": {
+    "version": "n02-v12-p2-v1",
+    "run_id": "raw-task-r9-control-s1103-a1",
+    "stage": "P2",
+    "arm": "raw_n02",
+    "platform": "robotwin",
+    "representation": {
+      "kind": "raw3",
+      "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+      "isp": null
+    },
+    "model": {
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "input_mode": "RAW3",
+      "in_chans": 3,
+      "input_size": [
+        256,
+        320
+      ],
+      "dims": [
+        128,
+        256,
+        512,
+        1024
+      ],
+      "depths": [
+        3,
+        3,
+        27,
+        3
+      ],
+      "d_model": 512,
+      "alignment": 32,
+      "k": 4,
+      "n_slots": 16,
+      "slot_dim": 512,
+      "tau": 1.0,
+      "rounds": 4,
+      "history": 8,
+      "query_stride": 1,
+      "max_queries_per_camera": 0,
+      "n_latents": 128,
+      "n_queries": 256,
+      "out_dim": 2048,
+      "decoder_hidden": 256,
+      "measurement_channels": 3,
+      "channel_reduction": "select",
+      "saturation_level": null,
+      "units": "sensor_units",
+      "min_variance": null,
+      "max_variance": null,
+      "action_dim": 0,
+      "action_horizon": 50,
+      "strict_check": true,
+      "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core; r8 RAW-only coordinate VICReg plus RAW patch prediction, balanced multiscale fusion; encoder is frozen during declared backend adaptation; r9 task arm unfreezes last6 stride16 blocks, all level projections and readout under native action supervision; paired control freezes frontend",
+      "batch_cameras": true,
+      "group_camera_queries": true,
+      "checkpoint_decoder": true,
+      "preserve_spatial_tokens": true,
+      "output_token_rms": 4.0,
+      "context_gate_init": 0.1,
+      "scale_balance": true,
+      "scale_balance_mode": "contrast"
+    },
+    "data": {
+      "dataset_format": "robotwin",
+      "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+      "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+      "manifest_seed": 1103,
+      "partitions": {
+        "train": 0.8,
+        "dev": 0.1,
+        "calibration": 0.1
+      },
+      "history": 8,
+      "declared_prior": null,
+      "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+      "protocol": {
+        "cameras": 3,
+        "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+        "offset": 1,
+        "horizon": 50,
+        "action_mask": "the loader's per-action padding mask",
+        "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+      },
+      "task_names": [
+        "grab_roller"
+      ],
+      "exclude_episode_ids": [
+        "grab_roller/episode_000000"
+      ]
+    },
+    "policy": {
+      "suite": "robotwin",
+      "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "token_dim": 2048,
+      "tokens_per_camera": 256,
+      "freeze_backend": true,
+      "language_state_contract": "pi05-native-language-state-v1",
+      "freeze_encoder": true,
+      "backend_adapter": {
+        "kind": "lora",
+        "rank": 8,
+        "alpha": 16,
+        "targets": [
+          "q_proj",
+          "v_proj"
+        ]
+      },
+      "freeze_frontend": true
+    },
+    "aux": {
+      "lambda_raw": 0.0,
+      "lambda_pred": 0.0,
+      "lambda_noise": 0.0,
+      "noise_note": "Noise targets remain disabled; independent sensor redraws are diagnostic only.",
+      "mask_ratio": 0.6,
+      "patch_size": 32,
+      "decoder_embed_dim": 512,
+      "decoder_depth": 1,
+      "grn_scope": "sparse",
+      "audit_disabled_terms": false
+    },
+    "optim": {
+      "lr": 2e-06,
+      "lr_head": 1e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "weight_decay": 0.01,
+      "warmup_updates": 16,
+      "grad_clip": 1.0,
+      "clip_scope": "parameter_group",
+      "lr_backend_adapter": 1e-05
+    },
+    "loop": {
+      "seed": 1103,
+      "max_updates": 64,
+      "profile_updates": 4,
+      "batch_size": 8,
+      "grad_accum": 1,
+      "validate_every": 16,
+      "save_every": 16,
+      "dev_windows": 20,
+      "calibration_windows": 4,
+      "previews": 0,
+      "profile_note": "r9 bounded512 anchor exposures with balanced light/timeline blocks; all five frozen dev episodes x4 landmarks; no new anti-noise loss",
+      "bptt_steps": 2,
+      "sampled_dev": true,
+      "monitor_metric": "sampled_control_mse"
+    },
+    "runtime": {
+      "device": "cuda",
+      "dtype": "float32",
+      "amp": false,
+      "threads": 4,
+      "gpu_note": "one process per GPU: CUDA_VISIBLE_DEVICES=0 for this RAW arm, in-process device cuda:0",
+      "performance": {
+        "tf32": true,
+        "batch_cameras": true,
+        "cudnn_benchmark": true,
+        "fused_adam": true,
+        "gradient_stats_every": 50,
+        "prefetch": 2,
+        "group_camera_queries": true
+      }
+    },
+    "paths": {
+      "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+    },
+    "execution_revision": "n02-v12-p2-spatial-r7",
+    "initialisation": {
+      "kind": "raw_representation_r8",
+      "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fusion-r8-contrast-s1103-b1/checkpoint_0000100.pt",
+      "checkpoint_sha256": "b2a54b35858947f7cec746b373a58fdacafc8c5cee9dba8ace55ee284e2e55cd",
+      "representation_checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-representation-r8-fresh-main-a1/checkpoint_0000400.pt",
+      "representation_sha256": "2cd1eb6039ec9be9747f4020182286776526f2a3aad09aeeffe14d9ab8672446",
+      "reset_readout": false,
+      "continue_data_order": false
+    },
+    "task_adaptation": {
+      "protocol": "n02-task-adaptation-r9-v1",
+      "objective": "control_flow_14",
+      "train_deep_blocks": 0,
+      "balanced_sampling": true,
+      "validation": "all5_frozen_dev_episodes_four_landmarks",
+      "selection": "balanced_light_phase_sampled_control_mse_with_normal_opening_guard",
+      "normal_opening_max_ratio": 1.05
+    }
+  },
+  "assets": {
+    "starvla_importable": true,
+    "omegaconf_importable": true,
+    "safetensors_importable": true,
+    "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+    "checkpoint_exists": true,
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "tokenizer_exists": true,
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "data_root_exists": true,
+    "real_backend_available": true
+  },
+  "parameters": {
+    "bridge_added": {
+      "tensors": 0,
+      "parameters": 0,
+      "names": [],
+      "disclosure": "no projection needed: the OWAC token width already equals the π0.5 prefix width"
+    },
+    "token_source_trainable": {
+      "tensors": 0,
+      "parameters": 0,
+      "names": [],
+      "count_complete": true,
+      "uninitialized_names": []
+    },
+    "frozen_backend_parameters": 3201953824,
+    "frozen_backend_tensors": 373,
+    "backend_trainable": {
+      "tensors": 144,
+      "parameters": 1548288,
+      "names": [
+        "backend.vlm.model.model.language_model.layers.0.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.0.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.0.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.0.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.1.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.1.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.1.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.1.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.2.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.2.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.2.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.2.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.3.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.3.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.3.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.3.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.4.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.4.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.4.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.4.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.5.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.5.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.5.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.5.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.6.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.6.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.6.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.6.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.7.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.7.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.7.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.7.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.8.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.8.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.8.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.8.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.9.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.9.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.9.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.9.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.10.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.10.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.10.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.10.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.11.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.11.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.11.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.11.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.12.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.12.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.12.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.12.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.13.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.13.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.13.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.13.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.14.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.14.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.14.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.14.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.15.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.15.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.15.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.15.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.16.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.16.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.16.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.16.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.17.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.17.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.vlm.model.model.language_model.layers.17.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.vlm.model.model.language_model.layers.17.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.0.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.0.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.0.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.0.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.1.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.1.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.1.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.1.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.2.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.2.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.2.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.2.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.3.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.3.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.3.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.3.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.4.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.4.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.4.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.4.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.5.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.5.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.5.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.5.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.6.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.6.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.6.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.6.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.7.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.7.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.7.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.7.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.8.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.8.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.8.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.8.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.9.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.9.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.9.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.9.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.10.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.10.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.10.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.10.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.11.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.11.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.11.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.11.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.12.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.12.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.12.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.12.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.13.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.13.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.13.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.13.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.14.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.14.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.14.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.14.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.15.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.15.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.15.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.15.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.16.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.16.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.16.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.16.self_attn.v_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.17.self_attn.q_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.17.self_attn.q_proj.parametrizations.weight.0.B",
+        "backend.action_head.gemma_expert.model.layers.17.self_attn.v_proj.parametrizations.weight.0.A",
+        "backend.action_head.gemma_expert.model.layers.17.self_attn.v_proj.parametrizations.weight.0.B"
+      ],
+      "disclosure": "only explicitly configured backend adapters may be trainable"
+    }
+  },
+  "trained_parameters": {
+    "encoder": 0,
+    "decoder": 0,
+    "readout": 0,
+    "proposals_corrector": 0,
+    "masked_branch": 0,
+    "bridge_projection": 0,
+    "backend_adapter": 1548288
+  },
+  "frozen": {
+    "backend_parameters": 3201953824,
+    "backend_parameters_with_grad": []
+  },
+  "overview": {
+    "updates_this_run": 64,
+    "final_step": 64,
+    "wall_seconds": 715.8813135512173,
+    "step_seconds_mean": 11.18564552423777,
+    "step_seconds_p50": 11.326370478142053,
+    "step_seconds_p95": 13.430715037649497,
+    "last_terms": {
+      "action": 1.771767
+    },
+    "final_loss_mean_last10": 1.4833647280931472,
+    "peak_gpu_bytes": 36828701696,
+    "skipped_all_padding_anchors": 0,
+    "loss_is_not_a_capability_score": true
+  },
+  "final": {
+    "checkpoint": "outputs/n02-v12/P2/raw-task-r9-control-s1103-a1/checkpoint_0000064.pt",
+    "checkpoint_bytes": 474012624,
+    "dev_action_error": 0.6219368860125541,
+    "previews": {
+      "status": "disabled"
+    }
+  },
+  "checks": {
+    "units_and_shapes": {
+      "dataset_format": "robotwin",
+      "partition": "train",
+      "cameras": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "camera_count": 3,
+      "rows": 64,
+      "history": 8,
+      "anchors": 8,
+      "frame_index": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "current_frame_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "channel_values": {
+        "robotwin_head": {
+          "shape": [
+            64,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.9974664449691772,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        },
+        "robotwin_left": {
+          "shape": [
+            64,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.006901675835251808,
+          "max": 0.9860484600067139,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        },
+        "robotwin_right": {
+          "shape": [
+            64,
+            3,
+            240,
+            320
+          ],
+          "dtype": "float32",
+          "min": 0.007060132455080748,
+          "max": 0.9155886769294739,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        }
+      },
+      "action_shape_unpadded": [
+        400,
+        14
+      ],
+      "action_control_dim": 14,
+      "action_offset": 1,
+      "action_mask_valid": 400,
+      "action_mask_shape": [
+        400
+      ],
+      "normalisation": "official loader statistics only; the training entry never normalises or de-normalises (prepare_control_targets pads to 32 dims)",
+      "finite": true
+    },
+    "causality": {
+      "windows_checked": 12,
+      "all_checks_passed": true,
+      "meaning": "history rows are earlier-or-equal real frame indices of their anchor and never a future frame"
+    },
+    "partition_isolation": {
+      "train_dev_overlap": 0,
+      "train_calibration_overlap": 0,
+      "dev_calibration_overlap": 0,
+      "train_measurements": 18,
+      "dev_measurements": 18,
+      "calibration_measurements": 18
+    },
+    "episode_reset": {
+      "selected_rows_zeroed": true,
+      "unselected_rows_bit_identical": true,
+      "version_incremented": true
+    },
+    "calibration": {
+      "status": "fitted",
+      "sequences": 4,
+      "threshold": 0.9861091108462645,
+      "quantile": 0.95,
+      "version": "n02-v12-windowed-check-v1",
+      "partition": "calibration",
+      "viewing_rule_hash": "c77a261ead1e57b379016797b75b54cf20e8b183790a0c1a7bd1c59e30372973",
+      "frame_axis_note": "relative check axis 0; actual decoder source time is unchanged",
+      "prediction_version": "causal_pre_locked",
+      "execution_revision": "n02-v12-p2-spatial-r7",
+      "scale": "sensor_stride1",
+      "regions": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "verdicts": {
+        "calibration": {
+          "sequences": 4,
+          "by_status": {
+            "compatible": 4
+          },
+          "invalid_no_prefix": 0,
+          "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+        },
+        "dev": {
+          "sequences": 20,
+          "by_status": {
+            "compatible": 20
+          },
+          "invalid_no_prefix": 0,
+          "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+        },
+        "per_step_check": "uncalibrated on purpose: see the comment in calibration_pass; an uncalibrated check returns AbsoluteCheckResult.invalid and is never counted as a zero"
+      }
+    },
+    "prior_wiring": {
+      "max_abs_log_p0_difference": 2.014903,
+      "max_abs_q_difference": 0.0,
+      "prior_reaches_log_p0": true,
+      "prior_changes_support": false,
+      "note": "same real window, same weights; only the declared prior differs",
+      "runs": {
+        "uniform": {
+          "log_p0": [
+            -1.386294,
+            -1.386294,
+            -1.386294,
+            -1.386294
+          ],
+          "q": [
+            0.0,
+            0.999826,
+            0.0,
+            0.000174
+          ],
+          "check_status": "insufficient_information",
+          "check_valid": false,
+          "calibration_version": "uncalibrated"
+        },
+        "biased": {
+          "log_p0": [
+            -0.10536,
+            -3.401197,
+            -3.401197,
+            -3.401197
+          ],
+          "q": [
+            0.0,
+            0.999826,
+            0.0,
+            0.000174
+          ],
+          "check_status": "insufficient_information",
+          "check_valid": false,
+          "calibration_version": "uncalibrated"
+        }
+      }
+    },
+    "gradient_wiring": {
+      "roles": {
+        "backend_adapter": {
+          "l1": 485.5943361688405,
+          "finite": true,
+          "tensors_with_grad": 144,
+          "tensors": 144
+        }
+      },
+      "roles_with_nonzero_gradient": [
+        "backend_adapter"
+      ],
+      "frozen_parameters_with_grad": [],
+      "hard_paths": {
+        "differentiable": [
+          "encoder",
+          "decoder",
+          "measurement_energy",
+          "corrector_predictor",
+          "readout"
+        ],
+        "hard_choice": [
+          "candidate_argmax_selection",
+          "accept_reject_decision"
+        ],
+        "note": "the discrete candidate selection and the accept/reject decision are hard; their gradient is not the gradient of the search, only of the selected values"
+      }
+    },
+    "profile": {
+      "updates": 4,
+      "wall_seconds": 44.593450573273,
+      "step_seconds_mean": 11.14836264331825,
+      "step_seconds_p50": 10.74106824118644,
+      "step_seconds_p95": 13.76114745736122,
+      "microbatch_anchors": 8,
+      "grad_accum": 1,
+      "effective_anchors": 8,
+      "peak_gpu_bytes": 36793664512,
+      "loss": 1.4581873416900635,
+      "terms": {
+        "action": 1.458187
+      },
+      "run_stats": {
+        "prefix_builds": 1,
+        "encoder_calls": 1,
+        "token_source_calls": 1,
+        "denoise_steps": 0
+      }
+    },
+    "previews": [
+      {
+        "status": "disabled"
+      },
+      {
+        "status": "disabled"
+      },
+      {
+        "status": "disabled"
+      }
+    ],
+    "final": {
+      "checkpoint": "outputs/n02-v12/P2/raw-task-r9-control-s1103-a1/checkpoint_0000064.pt",
+      "checkpoint_bytes": 474012624,
+      "dev_action_error": 0.6219368860125541,
+      "previews": {
+        "status": "disabled"
+      }
+    }
+  },
+  "eval": {
+    "planned_closed_loop": 100,
+    "completed": 0,
+    "note": "the 100-episode closed loop belongs to P4; nothing ran here"
+  }
+}

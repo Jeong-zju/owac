@@ -1,0 +1,321 @@
+{
+  "units_and_shapes": {
+    "dataset_format": "robotwin",
+    "partition": "train",
+    "cameras": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "camera_count": 3,
+    "rows": 96,
+    "history": 8,
+    "anchors": 12,
+    "frame_index": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      2,
+      3,
+      0,
+      0,
+      0,
+      0,
+      1,
+      2,
+      3,
+      4,
+      0,
+      0,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      0,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "current_frame_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "channel_values": {
+      "robotwin_head": {
+        "shape": [
+          96,
+          3,
+          240,
+          320
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.9974664449691772,
+        "finite": true,
+        "scale_note": "loader units kept; this entry does not rescale RAW values"
+      },
+      "robotwin_left": {
+        "shape": [
+          96,
+          3,
+          240,
+          320
+        ],
+        "dtype": "float32",
+        "min": 0.00638963608071208,
+        "max": 0.9860484600067139,
+        "finite": true,
+        "scale_note": "loader units kept; this entry does not rescale RAW values"
+      },
+      "robotwin_right": {
+        "shape": [
+          96,
+          3,
+          240,
+          320
+        ],
+        "dtype": "float32",
+        "min": 0.00704301567748189,
+        "max": 0.9522664546966553,
+        "finite": true,
+        "scale_note": "loader units kept; this entry does not rescale RAW values"
+      }
+    },
+    "action_shape_unpadded": [
+      600,
+      14
+    ],
+    "action_control_dim": 14,
+    "action_offset": 1,
+    "action_mask_valid": 600,
+    "action_mask_shape": [
+      600
+    ],
+    "normalisation": "official loader statistics only; the training entry never normalises or de-normalises (prepare_control_targets pads to 32 dims)",
+    "finite": true
+  },
+  "causality": {
+    "windows_checked": 12,
+    "all_checks_passed": true,
+    "meaning": "history rows are earlier-or-equal real frame indices of their anchor and never a future frame"
+  },
+  "partition_isolation": {
+    "train_dev_overlap": 0,
+    "train_calibration_overlap": 0,
+    "dev_calibration_overlap": 0,
+    "train_measurements": 18,
+    "dev_measurements": 18,
+    "calibration_measurements": 18
+  },
+  "episode_reset": {
+    "selected_rows_zeroed": true,
+    "unselected_rows_bit_identical": true,
+    "version_incremented": true
+  },
+  "calibration": {
+    "status": "fitted_during_each_fixed_weight_dev_pass"
+  },
+  "prior_wiring": {
+    "max_abs_log_p0_difference": 2.014903,
+    "max_abs_q_difference": 0.642922,
+    "prior_reaches_log_p0": true,
+    "prior_changes_support": true,
+    "note": "same real window, same weights; only the declared prior differs",
+    "runs": {
+      "uniform": {
+        "log_p0": [
+          -1.386294,
+          -1.386294,
+          -1.386294,
+          -1.386294
+        ],
+        "q": [
+          0.270137,
+          0.238395,
+          0.287559,
+          0.20391
+        ],
+        "check_status": "insufficient_information",
+        "check_valid": false,
+        "calibration_version": "n02-fixed-weight-r11-v1"
+      },
+      "biased": {
+        "log_p0": [
+          -0.10536,
+          -3.401197,
+          -3.401197,
+          -3.401197
+        ],
+        "q": [
+          0.913059,
+          0.02935,
+          0.033258,
+          0.024332
+        ],
+        "check_status": "insufficient_information",
+        "check_valid": false,
+        "calibration_version": "n02-fixed-weight-r11-v1"
+      }
+    }
+  },
+  "save_resume": {
+    "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fewshot-r12-three-s1103-a1/checkpoint_0000128.pt",
+    "resumed_step": 128,
+    "prediction_max_abs_difference": 0.09375,
+    "dev_action_error_at_save": 0.11300597619265318,
+    "dev_action_error_after_resume": 0.11301784366369247,
+    "measurement": "same fixed dev windows/noise/time/precision; teacher-forced velocity tensor, not a closed-loop action trajectory"
+  },
+  "gradient_wiring": {
+    "roles": {
+      "encoder": {
+        "l1": 967.4383705998771,
+        "finite": true,
+        "tensors_with_grad": 66,
+        "tensors": 66
+      },
+      "decoder": {
+        "l1": 0.00012026151278296472,
+        "finite": true,
+        "tensors_with_grad": 29,
+        "tensors": 33
+      },
+      "readout": {
+        "l1": 1094.1616317614705,
+        "finite": true,
+        "tensors_with_grad": 77,
+        "tensors": 77
+      },
+      "proposals_corrector": {
+        "l1": 0.0005995353766953873,
+        "finite": true,
+        "tensors_with_grad": 59,
+        "tensors": 59
+      },
+      "backend_adapter": {
+        "l1": 104.30096881104691,
+        "finite": true,
+        "tensors_with_grad": 144,
+        "tensors": 144
+      }
+    },
+    "roles_with_nonzero_gradient": [
+      "encoder",
+      "decoder",
+      "readout",
+      "proposals_corrector",
+      "backend_adapter"
+    ],
+    "frozen_parameters_with_grad": [],
+    "hard_paths": {
+      "differentiable": [
+        "encoder",
+        "decoder",
+        "measurement_energy",
+        "corrector_predictor",
+        "readout"
+      ],
+      "hard_choice": [
+        "candidate_argmax_selection",
+        "accept_reject_decision"
+      ],
+      "note": "the discrete candidate selection and the accept/reject decision are hard; their gradient is not the gradient of the search, only of the selected values"
+    }
+  },
+  "previews": [
+    {
+      "status": "disabled"
+    }
+  ],
+  "final": {
+    "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fewshot-r12-three-s1103-a1/checkpoint_0000256.pt",
+    "checkpoint_bytes": 750585832,
+    "dev_action_error": 0.10853071007877588,
+    "previews": {
+      "status": "disabled"
+    }
+  }
+}

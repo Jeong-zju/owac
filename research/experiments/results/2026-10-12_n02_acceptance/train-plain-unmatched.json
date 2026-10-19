@@ -1,0 +1,161 @@
+{
+  "command": "python -m owac.training.n02",
+  "config_path": "configs/encoders/n02/tiny.json",
+  "preset": null,
+  "config": {
+    "name": "tiny",
+    "K": 4,
+    "D": 32,
+    "cycles": 4,
+    "history": 4,
+    "temperature": 1.0,
+    "beta_prior": 1.0,
+    "beta_relation": 0.0,
+    "beta_prior_bounds": [
+      0.05,
+      4.0
+    ],
+    "stem_width": 32,
+    "stem_layers": 2,
+    "cell_kind": "convgru",
+    "cell_kernel": 3,
+    "readout_mode": "map",
+    "tokens_per_camera": 256,
+    "token_dim": 2048,
+    "prior_mode": "learned",
+    "geometry_dim": 8,
+    "seed": 0,
+    "measurement": {
+      "input_mode": "rawvla_rgb3",
+      "cfa_pattern": "RGGB",
+      "cfa_planes": false,
+      "black_level": 0.0,
+      "white_level": 1.0,
+      "robust": "huber",
+      "huber_delta": 3.0,
+      "variance_floor": 1e-06,
+      "shot_scale": null,
+      "read_scale": null,
+      "scale_estimated": false,
+      "predict_variance": true,
+      "head_width": 32,
+      "head_depth": 2,
+      "geometry_dim": 8,
+      "saturation_is_observation": false
+    },
+    "revision": {
+      "contradiction_enabled": true,
+      "contradiction_threshold": 2.5,
+      "relative_margin": 1.5,
+      "strong_contradiction_threshold": 4.0,
+      "residual_ema": 0.5,
+      "propagation_enabled": true,
+      "propagation_hops": 1,
+      "propagation_decay": 0.5,
+      "propagate_priority": true,
+      "reset_contradicted": true,
+      "reset_fraction": 1.0,
+      "downweight_contradicted": 0.5,
+      "proposal_enabled": true,
+      "proposal_temperature": 1.0,
+      "update_scale": 1.0,
+      "cold_start_threshold": 0.25,
+      "tolerance": 0.0001,
+      "min_iterations": 1,
+      "write_dependency_edges": true
+    },
+    "loss_weights": {
+      "measurement": 1.0,
+      "geometry_set": 1.0,
+      "revision": 0.1,
+      "diversity": 0.01,
+      "mixture": 1.0,
+      "collapse_penalty": 0.0
+    }
+  },
+  "seed": 0,
+  "git_sha": "dfece066f2500da4779ed93955e70fd0b28e9afc",
+  "source": "synthetic",
+  "arm": "plain_recurrent",
+  "resumed_from": null,
+  "first_step": 0,
+  "steps_run": 200,
+  "last_step": 200,
+  "steps": 200,
+  "batch_size": 2,
+  "sequence_length": 8,
+  "frame_size": 64,
+  "lr": 0.0003,
+  "grad_clip": 1.0,
+  "wall_seconds": 22.31059955300043,
+  "cpu_seconds": 22.309010107000002,
+  "steps_per_second": 8.964348964485946,
+  "cpu_seconds_per_step": 0.11154505053500001,
+  "fraction_of_wall_that_is_cpu": 0.9999287582569598,
+  "load_average_start": [
+    2.427734375,
+    3.33935546875,
+    14.953125
+  ],
+  "load_average_end": [
+    3.1318359375,
+    3.439453125,
+    14.67626953125
+  ],
+  "loss": {
+    "first": 399.73284912109375,
+    "last": -3.2101149559020996,
+    "best": -3.7320590019226074,
+    "mean_first_5": 287.98052368164065,
+    "mean_last_5": -2.810523796081543,
+    "terms_last": {
+      "measurement": -4.20348048210144,
+      "geometry_set": 0.9923659265041351,
+      "diversity": 0.10000000149011612,
+      "mixture": 0.0
+    }
+  },
+  "peak_rss_bytes": 364068864,
+  "parameters": {
+    "total": 92030,
+    "trainable": 92030
+  },
+  "latency_ms": {
+    "encoder_step_ms": {
+      "p50": 6.028104499819165,
+      "p95": 6.919848499637737,
+      "n": 1600
+    },
+    "readout_ms": {
+      "map": {
+        "p50": 1.31056499958504,
+        "p95": 2.050461399994674,
+        "n": 5
+      },
+      "tokens": {
+        "p50": 1.3424199996734387,
+        "p95": 1.3663859999724082,
+        "n": 5
+      },
+      "token_budget": 64
+    },
+    "single_hypothesis_baseline_ms": {
+      "p50": 12.341777000074217,
+      "p95": 13.610853499540099,
+      "n": 3
+    },
+    "analytic_reference_ms": {
+      "p50": 0.3097119997619302,
+      "p95": 0.4166360000454006,
+      "n": 5
+    }
+  },
+  "device": "cpu",
+  "torch_threads": 1,
+  "torch_version": "2.9.1+cpu",
+  "resumed_run_shape": false,
+  "notes": [
+    "measurement loss is nats per current likelihood; geometry is a binary proxy",
+    "the hidden geometry is used in the loss only and is never an encoder input"
+  ]
+}

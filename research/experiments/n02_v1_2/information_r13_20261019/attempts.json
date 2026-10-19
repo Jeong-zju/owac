@@ -1,0 +1,44 @@
+{
+  "failures": [
+    {
+      "job": "owac-n02-r13-capture-smoke-a1",
+      "cause": "Actor wrapper uses .actor.set_pose; fixed before full capture"
+    },
+    {
+      "job": "owac-n02-r13-extract850-a1",
+      "cause": "supervisor requires absolute Python executable; no extraction started"
+    },
+    {
+      "jobs": [
+        "owac-n02-r13-extract850-a2",
+        "owac-n02-r13-extract256-a1"
+      ],
+      "cause": "scalar tensor hashing needed reshape(-1); no head training started"
+    },
+    {
+      "jobs": [
+        "owac-n02-r13-extract850-a3",
+        "owac-n02-r13-extract256-a2"
+      ],
+      "cause": "concurrent NPZ reader saw incomplete ZIP; failed attempts preserved, reader retries and future writer atomic rename added"
+    },
+    {
+      "job": "owac-n02-r13-native-control-a1",
+      "cause": "original LeRobot prefix differs from StarVLA normalized keys; strict load rejected empty selection; corrected exact source prefix"
+    },
+    {
+      "job": "summarize model-runtime attempt",
+      "cause": "Matplotlib absent from model environment; used existing plotting dependency path without replacing NumPy"
+    },
+    {
+      "job": "summarize simulator-runtime attempt",
+      "cause": "NumPy1 vs2 float32 quantile interpolation differs at micrometre scale; final audit rerun in original NumPy2.2.6 with exact equality, no metric tolerance relaxation"
+    }
+  ],
+  "policy_updates": 0,
+  "disclosure": "These are isolated diagnostic harness failures, not established causes of prior policy failures.",
+  "pipeline_notes": [
+    "Head a1 jobs were stopped before creating heads or doing updates; a2 pipelines overlap fitting with cached-feature extraction.",
+    "Future frozen feature caches use atomic uncompressed NPZ to avoid CPU deflate holding GPUs idle; existing recorded caches retained unchanged."
+  ]
+}

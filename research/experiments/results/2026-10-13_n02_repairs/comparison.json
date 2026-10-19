@@ -1,0 +1,805 @@
+{
+  "data_only": {
+    "arm": "candidate",
+    "checkpoint_sha256": "37bf52c1ae59a6661fa504614c89111eea902fc0e44a18b986ea234a33985781",
+    "train_log_sha256": "6838a19607621c15951b8d41010d5e16111c0369cdfba04359700dbeaa01057a",
+    "evaluation_sha256": "e71c772db698de5bbca0148888f6a7b8eeb76bef482f5105dd5e9bcdc83cc751",
+    "gates": {
+      "correct": {
+        "passed": 11,
+        "total": 16
+      },
+      "misleading": {
+        "passed": 0,
+        "total": 16
+      },
+      "missing": {
+        "passed": 9,
+        "total": 16
+      },
+      "unidentifiable": {
+        "passed": 0,
+        "total": 16
+      },
+      "stale": {
+        "passed": 3,
+        "total": 16
+      }
+    },
+    "loss_first": 264.37738037109375,
+    "loss_last": 4.961019039154053,
+    "train_summary": {
+      "command": "python -m owac.training.n02",
+      "config_path": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-repair-20261013/before/configs/encoders/n02/tiny.json",
+      "preset": null,
+      "config": {
+        "name": "tiny",
+        "K": 4,
+        "D": 32,
+        "cycles": 4,
+        "history": 4,
+        "temperature": 1.0,
+        "beta_prior": 1.0,
+        "beta_relation": 0.0,
+        "beta_prior_bounds": [
+          0.05,
+          4.0
+        ],
+        "stem_width": 32,
+        "stem_layers": 2,
+        "cell_kind": "convgru",
+        "cell_kernel": 3,
+        "readout_mode": "map",
+        "tokens_per_camera": 256,
+        "token_dim": 2048,
+        "prior_mode": "learned",
+        "geometry_dim": 8,
+        "seed": 0,
+        "measurement": {
+          "input_mode": "rawvla_rgb3",
+          "cfa_pattern": "RGGB",
+          "cfa_planes": false,
+          "black_level": 0.0,
+          "white_level": 1.0,
+          "robust": "huber",
+          "huber_delta": 3.0,
+          "variance_floor": 1e-06,
+          "shot_scale": null,
+          "read_scale": null,
+          "scale_estimated": false,
+          "predict_variance": true,
+          "head_width": 32,
+          "head_depth": 2,
+          "geometry_dim": 8,
+          "saturation_is_observation": false
+        },
+        "revision": {
+          "contradiction_enabled": true,
+          "contradiction_threshold": 2.5,
+          "relative_margin": 1.5,
+          "strong_contradiction_threshold": 4.0,
+          "residual_ema": 0.5,
+          "propagation_enabled": true,
+          "propagation_hops": 1,
+          "propagation_decay": 0.5,
+          "propagate_priority": true,
+          "reset_contradicted": true,
+          "reset_fraction": 1.0,
+          "downweight_contradicted": 0.5,
+          "proposal_enabled": true,
+          "proposal_temperature": 1.0,
+          "update_scale": 1.0,
+          "cold_start_threshold": 0.25,
+          "tolerance": 0.0001,
+          "min_iterations": 1,
+          "write_dependency_edges": true
+        },
+        "loss_weights": {
+          "measurement": 1.0,
+          "geometry_set": 1.0,
+          "revision": 0.1,
+          "diversity": 0.01,
+          "mixture": 1.0,
+          "collapse_penalty": 0.0
+        }
+      },
+      "seed": 0,
+      "git_sha": "7c567cc33bb6abc382489c4f75c4a3ba810e6d43",
+      "source": "synthetic",
+      "arm": "candidate",
+      "resumed_from": null,
+      "first_step": 0,
+      "steps_run": 200,
+      "last_step": 200,
+      "steps": 200,
+      "batch_size": 2,
+      "sequence_length": 8,
+      "frame_size": 64,
+      "lr": 0.0003,
+      "grad_clip": 1.0,
+      "wall_seconds": 129.37565102000372,
+      "cpu_seconds": 129.368038051,
+      "steps_per_second": 1.54588594084892,
+      "cpu_seconds_per_step": 0.6468401902550001,
+      "fraction_of_wall_that_is_cpu": 0.9999411560912453,
+      "load_average_start": [
+        2.59228515625,
+        2.470703125,
+        1.923828125
+      ],
+      "load_average_end": [
+        2.38037109375,
+        2.4169921875,
+        1.97412109375
+      ],
+      "loss": {
+        "first": 264.37738037109375,
+        "last": 4.961019039154053,
+        "best": 3.7766342163085938,
+        "mean_first_5": 249.7890411376953,
+        "mean_last_5": 4.621884727478028,
+        "terms_last": {
+          "measurement": 1.209626317024231,
+          "geometry_set": 0.5888207256793976,
+          "revision": 2.778005540370941,
+          "diversity": 0.0947117367759347,
+          "mixture": 3.1616250574588776
+        }
+      },
+      "peak_rss_bytes": 699695104,
+      "parameters": {
+        "total": 159636,
+        "trainable": 159636
+      },
+      "latency_ms": {
+        "encoder_step_ms": {
+          "p50": 30.37853950081626,
+          "p95": 32.74470009491779,
+          "n": 1600
+        },
+        "readout_ms": {
+          "map": {
+            "p50": 0.998361996607855,
+            "p95": 1.5205220028292388,
+            "n": 5
+          },
+          "tokens": {
+            "p50": 0.8533520012861118,
+            "p95": 0.9555160067975521,
+            "n": 5
+          },
+          "token_budget": 64
+        },
+        "single_hypothesis_baseline_ms": {
+          "p50": 6.4317790092900395,
+          "p95": 9.589773700281512,
+          "n": 3
+        },
+        "analytic_reference_ms": {
+          "p50": 0.3003009915119037,
+          "p95": 0.38891700096428394,
+          "n": 5
+        }
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "torch_version": "2.9.1+cpu",
+      "resumed_run_shape": false,
+      "notes": [
+        "measurement loss is nats per current likelihood; geometry is a binary proxy",
+        "the hidden geometry is used in the loss only and is never an encoder input"
+      ]
+    },
+    "no_cue_mean_absolute_drift": 0.41153923189267516,
+    "no_cue_max_absolute_drift": 0.499941885471344,
+    "encoder_ms": {
+      "p50": 16.5367205045186,
+      "p95": 40.292272157239495
+    },
+    "wall_seconds_training_and_evaluation": 147.89446493300784,
+    "max_duplicate_posterior_refinement_delta": 0.10699480772018433
+  },
+  "repaired": {
+    "arm": "candidate",
+    "checkpoint_sha256": "9fbb672b44cd9ba2ef4b700d72892d468316af383c17497782a8a77fe005f090",
+    "train_log_sha256": "17a865a275fb70d8055a65741293eb4f4cd831e3d86a3c7008b8b6cacd323daa",
+    "evaluation_sha256": "737600afdce22be61a3a2539603f8cfbc2fe1d393231d40f960dbf8bfc4f49a0",
+    "gates": {
+      "correct": {
+        "passed": 8,
+        "total": 16
+      },
+      "misleading": {
+        "passed": 0,
+        "total": 16
+      },
+      "missing": {
+        "passed": 7,
+        "total": 16
+      },
+      "unidentifiable": {
+        "passed": 0,
+        "total": 16
+      },
+      "stale": {
+        "passed": 0,
+        "total": 16
+      }
+    },
+    "loss_first": 271.2413024902344,
+    "loss_last": 4.688168525695801,
+    "train_summary": {
+      "command": "python -m owac.training.n02",
+      "config_path": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/configs/encoders/n02/tiny.json",
+      "preset": null,
+      "config": {
+        "name": "tiny",
+        "K": 4,
+        "D": 32,
+        "cycles": 4,
+        "history": 4,
+        "temperature": 1.0,
+        "beta_prior": 1.0,
+        "beta_relation": 0.0,
+        "beta_prior_bounds": [
+          0.05,
+          4.0
+        ],
+        "stem_width": 32,
+        "stem_layers": 2,
+        "cell_kind": "convgru",
+        "cell_kernel": 3,
+        "readout_mode": "map",
+        "tokens_per_camera": 256,
+        "token_dim": 2048,
+        "prior_mode": "learned",
+        "geometry_dim": 8,
+        "seed": 0,
+        "measurement": {
+          "input_mode": "rawvla_rgb3",
+          "cfa_pattern": "RGGB",
+          "cfa_planes": false,
+          "black_level": 0.0,
+          "white_level": 1.0,
+          "robust": "huber",
+          "huber_delta": 3.0,
+          "variance_floor": 1e-06,
+          "shot_scale": null,
+          "read_scale": null,
+          "scale_estimated": false,
+          "predict_variance": true,
+          "head_width": 32,
+          "head_depth": 2,
+          "geometry_dim": 8,
+          "saturation_is_observation": false
+        },
+        "revision": {
+          "contradiction_enabled": true,
+          "contradiction_threshold": 2.5,
+          "relative_margin": 1.5,
+          "strong_contradiction_threshold": 4.0,
+          "residual_ema": 0.5,
+          "propagation_enabled": true,
+          "propagation_hops": 1,
+          "propagation_decay": 0.5,
+          "propagation_threshold": 0.01,
+          "propagate_priority": true,
+          "reset_contradicted": true,
+          "reset_fraction": 1.0,
+          "downweight_contradicted": 0.5,
+          "proposal_enabled": true,
+          "proposal_temperature": 1.0,
+          "update_scale": 1.0,
+          "cold_start_threshold": 0.25,
+          "tolerance": 0.0001,
+          "min_iterations": 1,
+          "write_dependency_edges": true
+        },
+        "loss_weights": {
+          "measurement": 1.0,
+          "geometry_set": 1.0,
+          "revision": 0.1,
+          "diversity": 0.01,
+          "mixture": 1.0,
+          "collapse_penalty": 0.0
+        }
+      },
+      "seed": 0,
+      "git_sha": "7c567cc33bb6abc382489c4f75c4a3ba810e6d43",
+      "source": "synthetic",
+      "arm": "candidate",
+      "resumed_from": null,
+      "first_step": 0,
+      "steps_run": 200,
+      "last_step": 200,
+      "steps": 200,
+      "batch_size": 2,
+      "sequence_length": 8,
+      "frame_size": 64,
+      "lr": 0.0003,
+      "grad_clip": 1.0,
+      "wall_seconds": 138.07520837800985,
+      "cpu_seconds": 137.942039167,
+      "steps_per_second": 1.4484859544984936,
+      "cpu_seconds_per_step": 0.6897101958349999,
+      "fraction_of_wall_that_is_cpu": 0.9990355313414029,
+      "load_average_start": [
+        5.80126953125,
+        3.19921875,
+        2.24169921875
+      ],
+      "load_average_end": [
+        8.9541015625,
+        4.94677734375,
+        2.99560546875
+      ],
+      "loss": {
+        "first": 271.2413024902344,
+        "last": 4.688168525695801,
+        "best": 3.1996517181396484,
+        "mean_first_5": 259.72230529785156,
+        "mean_last_5": 7.006898546218872,
+        "terms_last": {
+          "measurement": 3.9469637274742126,
+          "geometry_set": 0.5456368178129196,
+          "revision": 1.7105912268161774,
+          "diversity": 0.0986237209290266,
+          "mixture": 0.1945818942040205
+        }
+      },
+      "peak_rss_bytes": 700166144,
+      "parameters": {
+        "total": 159636,
+        "trainable": 159636
+      },
+      "latency_ms": {
+        "encoder_step_ms": {
+          "p50": 30.648045991256367,
+          "p95": 44.489639948733355,
+          "n": 1600
+        },
+        "readout_ms": {
+          "map": {
+            "p50": 1.0030950070358813,
+            "p95": 1.4396707963896915,
+            "n": 5
+          },
+          "tokens": {
+            "p50": 0.8619050058769062,
+            "p95": 0.9783970017451793,
+            "n": 5
+          },
+          "token_budget": 64
+        },
+        "single_hypothesis_baseline_ms": {
+          "p50": 6.423036989872344,
+          "p95": 9.916517499368638,
+          "n": 3
+        },
+        "analytic_reference_ms": {
+          "p50": 0.2877119986806065,
+          "p95": 0.406492204638198,
+          "n": 5
+        }
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "torch_version": "2.9.1+cpu",
+      "resumed_run_shape": false,
+      "notes": [
+        "measurement loss is nats per current likelihood; geometry is a binary proxy",
+        "the hidden geometry is used in the loss only and is never an encoder input"
+      ]
+    },
+    "no_cue_mean_absolute_drift": 0.42814941602500767,
+    "no_cue_max_absolute_drift": 0.4986910974839702,
+    "encoder_ms": {
+      "p50": 15.972969500580803,
+      "p95": 16.64231280228705
+    },
+    "wall_seconds_training_and_evaluation": 152.0373550229997,
+    "max_duplicate_posterior_refinement_delta": 0.11407089233398438
+  },
+  "no_propagation": {
+    "arm": "no_dependency_propagation",
+    "checkpoint_sha256": "158d99b351418cabd04fcd854c5b2ac3b7baddc622094393b099c0a0d9811c1d",
+    "train_log_sha256": "88c41b58181ce52b3a0645be2cff6046aa23f08cf9636b3fd2180bd787310c87",
+    "evaluation_sha256": "f3a55c390788d28cc1855abae64038b5bcd8b31ccbdc81140ee52f3d236373dd",
+    "gates": {
+      "correct": {
+        "passed": 10,
+        "total": 16
+      },
+      "misleading": {
+        "passed": 0,
+        "total": 16
+      },
+      "missing": {
+        "passed": 7,
+        "total": 16
+      },
+      "unidentifiable": {
+        "passed": 2,
+        "total": 16
+      },
+      "stale": {
+        "passed": 0,
+        "total": 16
+      }
+    },
+    "loss_first": 249.31735229492188,
+    "loss_last": 2.5021328926086426,
+    "train_summary": {
+      "command": "python -m owac.training.n02",
+      "config_path": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/configs/encoders/n02/tiny.json",
+      "preset": null,
+      "config": {
+        "name": "tiny",
+        "K": 4,
+        "D": 32,
+        "cycles": 4,
+        "history": 4,
+        "temperature": 1.0,
+        "beta_prior": 1.0,
+        "beta_relation": 0.0,
+        "beta_prior_bounds": [
+          0.05,
+          4.0
+        ],
+        "stem_width": 32,
+        "stem_layers": 2,
+        "cell_kind": "convgru",
+        "cell_kernel": 3,
+        "readout_mode": "map",
+        "tokens_per_camera": 256,
+        "token_dim": 2048,
+        "prior_mode": "learned",
+        "geometry_dim": 8,
+        "seed": 0,
+        "measurement": {
+          "input_mode": "rawvla_rgb3",
+          "cfa_pattern": "RGGB",
+          "cfa_planes": false,
+          "black_level": 0.0,
+          "white_level": 1.0,
+          "robust": "huber",
+          "huber_delta": 3.0,
+          "variance_floor": 1e-06,
+          "shot_scale": null,
+          "read_scale": null,
+          "scale_estimated": false,
+          "predict_variance": true,
+          "head_width": 32,
+          "head_depth": 2,
+          "geometry_dim": 8,
+          "saturation_is_observation": false
+        },
+        "revision": {
+          "contradiction_enabled": true,
+          "contradiction_threshold": 2.5,
+          "relative_margin": 1.5,
+          "strong_contradiction_threshold": 4.0,
+          "residual_ema": 0.5,
+          "propagation_enabled": false,
+          "propagation_hops": 1,
+          "propagation_decay": 0.5,
+          "propagation_threshold": 0.01,
+          "propagate_priority": true,
+          "reset_contradicted": true,
+          "reset_fraction": 1.0,
+          "downweight_contradicted": 0.5,
+          "proposal_enabled": true,
+          "proposal_temperature": 1.0,
+          "update_scale": 1.0,
+          "cold_start_threshold": 0.25,
+          "tolerance": 0.0001,
+          "min_iterations": 1,
+          "write_dependency_edges": true
+        },
+        "loss_weights": {
+          "measurement": 1.0,
+          "geometry_set": 1.0,
+          "revision": 0.1,
+          "diversity": 0.01,
+          "mixture": 1.0,
+          "collapse_penalty": 0.0
+        }
+      },
+      "seed": 0,
+      "git_sha": "7c567cc33bb6abc382489c4f75c4a3ba810e6d43",
+      "source": "synthetic",
+      "arm": "no_dependency_propagation",
+      "resumed_from": null,
+      "first_step": 0,
+      "steps_run": 200,
+      "last_step": 200,
+      "steps": 200,
+      "batch_size": 2,
+      "sequence_length": 8,
+      "frame_size": 64,
+      "lr": 0.0003,
+      "grad_clip": 1.0,
+      "wall_seconds": 141.77449452198925,
+      "cpu_seconds": 141.725770354,
+      "steps_per_second": 1.410690975653452,
+      "cpu_seconds_per_step": 0.7086288517699999,
+      "fraction_of_wall_that_is_cpu": 0.9996563262796067,
+      "load_average_start": [
+        7.27197265625,
+        4.76953125,
+        2.96875
+      ],
+      "load_average_end": [
+        7.12890625,
+        5.35693359375,
+        3.41650390625
+      ],
+      "loss": {
+        "first": 249.31735229492188,
+        "last": 2.5021328926086426,
+        "best": 2.3806803226470947,
+        "mean_first_5": 235.3076904296875,
+        "mean_last_5": 3.623603105545044,
+        "terms_last": {
+          "measurement": 1.829259231686592,
+          "geometry_set": 0.5090919584035873,
+          "revision": 1.114777535200119,
+          "diversity": 0.0891377730295062,
+          "mixture": 0.1628901781514287
+        }
+      },
+      "peak_rss_bytes": 691298304,
+      "parameters": {
+        "total": 159636,
+        "trainable": 159636
+      },
+      "latency_ms": {
+        "encoder_step_ms": {
+          "p50": 32.028752502810676,
+          "p95": 39.70331625605466,
+          "n": 1600
+        },
+        "readout_ms": {
+          "map": {
+            "p50": 1.1351479915902019,
+            "p95": 1.704990191501565,
+            "n": 5
+          },
+          "tokens": {
+            "p50": 0.8688039961270988,
+            "p95": 1.0469171887962148,
+            "n": 5
+          },
+          "token_budget": 64
+        },
+        "single_hypothesis_baseline_ms": {
+          "p50": 7.433323989971541,
+          "p95": 10.673065706214402,
+          "n": 3
+        },
+        "analytic_reference_ms": {
+          "p50": 0.307013004203327,
+          "p95": 0.45979979913681746,
+          "n": 5
+        }
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "torch_version": "2.9.1+cpu",
+      "resumed_run_shape": false,
+      "notes": [
+        "measurement loss is nats per current likelihood; geometry is a binary proxy",
+        "the hidden geometry is used in the loss only and is never an encoder input"
+      ]
+    },
+    "no_cue_mean_absolute_drift": 0.27172576229759215,
+    "no_cue_max_absolute_drift": 0.4991903781774454,
+    "encoder_ms": {
+      "p50": 16.855255991686136,
+      "p95": 18.752199102164013
+    },
+    "wall_seconds_training_and_evaluation": 156.7378504119988,
+    "max_duplicate_posterior_refinement_delta": 0.03588724136352539
+  },
+  "no_reset": {
+    "arm": "no_contradiction_reset",
+    "checkpoint_sha256": "37990c768314c335220d80b84363c6daa4cc7d8fe3dec6c77b64853528f707d3",
+    "train_log_sha256": "298a9c400c1a471df92bb7040f9cef5a9a96d3293758c61899fbbabd6587d6d3",
+    "evaluation_sha256": "4a6ad2212a250df278b4ccfe4fdccf7d1a9865c5c8ba8e6ca237b33933564533",
+    "gates": {
+      "correct": {
+        "passed": 9,
+        "total": 16
+      },
+      "misleading": {
+        "passed": 0,
+        "total": 16
+      },
+      "missing": {
+        "passed": 9,
+        "total": 16
+      },
+      "unidentifiable": {
+        "passed": 0,
+        "total": 16
+      },
+      "stale": {
+        "passed": 0,
+        "total": 16
+      }
+    },
+    "loss_first": 281.48297119140625,
+    "loss_last": 14.624970436096191,
+    "train_summary": {
+      "command": "python -m owac.training.n02",
+      "config_path": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/configs/encoders/n02/tiny.json",
+      "preset": null,
+      "config": {
+        "name": "tiny",
+        "K": 4,
+        "D": 32,
+        "cycles": 4,
+        "history": 4,
+        "temperature": 1.0,
+        "beta_prior": 1.0,
+        "beta_relation": 0.0,
+        "beta_prior_bounds": [
+          0.05,
+          4.0
+        ],
+        "stem_width": 32,
+        "stem_layers": 2,
+        "cell_kind": "convgru",
+        "cell_kernel": 3,
+        "readout_mode": "map",
+        "tokens_per_camera": 256,
+        "token_dim": 2048,
+        "prior_mode": "learned",
+        "geometry_dim": 8,
+        "seed": 0,
+        "measurement": {
+          "input_mode": "rawvla_rgb3",
+          "cfa_pattern": "RGGB",
+          "cfa_planes": false,
+          "black_level": 0.0,
+          "white_level": 1.0,
+          "robust": "huber",
+          "huber_delta": 3.0,
+          "variance_floor": 1e-06,
+          "shot_scale": null,
+          "read_scale": null,
+          "scale_estimated": false,
+          "predict_variance": true,
+          "head_width": 32,
+          "head_depth": 2,
+          "geometry_dim": 8,
+          "saturation_is_observation": false
+        },
+        "revision": {
+          "contradiction_enabled": true,
+          "contradiction_threshold": 2.5,
+          "relative_margin": 1.5,
+          "strong_contradiction_threshold": 4.0,
+          "residual_ema": 0.5,
+          "propagation_enabled": true,
+          "propagation_hops": 1,
+          "propagation_decay": 0.5,
+          "propagation_threshold": 0.01,
+          "propagate_priority": true,
+          "reset_contradicted": false,
+          "reset_fraction": 1.0,
+          "downweight_contradicted": 0.5,
+          "proposal_enabled": true,
+          "proposal_temperature": 1.0,
+          "update_scale": 1.0,
+          "cold_start_threshold": 0.25,
+          "tolerance": 0.0001,
+          "min_iterations": 1,
+          "write_dependency_edges": true
+        },
+        "loss_weights": {
+          "measurement": 1.0,
+          "geometry_set": 1.0,
+          "revision": 0.1,
+          "diversity": 0.01,
+          "mixture": 1.0,
+          "collapse_penalty": 0.0
+        }
+      },
+      "seed": 0,
+      "git_sha": "7c567cc33bb6abc382489c4f75c4a3ba810e6d43",
+      "source": "synthetic",
+      "arm": "no_contradiction_reset",
+      "resumed_from": null,
+      "first_step": 0,
+      "steps_run": 200,
+      "last_step": 200,
+      "steps": 200,
+      "batch_size": 2,
+      "sequence_length": 8,
+      "frame_size": 64,
+      "lr": 0.0003,
+      "grad_clip": 1.0,
+      "wall_seconds": 148.58053591600037,
+      "cpu_seconds": 148.50067276599998,
+      "steps_per_second": 1.3460713327421938,
+      "cpu_seconds_per_step": 0.7425033638299999,
+      "fraction_of_wall_that_is_cpu": 0.9994624925162099,
+      "load_average_start": [
+        7.5927734375,
+        5.55126953125,
+        3.51171875
+      ],
+      "load_average_end": [
+        9.34228515625,
+        6.7861328125,
+        4.26416015625
+      ],
+      "loss": {
+        "first": 281.48297119140625,
+        "last": 14.624970436096191,
+        "best": 1.897803783416748,
+        "mean_first_5": 205.228759765625,
+        "mean_last_5": 5.293280839920044,
+        "terms_last": {
+          "measurement": 2.558923751115799,
+          "geometry_set": 0.4646696113049984,
+          "revision": 1.0157605558633804,
+          "diversity": 0.09081820026040077,
+          "mixture": 11.600468158721924
+        }
+      },
+      "peak_rss_bytes": 639016960,
+      "parameters": {
+        "total": 159636,
+        "trainable": 159636
+      },
+      "latency_ms": {
+        "encoder_step_ms": {
+          "p50": 31.728609501442406,
+          "p95": 69.70461106029688,
+          "n": 1600
+        },
+        "readout_ms": {
+          "map": {
+            "p50": 1.5731409948784858,
+            "p95": 1.9544575974578038,
+            "n": 5
+          },
+          "tokens": {
+            "p50": 1.1106949968961999,
+            "p95": 1.7843031964730471,
+            "n": 5
+          },
+          "token_budget": 64
+        },
+        "single_hypothesis_baseline_ms": {
+          "p50": 8.658785009174608,
+          "p95": 11.154715393786319,
+          "n": 3
+        },
+        "analytic_reference_ms": {
+          "p50": 0.3432869998505339,
+          "p95": 0.4857327963691205,
+          "n": 5
+        }
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "torch_version": "2.9.1+cpu",
+      "resumed_run_shape": false,
+      "notes": [
+        "measurement loss is nats per current likelihood; geometry is a binary proxy",
+        "the hidden geometry is used in the loss only and is never an encoder input"
+      ]
+    },
+    "no_cue_mean_absolute_drift": 0.49777517933398485,
+    "no_cue_max_absolute_drift": 0.499999463558197,
+    "encoder_ms": {
+      "p50": 18.433616001857445,
+      "p95": 36.12055110061191
+    },
+    "wall_seconds_training_and_evaluation": 166.23931855800038,
+    "max_duplicate_posterior_refinement_delta": 0.44982749223709106
+  }
+}

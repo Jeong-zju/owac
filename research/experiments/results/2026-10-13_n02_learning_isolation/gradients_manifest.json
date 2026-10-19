@@ -1,0 +1,230 @@
+{
+  "git_sha": "b415c12906e89c86d3505626bc72786012d11fe5",
+  "source_sha256": {
+    "src/owac/frameworks/n02/__init__.py": "06498659bcf34d9425fb22d7f93688006bde67fbd3cf93a17abbc2d938c1db67",
+    "src/owac/frameworks/n02/analytic.py": "3c108e65d204f4013e4e77c31caff72d3b709d5fffe57d15ee9ee58c39cc6c5f",
+    "src/owac/frameworks/n02/config.py": "f3f53493f2212ad8e4028f58942c3d00211befa79cbd427f253e58ff86c4f94d",
+    "src/owac/frameworks/n02/hypotheses.py": "835e2a1b5ae38460a8883cb92d6ae488b47dc88e516e3db0708ee291b040264d",
+    "src/owac/frameworks/n02/measurement.py": "c67465abe06bb394cac4f79fe69493abf96a1f8352ea45129523aedfb434db86",
+    "src/owac/frameworks/n02/model.py": "9f479289100679e62a854077f0109f9d43bea4c760ee7c6796f00a4f6cdb8cd5",
+    "src/owac/frameworks/n02/readout.py": "074184741bf8f8ff3e068575f8607ac7210f35803a99bd7a23132cd4e3b97b24",
+    "src/owac/frameworks/n02/revision.py": "925640361133e73a5c6c266e10fb211452760f536e2abfa40a57dc8769588d8a",
+    "src/owac/frameworks/n02/state.py": "c2339f384ee8f7ad1e93fbbaeb32e96a168ca549770b1a5a7006d2eb1e7adf3d",
+    "src/owac/frameworks/n02/synthetic.py": "1b988e26f08ef32add099ba6e24a4894ad6913425bde7c6ee42ca2b88cbb7ea4",
+    "src/owac/training/n02.py": "72d81f348146f4da224136be4a49e642c28c1d0d794d388f8e561e19e045e044",
+    "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/src/owac/evaluation/n02_gradients.py": "582adeb919cb82c9b8f4a4f16e930728594525357976ed5ffb39971995fa8adf"
+  },
+  "config": {
+    "name": "tiny-contracts-v1",
+    "K": 4,
+    "D": 32,
+    "cycles": 4,
+    "history": 4,
+    "temperature": 1.0,
+    "beta_prior": 1.0,
+    "beta_relation": 0.0,
+    "beta_prior_bounds": [
+      0.05,
+      4.0
+    ],
+    "stem_width": 32,
+    "stem_layers": 2,
+    "cell_kind": "convgru",
+    "cell_kernel": 3,
+    "readout_mode": "map",
+    "tokens_per_camera": 256,
+    "token_dim": 2048,
+    "prior_mode": "learned",
+    "geometry_dim": 8,
+    "seed": 0,
+    "measurement": {
+      "input_mode": "rawvla_rgb3",
+      "cfa_pattern": "RGGB",
+      "cfa_planes": false,
+      "black_level": 0.0,
+      "white_level": 1.0,
+      "robust": "gaussian",
+      "huber_delta": 3.0,
+      "variance_floor": 1e-06,
+      "shot_scale": null,
+      "read_scale": null,
+      "scale_estimated": false,
+      "predict_variance": true,
+      "head_width": 32,
+      "head_depth": 2,
+      "geometry_dim": 8,
+      "saturation_is_observation": false,
+      "energy_reduction": "sum",
+      "variance_mode": "sensor_plus_model",
+      "head_kind": "geometry_coupled"
+    },
+    "revision": {
+      "contradiction_enabled": true,
+      "contradiction_threshold": 2.5,
+      "relative_margin": 1.5,
+      "strong_contradiction_threshold": 4.0,
+      "residual_ema": 0.5,
+      "propagation_enabled": true,
+      "propagation_hops": 1,
+      "propagation_decay": 0.5,
+      "propagation_threshold": 0.01,
+      "propagate_priority": true,
+      "reset_contradicted": true,
+      "reset_fraction": 1.0,
+      "downweight_contradicted": 0.5,
+      "proposal_enabled": true,
+      "proposal_temperature": 1.0,
+      "update_scale": 1.0,
+      "cold_start_threshold": 0.25,
+      "tolerance": 0.0001,
+      "min_iterations": 1,
+      "write_dependency_edges": true,
+      "semantic_refutation": true,
+      "semantic_log_bayes_threshold": 2.9444389791664403,
+      "geometry_separation": 1.0,
+      "separate_fit_updates": true
+    },
+    "loss_weights": {
+      "measurement": 1.0,
+      "geometry_set": 1.0,
+      "revision": 0.1,
+      "diversity": 0.01,
+      "mixture": 1.0,
+      "collapse_penalty": 0.0,
+      "counterfactual": 1.0
+    }
+  },
+  "config_sha256": "bc995c11413fba3fae89c83068c63da4b9f00f901b0d5f0424e7dc92df4f4024",
+  "checkpoint_sha256": {
+    "outputs/n02-contracts-20261013/seed0/checkpoint100.pt": "6754c27738b3e1eef8372d6c536208d2fb5b6971b6a90d3654c722d15ed00f5f",
+    "outputs/n02-contracts-20261013/seed0/checkpoint200.pt": "e50b55ac1a5430e59f7ff38933f6a17a76abd2ee8627d733f22f2bc602965751",
+    "outputs/n02-contracts-20261013/seed1/checkpoint100.pt": "7e6b93877f503c83bfa3b4d16cabe15920db6605c9fdffdefa83e768012da6b7",
+    "outputs/n02-contracts-20261013/seed1/checkpoint200.pt": "ba68594f36717ea2667c224b20b1df17499c235cd6b8f34a2800ccd07ead59b7",
+    "outputs/n02-contracts-20261013/seed2/checkpoint100.pt": "cbe148046a62e6ae62c78da1274af69e65904a45d669dce08414a92b9a08210b",
+    "outputs/n02-contracts-20261013/seed2/checkpoint200.pt": "051d63f2a89ce06d2057390957c42dbe426a5da5c6d2f7cff5dee72b94d53325"
+  },
+  "input_sha256": {
+    "900": "c2a507a4f5c59a8cd69ab5c43bd33998035bdd25193b7df0ca4c353c086d5098",
+    "901": "e08bfd8ca8223b3c6a5b195f7510dd24099a52829286fddaa96928261d253db8",
+    "902": "361442c052414414585e6a85a2f5b8bfab5694d0d0b42600425b4289db4d29d8",
+    "903": "6691bd87628cae86712cd2b32cc02f066cc493c906868d3c9251f1f4301bde4b"
+  },
+  "generator_seed": 900,
+  "split": "train",
+  "batch_size": 2,
+  "sequence_length": 8,
+  "frame_size": 64,
+  "torch_version": "2.9.1+cpu",
+  "threads": 1,
+  "boundary": "Local same-batch disposable AdamW steps, not training continuation or generalization.",
+  "optimizer_groups": {
+    "outputs/n02-contracts-20261013/seed0/checkpoint100.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ],
+    "outputs/n02-contracts-20261013/seed0/checkpoint200.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ],
+    "outputs/n02-contracts-20261013/seed1/checkpoint100.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ],
+    "outputs/n02-contracts-20261013/seed1/checkpoint200.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ],
+    "outputs/n02-contracts-20261013/seed2/checkpoint100.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ],
+    "outputs/n02-contracts-20261013/seed2/checkpoint200.pt": [
+      {
+        "lr": 0.0003,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.01,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true
+      }
+    ]
+  }
+}

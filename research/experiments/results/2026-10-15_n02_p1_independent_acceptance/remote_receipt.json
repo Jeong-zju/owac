@@ -1,0 +1,911 @@
+{
+  "root": "/workspace/owac/worktrees/n02-measurement-completion",
+  "python": "3.10.19",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "git_marker_exists": false,
+  "source_hashes": {
+    "configs/encoders/n02_full/p1_eval.json": "c574ac26d87cba9639d0e40b886c6bf9dd61cb5d5a01a8fde8c80a6776e4dd6e",
+    "configs/encoders/n02_full/p1_measurement.json": "f6f7d393bde3665b380e771cc7a509b23bf1223a26550cf8d9947423c8ff386b",
+    "configs/encoders/n02_full/p1_pretrain.json": "b185d2ea78f173c274fb800135cd2bbddb6232a66c2aec8764ce368cb77b3101",
+    "src/owac/evaluation/n02_full/p1.py": "7b90fdb52076691a111fed8609f4ef172026cb55df0ebaeab42bb93715e5f76e",
+    "src/owac/frameworks/n02_full/__init__.py": "760096629545c3d5eb242ecf7dbaad570811a2e08ec4db4d6c066839f6f133c9",
+    "src/owac/frameworks/n02_full/checks.py": "b4c99a4db7fa27380e6fdea4d10f35dd8f1e913a62dabb25c02bb0f28d76dbde",
+    "src/owac/frameworks/n02_full/config.py": "e790ea6a703a476043bdd9f4c4a4f38b4ed34bda24212a3391773e8f84d430a0",
+    "src/owac/frameworks/n02_full/data.py": "d70106da213788d5cbdf16869f656a2f6dc3ac3774be7f742b6886f9254aa637",
+    "src/owac/frameworks/n02_full/factors.py": "d1c068a6e55aeb58a8e626e7ce774f8188f53ce8caeed964ee42218c104495d0",
+    "src/owac/frameworks/n02_full/model.py": "287139f949e9c6939524da3d5ca408eeafcb8ce3d1fcc2b1f9d1e110915362b9",
+    "src/owac/frameworks/n02_full/observation.py": "660998df54ac741f1d7cdee9d6f8929a5c0c4dd940623aab777fa1662db34ab3",
+    "src/owac/frameworks/n02_full/sensor.py": "6d590d64973fd2f217b4e0d387a7f2079b225272457e77ad19fab396dfc3f665",
+    "src/owac/frameworks/n02_full/state.py": "9c74d4775ad2ca70b92c2e8ab6fc345a1e72ed72644cfe658f805c863a825e0b",
+    "src/owac/frameworks/n02_full/synthetic.py": "d26e66a5d9dbfce4ce3a4c02ec5984c2a1f60b2b387674b186279f7f8ab18f42",
+    "src/owac/training/n02_full.py": "4f20d98b4d2bfb70d65b8aa68ed4cd8c58ad5ff61076a373cf5d116b721b73db"
+  },
+  "acceptance": {
+    "p1-acceptance-interim": {
+      "sha256": "74174a0709e818b0690890f16b060b1564d5ea6519f2119f9fe36d75363c0227",
+      "rows": 11532,
+      "families": {
+        "cue_swap": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 254,
+          "paired_both_correct": 127,
+          "a": {
+            "total": 961,
+            "successes": 127
+          },
+          "b": {
+            "total": 961,
+            "successes": 127
+          }
+        },
+        "insufficiency": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "detected": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "no_information": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "drift_max": 0.0016779119144547106,
+          "within_0.05": 961
+        },
+        "normal": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "flagged": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "oracle": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 797,
+          "exact_all_equal": 693,
+          "spread_max": 4596.880859375,
+          "truth_unique_minimum": 1,
+          "first_records": [
+            {
+              "budget": {
+                "interim_budget": 1000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": false,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 2,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0000",
+              "scores": [
+                5413.376953125,
+                5413.376953125,
+                4289.5224609375,
+                5413.376953125
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            },
+            {
+              "budget": {
+                "interim_budget": 1000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": true,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 0,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0004",
+              "scores": [
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            }
+          ],
+          "a": {
+            "total": 961,
+            "successes": 797
+          }
+        },
+        "wrong_prior": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "corrected": 917,
+          "a": {
+            "total": 961,
+            "successes": 630
+          },
+          "b": {
+            "total": 961,
+            "successes": 287
+          }
+        }
+      }
+    },
+    "p1-acceptance-5k": {
+      "sha256": "913174b6b676ed81501e8f4d9ee38696db898a1af4c566f41967f66cb8a49790",
+      "rows": 11532,
+      "families": {
+        "cue_swap": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 34,
+          "paired_both_correct": 17,
+          "a": {
+            "total": 961,
+            "successes": 17
+          },
+          "b": {
+            "total": 961,
+            "successes": 17
+          }
+        },
+        "insufficiency": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "detected": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "no_information": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "drift_max": 0.03973304585242374,
+          "within_0.05": 961
+        },
+        "normal": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "flagged": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "oracle": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 797,
+          "exact_all_equal": 693,
+          "spread_max": 4596.880859375,
+          "truth_unique_minimum": 1,
+          "first_records": [
+            {
+              "budget": {
+                "interim_budget": 5000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": false,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 2,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0000",
+              "scores": [
+                5413.376953125,
+                5413.376953125,
+                4289.5224609375,
+                5413.376953125
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            },
+            {
+              "budget": {
+                "interim_budget": 5000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": true,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 0,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0004",
+              "scores": [
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            }
+          ],
+          "a": {
+            "total": 961,
+            "successes": 797
+          }
+        },
+        "wrong_prior": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "corrected": 784,
+          "a": {
+            "total": 961,
+            "successes": 66
+          },
+          "b": {
+            "total": 961,
+            "successes": 718
+          }
+        }
+      }
+    },
+    "p1-acceptance-5k-true": {
+      "sha256": "ef72c5b1d8ccdc399151330497002e26d3039f00a4057a8ce9ae20684595dc46",
+      "rows": 11532,
+      "families": {
+        "cue_swap": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 22,
+          "paired_both_correct": 11,
+          "a": {
+            "total": 961,
+            "successes": 11
+          },
+          "b": {
+            "total": 961,
+            "successes": 11
+          }
+        },
+        "insufficiency": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "detected": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "no_information": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "drift_max": 0.045701876918066875,
+          "within_0.05": 961
+        },
+        "normal": {
+          "rows": 2883,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "flagged": 0,
+          "verdict_tuples": {
+            "['None', 'None', 'None', 'None']": 2883
+          },
+          "same_outcome_across_groups": 961
+        },
+        "oracle": {
+          "rows": 961,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "correct": 797,
+          "exact_all_equal": 693,
+          "spread_max": 4596.880859375,
+          "truth_unique_minimum": 1,
+          "first_records": [
+            {
+              "budget": {
+                "interim_budget": 5000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": false,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 2,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0000",
+              "scores": [
+                5413.376953125,
+                5413.376953125,
+                4289.5224609375,
+                5413.376953125
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            },
+            {
+              "budget": {
+                "interim_budget": 5000,
+                "oracle_hypotheses": 4,
+                "world_size": 2
+              },
+              "candidate_index": 0,
+              "correct": true,
+              "direction": "a",
+              "family": "oracle",
+              "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+              "map_index": 0,
+              "oracle": true,
+              "oracle_family": "cue_swap",
+              "posterior": 0.0,
+              "scenario_id": "train-0004",
+              "scores": [
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875,
+                1577.5916748046875
+              ],
+              "seed": 1103,
+              "source": "generator_truth"
+            }
+          ],
+          "a": {
+            "total": 961,
+            "successes": 797
+          }
+        },
+        "wrong_prior": {
+          "rows": 1922,
+          "unique_scenes": 961,
+          "seeds": [
+            1103
+          ],
+          "corrected": 771,
+          "a": {
+            "total": 961,
+            "successes": 76
+          },
+          "b": {
+            "total": 961,
+            "successes": 695
+          }
+        }
+      }
+    }
+  },
+  "oracle_geometry_probes": [
+    {
+      "scene_id": "train-0000",
+      "world_size": 2,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        833.0,
+        3852.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 2819.235107421875,
+      "candidate_mean_spread_query_delivered": 2819.235107421875,
+      "candidate_mean_spread_full_sensor": 2819.235107421875
+    },
+    {
+      "scene_id": "train-0001",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        959.0,
+        3792.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 229.3878173828125,
+      "candidate_mean_spread_query_delivered": 229.3878173828125,
+      "candidate_mean_spread_full_sensor": 1875.9283447265625
+    },
+    {
+      "scene_id": "train-0002",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        443.0,
+        2633.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 0.0,
+      "candidate_mean_spread_query_delivered": 0.0,
+      "candidate_mean_spread_full_sensor": 1975.350830078125
+    },
+    {
+      "scene_id": "train-0003",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        202.0,
+        2836.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 0.0,
+      "candidate_mean_spread_query_delivered": 0.0,
+      "candidate_mean_spread_full_sensor": 2149.2861328125
+    },
+    {
+      "scene_id": "train-0004",
+      "world_size": 2,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        1227.0,
+        4095.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 0.0,
+      "candidate_mean_spread_query_delivered": 0.0,
+      "candidate_mean_spread_full_sensor": 1850.00634765625
+    },
+    {
+      "scene_id": "train-0005",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        680.0,
+        2898.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 0.0,
+      "candidate_mean_spread_query_delivered": 0.0,
+      "candidate_mean_spread_full_sensor": 1051.3238525390625
+    },
+    {
+      "scene_id": "train-0006",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        1796.0,
+        4095.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 2493.8880615234375,
+      "candidate_mean_spread_query_delivered": 2493.88818359375,
+      "candidate_mean_spread_full_sensor": 2616.8623046875
+    },
+    {
+      "scene_id": "train-0007",
+      "world_size": 3,
+      "candidate_index": 0,
+      "query_points": 128,
+      "observed_values_minmax": [
+        331.0,
+        4063.0
+      ],
+      "integer_vs_delivered_mean_abs_max": 0.0,
+      "candidate_mean_spread_query_integer": 0.0,
+      "candidate_mean_spread_query_delivered": 0.0,
+      "candidate_mean_spread_full_sensor": 3469.310791015625
+    }
+  ],
+  "static_wiring": {
+    "step_bundle_has_declared_prior_argument": false,
+    "evaluator_model_step_mentions_declared_prior": false,
+    "model_module_mentions_declared_prior": false,
+    "model_module_imports_checks": false,
+    "measurement_score_fields": [
+      "relative_terms",
+      "raw_nll_or_energy",
+      "local_stats",
+      "kind",
+      "per_valid_scalar"
+    ]
+  },
+  "source_hashes_match_local": {
+    "configs/encoders/n02_full/p1_eval.json": true,
+    "configs/encoders/n02_full/p1_measurement.json": true,
+    "configs/encoders/n02_full/p1_pretrain.json": true,
+    "src/owac/evaluation/n02_full/p1.py": true,
+    "src/owac/frameworks/n02_full/__init__.py": true,
+    "src/owac/frameworks/n02_full/checks.py": true,
+    "src/owac/frameworks/n02_full/config.py": true,
+    "src/owac/frameworks/n02_full/data.py": true,
+    "src/owac/frameworks/n02_full/factors.py": true,
+    "src/owac/frameworks/n02_full/model.py": true,
+    "src/owac/frameworks/n02_full/observation.py": true,
+    "src/owac/frameworks/n02_full/sensor.py": true,
+    "src/owac/frameworks/n02_full/state.py": true,
+    "src/owac/frameworks/n02_full/synthetic.py": true,
+    "src/owac/training/n02_full.py": true
+  },
+  "training_runs": {
+    "p1-measurement-seed1103-formal-arm-bnre": {
+      "last_log_update": 2000,
+      "run_manifest_exists": true,
+      "stage": "p1-measurement",
+      "updates": 2000,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-measurement",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "2000",
+        "--amp",
+        "bf16",
+        "--arm",
+        "bnre",
+        "--micro-batch",
+        "16",
+        "--resume",
+        "outputs/n02-full/p1-formal/p1-pretrain-seed1103-formal-cfa4-stem-2k/checkpoints/final.pt",
+        "--log-every",
+        "100",
+        "--tag",
+        "formal-arm-bnre",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": null
+    },
+    "p1-measurement-seed1103-formal-arm-candidate_discrimination": {
+      "last_log_update": 4000,
+      "run_manifest_exists": true,
+      "stage": "p1-measurement",
+      "updates": 4000,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-measurement",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "2000",
+        "--amp",
+        "bf16",
+        "--arm",
+        "candidate_discrimination",
+        "--micro-batch",
+        "32",
+        "--resume",
+        "outputs/n02-full/p1-formal/p1-pretrain-seed1103-formal-cfa4-stem-2k/checkpoints/final.pt",
+        "--log-every",
+        "50",
+        "--tag",
+        "formal-arm-candidate_discrimination",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": null
+    },
+    "p1-measurement-seed1103-formal-arm-conditional_likelihood": {
+      "last_log_update": 850,
+      "run_manifest_exists": false,
+      "stage": null,
+      "updates": null,
+      "git_sha": null,
+      "command": null,
+      "seed": null,
+      "checkpoint": null
+    },
+    "p1-measurement-seed1103-formal-arm-nre": {
+      "last_log_update": 2000,
+      "run_manifest_exists": true,
+      "stage": "p1-measurement",
+      "updates": 2000,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-measurement",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "2000",
+        "--amp",
+        "bf16",
+        "--arm",
+        "nre",
+        "--micro-batch",
+        "16",
+        "--resume",
+        "outputs/n02-full/p1-formal/p1-pretrain-seed1103-formal-cfa4-stem-2k/checkpoints/final.pt",
+        "--log-every",
+        "100",
+        "--tag",
+        "formal-arm-nre",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": null
+    },
+    "p1-measurement-seed1103-formal-cfa4-meas-1k-interim": {
+      "last_log_update": 1300,
+      "run_manifest_exists": false,
+      "stage": null,
+      "updates": null,
+      "git_sha": null,
+      "command": null,
+      "seed": null,
+      "checkpoint": null
+    },
+    "p1-measurement-seed1103-formal-cfa4-meas-5k": {
+      "last_log_update": 4000,
+      "run_manifest_exists": true,
+      "stage": "p1-measurement",
+      "updates": 4000,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-measurement",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "4000",
+        "--amp",
+        "bf16",
+        "--micro-batch",
+        "32",
+        "--log-every",
+        "50",
+        "--resume",
+        "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-1k-interim/checkpoints/update-0001000.pt",
+        "--tag",
+        "formal-cfa4-meas-5k",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": {
+        "path": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-5k/checkpoints/final.pt",
+        "bytes": 372349191,
+        "sha256": "42dcd57ef71f613b548db3b9075dd0c74a0257649d258253efe6463e8b87ceb9",
+        "keys": [
+          "amp",
+          "config_hash",
+          "extras",
+          "format",
+          "model",
+          "optimizer",
+          "partition",
+          "rng",
+          "run_id",
+          "sampler",
+          "saved_at",
+          "scheduler",
+          "seed",
+          "stage",
+          "updates",
+          "versions"
+        ],
+        "metadata": {
+          "format": "n02-full-p1-checkpoint-v1",
+          "stage": "p1-measurement",
+          "updates": 4000,
+          "seed": 1103,
+          "config_hash": "bbf4d970d46e6e47b11dc90afb19c08fdad318df8ea68c4de634d11217d0ccd1",
+          "sampler": {
+            "position": {
+              "cursor": 4000,
+              "sources": [
+                {
+                  "kind": "synthetic",
+                  "cursor": null,
+                  "synthetic_sequences": 155
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "p1-measurement-seed1103-formal-cfa4-meas-5k-true": {
+      "last_log_update": 5000,
+      "run_manifest_exists": true,
+      "stage": "p1-measurement",
+      "updates": 5000,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-measurement",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "1000",
+        "--amp",
+        "bf16",
+        "--micro-batch",
+        "32",
+        "--log-every",
+        "50",
+        "--resume",
+        "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-5k/checkpoints/final.pt",
+        "--tag",
+        "formal-cfa4-meas-5k-true",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": {
+        "path": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-5k-true/checkpoints/final.pt",
+        "bytes": 372349191,
+        "sha256": "e53d976928da2428a9fee2d4d889f6e4f81a4aeb2d77122d4be83b866bef3742",
+        "keys": [
+          "amp",
+          "config_hash",
+          "extras",
+          "format",
+          "model",
+          "optimizer",
+          "partition",
+          "rng",
+          "run_id",
+          "sampler",
+          "saved_at",
+          "scheduler",
+          "seed",
+          "stage",
+          "updates",
+          "versions"
+        ],
+        "metadata": {
+          "format": "n02-full-p1-checkpoint-v1",
+          "stage": "p1-measurement",
+          "updates": 5000,
+          "seed": 1103,
+          "config_hash": "bbf4d970d46e6e47b11dc90afb19c08fdad318df8ea68c4de634d11217d0ccd1",
+          "sampler": {
+            "position": {
+              "cursor": 5000,
+              "sources": [
+                {
+                  "kind": "synthetic",
+                  "cursor": null,
+                  "synthetic_sequences": 106
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "p1-pretrain-seed1103-formal-cfa4-stem-2k": {
+      "last_log_update": 2000,
+      "run_manifest_exists": true,
+      "stage": "p1-pretrain",
+      "updates": null,
+      "git_sha": null,
+      "command": [
+        "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+        "-m",
+        "owac.training.n02_full",
+        "--stage",
+        "p1-pretrain",
+        "--config",
+        "configs/encoders/n02_full/p1_measurement.json",
+        "--seed",
+        "1103",
+        "--updates",
+        "2000",
+        "--amp",
+        "bf16",
+        "--synthetic-frames",
+        "--dev-eval-every",
+        "500",
+        "--log-every",
+        "100",
+        "--tag",
+        "formal-cfa4-stem-2k",
+        "--output",
+        "outputs/n02-full/p1-formal"
+      ],
+      "seed": 1103,
+      "checkpoint": null
+    },
+    "p1-pretrain-seed1103-formal-raw3-25k": {
+      "last_log_update": 6500,
+      "run_manifest_exists": false,
+      "stage": null,
+      "updates": null,
+      "git_sha": null,
+      "command": null,
+      "seed": null,
+      "checkpoint": null
+    }
+  },
+  "full_receipt_sha256": "2e7a461951b9c165ae9ab7d6feaec476cab20bd22c669a698591d7f4d0c9b6ec"
+}

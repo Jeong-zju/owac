@@ -1,0 +1,33 @@
+# N02 full-development runtime (P0 §2.3): an isolated Python 3.10 + CUDA 12.8 stack that
+# matches the already deployed StarVLA / pi0.5 Python 3.10 target. The root `owac` package
+# (requires-python >=3.11) is deliberately NOT installed here; project code is loaded with
+# PYTHONPATH=src instead, so this environment never constrains the root package.
+#
+# The versions below are the ones actually resolved and installed on 2026-10-14 in
+# outputs/n02-full/runtime/py310-cu128. The authoritative pin set is requirements.lock.txt,
+# which is the real `uv pip freeze` output of that environment (see README.md).
+
+[project]
+name = "owac-n02-full-runtime"
+version = "0.1.0"
+description = "Isolated Python 3.10 + torch cu128 runtime for N02 full development"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "torch==2.11.0+cu128",
+    "torchvision==0.26.0+cu128",
+    "numpy>=2.2,<3",
+]
+
+# sm_120 (RTX 5090) kernels exist only in the CUDA 12.8 wheels; the index is explicit so it
+# cannot leak into an ordinary PyPI resolution.
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[tool.uv]
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]

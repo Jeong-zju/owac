@@ -1,0 +1,21 @@
+{
+  "title": "r12 少量示范拟合检查",
+  "phase": "fewshot_fit",
+  "phase_detail": "第一步RAW固定噪声复验仍失败：400条动作、持续抓持0秒。现在双卡分别拟合1条、3条正常光训练示范，各128次更新；先学会训练样本，再进入正常光闭环。",
+  "runs": [
+    {
+      "run_id": "raw-fewshot-r12-one-s1103-a1",
+      "stage": "P2",
+      "label": "RAW · 1条示范拟合",
+      "effective_batch_size": 12,
+      "target": 128
+    },
+    {
+      "run_id": "raw-fewshot-r12-three-s1103-a1",
+      "stage": "P2",
+      "label": "RAW · 3条示范拟合",
+      "effective_batch_size": 12,
+      "target": 128
+    }
+  ]
+}

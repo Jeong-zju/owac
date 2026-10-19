@@ -1,0 +1,19 @@
+{
+  "branch": "small",
+  "seed": 14019,
+  "max_updates_per_phase": 256,
+  "common_spatial_sha": "ad932089fc5d13f7519848fdbd6bfe0bc57a60c1cb18f6cff5d5fbec425bd88a",
+  "common_tokens_sha": "5ee2c2ac7600d99aad1c86a4f39bbccaeeae1bf4afe5958bc23ae53897055781",
+  "stages": [],
+  "policy_closed_loops": 0,
+  "horizon": 50,
+  "offset": 1,
+  "native_action_dims": 32,
+  "actual_control_dims": 14,
+  "state_input": "current normalized measured joints14; no phase/index",
+  "head_parameters": 2008392,
+  "backend_trainable": [],
+  "objectives": "small:direct masked32 MSE; pi:native masked32 flow; compare sampled14 metrics",
+  "initialization": "same RAW850 visual/LoRA; small random; pi residual adapter identity",
+  "test_scope": "historical frozen dev episodes; not new blind benchmark or closed-loop proof"
+}

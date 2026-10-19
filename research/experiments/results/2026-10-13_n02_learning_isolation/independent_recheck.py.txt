@@ -1,0 +1,205 @@
+"""Independent receipt check: no diagnostic helper imports; production head layers only."""
+import hashlib
+import json
+import math
+from pathlib import Path
+import subprocess
+import numpy as np
+import torch
+from owac.frameworks.n02.config import N02Config
+from owac.frameworks.n02.model import N02Encoder
+from owac.frameworks.n02.synthetic import SyntheticGenerator, SyntheticOptions
+from owac.training.n02 import synthetic_batch
+
+ROOT = Path.cwd()
+OUT = ROOT / 'outputs/n02-isolation-20261013'
+M = OUT / 'measurement'
+G = OUT / 'gradients'
+def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def td(tensor):
+    t = tensor.detach().cpu().contiguous()
+    return hashlib.sha256(f'{t.dtype}:{tuple(t.shape)}:'.encode() + t.numpy().tobytes()).hexdigest()
+def load(path): return json.loads(Path(path).read_text())
+def treehash(tree):
+    h = hashlib.sha256()
+    def rec(value):
+        if torch.is_tensor(value):
+            t = value.detach().cpu().contiguous()
+            h.update(str((str(t.dtype), tuple(t.shape))).encode()); h.update(t.numpy().tobytes())
+        elif isinstance(value, dict):
+            for k in sorted(value, key=str): h.update(str(k).encode()); rec(value[k])
+        elif isinstance(value, (list, tuple)):
+            for v in value: rec(v)
+        else: h.update(repr(value).encode())
+    rec(tree); return h.hexdigest()
+def independently_predict(head, fields):
+    # Algebraically reconstruct production outputs, do not invoke fixed-geometry wrapper.
+    outputs=[]
+    with torch.no_grad():
+        for f in fields.split(16):
+            n,k,d,h,w=f.shape
+            x=head.trunk(f.reshape(n,k*d,h,w)); hidden=x.shape[1]//k
+            common=head.value(x).reshape(n,k,head.out_channels,h,w).mean(1)
+            delta=head.contrast(x.reshape(n,k,hidden,h,w).mean(1))
+            outputs.append(torch.stack([common-delta, common+delta],1))
+    return torch.cat(outputs).numpy()
+def metrics(pred, target):
+    a=((pred[:,1]-pred[:,0])/2).astype(np.float64)
+    t=((target[:,1]-target[:,0])/2).astype(np.float64)
+    cue=np.sum(t*t,axis=(1,2,3))>1e-20
+    aa=a[cue].ravel(); tt=t[cue].ravel(); power=np.dot(tt,tt); cross=np.dot(aa,tt)
+    return {'contrast_nmse':float(np.dot(aa-tt,aa-tt)/power), 'cosine':float(cross/np.sqrt(np.dot(aa,aa)*power)), 'projection_gain':float(cross/power)}
+def choices(pred, cache):
+    pred=pred.astype(np.float64)
+    residual=pred-cache['observed'].numpy().astype(np.float64)[:,None]
+    costs=np.sum(residual**2/(2*cache['total_variance'].numpy().astype(np.float64)[:,None]),axis=(2,3,4))
+    totals={}
+    for i,idn in enumerate(cache['identities']):
+        if idn.get('world') in ('0','1'):
+            totals.setdefault(idn['seed'],[0.,0.])[int(idn['world'])]+=float(costs[i,1]-costs[i,0])
+    return sum(a>0 and b<0 for a,b in totals.values()),len(totals)
+
+torch.set_num_threads(1)
+manifest=load(M/'manifest.json'); results=load(M/'results.json'); gm=load(G/'manifest.json')
+report={'passed':False,'scope':'Independent saved-artifact recomputation; no diagnostic assess/objective helpers imported.','measurement':{},'checks':{},'limits':[]}
+historical=load(ROOT/'research/experiments/results/2026-10-13_n02_contracts/training.json')
+hashes={(row['seed'],c['step']):c['checkpoint_sha256'] for row in historical for c in row['checkpoints']}
+verified_files={}
+for p,h in gm['checkpoint_sha256'].items():
+    payload=torch.load(p,map_location='cpu',weights_only=False)
+    assert sha(p)==h==hashes[(payload['seed'],payload['step'])]
+    verified_files[p]=h
+report['checks']['six_checkpoint_hashes_match_historical_training_receipts']=len(verified_files)==6
+# Verify every tracked production/config file against the baseline commit bytes.
+tracked=subprocess.check_output(['git','ls-tree','-r','--name-only','b415c12','src/owac','configs/encoders/n02'],text=True).splitlines()
+changed=[]
+for path in tracked:
+    old=subprocess.check_output(['git','show',f'b415c12:{path}'])
+    if not Path(path).exists() or Path(path).read_bytes()!=old: changed.append(path)
+assert not changed,changed
+report['checks']['production_and_existing_evaluation_config_files_unchanged_since_b415c12']=True
+report['checks']['baseline_files_compared']=len(tracked)
+# All files pinned in both diagnostic receipts remain byte-identical.
+for mm in (manifest,gm):
+    for path,digest in mm['source_sha256'].items(): assert sha(path)==digest,path
+report['checks']['both_run_source_hash_sets_current']=True
+shared={}
+for seed in range(3):
+    cachefile=M/f'cache_seed{seed}.pt'
+    assert sha(cachefile)==manifest['seeds'][str(seed)]['cache_file_sha256']
+    caches=torch.load(cachefile,map_location='cpu',weights_only=False)
+    fit,ev=caches['train'],caches['evaluation']
+    assert len(fit['identities'])==128 and len(ev['identities'])==384
+    assert not set(fit['raw_sha256'])&set(ev['raw_sha256'])
+    assert {d['split'] for d in fit['identities']}=={'train'}
+    assert {d['split'] for d in ev['identities']}=={'validation'}
+    for split,cache in [('fit',fit),('evaluation',ev)]:
+        for key,digest in manifest['seeds'][str(seed)][split]['tensor_sha256'].items(): assert td(cache[key])==digest
+        inp=(cache['raw_sha256'],cache['full_template_sha256'],cache['prior_sha256'])
+        if seed: assert inp==shared[split]
+        else: shared[split]=inp
+    # Verify cached worlds share exact template pair and equivalent applied sensor noise.
+    bykey={(d['seed'],d['world'],d['frame']):i for i,d in enumerate(ev['identities'])}
+    max_noise_difference=0.
+    regenerated=0
+    for rngseed in range(720,736):
+        gen=SyntheticGenerator(SyntheticOptions(height=64,width=64),seed=rngseed,split='validation')
+        episode=gen.generate(seed=rngseed,prior_condition='correct',identifiable=True)
+        for frame in range(8):
+            i,j=bykey[rngseed,'0',frame],bykey[rngseed,'1',frame]
+            assert torch.equal(ev['templates'][i],ev['templates'][j])
+            n0=ev['observed'][i]-ev['templates'][i,0]
+            n1=ev['observed'][j]-ev['templates'][j,1]
+            max_noise_difference=max(max_noise_difference,float((n0-n1).abs().max()))
+            assert torch.allclose(n0,n1,atol=1e-7,rtol=0)
+            template=gen.measurement_templates(episode,frame)
+            for truth,index in [(0,i),(1,j)]:
+                raw=torch.from_numpy((template[truth]+episode.noise[frame]).astype(np.float32))
+                assert td(raw)==ev['raw_sha256'][index]
+                assert td(torch.from_numpy(template))==ev['full_template_sha256'][index]
+                regenerated+=1
+    checkpoint=manifest['seeds'][str(seed)]['checkpoint']
+    payload=torch.load(checkpoint,map_location='cpu',weights_only=False)
+    model=N02Encoder(N02Config.from_dict(payload['config']))
+    head=model.measurement.head
+    sd=torch.load(M/f'head_seed{seed}_contrast_mse.pt',map_location='cpu',weights_only=False)
+    head.load_state_dict({key.removeprefix('head.'):v for key,v in sd.items()})
+    pred=independently_predict(head,ev['fields']); target=ev['templates'].numpy()
+    recomputed=metrics(pred,target)
+    common=target.mean(1); contrast=(pred[:,1]-pred[:,0])/2
+    actual=choices(pred,ev); oracle=choices(np.stack([common-contrast,common+contrast],1),ev)
+    exact=choices(target,ev)
+    expected=results[str(seed)]['arms']['contrast_mse']['evaluation']
+    for key,value in recomputed.items(): assert math.isclose(value,expected[key],rel_tol=2e-6,abs_tol=2e-7),(seed,key,value,expected[key])
+    assert actual==(expected['actual_head_choices']['both_correct'],16)
+    assert oracle==(expected['oracle_common_choices']['both_correct'],16)
+    assert exact==(16,16)
+    report['measurement'][str(seed)]={**recomputed,'actual_both_correct':actual[0],'oracle_common_both_correct':oracle[0],'exact_template_both_correct':exact[0],'pair_denominator':16,'same_scene_pair_frames_regenerated':regenerated,'max_same_noise_roundoff':max_noise_difference,'train_eval_raw_overlap':0}
+    # Independently expand equal-variance Gaussian class-score difference in fp64.
+    mu0,mu1=pred[:,0].astype(np.float64),pred[:,1].astype(np.float64)
+    c=(mu0+mu1)/2; d=(mu1-mu0)/2
+    y=ev['observed'].numpy().astype(np.float64); v=ev['total_variance'].numpy().astype(np.float64)
+    cstar=target.astype(np.float64).mean(1)
+    direct=((mu1-y)**2/(2*v)-(mu0-y)**2/(2*v)).sum(axis=(1,2,3))
+    expanded=(2*(c-y)*d/v).sum(axis=(1,2,3))
+    oracle_direct=(((cstar+d-y)**2-(cstar-d-y)**2)/(2*v)).sum(axis=(1,2,3))
+    background=(2*(c-cstar)*d/v).sum(axis=(1,2,3))
+    absolute_error=float(np.max(np.abs(direct-expanded)))
+    replacement_error=float(np.max(np.abs((direct-oracle_direct)-background)))
+    assert absolute_error<1e-10 and replacement_error<1e-10
+    cum={}
+    for ii,ident in enumerate(ev['identities']):
+        if ident['world'] not in ('0','1'): continue
+        k=(ident['seed'],ident['world']); cum.setdefault(k,np.zeros(3))
+        direction=1 if ident['world']=='0' else -1
+        cum[k]+=direction*np.array([direct[ii],oracle_direct[ii],background[ii]])
+    values=np.stack(list(cum.values()))
+    oracle_positive=values[:,1]>0
+    report['measurement'][str(seed)]['background_decomposition']={
+        'formula_max_abs_error':absolute_error,
+        'replacement_delta_formula_max_abs_error':replacement_error,
+        'paired_worlds':len(values),
+        'actual_world_correct':int((values[:,0]>0).sum()),
+        'oracle_common_world_correct':int(oracle_positive.sum()),
+        'signed_actual_margin_mean':float(values[:,0].mean()),
+        'signed_oracle_common_margin_mean':float(values[:,1].mean()),
+        'signed_common_bias_mean':float(values[:,2].mean()),
+        'absolute_common_bias_median':float(np.median(np.abs(values[:,2]))),
+        'absolute_useful_margin_median':float(np.median(np.abs(values[:,1]))),
+        'absolute_bias_over_useful_median':float(np.median(np.abs(values[:,2])/np.maximum(np.abs(values[:,1]),1e-20))),
+        'background_flips_oracle_correct_worlds':int(((values[:,0]<=0)&oracle_positive).sum()),
+        'scope':'Sum eight unique-frame scores per paired world; positive signed margin supports true class. Exact fp64 common replacement; no retraining.'}
+report['checks']['measurement_input_template_prior_identical_across_checkpoint_seeds']=True
+report['checks']['six_cache_tensor_hash_sets_verified']=True
+# Cardinality, per-case arm coverage, and independent input batch regeneration.
+rows=[json.loads(line) for line in (G/'records.jsonl').read_text().splitlines()]
+expected_arms={'full','omit_mixture','omit_geometry_set','omit_counterfactual','full_no_clip','zero_current_gradient'}
+assert len(rows)==24
+keys={(r['seed'],r['step'],r['rng_seed']) for r in rows}
+assert keys=={(s,t,b) for s in range(3) for t in (100,200) for b in range(900,904)}
+for row in rows:
+    assert set(row['updates'])==expected_arms
+    assert row['input_sha256']==gm['input_sha256'][str(row['rng_seed'])]
+config=N02Config.from_dict(gm['config'])
+for rngseed in range(900,904):
+    b=synthetic_batch(config,np.random.default_rng(rngseed),batch_size=2,num_frames=8,frame_size=64,seed=900,split='train')
+    identity={'values':b.values,'masks':b.masks,'anchor':b.anchor,'wrong':b.wrong,'post':b.post_contradiction,'identifiable':b.identifiable_now,'templates':b.counterfactual_templates,'sample_xy':b.sample_xy,'priors':[c.hypothesis_prior for c in b.contexts],'prior_available':[c.hypothesis_prior_available for c in b.contexts]}
+    assert treehash(identity)==gm['input_sha256'][str(rngseed)]
+report['gradient']={'cases':24,'arms_per_case':6,'disposable_optimizer_steps':144,'inputs_shared_across_6_checkpoints':True,'four_input_batches_independently_regenerated':True,'maximum_reported_gradient_sum_relative_error':max(r['gradients']['gradient_sum_relative_error'] for r in rows),'revision_inactive_cases':sum(r['active_steps']['revision']==0 for r in rows)}
+coverage_root=G/'revision-coverage'
+coverage_rows=[json.loads(line) for line in (coverage_root/'records.jsonl').read_text().splitlines()]
+assert len(coverage_rows)==6 and {(r['seed'],r['step']) for r in coverage_rows}=={(s,t) for s in range(3) for t in (100,200)}
+b=synthetic_batch(config,np.random.default_rng(904),batch_size=2,num_frames=8,frame_size=64,seed=900,split='train')
+identity={'values':b.values,'masks':b.masks,'anchor':b.anchor,'wrong':b.wrong,'post':b.post_contradiction,'identifiable':b.identifiable_now,'templates':b.counterfactual_templates,'sample_xy':b.sample_xy,'priors':[c.hypothesis_prior for c in b.contexts],'prior_available':[c.hypothesis_prior_available for c in b.contexts]}
+coverage_hash=treehash(identity)
+assert b.post_contradiction.any() and int(b.post_contradiction.sum())==4
+for row in coverage_rows:
+    assert row['rng_seed']==904 and row['input_sha256']==coverage_hash
+    assert row['active_steps']['revision']==2 and row['effective_samples']['revision']==4
+    assert 'updates' not in row
+report['gradient']['revision_coverage_supplement']={'cases':6,'rng_seed':904,'input_independently_regenerated':True,'natural_revision_active_frames':2,'natural_revision_active_samples':4,'optimizer_updates':0,'input_sha256':coverage_hash,'records_sha256':sha(coverage_root/'records.jsonl')}
+report['limits']=['Did not independently rerun all 144 optimizer forks or all per-term gradients; cardinality and regenerated input identity verified.','Did not repeat the 200-step head optimizations; saved head predictions and metrics independently recomputed.','Only contrast_mse arms independently rescored; paired_nll values remain worker-reported.','No-cue evaluation worlds were hash-checked but not independently regenerated.','No-cue ratio was not independently recomputed.','No original 600-step training data regeneration in this audit; original checkpoint hashes matched historical receipts.']
+report['artifact_sha256']={'measurement_results':sha(M/'results.json'),'measurement_manifest':sha(M/'manifest.json'),'gradient_records':sha(G/'records.jsonl'),'gradient_manifest':sha(G/'manifest.json'),'script':sha(__file__)}
+report['passed']=True
+(OUT/'independent/receipt.json').write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
+print(json.dumps({'passed':report['passed'],'measurement':report['measurement'],'gradient':report['gradient']},indent=2))

@@ -1,0 +1,13 @@
+[Unit]
+Description=OWAC N02 private monitoring tunnel
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh -N -T -o BatchMode=yes -o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o IPQoS=none -p 51584 -L 127.0.0.1:8081:127.0.0.1:18080 -L 127.0.0.1:54864:127.0.0.1:18080 root@93.91.156.102
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

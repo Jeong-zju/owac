@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-13",
+  "kind": "prompt_preparation_not_n02_v1_1_implementation_acceptance",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion",
+  "branch": "lzh/n02-measurement-completion",
+  "head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+  "changes": "Documentation and prompt package only; existing uncommitted work preserved. No new model code, GPU training, remote process mutation, commit or push.",
+  "checks": [
+    {
+      "command": "uv run --locked --extra encoder pytest -q tests/encoders/n02/test_raw_dataset.py tests/encoders/n02/test_rawvla_features.py tests/encoders/n02/test_encoder_contract.py tests/test_n02_revision_comparison.py tests/test_n02_retrained.py",
+      "exit_code": 0,
+      "passed": 87,
+      "skipped": 4,
+      "warnings": 1,
+      "elapsed_seconds": 1.87,
+      "skip_reason": "Two real NPZ data checks and two real StarVLA/checkpoint integration checks lack local assets.",
+      "scope": "Existing loader, bridge, state and historical baseline regression; not v1.1 capability."
+    },
+    {
+      "command": "make check",
+      "exit_code": 0,
+      "details": "ruff check passed; ruff format --check: 218 files already formatted; compileall passed."
+    }
+  ],
+  "references": {
+    "retrieved_files": 52,
+    "retrieval_manifest": "source_manifest.json",
+    "runtime_reproduction_performed": false,
+    "paper_web_failures": [
+      "dNRI publisher page",
+      "RJMCMC DOI",
+      "ATMS DOI"
+    ],
+    "note": "Fixed source files retrieved; cited theoretical guarantees still require implementation-specific proof. Some paper links inherit the existing research source inventory."
+  },
+  "remote_live_verification": false,
+  "new_stage_status": {
+    "P0": "not_started",
+    "P1": "not_started",
+    "E1": "not_started",
+    "P2": "not_started",
+    "E2": "not_started",
+    "P3": "not_started",
+    "P4": "not_started",
+    "P5": "not_started",
+    "P6": "not_started",
+    "P7": "not_started"
+  },
+  "document_checks": {
+    "markdown_files": 13,
+    "local_links_checked": 72,
+    "distinct_external_urls": 80,
+    "source_hashes_checked": 52,
+    "errors": []
+  },
+  "prompt_files": [
+    {
+      "path": "00_SHARED_CONTRACT.md",
+      "bytes": 11572,
+      "sha256": "0cf73cbaea53512ca23a0b4c886f9a9cc5cef0ff20dc58a08092e517b17b3aa3"
+    },
+    {
+      "path": "01_CURRENT_IMPLEMENTATION.md",
+      "bytes": 6796,
+      "sha256": "e484bbdd544043168ea4d2798f124160b5f9d7ef19d31b4c54792c52cfacb2c0"
+    },
+    {
+      "path": "02_REFERENCES.md",
+      "bytes": 18962,
+      "sha256": "bb757fbeeedb3c959d71e7b4359641359845a33a226f256f647f68fc2314de08"
+    },
+    {
+      "path": "EARLY_POLICY_PREFLIGHT.md",
+      "bytes": 5735,
+      "sha256": "7cb0cb61adf9a53c3355fa1ae4fccf4a7415b1bfd93fe68bf4f685199f9fd0c8"
+    },
+    {
+      "path": "P0_FOUNDATION.md",
+      "bytes": 9188,
+      "sha256": "ad437e16f15bcbaef9718a25e1124b8242d51cf49062d3d7416ae2ec3b91506e"
+    },
+    {
+      "path": "P1_OBSERVATION.md",
+      "bytes": 7620,
+      "sha256": "a0f225fe2e74d70f904b5ce71f059a6debb2754befe2410ebffc11a416f1a03a"
+    },
+    {
+      "path": "P2_ENTITIES_SOLVER.md",
+      "bytes": 7204,
+      "sha256": "74ea2c7386b711cef9d9781f7f7ed9638c39f6a0132437516cf167708fde6a94"
+    },
+    {
+      "path": "P3_STRUCTURE_DISCOVERY.md",
+      "bytes": 7043,
+      "sha256": "656ed04aad1588c85154e07cb1954a00a05c1a74ec296ec9616ce640b4a3e608"
+    },
+    {
+      "path": "P4_PROVENANCE_REPLAY.md",
+      "bytes": 6796,
+      "sha256": "4a6ec4defe6699696eff16928b66e4b419f30730fcfe8947e1fb19ed68dd02e1"
+    },
+    {
+      "path": "P5_MECHANISM_AUDIT.md",
+      "bytes": 5810,
+      "sha256": "ab711fe5a2f480441ef03a1c179bd04de80819616c042354ff1d504bbc79e869"
+    },
+    {
+      "path": "P6_POLICY_TRAINING.md",
+      "bytes": 6279,
+      "sha256": "acd28ef8c115c3be40e256561a9b1768ae85326efa8ad51508c14804ec1a3694"
+    },
+    {
+      "path": "P7_CLOSED_LOOP.md",
+      "bytes": 5542,
+      "sha256": "72a120fb24def50d5d54bcf15add9997642678d30d3e3512d81bf9bfc0e2cef5"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4956,
+      "sha256": "9a16617d9fba9f501e52e0c443baf369762df8935e5c4ab9696f46ca1e1e84c9"
+    }
+  ]
+}

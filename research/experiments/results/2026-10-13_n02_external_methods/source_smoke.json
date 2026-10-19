@@ -1,0 +1,39 @@
+{
+  "scope": "Inspected upstream loss classes loaded by unchanged AST extraction; no full package installation, N02 optimizer updates, or performance reproduction.",
+  "torch_version": "2.9.1+cpu",
+  "source_sha256": {
+    "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-literature-20261013/sources/probabilists/lampe/lampe/inference/nre.py": "eceb051706890ab59fb816e79ce0320cfe21c95283c621b1e035768a78b86eb6",
+    "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-literature-20261013/sources/probabilists/lampe/lampe/inference/bnre.py": "3c7c5e4eefffded967928437723951feb27f72bc4db321fd980ef9739e98b4c4",
+    "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-literature-20261013/sources/Cranial-XIX/FAMO/famo.py": "3673c44252da7073a05706e8b06b657e7293dc1586bb15b104144cddcdfd4003"
+  },
+  "loss_interface": {
+    "NRELoss": {
+      "loss": 0.7072162628173828,
+      "gradient_norm": 0.09275650233030319
+    },
+    "BNRELoss": {
+      "loss": 2.6069283485412598,
+      "gradient_norm": 17.85108757019043
+    }
+  },
+  "bnre_constructed_counterexample": {
+    "description": "Score=3*theta ignores x; alternating balanced theta batch. Balancing penalty alone is zero, but NRE BCE penalizes this score.",
+    "nre_bce": 1.5485875606536865,
+    "bnre_balance_penalty": 0.0,
+    "uniform_prior_binary_posterior_p1": 0.9975274205207825,
+    "trained_result": false
+  },
+  "famo": {
+    "positive_objective_toy_one_step_finite": true,
+    "raw_n02_weighted_terms": {
+      "measurement": -2.922092914581299,
+      "geometry_set": 0.5949973464012146,
+      "diversity": 2.0882040189462714e-05,
+      "mixture": 0.6914893984794617,
+      "counterfactual": -2.92311954498291
+    },
+    "raw_n02_default_min_losses_result": "nonfinite",
+    "cause": "D=losses-min_losses+1e-8 is negative for Gaussian NLL terms; D.log() invalid.",
+    "n02_optimizer_updates": 0
+  }
+}

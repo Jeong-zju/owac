@@ -1,0 +1,55 @@
+"""Predeclared coverage supplement; no optimizer steps, no original-file writes."""
+import json
+from pathlib import Path
+import numpy as np
+import torch
+from owac.evaluation.n02_gradients import (
+    batch_digest, clone_with_optimizer, decompose_gradients, sha256,
+    training_objective, tree_digest,
+)
+from owac.frameworks.n02.config import N02Config
+from owac.training.n02 import synthetic_batch
+
+out = Path(__file__).resolve().parent
+torch.set_num_threads(1)
+protocol = {
+    'generator_seed': 900, 'rng_search_start': 904, 'selection': 'First sequential rng with natural post_contradiction.any(); no model evaluation during selection.',
+    'batch_size': 2, 'frames': 8, 'side': 64, 'split': 'train', 'checkpoint_seeds': [0,1,2], 'checkpoint_steps': [100,200],
+    'optimizer_updates': 0, 'boundary': 'Target-coverage supplement; original four rng batches have inactive revision, not disconnected revision.',
+    'source_unchanged_from_main_run': True,
+}
+(out / 'protocol.json').write_text(json.dumps(protocol, indent=2)+'\n')
+checkpoints = [Path(f'outputs/n02-contracts-20261013/seed{s}/checkpoint{t}.pt') for s in (0,1,2) for t in (100,200)]
+first = torch.load(checkpoints[0], map_location='cpu', weights_only=False)
+config = N02Config.from_dict(first['config'])
+search = []
+rng_seed=904
+while True:
+    batch=synthetic_batch(config,np.random.default_rng(rng_seed),batch_size=2,num_frames=8,frame_size=64,seed=900,split='train')
+    record={'rng_seed':rng_seed,'post_contradiction_samples':int(batch.post_contradiction.sum()),'identifiable_samples':int(batch.identifiable_now.sum()),'notes':batch.notes,'input_sha256':batch_digest(batch)}
+    search.append(record)
+    (out / 'selection.json').write_text(json.dumps(search,indent=2)+'\n')
+    if batch.post_contradiction.any():break
+    rng_seed+=1
+    if rng_seed>10000:raise RuntimeError('No naturally active revision in bounded sequential search')
+manifest={'source_sha256':{'src/owac/evaluation/n02_gradients.py':sha256('src/owac/evaluation/n02_gradients.py'),str(Path(__file__).resolve()):sha256(__file__)},'checkpoint_sha256':{str(p):sha256(p) for p in checkpoints},'input_sha256':batch_digest(batch),'config_sha256':tree_digest(config.as_dict()),'rng_seed':rng_seed}
+(out / 'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+rows=[]
+for path in checkpoints:
+    payload=torch.load(path,map_location='cpu',weights_only=False)
+    original=tree_digest(payload)
+    model,_=clone_with_optimizer(payload)
+    params_before=tree_digest(model.state_dict())
+    total,weighted,row=training_objective(model,batch,diversity_margin=payload['run']['diversity_margin'])
+    row['gradients'],_,_=decompose_gradients(weighted,total,list(model.named_parameters()),clip=payload['run']['grad_clip'])
+    row.update(seed=payload['seed'],step=payload['step'],checkpoint=str(path),rng_seed=rng_seed,input_sha256=batch_digest(batch))
+    assert row['active_steps']['revision']>0
+    assert tree_digest(payload)==original
+    assert tree_digest(model.state_dict())==params_before
+    assert sha256(path)==manifest['checkpoint_sha256'][str(path)]
+    assert batch_digest(batch)==manifest['input_sha256']
+    rows.append(row)
+    print(payload['seed'],payload['step'],'revision',row['weighted']['revision'],flush=True)
+(out/'records.jsonl').write_text(''.join(json.dumps(row,allow_nan=False)+'\n' for row in rows))
+summary={'selected_rng_seed':rng_seed,'searched_batches':len(search),'cases':len(rows),'optimizer_updates':0,'original_payloads_parameters_files_and_input_unchanged':True,'gradient_sum_max_relative_error':max(r['gradients']['gradient_sum_relative_error'] for r in rows),'revision':[{k:r[k] for k in ('seed','step','active_steps','effective_samples','weighted')}|{'branch_gradient_norms':{name:value['terms']['revision']['grad_norm'] for name,value in r['gradients']['groups'].items()}} for r in rows]}
+(out/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')

@@ -1,0 +1,21 @@
+{
+  "title": "r11 RAW重新训练",
+  "phase": "task_adaptation",
+  "phase_detail": "两组各1000步训练已结束。选用联合适配臂第850步权重，正常光、弱光、极弱光闭环各400条动作，均未完成抓取，持续有效抓持均0秒（0/3）。动作块切换仍有大跳变；离线误差改善没有转化为抓取成功。视频在闭环页顶部。",
+  "runs": [
+    {
+      "run_id": "raw-task-r11-task-s1103-a1",
+      "stage": "P2",
+      "label": "RAW表征＋动作适配",
+      "effective_batch_size": 12,
+      "target": 1000
+    },
+    {
+      "run_id": "raw-task-r11-control-s1103-a1",
+      "stage": "P2",
+      "label": "冻结RAW前端对照",
+      "effective_batch_size": 12,
+      "target": 1000
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "convnext": {
+    "environment": {
+      "python": "3.12.12",
+      "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0/parity-venv/bin/python",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.1.3",
+      "cuda_available": false,
+      "git_head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+      "timestamp": "2026-10-14T10:45:27+0800",
+      "timm": "1.0.20",
+      "jax": "0.4.38",
+      "flax": "0.10.2",
+      "theseus": "not_available: ModuleNotFoundError: No module named 'theseus'",
+      "MinkowskiEngine": "installed(no __version__)",
+      "particles": "not_available: ModuleNotFoundError: No module named 'particles'"
+    },
+    "import_placeholders": [
+      "MinkowskiEngine",
+      "MinkowskiOps"
+    ],
+    "fixtures": {
+      "convnext_block": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/convnext_block.pt",
+        "sha256": "4b10b3b0f7129ebe606433eaa8a8500e7fb4ab530a636b2cefbe05c08f0fd1f8",
+        "bytes": 92553
+      },
+      "convnext_grn": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/convnext_grn.pt",
+        "sha256": "9a7fa97952e4ad05fda4f82757ff9011eb6b63bc340a9516faa6e5f9a427426d",
+        "bytes": 5713
+      },
+      "convnext_3ch_square": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/convnext_3ch_square.pt",
+        "sha256": "25be2854cf5c3e242a77c15709db772cc73121a3c78f9b8822556ee3db88e4f0",
+        "bytes": 2271157
+      },
+      "convnext_4ch_rect": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/convnext_4ch_rect.pt",
+        "sha256": "a018bc941ccc6875f62e43936b2fd9f487ca3000fddbbb2e261509da384289fc",
+        "bytes": 2287827
+      },
+      "convnext_block_basewidth": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/convnext_block_basewidth.pt",
+        "sha256": "d3a4d0a534c75a3a2829377d1bd84c6c810fa94ec75c2f0dbe11b6248c39b5e9",
+        "bytes": 600433
+      }
+    },
+    "upstream_source_sha256": {
+      "models/convnextv2.py": "c553af39d6ed5e89d1ceec4598fb48001c3757f7a547c535812291ecb6fc2f1a",
+      "models/utils.py": "f7eca4be0696ccdae8b7a05387870cacc66d6408a7acc44b0b7f1ae56b2df631",
+      "models/fcmae.py": "b544d909cb2eb5693bab7732078b7548f0c6d6c50266cee0c30c5c15aaa22cd1"
+    }
+  },
+  "fcmae": {
+    "environment": {
+      "python": "3.12.12",
+      "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0/parity-venv/bin/python",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.1.3",
+      "cuda_available": false,
+      "git_head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+      "timestamp": "2026-10-14T10:45:28+0800",
+      "timm": "1.0.20",
+      "jax": "0.4.38",
+      "flax": "0.10.2",
+      "theseus": "not_available: ModuleNotFoundError: No module named 'theseus'",
+      "MinkowskiEngine": "installed(no __version__)",
+      "particles": "not_available: ModuleNotFoundError: No module named 'particles'"
+    },
+    "import_placeholders": [],
+    "note": "FCMAE.__init__ builds the Minkowski sparse encoder and is therefore never called; the upstream geometry methods are bound to a holder created with object.__new__ carrying only patch_size. No sparse operator was executed.",
+    "fixtures": {
+      "fcmae_geometry_3ch": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/fcmae_geometry_3ch.pt",
+        "sha256": "b90c67e6dc2d23aed5b7dfd8de842ea7ac5fff94a1721d3d7aaf766a88d068de",
+        "bytes": 300562
+      }
+    },
+    "upstream_geometry_failures": {
+      "4ch_square": "RuntimeError: shape '[1, 3, 2, 32, 2, 32]' is invalid for input of size 16384",
+      "3ch_rect": "AssertionError: ",
+      "rect_unpatchify": "AssertionError: "
+    }
+  },
+  "savi": {
+    "environment": {
+      "python": "3.12.12",
+      "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0/parity-venv/bin/python",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.1.3",
+      "cuda_available": false,
+      "git_head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+      "timestamp": "2026-10-14T10:45:28+0800",
+      "timm": "1.0.20",
+      "jax": "0.4.38",
+      "flax": "0.10.2",
+      "theseus": "not_available: ModuleNotFoundError: No module named 'theseus'",
+      "MinkowskiEngine": "installed(no __version__)",
+      "particles": "not_available: ModuleNotFoundError: No module named 'particles'"
+    },
+    "flax_version": "0.10.2",
+    "grucell_compat_patch": {
+      "applied": true,
+      "flax_version": "0.10.2",
+      "error_without_patch": "GRUCell.__init__() missing 1 required positional argument: 'features'",
+      "note": "GRUCellCompat only restores the defaulted `features` field"
+    },
+    "upstream_source_sha256": {
+      "attention.py": "f02c9960e9d7cff5490ac60e263fef4b31d4b011b7809d5f556d67d957052ec5",
+      "video.py": "795736e117b0d893aadf72c6ff603b7d5f6b2f34df4f34a355a027632168d4d1",
+      "misc.py": "ee22ff57ded792602a0b48db2f580db8d89bb0cb95ec45a97c5f38b66fa56c06"
+    },
+    "fixtures": {
+      "savi_slot_attention": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_slot_attention.npz",
+        "sha256": "70b4d99e865f808a9f841c950d9d159c3d5e337a217ab5589ff09c243cb32a07",
+        "bytes": 23569
+      },
+      "savi_slot_attention_multhead": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_slot_attention_multhead.npz",
+        "sha256": "aa50af650f022fa6dae224efb9d82fad5ec1e5cae49c359edbb45e5a125d5a54",
+        "bytes": 10190
+      },
+      "savi_gru": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_gru.npz",
+        "sha256": "0bc7e000437db16114e70cc60daaac7650822071f7e6295bc13e1b7563ded5ec",
+        "bytes": 9660
+      },
+      "savi_mlp": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_mlp.npz",
+        "sha256": "71708656ef089924a345ac596b97c62666e477ee2768bdc9eaf79beebb20c2c8",
+        "bytes": 4680
+      },
+      "savi_predictor": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_predictor.npz",
+        "sha256": "d9bf401192488306c72788aae3da3bb0d5b6993909f1c2ab39d6212ea15b8490",
+        "bytes": 23994
+      },
+      "savi_processor": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/savi_processor.npz",
+        "sha256": "d5c50453a58d982d0d0e68c3039efbd1ff996e475d8bb04bebd2da680cb961db",
+        "bytes": 12407
+      }
+    }
+  },
+  "dnri": {
+    "environment": {
+      "python": "3.12.12",
+      "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0/parity-venv/bin/python",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.1.3",
+      "cuda_available": false,
+      "git_head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+      "timestamp": "2026-10-14T10:45:34+0800",
+      "timm": "1.0.20",
+      "jax": "0.4.38",
+      "flax": "0.10.2",
+      "theseus": "not_available: ModuleNotFoundError: No module named 'theseus'",
+      "MinkowskiEngine": "installed(no __version__)",
+      "particles": "not_available: ModuleNotFoundError: No module named 'particles'"
+    },
+    "upstream_source_sha256": {
+      "dnri/models/dnri.py": "f6f53aeef56d93ecef67a63b910195240ee21a899b213f7ed29900a588f9a62b",
+      "dnri/models/model_utils.py": "4880d226e5b9bfa9b822219868823d5a8a72deef4ddc075cb3ba4151601f1a4d"
+    },
+    "fixtures": {
+      "dnri_one_step": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/dnri_one_step.pt",
+        "sha256": "ace19ebf8d17cd0c243ea4e17edee6470abcfa67fa6a676081e5c98254e926f5",
+        "bytes": 75261
+      }
+    }
+  },
+  "train_trend": {
+    "environment": {
+      "python": "3.12.12",
+      "executable": "/home/jeong/zeno/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0/parity-venv/bin/python",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.1.3",
+      "cuda_available": false,
+      "git_head": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+      "timestamp": "2026-10-14T10:45:34+0800",
+      "timm": "1.0.20",
+      "jax": "0.4.38",
+      "flax": "0.10.2",
+      "theseus": "not_available: ModuleNotFoundError: No module named 'theseus'",
+      "MinkowskiEngine": "installed(no __version__)",
+      "particles": "not_available: ModuleNotFoundError: No module named 'particles'"
+    },
+    "fixtures": {
+      "train_trend": {
+        "path": "outputs/n02-full/p0-independent-audit/fixtures/train_trend.pt",
+        "sha256": "06b1319438947f6580222577276723b952bfd7cb9dbc8b98bc8168529ffc2cf1",
+        "bytes": 1754979
+      }
+    },
+    "upstream_losses": [
+      0.9775444865226746,
+      0.042973123490810394,
+      0.020368283614516258,
+      0.014841868542134762,
+      0.01734161749482155,
+      0.015629004687070847,
+      0.0058889915235340595,
+      0.0057871355675160885,
+      0.007945768535137177,
+      0.006731877569109201,
+      0.006491349544376135,
+      0.005547842010855675,
+      0.0038745496422052383,
+      0.004423521924763918,
+      0.004406484309583902,
+      0.002472108928486705,
+      0.001851305365562439,
+      0.002437708666548133,
+      0.0022109600249677896,
+      0.0021212175488471985
+    ]
+  },
+  "command": "python -m owac.frameworks.n02_full.components.upstream_refs --check all --out outputs/n02-full/p0-independent-audit/fixtures"
+}

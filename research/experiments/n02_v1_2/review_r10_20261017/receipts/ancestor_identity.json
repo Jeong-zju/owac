@@ -1,0 +1,360 @@
+{
+  "path": "outputs/n02-v12/P2/raw-n02-robotwin-r5-s1103/checkpoint_0000900.pt",
+  "sha256": "4d792463f5d65ab0822e2f56644bb86ad246cb870b5b0d8279b200987c64c66b",
+  "identity": {
+    "train": {
+      "module": "owac.frameworks.n02_full.data_v12",
+      "dataset_format": "robotwin",
+      "partition": "train",
+      "history": 8,
+      "batch_size": 2,
+      "stride": 1,
+      "observation_stride": 1,
+      "window": {
+        "observation_stride": 1,
+        "burst_frames": 1,
+        "rnn_frames": 8,
+        "action_horizon": 50,
+        "action_offset": 1,
+        "state_source_key": "actions",
+        "executed_action_available": false
+      },
+      "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "measurement_keys": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "manifest": {
+        "version": "n02-full-partition-v2",
+        "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+        "seed": 1103,
+        "fractions": {
+          "calibration": 0.1,
+          "dev": 0.1,
+          "train": 0.8
+        },
+        "partition_sizes": {
+          "calibration": 67,
+          "dev": 65,
+          "train": 500
+        },
+        "source": {
+          "kind": "receipt_file",
+          "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+          "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+        }
+      },
+      "partition_verification": {
+        "disjoint": true,
+        "groups_single_partition": true,
+        "violations": [],
+        "counts": {
+          "partitions": {
+            "calibration": {
+              "files": 67,
+              "frames": 15413,
+              "groups": 67
+            },
+            "dev": {
+              "files": 65,
+              "frames": 15414,
+              "groups": 65
+            },
+            "train": {
+              "files": 500,
+              "frames": 116117,
+              "groups": 500
+            }
+          },
+          "groups": 632,
+          "files": 632,
+          "frames": 146944
+        }
+      },
+      "anchor_table": {
+        "version": "n02-full-anchor-v1",
+        "sha256": "0dd2dff0a3fa6245c0c89934005032ca0fa1853974c6b222f9e6958570c1b791",
+        "entries": 116117,
+        "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+      },
+      "frozen_anchor_receipt": {
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-train-anchors.json.gz",
+        "gzip_sha256": "fdac10761736a2c863bf4d92ee75e3fcbcc8a406bb2cd34614515d151edaaddf",
+        "json_sha256": "57f1576da96026810339a5925b7390545149cba3095056b382b7b176c024d230",
+        "version": "n02-full-anchor-v1",
+        "partition": "train",
+        "dataset_format": "robotwin",
+        "entries": 116117,
+        "window": {
+          "action_horizon": 50,
+          "action_offset": 1,
+          "burst_frames": 1,
+          "executed_action_available": false,
+          "observation_stride": 1,
+          "rnn_frames": 1,
+          "state_source_key": "actions"
+        },
+        "reproduced_from_manifest": true,
+        "reproduced_entries": 116117
+      },
+      "frozen_anchor_identity_preserved": true,
+      "stats": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "mode": "zscore",
+        "epsilon": 1e-08,
+        "epsilon_mode": "add"
+      }
+    },
+    "dev": {
+      "module": "owac.frameworks.n02_full.data_v12",
+      "dataset_format": "robotwin",
+      "partition": "dev",
+      "history": 8,
+      "batch_size": 2,
+      "stride": 1,
+      "observation_stride": 1,
+      "window": {
+        "observation_stride": 1,
+        "burst_frames": 1,
+        "rnn_frames": 8,
+        "action_horizon": 50,
+        "action_offset": 1,
+        "state_source_key": "actions",
+        "executed_action_available": false
+      },
+      "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "measurement_keys": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "manifest": {
+        "version": "n02-full-partition-v2",
+        "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+        "seed": 1103,
+        "fractions": {
+          "calibration": 0.1,
+          "dev": 0.1,
+          "train": 0.8
+        },
+        "partition_sizes": {
+          "calibration": 67,
+          "dev": 65,
+          "train": 500
+        },
+        "source": {
+          "kind": "receipt_file",
+          "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+          "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+        }
+      },
+      "partition_verification": {
+        "disjoint": true,
+        "groups_single_partition": true,
+        "violations": [],
+        "counts": {
+          "partitions": {
+            "calibration": {
+              "files": 67,
+              "frames": 15413,
+              "groups": 67
+            },
+            "dev": {
+              "files": 65,
+              "frames": 15414,
+              "groups": 65
+            },
+            "train": {
+              "files": 500,
+              "frames": 116117,
+              "groups": 500
+            }
+          },
+          "groups": 632,
+          "files": 632,
+          "frames": 146944
+        }
+      },
+      "anchor_table": {
+        "version": "n02-full-anchor-v1",
+        "sha256": "a5e250cf352df4fe354154e923786c26ae8c16d400da5c0d95cbe39b52d39c28",
+        "entries": 15414,
+        "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+      },
+      "frozen_anchor_receipt": {
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-dev-anchors.json.gz",
+        "gzip_sha256": "a3ed6a11a85a79c72d320e6a95537fcb3dee4ed5c672d66cef92f2d5cda5e945",
+        "json_sha256": "32c1bae7ee1fbc708e2fe7fc42409575090a3fafd68afcb85a2888c7e155c8be",
+        "version": "n02-full-anchor-v1",
+        "partition": "dev",
+        "dataset_format": "robotwin",
+        "entries": 15414,
+        "window": {
+          "action_horizon": 50,
+          "action_offset": 1,
+          "burst_frames": 1,
+          "executed_action_available": false,
+          "observation_stride": 1,
+          "rnn_frames": 1,
+          "state_source_key": "actions"
+        },
+        "reproduced_from_manifest": true,
+        "reproduced_entries": 15414
+      },
+      "frozen_anchor_identity_preserved": true,
+      "stats": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "mode": "zscore",
+        "epsilon": 1e-08,
+        "epsilon_mode": "add"
+      }
+    },
+    "calibration": {
+      "module": "owac.frameworks.n02_full.data_v12",
+      "dataset_format": "robotwin",
+      "partition": "calibration",
+      "history": 8,
+      "batch_size": 2,
+      "stride": 1,
+      "observation_stride": 1,
+      "window": {
+        "observation_stride": 1,
+        "burst_frames": 1,
+        "rnn_frames": 8,
+        "action_horizon": 50,
+        "action_offset": 1,
+        "state_source_key": "actions",
+        "executed_action_available": false
+      },
+      "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "measurement_keys": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "manifest": {
+        "version": "n02-full-partition-v2",
+        "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+        "seed": 1103,
+        "fractions": {
+          "calibration": 0.1,
+          "dev": 0.1,
+          "train": 0.8
+        },
+        "partition_sizes": {
+          "calibration": 67,
+          "dev": 65,
+          "train": 500
+        },
+        "source": {
+          "kind": "receipt_file",
+          "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+          "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+        }
+      },
+      "partition_verification": {
+        "disjoint": true,
+        "groups_single_partition": true,
+        "violations": [],
+        "counts": {
+          "partitions": {
+            "calibration": {
+              "files": 67,
+              "frames": 15413,
+              "groups": 67
+            },
+            "dev": {
+              "files": 65,
+              "frames": 15414,
+              "groups": 65
+            },
+            "train": {
+              "files": 500,
+              "frames": 116117,
+              "groups": 500
+            }
+          },
+          "groups": 632,
+          "files": 632,
+          "frames": 146944
+        }
+      },
+      "anchor_table": {
+        "version": "n02-full-anchor-v1",
+        "sha256": "3436898e2c174f6d635e3ce8f0ddb18a77a54f77a32cd4464f61009207ee1e40",
+        "entries": 15413,
+        "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+      },
+      "frozen_anchor_receipt": {
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+        "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+        "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+        "version": "n02-full-anchor-v1",
+        "partition": "calibration",
+        "dataset_format": "robotwin",
+        "entries": 15413,
+        "window": {
+          "action_horizon": 50,
+          "action_offset": 1,
+          "burst_frames": 1,
+          "executed_action_available": false,
+          "observation_stride": 1,
+          "rnn_frames": 1,
+          "state_source_key": "actions"
+        },
+        "reproduced_from_manifest": true,
+        "reproduced_entries": 15413
+      },
+      "frozen_anchor_identity_preserved": true,
+      "stats": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "mode": "zscore",
+        "epsilon": 1e-08,
+        "epsilon_mode": "add"
+      }
+    }
+  },
+  "config_data": {
+    "dataset_format": "robotwin",
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+    "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+    "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+    "manifest_seed": 1103,
+    "partitions": {
+      "train": 0.8,
+      "dev": 0.1,
+      "calibration": 0.1
+    },
+    "history": 8,
+    "declared_prior": null,
+    "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+    "protocol": {
+      "cameras": 3,
+      "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+      "offset": 1,
+      "horizon": 50,
+      "action_mask": "the loader's per-action padding mask",
+      "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+    }
+  }
+}

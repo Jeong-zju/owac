@@ -1,0 +1,483 @@
+{
+  "stage": "n02_p1_observation",
+  "date": "2026-10-14",
+  "tests": {
+    "target_suite": "500 passed / 1 skipped (both hosts)",
+    "make_check": "exit 0 on local and new host"
+  },
+  "p0_parity_on_new_host": {
+    "status": "incomplete",
+    "pass": 16,
+    "fail": 0,
+    "not_run": 1,
+    "not_run_reason": "numba not installed"
+  },
+  "dev_grid": {
+    "criterion": "frozen before the grid",
+    "lr_scale_0.5_dev_end": 0.04091,
+    "lr_scale_1.0_dev_end": 0.07638,
+    "lr_scale_2.0_dev_end": 0.07061,
+    "selected": 0.5
+  },
+  "cost": {
+    "raw3_fp32_s_per_update": 6.81,
+    "raw3_bf16_s_per_update": 5.01,
+    "synthetic_cfa4_micro32_s_per_update": 14.1,
+    "contended_pre_fix_s_per_update": 85.0,
+    "contended_post_fix_s_per_update": 16.4,
+    "new_host_interim_1k_s_per_update": 7.1,
+    "new_host_raw3_s_per_update": 10.6
+  },
+  "scale_evidence": {
+    "t2_correct_domain_per_valid_nll": 1.94892,
+    "t2_normalized_domain": 8510756000000.0,
+    "t2_cross_domain": 523780.0,
+    "t3_post_fix_cfa4_raw_nll": 36.05,
+    "t3_pre_fix_cfa4_raw_nll": 1980000.0,
+    "oracle_analytic_per_valid_nll": 1.883
+  },
+  "false_alarm": {
+    "checks_normal_sequences": "34/800 = 4.25%",
+    "threshold": 1.355338
+  },
+  "double_bright_spot": {
+    "verdict": "model_inadequate",
+    "global_mean": 0.9433,
+    "threshold": 1.3874,
+    "local_max": 3.7751
+  },
+  "stem_only_acceptance_baseline": {
+    "records": 55,
+    "cue_swap_correct": "0/10",
+    "cue_swap_map_posterior": 0.251,
+    "no_information_drift": [
+      0.0012,
+      0.0017
+    ],
+    "normal_flagged": "0/15",
+    "insufficiency_detected": "0/15"
+  },
+  "migration": {
+    "dataset": "HF ToferFish/RawVLA-Bench rev 8586c594fff9ce38580e29745f074e82e96e74f7, 665 GB",
+    "norm_stats_sha256_first16": {
+      "libero": "b3a44bb2810436fb",
+      "robotwin": "229a4a2d6cfd1ba4"
+    },
+    "anchors_verified_on_old_host": "6/6 gzip sha256 match frozen-data.json (408075 anchors)"
+  },
+  "acceptance_interim": {
+    "budget": {
+      "interim_budget": 1000,
+      "full_budget": 5000,
+      "note": "1000-update interim is a first-stage signal; the final scope is the cumulative 5000-update measurement run"
+    },
+    "checkpoint": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-1k-interim/checkpoints/update-0001000.pt",
+    "scenario_records": "outputs/n02-full/p1-acceptance-interim/scenario_records.jsonl",
+    "oracle": {
+      "status": "ok",
+      "scenarios_evaluated": 961,
+      "scenarios_requested": 1000,
+      "skipped_reason": "one encoder pins one candidate capacity, so scenes with another object count are skipped",
+      "correct": {
+        "successes": 797,
+        "total": 961,
+        "rate": 0.8293444328824141,
+        "wilson95": [
+          0.8042582931534514,
+          0.8518079461131803
+        ]
+      },
+      "min_correctable": 0.95,
+      "verdict": "fail",
+      "tie_analysis": {
+        "records_with_any_tie": 961,
+        "records_all_four_equal": 693,
+        "records_two_distinct": 239,
+        "records_three_distinct": 29,
+        "truth_uniquely_best": 1,
+        "truth_uniquely_best_rate": 0.001,
+        "map_index_zero": 797,
+        "mechanism": "candidate expected signals coincide at the sampled query points; the reported 0.8293 is the argmin-first-index tie-break (truth is pinned at index 0), so the analytic oracle's true discriminability is ~0.1% -> information insufficiency, P1 §6 path",
+        "no_thresholds_changed": true,
+        "no_scenarios_selected": true,
+        "dictionary_unchanged": true
+      },
+      "hook_hash": "synthetic.py d26e66a5d9dbfce4",
+      "wall_seconds": 328.677
+    },
+    "behavior": {
+      "status": "ok",
+      "wall_seconds": 1448.314,
+      "scenarios_per_class": 961,
+      "seeds_run": [
+        1103
+      ],
+      "families": {
+        "cue_swap": {
+          "metric": "both_correct",
+          "successes": 127,
+          "total": 961,
+          "rate": 0.1322,
+          "wilson95": [
+            0.1122,
+            0.155
+          ],
+          "threshold": 0.9,
+          "verdict": "fail"
+        },
+        "no_information": {
+          "metric": "within_threshold",
+          "successes": 961,
+          "total": 961,
+          "rate": 1.0,
+          "wilson95": [
+            0.996,
+            1.0
+          ],
+          "drift_mean": 0.0004,
+          "drift_max": 0.0017,
+          "threshold": 0.05,
+          "verdict": "incomplete",
+          "note": "the drift criterion passes; the family is incomplete because the per-class scenario count (961) is below the frozen minimum (1000)"
+        },
+        "wrong_prior": {
+          "direction_a": {
+            "successes": 630,
+            "total": 961,
+            "rate": 0.6556
+          },
+          "direction_b": {
+            "successes": 287,
+            "total": 961,
+            "rate": 0.2986
+          },
+          "threshold": 0.8,
+          "verdict": "fail"
+        },
+        "checks_normal": {
+          "false_positive_rate": 0.0,
+          "total": 961,
+          "threshold": 0.05,
+          "verdict": "pass_expectation_met"
+        },
+        "checks_insufficiency": {
+          "detection_rate": 0.0,
+          "total": 961,
+          "threshold": 0.9,
+          "verdict": "fail"
+        }
+      },
+      "mechanism": "consistent with the oracle finding: the controlled task as configured carries no discriminable information (cue_swap 0.1322 is below the 4-candidate chance level 0.25; insufficiency detection 0; no family passes except the trivially-passing drift criterion and the absence of false flags)",
+      "no_thresholds_changed": true,
+      "no_scenarios_selected": true,
+      "dictionary_unchanged": true,
+      "scenario_records": "outputs/n02-full/p1-acceptance-interim/scenario_records.jsonl (oracle 961 + behavior 961*11 rows; the family field separates them)"
+    },
+    "process_facts": {
+      "interim_run_exit": "silent exit after the last update (no final.pt/manifest, no traceback, no zombie); container cgroup memory.events/memory.peak and journalctl -k unreadable, so a host OOM could not be confirmed or excluded",
+      "hardening_for_5k": [
+        "PYTHONFAULTHANDLER=1",
+        "ulimit -c 0",
+        "stdout/stderr fully redirected",
+        "/proc/<pid>/stat liveness check",
+        "try/except around the final checkpoint write with traceback"
+      ],
+      "code_hash_5k_segment": "training/n02_full.py a39a87c2079d4535",
+      "checkpoint_every": 1000,
+      "migration": "chain relocated to the new server by user ruling; CUDA_VISIBLE_DEVICES=0 for the CFA4 chain, =1 for the raw3 arm",
+      "acceptance_bottleneck_fix": {
+        "measured": "one family step: 29.0 s wall / 880 CPU-s at the host's full thread count; 1.0 s wall / 1.9 CPU-s at four threads",
+        "generator_cost": "0.021 s/scene (measured) - rendering was never the bottleneck",
+        "fix": "_bound_torch_threads() (default 8, OWAC_EVAL_THREADS overrides); pure scheduling change, no scenario count or threshold change",
+        "behavior_wall_after_fix": 1448.3
+      }
+    }
+  },
+  "dispatcher_note": "behavior five-family numbers pending at hand-off; T4 writes them into acceptance_interim.md and this file, then syncs back.",
+  "acceptance_5k": {
+    "budget": {
+      "cumulative_updates": 4000,
+      "correction": "the run was intended to reach 5000 but stopped at 4000 because of a budget_start wiring defect (stage strings swapped between run_pretrain and run_measurement); the receipts' interim_budget=5000 field is the requested value, not the checkpoint state",
+      "segments": {
+        "interim": 1000,
+        "resume": 3000
+      },
+      "note": "FINAL scope is this 4000-state checkpoint; a true-5000 run would be a separate, later acceptance"
+    },
+    "checkpoint": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-5k/checkpoints/final.pt",
+    "scenario_records": "outputs/n02-full/p1-acceptance-5k/scenario_records.jsonl",
+    "seeds_run": [
+      1103
+    ],
+    "oracle": {
+      "status": "ok",
+      "wall_seconds": 99.286,
+      "successes": 797,
+      "total": 961,
+      "rate": 0.8293444328824141,
+      "wilson95": [
+        0.8042582931534514,
+        0.8518079461131803
+      ],
+      "min_correctable": 0.95,
+      "verdict": "fail",
+      "mechanism": "correct == map_index==0 count; tie-break artifact (961/961 records carry ties; truth uniquely best in 1/961) -> true discriminability ~0.1% -> information insufficiency"
+    },
+    "behavior": {
+      "status": "ok",
+      "wall_seconds": 1426.726,
+      "families": {
+        "cue_swap": {
+          "both_correct": 17,
+          "total": 961,
+          "rate": 0.01768990634755463,
+          "wilson95": [
+            0.0110735391600031,
+            0.028146991961374747
+          ],
+          "threshold": 0.9,
+          "verdict": "fail"
+        },
+        "no_information": {
+          "within_threshold": 961,
+          "total": 961,
+          "rate": 1.0,
+          "drift_mean": 0.0081,
+          "drift_max": 0.0397,
+          "threshold": 0.05,
+          "verdict": "incomplete",
+          "note": "961 < frozen 1000 minimum; the criterion itself passes but max drift is near the threshold"
+        },
+        "wrong_prior": {
+          "a": {
+            "successes": 66,
+            "rate": 0.06867845993756504
+          },
+          "b": {
+            "successes": 718,
+            "rate": 0.7471383975026015
+          },
+          "threshold": 0.8,
+          "verdict": "fail"
+        },
+        "checks_normal": {
+          "false_positive_rate": 0.0,
+          "total": 961,
+          "threshold": 0.05,
+          "verdict": "pass_expectation_met"
+        },
+        "checks_insufficiency": {
+          "detection_rate": 0.0,
+          "total": 961,
+          "threshold": 0.9,
+          "verdict": "fail"
+        }
+      },
+      "mechanism": "final scope fails like the interim one and is more extreme (cue_swap 0.0177 < chance 0.25; wrong_prior strongly direction-asymmetric; insufficiency never fires) - consistent with the oracle's information-insufficiency finding; no thresholds/scenarios/dictionary changed"
+    }
+  },
+  "ablation_arms": {
+    "budget": "2000 updates each, budget_deviation declared (not the §5 same-budget comparison), seed 1103, frozen Base = CFA4 stem 2k",
+    "nre": {
+      "status": "ok",
+      "updates": 2000,
+      "wall_seconds": 2225.3,
+      "base_frozen": true,
+      "base_loaded": true,
+      "loss_first": 0.693366,
+      "loss_last": 0.693168,
+      "loss_min": 0.693148,
+      "loss_max": 0.706864,
+      "note": "flat at ln 2 = 0.6931 -> the ratio head learns no discrimination on the uninformative task (consistent with the oracle)"
+    },
+    "bnre": {
+      "status": "ok",
+      "updates": 2000,
+      "wall_seconds": 2188.9,
+      "base_frozen": true,
+      "base_loaded": true,
+      "loss_first": 2.322817,
+      "loss_last": 0.762704,
+      "loss_min": 0.715335,
+      "note": "decreases but stays above ln 2; no evidence of usable discrimination"
+    },
+    "candidate_discrimination": {
+      "status": "ok",
+      "declared_budget": 2000,
+      "actual_updates": 4000,
+      "budget_note": "over-ran to 4000 because of the budget_start wiring defect (stage strings swapped); NOT directly comparable with the other arms' budgets",
+      "same_budget_as_main": false,
+      "loss_weights": {
+        "candidate_ce": 1.0,
+        "geometry_aux": 0.1,
+        "raw_proper_prediction": 0.0
+      },
+      "loss_first": null,
+      "loss_last": 21.699750900268555,
+      "terms_last": {
+        "candidate_ce": 21.699750900268555,
+        "raw_proper_prediction_fit": 72.76553440093994,
+        "raw_proper_prediction_prequential": 72.7654800415039
+      },
+      "base_frozen": true,
+      "code_hash_note": "this arm ran the pre-fix code (no thread cap, 6.99 s/update); the later arms ran the capped code - the difference is scheduling only, semantics identical",
+      "source": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-arm-candidate_discrimination/run_manifest.json",
+      "note": "candidate-CE-only arm; the CE term decreases on the synthetic task while the oracle shows the task carries no discriminable information, so the loss level is not evidence of usable discrimination"
+    },
+    "conditional_likelihood": {
+      "status": "stopped_by_user",
+      "updates": 850,
+      "declared_budget": 2000,
+      "note": "stopped on the user's instruction at update 850/2000; no manifest produced"
+    },
+    "not_run": [
+      "raw_frame",
+      "conditional_innovation",
+      "registration"
+    ]
+  },
+  "acceptance_5000_true": {
+    "budget": {
+      "cumulative_updates": 5000,
+      "segments": {
+        "interim": 1000,
+        "to_4000": 3000,
+        "true_5000": 1000
+      },
+      "note": "true cumulative 5000: the 4000-state checkpoint resumed by exactly +1000 updates with the fixed budget_start accounting"
+    },
+    "checkpoint": "outputs/n02-full/p1-formal/p1-measurement-seed1103-formal-cfa4-meas-5k-true/checkpoints/final.pt",
+    "scenario_records": "outputs/n02-full/p1-acceptance-5k-true/scenario_records.jsonl",
+    "seeds_run": [
+      1103
+    ],
+    "code_hash": "training/n02_full.py 4f20d98b4d2bfb70",
+    "oracle": {
+      "status": "ok",
+      "wall_seconds": 115.0,
+      "successes": 797,
+      "total": 961,
+      "rate": 0.8293444328824141,
+      "wilson95": [
+        0.8042582931534514,
+        0.8518079461131803
+      ],
+      "min_correctable": 0.95,
+      "verdict": "fail",
+      "mechanism": "bit-identical to the 4000 run (the oracle carries no trained weights): correct == map_index==0 count; true discriminability ~0.1% -> information insufficiency"
+    },
+    "behavior": {
+      "status": "ok",
+      "wall_seconds": 1584.989,
+      "families": {
+        "cue_swap": {
+          "both_correct": 11,
+          "total": 961,
+          "rate": 0.011446409989594173,
+          "wilson95": [
+            0.006403275525752726,
+            0.020379980917584705
+          ],
+          "threshold": 0.9,
+          "verdict": "fail"
+        },
+        "no_information": {
+          "within_threshold": 961,
+          "total": 961,
+          "rate": 1.0,
+          "drift_mean": 0.0089,
+          "drift_max": 0.0457,
+          "threshold": 0.05,
+          "verdict": "incomplete",
+          "note": "961 < frozen 1000 minimum; the criterion itself passes"
+        },
+        "wrong_prior": {
+          "a": {
+            "successes": 76,
+            "rate": 0.07908428720083246
+          },
+          "b": {
+            "successes": 695,
+            "rate": 0.7232049947970863
+          },
+          "threshold": 0.8,
+          "verdict": "fail"
+        },
+        "checks_normal": {
+          "false_positive_rate": 0.0,
+          "total": 961,
+          "threshold": 0.05,
+          "verdict": "pass_expectation_met"
+        },
+        "checks_insufficiency": {
+          "detection_rate": 0.0,
+          "total": 961,
+          "threshold": 0.9,
+          "verdict": "fail"
+        }
+      },
+      "mechanism": "the extra 1000 updates produced no usable capability; same failure mechanism as the 4000 scope (information insufficiency confirmed by the oracle); no thresholds/scenarios/dictionary changed"
+    },
+    "comparison_with_budget_4000": {
+      "oracle_correct": "identical (0.8293)",
+      "cue_swap": {
+        "budget_4000": 0.0177,
+        "budget_5000": 0.0114
+      },
+      "wrong_prior_a_b": {
+        "budget_4000": [
+          0.0687,
+          0.7471
+        ],
+        "budget_5000": [
+          0.0791,
+          0.7232
+        ]
+      },
+      "insufficiency_detection": {
+        "budget_4000": 0.0,
+        "budget_5000": 0.0
+      },
+      "no_information_max_drift": {
+        "budget_4000": 0.0397,
+        "budget_5000": 0.0457
+      }
+    }
+  },
+  "runs": {
+    "raw3_25k": {
+      "status": "stopped_by_user",
+      "updates": 6500,
+      "planned": 25000,
+      "s_per_update": 10.8,
+      "partial_kept": "checkpoints/update-0005000.pt"
+    },
+    "stem_2k": {
+      "status": "ok"
+    },
+    "interim_1k": {
+      "status": "ok"
+    },
+    "meas_4000": {
+      "status": "ok"
+    },
+    "meas_5000_true": {
+      "status": "ok"
+    },
+    "arms": {
+      "nre": "ok",
+      "bnre": "ok",
+      "candidate_discrimination": "ok (4000 updates, wiring defect)",
+      "conditional_likelihood": "stopped_by_user (850/2000)"
+    }
+  },
+  "stopped_by_user": {
+    "at": "2026-10-15T09:13:08Z",
+    "what": [
+      "raw3 25k pretrain (6500/25000)",
+      "conditional_likelihood arm (850/2000)"
+    ],
+    "kept": "read-only progress page service on remote 127.0.0.1:18080",
+    "record": "outputs/n02-full/p1-formal/logs/user_stop.json"
+  }
+}

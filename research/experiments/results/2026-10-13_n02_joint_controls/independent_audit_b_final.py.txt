@@ -1,0 +1,131 @@
+"""Independent frozen-gate/log audit. No diagnostic decision helper imports."""
+import hashlib,json,math
+from pathlib import Path
+import torch
+ROOT=Path('outputs/n02-joint-controls-20261013/factorial'); OUT=ROOT.parent/'independent'
+ARMS=('baseline','balanced_cf','projected_geometry','both')
+THRESHOLDS={'correct':12,'misleading':4,'unidentifiable':12,'stale':4}
+def load(p):return json.loads(Path(p).read_text())
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def close(a,b,rel=3e-6,abs_=3e-7):assert math.isclose(a,b,rel_tol=rel,abs_tol=abs_),(a,b)
+shared_inputs={};reports_audited=0
+
+def check_report(path,checkpoint,seeds):
+ global reports_audited
+ x=load(path);assert x['checkpoint_sha256']==sha(checkpoint)
+ p=torch.load(checkpoint,weights_only=False);assert x['checkpoint_step']==p['step']
+ counts={k:0 for k in ('correct','misleading','missing','unidentifiable','stale')}
+ seen=set()
+ for row in x['records']:
+  key=(row['seed'],row['condition']);assert key not in seen;seen.add(key)
+  assert row['seed'] in seeds
+  s=row['steps']; assert [a['frame'] for a in s]==list(range(8))
+  prefix=[a for a in s if not a['cue_visible']]
+  gates={'correct':s[-1]['truth_semantic_mass']>=.7,
+   'misleading':bool(prefix) and prefix[-1]['truth_semantic_mass']<=.25 and s[-1]['truth_semantic_mass']>=.7,
+   'missing':s[-1]['truth_semantic_mass']>.5,
+   'unidentifiable':all(abs(a['semantic_mass'][0]-.5)<=.15 for a in s),
+   'stale':s[max(0,row['geometry_change_step']-1)]['truth_semantic_mass']>=.7 and s[-1]['truth_semantic_mass']>=.7}
+  g=gates[row['condition']];assert g==row['gate_passed'];counts[row['condition']]+=g
+  digest=row['measurement_sha256']
+  if key in shared_inputs:assert shared_inputs[key]==digest
+  else:shared_inputs[key]=digest
+  # Duplicate IDs may continue approximate solving; only unique-evidence identity is invariant.
+  assert math.isfinite(row['duplicate_weight_delta'])
+ assert len(seen)==len(seeds)*5
+ for k,v in counts.items():assert x['gates'][k]=={'passed':v,'total':len(seeds)}
+ both=0
+ assert len(x['counterfactual']['records'])==len(seeds)
+ for row in x['counterfactual']['records']:
+  assert row['seed'] in seeds
+  passed=row['p1_when_0']<.5 and row['p1_when_1']>.5
+  assert row['both_correct']==passed;both+=passed
+  for world in (0,1):
+   key=(row['seed'],'paired',world);digest=row[f'measurement_sha256_{world}']
+   if key in shared_inputs:assert shared_inputs[key]==digest
+   else:shared_inputs[key]=digest
+ assert both==x['counterfactual']['both_correct']
+ reports_audited+=1
+ return {'counts':counts,'both':both,'qualified':all(counts[k]>=v for k,v in THRESHOLDS.items()) and both>=8}
+
+def main():
+ torch.set_num_threads(1)
+ m=load(ROOT/'manifest.json');summary=load(ROOT/'summary.json');before_holdout=load(ROOT/'decision_before_holdout.json')
+ for p,h in m['source_sha256'].items():assert sha(p)==h,p
+ for p,h in m['checkpoint_sha256'].items():assert sha(p)==h,p
+ dev={a:{} for a in ARMS};hold={a:{} for a in ARMS};log_results=[];starts={};total=0;control_count=0;finite=True
+ for seed in range(3):
+  orig=Path(m['checkpoint_root'])/f'seed{seed}/checkpoint200.pt';initial=torch.load(orig,weights_only=False)
+  check_report(ROOT/f'seed{seed}/dev_step0.json',orig,range(740,756))
+  assert load(ROOT/f'seed{seed}/resources.json')['finite']
+  for arm in ARMS:
+   path=ROOT/f'seed{seed}'/arm
+   logs=[json.loads(line) for line in (path/'train_log.jsonl').read_text().splitlines()]
+   assert len(logs)==200;total+=len(logs);starts[seed,arm]=logs[0]
+   applied=0;opposed=0;adam_ascent=0;max_dot_fraction=0.
+   project=arm in ('projected_geometry','both');balanced=arm in ('balanced_cf','both')
+   for i,row in enumerate(logs,1):
+    assert row['diagnostic_step']==i and row['total_seen']==200+i and row['seed']==seed and row['arm']==arm
+    assert row['input_sha256']==m['train_input_sha256'][str(i-1)]
+    close(row['loss'],sum(row['weighted'].values()),abs_=3e-6)
+    c=row['components'];cf=c['common']+(m['lambda'] if balanced else 1)*c['difference']+c['log_variance']
+    close(cf,row['unweighted']['counterfactual'],abs_=3e-6)
+    p=row['projection'];u=row['update'];dot=p['mixture_geometry_dot_before'];norm=p['geometry_gradient_norm']
+    expected_coeff=dot/(norm*norm) if dot<0 and norm>0 else 0.
+    close(p['projection_coefficient'],expected_coeff,rel=1e-10,abs_=1e-12)
+    assert p['opposing_component_found']==(expected_coeff!=0)
+    assert p['intervention_enabled']==project and p['applied']==(project and expected_coeff!=0)
+    opposed+=p['opposing_component_found'];applied+=p['applied'];adam_ascent+=u['geometry_gradient_dot_actual_delta']>0
+    if p['applied']:
+     frac=abs(p['mixture_geometry_dot_after'])/max(abs(dot),1e-30);max_dot_fraction=max(max_dot_fraction,frac)
+     assert frac<3e-5
+    else:
+     assert p['mixture_geometry_dot_after']==dot
+     assert p['intervened_global_norm']==p['baseline_global_norm']
+    clip=initial['run']['grad_clip']
+    close(row['baseline_clip_factor'],min(1,clip/(p['baseline_global_norm']+1e-6)),rel=1e-10,abs_=1e-12)
+    close(u['clip_factor'],min(1,clip/(p['intervened_global_norm']+1e-6)),rel=1e-10,abs_=1e-12)
+    assert ('local_baseline_clip_control' in row)==(project and i==1)
+    if 'local_baseline_clip_control' in row:
+     control_count+=1;close(row['local_baseline_clip_control']['clip_factor'],row['baseline_clip_factor'],rel=0,abs_=0)
+   stages={}
+   for step in (100,200):
+    checkpoint=path/f'diagnostic_step{step}.pt';payload=torch.load(checkpoint,weights_only=False)
+    assert payload['step']==payload['total_seen']==200+step and payload['diagnostic_step']==step
+    assert payload['diagnostic_arm']==arm and payload['diagnostic_lambda']==m['lambda']
+    assert payload['config']==initial['config']
+    assert any(not torch.equal(v,initial['model'][k]) for k,v in payload['model'].items())
+    assert all(torch.isfinite(v).all() for v in payload['model'].values())
+    oldstates=initial['optimizer']['state'];newstates=payload['optimizer']['state']
+    assert set(oldstates)<=set(newstates)
+    increments=[]
+    for k,v in newstates.items():
+     increment=int(v['step'])-(int(oldstates[k]['step']) if k in oldstates else 0);assert 0<=increment<=step;increments.append(increment)
+     assert all(torch.isfinite(a).all() for a in v.values() if torch.is_tensor(a))
+    assert max(increments)==step
+    stages[step]=check_report(path/f'dev_step{step}.json',checkpoint,range(740,756))
+   dev[arm][str(seed)]=stages
+   hold[arm][str(seed)]=check_report(path/'holdout_step200.json',path/'diagnostic_step200.pt',range(760,776))
+   log_results.append({'seed':seed,'arm':arm,'opposed_steps':opposed,'projection_applied_steps':applied,'geometry_Adam_update_ascent_steps':adam_ascent,'max_projected_dot_relative_to_original':max_dot_fraction,'optimizer_steps':200})
+  for projectarm,basearm in (('projected_geometry','baseline'),('both','balanced_cf')):
+   control=starts[seed,projectarm]['local_baseline_clip_control'];baseline=starts[seed,basearm]['update']
+   # Same initial weights, data, Adam states and original clip. Geometry-only intervention implies identical other parameter updates.
+   assert control['nongeometry_parameter_delta_norm']==baseline['nongeometry_parameter_delta_norm']
+   assert control['clip_factor']==baseline['clip_factor']
+ contracts=load(ROOT/'preflight.json')['passed'] and m['contracts_passed'];decisions={}
+ for arm in ARMS:
+  sums={str(t):sum(sum(dev[arm][str(s)][t]['counts'][k] for k in ('misleading','unidentifiable','stale')) for s in range(3)) for t in (100,200)}
+  qualified={str(s):dev[arm][str(s)][200]['qualified'] for s in range(3)}
+  hg={str(s):hold[arm][str(s)]['qualified'] for s in range(3)}
+  nondecreasing=sums['200']>=sums['100']
+  dpass=sum(qualified.values())>=2 and nondecreasing and contracts and finite
+  decision={'seed_qualified':qualified,'behavior_count_sum':sums,'nondecreasing':nondecreasing,'contracts_passed':contracts,'finite':finite,'development_gates_pass':dpass}
+  assert decision==before_holdout[arm]==summary['decision'][arm]
+  assert hg==summary['holdout_seed_qualified'][arm]
+  support=dpass and sum(hg.values())>=2;assert support==summary['evidence_supports_further_training'][arm]
+  decisions[arm]={'development':decision,'holdout_qualified':hg,'supports_more_training':support}
+ assert total==summary['diagnostic_optimizer_updates']==2400
+ assert control_count==summary['disposable_clip_controls']==6
+ receipt={'passed':True,'detailed_behavior_reports':reports_audited,'gates_recomputed_from_frame_trajectories':reports_audited*80,'pair_decisions_recomputed_from_masses':reports_audited*16,'training_logs_checked':total,'saved_models_and_Adam_steps_checked':24,'fixed_clip_controls_checked':control_count,'all_arms_share_input_hashes':True,'all_saved_models_differ_from_original_200':True,'all_source_and_checkpoint_hashes_unchanged':True,'decision':decisions,'development':dev,'holdout':hold,'projection_and_Adam_log_checks':log_results,'limits':['Projection scalars and Adam deltas checked for internal consistency; full 2400 gradient/Adam trajectories not rerun.','Behavior gate arithmetic recomputed from saved detailed trajectories, not from summary; one saved model forward rerun is a separate receipt.','Scope of direct gradient edit established by independent source/test review; global clipping and subsequent trajectories may indirectly change other parameters.']}
+ (OUT/'audit_b_final.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps({'passed':True,'reports':reports_audited,'updates':total,'decisions':decisions},indent=2))
+if __name__=='__main__':main()

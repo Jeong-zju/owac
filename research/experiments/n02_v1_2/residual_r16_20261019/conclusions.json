@@ -1,0 +1,66 @@
+{
+  "protocol": "n02-state-baseline-visual-residual-r16-v1",
+  "completed": true,
+  "actual_updates": 6144,
+  "encoder_updates": 0,
+  "pi_updates": 0,
+  "closed_loops": 0,
+  "primary_result": "Bounded residual learning markedly improves RAW over prior direct action readout, but does not establish positive RAW geometry/action generalization over the fixed state baseline.",
+  "normal_test_joint_deg": {
+    "fixed_state_baseline": 11.003989520079271,
+    "state_residual": 10.596977655807443,
+    "raw_residual": 11.389330988952334,
+    "native_residual": 10.210248679912986
+  },
+  "raw": {
+    "versus_prior_r15_direct_head_deg": [
+      16.604565542258246,
+      11.389330988952334
+    ],
+    "normal_baseline_relative_improvement_percent": -3.5018342044939255,
+    "both_seeds_normal_worse_than_baseline": true,
+    "train_deg": 1.1984206648792801,
+    "validation_deg": 5.930632842558461,
+    "selected_steps": [
+      256,
+      384
+    ],
+    "selected_gates": [
+      1.0,
+      1.0
+    ],
+    "interpretation": "Training fit and the reserved validation episode improve, but Normal historical holdout worsens. Optimizing longer past512 does not improve validation selection. This supports remaining generalization/validation-coverage limitations, not an isolated encoder design defect.",
+    "partial_benefits": "RAW improves mean Over joint error and Normal gripper MAE, while Normal full-block joint RMS and normalized14 MSE worsen; benefit is not uniform across targets/scenes"
+  },
+  "native": {
+    "normal_baseline_relative_improvement_percent": 7.2132097065153005,
+    "normal_gain_beyond_state_residual_deg": 0.38672897589445654,
+    "both_seeds_normal_better_than_baseline": true,
+    "interpretation": "Small positive Normal increment beyond matched nominal state-residual control. Only3 Normal heldout episodes, two seeds; no statistical population or robustness claim."
+  },
+  "selection": "Only validation normalized14 MSE chooses checkpoint/gate, full50-step action supervision. All6 selected gates1; zero candidate retained but not selected. Validation fallback did not protect RAW Normal holdout. No test-driven gate override.",
+  "regression": "RAW selected steps256/384 remain unchanged at512/1024 budgets. Native selected1024/704. Last weights retained; cosine3e-4 to3e-5 reduced previous gross fitting regression; no assumption of monotonic generalization.",
+  "recommended_next": "Do not lengthen RAW residual training on this split just to force a positive result. Before joint encoder updates, strengthen episode-level validation coverage (predeclare leave-one-training-episode-out if retaining5 demonstrations) and inspect scene/phase-specific residual errors, then compare residual objective with limited task-supervised encoder adaptation under the same baseline. Keep historical test identity and no test-based tuning.",
+  "limits": [
+    "5train53windows,1validation11windows,5historicaltest55windows:3Normal33/2Over22",
+    "historical development holdout, not newblindtest",
+    "baseline selected earlier on samevalidation and parentRAW850 has prior training-partition exposure",
+    "native pretraining and original-light RGB replay differ; Over column not causal imaging-robustness comparison",
+    "same nominal residual architecture/init/order, zero-visual state arm has fewer active information degrees of freedom",
+    "no RGB teacher or simulator hidden-state runtime inputs",
+    "offline action regression only; RAW closed-loop success remains unachieved",
+    "r15 direct head comparison also changes baseline pretraining/warm start, loss parameterization, learning rate and schedule; the numerical gain is not an isolated residual-architecture causal effect"
+  ],
+  "checks": {
+    "targeted_tests": 64,
+    "make_check": "passed458Pythonfiles",
+    "saved_weight_predictions": "all6runsx3budgetsx2versionsx3splits exact reload; baselineexactr15",
+    "source_data": "dataset/features hashes unchanged; no optimizer holdout exposure"
+  },
+  "postlaunch_maintenance": {
+    "description": "Bind synchronous callback loop variables explicitly for B023 lint; numerical training logic unchanged. Original launched script retained as run_launched.py.txt matching launch manifest.",
+    "original_sha256": "083b37fd849c9e417e18d228db4f29e251e5718547e8355b8af20b9a8c572268",
+    "current_sha256": "b1307793765a0aef9582eb06a72cd894fa57fc6a273bda48e11a9a8de62f5882"
+  },
+  "commit_push": false
+}

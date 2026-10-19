@@ -1,0 +1,2689 @@
+{
+  "train": {
+    "module": "owac.frameworks.n02_full.data_v12",
+    "dataset_format": "robotwin",
+    "partition": "train",
+    "history": 8,
+    "batch_size": 1,
+    "stride": 1,
+    "observation_stride": 1,
+    "window": {
+      "observation_stride": 1,
+      "burst_frames": 1,
+      "rnn_frames": 8,
+      "action_horizon": 50,
+      "action_offset": 1,
+      "state_source_key": "actions",
+      "executed_action_available": false
+    },
+    "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "measurement_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "manifest": {
+      "version": "n02-full-partition-v2",
+      "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+      "seed": 1103,
+      "fractions": {
+        "calibration": 0.1,
+        "dev": 0.1,
+        "train": 0.8
+      },
+      "partition_sizes": {
+        "calibration": 67,
+        "dev": 65,
+        "train": 500
+      },
+      "source": {
+        "kind": "receipt_file",
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+        "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+      }
+    },
+    "partition_verification": {
+      "disjoint": true,
+      "groups_single_partition": true,
+      "violations": [],
+      "counts": {
+        "partitions": {
+          "calibration": {
+            "files": 67,
+            "frames": 15413,
+            "groups": 67
+          },
+          "dev": {
+            "files": 65,
+            "frames": 15414,
+            "groups": 65
+          },
+          "train": {
+            "files": 500,
+            "frames": 116117,
+            "groups": 500
+          }
+        },
+        "groups": 632,
+        "files": 632,
+        "frames": 146944
+      }
+    },
+    "anchor_table": {
+      "version": "n02-full-anchor-v1",
+      "sha256": "5b6f18c81f87e9eac5ae0ebbf6831550009fca699a6eacfc88a0027ad97669aa",
+      "entries": 3668,
+      "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50; explicit task subset of verified frozen parent"
+    },
+    "frozen_anchor_receipt": {
+      "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-train-anchors.json.gz",
+      "gzip_sha256": "fdac10761736a2c863bf4d92ee75e3fcbcc8a406bb2cd34614515d151edaaddf",
+      "json_sha256": "57f1576da96026810339a5925b7390545149cba3095056b382b7b176c024d230",
+      "version": "n02-full-anchor-v1",
+      "partition": "train",
+      "dataset_format": "robotwin",
+      "entries": 116117,
+      "window": {
+        "action_horizon": 50,
+        "action_offset": 1,
+        "burst_frames": 1,
+        "executed_action_available": false,
+        "observation_stride": 1,
+        "rnn_frames": 1,
+        "state_source_key": "actions"
+      },
+      "reproduced_from_manifest": true,
+      "reproduced_entries": 116117
+    },
+    "frozen_anchor_identity_preserved": false,
+    "stats": {
+      "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+      "mode": "zscore",
+      "epsilon": 1e-08,
+      "epsilon_mode": "add"
+    },
+    "selection": {
+      "tasks": [
+        "grab_roller"
+      ],
+      "excluded_episodes": [
+        "grab_roller/episode_000000"
+      ],
+      "parent_anchor_sha256": "0dd2dff0a3fa6245c0c89934005032ca0fa1853974c6b222f9e6958570c1b791",
+      "parent_entries": 116117,
+      "selected_entries": 3668,
+      "selected_episodes": [
+        "grab_roller/episode_000001",
+        "grab_roller/episode_000003",
+        "grab_roller/episode_000004",
+        "grab_roller/episode_000005",
+        "grab_roller/episode_000006",
+        "grab_roller/episode_000007",
+        "grab_roller/episode_000009",
+        "grab_roller/episode_000010",
+        "grab_roller/episode_000011",
+        "grab_roller/episode_000012",
+        "grab_roller/episode_000013",
+        "grab_roller/episode_000014",
+        "grab_roller/episode_000015",
+        "grab_roller/episode_000018",
+        "grab_roller/episode_000020",
+        "grab_roller/episode_000021",
+        "grab_roller/episode_000022",
+        "grab_roller/episode_000023",
+        "grab_roller/episode_000024",
+        "grab_roller/episode_000025",
+        "grab_roller/episode_000026",
+        "grab_roller/episode_000028",
+        "grab_roller/episode_000029",
+        "grab_roller/episode_000031",
+        "grab_roller/episode_000032",
+        "grab_roller/episode_000033",
+        "grab_roller/episode_000034",
+        "grab_roller/episode_000035",
+        "grab_roller/episode_000036",
+        "grab_roller/episode_000038",
+        "grab_roller/episode_000039",
+        "grab_roller/episode_000040",
+        "grab_roller/episode_000042",
+        "grab_roller/episode_000043",
+        "grab_roller/episode_000044",
+        "grab_roller/episode_000045",
+        "grab_roller/episode_000046",
+        "grab_roller/episode_000049"
+      ]
+    }
+  },
+  "dev": {
+    "module": "owac.frameworks.n02_full.data_v12",
+    "dataset_format": "robotwin",
+    "partition": "dev",
+    "history": 8,
+    "batch_size": 1,
+    "stride": 1,
+    "observation_stride": 1,
+    "window": {
+      "observation_stride": 1,
+      "burst_frames": 1,
+      "rnn_frames": 8,
+      "action_horizon": 50,
+      "action_offset": 1,
+      "state_source_key": "actions",
+      "executed_action_available": false
+    },
+    "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "measurement_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "manifest": {
+      "version": "n02-full-partition-v2",
+      "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+      "seed": 1103,
+      "fractions": {
+        "calibration": 0.1,
+        "dev": 0.1,
+        "train": 0.8
+      },
+      "partition_sizes": {
+        "calibration": 67,
+        "dev": 65,
+        "train": 500
+      },
+      "source": {
+        "kind": "receipt_file",
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+        "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+      }
+    },
+    "partition_verification": {
+      "disjoint": true,
+      "groups_single_partition": true,
+      "violations": [],
+      "counts": {
+        "partitions": {
+          "calibration": {
+            "files": 67,
+            "frames": 15413,
+            "groups": 67
+          },
+          "dev": {
+            "files": 65,
+            "frames": 15414,
+            "groups": 65
+          },
+          "train": {
+            "files": 500,
+            "frames": 116117,
+            "groups": 500
+          }
+        },
+        "groups": 632,
+        "files": 632,
+        "frames": 146944
+      }
+    },
+    "anchor_table": {
+      "version": "n02-full-anchor-v1",
+      "sha256": "a61fe6dd891931b4e201e7db935964289e3f1fb0cb7d583b31ad44d780956e46",
+      "entries": 469,
+      "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50; explicit task subset of verified frozen parent"
+    },
+    "frozen_anchor_receipt": {
+      "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-dev-anchors.json.gz",
+      "gzip_sha256": "a3ed6a11a85a79c72d320e6a95537fcb3dee4ed5c672d66cef92f2d5cda5e945",
+      "json_sha256": "32c1bae7ee1fbc708e2fe7fc42409575090a3fafd68afcb85a2888c7e155c8be",
+      "version": "n02-full-anchor-v1",
+      "partition": "dev",
+      "dataset_format": "robotwin",
+      "entries": 15414,
+      "window": {
+        "action_horizon": 50,
+        "action_offset": 1,
+        "burst_frames": 1,
+        "executed_action_available": false,
+        "observation_stride": 1,
+        "rnn_frames": 1,
+        "state_source_key": "actions"
+      },
+      "reproduced_from_manifest": true,
+      "reproduced_entries": 15414
+    },
+    "frozen_anchor_identity_preserved": false,
+    "stats": {
+      "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+      "mode": "zscore",
+      "epsilon": 1e-08,
+      "epsilon_mode": "add"
+    },
+    "selection": {
+      "tasks": [
+        "grab_roller"
+      ],
+      "excluded_episodes": [
+        "grab_roller/episode_000000"
+      ],
+      "parent_anchor_sha256": "a5e250cf352df4fe354154e923786c26ae8c16d400da5c0d95cbe39b52d39c28",
+      "parent_entries": 15414,
+      "selected_entries": 469,
+      "selected_episodes": [
+        "grab_roller/episode_000008",
+        "grab_roller/episode_000016",
+        "grab_roller/episode_000017",
+        "grab_roller/episode_000019",
+        "grab_roller/episode_000047"
+      ]
+    }
+  },
+  "train_frames": [
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 50
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 58
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 75
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 83
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "frame": 92
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 42
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 50
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 67
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 84
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "frame": 93
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "frame": 100
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 43
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 60
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 69
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 77
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 86
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "frame": 95
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 26
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 35
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 44
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 53
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 62
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 71
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 89
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "frame": 98
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "frame": 91
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000009.npz",
+      "frame": 100
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 42
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 50
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 67
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 84
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000010.npz",
+      "frame": 93
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000011.npz",
+      "frame": 91
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 26
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 35
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 44
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 53
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 62
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 71
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 89
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000012.npz",
+      "frame": 98
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 65
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 73
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000013.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 42
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 68
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 85
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000014.npz",
+      "frame": 94
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 42
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 50
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 67
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 84
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000015.npz",
+      "frame": 93
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 7
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 15
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 23
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 31
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 39
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 47
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 55
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 71
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 79
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000018.npz",
+      "frame": 87
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000020.npz",
+      "frame": 100
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 19
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 29
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 38
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 48
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 58
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 68
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 77
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 87
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 97
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000021.npz",
+      "frame": 107
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000022.npz",
+      "frame": 100
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 65
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 73
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000023.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 48
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 56
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 64
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000024.npz",
+      "frame": 88
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 48
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 56
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 64
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000025.npz",
+      "frame": 89
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000026.npz",
+      "frame": 91
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000028.npz",
+      "frame": 99
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 43
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 60
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 69
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 77
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 86
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000029.npz",
+      "frame": 95
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000031.npz",
+      "frame": 91
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 36
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 45
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 54
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 63
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000032.npz",
+      "frame": 99
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 43
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 60
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 69
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 77
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 86
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000033.npz",
+      "frame": 95
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 43
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 60
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 69
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 77
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 86
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000034.npz",
+      "frame": 95
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 42
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 51
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 68
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 85
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000035.npz",
+      "frame": 94
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 48
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 56
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 64
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 72
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000036.npz",
+      "frame": 88
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 11
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 23
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 35
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 47
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 59
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 70
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 94
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 106
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 118
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000038.npz",
+      "frame": 130
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 65
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 73
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000039.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 82
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000040.npz",
+      "frame": 91
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 26
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 35
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 44
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 53
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 62
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 71
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 80
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 89
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000042.npz",
+      "frame": 98
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 17
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 26
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 34
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 43
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 52
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 61
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 69
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 78
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 87
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000043.npz",
+      "frame": 96
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 24
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 32
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 40
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 49
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 65
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 73
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 81
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000044.npz",
+      "frame": 90
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 19
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 28
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 38
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 47
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 57
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 76
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 85
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 95
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000045.npz",
+      "frame": 105
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 8
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 16
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 25
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 33
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 41
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 50
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 58
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 66
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 75
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 83
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000046.npz",
+      "frame": 92
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 0
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 9
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 18
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 27
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 37
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 46
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 55
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 64
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 74
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 83
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 92
+    },
+    {
+      "partition": "train",
+      "path": "data/robotwin2/raw/grab_roller/episode_000049.npz",
+      "frame": 102
+    }
+  ],
+  "dev_frames": [
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000008.npz",
+      "frame": 0
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000008.npz",
+      "frame": 30
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000008.npz",
+      "frame": 60
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000008.npz",
+      "frame": 91
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000016.npz",
+      "frame": 0
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000016.npz",
+      "frame": 32
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000016.npz",
+      "frame": 64
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000016.npz",
+      "frame": 96
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000017.npz",
+      "frame": 0
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000017.npz",
+      "frame": 31
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000017.npz",
+      "frame": 63
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000017.npz",
+      "frame": 95
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000019.npz",
+      "frame": 0
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000019.npz",
+      "frame": 30
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000019.npz",
+      "frame": 60
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000019.npz",
+      "frame": 90
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000047.npz",
+      "frame": 0
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000047.npz",
+      "frame": 30
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000047.npz",
+      "frame": 61
+    },
+    {
+      "partition": "dev",
+      "path": "data/robotwin2/raw/grab_roller/episode_000047.npz",
+      "frame": 92
+    }
+  ],
+  "train_pool_shape": [
+    456,
+    3,
+    3,
+    240,
+    320
+  ],
+  "dev_pool_shape": [
+    20,
+    3,
+    3,
+    240,
+    320
+  ]
+}

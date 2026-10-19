@@ -1,0 +1,45 @@
+{
+  "version": "n02-rawvla-split-v1",
+  "split_unit": "acquisition_source",
+  "seed": 1,
+  "val_fraction": 0.25,
+  "dataset_format": "libero",
+  "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw",
+  "train_sources": [
+    "libero_10_no_noops_1.0.0_lerobot"
+  ],
+  "val_sources": [
+    "libero_goal_no_noops_1.0.0_lerobot"
+  ],
+  "train_episodes": [
+    "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz"
+  ],
+  "val_episodes": [
+    "libero_goal_no_noops_1.0.0_lerobot/episode_000000/variant_00.npz"
+  ],
+  "episodes": [
+    {
+      "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+      "relative_path": "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00.npz",
+      "acquisition_source": "libero_10_no_noops_1.0.0_lerobot",
+      "episode_group_id": "libero_10_no_noops_1.0.0_lerobot/episode_000001/variant_00",
+      "num_frames": 293,
+      "size_bytes": 115527320,
+      "sha256": "9dd7479f290841d04809889c2024323fcf0ad895e5471113e6f2e2bc28af23e7"
+    },
+    {
+      "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_goal_no_noops_1.0.0_lerobot/episode_000000/variant_00.npz",
+      "relative_path": "libero_goal_no_noops_1.0.0_lerobot/episode_000000/variant_00.npz",
+      "acquisition_source": "libero_goal_no_noops_1.0.0_lerobot",
+      "episode_group_id": "libero_goal_no_noops_1.0.0_lerobot/episode_000000/variant_00",
+      "num_frames": 127,
+      "size_bytes": 50035100,
+      "sha256": "2d9c4c652efd47812724fe0fa292e55e55dbf949546cd909bf391e65fc23fc2e"
+    }
+  ],
+  "num_frames": {
+    "train": 293,
+    "validation": 127
+  },
+  "notes": "Split unit is the acquisition source (LIBERO suite directory / RoboTwin task directory). Adjacent frames are never separated and every derived variant of an episode stays on the same side. Formal closed-loop manifests are tracked separately and are not produced here."
+}

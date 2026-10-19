@@ -1,0 +1,23 @@
+{
+  "scope": "independent diagnostic RGB reference; no RAW teacher or policy optimization",
+  "samples": 384,
+  "scene_split": [
+    32,
+    8,
+    8
+  ],
+  "weights": "original pi05_robotwin vision tower and multimodal projector, strict full tensor match",
+  "preprocessing": "actual pinned PI0._image_to_tensor",
+  "heads": [
+    "linear_bottleneck",
+    "mlp"
+  ],
+  "seeds": [
+    13019,
+    13020,
+    13021
+  ],
+  "updates_per_head": 600,
+  "selection": "validation normalized MSE only",
+  "policy_updates": 0
+}

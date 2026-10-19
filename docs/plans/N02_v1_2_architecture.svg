@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 760" role="img" aria-labelledby="title desc">
+  <title id="title">N02 v1.2 规划架构</title>
+  <desc id="desc">RAW 编码后，直接空间特征与测量约束的潜在解释共同读出到 π0.5。内部循环不新增测量；执行动作后的外部循环获得下一次观测。全部模块为待实现方案。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#4c6678"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#247863"/></marker>
+    <style>
+      text{font-family:system-ui,"Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#183447}
+      .title{font-size:28px;font-weight:700}.sub{font-size:17px;fill:#536c7b}.head{font-size:20px;font-weight:650}.body{font-size:17px}.small{font-size:16px;fill:#536c7b}
+      .line{fill:none;stroke:#4c6678;stroke-width:2.5;marker-end:url(#arrow)}.feedback{fill:none;stroke:#247863;stroke-width:3;marker-end:url(#green)}
+      .box{stroke-width:1.6;rx:12}.blue{fill:#ecf4ff;stroke:#7ea4ce}.greenbox{fill:#edf8f3;stroke:#8fbca9}.orange{fill:#fff4e7;stroke:#d6b081}
+    </style>
+  </defs>
+  <rect width="1240" height="760" rx="18" fill="#f8fafc"/>
+  <text x="42" y="52" class="title">N02 v1.2 RAW 测量约束的动作表征</text>
+  <text x="42" y="84" class="sub">规划架构 · P2 待实施 · 非模型实测结果</text>
+  <rect x="40" y="132" width="250" height="110" class="box blue"/>
+  <text x="60" y="168" class="head">多相机 RAW 测量</text>
+  <text x="60" y="200" class="body">实际成像参数、有效性</text>
+  <text x="60" y="225" class="small">唯一采集身份，不重复计证据</text>
+  <rect x="350" y="132" width="280" height="110" class="box blue"/>
+  <text x="370" y="168" class="head">ConvNeXt V2-Base</text>
+  <text x="370" y="200" class="body">保留 stride 4/8/16 特征</text>
+  <text x="370" y="225" class="small">空间细节直接进入策略读出</text>
+  <rect x="735" y="132" width="450" height="110" class="box greenbox"/>
+  <text x="755" y="168" class="head">潜在解释与因果历史</text>
+  <text x="755" y="200" class="body">SAVi 来源的预测—校正，K=4 起步</text>
+  <text x="755" y="225" class="small">本体状态、已执行动作；不读未来标签</text>
+  <path d="M290 187 H350" class="line"/>
+  <path d="M630 187 H735" class="line"/>
+  <rect x="735" y="323" width="450" height="110" class="box greenbox"/>
+  <text x="755" y="359" class="head">RAW 测量预测与比较</text>
+  <text x="755" y="391" class="body">局部结构、噪声、饱和、成像干扰</text>
+  <text x="755" y="416" class="small">相对支持与独立预测检查分开</text>
+  <path d="M960 242 V323" class="feedback"/>
+  <path d="M290 215 H320 V378 H735" class="line"/>
+  <text x="345" y="362" class="small">已有真实测量</text>
+  <rect x="735" y="510" width="450" height="110" class="box greenbox"/>
+  <text x="755" y="546" class="head">修正、替代解释或保留歧义</text>
+  <text x="755" y="578" class="body">4 轮起步；完整目标决定接受</text>
+  <text x="755" y="603" class="small">失效状态和缓存重建，首版允许全局重算</text>
+  <path d="M960 433 V510" class="feedback"/>
+  <path d="M1185 565 H1211 V184 H1185" class="feedback"/>
+  <text x="1035" y="477" class="small">同测量内部循环</text>
+  <rect x="350" y="510" width="280" height="110" class="box orange"/>
+  <text x="370" y="546" class="head">Perceiver IO 读出</text>
+  <text x="370" y="578" class="body">细节、一致状态与不确定性</text>
+  <text x="370" y="603" class="small">直接对接 π0.5 视觉 token</text>
+  <path d="M735 565 H630" class="line"/>
+  <path d="M490 242 V510" class="line"/>
+  <rect x="40" y="510" width="250" height="110" class="box orange"/>
+  <text x="60" y="546" class="head">π0.5 动作后端</text>
+  <text x="60" y="578" class="body">语言、状态与视觉特征</text>
+  <text x="60" y="603" class="small">生成并执行动作 chunk</text>
+  <path d="M350 565 H290" class="line"/>
+  <path d="M165 620 V690 H18 V187 H40" class="line"/>
+  <text x="190" y="691" class="body">执行动作后获得新观测：机器人外部循环</text>
+  <text x="42" y="733" class="small">主链 RAW → 特征 → 动作；不生成策略 RGB 输入。候选、循环次数与窗口长度是配置起点。</text>
+</svg>

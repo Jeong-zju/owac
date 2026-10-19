@@ -1,0 +1,113 @@
+{
+  "verified_at": "2026-10-16T18:37:58.700468+00:00",
+  "optimizer_updates": 0,
+  "new_policy_closed_loops": 0,
+  "production_model_or_training_config_changes": false,
+  "local_checks": {
+    "make_check_exit": 0,
+    "ruff_review_scripts_exit": 0,
+    "targeted_pytest": "9 passed in 0.63s",
+    "tests": [
+      "tests/test_n02_r9_task.py",
+      "tests/test_rawvla_language.py"
+    ]
+  },
+  "source_parity_before_documentation": {
+    "matched": 287,
+    "count": 287,
+    "mismatched": [],
+    "git_head": "861c46f67fff552c81fff89c5116c63b815224c5"
+  },
+  "current_local_runtime_files_matched": 201,
+  "remote": {
+    "runtime_source_files_checked": 201,
+    "runtime_source_mismatches": [],
+    "gpu": [
+      "0, 0 %, 2 MiB",
+      "1, 0 %, 2 MiB"
+    ],
+    "processes": {
+      "owac-n02-r10-review": "EXITED",
+      "owac-n02-r10-precision": "EXITED",
+      "owac-n02-v12-monitor": "RUNNING"
+    },
+    "monitor_http": 200
+  },
+  "runtime_probe": {
+    "weight_sets": 3,
+    "windows_each": 4,
+    "same_solver_assertions": 12,
+    "same_solver_max_abs": 0,
+    "repeat_sample_max_abs": 0,
+    "counterfactuals_are_not_trained_or_closed_loop_models": true
+  },
+  "precision_probe": {
+    "optimizer_updates": 0,
+    "rows": [
+      {
+        "mode": "production",
+        "index": 0,
+        "prefix_dtype": "torch.bfloat16",
+        "max_abs": 0.0625,
+        "rms": 0.009032752364873886,
+        "control_max_abs": 0.0625
+      },
+      {
+        "mode": "production",
+        "index": 1,
+        "prefix_dtype": "torch.bfloat16",
+        "max_abs": 0.09375,
+        "rms": 0.01217808946967125,
+        "control_max_abs": 0.09375
+      },
+      {
+        "mode": "bf16_no_tf32",
+        "index": 0,
+        "prefix_dtype": "torch.bfloat16",
+        "max_abs": 0.0625,
+        "rms": 0.010755949653685093,
+        "control_max_abs": 0.0625
+      },
+      {
+        "mode": "bf16_no_tf32",
+        "index": 1,
+        "prefix_dtype": "torch.bfloat16",
+        "max_abs": 0.09375,
+        "rms": 0.012619620189070702,
+        "control_max_abs": 0.09375
+      },
+      {
+        "mode": "fp32_no_tf32",
+        "index": 0,
+        "prefix_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "rms": 0.0,
+        "control_max_abs": 0.0
+      },
+      {
+        "mode": "fp32_no_tf32",
+        "index": 1,
+        "prefix_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "rms": 0.0,
+        "control_max_abs": 0.0
+      }
+    ]
+  },
+  "review_artifact_sha256": {
+    "static_audit.py": "75ea4e19fd6a21bb4fc61df153503043ac94f46d3baf7f339cb90c205c13985f",
+    "receipt_probe.py": "1937682a7357a0cdf56b2bb4d44c653cdfb1c33dd94394aa65c32fcba2ada3dd",
+    "source_parity.json": "e6eaf244e746758980e7662daf13fe25b00a54d470df13a89900fc4e473a5571",
+    "static_audit.json": "ac70b53b9508f447f212ef1e0d14064d78b1a0ed207118294da49b47f2b03f37",
+    "precision_probe.py": "f299acf51636b318eceaac43f111a0cc08790440ebd0b9acf8d59f845ac228f6",
+    "runtime_probe.py": "4ef129572e2b37b0414f7236fffa95d0982f63fe2048dbb5c777e7ef3ab8489c",
+    "runtime_summary.json": "5ebed6086c3f75d5d9d85c4afe2ebd5547caa70344862d2080e6d010edc91bee",
+    "receipts/runtime_probe.json": "be8db8f043ea0888089977e339b04ba0d7ce1929f963a263391975b95d415752",
+    "receipts/ancestor_exposures.json": "aa2b5efe1e8c808ea4d96948383a218d8f354f9d83f0f0293f939101a4a9543b",
+    "receipts/receipt_probe.json": "72de473fd1fd402c539cc85e7e32473541fca35be80e677fa9214058b49bd53a",
+    "receipts/actions.npz": "5a1823c73ef29a09349e8dacf0770fcd7d9b1adf238562f22eb7321184b73601",
+    "receipts/ancestor_identity.json": "a51c9ed7d6e9f42c830536693a40b2a40b7259024c825649a0786d8e8754c64c",
+    "receipts/precision_probe.json": "8df39d41c0ca1818cfcaedc65cf8c6c0b3d424616f1fc20e75356d62a80b3aa7"
+  },
+  "no_commit_or_push": true
+}

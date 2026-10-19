@@ -1,0 +1,2921 @@
+{
+  "dataset_format": "robotwin",
+  "checked_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+  "evidence_kind": "real_cache",
+  "real_cache_evidence": true,
+  "expected_fields": {
+    "measurement_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "conversion": "float32 kept in the original HDR-derived float scale, no /255 and no per-frame max normalisation",
+    "state_source_key": "actions",
+    "state_source_width": 14,
+    "state_source_expression": "actions[t]",
+    "action_supervision_expression": "actions[t+1:t+51]",
+    "loader_default_action_normalisation": "starvla_minmax",
+    "formal_statistics": "explicit checkpoint MEAN_STD / zscore with epsilon",
+    "executed_action_window": 50,
+    "required_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32",
+      "actions",
+      "actions",
+      "metadata_json"
+    ]
+  },
+  "search_pattern": "data/robotwin2/raw/**/*.npz",
+  "status": "ok",
+  "files_total": 632,
+  "files_checked": 8,
+  "truncated": true,
+  "files": [
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000000.npz",
+      "sha256": "0d0c834f5d0c1b22207663eeae34f0b0c7564beacffa279166f6afc6957b3316",
+      "file_bytes": 257150606,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 93,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.009070017375051975,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.0014487779699265957,
+            "q99": 0.0023605857603251935
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.005358699709177017,
+          "finite": true,
+          "quantiles": {
+            "q01": 4.6172040165402e-05,
+            "q50": 0.0013495271559804678,
+            "q99": 0.0023096288042142982
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.004863249137997627,
+          "finite": true,
+          "quantiles": {
+            "q01": 7.183687121141702e-05,
+            "q50": 0.0014129437040537596,
+            "q99": 0.0023318175366148345
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            93,
+            14
+          ],
+          "size": 1302,
+          "min": -2.764831781387329,
+          "max": 2.3322856426239014,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.7581639289855957,
+            "q50": 0.08340144157409668,
+            "q99": 2.3322856426239014
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            93,
+            16
+          ],
+          "size": 1488,
+          "min": -0.7542192339897156,
+          "max": 1.0721676349639893,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6833269321918487,
+            "q50": 0.19281771034002304,
+            "q99": 1.0241257929801941
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          93,
+          14
+        ],
+        "size": 1302,
+        "min": -2.764831781387329,
+        "max": 2.3322856426239014,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.7581639289855957,
+          "q50": 0.08340144157409668,
+          "q99": 2.3322856426239014
+        },
+        "quantile_kind": "exact",
+        "rows": 93,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 93,
+          "columns": 14,
+          "min": [
+            -0.6615301966667175,
+            0.0,
+            0.0,
+            -1.175309658050537,
+            -0.013290000148117542,
+            -2.764831781387329,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.3729571104049683,
+            -0.008407557383179665,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            2.0557055473327637,
+            1.5177162885665894,
+            0.0,
+            0.015449999831616879,
+            0.0,
+            1.0,
+            0.5677943825721741,
+            2.3322856426239014,
+            2.0194520950317383,
+            0.0,
+            0.0,
+            1.606119990348816,
+            1.0
+          ],
+          "mean": [
+            -0.5186446012218072,
+            1.5672766294090017,
+            1.0522361666074282,
+            -0.7244579389050443,
+            -0.0056148322573496825,
+            -2.169214456041734,
+            0.678932295671554,
+            0.4446796680830659,
+            1.7994137770566407,
+            1.4340985856239272,
+            -0.8653584430394794,
+            -0.0052960875819412796,
+            1.2670592615801481,
+            0.678932295671554
+          ],
+          "std": [
+            0.22452118044485347,
+            0.6900816188213472,
+            0.45327091346764375,
+            0.3210768438392813,
+            0.009927656063778776,
+            0.9554115413516089,
+            0.4407524823827857,
+            0.19182469415674192,
+            0.7980566366935086,
+            0.6171737025990525,
+            0.37680517121487495,
+            0.0023109867188409084,
+            0.5453549341892046,
+            0.4407524823827857
+          ],
+          "q01": [
+            -0.6615301966667175,
+            0.0,
+            0.0,
+            -1.175309658050537,
+            -0.013273353055119515,
+            -2.764831781387329,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.3729571104049683,
+            -0.008407557383179665,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.6558730006217957,
+            1.9300892353057861,
+            1.2383701801300049,
+            -0.7593244910240173,
+            -0.012235760688781738,
+            -2.7480475902557373,
+            1.0,
+            0.5600600242614746,
+            2.2447948455810547,
+            1.7115546464920044,
+            -0.9386504292488098,
+            -0.006000973284244537,
+            1.5838557481765747,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            2.0557055473327637,
+            1.5177162885665894,
+            0.0,
+            0.015445279628038407,
+            0.0,
+            1.0,
+            0.5677483749389648,
+            2.3322856426239014,
+            2.0194520950317383,
+            0.0,
+            0.0,
+            1.6060933399200439,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "c09c715084138981fa210a56af70f818210d9831a32621c89c15b92ce133bc47",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000001.npz",
+      "sha256": "7203beb6aca19c1792c1cfd1ef42febf58e0edf3c74d3763723dd5013dede311",
+      "file_bytes": 257150590,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 93,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 1.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0023911539651453495,
+            "q50": 0.3485058546066284,
+            "q99": 0.4370637553930283
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0007229481125250459,
+          "max": 0.9860484600067139,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.013497004508972168,
+            "q50": 0.31822001934051514,
+            "q99": 0.44275286078453063
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            93,
+            240,
+            320,
+            3
+          ],
+          "size": 21427200,
+          "frames": 93,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 1.134358171839267e-05,
+          "max": 0.980689287185669,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.01896106295287609,
+            "q50": 0.31493300199508667,
+            "q99": 0.43692993819713594
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            93,
+            14
+          ],
+          "size": 1302,
+          "min": -1.9205199480056763,
+          "max": 2.59773850440979,
+          "finite": true,
+          "quantiles": {
+            "q01": -1.9060442388057708,
+            "q50": 0.11393711715936661,
+            "q99": 2.5832641315460205
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            93,
+            16
+          ],
+          "size": 1488,
+          "min": -0.7208070755004883,
+          "max": 1.0384410619735718,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.7202412712574006,
+            "q50": 0.07816791534423828,
+            "q99": 1.0029031264781951
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          93,
+          14
+        ],
+        "size": 1302,
+        "min": -1.9205199480056763,
+        "max": 2.59773850440979,
+        "finite": true,
+        "quantiles": {
+          "q01": -1.9060442388057708,
+          "q50": 0.11393711715936661,
+          "q99": 2.5832641315460205
+        },
+        "quantile_kind": "exact",
+        "rows": 93,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 93,
+          "columns": 14,
+          "min": [
+            -0.4560823440551758,
+            0.0,
+            0.0,
+            -1.0432982444763184,
+            -0.03532310575246811,
+            -1.9205199480056763,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1653984785079956,
+            -0.0032730235252529383,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            1.82563316822052,
+            1.1691298484802246,
+            0.0,
+            0.012769999913871288,
+            0.0,
+            1.0,
+            0.914027214050293,
+            2.1514947414398193,
+            1.6738476753234863,
+            0.0,
+            0.11409424990415573,
+            2.59773850440979,
+            1.0
+          ],
+          "mean": [
+            -0.3577781982810026,
+            1.375687292010914,
+            0.772841146280889,
+            -0.5651528186750628,
+            -0.02033992232694829,
+            -1.511318887563883,
+            0.668179607499511,
+            0.7232924889703031,
+            1.662964272443005,
+            1.1883799635695034,
+            -0.7280306399910039,
+            0.08195767965091402,
+            2.0518424550111414,
+            0.668179607499511
+          ],
+          "std": [
+            0.1499037717266683,
+            0.5965121087750658,
+            0.3256979359998251,
+            0.26657831203958793,
+            0.017871970679000197,
+            0.6429632897560799,
+            0.44496644455755363,
+            0.3009562867397685,
+            0.7150244836442016,
+            0.4981795934907621,
+            0.3170015804467715,
+            0.04051919726183408,
+            0.8818437132174318,
+            0.44496644455755363
+          ],
+          "q01": [
+            -0.4558822190761566,
+            0.0,
+            0.0,
+            -1.0432982444763184,
+            -0.035266250818967816,
+            -1.919771761894226,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1653984785079956,
+            -0.003051932882517576,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.44489526748657227,
+            1.6307499408721924,
+            0.8836788535118103,
+            -0.5138052701950073,
+            -0.03247891739010811,
+            -1.844788670539856,
+            1.0,
+            0.8925843834877014,
+            2.0235581398010254,
+            1.4020644426345825,
+            -0.7611544132232666,
+            0.1092338040471077,
+            2.552922010421753,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            1.82563316822052,
+            1.1691298484802246,
+            0.0,
+            0.01262228813022375,
+            0.0,
+            1.0,
+            0.914027214050293,
+            2.1514947414398193,
+            1.6738476753234863,
+            0.0,
+            0.11409424990415573,
+            2.59773850440979,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "13b93971ccc78147d039ce0fa755d59a4d3301f3c02a924d8f884245047dda1a",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000002.npz",
+      "sha256": "2dcfabd4649e3d4b559471cc6e43ad69e94d4b7cae4786c32390aa77e0a85aef",
+      "file_bytes": 246090706,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 89,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            89,
+            240,
+            320,
+            3
+          ],
+          "size": 20505600,
+          "frames": 89,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.545294463634491,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0013357369881123306,
+            "q50": 0.17572499811649323,
+            "q99": 0.34033053606748576
+          },
+          "quantile_kind": "strided_subsample(stride=20)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            89,
+            240,
+            320,
+            3
+          ],
+          "size": 20505600,
+          "frames": 89,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.43986767530441284,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.00523600553162396,
+            "q50": 0.15812402963638306,
+            "q99": 0.3424107679724693
+          },
+          "quantile_kind": "strided_subsample(stride=20)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            89,
+            240,
+            320,
+            3
+          ],
+          "size": 20505600,
+          "frames": 89,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.46627750992774963,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.005882782796397805,
+            "q50": 0.1589777171611786,
+            "q99": 0.34083973258733746
+          },
+          "quantile_kind": "strided_subsample(stride=20)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            89,
+            14
+          ],
+          "size": 1246,
+          "min": -2.382866144180298,
+          "max": 2.209944725036621,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.3771607875823975,
+            "q50": 0.08531202375888824,
+            "q99": 2.209944725036621
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            89,
+            16
+          ],
+          "size": 1424,
+          "min": -0.734503984451294,
+          "max": 1.0452598333358765,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.7081052726507187,
+            "q50": 0.08848272264003754,
+            "q99": 1.0277739572525024
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          89,
+          14
+        ],
+        "size": 1246,
+        "min": -2.382866144180298,
+        "max": 2.209944725036621,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.3771607875823975,
+          "q50": 0.08531202375888824,
+          "q99": 2.209944725036621
+        },
+        "quantile_kind": "exact",
+        "rows": 89,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 89,
+          "columns": 14,
+          "min": [
+            -0.6811487078666687,
+            0.0,
+            0.0,
+            -1.260015606880188,
+            -0.012419999577105045,
+            -2.382866144180298,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2366933822631836,
+            -0.023819712921977043,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            2.209944725036621,
+            1.772080421447754,
+            0.0,
+            0.022133665159344673,
+            0.0,
+            1.0,
+            0.4902348518371582,
+            2.139880657196045,
+            1.6543879508972168,
+            0.0,
+            0.008024598471820354,
+            1.9237953424453735,
+            1.0
+          ],
+          "mean": [
+            -0.5405376733678362,
+            1.7176980910446034,
+            1.2655723192781378,
+            -0.80124783775968,
+            -0.003707970780310001,
+            -1.8911624355869514,
+            0.664502286488253,
+            0.38523261341151227,
+            1.6557899466140216,
+            1.1744353001874483,
+            -0.7657870969033977,
+            -0.0054548062556462485,
+            1.5285940259234625,
+            0.664502286488253
+          ],
+          "std": [
+            0.22699395454938517,
+            0.7378759822626315,
+            0.5278831519036685,
+            0.3443469734254738,
+            0.012339559493927682,
+            0.8106672152501522,
+            0.4451431520136548,
+            0.16350264584197463,
+            0.7179584857269862,
+            0.49103944892286094,
+            0.33101463152425264,
+            0.008816790781199946,
+            0.6513804227522233,
+            0.4451431520136548
+          ],
+          "q01": [
+            -0.6811487078666687,
+            0.0,
+            0.0,
+            -1.260015606880188,
+            -0.012390728034079075,
+            -2.382866144180298,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2366933822631836,
+            -0.023819712921977043,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.6761999726295471,
+            2.1053853034973145,
+            1.4919426441192627,
+            -0.854099452495575,
+            -0.011227289214730263,
+            -2.357567071914673,
+            1.0,
+            0.48101112246513367,
+            2.0251152515411377,
+            1.3816025257110596,
+            -0.7997034788131714,
+            -0.0045436229556798935,
+            1.8982796669006348,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            2.209944725036621,
+            1.772080421447754,
+            0.0,
+            0.022127279117703437,
+            0.0,
+            1.0,
+            0.49022685289382933,
+            2.139880657196045,
+            1.6543879508972168,
+            0.0,
+            0.008018453381955623,
+            1.9237953424453735,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "e8dec4921fadd9237886e3808e3e4a34733af393b14b97a710ab362539e61d2c",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000003.npz",
+      "sha256": "8e2de49f08ebfd4a76ed1c2aed3dcb806086ed7322c7793d35db307a06b9b2d2",
+      "file_bytes": 259915620,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 94,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            94,
+            240,
+            320,
+            3
+          ],
+          "size": 21657600,
+          "frames": 94,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 1.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.005032368218526244,
+            "q50": 0.7151915431022644,
+            "q99": 0.8282881724834442
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            94,
+            240,
+            320,
+            3
+          ],
+          "size": 21657600,
+          "frames": 94,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0007600917597301304,
+          "max": 1.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.03155326873064041,
+            "q50": 0.5911751389503479,
+            "q99": 0.8370742213726043
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            94,
+            240,
+            320,
+            3
+          ],
+          "size": 21657600,
+          "frames": 94,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 8.243482443504035e-05,
+          "max": 1.0,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.036403984352946284,
+            "q50": 0.5771105289459229,
+            "q99": 0.8285677778720856
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            94,
+            14
+          ],
+          "size": 1316,
+          "min": -2.245759963989258,
+          "max": 2.560391426086426,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.2363576769828795,
+            "q50": 0.08866918832063675,
+            "q99": 2.560391426086426
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            94,
+            16
+          ],
+          "size": 1504,
+          "min": -0.7196836471557617,
+          "max": 1.014052391052246,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.7116011458635331,
+            "q50": 0.0954773873090744,
+            "q99": 1.0003939616680146
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          94,
+          14
+        ],
+        "size": 1316,
+        "min": -2.245759963989258,
+        "max": 2.560391426086426,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.2363576769828795,
+          "q50": 0.08866918832063675,
+          "q99": 2.560391426086426
+        },
+        "quantile_kind": "exact",
+        "rows": 94,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 94,
+          "columns": 14,
+          "min": [
+            -0.9089632630348206,
+            0.0,
+            0.0,
+            -1.177251935005188,
+            -0.014030000194907188,
+            -2.245759963989258,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1302602291107178,
+            -0.030684100463986397,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            2.0156469345092773,
+            1.452053427696228,
+            0.0,
+            0.02535432018339634,
+            0.0,
+            1.0,
+            0.7594748139381409,
+            1.6672918796539307,
+            1.0378353595733643,
+            0.0,
+            0.0031358322594314814,
+            2.560391426086426,
+            1.0
+          ],
+          "mean": [
+            -0.72385764630769,
+            1.5558935898415587,
+            1.0137441438731758,
+            -0.71914034417553,
+            -0.00464817432378929,
+            -1.7815542466086434,
+            0.6717096116750482,
+            0.6040111343782554,
+            1.2579797294208819,
+            0.6570955282176271,
+            -0.6450422054919553,
+            -0.00386489852687017,
+            2.042335462053009,
+            0.6717096116750482
+          ],
+          "std": [
+            0.30387789827767564,
+            0.6655551300268798,
+            0.4223397092107729,
+            0.31275589308957014,
+            0.013997748757943336,
+            0.7609458153875691,
+            0.4439005203662218,
+            0.25328281130420216,
+            0.5441836166584793,
+            0.2778233875826872,
+            0.2955949581245293,
+            0.012102666652389361,
+            0.8657104770540579,
+            0.4439005203662218
+          ],
+          "q01": [
+            -0.9088642609119415,
+            0.0,
+            0.0,
+            -1.177251935005188,
+            -0.014010992106050254,
+            -2.245273268222809,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1302602291107178,
+            -0.030668636579066516,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.9037619829177856,
+            1.8837542533874512,
+            1.1758792400360107,
+            -0.730048418045044,
+            -0.012103212531656027,
+            -2.2077237367630005,
+            1.0,
+            0.752531886100769,
+            1.4851325750350952,
+            0.7130880355834961,
+            -0.6082833707332611,
+            0.002106283907778561,
+            2.5410526990890503,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            2.0156469345092773,
+            1.452053427696228,
+            0.0,
+            0.02531940821558237,
+            0.0,
+            1.0,
+            0.7593999248743057,
+            1.6672918796539307,
+            1.0378353595733643,
+            0.0,
+            0.003086651016492396,
+            2.560391426086426,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "0c7ac6103148aaa301b32f181f2c82b33e474131eec5e4255882b7fceedbfbc7",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000004.npz",
+      "sha256": "7bddb6bad83bceb8326e790c2c28f3f97c33475de5c010a0b25b89e3dbd945be",
+      "file_bytes": 279270490,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 101,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            101,
+            240,
+            320,
+            3
+          ],
+          "size": 23270400,
+          "frames": 101,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.0029643895104527473,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.00036598334554582834,
+            "q99": 0.0010909410472959265
+          },
+          "quantile_kind": "strided_subsample(stride=23)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            101,
+            240,
+            320,
+            3
+          ],
+          "size": 23270400,
+          "frames": 101,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.0022497354075312614,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.0003426688490435481,
+            "q99": 0.001022909958846867
+          },
+          "quantile_kind": "strided_subsample(stride=23)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            101,
+            240,
+            320,
+            3
+          ],
+          "size": 23270400,
+          "frames": 101,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.0018158695893362164,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.00036568910581991076,
+            "q99": 0.0010365553060546508
+          },
+          "quantile_kind": "strided_subsample(stride=23)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            101,
+            14
+          ],
+          "size": 1414,
+          "min": -2.9645273685455322,
+          "max": 2.015779972076416,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.957195315361023,
+            "q50": 0.09470174461603165,
+            "q99": 2.015779972076416
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            101,
+            16
+          ],
+          "size": 1616,
+          "min": -0.7724578380584717,
+          "max": 1.0195683240890503,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6869446188211441,
+            "q50": 0.18029768019914627,
+            "q99": 1.002664715051651
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          101,
+          14
+        ],
+        "size": 1414,
+        "min": -2.9645273685455322,
+        "max": 2.015779972076416,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.957195315361023,
+          "q50": 0.09470174461603165,
+          "q99": 2.015779972076416
+        },
+        "quantile_kind": "exact",
+        "rows": 101,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 101,
+          "columns": 14,
+          "min": [
+            -0.8972678780555725,
+            0.0,
+            0.0,
+            -1.1287301778793335,
+            -0.012500000186264515,
+            -2.9645273685455322,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1943079233169556,
+            -0.01998540386557579,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            1.9155688285827637,
+            1.3148492574691772,
+            0.0,
+            0.008620000444352627,
+            0.0,
+            1.0,
+            0.6471433043479919,
+            2.015779972076416,
+            1.4572919607162476,
+            0.0,
+            0.0006261633243411779,
+            1.7224899530410767,
+            1.0
+          ],
+          "mean": [
+            -0.7001917478789824,
+            1.4379572498814968,
+            0.882255168550989,
+            -0.6777230900952058,
+            -0.0066501239677320585,
+            -2.320596337429073,
+            0.7043634009648962,
+            0.49969959987032386,
+            1.516105784181653,
+            0.9992535970505733,
+            -0.706295885751946,
+            -0.0071574806092985005,
+            1.3367777759725652,
+            0.7043634009648962
+          ],
+          "std": [
+            0.3061139133229494,
+            0.6412082371808108,
+            0.38393451031837017,
+            0.3053216328994576,
+            0.007394180423013641,
+            1.0156479090024062,
+            0.4317336767415903,
+            0.22032695653538553,
+            0.6890949137656386,
+            0.43465439708074144,
+            0.3199291604498197,
+            0.005817332415133668,
+            0.5928547847191818,
+            0.4317336767415903
+          ],
+          "q01": [
+            -0.8972678780555725,
+            0.0,
+            0.0,
+            -1.128577470779419,
+            -0.01248405035585165,
+            -2.9645273685455322,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.1943079233169556,
+            -0.01998540386557579,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.8911713361740112,
+            1.77079176902771,
+            1.026181936264038,
+            -0.6899601221084595,
+            -0.011298459954559803,
+            -2.955601930618286,
+            1.0,
+            0.6380227208137512,
+            1.8812896013259888,
+            1.183624267578125,
+            -0.7261982560157776,
+            -0.0075348359532654285,
+            1.6896607875823975,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            1.9155688285827637,
+            1.314721941947937,
+            0.0,
+            0.008614095859229565,
+            0.0,
+            1.0,
+            0.647121250629425,
+            2.015779972076416,
+            1.4572919607162476,
+            0.0,
+            0.0006152370478957891,
+            1.7220149040222168,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "40d8c6e29f2fc9af5b4f77c5f97aceb55ef8a898392202afaa756a75d932de76",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+      "sha256": "663b16c73d61929817f434735e83e568201a76ca3312754535d3dd153717c32e",
+      "file_bytes": 265445568,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 96,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            96,
+            240,
+            320,
+            3
+          ],
+          "size": 22118400,
+          "frames": 96,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.43342745304107666,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0010609171260148288,
+            "q50": 0.1492736041545868,
+            "q99": 0.28476872146129606
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            96,
+            240,
+            320,
+            3
+          ],
+          "size": 22118400,
+          "frames": 96,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.00014458681107498705,
+          "max": 0.3826119005680084,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.00799130636267364,
+            "q50": 0.12875665724277496,
+            "q99": 0.28655863374471663
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            96,
+            240,
+            320,
+            3
+          ],
+          "size": 22118400,
+          "frames": 96,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0005355878965929151,
+          "max": 0.36519545316696167,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.009700439805164933,
+            "q50": 0.13741321861743927,
+            "q99": 0.28565401226282117
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            96,
+            14
+          ],
+          "size": 1344,
+          "min": -2.858024835586548,
+          "max": 2.2124178409576416,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.85170175075531,
+            "q50": 0.0839373730123043,
+            "q99": 2.2124178409576416
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            96,
+            16
+          ],
+          "size": 1536,
+          "min": -0.7574823498725891,
+          "max": 1.0383774042129517,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6884854197502136,
+            "q50": 0.16085698455572128,
+            "q99": 1.021358859539032
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          96,
+          14
+        ],
+        "size": 1344,
+        "min": -2.858024835586548,
+        "max": 2.2124178409576416,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.85170175075531,
+          "q50": 0.0839373730123043,
+          "q99": 2.2124178409576416
+        },
+        "quantile_kind": "exact",
+        "rows": 96,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 96,
+          "columns": 14,
+          "min": [
+            -0.8674023151397705,
+            0.0,
+            0.0,
+            -1.236478328704834,
+            -0.005847310181707144,
+            -2.858024835586548,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2126340866088867,
+            -0.009888994507491589,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            2.2124178409576416,
+            1.7775036096572876,
+            0.0,
+            0.01735999993979931,
+            0.0,
+            1.0,
+            0.37904030084609985,
+            2.06536865234375,
+            1.5197337865829468,
+            0.0,
+            0.004145998507738113,
+            1.531350016593933,
+            1.0
+          ],
+          "mean": [
+            -0.689356917985909,
+            1.7194898563514773,
+            1.2586285401533435,
+            -0.7954478013222493,
+            0.0057569361944539805,
+            -2.2711547159221177,
+            0.6785489947651513,
+            0.2979749431154535,
+            1.5781082181977883,
+            1.0634014619427035,
+            -0.7317978463155063,
+            0.0002753787800126399,
+            1.2122333568501442,
+            0.6785489947651513
+          ],
+          "std": [
+            0.29173526586878484,
+            0.7331141802146993,
+            0.5277859783850395,
+            0.3411922734369477,
+            0.006244978070721195,
+            0.9742735867833758,
+            0.4417477093522465,
+            0.12447282430543927,
+            0.694786462503114,
+            0.448697531064202,
+            0.32409423373743224,
+            0.003362740704877079,
+            0.5155612416859221,
+            0.4417477093522465
+          ],
+          "q01": [
+            -0.8674023151397705,
+            0.0,
+            0.0,
+            -1.236478328704834,
+            -0.005696464516222477,
+            -2.8578153252601624,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2126340866088867,
+            -0.009873244957998396,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.8615536689758301,
+            2.1041433811187744,
+            1.4813122749328613,
+            -0.8409411311149597,
+            0.006567805306985974,
+            -2.8496495485305786,
+            1.0,
+            0.37225452065467834,
+            1.9362483024597168,
+            1.237789511680603,
+            -0.7474022507667542,
+            0.0012959932209923863,
+            1.502610445022583,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            2.2124178409576416,
+            1.7775036096572876,
+            0.0,
+            0.017359124030917883,
+            0.0,
+            1.0,
+            0.37904030084609985,
+            2.06536865234375,
+            1.5197337865829468,
+            0.0,
+            0.004135135910473764,
+            1.530870407819748,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "47a58282b5c43a20797c325cc29a4f0ccbebe4fceac71d80c35cae99155f114c",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000006.npz",
+      "sha256": "9350ac0ca5f09db2512c2bcd73eebd0455d6f2ff40eddebdc769a048cc67badd",
+      "file_bytes": 273740498,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 99,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            99,
+            240,
+            320,
+            3
+          ],
+          "size": 22809600,
+          "frames": 99,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.3980952203273773,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.001015626327134669,
+            "q50": 0.15052679181098938,
+            "q99": 0.27242434620857237
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            99,
+            240,
+            320,
+            3
+          ],
+          "size": 22809600,
+          "frames": 99,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.4717268645763397,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.004466709643602371,
+            "q50": 0.1227702647447586,
+            "q99": 0.27274534553289415
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            99,
+            240,
+            320,
+            3
+          ],
+          "size": 22809600,
+          "frames": 99,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.33639097213745117,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0045222857594490054,
+            "q50": 0.12424902245402336,
+            "q99": 0.26989073157310484
+          },
+          "quantile_kind": "strided_subsample(stride=22)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            99,
+            14
+          ],
+          "size": 1386,
+          "min": -3.12434983253479,
+          "max": 2.117549419403076,
+          "finite": true,
+          "quantiles": {
+            "q01": -3.1193843483924866,
+            "q50": 0.08628949522972107,
+            "q99": 2.117549419403076
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            99,
+            16
+          ],
+          "size": 1584,
+          "min": -0.7244976162910461,
+          "max": 1.039995789527893,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6733927536010742,
+            "q50": 0.23735320568084717,
+            "q99": 1.0035939049720766
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          99,
+          14
+        ],
+        "size": 1386,
+        "min": -3.12434983253479,
+        "max": 2.117549419403076,
+        "finite": true,
+        "quantiles": {
+          "q01": -3.1193843483924866,
+          "q50": 0.08628949522972107,
+          "q99": 2.117549419403076
+        },
+        "quantile_kind": "exact",
+        "rows": 99,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 99,
+          "columns": 14,
+          "min": [
+            -0.8875973224639893,
+            0.0,
+            0.0,
+            -1.1227387189865112,
+            -0.12668251991271973,
+            -3.12434983253479,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.237170934677124,
+            -0.01750227063894272,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            1.7250062227249146,
+            1.0882787704467773,
+            0.0,
+            0.005996643099933863,
+            0.0,
+            1.0,
+            0.7967519760131836,
+            2.117549419403076,
+            1.6203356981277466,
+            0.0,
+            0.0,
+            1.70756995677948,
+            1.0
+          ],
+          "mean": [
+            -0.6927520458614735,
+            1.2735833698516767,
+            0.6841109336066916,
+            -0.6774768315377937,
+            -0.02965096068672008,
+            -2.460806839967692,
+            0.6882899343177225,
+            0.6214737960071576,
+            1.6045508314055776,
+            1.1339783776937185,
+            -0.7511900970971005,
+            -0.008705662276520573,
+            1.3340227263697395,
+            0.6882899343177225
+          ],
+          "std": [
+            0.30379735243287126,
+            0.5818842299809197,
+            0.3076359745334622,
+            0.296777273782046,
+            0.040098786730741305,
+            1.0699852614606247,
+            0.43847921594536343,
+            0.2685159859431061,
+            0.723369465073149,
+            0.4907593966196788,
+            0.3367428329249933,
+            0.004112520559359402,
+            0.5849991646945923,
+            0.43847921594536343
+          ],
+          "q01": [
+            -0.8875973224639893,
+            0.0,
+            0.0,
+            -1.1227387189865112,
+            -0.1259707337617874,
+            -3.1240404796600343,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.237170934677124,
+            -0.01750227063894272,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.8809561133384705,
+            1.5547798871994019,
+            0.7725924849510193,
+            -0.6559699773788452,
+            -0.009988481178879738,
+            -3.113541841506958,
+            1.0,
+            0.7872879505157471,
+            1.99764084815979,
+            1.3450219631195068,
+            -0.7870144248008728,
+            -0.0073376805521547794,
+            1.6757839918136597,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            1.7250062227249146,
+            1.0882787704467773,
+            0.0,
+            0.005769263571128248,
+            0.0,
+            1.0,
+            0.796637020111084,
+            2.117549419403076,
+            1.6203356981277466,
+            0.0,
+            0.0,
+            1.7072419118881226,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "ca81e00e21869c88e2fe4f0a8213390d34d3af6f81bdbc167eeb419dd2aab755",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    },
+    {
+      "relative_path": "data/robotwin2/raw/grab_roller/episode_000007.npz",
+      "sha256": "c2b257b575d11fa85b9e78254b9d55dd563beb168c4b4b1ff5114d11ecf9d66a",
+      "file_bytes": 254385684,
+      "keys": [
+        "actions",
+        "robot_states",
+        "left_endpose",
+        "right_endpose",
+        "dones",
+        "rewards",
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32",
+        "metadata_json"
+      ],
+      "num_frames": 92,
+      "missing_required_keys": [],
+      "measurements": {
+        "head_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            92,
+            240,
+            320,
+            3
+          ],
+          "size": 21196800,
+          "frames": 92,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.002186996629461646,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.00026578390679787844,
+            "q99": 0.0008211046736687423
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "left_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            92,
+            240,
+            320,
+            3
+          ],
+          "size": 21196800,
+          "frames": 92,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.001883333083242178,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.0002671504335012287,
+            "q99": 0.0007924291060771794
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        },
+        "right_camera_raw_float32": {
+          "present": true,
+          "dtype": "float32",
+          "shape": [
+            92,
+            240,
+            320,
+            3
+          ],
+          "size": 21196800,
+          "frames": 92,
+          "resolution_hw": [
+            240,
+            320
+          ],
+          "channels": 3,
+          "min": 0.0,
+          "max": 0.0019354850519448519,
+          "finite": true,
+          "quantiles": {
+            "q01": 0.0,
+            "q50": 0.00028373184613883495,
+            "q99": 0.0008046090853167699
+          },
+          "quantile_kind": "strided_subsample(stride=21)"
+        }
+      },
+      "file_measurement_key_order": [
+        "head_camera_raw_float32",
+        "left_camera_raw_float32",
+        "right_camera_raw_float32"
+      ],
+      "camera_order_matches_declared": true,
+      "timestamp": {
+        "array_keys_found": [],
+        "metadata_fields": [],
+        "declared_unit": "unknown"
+      },
+      "noise": {
+        "array_keys_found": [],
+        "metadata_fields": [
+          "noise_seed",
+          "raw_sensor_noise_enabled",
+          "raw_sensor_read_noise",
+          "raw_sensor_shot_noise"
+        ],
+        "declared": true
+      },
+      "language": {
+        "task_text": "grab_roller",
+        "array_keys_found": []
+      },
+      "proprio": {
+        "actions": {
+          "dtype": "float32",
+          "shape": [
+            92,
+            14
+          ],
+          "size": 1288,
+          "min": -2.5085222721099854,
+          "max": 2.149803400039673,
+          "finite": true,
+          "quantiles": {
+            "q01": -2.5043859481811523,
+            "q50": 0.08281861618161201,
+            "q99": 2.149803400039673
+          },
+          "quantile_kind": "exact"
+        },
+        "robot_states": {
+          "dtype": "float32",
+          "shape": [
+            92,
+            16
+          ],
+          "size": 1472,
+          "min": -0.7377102971076965,
+          "max": 1.0412988662719727,
+          "finite": true,
+          "quantiles": {
+            "q01": -0.6963923472166061,
+            "q50": 0.11511721089482307,
+            "q99": 1.0044475078582764
+          },
+          "quantile_kind": "exact"
+        }
+      },
+      "state_source_key": "actions",
+      "state_source_present": true,
+      "state_source_width": 14,
+      "actions": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          92,
+          14
+        ],
+        "size": 1288,
+        "min": -2.5085222721099854,
+        "max": 2.149803400039673,
+        "finite": true,
+        "quantiles": {
+          "q01": -2.5043859481811523,
+          "q50": 0.08281861618161201,
+          "q99": 2.149803400039673
+        },
+        "quantile_kind": "exact",
+        "rows": 92,
+        "columns": 14,
+        "units": "unknown",
+        "normalisation_stats": {
+          "rows": 92,
+          "columns": 14,
+          "min": [
+            -0.6281428933143616,
+            0.0,
+            0.0,
+            -1.124721884727478,
+            -0.007635714020580053,
+            -2.5085222721099854,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2394651174545288,
+            -0.021698595955967903,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.0,
+            1.7955840826034546,
+            1.1486085653305054,
+            0.0,
+            0.02947087772190571,
+            0.0,
+            1.0,
+            0.7833321690559387,
+            2.149803400039673,
+            1.659317135810852,
+            0.0,
+            0.0035553653724491596,
+            2.0445899963378906,
+            1.0
+          ],
+          "mean": [
+            -0.4996775526188962,
+            1.3643522779963424,
+            0.7547025104640457,
+            -0.6530428808840477,
+            0.005674138169030377,
+            -1.9981621275453463,
+            0.6645728641027666,
+            0.6201774323126301,
+            1.65738952826992,
+            1.1740917761850616,
+            -0.7649013177269017,
+            -0.0041017930905028425,
+            1.6215051537197407,
+            0.6645728641027666
+          ],
+          "std": [
+            0.2095046013141096,
+            0.5851008585649708,
+            0.3176625792457604,
+            0.29479101455569906,
+            0.010710784225088248,
+            0.8517410984808047,
+            0.44602405565920406,
+            0.2605472190764444,
+            0.7204548046072509,
+            0.4932368851342872,
+            0.3348144787516105,
+            0.008362831516951044,
+            0.6963101967497207,
+            0.44602405565920406
+          ],
+          "q01": [
+            -0.6281428933143616,
+            0.0,
+            0.0,
+            -1.124721884727478,
+            -0.007541783507913351,
+            -2.5085222721099854,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.2394651174545288,
+            -0.021698595955967903,
+            0.0,
+            0.0
+          ],
+          "q50": [
+            -0.6223917305469513,
+            1.626330852508545,
+            0.8442049622535706,
+            -0.6238648891448975,
+            0.003007514402270317,
+            -2.4899399280548096,
+            1.0,
+            0.7741419970989227,
+            2.032650947570801,
+            1.3754236698150635,
+            -0.7992672324180603,
+            0.00027667550602927804,
+            2.0236494541168213,
+            1.0
+          ],
+          "q99": [
+            0.0,
+            1.7955840826034546,
+            1.1486085653305054,
+            0.0,
+            0.029399528093636038,
+            0.0,
+            1.0,
+            0.7832175052165985,
+            2.149803400039673,
+            1.659317135810852,
+            0.0,
+            0.003505467330105603,
+            2.0441575932502745,
+            1.0
+          ]
+        },
+        "normalisation_stats_sha256": "ec4f3df596f6d802187f583c9f99ea780e8f950bf13cb9dcc787c1367d02f81e",
+        "normalisation_stats_source": "empirical statistics of this file's action array (min/max/mean/std/q01/q50/q99 per column); this is not the author's normalisation constants"
+      },
+      "metadata_json_keys": [
+        "benchmark",
+        "clean_protocol",
+        "clean_replay_record",
+        "dataset_seed",
+        "entry_index",
+        "episode",
+        "lighting_applied",
+        "lighting_domain",
+        "lighting_ev",
+        "lighting_sample_unit",
+        "lighting_scale",
+        "lighting_strategy",
+        "noise_seed",
+        "num_frames",
+        "raw_npz",
+        "raw_protocol",
+        "raw_sensor_noise_enabled",
+        "raw_sensor_read_noise",
+        "raw_sensor_shot_noise",
+        "raw_white_level",
+        "representation",
+        "rgb_npz",
+        "source_hdf5",
+        "source_trajectory",
+        "task_name",
+        "views"
+      ]
+    }
+  ],
+  "protocol_checks": [
+    {
+      "id": "raw_measurement_keys",
+      "item": "RAW key names and camera order",
+      "expected": {
+        "keys": [
+          "head_camera_raw_float32",
+          "left_camera_raw_float32",
+          "right_camera_raw_float32"
+        ],
+        "camera_ids": [
+          "robotwin_head",
+          "robotwin_left",
+          "robotwin_right"
+        ],
+        "order_matters": true
+      },
+      "observed": {
+        "files": 8,
+        "present_files": {
+          "head_camera_raw_float32": 8,
+          "left_camera_raw_float32": 8,
+          "right_camera_raw_float32": 8
+        },
+        "file_measurement_key_order": [
+          [
+            "head_camera_raw_float32",
+            "left_camera_raw_float32",
+            "right_camera_raw_float32"
+          ]
+        ]
+      },
+      "verdict": "match",
+      "note": "the frozen format spec declares exactly these keys; a present-but-reordered cache is reported as a mismatch because camera order is part of the protocol"
+    },
+    {
+      "id": "measurement_dtype_conversion",
+      "item": "storage dtype and the declared conversion rule",
+      "expected": {
+        "dtypes": [
+          "float32"
+        ],
+        "rule": "float32 kept in the original HDR-derived float scale, no /255 and no per-frame max normalisation"
+      },
+      "observed": {
+        "dtypes": {
+          "head_camera_raw_float32": [
+            "float32"
+          ],
+          "left_camera_raw_float32": [
+            "float32"
+          ],
+          "right_camera_raw_float32": [
+            "float32"
+          ]
+        }
+      },
+      "verdict": "match",
+      "note": "the frozen loader keys the conversion off the stored dtype: uint8 -> float32/255 and floating -> unchanged (rawvla_sequence.RawVLAWindowDataset._calibrate)"
+    },
+    {
+      "id": "current_proprio_source",
+      "item": "current proprio source and width",
+      "expected": {
+        "key": "actions",
+        "expression": "actions[t]",
+        "width": 14,
+        "note": "the author's current 14-dim joint proxy; the cached 16-dim `robot_states` is an end-effector representation and is not the joint state"
+      },
+      "observed": {
+        "files_with_key": 8,
+        "files": 8,
+        "widths": [
+          14
+        ],
+        "companion_keys": [
+          "robot_states"
+        ]
+      },
+      "verdict": "match",
+      "note": "a companion 16-dim robot_states array may exist on RoboTwin; it is recorded but is not the joint state"
+    },
+    {
+      "id": "action_supervision_window",
+      "item": "action supervision window",
+      "expected": {
+        "expression": "actions[t+1:t+51]",
+        "offset": 1,
+        "horizon": 50
+      },
+      "observed": {
+        "loader_default": {
+          "action_offset": 1,
+          "action_horizon": 50
+        },
+        "files_with_actions": 8,
+        "files": 8,
+        "num_frames": [
+          93,
+          93,
+          89,
+          94,
+          101,
+          96,
+          99,
+          92
+        ],
+        "files_with_horizon_plus_offset_rows": 8
+      },
+      "verdict": "match",
+      "note": "the window rule is a declared protocol; the audit can only confirm that the loader default agrees and that each file has enough action rows"
+    },
+    {
+      "id": "formal_normalisation_statistics",
+      "item": "formal pi0.5 normalisation statistics",
+      "expected": {
+        "formal_statistics": "explicit checkpoint MEAN_STD / zscore with epsilon",
+        "expected_loader_default": "starvla_minmax"
+      },
+      "observed": {
+        "loader_default": "starvla_minmax"
+      },
+      "verdict": "mismatch",
+      "note": "the frozen loader's starvla_minmax default is the author demo recipe, not the formal pi0.5 checkpoint statistics; the formal run must pass the checkpoint MEAN_STD/zscore statistics explicitly"
+    },
+    {
+      "id": "executed_action_window",
+      "item": "actually executed actions per inference",
+      "expected": {
+        "actions_executed": 50
+      },
+      "observed": {
+        "npz_field": null
+      },
+      "verdict": "declared_only",
+      "note": "the NPZ records no executed-action trace, so the number of actions the frozen policy executed per inference is a protocol constant, not an audited field"
+    },
+    {
+      "id": "camera_order",
+      "item": "camera key order in each file",
+      "expected": {
+        "order": [
+          "head_camera_raw_float32",
+          "left_camera_raw_float32",
+          "right_camera_raw_float32"
+        ]
+      },
+      "observed": {
+        "files_matching": 8,
+        "files": 8
+      },
+      "verdict": "match",
+      "note": "streams are synchronised; the order identifies which camera is which"
+    },
+    {
+      "id": "measurement_timestamp",
+      "item": "timestamp key and its unit",
+      "expected": {
+        "timestamp_key": true,
+        "unit_declared": true
+      },
+      "observed": {
+        "files_with_timestamp_key": 0,
+        "files": 8,
+        "declared_units": [
+          "unknown"
+        ]
+      },
+      "verdict": "not_declared",
+      "note": "a frame-index-only cache cannot support exposure-time reasoning; the loader reports time_unit='frame' and timestamp=None in that case"
+    },
+    {
+      "id": "noise_availability",
+      "item": "declared noise / variance source",
+      "expected": {
+        "noise_arrays_or_metadata": true
+      },
+      "observed": {
+        "files_with_noise_declaration": 8,
+        "files": 8,
+        "arrays": []
+      },
+      "verdict": "match",
+      "note": "without a declared noise model no variance may be fabricated; an estimated scale stays an estimate and any energy built from it is not a posterior"
+    },
+    {
+      "id": "language_keys",
+      "item": "task instruction / language text",
+      "expected": {
+        "task_text": true
+      },
+      "observed": {
+        "files_with_task_text": 8,
+        "files": 8
+      },
+      "verdict": "match",
+      "note": "language is declared context, never a hidden-truth channel"
+    },
+    {
+      "id": "action_units",
+      "item": "action units and normalisation statistics fingerprint",
+      "expected": {
+        "units": "declared cache units or UNKNOWN",
+        "stats_hash": true
+      },
+      "observed": {
+        "units": [
+          "unknown"
+        ],
+        "stats_hashes": [
+          "0c7ac6103148aaa301b32f181f2c82b33e474131eec5e4255882b7fceedbfbc7",
+          "13b93971ccc78147d039ce0fa755d59a4d3301f3c02a924d8f884245047dda1a",
+          "40d8c6e29f2fc9af5b4f77c5f97aceb55ef8a898392202afaa756a75d932de76",
+          "47a58282b5c43a20797c325cc29a4f0ccbebe4fceac71d80c35cae99155f114c",
+          "c09c715084138981fa210a56af70f818210d9831a32621c89c15b92ce133bc47",
+          "ca81e00e21869c88e2fe4f0a8213390d34d3af6f81bdbc167eeb419dd2aab755",
+          "e8dec4921fadd9237886e3808e3e4a34733af393b14b97a710ab362539e61d2c",
+          "ec4f3df596f6d802187f583c9f99ea780e8f950bf13cb9dcc787c1367d02f81e"
+        ]
+      },
+      "verdict": "match",
+      "note": "the hash covers the empirical per-column statistics of the file's own action array, not the author's normalisation constants"
+    }
+  ],
+  "checks_summary": {
+    "match": 8,
+    "mismatch": 1,
+    "declared_only": 1,
+    "not_declared": 1
+  },
+  "problems": [],
+  "limits": [
+    "each file is read fully to measure min/max; quantiles use an evenly strided subsample of at most 1048576 elements and report quantile_kind",
+    "the executed-action window and the author's normalisation constants are not stored in the NPZ, so those checks are declared-only",
+    "max_files=8; 8 of 632 discovered files were read"
+  ],
+  "notes": [
+    "evidence_kind='real_cache' was declared by the caller; this audit reports measured facts and never infers that a root is the deployed cache",
+    "FORMAT_SPECS['robotwin'] default action normalisation is 'starvla_minmax'"
+  ]
+}

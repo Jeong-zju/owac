@@ -1,0 +1,271 @@
+{
+  "composed_estimate": {
+    "available": false,
+    "reason": "no target declared composed_parts; stages without an implemented target are not estimated",
+    "targets": []
+  },
+  "config_hash": "42b4f8b44bb26f7161aa034bdb44ac6efb09b6adde1f3408a24c0a70c356fec8",
+  "config_path": "configs/encoders/n02_full/p0.json",
+  "generated_at": "2026-10-14T02:49:58.192757+00:00",
+  "git_sha": "843be674c35e8e058a364154e1c27a4b26ded2e4",
+  "measured": {
+    "targets": [
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": true,
+        "loss_first": 0.9999923706054688,
+        "loss_last": 0.9157251715660095,
+        "module_training": true,
+        "name": "convnext_raw4",
+        "notes": [
+          "RAW-adapted ConvNeXt V2 Base observation encoder; profile_meta describes a single frame batch (no time axis)"
+        ],
+        "operation": "train_step",
+        "optimizer": "AdamW",
+        "optimizer_steps": 220,
+        "parameter_count": 87694848,
+        "peak_memory": {
+          "allocated_bytes": 2133809152,
+          "reserved_bytes": 2195718144,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.027214482999625034,
+          "mean": 0.024518295884984127,
+          "min": 0.023545668000224396,
+          "p50": 0.024468332499964163,
+          "p95": 0.025580051199699482
+        },
+        "seconds_total": 4.903659176996825,
+        "sequence_length": null,
+        "throughput_basis": "batch_size (target declares no time axis)",
+        "throughput_per_second": 81.57173766814972,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      },
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": true,
+        "loss_first": 0.999993085861206,
+        "loss_last": 0.9151431322097778,
+        "module_training": true,
+        "name": "convnext_raw3",
+        "notes": [
+          "RAW-adapted ConvNeXt V2 Base observation encoder; profile_meta describes a single frame batch (no time axis)"
+        ],
+        "operation": "train_step",
+        "optimizer": "AdamW",
+        "optimizer_steps": 220,
+        "parameter_count": 87692800,
+        "peak_memory": {
+          "allocated_bytes": 2133653504,
+          "reserved_bytes": 2191523840,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.028936452999914763,
+          "mean": 0.024720658310009185,
+          "min": 0.023585456000091654,
+          "p50": 0.02451971450000201,
+          "p95": 0.026633694449924406
+        },
+        "seconds_total": 4.944131662001837,
+        "sequence_length": null,
+        "throughput_basis": "batch_size (target declares no time axis)",
+        "throughput_per_second": 80.9039943402404,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      },
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": false,
+        "loss_first": null,
+        "loss_last": null,
+        "module_training": true,
+        "name": "fcmae_patchify_unpatchify",
+        "notes": [
+          "pure geometry op; also exercised with 3 channels and rectangular inputs"
+        ],
+        "operation": "forward",
+        "optimizer": null,
+        "optimizer_steps": 0,
+        "parameter_count": 0,
+        "peak_memory": {
+          "allocated_bytes": 24379392,
+          "reserved_bytes": 44040192,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.0001553400002194394,
+          "mean": 2.812728996786973e-05,
+          "min": 2.4200999632739695e-05,
+          "p50": 2.4956000061138184e-05,
+          "p95": 2.7889050238627518e-05
+        },
+        "seconds_total": 0.005625457993573946,
+        "sequence_length": null,
+        "throughput_basis": "batch_size (target declares no time axis)",
+        "throughput_per_second": 71105.32163904284,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      },
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": true,
+        "loss_first": 0.12656915187835693,
+        "loss_last": 5.600728325561022e-09,
+        "module_training": true,
+        "name": "fcmae_mask_decoder",
+        "notes": [
+          "FCMAE decoder half: 1x1 projection, mask-token insertion, decoder Blocks and the pixel head; input is the encoder feature map at stride patch_size"
+        ],
+        "operation": "train_step",
+        "optimizer": "AdamW",
+        "optimizer_steps": 220,
+        "parameter_count": 4756992,
+        "peak_memory": {
+          "allocated_bytes": 115849728,
+          "reserved_bytes": 136314880,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.0020082189998902322,
+          "mean": 0.0013681103999897458,
+          "min": 0.0012326020000728022,
+          "p50": 0.001292793999937203,
+          "p95": 0.0017609808500310463
+        },
+        "seconds_total": 0.2736220799979492,
+        "sequence_length": null,
+        "throughput_basis": "batch_size (target declares no time axis)",
+        "throughput_per_second": 1461.870328604322,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      },
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": true,
+        "loss_first": 1.006408929824829,
+        "loss_last": 0.24472050368785858,
+        "module_training": true,
+        "name": "fcmae_full",
+        "notes": [
+          "full FCMAE forward (masked encoder + decoder + reconstruction loss)"
+        ],
+        "operation": "train_step",
+        "optimizer": "AdamW",
+        "optimizer_steps": 220,
+        "parameter_count": 92449792,
+        "peak_memory": {
+          "allocated_bytes": 2406693888,
+          "reserved_bytes": 2541748224,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.07392988900028286,
+          "mean": 0.028404430475011396,
+          "min": 0.02546970399998827,
+          "p50": 0.027213089500037313,
+          "p95": 0.03128826599977401
+        },
+        "seconds_total": 5.680886095002279,
+        "sequence_length": null,
+        "throughput_basis": "batch_size (target declares no time axis)",
+        "throughput_per_second": 70.4115508233649,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      },
+      {
+        "device_name": "NVIDIA GeForce RTX 5090",
+        "dtype": "float32",
+        "effective_batch_size": 2,
+        "grad_enabled": true,
+        "loss_first": 0.9999991655349731,
+        "loss_last": 0.9107636213302612,
+        "module_training": true,
+        "name": "savi_512",
+        "notes": [
+          "256 input tokens per frame; full short-sequence backpropagation"
+        ],
+        "operation": "train_step",
+        "optimizer": "AdamW",
+        "optimizer_steps": 220,
+        "parameter_count": 16024064,
+        "peak_memory": {
+          "allocated_bytes": 555678720,
+          "reserved_bytes": 905969664,
+          "scope": "peak since reset_peak_memory_stats for this target; the target is returned to cpu before the next target is reset",
+          "source": "torch.cuda.max_memory_allocated/reserved"
+        },
+        "seconds_per_update": {
+          "max": 0.05839293400003953,
+          "mean": 0.037909064190018854,
+          "min": 0.03588814599970647,
+          "p50": 0.03741221600012068,
+          "p95": 0.039882620350181225
+        },
+        "seconds_total": 7.581812838003771,
+        "sequence_length": 8,
+        "throughput_basis": "batch_size*sequence_length",
+        "throughput_per_second": 422.06264759795016,
+        "throughput_unit": "samples",
+        "timing_synchronized": true,
+        "updates": 200,
+        "warmup_updates": 20
+      }
+    ]
+  },
+  "not_measured": {
+    "items": [
+      {
+        "name": "composed_estimate",
+        "reason": "no target declared composed_parts; stages without an implemented target are not estimated"
+      }
+    ],
+    "targets": []
+  },
+  "protocol": {
+    "amp": false,
+    "dtype": "float32",
+    "updates": 200,
+    "warmup_updates": 20
+  },
+  "reason": "",
+  "runtime": {
+    "cuda_available": true,
+    "cuda_queried": true,
+    "cuda_version": "12.8",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 5090",
+    "device_type": "cuda",
+    "reason": "",
+    "torch_version": "2.11.0+cu128"
+  },
+  "stage": "profile",
+  "status": "ok"
+}

@@ -1,0 +1,176 @@
+{
+  "version": "n02-v12-p2-v1",
+  "run_id": "raw-fusion-r8-warm-s1103-a1",
+  "stage": "P2",
+  "arm": "raw_n02",
+  "platform": "robotwin",
+  "representation": {
+    "kind": "raw3",
+    "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+    "isp": null
+  },
+  "model": {
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "input_mode": "RAW3",
+    "in_chans": 3,
+    "input_size": [
+      256,
+      320
+    ],
+    "dims": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "depths": [
+      3,
+      3,
+      27,
+      3
+    ],
+    "d_model": 512,
+    "alignment": 32,
+    "k": 4,
+    "n_slots": 16,
+    "slot_dim": 512,
+    "tau": 1.0,
+    "rounds": 4,
+    "history": 8,
+    "query_stride": 1,
+    "max_queries_per_camera": 0,
+    "n_latents": 128,
+    "n_queries": 256,
+    "out_dim": 2048,
+    "decoder_hidden": 256,
+    "measurement_channels": 3,
+    "channel_reduction": "select",
+    "saturation_level": null,
+    "units": "sensor_units",
+    "min_variance": null,
+    "max_variance": null,
+    "action_dim": 0,
+    "action_horizon": 50,
+    "strict_check": true,
+    "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core; r8 RAW-only coordinate VICReg plus RAW patch prediction, balanced multiscale fusion; encoder is frozen during declared backend adaptation",
+    "batch_cameras": true,
+    "group_camera_queries": true,
+    "checkpoint_decoder": true,
+    "preserve_spatial_tokens": true,
+    "output_token_rms": 4.0,
+    "context_gate_init": 0.1,
+    "scale_balance": true
+  },
+  "data": {
+    "dataset_format": "robotwin",
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+    "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+    "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+    "manifest_seed": 1103,
+    "partitions": {
+      "train": 0.8,
+      "dev": 0.1,
+      "calibration": 0.1
+    },
+    "history": 8,
+    "declared_prior": null,
+    "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+    "protocol": {
+      "cameras": 3,
+      "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+      "offset": 1,
+      "horizon": 50,
+      "action_mask": "the loader's per-action padding mask",
+      "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+    },
+    "task_names": [
+      "grab_roller"
+    ],
+    "exclude_episode_ids": [
+      "grab_roller/episode_000000"
+    ]
+  },
+  "policy": {
+    "suite": "robotwin",
+    "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "token_dim": 2048,
+    "tokens_per_camera": 256,
+    "freeze_backend": true,
+    "language_state_contract": "pi05-native-language-state-v1",
+    "freeze_encoder": true
+  },
+  "aux": {
+    "lambda_raw": 0.0,
+    "lambda_pred": 0.0,
+    "lambda_noise": 0.0,
+    "noise_note": "the official RoboTwin cache declares no sensor noise model, so the noise term stays off and no target is invented",
+    "mask_ratio": 0.6,
+    "patch_size": 32,
+    "decoder_embed_dim": 512,
+    "decoder_depth": 1,
+    "grn_scope": "sparse",
+    "audit_disabled_terms": false
+  },
+  "optim": {
+    "lr": 1e-05,
+    "lr_head": 0.0001,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "weight_decay": 0.01,
+    "warmup_updates": 30,
+    "grad_clip": 1.0,
+    "clip_scope": "parameter_group",
+    "lr_backend_adapter": 5e-05
+  },
+  "loop": {
+    "seed": 1103,
+    "max_updates": 100,
+    "profile_updates": 2,
+    "batch_size": 4,
+    "grad_accum": 1,
+    "validate_every": 25,
+    "save_every": 50,
+    "dev_windows": 4,
+    "calibration_windows": 4,
+    "previews": 0,
+    "profile_note": "r8 frontend fusion first: fixed accepted RAW encoder, original pi0.5 frozen, no backend adapters; compare inherited vs freshly initialized readout. Stop at 100 for frontend acceptance before backend adaptation.",
+    "bptt_steps": 2,
+    "sampled_dev": true
+  },
+  "runtime": {
+    "device": "cuda",
+    "dtype": "float32",
+    "amp": false,
+    "threads": 4,
+    "gpu_note": "one process per GPU: CUDA_VISIBLE_DEVICES=0 for this RAW arm, in-process device cuda:0",
+    "performance": {
+      "tf32": true,
+      "batch_cameras": true,
+      "cudnn_benchmark": true,
+      "fused_adam": true,
+      "gradient_stats_every": 50,
+      "prefetch": 2,
+      "group_camera_queries": true
+    }
+  },
+  "paths": {
+    "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+  },
+  "execution_revision": "n02-v12-p2-spatial-r7",
+  "initialisation": {
+    "kind": "raw_representation_r8",
+    "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-repair-warm-r7-s1103-a3/checkpoint_0000100.pt",
+    "checkpoint_sha256": "aa3819af1380ba0d05f381ea4b83c3fb145a42d4a0bf9a730d64587dad9207bd",
+    "representation_checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-representation-r8-fresh-main-a1/checkpoint_0000400.pt",
+    "representation_sha256": "2cd1eb6039ec9be9747f4020182286776526f2a3aad09aeeffe14d9ab8672446",
+    "reset_readout": false
+  }
+}

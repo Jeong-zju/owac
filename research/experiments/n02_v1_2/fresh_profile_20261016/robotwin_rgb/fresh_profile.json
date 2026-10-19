@@ -1,0 +1,1317 @@
+{
+  "format": "n02-v12-fresh-zero-update-profile-v1",
+  "execution_revision": "n02-v12-p2-causal-r4",
+  "run_id": "fresh-profile-r4-rgb-robotwin",
+  "arm": "rgb_n02",
+  "platform": "robotwin",
+  "seed": 1103,
+  "initialisation": "fresh frontend, official frozen pi0.5 checkpoint",
+  "optimizer_updates": 0,
+  "optimizer_state_entries": 0,
+  "weights_unchanged": true,
+  "trainable_sha256_before": "fb0f29ef15f773d34c323960daac37788dd2cd04b58621eddaa1704dd5169da0",
+  "trainable_sha256_after": "fb0f29ef15f773d34c323960daac37788dd2cd04b58621eddaa1704dd5169da0",
+  "trainable_parameters": 110556363,
+  "parameters_by_optimizer_role": {
+    "encoder": 88153088,
+    "decoder": 1243851,
+    "readout": 7173632,
+    "proposals_corrector": 9754112,
+    "masked_branch": 4231680,
+    "bridge_projection": 0
+  },
+  "frozen_backend_parameters": 3616757520,
+  "adam_moment_bytes_estimate_unallocated": 884450904,
+  "bptt_steps": 2,
+  "history": 8,
+  "batch_size": 1,
+  "grad_accum_configured_not_executed": 2,
+  "fwbw_seconds_p50": 4.4145001554861665,
+  "fwbw_seconds_p95": 4.530603086389601,
+  "timing_scope": "forward includes data IO, total backward; per-loss probes excluded from timing but included in peak memory; no optimizer step",
+  "training_contract": {
+    "sha256": "7ba52020ef2b542755943ed7006423a63e149759d645445c5cd61018b772ee61",
+    "content": {
+      "arm": "rgb_n02",
+      "platform": "robotwin",
+      "representation": {
+        "kind": "raw3_fixed_isp",
+        "declared": "controlled RGB arm: the SAME loader RAW values of this acquisition passed through one fixed, declared ISP (no per-frame statistics): clip(x / input_scale, 0, 1), per-channel gain, gamma encoding, 8-bit quantisation, then /255 back to float32. This is not the official normal-light paired RGB.",
+        "isp": {
+          "input_scale": 1.0,
+          "gain": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gamma": 2.2,
+          "quantise_bits": 8
+        }
+      },
+      "model": {
+        "camera_ids": [
+          "robotwin_head",
+          "robotwin_left",
+          "robotwin_right"
+        ],
+        "input_mode": "RAW3",
+        "in_chans": 3,
+        "input_size": [
+          256,
+          320
+        ],
+        "dims": [
+          128,
+          256,
+          512,
+          1024
+        ],
+        "depths": [
+          3,
+          3,
+          27,
+          3
+        ],
+        "d_model": 512,
+        "alignment": 32,
+        "k": 4,
+        "n_slots": 16,
+        "slot_dim": 512,
+        "tau": 1.0,
+        "rounds": 4,
+        "history": 8,
+        "query_stride": 1,
+        "max_queries_per_camera": 0,
+        "n_latents": 128,
+        "n_queries": 256,
+        "out_dim": 2048,
+        "decoder_hidden": 256,
+        "measurement_channels": 3,
+        "channel_reduction": "select",
+        "saturation_level": null,
+        "units": "sensor_units",
+        "min_variance": null,
+        "max_variance": null,
+        "action_dim": 0,
+        "action_horizon": 50,
+        "strict_check": true,
+        "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core; the RGB arm feeds the identical backbone with the fixed-ISP transform of the same RAW"
+      },
+      "data": {
+        "dataset_format": "robotwin",
+        "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+        "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+        "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+        "manifest_seed": 1103,
+        "partitions": {
+          "train": 0.8,
+          "dev": 0.1,
+          "calibration": 0.1
+        },
+        "history": 8,
+        "declared_prior": null,
+        "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+        "protocol": {
+          "cameras": 3,
+          "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+          "offset": 1,
+          "horizon": 50,
+          "action_mask": "the loader's per-action padding mask",
+          "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+        }
+      },
+      "policy": {
+        "suite": "robotwin",
+        "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+        "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+        "token_dim": 2048,
+        "tokens_per_camera": 256,
+        "freeze_backend": true
+      },
+      "aux": {
+        "lambda_raw": 1.0,
+        "lambda_pred": 1.0,
+        "lambda_noise": 0.0,
+        "noise_note": "the official RoboTwin cache declares no sensor noise model, so the noise term stays off and no target is invented",
+        "mask_ratio": 0.6,
+        "patch_size": 32,
+        "decoder_embed_dim": 512,
+        "decoder_depth": 1,
+        "grn_scope": "sparse"
+      },
+      "optim": {
+        "lr": 0.00015,
+        "lr_head": 0.0003,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "weight_decay": 0.01,
+        "warmup_updates": 50,
+        "grad_clip": 1.0
+      },
+      "execution_revision": "n02-v12-p2-causal-r4",
+      "seed": 1103,
+      "batch_size": 1,
+      "grad_accum": 2,
+      "history": 8,
+      "bptt_steps": 2,
+      "data_identity": {
+        "train": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "robotwin",
+          "partition": "train",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 50,
+            "action_offset": 1,
+            "state_source_key": "actions",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "head_camera_raw_float32",
+            "left_camera_raw_float32",
+            "right_camera_raw_float32"
+          ],
+          "camera_ids": [
+            "robotwin_head",
+            "robotwin_left",
+            "robotwin_right"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 67,
+              "dev": 65,
+              "train": 500
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+              "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 67,
+                  "frames": 15413,
+                  "groups": 67
+                },
+                "dev": {
+                  "files": 65,
+                  "frames": 15414,
+                  "groups": 65
+                },
+                "train": {
+                  "files": 500,
+                  "frames": 116117,
+                  "groups": 500
+                }
+              },
+              "groups": 632,
+              "files": 632,
+              "frames": 146944
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "0dd2dff0a3fa6245c0c89934005032ca0fa1853974c6b222f9e6958570c1b791",
+            "entries": 116117,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-train-anchors.json.gz",
+            "gzip_sha256": "fdac10761736a2c863bf4d92ee75e3fcbcc8a406bb2cd34614515d151edaaddf",
+            "json_sha256": "57f1576da96026810339a5925b7390545149cba3095056b382b7b176c024d230",
+            "version": "n02-full-anchor-v1",
+            "partition": "train",
+            "dataset_format": "robotwin",
+            "entries": 116117,
+            "window": {
+              "action_horizon": 50,
+              "action_offset": 1,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "actions"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 116117
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+            "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+            "mode": "zscore",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        },
+        "dev": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "robotwin",
+          "partition": "dev",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 50,
+            "action_offset": 1,
+            "state_source_key": "actions",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "head_camera_raw_float32",
+            "left_camera_raw_float32",
+            "right_camera_raw_float32"
+          ],
+          "camera_ids": [
+            "robotwin_head",
+            "robotwin_left",
+            "robotwin_right"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 67,
+              "dev": 65,
+              "train": 500
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+              "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 67,
+                  "frames": 15413,
+                  "groups": 67
+                },
+                "dev": {
+                  "files": 65,
+                  "frames": 15414,
+                  "groups": 65
+                },
+                "train": {
+                  "files": 500,
+                  "frames": 116117,
+                  "groups": 500
+                }
+              },
+              "groups": 632,
+              "files": 632,
+              "frames": 146944
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "a5e250cf352df4fe354154e923786c26ae8c16d400da5c0d95cbe39b52d39c28",
+            "entries": 15414,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-dev-anchors.json.gz",
+            "gzip_sha256": "a3ed6a11a85a79c72d320e6a95537fcb3dee4ed5c672d66cef92f2d5cda5e945",
+            "json_sha256": "32c1bae7ee1fbc708e2fe7fc42409575090a3fafd68afcb85a2888c7e155c8be",
+            "version": "n02-full-anchor-v1",
+            "partition": "dev",
+            "dataset_format": "robotwin",
+            "entries": 15414,
+            "window": {
+              "action_horizon": 50,
+              "action_offset": 1,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "actions"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 15414
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+            "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+            "mode": "zscore",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        },
+        "calibration": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "robotwin",
+          "partition": "calibration",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 50,
+            "action_offset": 1,
+            "state_source_key": "actions",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "head_camera_raw_float32",
+            "left_camera_raw_float32",
+            "right_camera_raw_float32"
+          ],
+          "camera_ids": [
+            "robotwin_head",
+            "robotwin_left",
+            "robotwin_right"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 67,
+              "dev": 65,
+              "train": 500
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+              "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 67,
+                  "frames": 15413,
+                  "groups": 67
+                },
+                "dev": {
+                  "files": 65,
+                  "frames": 15414,
+                  "groups": 65
+                },
+                "train": {
+                  "files": 500,
+                  "frames": 116117,
+                  "groups": 500
+                }
+              },
+              "groups": 632,
+              "files": 632,
+              "frames": 146944
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "3436898e2c174f6d635e3ce8f0ddb18a77a54f77a32cd4464f61009207ee1e40",
+            "entries": 15413,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+            "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+            "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+            "version": "n02-full-anchor-v1",
+            "partition": "calibration",
+            "dataset_format": "robotwin",
+            "entries": 15413,
+            "window": {
+              "action_horizon": 50,
+              "action_offset": 1,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "actions"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 15413
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+            "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+            "mode": "zscore",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        }
+      }
+    }
+  },
+  "assets": {
+    "starvla_importable": true,
+    "omegaconf_importable": true,
+    "safetensors_importable": true,
+    "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+    "checkpoint_exists": true,
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "tokenizer_exists": true,
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "data_root_exists": true,
+    "real_backend_available": true
+  },
+  "windows": [
+    {
+      "anchor_index": 29029,
+      "loss": 9.545205116271973,
+      "terms": {
+        "action": 7.389935493469238,
+        "masked_raw": 0.8162389993667603,
+        "causal_raw": 1.3390305042266846,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 50,
+        "action_shape": [
+          1,
+          50,
+          14
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.356798
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 423936,
+          "saturated_count": 0,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 2764800,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 29029,
+          "stop": 29030,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            72
+          ],
+          "unique_measurements": 24,
+          "anchors": [
+            "data/robotwin2/raw/open_laptop/episode_000037.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 9.545205116271973
+      },
+      "forward_seconds_including_io": 3.9990940652787685,
+      "total_backward_seconds": 0.41540609020739794,
+      "per_loss_gradients": {
+        "action": {
+          "encoder": {
+            "l2": 969.9650760306738,
+            "finite": true,
+            "connected_tensors": 348,
+            "nonzero_tensors": 348,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.5462369362326146,
+            "finite": true,
+            "connected_tensors": 29,
+            "nonzero_tensors": 29,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 416.34432055220236,
+            "finite": true,
+            "connected_tensors": 72,
+            "nonzero_tensors": 72,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 1.432685727889097,
+            "finite": true,
+            "connected_tensors": 9,
+            "nonzero_tensors": 9,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.8916151244258635,
+            "finite": true,
+            "connected_tensors": 17,
+            "nonzero_tensors": 17,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 1.031807550872355,
+            "finite": true,
+            "connected_tensors": 32,
+            "nonzero_tensors": 32,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.027638427913188934,
+            "finite": true,
+            "connected_tensors": 1,
+            "nonzero_tensors": 1,
+            "total_tensors": 1
+          }
+        },
+        "masked_raw": {
+          "encoder": {
+            "l2": 3.14803822336716,
+            "finite": true,
+            "connected_tensors": 376,
+            "nonzero_tensors": 376,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.12291059382961095,
+            "finite": true,
+            "connected_tensors": 15,
+            "nonzero_tensors": 15,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 1
+          }
+        },
+        "causal_raw": {
+          "encoder": {
+            "l2": 1.4078974904353074,
+            "finite": true,
+            "connected_tensors": 348,
+            "nonzero_tensors": 348,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.6423202998433397,
+            "finite": true,
+            "connected_tensors": 29,
+            "nonzero_tensors": 29,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 0.06034339527374924,
+            "finite": true,
+            "connected_tensors": 9,
+            "nonzero_tensors": 9,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.03745094062766272,
+            "finite": true,
+            "connected_tensors": 17,
+            "nonzero_tensors": 17,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 0.06699934491672548,
+            "finite": true,
+            "connected_tensors": 32,
+            "nonzero_tensors": 32,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.0011426347773522139,
+            "finite": true,
+            "connected_tensors": 1,
+            "nonzero_tensors": 1,
+            "total_tensors": 1
+          }
+        }
+      },
+      "total_gradients": {
+        "encoder": {
+          "l2": 970.4309707872634,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.8254740424832425,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 416.34432055220236,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 1.429349276125855,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.8899324644008128,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 1.0345432992182282,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.12291059382961095,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.027524612843990326,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.3292396366596222,
+          0.02104758471250534,
+          0.542824387550354,
+          0.10688845068216324
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          691200,
+          691200,
+          691200,
+          691200
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "robotwin_head": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_left": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_right": [
+          8,
+          3,
+          240,
+          320
+        ]
+      },
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        230400,
+        230400,
+        230400
+      ],
+      "peak_allocated_bytes": 78452423680,
+      "peak_reserved_bytes": 79003910144
+    },
+    {
+      "anchor_index": 58058,
+      "loss": 2.360118865966797,
+      "terms": {
+        "action": 1.4334124326705933,
+        "masked_raw": 0.005935844033956528,
+        "causal_raw": 0.920770525932312,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 50,
+        "action_shape": [
+          1,
+          50,
+          14
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.778742
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 419328,
+          "saturated_count": 0,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 2764800,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 58058,
+          "stop": 58059,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            270
+          ],
+          "unique_measurements": 24,
+          "anchors": [
+            "data/robotwin2/raw/put_bottles_dustbin/episode_000000.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 2.360118865966797
+      },
+      "forward_seconds_including_io": 4.131751729175448,
+      "total_backward_seconds": 0.41175168287009,
+      "per_loss_gradients": {},
+      "total_gradients": {
+        "encoder": {
+          "l2": 696.7658666585327,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.23116043748492193,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 129.15932690930111,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 0.41616870533220784,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.2526751873071811,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 0.29407823882811307,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.012149447672923263,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.008511016145348549,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.910227358341217,
+          0.008923555724322796,
+          0.0747160091996193,
+          0.006133063696324825
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          691200,
+          691200,
+          691200,
+          691200
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "robotwin_head": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_left": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_right": [
+          8,
+          3,
+          240,
+          320
+        ]
+      },
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        230400,
+        230400,
+        230400
+      ],
+      "peak_allocated_bytes": 78821941760,
+      "peak_reserved_bytes": 79339454464
+    },
+    {
+      "anchor_index": 87087,
+      "loss": 1.4246330261230469,
+      "terms": {
+        "action": 0.4976407587528229,
+        "masked_raw": 0.005940297152847052,
+        "causal_raw": 0.9210520386695862,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 50,
+        "action_shape": [
+          1,
+          50,
+          14
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.878324
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 407040,
+          "saturated_count": 0,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 2764800,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 87087,
+          "stop": 87088,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            31
+          ],
+          "unique_measurements": 24,
+          "anchors": [
+            "data/robotwin2/raw/put_object_cabinet/episode_000026.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 1.4246330261230469
+      },
+      "forward_seconds_including_io": 3.3794736051931977,
+      "total_backward_seconds": 0.41098873876035213,
+      "per_loss_gradients": {},
+      "total_gradients": {
+        "encoder": {
+          "l2": 383.10943142741957,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.22707853205556347,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 75.78977643012558,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 0.22220124902596797,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.14699183222095127,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 0.16169412279300813,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.012665883883690564,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.004977997858077288,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.9653217196464539,
+          0.012151607312262058,
+          0.015602972358465195,
+          0.006923776585608721
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          691200,
+          691200,
+          691200,
+          691200
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "robotwin_head": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_left": [
+          8,
+          3,
+          240,
+          320
+        ],
+        "robotwin_right": [
+          8,
+          3,
+          240,
+          320
+        ]
+      },
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        230400,
+        230400,
+        230400
+      ],
+      "peak_allocated_bytes": 78827696640,
+      "peak_reserved_bytes": 79339454464
+    }
+  ],
+  "claim_boundary": "implementation/gradient/resource profile only; no optimisation stability, training performance or closed-loop evidence"
+}

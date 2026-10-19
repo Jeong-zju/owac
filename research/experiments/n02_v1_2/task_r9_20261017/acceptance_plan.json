@@ -1,0 +1,62 @@
+{
+  "frozen_before_adaptation": true,
+  "created_at": "2026-10-16T17:36:44.285104+00:00",
+  "protocol": "n02-task-adaptation-r9-v1",
+  "stage": "P2 bounded repair",
+  "task": "grab_roller",
+  "exclude_train_episode": "grab_roller/episode_000000",
+  "data_split": "unchanged P0 train/dev/calibration; no dark episode moved into dev",
+  "arms": {
+    "control": "frozen frontend + q/v rank8 LoRA",
+    "task": "last6 stride16 blocks + three level projections + readout + same LoRA"
+  },
+  "budget": {
+    "updates_each": 64,
+    "microbatch_anchors": 8,
+    "exposures_each": 512,
+    "warmup_updates": 16,
+    "pilot_updates_each": 3,
+    "save_and_validate_every": 16,
+    "max_new_physical_rollouts": 2,
+    "max_commands_each": 400
+  },
+  "shared_changes": [
+    "balanced lighting x timeline sampling",
+    "14D control flow loss, real temporal mask",
+    "all5 frozen dev episodes at t0/t10/midpoint/ten-valid-action tail",
+    "balanced lighting x phase complete-sampling normalized14D MSE",
+    "Normal opening may not exceed initial error by more than5percent"
+  ],
+  "noise_probe": {
+    "weights": "unchanged D1 narrow50 and wide25",
+    "domains": [
+      "Normal",
+      "Low",
+      "ExtremeLow"
+    ],
+    "same_clean_HDR_buffer": true,
+    "sensor_variants": [
+      "off",
+      "original draw",
+      "three independent redraws"
+    ],
+    "flow_seeds": [
+      188390828,
+      188390878,
+      188390928,
+      188390978
+    ],
+    "axes": "vary sensor at fixed flow; vary flow on clean fixed pixels",
+    "optimizer_updates": 0,
+    "scope": "initial-state sensitivity, not closed-loop success or robustness"
+  },
+  "prohibitions": [
+    "no RGB teacher",
+    "no anti-noise loss added",
+    "no expert action replay",
+    "no relaxed physical acceptance",
+    "no P3/P4 expansion",
+    "no commit/push"
+  ],
+  "selection_rule": "best saved balanced score improving baseline with Normal opening guard; if no eligible checkpoint, no promotion to physical trial"
+}

@@ -1,0 +1,32 @@
+{
+  "checkpoints": 6,
+  "batches_per_checkpoint": 4,
+  "arms": [
+    "full",
+    "omit_mixture",
+    "omit_geometry_set",
+    "omit_counterfactual",
+    "full_no_clip",
+    "zero_current_gradient"
+  ],
+  "disposable_optimizer_steps": 144,
+  "generator_seed": 900,
+  "rng_seeds": [
+    900,
+    901,
+    902,
+    903
+  ],
+  "split": "train",
+  "batch_size": 2,
+  "sequence_length": 8,
+  "frame_size": 64,
+  "loss_aggregation": "Production step_terms and counterfactual loss; active-frame means; original weights; frame state detach.",
+  "gradient_clip": "One global factor after full weighted total; component effective norms use that same factor.",
+  "inactive_terms": "Absent from gradients; None means disconnected; connected exact zero recorded separately.",
+  "zero_gradient_control": "Connected gradients zeroed, None remains None; retained AdamW momentum and weight decay.",
+  "functional_contrast": "Predicted odd-minus-even class mean versus pooled physical template1-minus-template0.",
+  "semantic_predicates": "Detached hard predicates intentionally have no derivative; location straight-through gradient is a surrogate.",
+  "decision_scope": "Local gradient direction and disposable same-batch response only; no continuation or model selection.",
+  "frozen_before_formal": true
+}

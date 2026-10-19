@@ -1,0 +1,669 @@
+{
+  "decision": {
+    "extend_to_800": false,
+    "seed_qualified": {
+      "0": false,
+      "1": false,
+      "2": false
+    },
+    "behavior_count_sum": {
+      "100": 20,
+      "200": 7
+    },
+    "nondecreasing": false,
+    "contracts_passed": true,
+    "finite": true
+  },
+  "final_step": 200,
+  "formal_optimizer_steps": 600,
+  "development": {
+    "0": {
+      "100": {
+        "checkpoint_sha256": "6754c27738b3e1eef8372d6c536208d2fb5b6971b6a90d3654c722d15ed00f5f",
+        "checkpoint_step": 100,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 8,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 1,
+            "total": 16
+          },
+          "missing": {
+            "passed": 8,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 0,
+            "total": 16
+          },
+          "stale": {
+            "passed": 0,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 14.212898997357115,
+          "p95": 21.13194814737653
+        },
+        "counterfactual": {
+          "both_correct": 0,
+          "total": 16,
+          "mean_p1_change": -0.00705025065690279,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 0.8253968253968254,
+              "physical_template_rmse": 0.01732981512529771,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.048048685171774456,
+              "standardized_template_mse": 0.1386419021016096,
+              "prediction_class_rmse": 0.00030272035621150975,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.022400793575105212
+            },
+            "cue": {
+              "geometry_sign_accuracy": 0.9846153846153847,
+              "physical_template_rmse": 0.016653900036463776,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.04802910149670564,
+              "standardized_template_mse": 0.12710238179157882,
+              "prediction_class_rmse": 0.0003413309842401829,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.10524321507949096
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      },
+      "200": {
+        "checkpoint_sha256": "e50b55ac1a5430e59f7ff38933f6a17a76abd2ee8627d733f22f2bc602965751",
+        "checkpoint_step": 200,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 16,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 0,
+            "total": 16
+          },
+          "missing": {
+            "passed": 10,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 0,
+            "total": 16
+          },
+          "stale": {
+            "passed": 0,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 16.673859499860555,
+          "p95": 19.299227203009647
+        },
+        "counterfactual": {
+          "both_correct": 2,
+          "total": 16,
+          "mean_p1_change": 0.03387298807501793,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.02823417875579929,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.04682056262852654,
+              "standardized_template_mse": 0.3805515345129575,
+              "prediction_class_rmse": 0.0006033051851397705,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.19980253870525058
+            },
+            "cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.027795832252135177,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.046803052694751664,
+              "standardized_template_mse": 0.3746454316781983,
+              "prediction_class_rmse": 0.0005748837886270709,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.14861607184776893
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      }
+    },
+    "1": {
+      "100": {
+        "checkpoint_sha256": "7e6b93877f503c83bfa3b4d16cabe15920db6605c9fdffdefa83e768012da6b7",
+        "checkpoint_step": 100,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 8,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 2,
+            "total": 16
+          },
+          "missing": {
+            "passed": 8,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 0,
+            "total": 16
+          },
+          "stale": {
+            "passed": 1,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 18.727283000771422,
+          "p95": 25.373804460105003
+        },
+        "counterfactual": {
+          "both_correct": 0,
+          "total": 16,
+          "mean_p1_change": 8.866190910339355e-06,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 0.5,
+              "physical_template_rmse": 0.021662780047732758,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.04716828985819741,
+              "standardized_template_mse": 0.22971402592234347,
+              "prediction_class_rmse": 0.0004555784042976383,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.40694340732362533
+            },
+            "cue": {
+              "geometry_sign_accuracy": 0.5,
+              "physical_template_rmse": 0.0238867509804762,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.04706750214099884,
+              "standardized_template_mse": 0.28322395565139935,
+              "prediction_class_rmse": 0.00044102424312418754,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.49447394563601565
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      },
+      "200": {
+        "checkpoint_sha256": "ba68594f36717ea2667c224b20b1df17499c235cd6b8f34a2800ccd07ead59b7",
+        "checkpoint_step": 200,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 16,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 0,
+            "total": 16
+          },
+          "missing": {
+            "passed": 9,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 7,
+            "total": 16
+          },
+          "stale": {
+            "passed": 0,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 17.924599000252783,
+          "p95": 20.822184106509667
+        },
+        "counterfactual": {
+          "both_correct": 0,
+          "total": 16,
+          "mean_p1_change": -8.532218635082245e-05,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.0211631711969894,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.04524372317015179,
+              "standardized_template_mse": 0.2645446490895699,
+              "prediction_class_rmse": 0.0002727688563662389,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.043414566251966685
+            },
+            "cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.024748976256982178,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.04519709254113528,
+              "standardized_template_mse": 0.36042094571513866,
+              "prediction_class_rmse": 0.00025815020848173075,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.12614670556325178
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      }
+    },
+    "2": {
+      "100": {
+        "checkpoint_sha256": "cbe148046a62e6ae62c78da1274af69e65904a45d669dce08414a92b9a08210b",
+        "checkpoint_step": 100,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 16,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 0,
+            "total": 16
+          },
+          "missing": {
+            "passed": 8,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 16,
+            "total": 16
+          },
+          "stale": {
+            "passed": 0,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 21.05419649888063,
+          "p95": 47.49720884137787
+        },
+        "counterfactual": {
+          "both_correct": 0,
+          "total": 16,
+          "mean_p1_change": -0.0012546181678771973,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 0.75,
+              "physical_template_rmse": 0.020632992703863214,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.04851904215793761,
+              "standardized_template_mse": 0.18739609475083951,
+              "prediction_class_rmse": 0.00011300420195015798,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.049063117731185185
+            },
+            "cue": {
+              "geometry_sign_accuracy": 0.75,
+              "physical_template_rmse": 0.02219784085749053,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.04844844140685522,
+              "standardized_template_mse": 0.221044384631723,
+              "prediction_class_rmse": 0.00010863746675358226,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.04904288259836344
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      },
+      "200": {
+        "checkpoint_sha256": "051d63f2a89ce06d2057390957c42dbe426a5da5c6d2f7cff5dee72b94d53325",
+        "checkpoint_step": 200,
+        "trained_arm": "candidate",
+        "evaluated_arm": "candidate",
+        "comparison_scope": "trained checkpoint",
+        "scope": "binary semantic proxy; no physical or closed-loop score",
+        "gate_definition": {
+          "correct": "final true semantic mass >= .7",
+          "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+          "missing": "final true semantic mass > .5",
+          "stale": "true mass >= .7 both before and after actual geometry change",
+          "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+        },
+        "all_gates_passed": false,
+        "gate_applicability": "declared slot-parity convention",
+        "gates": {
+          "correct": {
+            "passed": 8,
+            "total": 16
+          },
+          "misleading": {
+            "passed": 0,
+            "total": 16
+          },
+          "missing": {
+            "passed": 8,
+            "total": 16
+          },
+          "unidentifiable": {
+            "passed": 0,
+            "total": 16
+          },
+          "stale": {
+            "passed": 0,
+            "total": 16
+          }
+        },
+        "encoder_ms": {
+          "p50": 19.450604493613355,
+          "p95": 38.38731414143693
+        },
+        "counterfactual": {
+          "both_correct": 0,
+          "total": 16,
+          "mean_p1_change": 3.725290298461914e-09,
+          "diagnostics": {
+            "no_cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.04348597063117937,
+              "own_template_closer_fraction": 0.0,
+              "model_std": 0.04701269766877568,
+              "standardized_template_mse": 0.8723999005625523,
+              "prediction_class_rmse": 0.0003938504613913773,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.49275187651316327
+            },
+            "cue": {
+              "geometry_sign_accuracy": 1.0,
+              "physical_template_rmse": 0.04640631980584084,
+              "own_template_closer_fraction": 0.5,
+              "model_std": 0.046916789532854004,
+              "standardized_template_mse": 0.9913726142712165,
+              "prediction_class_rmse": 0.0003926434916838144,
+              "semantic_refutation_fraction": 0.0,
+              "mean_abs_p1_drift": 0.49999859883235054
+            }
+          },
+          "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+        }
+      }
+    }
+  },
+  "final": {
+    "0": {
+      "checkpoint_sha256": "e50b55ac1a5430e59f7ff38933f6a17a76abd2ee8627d733f22f2bc602965751",
+      "checkpoint_step": 200,
+      "trained_arm": "candidate",
+      "evaluated_arm": "candidate",
+      "comparison_scope": "trained checkpoint",
+      "scope": "binary semantic proxy; no physical or closed-loop score",
+      "gate_definition": {
+        "correct": "final true semantic mass >= .7",
+        "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+        "missing": "final true semantic mass > .5",
+        "stale": "true mass >= .7 both before and after actual geometry change",
+        "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+      },
+      "all_gates_passed": false,
+      "gate_applicability": "declared slot-parity convention",
+      "gates": {
+        "correct": {
+          "passed": 32,
+          "total": 32
+        },
+        "misleading": {
+          "passed": 0,
+          "total": 32
+        },
+        "missing": {
+          "passed": 19,
+          "total": 32
+        },
+        "unidentifiable": {
+          "passed": 0,
+          "total": 32
+        },
+        "stale": {
+          "passed": 0,
+          "total": 32
+        }
+      },
+      "encoder_ms": {
+        "p50": 19.45626750239171,
+        "p95": 32.991649500036125
+      },
+      "counterfactual": {
+        "both_correct": 3,
+        "total": 32,
+        "mean_p1_change": 0.033920105546712875,
+        "diagnostics": {
+          "no_cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.029004937417900823,
+            "own_template_closer_fraction": 0.0,
+            "model_std": 0.04682134275162031,
+            "standardized_template_mse": 0.40227632540694525,
+            "prediction_class_rmse": 0.0006034638643050419,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.2024462532902521
+          },
+          "cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.029230222355545756,
+            "own_template_closer_fraction": 0.5009615384615385,
+            "model_std": 0.04680482725111338,
+            "standardized_template_mse": 0.41621718409042874,
+            "prediction_class_rmse": 0.0005748912891319309,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.1404864292878371
+          }
+        },
+        "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+      }
+    },
+    "1": {
+      "checkpoint_sha256": "ba68594f36717ea2667c224b20b1df17499c235cd6b8f34a2800ccd07ead59b7",
+      "checkpoint_step": 200,
+      "trained_arm": "candidate",
+      "evaluated_arm": "candidate",
+      "comparison_scope": "trained checkpoint",
+      "scope": "binary semantic proxy; no physical or closed-loop score",
+      "gate_definition": {
+        "correct": "final true semantic mass >= .7",
+        "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+        "missing": "final true semantic mass > .5",
+        "stale": "true mass >= .7 both before and after actual geometry change",
+        "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+      },
+      "all_gates_passed": false,
+      "gate_applicability": "declared slot-parity convention",
+      "gates": {
+        "correct": {
+          "passed": 32,
+          "total": 32
+        },
+        "misleading": {
+          "passed": 0,
+          "total": 32
+        },
+        "missing": {
+          "passed": 14,
+          "total": 32
+        },
+        "unidentifiable": {
+          "passed": 9,
+          "total": 32
+        },
+        "stale": {
+          "passed": 0,
+          "total": 32
+        }
+      },
+      "encoder_ms": {
+        "p50": 18.12441600486636,
+        "p95": 25.768777645862425
+      },
+      "counterfactual": {
+        "both_correct": 0,
+        "total": 32,
+        "mean_p1_change": 0.006488975137472153,
+        "diagnostics": {
+          "no_cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.02287900621680387,
+            "own_template_closer_fraction": 0.0,
+            "model_std": 0.04524429376044917,
+            "standardized_template_mse": 0.3019478116988049,
+            "prediction_class_rmse": 0.00027277343883363916,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.04998007298461975
+          },
+          "cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.025390881638041835,
+            "own_template_closer_fraction": 0.5,
+            "model_std": 0.04519744042593699,
+            "standardized_template_mse": 0.37633887235941665,
+            "prediction_class_rmse": 0.0002581010065534009,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.1253604496900852
+          }
+        },
+        "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+      }
+    },
+    "2": {
+      "checkpoint_sha256": "051d63f2a89ce06d2057390957c42dbe426a5da5c6d2f7cff5dee72b94d53325",
+      "checkpoint_step": 200,
+      "trained_arm": "candidate",
+      "evaluated_arm": "candidate",
+      "comparison_scope": "trained checkpoint",
+      "scope": "binary semantic proxy; no physical or closed-loop score",
+      "gate_definition": {
+        "correct": "final true semantic mass >= .7",
+        "misleading": "95% wrong prior; pre-cue true mass <= .25, post-cue >= .7",
+        "missing": "final true semantic mass > .5",
+        "stale": "true mass >= .7 both before and after actual geometry change",
+        "unidentifiable": "all prefix and final semantic masses within .15 of .5"
+      },
+      "all_gates_passed": false,
+      "gate_applicability": "declared slot-parity convention",
+      "gates": {
+        "correct": {
+          "passed": 14,
+          "total": 32
+        },
+        "misleading": {
+          "passed": 0,
+          "total": 32
+        },
+        "missing": {
+          "passed": 14,
+          "total": 32
+        },
+        "unidentifiable": {
+          "passed": 0,
+          "total": 32
+        },
+        "stale": {
+          "passed": 0,
+          "total": 32
+        }
+      },
+      "encoder_ms": {
+        "p50": 17.516309999336954,
+        "p95": 22.673980143736102
+      },
+      "counterfactual": {
+        "both_correct": 0,
+        "total": 32,
+        "mean_p1_change": 7.450580596923828e-09,
+        "diagnostics": {
+          "no_cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.043892741412639456,
+            "own_template_closer_fraction": 0.0,
+            "model_std": 0.047013359824343334,
+            "standardized_template_mse": 0.8889081014864351,
+            "prediction_class_rmse": 0.0003941912640122667,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.49289921304536244
+          },
+          "cue": {
+            "geometry_sign_accuracy": 1.0,
+            "physical_template_rmse": 0.04655689155701773,
+            "own_template_closer_fraction": 0.5,
+            "model_std": 0.0469168638667235,
+            "standardized_template_mse": 0.9979350391427295,
+            "prediction_class_rmse": 0.0003928018539087274,
+            "semantic_refutation_fraction": 0.0,
+            "mean_abs_p1_drift": 0.49999897204912624
+          }
+        },
+        "diagnostic_scope": "prediction after solving and semantic map from last revision cycle"
+      }
+    }
+  },
+  "wall_seconds": 697.5238135659893
+}

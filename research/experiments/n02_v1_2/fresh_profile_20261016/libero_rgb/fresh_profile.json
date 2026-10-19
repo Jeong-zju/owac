@@ -1,0 +1,1284 @@
+{
+  "format": "n02-v12-fresh-zero-update-profile-v1",
+  "execution_revision": "n02-v12-p2-causal-r4",
+  "run_id": "fresh-profile-r4-rgb-libero",
+  "arm": "rgb_n02",
+  "platform": "libero",
+  "seed": 1103,
+  "initialisation": "fresh frontend, official frozen pi0.5 checkpoint",
+  "optimizer_updates": 0,
+  "optimizer_state_entries": 0,
+  "weights_unchanged": true,
+  "trainable_sha256_before": "c326728cddd6ea05f39075cc49d0ccbf66262f03de5d4e317cf0fa825ae0b285",
+  "trainable_sha256_after": "c326728cddd6ea05f39075cc49d0ccbf66262f03de5d4e317cf0fa825ae0b285",
+  "trainable_parameters": 109769931,
+  "parameters_by_optimizer_role": {
+    "encoder": 88153088,
+    "decoder": 1243851,
+    "readout": 7173632,
+    "proposals_corrector": 8967680,
+    "masked_branch": 4231680,
+    "bridge_projection": 0
+  },
+  "frozen_backend_parameters": 3616757520,
+  "adam_moment_bytes_estimate_unallocated": 878159448,
+  "bptt_steps": 2,
+  "history": 8,
+  "batch_size": 1,
+  "grad_accum_configured_not_executed": 2,
+  "fwbw_seconds_p50": 3.794921095483005,
+  "fwbw_seconds_p95": 4.32257674029097,
+  "timing_scope": "forward includes data IO, total backward; per-loss probes excluded from timing but included in peak memory; no optimizer step",
+  "training_contract": {
+    "sha256": "81a4d2defc31b80ffc2fcd2b746a8985c33be0e73046755adadeb6de0428030e",
+    "content": {
+      "arm": "rgb_n02",
+      "platform": "libero",
+      "representation": {
+        "kind": "raw3_fixed_isp",
+        "declared": "controlled RGB arm: the SAME loader RAW values of this acquisition passed through one fixed, declared ISP (no per-frame statistics): clip(x / input_scale, 0, 1), per-channel gain, gamma encoding, 8-bit quantisation, then /255 back to float32. This is not the official normal-light paired RGB.",
+        "isp": {
+          "input_scale": 1.0,
+          "gain": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "gamma": 2.2,
+          "quantise_bits": 8
+        }
+      },
+      "model": {
+        "camera_ids": [
+          "libero_agentview",
+          "libero_wrist"
+        ],
+        "input_mode": "RAW3",
+        "in_chans": 3,
+        "input_size": [
+          256,
+          256
+        ],
+        "dims": [
+          128,
+          256,
+          512,
+          1024
+        ],
+        "depths": [
+          3,
+          3,
+          27,
+          3
+        ],
+        "d_model": 512,
+        "alignment": 32,
+        "k": 4,
+        "n_slots": 16,
+        "slot_dim": 512,
+        "tau": 1.0,
+        "rounds": 4,
+        "history": 8,
+        "query_stride": 1,
+        "max_queries_per_camera": 0,
+        "n_latents": 128,
+        "n_queries": 256,
+        "out_dim": 2048,
+        "decoder_hidden": 256,
+        "measurement_channels": 3,
+        "channel_reduction": "select",
+        "saturation_level": null,
+        "units": "sensor_units",
+        "min_variance": null,
+        "max_variance": null,
+        "action_dim": 0,
+        "action_horizon": 10,
+        "strict_check": true,
+        "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core; the RGB arm feeds the identical backbone with the fixed-ISP transform of the same RAW"
+      },
+      "data": {
+        "dataset_format": "libero",
+        "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+        "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+        "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+        "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+        "manifest_seed": 1103,
+        "partitions": {
+          "train": 0.8,
+          "dev": 0.1,
+          "calibration": 0.1
+        },
+        "history": 8,
+        "declared_prior": null,
+        "normalisation": "loader statistics only, LIBERO quantile statistics with the author gripper rule; the training entry never normalises or de-normalises actions",
+        "protocol": {
+          "cameras": 2,
+          "action": "7-dim end-effector control chunk",
+          "offset": 0,
+          "horizon": 10,
+          "replan_steps": 5,
+          "action_mask": "the loader's per-action padding mask",
+          "unit_note": "the 92-dim simulator state never enters the policy; only the 8-dim proprio does"
+        }
+      },
+      "policy": {
+        "suite": "libero",
+        "checkpoint": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+        "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+        "token_dim": 2048,
+        "tokens_per_camera": 256,
+        "freeze_backend": true
+      },
+      "aux": {
+        "lambda_raw": 1.0,
+        "lambda_pred": 1.0,
+        "lambda_noise": 0.0,
+        "noise_note": "the official LIBERO cache declares no sensor noise model, so the noise term stays off",
+        "mask_ratio": 0.6,
+        "patch_size": 32,
+        "decoder_embed_dim": 512,
+        "decoder_depth": 1,
+        "grn_scope": "sparse"
+      },
+      "optim": {
+        "lr": 0.00015,
+        "lr_head": 0.0003,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "weight_decay": 0.01,
+        "warmup_updates": 50,
+        "grad_clip": 1.0
+      },
+      "execution_revision": "n02-v12-p2-causal-r4",
+      "seed": 1103,
+      "batch_size": 1,
+      "grad_accum": 2,
+      "history": 8,
+      "bptt_steps": 2,
+      "data_identity": {
+        "train": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "libero",
+          "partition": "train",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 10,
+            "action_offset": 0,
+            "state_source_key": "robot_states",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "agentview_raw_uint8",
+            "wrist_raw_uint8"
+          ],
+          "camera_ids": [
+            "libero_agentview",
+            "libero_wrist"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 190,
+              "dev": 189,
+              "train": 1392
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-libero.json",
+              "sha256": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 190,
+                  "frames": 28436,
+                  "groups": 190
+                },
+                "dev": {
+                  "files": 189,
+                  "frames": 28394,
+                  "groups": 189
+                },
+                "train": {
+                  "files": 1392,
+                  "frames": 204301,
+                  "groups": 1392
+                }
+              },
+              "groups": 1771,
+              "files": 1771,
+              "frames": 261131
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "5889d892558c0ac19bfdeb836a2119a0a089952860d171cbc1a49eb38481286a",
+            "entries": 204301,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+0 .. t+0+10"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/libero-train-anchors.json.gz",
+            "gzip_sha256": "5bfb889b5e53b5a78e8bc294c0cd1cd28a3e8137164a5fd29ba46627145eee43",
+            "json_sha256": "27c3985885bbc904f4e7159be599b97029cb86a03fc104d73a68ce817446fb45",
+            "version": "n02-full-anchor-v1",
+            "partition": "train",
+            "dataset_format": "libero",
+            "entries": 204301,
+            "window": {
+              "action_horizon": 10,
+              "action_offset": 0,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "robot_states"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 204301
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+            "sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+            "mode": "quantile",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        },
+        "dev": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "libero",
+          "partition": "dev",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 10,
+            "action_offset": 0,
+            "state_source_key": "robot_states",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "agentview_raw_uint8",
+            "wrist_raw_uint8"
+          ],
+          "camera_ids": [
+            "libero_agentview",
+            "libero_wrist"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 190,
+              "dev": 189,
+              "train": 1392
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-libero.json",
+              "sha256": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 190,
+                  "frames": 28436,
+                  "groups": 190
+                },
+                "dev": {
+                  "files": 189,
+                  "frames": 28394,
+                  "groups": 189
+                },
+                "train": {
+                  "files": 1392,
+                  "frames": 204301,
+                  "groups": 1392
+                }
+              },
+              "groups": 1771,
+              "files": 1771,
+              "frames": 261131
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "49522c274358f2d98bfbbb05acdc696bc56f31259f24373e70acbe5c258a84a5",
+            "entries": 28394,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+0 .. t+0+10"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/libero-dev-anchors.json.gz",
+            "gzip_sha256": "9fa508a891668984f59ec65ad0534ecc4e537f993c48c41f990ca33f0eebc6fb",
+            "json_sha256": "c4e2acba85e916c76bfcd7ce70e884a68f6efb9cd83ac1802f21f6eb57302837",
+            "version": "n02-full-anchor-v1",
+            "partition": "dev",
+            "dataset_format": "libero",
+            "entries": 28394,
+            "window": {
+              "action_horizon": 10,
+              "action_offset": 0,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "robot_states"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 28394
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+            "sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+            "mode": "quantile",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        },
+        "calibration": {
+          "module": "owac.frameworks.n02_full.data_v12",
+          "dataset_format": "libero",
+          "partition": "calibration",
+          "history": 8,
+          "batch_size": 1,
+          "stride": 1,
+          "observation_stride": 1,
+          "window": {
+            "observation_stride": 1,
+            "burst_frames": 1,
+            "rnn_frames": 8,
+            "action_horizon": 10,
+            "action_offset": 0,
+            "state_source_key": "robot_states",
+            "executed_action_available": false
+          },
+          "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+          "measurement_keys": [
+            "agentview_raw_uint8",
+            "wrist_raw_uint8"
+          ],
+          "camera_ids": [
+            "libero_agentview",
+            "libero_wrist"
+          ],
+          "manifest": {
+            "version": "n02-full-partition-v2",
+            "content_hash": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52",
+            "seed": 1103,
+            "fractions": {
+              "calibration": 0.1,
+              "dev": 0.1,
+              "train": 0.8
+            },
+            "partition_sizes": {
+              "calibration": 190,
+              "dev": 189,
+              "train": 1392
+            },
+            "source": {
+              "kind": "receipt_file",
+              "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-libero.json",
+              "sha256": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52"
+            }
+          },
+          "partition_verification": {
+            "disjoint": true,
+            "groups_single_partition": true,
+            "violations": [],
+            "counts": {
+              "partitions": {
+                "calibration": {
+                  "files": 190,
+                  "frames": 28436,
+                  "groups": 190
+                },
+                "dev": {
+                  "files": 189,
+                  "frames": 28394,
+                  "groups": 189
+                },
+                "train": {
+                  "files": 1392,
+                  "frames": 204301,
+                  "groups": 1392
+                }
+              },
+              "groups": 1771,
+              "files": 1771,
+              "frames": 261131
+            }
+          },
+          "anchor_table": {
+            "version": "n02-full-anchor-v1",
+            "sha256": "86b63ea7f0480555a4341878e1d838add59660920057cd4bfa1c770ed92e4343",
+            "entries": 28436,
+            "notes": "anchor grid stride=1; history spacing=1; action window t+0 .. t+0+10"
+          },
+          "frozen_anchor_receipt": {
+            "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/libero-calibration-anchors.json.gz",
+            "gzip_sha256": "9ce71ee58640ef3509032e3b8475399c259c86aebc9d916e8217288f707472ef",
+            "json_sha256": "e963ce93bc81ef2eeb8192c11463c5ca33d62b9dbd215fee8d77809b53a51a67",
+            "version": "n02-full-anchor-v1",
+            "partition": "calibration",
+            "dataset_format": "libero",
+            "entries": 28436,
+            "window": {
+              "action_horizon": 10,
+              "action_offset": 0,
+              "burst_frames": 1,
+              "executed_action_available": false,
+              "observation_stride": 1,
+              "rnn_frames": 1,
+              "state_source_key": "robot_states"
+            },
+            "reproduced_from_manifest": true,
+            "reproduced_entries": 28436
+          },
+          "frozen_anchor_identity_preserved": true,
+          "stats": {
+            "path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+            "sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+            "mode": "quantile",
+            "epsilon": 1e-08,
+            "epsilon_mode": "add"
+          }
+        }
+      }
+    }
+  },
+  "assets": {
+    "starvla_importable": true,
+    "omegaconf_importable": true,
+    "safetensors_importable": true,
+    "checkpoint": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_exists": true,
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "tokenizer_exists": true,
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "data_root_exists": true,
+    "real_backend_available": true
+  },
+  "windows": [
+    {
+      "anchor_index": 51075,
+      "loss": 1.5133187770843506,
+      "terms": {
+        "action": 0.17707005143165588,
+        "masked_raw": 0.27979883551597595,
+        "causal_raw": 1.0564498901367188,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 10,
+        "action_shape": [
+          1,
+          10,
+          7
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.356798
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 187965,
+          "saturated_count": 51651,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 1261092,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 51075,
+          "stop": 51076,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            14
+          ],
+          "unique_measurements": 16,
+          "anchors": [
+            "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000323/variant_00.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 1.5133187770843506
+      },
+      "forward_seconds_including_io": 4.118626576848328,
+      "total_backward_seconds": 0.2625785684213042,
+      "per_loss_gradients": {
+        "action": {
+          "encoder": {
+            "l2": 60.060895576954344,
+            "finite": true,
+            "connected_tensors": 348,
+            "nonzero_tensors": 348,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.06274285545372177,
+            "finite": true,
+            "connected_tensors": 29,
+            "nonzero_tensors": 29,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 54.10274864082879,
+            "finite": true,
+            "connected_tensors": 72,
+            "nonzero_tensors": 72,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 0.3169536737560655,
+            "finite": true,
+            "connected_tensors": 9,
+            "nonzero_tensors": 9,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.22257377554888394,
+            "finite": true,
+            "connected_tensors": 17,
+            "nonzero_tensors": 17,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 0.2303675397248372,
+            "finite": true,
+            "connected_tensors": 32,
+            "nonzero_tensors": 32,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.008218958042562008,
+            "finite": true,
+            "connected_tensors": 1,
+            "nonzero_tensors": 1,
+            "total_tensors": 1
+          }
+        },
+        "masked_raw": {
+          "encoder": {
+            "l2": 0.06914718176251704,
+            "finite": true,
+            "connected_tensors": 376,
+            "nonzero_tensors": 376,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.07666352916096002,
+            "finite": true,
+            "connected_tensors": 15,
+            "nonzero_tensors": 15,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 1
+          }
+        },
+        "causal_raw": {
+          "encoder": {
+            "l2": 0.06232028572003223,
+            "finite": true,
+            "connected_tensors": 348,
+            "nonzero_tensors": 348,
+            "total_tensors": 384
+          },
+          "decoder": {
+            "l2": 0.3773031229587235,
+            "finite": true,
+            "connected_tensors": 29,
+            "nonzero_tensors": 29,
+            "total_tensors": 33
+          },
+          "readout": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 72
+          },
+          "proposal": {
+            "l2": 0.023110015811647927,
+            "finite": true,
+            "connected_tensors": 9,
+            "nonzero_tensors": 7,
+            "total_tensors": 9
+          },
+          "corrector": {
+            "l2": 0.017071567488703306,
+            "finite": true,
+            "connected_tensors": 17,
+            "nonzero_tensors": 17,
+            "total_tensors": 17
+          },
+          "predictor": {
+            "l2": 0.029001238544265524,
+            "finite": true,
+            "connected_tensors": 32,
+            "nonzero_tensors": 32,
+            "total_tensors": 32
+          },
+          "measurement": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "masked_branch": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 15
+          },
+          "bridge_projection": {
+            "l2": 0.0,
+            "finite": true,
+            "connected_tensors": 0,
+            "nonzero_tensors": 0,
+            "total_tensors": 0
+          },
+          "other_inference": {
+            "l2": 0.0006722957477904856,
+            "finite": true,
+            "connected_tensors": 1,
+            "nonzero_tensors": 1,
+            "total_tensors": 1
+          }
+        }
+      },
+      "total_gradients": {
+        "encoder": {
+          "l2": 60.06416440163638,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.38022536913533495,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 54.10274864082879,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 0.32148764213213926,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.22491810520501127,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 0.23480838767621026,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.07666352916096002,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.008287436328828335,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.8274132013320923,
+          0.08720871061086655,
+          0.03869863227009773,
+          0.04667946323752403
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          315273,
+          315273,
+          315273,
+          315273
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "libero_agentview": [
+          8,
+          3,
+          256,
+          256
+        ],
+        "libero_wrist": [
+          8,
+          3,
+          256,
+          256
+        ]
+      },
+      "camera_ids": [
+        "libero_agentview",
+        "libero_wrist"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        196608,
+        196608
+      ],
+      "peak_allocated_bytes": 44646721536,
+      "peak_reserved_bytes": 44897927168
+    },
+    {
+      "anchor_index": 102150,
+      "loss": 1.0784345865249634,
+      "terms": {
+        "action": 0.12911257147789001,
+        "masked_raw": 0.020870190113782883,
+        "causal_raw": 0.9284517765045166,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 10,
+        "action_shape": [
+          1,
+          10,
+          7
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.778742
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 239616,
+          "saturated_count": 0,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 1572864,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 102150,
+          "stop": 102151,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            79
+          ],
+          "unique_measurements": 16,
+          "anchors": [
+            "data/libero/raw/libero_goal_no_noops_1.0.0_lerobot/episode_000288/variant_00.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 1.0784345865249634
+      },
+      "forward_seconds_including_io": 3.5168317928910255,
+      "total_backward_seconds": 0.26461367029696703,
+      "per_loss_gradients": {},
+      "total_gradients": {
+        "encoder": {
+          "l2": 18.009768996011363,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.23519072394514057,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 12.555001802624835,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 0.10983408016043845,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.0728682248787909,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 0.07709020582972882,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.023132203648643754,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.002802940784022212,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.6396780014038086,
+          0.1340837925672531,
+          0.0921543538570404,
+          0.1340837925672531
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          393216,
+          393216,
+          393216,
+          393216
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "libero_agentview": [
+          8,
+          3,
+          256,
+          256
+        ],
+        "libero_wrist": [
+          8,
+          3,
+          256,
+          256
+        ]
+      },
+      "camera_ids": [
+        "libero_agentview",
+        "libero_wrist"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        196608,
+        196608
+      ],
+      "peak_allocated_bytes": 44885279744,
+      "peak_reserved_bytes": 45166362624
+    },
+    {
+      "anchor_index": 153225,
+      "loss": 1.7417906522750854,
+      "terms": {
+        "action": 0.049246709793806076,
+        "masked_raw": 0.512645423412323,
+        "causal_raw": 1.1798985004425049,
+        "noise": null
+      },
+      "info": {
+        "weights": {
+          "masked_raw": 1.0,
+          "causal_raw": 1.0,
+          "noise": 0.0
+        },
+        "action_mask_valid": 10,
+        "action_shape": [
+          1,
+          10,
+          7
+        ],
+        "action_dim_internal": 32,
+        "flow_time": [
+          0.878324
+        ],
+        "masked_raw": {
+          "scope": "masked RAW pixels only (contributing, non-saturated)",
+          "mask_ratio": 0.6,
+          "patch_size": 32,
+          "valid_target_count": 212766,
+          "saturated_count": 26850,
+          "shared_backbone_tensors": 376
+        },
+        "causal_raw": {
+          "enabled": true,
+          "scored_samples": 1373796,
+          "leak_guard": "previous spatial features/state only; current values are labels",
+          "execution_revision": "n02-v12-p2-causal-r4",
+          "gradient_boundary": "truncated recurrent graph, including last prefix corrector",
+          "candidate_aggregation": "previous support, detached before observing target"
+        },
+        "noise": {
+          "enabled": false,
+          "weight": 0.0,
+          "reason": "only a fitted variance estimate exists, not a declared noise model"
+        },
+        "window": {
+          "start": 153225,
+          "stop": 153226,
+          "rows": 8,
+          "partition": "train",
+          "current_frame_indices": [
+            33
+          ],
+          "unique_measurements": 16,
+          "anchors": [
+            "data/libero/raw/libero_object_no_noops_1.0.0_lerobot/episode_000365/variant_00.npz"
+          ]
+        },
+        "run_stats": {
+          "prefix_builds": 1,
+          "encoder_calls": 1,
+          "token_source_calls": 1,
+          "denoise_steps": 0
+        },
+        "total": 1.7417906522750854
+      },
+      "forward_seconds_including_io": 3.4984689773991704,
+      "total_backward_seconds": 0.29645211808383465,
+      "per_loss_gradients": {},
+      "total_gradients": {
+        "encoder": {
+          "l2": 6.021123094645623,
+          "finite": true,
+          "connected_tensors": 382,
+          "nonzero_tensors": 382,
+          "total_tensors": 384
+        },
+        "decoder": {
+          "l2": 0.507498318444943,
+          "finite": true,
+          "connected_tensors": 29,
+          "nonzero_tensors": 29,
+          "total_tensors": 33
+        },
+        "readout": {
+          "l2": 7.1147529511400505,
+          "finite": true,
+          "connected_tensors": 72,
+          "nonzero_tensors": 72,
+          "total_tensors": 72
+        },
+        "proposal": {
+          "l2": 0.06129161359785474,
+          "finite": true,
+          "connected_tensors": 9,
+          "nonzero_tensors": 9,
+          "total_tensors": 9
+        },
+        "corrector": {
+          "l2": 0.04089644688051427,
+          "finite": true,
+          "connected_tensors": 17,
+          "nonzero_tensors": 17,
+          "total_tensors": 17
+        },
+        "predictor": {
+          "l2": 0.05561042530309756,
+          "finite": true,
+          "connected_tensors": 32,
+          "nonzero_tensors": 32,
+          "total_tensors": 32
+        },
+        "measurement": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "masked_branch": {
+          "l2": 0.10598023480557033,
+          "finite": true,
+          "connected_tensors": 15,
+          "nonzero_tensors": 15,
+          "total_tensors": 15
+        },
+        "bridge_projection": {
+          "l2": 0.0,
+          "finite": true,
+          "connected_tensors": 0,
+          "nonzero_tensors": 0,
+          "total_tensors": 0
+        },
+        "other_inference": {
+          "l2": 0.0014974790392443538,
+          "finite": true,
+          "connected_tensors": 1,
+          "nonzero_tensors": 1,
+          "total_tensors": 1
+        }
+      },
+      "q": [
+        [
+          0.8022369146347046,
+          0.14839890599250793,
+          0.02660645917057991,
+          0.02275771088898182
+        ]
+      ],
+      "scored_scalars_per_candidate": [
+        [
+          343449,
+          343449,
+          343449,
+          343449
+        ]
+      ],
+      "saturation_policy": "explicit_exclusion_from_primary_objective",
+      "frame_shapes_including_history": {
+        "libero_agentview": [
+          8,
+          3,
+          256,
+          256
+        ],
+        "libero_wrist": [
+          8,
+          3,
+          256,
+          256
+        ]
+      },
+      "camera_ids": [
+        "libero_agentview",
+        "libero_wrist"
+      ],
+      "query_coverage_per_camera": [
+        1.0,
+        1.0
+      ],
+      "query_count_per_camera": [
+        196608,
+        196608
+      ],
+      "peak_allocated_bytes": 44892029952,
+      "peak_reserved_bytes": 45166362624
+    }
+  ],
+  "claim_boundary": "implementation/gradient/resource profile only; no optimisation stability, training performance or closed-loop evidence"
+}

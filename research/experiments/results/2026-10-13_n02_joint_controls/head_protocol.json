@@ -1,0 +1,70 @@
+{
+  "diagnostic_only": true,
+  "smoke": false,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "checkpoint_step": 200,
+  "fit_cache": "previous fixed causal fields: generator seed910, rng seeds910..917",
+  "evaluation_seeds": [
+    740,
+    741,
+    742,
+    743,
+    744,
+    745,
+    746,
+    747,
+    748,
+    749,
+    750,
+    751,
+    752,
+    753,
+    754,
+    755
+  ],
+  "evaluation_split": "validation; same geometry set as earlier round, new seeds",
+  "updates_per_arm": 200,
+  "snapshot_steps": [
+    0,
+    100,
+    200
+  ],
+  "objectives": {
+    "paired_nll": "Lc + Ld + Lvar; exact decomposition of original paired Gaussian NLL",
+    "joint_balanced": "Lc + lambda*Ld + Lvar"
+  },
+  "coefficient": "lambda=Lc_initial/Ld_initial on full fit cache at original fixed-g head",
+  "components": {
+    "Lc": ".5 * mean((c-c_target)^2 / cached_total_variance)",
+    "Ld": ".5 * mean((d-d_target)^2 / cached_total_variance)",
+    "Lvar": ".5 * mean(log(cached_total_variance))",
+    "c": "(mu0+mu1)/2",
+    "d": "(mu1-mu0)/2"
+  },
+  "single_factor": "only contrast coefficient; same common fit, inverse variance and pixels",
+  "geometry": "production head pre-tanh geometry0 parity +/-20, returned +/-1 fp32",
+  "variance": "original checkpoint-predicted VALUES plus cached actual sensor variance",
+  "no_cue_mask_in_objective": true,
+  "sampler_seed": 910,
+  "batch_size": 2,
+  "optimizer": "AdamW",
+  "lr": 0.0003,
+  "weight_decay": 0.01,
+  "gradient_clip_norm": 1.0,
+  "threads": 1,
+  "criteria": {
+    "eval_contrast_nmse_max": 0.5,
+    "eval_contrast_cosine_min": 0.5,
+    "eval_actual_common_pair_both_min": 12,
+    "eval_pair_count": 16,
+    "eval_no_cue_false_contrast_ratio_max": 0.1,
+    "common_weighted_rmse": "train AND evaluation <= own step0 +1e-12"
+  },
+  "no_cue_false_score": "diagnostic only; no post-hoc new threshold",
+  "gradient_probe": "Lc/Ld on shared trunk with full fit cache at0/100/200; no projection",
+  "scope": "frozen-field head joint learnability; no end-to-end or deployment claim"
+}
