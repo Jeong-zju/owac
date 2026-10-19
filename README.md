@@ -1,6 +1,12 @@
 # OWAC
 
-[打开 N01 / N02 / N04 研究统筹台](outputs/research-hub/index.html)：开发树、当前路线、文档阅读与提示词复制的统一入口。日常使用[自动更新入口](http://127.0.0.1:8876/)：刷新页面即在主 repo 执行 `make research-hub`。服务用 `make research-hub-serve` 启动；离线快照也可直接阅读。详见[使用与维护说明](docs/research-hub.md)。
+2026-10-15 **N02 v1.2完整阶段提示词已备，代码环境已部署**：[P2—P4入口](../worktrees/n02-measurement-completion/docs/prompts/n02_v1_2/README.md)。当前P2一次建立完整模型/真实π0.5/实际训练与简洁实时网页；P3充分训练整体比较，P4每个实际选中模型共100次闭环。仅seed1103，新服务器`93.91.156.102:51584`双约96GiB GPU，RAW/RGB可并行；环境/权重/双平台原策略迁移检查通过，数据全集后台同步；不要求三种子/全部矩阵/13,250全集/严苛hash或收敛判定。[部署记录](../worktrees/n02-measurement-completion/research/experiments/2026-10-15_n02_v1_2_remote_deployment.md)区分实际完成项与缺口。P1独立验收未通过保留；本轮Codex写提示词并部署，模型P2待实施，未启动长训练。
+
+[打开 N01 / N02 / N04 研究统筹台](outputs/research-hub/index.html)：开发树、当前路线、文档阅读与提示词复制的统一入口。日常使用[自动更新入口](http://127.0.0.1:8876/)：刷新页面即在主 repo 执行 `make research-hub`。本机已配置 systemd 常驻服务，开机启动、异常退出自动恢复；离线快照也可直接阅读。详见[使用与维护说明](docs/research-hub.md)。
+
+N04 当前采用 **v1.1**：S2 一次建立完整 RAW 编码器并接入 VLA，新增网络只用官方数据；[正式方案](../worktrees/n04-egomotion-separation/docs/plans/N04_full_development_v1.1.md)与阶段交接从统筹台进入。S0／S1 保留为历史，S2 待实施。DeepSeek各阶段任务采用单种子、每个待评模型100次闭环，并内置简洁实时监控任务；已指定N04专用双GPU服务器，可双模型／验证并行，HF凭据从服务器环境读取。
+
+N01当前采用v1.2：同源RAW/RGB四臂、单种子，完整方案与DeepSeek交接从统筹台进入；四臂卡片为计划规格，P3待实施。
 
 发布固定：`owac-rawvla-pi05-v0.1.0` 标记两平台部署跑通、RawVLA-Bench 与对应 π0.5 权重及比较协议固定。2026-10-14 主清单已完整：LIBERO 58.20%、RoboTwin 15.63%；[完整评测报告](research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md)单独留档，原标签不移动。冻结范围见 [0012](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)。
 

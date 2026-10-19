@@ -1,0 +1,18 @@
+[Unit]
+Description=OWAC local research hub
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=%h/zeno/owac/repo
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/zeno/owac/repo/.venv/bin/python -m owac.runtime.research_hub serve --port 8876
+Restart=always
+RestartSec=3
+TimeoutStopSec=15
+KillMode=control-group
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -147,6 +147,13 @@ def prompt_packet(route: dict, stage: dict, docs: dict[str, dict]) -> dict:
             "kind": kind,
             "reason": "提示词来源缺失：" + "、".join(missing or ["未配置来源"]),
         }
+    if kind == "complete":
+        return {
+            "available": True,
+            "kind": kind,
+            "sources": sources,
+            "text": "\n\n".join(docs[path]["content"] for path in sources),
+        }
     introduction = (
         f"请进入 {route['checkout']}。\n"
         f"目标分支：{route['branch']}。\n"

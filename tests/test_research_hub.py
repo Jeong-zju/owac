@@ -97,6 +97,19 @@ def test_refresh_picks_up_new_source_and_flags_old_summary(workspace):
     assert any("摘要来源已变化" in warning for warning in route["warnings"])
 
 
+def test_complete_packet_keeps_its_own_scope_without_legacy_wrapper(workspace):
+    repo, _, registry, files = workspace
+    settings = json.loads(registry.read_text())
+    stage = settings["routes"][0]["stages"][0]
+    stage["prompt_kind"] = "complete"
+    stage["prompt_sources"] = ["docs/prompts/n02/P0.md"]
+    registry.write_text(json.dumps(settings))
+    packet = build_snapshot(repo, registry)["routes"][0]["stages"][0]["prompt"]
+    assert packet["available"]
+    assert packet["text"] == files["docs/prompts/n02/P0.md"]
+    assert "不越过阶段门槛" not in packet["text"]
+
+
 def test_missing_prompt_fails_without_falling_back(workspace):
     repo, root, registry, _ = workspace
     (root / "docs/prompts/n02/P0.md").unlink()

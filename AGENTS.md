@@ -6,6 +6,10 @@
 
 ## 开始工作
 
+2026-10-15 **N02 v1.2完整阶段提示词已备，代码环境已部署**：[P2—P4入口](../worktrees/n02-measurement-completion/docs/prompts/n02_v1_2/README.md)。当前P2一次建立完整模型/真实π0.5/实际训练与简洁实时网页；P3充分训练整体比较，P4每个实际选中模型共100次闭环。仅seed1103，新服务器`93.91.156.102:51584`双约96GiB GPU，RAW/RGB可并行；环境/权重/双平台原策略迁移检查通过，数据全集后台同步；不要求三种子/全部矩阵/13,250全集/严苛hash或收敛判定。[部署记录](../worktrees/n02-measurement-completion/research/experiments/2026-10-15_n02_v1_2_remote_deployment.md)区分实际完成项与缺口。P1独立验收未通过保留；本轮Codex写提示词并部署，模型P2待实施，未启动长训练。
+
+2026-10-15 N04 已正式采用 `../worktrees/n04-egomotion-separation/docs/plans/N04_full_development_v1.1.md`，下一节点 S2 一次建立完整模型，新增网络仅用官方数据；旧 v1.0 后续阶段转为历史。N04 当前执行为每平台／方法seed101、每个待评模型100次（默认两平台各50），阶段包含前端专家实时监控任务、已指定N04专用双GPU服务器，可双模型／验证并行，HF凭据从服务器环境读取，不以三种子／全清单／逐文件hash／收敛判定为门槛。N04 具体实现规则与阶段任务在该 worktree 维护；主 checkout 只同步研究统筹入口。本次采用不表示 S2 已实现或启动训练。
+
 2026-10-12 用户要求提交 RawVLA-Bench 修改并打标签；固定部署/协议标签为 `owac-rawvla-pi05-v0.1.0`，范围见 `docs/decisions/0012-rawvla-pi05-protocol-freeze.md`。标签创建时两平台推理已跑通、LIBERO 全量完成。2026-10-14 完整结果另存于 `research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md`：LIBERO 58.20%，RoboTwin 15.63%，主清单 13,250/13,250；原标签不移动，仍不表示论文数值复现或 RAW/特征接口验收。
 
 2026-10-11 用户最新决定：**后续路线全部使用 RAWVLA-bench**。见 `docs/decisions/0011-rawvla-bench-main-route.md`。Arena DROID / PolaRiS 的基准、场景重建、抓取约束诊断及该衍生集的公开发布均已终止；保留历史源码、数据、权重、结果及失败版本，不因历史授权自动恢复旧任务。0008—0010 的旧 benchmark 选择与重建交付要求由 0011 取代，不再作为后续实现前置。
