@@ -1,0 +1,34 @@
+import json
+from pathlib import Path
+import torch
+from owac.baselines.burst_features import BurstFeatureConfig
+from owac.evaluation.n01_burst import BurstProbe
+from owac.evaluation.n01_burst_training import configure_runtime,sequence
+from owac.evaluation.n01_content import make_protocol_batch
+root=Path('/workspace/owac/research/n01-dbsr-20261013');result=[]
+for seed in [61,73,89]:
+ folder=root/'baseline-runs'/f'{seed}-dbsr_reference'
+ run=json.loads((folder/'result.json').read_text());p=run['protocol'];configure_runtime(p)
+ cp=torch.load(folder/'best.pt',map_location='cpu',weights_only=True)
+ model=BurstProbe(BurstFeatureConfig(**cp['encoder_config']));model.load_state_dict(cp['model']);model.cuda().eval()
+ for index,condition in enumerate(['static_weak','translation_oracle_alignment','occlusion_release','local_change_stale_history']):
+  batch=make_protocol_batch(p,seed,'test',index,condition);rows=[];position=[0]
+  def hook(module,args,out):
+   weights=out[1];b=batch.values.shape[0];q=weights.shape[0]//b;start=position[0]
+   target=batch.target_xy[:,start:start+q].cuda().flatten(0,1)
+   height,width=weights.shape[-2:];r=torch.arange(height,device='cuda')[None,:,None];c=torch.arange(width,device='cuda')[None,None,:]
+   roi=(r-target[:,0,None,None]).square()+(c-target[:,1,None,None]).square()<=2.5**2
+   averaged=weights.mean(2);mass=averaged[:,1:].sum(1);age=(averaged*torch.arange(weights.shape[1],device='cuda')[None,:,None,None]).sum(1)
+   for key,values in [('historical_mass',mass),('weighted_age',age)]:
+    scores=(values*roi).sum((1,2))/roi.sum((1,2)).clamp_min(1)
+    rows.append((key,scores.reshape(b,q).mean(0).cpu().tolist()))
+   position[0]+=q
+  handle=model.encoder.fusion.register_forward_hook(hook)
+  with torch.no_grad():sequence(model,batch,p)
+  handle.remove()
+  row={'seed':seed,'condition':condition,'role':'post-hoc ROI diagnostics only; geometry not passed to encoder','historical_mass':[],'weighted_age':[]}
+  for key,values in rows:row[key]+=values
+  result.append(row)
+ del model;torch.cuda.empty_cache()
+(root/'attention-roi.json').write_text(json.dumps(result,indent=2)+'\n')
+print('attention ROI diagnostics saved')

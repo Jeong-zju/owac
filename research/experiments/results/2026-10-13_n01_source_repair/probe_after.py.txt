@@ -1,0 +1,81 @@
+import json
+import math
+from pathlib import Path
+
+import torch
+
+from owac.baselines.n01 import N01Probe
+from owac.core.encoder_contract import MeasurementFrame
+from owac.evaluation.n01 import build_conditions
+from owac.frameworks.n01.config import load_config
+from owac.frameworks.n01.model import N01Encoder
+from owac.frameworks.n01.motion import MotionField
+from owac.frameworks.n01.support import SupportDomainIntegrator
+from owac.frameworks.n01.synthetic import SyntheticWeakEdgeTask, _SNR_SETTINGS
+
+torch.set_num_threads(4)
+cfg = load_config(Path('configs/encoders/n01/tiny.json'))
+result = {}
+common = dict(image_size=32, snr='medium', motion='slow', seed=42, dead_pixel_rate=0)
+reference = SyntheticWeakEdgeTask(cfg, augment='none', **common).sample(2, 12)
+result['events'] = {}
+for event in ['sudden_appear', 'direction_reversal', 'occlusion_release', 'crossing']:
+    batch = SyntheticWeakEdgeTask(cfg, augment=event, **common).sample(2, 12)
+    result['events'][event] = {'values_identical_to_none': torch.equal(batch.values, reference.values), 'trajectory_identical_to_none': torch.equal(batch.target_xy, reference.target_xy), 'all_frames_visible': bool(batch.target_visible.all())}
+result['speed'] = {}
+for mode in ['still', 'slow', 'fast']:
+    batch = SyntheticWeakEdgeTask(cfg, motion=mode, seed=42, dead_pixel_rate=0).sample(2, 12)
+    delta = (batch.target_xy[:, 1:] - batch.target_xy[:, :-1]) * 31
+    result['speed'][mode] = {'max_pixels_per_frame': float(delta.norm(dim=-1).max()), 'total_pixels': float(((batch.target_xy[:, -1] - batch.target_xy[:, 0]) * 31).norm(dim=-1).mean())}
+result['nominal_slit_snr'] = {name: contrast / math.sqrt(photon*contrast + read*read) for name, (photon, read, contrast) in _SNR_SETTINGS.items()}
+result['tolerance_values_in_matrix'] = {c.name: c.tolerance_px for c in build_conditions()[:6]}
+
+cfg_motion = cfg.replace(alignment='fixed', learnable_gate=False)
+integ = SupportDomainIntegrator(cfg_motion)
+x = torch.zeros(2, 3, 4, 4)
+identity = MotionField(torch.zeros(2,2), torch.zeros(2), torch.ones(2), torch.ones(2,dtype=torch.bool))
+bad = MotionField(torch.zeros(2,2), torch.full((2,), 100.0), torch.ones(2), torch.ones(2,dtype=torch.bool))
+good_gate, _ = integ._motion_gate([identity, identity], 2, x[:, :1])
+bad_gate, unresolved = integ._motion_gate([identity, bad], 2, x[:, :1])
+result['motion_gate'] = {'same_when_historical_residual_changes_0_to_100': torch.equal(good_gate, bad_gate), 'bad_history_gate_value': float(bad_gate.mean()), 'unresolved': unresolved}
+
+cfa_cfg = cfg.replace(input_mode='bayer_cfa', channels=4, planes=4, learnable_gate=False, spatial_radii=(0,1), neighbourhood_radius=1)
+cfa_task = SyntheticWeakEdgeTask(cfa_cfg, cfa=True, image_size=8, motion='still', dead_pixel_rate=0)
+batch = cfa_task.sample(1, 1)
+cfa_encoder = N01Encoder(cfa_cfg)
+state = cfa_encoder.init_state(1, {'camera_ids':['cam'], 'shape':tuple(batch.values.shape[-2:])})
+frame = MeasurementFrame(batch.values[:,0], valid_mask=batch.valid[:,0], camera_id='cam', timestamp=torch.zeros(1), frame_ids=torch.zeros(1,dtype=torch.long), metadata={'variance':batch.variance[:,0]}, sample_xy=cfa_task.sample_xy())
+output = cfa_encoder.step(frame, state=state)
+result['synthetic_cfa'] = {'valid_samples': int(batch.valid.sum()), 'nonzero_support_edges': int(torch.count_nonzero(output.state.support['cam'].edges))}
+
+batch = SyntheticWeakEdgeTask(cfg, motion='still', seed=50, dead_pixel_rate=0).sample(4, 8)
+result['statistic_gate'] = {}
+for label in ['initialized', 'trained200']:
+    torch.manual_seed(0)
+    probe = N01Probe(cfg)
+    if label == 'trained200':
+        ckpt = torch.load('outputs/n01-source-repair-20261013/smoke200/checkpoint.pt', map_location='cpu', weights_only=False)
+        probe.encoder.load_state_dict(ckpt['model'])
+    captured = []
+    handles = [block.gate.register_forward_hook(lambda module, args, out: captured.append((args[0].detach(), out.detach()))) for block in probe.encoder.blocks]
+    with torch.no_grad():
+        before = probe.encode(batch.values, batch.valid, batch.variance, batch.timestamps)
+    for h in handles: h.remove()
+    last = captured[-len(probe.encoder.blocks):]
+    gate_stats = []
+    for gate_input, gate_output in last:
+        raw_stats = gate_input[:, cfg.width:]
+        gate_stats.append({'support_mass_min':float(raw_stats[:,3].min()), 'support_mass_max':float(raw_stats[:,3].max()), 'fraction_saturated_1e6':float(((gate_output<=1e-6)|(gate_output>=1-1e-6)).float().mean())})
+    def remove_other_statistics(module, args):
+        features, stats, graph, mask = args
+        changed = torch.zeros_like(stats)
+        changed[:,3] = stats[:,3]
+        return features, changed, graph, mask
+    handles = [block.register_forward_pre_hook(remove_other_statistics) for block in probe.encoder.blocks]
+    probe.reset_state()
+    with torch.no_grad():
+        after = probe.encode(batch.values, batch.valid, batch.variance, batch.timestamps)
+    for h in handles: h.remove()
+    result['statistic_gate'][label] = {'blocks':gate_stats, 'feature_difference_after_erasing_mean_variance_age_framecount_concentration':float((before-after).abs().max())}
+print(json.dumps(result, indent=2))
+Path('outputs/n01-source-repair-20261013/probe-after.json').write_text(json.dumps(result, indent=2)+'\n')

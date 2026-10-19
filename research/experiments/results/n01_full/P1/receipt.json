@@ -1,0 +1,287 @@
+{
+  "format": "owac.n01_full.phase_receipt.v1",
+  "phase": "P1",
+  "title": "\u53ef\u7ec4\u5408\u4e0e\u53ef\u64a4\u56de\u7684\u89e3\u6790\u53c2\u8003",
+  "date": "2026-10-14",
+  "worktree": "worktrees/n01-evidence-integration",
+  "branch": "lzh/n01-evidence-integration",
+  "status": {
+    "implementation_status": "PASS_P1",
+    "training_status": "NOT_STARTED",
+    "effect_status": "NOT_APPLICABLE"
+  },
+  "start": {
+    "head": "b7f36a7",
+    "prior_acceptance": "research/experiments/n01_full/P0_acceptance_report.md"
+  },
+  "commits": [
+    "18d01e1",
+    "bf0ca4f",
+    "e42ad1c"
+  ],
+  "files_added": [
+    "src/owac/frameworks/n01_full/ledger.py",
+    "src/owac/frameworks/n01_full/domains.py",
+    "src/owac/frameworks/n01_full/statistics.py",
+    "src/owac/frameworks/n01_full/replay.py",
+    "src/owac/frameworks/n01_full/reference.py",
+    "src/owac/frameworks/n01_full/sequence1d.py",
+    "src/owac/evaluation/n01_full.py",
+    "src/owac/runtime/n01_full_ledger_check.py",
+    "src/owac/runtime/n01_full_policy_preflight.py",
+    "configs/encoders/n01_full/policy_contract_encoder.json",
+    "tests/encoders/n01_full/test_ledger.py",
+    "tests/encoders/n01_full/test_statistics.py",
+    "tests/encoders/n01_full/test_replay.py"
+  ],
+  "files_modified": [
+    "src/owac/frameworks/n01_full/config.py",
+    "research/theory/n01_support_contract_v1.md"
+  ],
+  "local_checks": {
+    "pytest": {
+      "passed": 473,
+      "warnings": 1
+    },
+    "make_check": "passed",
+    "analytic": {
+      "total": 9,
+      "passed": 9,
+      "failed": []
+    },
+    "environment": {
+      "python": "3.12.12",
+      "torch": "2.9.1+cpu",
+      "numpy": "2.5.1"
+    }
+  },
+  "remote": {
+    "root": "/workspace/owac/rawvla/research/n01-v1/runs/p1-20261014",
+    "snapshot": "source-v8",
+    "archive_sha256": "4d54972cf145578b96627405c65cae135c2cb34649b54b28c6ef788589c1c529",
+    "files_in_bundle": 152,
+    "bundle_files_matching_committed_tree": 152,
+    "verify": {
+      "status": "passed",
+      "checks": 22,
+      "failures": [],
+      "pending": []
+    },
+    "pytest": {
+      "passed": 125
+    },
+    "analytic": {
+      "total": 9,
+      "passed": 9
+    },
+    "encoder_env": {
+      "python": "3.11.16",
+      "torch": "2.9.1+cu128",
+      "numpy": "2.4.6"
+    },
+    "policy_env": {
+      "python": "3.10.21",
+      "torch": "2.7.1+cu128",
+      "cuda_available": true
+    },
+    "gpu": {
+      "name": "RTX PRO 6000 Blackwell",
+      "used_mib_before": 51218,
+      "total_mib": 97887
+    },
+    "ledger_check": {
+      "crop": 32,
+      "region": "train",
+      "libero": {
+        "arrivals": 33,
+        "registered_frames": 28,
+        "duplicates": 5,
+        "unique_frames_per_camera": {
+          "agentview": 14,
+          "wrist": 14
+        },
+        "repeat_new_samples": 0
+      },
+      "robotwin2": {
+        "arrivals": 49,
+        "registered_frames": 42,
+        "duplicates": 7,
+        "unique_frames_per_camera": {
+          "head_camera": 14,
+          "left_camera": 14,
+          "right_camera": 14
+        },
+        "repeat_new_samples": 0
+      },
+      "sample_xy": "per-channel (row,col) offsets expanded to per-sample (x,y)"
+    },
+    "policy_contract": {
+      "reference_encoder": "accepted three-channel reference encoder (configs/encoders/n01/small.json copy)",
+      "libero": {
+        "episodes": [
+          "libero_10_no_noops_1.0.0_lerobot/episode_000002",
+          "libero_object_no_noops_1.0.0_lerobot/episode_000040"
+        ],
+        "action_loss": [
+          0.88432,
+          4.72427
+        ],
+        "encoder_gradient_norm": [
+          532.9228,
+          2483.389
+        ],
+        "backend_gradients": 0,
+        "tokens_shape": [
+          1,
+          512,
+          2048
+        ],
+        "validation_loss": 0.52693,
+        "validation_parameter_drift": 0.0,
+        "encoder_parameter_delta_l1": 42.564785
+      },
+      "robotwin2": {
+        "episodes": [
+          "grab_roller/episode_000001",
+          "place_dual_shoes/episode_000023"
+        ],
+        "action_loss": [
+          1.07568,
+          1.58268
+        ],
+        "encoder_gradient_norm": [
+          90.4497,
+          195.189
+        ],
+        "backend_gradients": 0,
+        "tokens_shape": [
+          1,
+          768,
+          2048
+        ],
+        "validation_loss": 2.05675,
+        "validation_parameter_drift": 0.0,
+        "encoder_parameter_delta_l1": 44.113339
+      },
+      "weights_sha256": {
+        "libero": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+        "robotwin2": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3"
+      },
+      "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+    }
+  },
+  "required_checks_section4": {
+    "1_duplicate_then_new_id": {
+      "mean": 2.0,
+      "variance": 0.5,
+      "replay_variance": 0.5,
+      "new_measurement_from_duplicate": 0,
+      "third_mean": 1.6666666667,
+      "third_variance": 0.3333333333,
+      "third_observations": 3
+    },
+    "2_correlated_and_precision_slice": {
+      "mean": 2.0,
+      "variance": 0.75,
+      "variance_after_retract": 1.0,
+      "wrong_precision_slice": 0.75,
+      "wrong_version_detected": true
+    },
+    "3_production_vs_oracle": {
+      "max_abs_mean_difference": 1.7763568394002505e-15,
+      "max_abs_variance_difference": 0.0,
+      "condition_numbers": [
+        2.4742568339,
+        2.4742568339
+      ],
+      "phases": [
+        0,
+        1
+      ],
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      }
+    },
+    "4_set_algebra": {
+      "merge_order_independent": true,
+      "merged_evidence_count": 3,
+      "split_merge_digest_equal": true,
+      "retract_restore_digest_equal": true,
+      "restore_version_differs": true,
+      "chunked_events_equal": true,
+      "version_change_changes_digest": true
+    },
+    "5_validity_and_rank": {
+      "used_observations": 2,
+      "excluded_reasons": [
+        "missing",
+        "bad",
+        "saturated"
+      ],
+      "all_invalid_rank": 0,
+      "rank_deficient_rank": 2,
+      "rank_deficient_mask": [
+        true,
+        false,
+        true
+      ],
+      "rank_deficient_uncertainty": "none"
+    },
+    "6_camera_episode_isolation": {
+      "same_frame_id_independent": true,
+      "partial_reset_keeps_other_members": true
+    },
+    "7_replay_interfaces": {
+      "fixed_decision_clean_unchanged": true,
+      "fixed_decision_clean_max_abs_diff": 0.0,
+      "fixed_decision_leak_detected": true,
+      "fixed_decision_leak_max_abs_diff": 205.1666666667,
+      "counterfactual_matches_reference": true,
+      "counterfactual_claim": "exact_independence_in_event_stream",
+      "beyond_exact_range_claim": "rebuild_from_legal_boundary",
+      "history_loss_frames": 2,
+      "toy_closure_matches_full_retraction": true,
+      "toy_zero_input_cheat_detected": true
+    }
+  },
+  "extras": {
+    "interpolation": {
+      "row_covariance_is_A_sigma_A_transpose": true,
+      "singular_fallback": true
+    },
+    "prior": {
+      "prior_id": "prior-v1",
+      "counted_as_observation": false
+    },
+    "conservative_bound": {
+      "kind": "proxy",
+      "bound": 0.5,
+      "empirical_variance": 0.3389263451,
+      "empirical_variance_below_bound": true
+    },
+    "sequence1d": {
+      "unique_frames": 4,
+      "duplicate_measurements_added": 0,
+      "observations": 32,
+      "observations_after_retraction": 31,
+      "raw_record_untouched": true
+    }
+  },
+  "defects_found_and_fixed": [
+    "0-dim tensor identities hashed by object, breaking SourceKey dedup on real loader data",
+    "window [B,T,C,H,W] iterated on the wrong axis in the ledger check",
+    "loader sample_xy is per-channel (row,col), expanded explicitly to per-sample coordinates",
+    "singular interpolation detected by eigenvalues rather than Cholesky alone",
+    "validation forward used torch.inference_mode(), refused by the bridge training forward",
+    "typing.Self (3.11+) made the P0 config unimportable on the pinned Python 3.10 policy runtime",
+    "the reference-encoder config was missing from the bundle directories"
+  ],
+  "not_claimed": [
+    "mechanism effect, training sufficiency or closed-loop benefit",
+    "theoretical propositions P-T1/P-T2/P-T5 (still unproven)",
+    "full-resolution policy forward (crop 32 disclosed)",
+    "mode=raw_adapter (P2, explicitly refused)",
+    "exact retraction beyond the 32-frame window"
+  ]
+}

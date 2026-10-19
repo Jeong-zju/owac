@@ -1,0 +1,1943 @@
+{
+  "mode": "raw_adapter",
+  "acceptance": "P2_end_early_policy_preflight",
+  "p2_acceptance_note": "interface/gradient connectivity only; not P7 action quality",
+  "environment": {
+    "python": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+    "torch": "2.7.1+cu128",
+    "cuda_available": true,
+    "device": "cuda"
+  },
+  "protocol": "configs/encoders/n01_full/protocol_v1.json",
+  "protocol_sha256": "66ca60f3276acb5320dc6a4fd68db7e342fa40a58c9986e477dac2287bc7dfa4",
+  "runtime_sha256": "5fa4d14d7bbb55982a1a2dd821784735036e00561c02fb8fab676f70ede5408a",
+  "p3_support_enabled": false,
+  "aux_raw_loss": {
+    "enabled": false,
+    "config": "aux_measurement_prediction=False",
+    "note": "auxiliary RAW-domain loss stays off unless a later phase turns it on"
+  },
+  "platforms": {
+    "libero": {
+      "weights": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+      "weights_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+      "regions": {
+        "train_samples": 39296,
+        "validation_samples": 6592,
+        "train_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+        "validation_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000031/variant_00.npz"
+      },
+      "motion": {
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+        "checkpoint_sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+        "mode": "rgb3",
+        "checkpoint_stem": {
+          "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+          "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+          "weights_only_fallback": true,
+          "declared_mode": "rgb3",
+          "fnet_channels": 3,
+          "cnet_channels": 6,
+          "inferred_mode": "rgb3",
+          "expected_pairs": {
+            "cfa4": [
+              4,
+              8
+            ],
+            "rgb3": [
+              3,
+              6
+            ]
+          }
+        },
+        "iters": 4,
+        "calibration_version": "p2-synth-cfa-v1",
+        "mapping_version": "n01-full-v1",
+        "pretrained_report": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+          "sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+          "weights_only_fallback": true,
+          "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "checkpoint_update": 74000,
+          "checkpoint_mode": "rgb3",
+          "checkpoint_depth": "resnet34",
+          "loaded_tensors": 472,
+          "missing_key_count": 0,
+          "missing_keys": [],
+          "unexpected_key_count": 0,
+          "unexpected_keys": []
+        }
+      },
+      "input_mode": "rawvla_rgb3",
+      "camera_order": [
+        "agentview",
+        "wrist"
+      ],
+      "adapter": {
+        "input_mode": "rawvla_rgb3",
+        "input_channels": 3,
+        "feature_width": 512,
+        "stem_width": 64,
+        "residual_blocks": 9,
+        "fusion": "dbsr_reference",
+        "projection_width": 32,
+        "offset_width": 64,
+        "max_history": 8,
+        "pool_grid": 16,
+        "tokens_per_camera": 256,
+        "readout_width": 2048,
+        "cfa_pattern": null
+      },
+      "stem": {
+        "input_channels": 3,
+        "stem_replaced": true,
+        "upstream_default_channels": 4,
+        "cfa_entry_channels": 4
+      },
+      "parameters": {
+        "adapter": {
+          "backbone": {
+            "total": 961920,
+            "trainable": 961920,
+            "by_name": {
+              "upstream.init_layer.0.weight": 1728,
+              "upstream.init_layer.0.bias": 64,
+              "upstream.res_layers.0.conv1.0.weight": 36864,
+              "upstream.res_layers.0.conv1.0.bias": 64,
+              "upstream.res_layers.0.conv2.0.weight": 36864,
+              "upstream.res_layers.0.conv2.0.bias": 64,
+              "upstream.res_layers.1.conv1.0.weight": 36864,
+              "upstream.res_layers.1.conv1.0.bias": 64,
+              "upstream.res_layers.1.conv2.0.weight": 36864,
+              "upstream.res_layers.1.conv2.0.bias": 64,
+              "upstream.res_layers.2.conv1.0.weight": 36864,
+              "upstream.res_layers.2.conv1.0.bias": 64,
+              "upstream.res_layers.2.conv2.0.weight": 36864,
+              "upstream.res_layers.2.conv2.0.bias": 64,
+              "upstream.res_layers.3.conv1.0.weight": 36864,
+              "upstream.res_layers.3.conv1.0.bias": 64,
+              "upstream.res_layers.3.conv2.0.weight": 36864,
+              "upstream.res_layers.3.conv2.0.bias": 64,
+              "upstream.res_layers.4.conv1.0.weight": 36864,
+              "upstream.res_layers.4.conv1.0.bias": 64,
+              "upstream.res_layers.4.conv2.0.weight": 36864,
+              "upstream.res_layers.4.conv2.0.bias": 64,
+              "upstream.res_layers.5.conv1.0.weight": 36864,
+              "upstream.res_layers.5.conv1.0.bias": 64,
+              "upstream.res_layers.5.conv2.0.weight": 36864,
+              "upstream.res_layers.5.conv2.0.bias": 64,
+              "upstream.res_layers.6.conv1.0.weight": 36864,
+              "upstream.res_layers.6.conv1.0.bias": 64,
+              "upstream.res_layers.6.conv2.0.weight": 36864,
+              "upstream.res_layers.6.conv2.0.bias": 64,
+              "upstream.res_layers.7.conv1.0.weight": 36864,
+              "upstream.res_layers.7.conv1.0.bias": 64,
+              "upstream.res_layers.7.conv2.0.weight": 36864,
+              "upstream.res_layers.7.conv2.0.bias": 64,
+              "upstream.res_layers.8.conv1.0.weight": 36864,
+              "upstream.res_layers.8.conv1.0.bias": 64,
+              "upstream.res_layers.8.conv2.0.weight": 36864,
+              "upstream.res_layers.8.conv2.0.bias": 64,
+              "upstream.out_layer.0.weight": 294912,
+              "upstream.out_layer.0.bias": 512
+            }
+          },
+          "fusion": {
+            "total": 534560,
+            "trainable": 534560,
+            "by_name": {
+              "feat_project_layer.0.weight": 16384,
+              "feat_project_layer.0.bias": 32,
+              "offset_feat_extractor.0.0.weight": 1152,
+              "offset_feat_extractor.0.0.bias": 64,
+              "offset_feat_extractor.1.conv1.0.weight": 36864,
+              "offset_feat_extractor.1.conv1.0.bias": 64,
+              "offset_feat_extractor.1.conv2.0.weight": 36864,
+              "offset_feat_extractor.1.conv2.0.bias": 64,
+              "weight_predictor.0.0.weight": 73728,
+              "weight_predictor.0.0.bias": 64,
+              "weight_predictor.1.conv1.0.weight": 36864,
+              "weight_predictor.1.conv1.0.bias": 64,
+              "weight_predictor.1.conv2.0.weight": 36864,
+              "weight_predictor.1.conv2.0.bias": 64,
+              "weight_predictor.2.0.weight": 294912,
+              "weight_predictor.2.0.bias": 512
+            }
+          },
+          "total": 1496480
+        },
+        "postprocessor": {
+          "total": 1615874,
+          "trainable": 1615874,
+          "by_name": {
+            "camera_gain": 2,
+            "in_proj.weight": 1048576,
+            "norm.weight": 2048,
+            "norm.bias": 2048,
+            "camera_embed.weight": 4096,
+            "spatial_index.weight": 524288,
+            "spatial_fourier.weight": 32768,
+            "spatial_fourier.bias": 2048
+          }
+        },
+        "freeze": {
+          "frozen_backend_tensors": 375,
+          "trainable_encoder_tensors": 64,
+          "backend_requires_grad": 0
+        },
+        "no_hidden_readout_projection": "the only 512 -> 2048 map is postprocessor.in_proj; no (2048, 2048) parameter exists in either module"
+      },
+      "initial_model_hashes": {
+        "adapter": "4f174622f2fa96603c9c908e9048b27538dbd3e4a40cd18daac927dafac652a0",
+        "postprocessor": "298de746a165469cee9eb099c76c544dbf98aca6f83be90b7e5685152733982b",
+        "backend": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8"
+      },
+      "train_updates": [
+        {
+          "step": 0,
+          "episode": "libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+          "action_loss": 0.1017998456954956,
+          "valid_actions": 10,
+          "encoder_gradient": {
+            "total": 8.373055436483446,
+            "finite": true,
+            "tensors": 56
+          },
+          "bridge_gradient": {
+            "total": 3.6887418925762177,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "adapter": 89.08558963044561,
+            "postprocessor": 91.59621204435825
+          },
+          "input_hashes": {
+            "windows": {
+              "agentview": {
+                "values": "3e3c4cd4ae74ccf6cff67c372307c1ebb864c9afa67916f28604f087eaa74cf5",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "424b9fc7a5e66260a41842713a8e3e766465109ddf0f28e1f44ab6f49ea4289e",
+                "new_measurement": "5c649d15a6f3a544b572461d4dc382087ff6f8c9bb2989223b3e6444d3267109"
+              },
+              "wrist": {
+                "values": "c81cf97c1fe96ecd5c0e125782e47eb790c770cb8bae7b5f96b1c3fd62a57adf",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "424b9fc7a5e66260a41842713a8e3e766465109ddf0f28e1f44ab6f49ea4289e",
+                "new_measurement": "5c649d15a6f3a544b572461d4dc382087ff6f8c9bb2989223b3e6444d3267109"
+              }
+            },
+            "actions": "6749e706e59cccc47e7b801c99116d4a3d5888b46e67c3243556ce0f5d4c2ba4",
+            "action_mask": "62987c1e1e520807954d225ed0ba88c586d2f6a013871a8e6e7b4260f4ac1c1e",
+            "state": "93272e7a195e2491eab5510d7ffdf2c8325d4a00945fb63d0ba7867b74ca0f8a"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            512,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "a1aaa8101572452cdede3a7b32d9bef3b7286795f8feb0196b24f736c1de2f36",
+          "visual_prefix_tokens": 512,
+          "prefix_valid_slots": 512,
+          "token_shape": [
+            1,
+            512,
+            512
+          ],
+          "bridge_encoder_calls": 1,
+          "backend_gradients": 0,
+          "wall_ms": 827.6151530008065,
+          "source_observe_counts": {
+            "agentview": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                6
+              ],
+              "unique_new_measurements_window": [
+                6
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                6
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 6,
+                "valid_pairs_per_member": [
+                  6
+                ],
+                "source_frame_ids": [
+                  21,
+                  16,
+                  11,
+                  6,
+                  1,
+                  0
+                ],
+                "offsets_shape": [
+                  1,
+                  6,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "wrist": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                6
+              ],
+              "unique_new_measurements_window": [
+                6
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                6
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 6,
+                "valid_pairs_per_member": [
+                  6
+                ],
+                "source_frame_ids": [
+                  21,
+                  16,
+                  11,
+                  6,
+                  1,
+                  0
+                ],
+                "offsets_shape": [
+                  1,
+                  6,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            }
+          },
+          "prefix_diagnostics": {
+            "config_name": "owac-n01-256x2048",
+            "spatial_branch": [
+              "positions"
+            ],
+            "synthetic_camera_blocks": [],
+            "valid_tokens_total": 512,
+            "prefix_tokens": 512,
+            "language_width": 2048,
+            "visual_prefix_scale": "none",
+            "scale_value": 1.0,
+            "time_slot": -1,
+            "dtype": "torch.float32",
+            "dtype_cast": "torch.float32 -> torch.bfloat16"
+          },
+          "p3_support_applied": false,
+          "aux_raw_loss": false
+        },
+        {
+          "step": 1,
+          "episode": "libero_object_no_noops_1.0.0_lerobot/episode_000040/variant_00.npz",
+          "action_loss": 0.6728257536888123,
+          "valid_actions": 8,
+          "encoder_gradient": {
+            "total": 76.7461903049687,
+            "finite": true,
+            "tensors": 56
+          },
+          "bridge_gradient": {
+            "total": 49.89582785964012,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "adapter": 80.86899446847747,
+            "postprocessor": 68.68577668070793
+          },
+          "input_hashes": {
+            "windows": {
+              "agentview": {
+                "values": "f89a4deae071c5894ce4481e8ef3b44bbcd8101cbd0e161cf2b8ed70a5bc0c14",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "255e747f35f00d3d9d2a5c43fd5b44c0dc476ed91c93b06208adf160c87aab49",
+                "frame_ids": "cec2a371a2d7a397417d56f0cc84ad95cb21dd7944419e614e69be26ac82bb37",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "wrist": {
+                "values": "5319bdcdaa0f5b7b6846a2f734696861b8632bb87d9a8d815a14004956601c3a",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "c19196953629764e0957704ba02da16cc876878d2a7dfa37dbb47db3b4b9ee13",
+                "frame_ids": "cec2a371a2d7a397417d56f0cc84ad95cb21dd7944419e614e69be26ac82bb37",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "0bb02a0e812ce2777759521e4c46a6ecc7b3d70e688162fc3848eb9a9833054a",
+            "action_mask": "857932b8dc167e23fb127ee496a4238049284b266a8ab8d0f83b079fcd98118a",
+            "state": "2bb0e8c33a1ab54d96abe530e7d1c0bac6ca533d37fb58a155fbac187b171408"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            512,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "d306a86ef25cc33278c404a2732a507002dfdeece3a4083ce2bb3a24765a7c9e",
+          "visual_prefix_tokens": 512,
+          "prefix_valid_slots": 511,
+          "token_shape": [
+            1,
+            512,
+            512
+          ],
+          "bridge_encoder_calls": 2,
+          "backend_gradients": 0,
+          "wall_ms": 869.5148799961316,
+          "source_observe_counts": {
+            "agentview": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  117,
+                  112,
+                  107,
+                  102,
+                  97,
+                  92,
+                  87,
+                  82
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "wrist": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  117,
+                  112,
+                  107,
+                  102,
+                  97,
+                  92,
+                  87,
+                  82
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            }
+          },
+          "prefix_diagnostics": {
+            "config_name": "owac-n01-256x2048",
+            "spatial_branch": [
+              "positions"
+            ],
+            "synthetic_camera_blocks": [],
+            "valid_tokens_total": 511,
+            "prefix_tokens": 512,
+            "language_width": 2048,
+            "visual_prefix_scale": "none",
+            "scale_value": 1.0,
+            "time_slot": -1,
+            "dtype": "torch.float32",
+            "dtype_cast": "torch.float32 -> torch.bfloat16"
+          },
+          "p3_support_applied": false,
+          "aux_raw_loss": false
+        }
+      ],
+      "distinct_train_episodes": 2,
+      "policy_reset_check": {
+        "partial": true,
+        "encoder_reset": "delegated_to_encoder",
+        "encoder_calls": 2,
+        "notes": [],
+        "readout_tokens_dropped": 1,
+        "readout_tokens_cleared": [
+          0
+        ],
+        "action_cache": {
+          "slots": 1,
+          "indices": [
+            0
+          ],
+          "partial": true,
+          "replan_steps": 5
+        }
+      },
+      "repeat_frame_check": {
+        "camera": "agentview",
+        "unique_before": [
+          6
+        ],
+        "unique_after": [
+          6
+        ],
+        "arrivals_before": [
+          8
+        ],
+        "arrivals_after": [
+          9
+        ],
+        "unique_unchanged": true,
+        "one_arrival_per_step": true,
+        "tokens_identical_after_repeat": true,
+        "mask_identical_after_repeat": true,
+        "readout_repeat_identical": true,
+        "repeated_state_unchanged_by_readout": true,
+        "tokens_sha256": "679bddf10322b27a2e1cb7197cd1de495167ea565755569a0c8300c6d3928834",
+        "window_frames_after_repeat": 6,
+        "repeated_this_step": [
+          true
+        ]
+      },
+      "analytic_variance_check": {
+        "unique_sources": 6,
+        "unique_sources_after_repeats": 6,
+        "posterior_variance_unique": 0.16666666666666666,
+        "posterior_variance_after_repeats": 0.16666666666666666,
+        "covariance_identical": true,
+        "repeats_sent": 10,
+        "estimator": "unit-noise FP64 dense GLS over registered unique sources"
+      },
+      "episode_change_check": {
+        "camera": "agentview",
+        "unique_before_switch": [
+          6
+        ],
+        "unique_after_switch": [
+          1
+        ],
+        "window_frames_after_switch": 1,
+        "episode_before": "libero_10_no_noops_1.0.0_lerobot/episode_000002/variant_00.npz",
+        "episode_after": "libero_10_no_noops_1.0.0_lerobot/episode_000008/variant_00.npz",
+        "source_frame_ids_after_switch": [
+          91
+        ]
+      },
+      "partial_reset_check": {
+        "camera": "agentview",
+        "member_reset_filled": 0,
+        "member_kept_filled": 8,
+        "member_kept_filled_unchanged": true,
+        "member_reset_frame_ids_cleared": true,
+        "member_kept_frame_ids_unchanged": true,
+        "member_kept_tokens_unchanged": false,
+        "reset_member_token_mask_false": true
+      },
+      "missing_camera_check": {
+        "present_camera": "agentview",
+        "missing_cameras": [
+          "wrist"
+        ],
+        "token_camera_ids": [
+          "agentview"
+        ],
+        "token_shape": [
+          1,
+          256,
+          512
+        ],
+        "prefix_shape": [
+          1,
+          512,
+          2048
+        ],
+        "prefix_len_is_fixed": true,
+        "missing_block_zero": true,
+        "missing_block_mask_false": true,
+        "present_block_mask_matches_tokens": true,
+        "synthetic_blocks": [
+          "wrist"
+        ]
+      },
+      "denoise_check": {
+        "num_denoise_steps": 10,
+        "shape": [
+          1,
+          10,
+          32
+        ],
+        "finite": true,
+        "repeat_max_abs": 0.0,
+        "tolerance": 0.001,
+        "encoder_calls_during_denoise": 0,
+        "arrivals_during_denoise": 0,
+        "denoise_steps_two_calls": 20,
+        "prefix_builds_two_calls": 2,
+        "prefix_source": "visual_tokens"
+      },
+      "vision_tower": {
+        "probe": {
+          "embed_image_present": true,
+          "embed_image_calls": 0,
+          "hooked_modules": [],
+          "vision_module_forwards": 0,
+          "vision_parameter_tensors": 0,
+          "method": "wrapped vlm.embed_image + forward hooks on every module named *vision*"
+        },
+        "audit_vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": false,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "replaced_vision_keys": 437,
+        "zero_entry_calls": true,
+        "zero_vision_parameter_tensors": true,
+        "evidence": "wrapped vlm.embed_image + forward hooks installed before the batches"
+      },
+      "validation": {
+        "rows": [
+          {
+            "episode": "libero_10_no_noops_1.0.0_lerobot/episode_000031/variant_00.npz",
+            "action_loss": 0.24751035869121552,
+            "updated": false,
+            "source_observe_counts": {
+              "agentview": {
+                "window_frames": 8,
+                "unique_frames_window": [
+                  6
+                ],
+                "unique_new_measurements_window": [
+                  6
+                ],
+                "unique_frame_identity_rule": "(episode_id, frame_id)",
+                "adapter_arrivals_lifetime": [
+                  8
+                ],
+                "adapter_unique_lifetime": [
+                  6
+                ],
+                "unique_matches_window": [
+                  true
+                ],
+                "p2_motion_status": "motion_provider",
+                "correspondence": {
+                  "mapping_version": "n01-full-v1",
+                  "decision_version": "p2-motion-window-v1",
+                  "risk_kind": "proxy",
+                  "window_frames": 6,
+                  "valid_pairs_per_member": [
+                    6
+                  ],
+                  "source_frame_ids": [
+                    24,
+                    19,
+                    14,
+                    9,
+                    4,
+                    0
+                  ],
+                  "offsets_shape": [
+                    1,
+                    6,
+                    2,
+                    128,
+                    128
+                  ]
+                }
+              },
+              "wrist": {
+                "window_frames": 8,
+                "unique_frames_window": [
+                  6
+                ],
+                "unique_new_measurements_window": [
+                  6
+                ],
+                "unique_frame_identity_rule": "(episode_id, frame_id)",
+                "adapter_arrivals_lifetime": [
+                  8
+                ],
+                "adapter_unique_lifetime": [
+                  6
+                ],
+                "unique_matches_window": [
+                  true
+                ],
+                "p2_motion_status": "motion_provider",
+                "correspondence": {
+                  "mapping_version": "n01-full-v1",
+                  "decision_version": "p2-motion-window-v1",
+                  "risk_kind": "proxy",
+                  "window_frames": 6,
+                  "valid_pairs_per_member": [
+                    6
+                  ],
+                  "source_frame_ids": [
+                    24,
+                    19,
+                    14,
+                    9,
+                    4,
+                    0
+                  ],
+                  "offsets_shape": [
+                    1,
+                    6,
+                    2,
+                    128,
+                    128
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "parameter_drift_after_validation": 0.0,
+        "before_hashes": {
+          "adapter": "16f05f650f9c61b031ee07caac643f342091a4407e0a3133283c1784df195957",
+          "postprocessor": "51c1119ac6e8542dcf7ac091d9430991b5f1e602e022a601c939f2c6605f21cc"
+        },
+        "after_hashes": {
+          "adapter": "16f05f650f9c61b031ee07caac643f342091a4407e0a3133283c1784df195957",
+          "postprocessor": "51c1119ac6e8542dcf7ac091d9430991b5f1e602e022a601c939f2c6605f21cc"
+        }
+      },
+      "backend_parameter_hashes": {
+        "before": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8",
+        "after": "7ffc30311b00c6f9f941566fcfe3c6293582a7fb91eb559dd41dff63de3ad5a8"
+      },
+      "load_audit": {
+        "loaded_keys": 376,
+        "model_keys": 376,
+        "inactive_keys": [],
+        "active_missing": [],
+        "unexpected": [],
+        "shape_mismatch": [],
+        "replaced_vision_keys": 437,
+        "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+        "replaced_vision_key_sample": [
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+        ],
+        "parameter_groups": {
+          "language_model": {
+            "prefixes": [
+              "vlm.model.model.language_model.",
+              "vlm.model.language_model."
+            ],
+            "model_tensors": 164,
+            "checked_tensors": 164,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 2508531712
+          },
+          "language_projection": {
+            "prefixes": [
+              "vlm.model.lm_head.",
+              "vlm.model.model.embed_tokens.",
+              "vlm.lm_head."
+            ],
+            "model_tensors": 1,
+            "checked_tensors": 1,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 526647296
+          },
+          "action_expert": {
+            "prefixes": [
+              "action_head."
+            ],
+            "model_tensors": 209,
+            "checked_tensors": 209,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 693422112
+          }
+        },
+        "vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": false,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "notes": [
+          "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+          "language/action parameters were checked item by item before loading"
+        ]
+      },
+      "ledger_source_check": {
+        "batches": 2,
+        "frames_observed": 32,
+        "registered_frames": 28,
+        "unique_frames_per_camera": {
+          "agentview": 14,
+          "wrist": 14
+        },
+        "samples": 1376256,
+        "validity_counts": {
+          "valid": 1376256,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 33,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          0
+        ]
+      }
+    },
+    "robotwin2": {
+      "weights": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "weights_sha256": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+      "regions": {
+        "train_samples": 14400,
+        "validation_samples": 1856,
+        "train_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000001.npz",
+        "validation_first_path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/grab_roller/episode_000014.npz"
+      },
+      "motion": {
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+        "checkpoint_sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+        "mode": "rgb3",
+        "checkpoint_stem": {
+          "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+          "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+          "weights_only_fallback": true,
+          "declared_mode": "rgb3",
+          "fnet_channels": 3,
+          "cnet_channels": 6,
+          "inferred_mode": "rgb3",
+          "expected_pairs": {
+            "cfa4": [
+              4,
+              8
+            ],
+            "rgb3": [
+              3,
+              6
+            ]
+          }
+        },
+        "iters": 4,
+        "calibration_version": "p2-synth-cfa-v1",
+        "mapping_version": "n01-full-v1",
+        "pretrained_report": {
+          "path": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-101-rgb3/checkpoints/best.pt",
+          "sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+          "weights_only_fallback": true,
+          "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+          "core_fingerprint": "b8a49b5029c7d48b3483a6db7d5c837ff21459c82c0c5c9bc310a9129d88be7f",
+          "checkpoint_update": 74000,
+          "checkpoint_mode": "rgb3",
+          "checkpoint_depth": "resnet34",
+          "loaded_tensors": 472,
+          "missing_key_count": 0,
+          "missing_keys": [],
+          "unexpected_key_count": 0,
+          "unexpected_keys": []
+        }
+      },
+      "input_mode": "rawvla_rgb3",
+      "camera_order": [
+        "head_camera",
+        "left_camera",
+        "right_camera"
+      ],
+      "adapter": {
+        "input_mode": "rawvla_rgb3",
+        "input_channels": 3,
+        "feature_width": 512,
+        "stem_width": 64,
+        "residual_blocks": 9,
+        "fusion": "dbsr_reference",
+        "projection_width": 32,
+        "offset_width": 64,
+        "max_history": 8,
+        "pool_grid": 16,
+        "tokens_per_camera": 256,
+        "readout_width": 2048,
+        "cfa_pattern": null
+      },
+      "stem": {
+        "input_channels": 3,
+        "stem_replaced": true,
+        "upstream_default_channels": 4,
+        "cfa_entry_channels": 4
+      },
+      "parameters": {
+        "adapter": {
+          "backbone": {
+            "total": 961920,
+            "trainable": 961920,
+            "by_name": {
+              "upstream.init_layer.0.weight": 1728,
+              "upstream.init_layer.0.bias": 64,
+              "upstream.res_layers.0.conv1.0.weight": 36864,
+              "upstream.res_layers.0.conv1.0.bias": 64,
+              "upstream.res_layers.0.conv2.0.weight": 36864,
+              "upstream.res_layers.0.conv2.0.bias": 64,
+              "upstream.res_layers.1.conv1.0.weight": 36864,
+              "upstream.res_layers.1.conv1.0.bias": 64,
+              "upstream.res_layers.1.conv2.0.weight": 36864,
+              "upstream.res_layers.1.conv2.0.bias": 64,
+              "upstream.res_layers.2.conv1.0.weight": 36864,
+              "upstream.res_layers.2.conv1.0.bias": 64,
+              "upstream.res_layers.2.conv2.0.weight": 36864,
+              "upstream.res_layers.2.conv2.0.bias": 64,
+              "upstream.res_layers.3.conv1.0.weight": 36864,
+              "upstream.res_layers.3.conv1.0.bias": 64,
+              "upstream.res_layers.3.conv2.0.weight": 36864,
+              "upstream.res_layers.3.conv2.0.bias": 64,
+              "upstream.res_layers.4.conv1.0.weight": 36864,
+              "upstream.res_layers.4.conv1.0.bias": 64,
+              "upstream.res_layers.4.conv2.0.weight": 36864,
+              "upstream.res_layers.4.conv2.0.bias": 64,
+              "upstream.res_layers.5.conv1.0.weight": 36864,
+              "upstream.res_layers.5.conv1.0.bias": 64,
+              "upstream.res_layers.5.conv2.0.weight": 36864,
+              "upstream.res_layers.5.conv2.0.bias": 64,
+              "upstream.res_layers.6.conv1.0.weight": 36864,
+              "upstream.res_layers.6.conv1.0.bias": 64,
+              "upstream.res_layers.6.conv2.0.weight": 36864,
+              "upstream.res_layers.6.conv2.0.bias": 64,
+              "upstream.res_layers.7.conv1.0.weight": 36864,
+              "upstream.res_layers.7.conv1.0.bias": 64,
+              "upstream.res_layers.7.conv2.0.weight": 36864,
+              "upstream.res_layers.7.conv2.0.bias": 64,
+              "upstream.res_layers.8.conv1.0.weight": 36864,
+              "upstream.res_layers.8.conv1.0.bias": 64,
+              "upstream.res_layers.8.conv2.0.weight": 36864,
+              "upstream.res_layers.8.conv2.0.bias": 64,
+              "upstream.out_layer.0.weight": 294912,
+              "upstream.out_layer.0.bias": 512
+            }
+          },
+          "fusion": {
+            "total": 534560,
+            "trainable": 534560,
+            "by_name": {
+              "feat_project_layer.0.weight": 16384,
+              "feat_project_layer.0.bias": 32,
+              "offset_feat_extractor.0.0.weight": 1152,
+              "offset_feat_extractor.0.0.bias": 64,
+              "offset_feat_extractor.1.conv1.0.weight": 36864,
+              "offset_feat_extractor.1.conv1.0.bias": 64,
+              "offset_feat_extractor.1.conv2.0.weight": 36864,
+              "offset_feat_extractor.1.conv2.0.bias": 64,
+              "weight_predictor.0.0.weight": 73728,
+              "weight_predictor.0.0.bias": 64,
+              "weight_predictor.1.conv1.0.weight": 36864,
+              "weight_predictor.1.conv1.0.bias": 64,
+              "weight_predictor.1.conv2.0.weight": 36864,
+              "weight_predictor.1.conv2.0.bias": 64,
+              "weight_predictor.2.0.weight": 294912,
+              "weight_predictor.2.0.bias": 512
+            }
+          },
+          "total": 1496480
+        },
+        "postprocessor": {
+          "total": 1617923,
+          "trainable": 1617923,
+          "by_name": {
+            "camera_gain": 3,
+            "in_proj.weight": 1048576,
+            "norm.weight": 2048,
+            "norm.bias": 2048,
+            "camera_embed.weight": 6144,
+            "spatial_index.weight": 524288,
+            "spatial_fourier.weight": 32768,
+            "spatial_fourier.bias": 2048
+          }
+        },
+        "freeze": {
+          "frozen_backend_tensors": 375,
+          "trainable_encoder_tensors": 64,
+          "backend_requires_grad": 0
+        },
+        "no_hidden_readout_projection": "the only 512 -> 2048 map is postprocessor.in_proj; no (2048, 2048) parameter exists in either module"
+      },
+      "initial_model_hashes": {
+        "adapter": "3ee1e2b4aa316650850164c337c6e298023e121350d0d3b59b72bb5a8531cb20",
+        "postprocessor": "3127e3a704010d2d9cb89503d72575abb0f2f43b530da8284cf10a89907dc20f",
+        "backend": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b"
+      },
+      "train_updates": [
+        {
+          "step": 0,
+          "episode": "grab_roller/episode_000001.npz",
+          "action_loss": 0.8320071697235107,
+          "valid_actions": 50,
+          "encoder_gradient": {
+            "total": 10.302287228032755,
+            "finite": true,
+            "tensors": 56
+          },
+          "bridge_gradient": {
+            "total": 7.193026103079319,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "adapter": 91.53571743886278,
+            "postprocessor": 96.27584265172482
+          },
+          "input_hashes": {
+            "windows": {
+              "head_camera": {
+                "values": "f047f48bdc752dbefb2b27f1252d40f68d7774c84b83258de09326b34fe859c5",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "left_camera": {
+                "values": "b10d790c46aff6f6577694006488eeb170e42d872e49532d435871f1a70e3d42",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "right_camera": {
+                "values": "ef9a6e1b7839bb789802405edf7ab10138d11fb184b31c12c1ce5fe157723a0e",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "0d53049f219ab6a6d75ceffbe82a1e524446f5cc5362088f309747709dc4a7f9",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "cd77c5719103d839fcf650efd2ad9de64bd3e58bfdad5a4d4c562f4954ef9fe7",
+            "action_mask": "ce4b80ca5f34e66bb42e2ec958e768d4872ea2d5e0adf2d22b37a9426a59256d",
+            "state": "0250389a1a439ffa8a34b06171f5f88fe2ad6813adea71b1fb00b8068e3d4053"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            768,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "c70628ae96a81388d768386f35948e83dbac69aede0278563f96f439d51c51f1",
+          "visual_prefix_tokens": 768,
+          "prefix_valid_slots": 768,
+          "token_shape": [
+            1,
+            768,
+            512
+          ],
+          "bridge_encoder_calls": 1,
+          "backend_gradients": 0,
+          "wall_ms": 1252.5941540006897,
+          "source_observe_counts": {
+            "head_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  8,
+                  7,
+                  6,
+                  5,
+                  4,
+                  3,
+                  2,
+                  1
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "left_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  8,
+                  7,
+                  6,
+                  5,
+                  4,
+                  3,
+                  2,
+                  1
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "right_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  8,
+                  7,
+                  6,
+                  5,
+                  4,
+                  3,
+                  2,
+                  1
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            }
+          },
+          "prefix_diagnostics": {
+            "config_name": "owac-n01-256x2048",
+            "spatial_branch": [
+              "positions"
+            ],
+            "synthetic_camera_blocks": [],
+            "valid_tokens_total": 768,
+            "prefix_tokens": 768,
+            "language_width": 2048,
+            "visual_prefix_scale": "none",
+            "scale_value": 1.0,
+            "time_slot": -1,
+            "dtype": "torch.float32",
+            "dtype_cast": "torch.float32 -> torch.bfloat16"
+          },
+          "p3_support_applied": false,
+          "aux_raw_loss": false
+        },
+        {
+          "step": 1,
+          "episode": "place_dual_shoes/episode_000023.npz",
+          "action_loss": 2.089566707611084,
+          "valid_actions": 50,
+          "encoder_gradient": {
+            "total": 573.75632563338,
+            "finite": true,
+            "tensors": 56
+          },
+          "bridge_gradient": {
+            "total": 202.60963940620422,
+            "finite": true,
+            "tensors": 7
+          },
+          "parameter_updates_l1": {
+            "adapter": 64.42012011077895,
+            "postprocessor": 64.40034657716751
+          },
+          "input_hashes": {
+            "windows": {
+              "head_camera": {
+                "values": "2350045c53d5bea69674c928d019ca46a9d02d1bcab451d855115d37cde02f86",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "left_camera": {
+                "values": "2e2313cc4c360982162e1dd287edb9cae335d7297778796d97181895425d67f3",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              },
+              "right_camera": {
+                "values": "b7235ad74a9355191c3daf744bd3240a2eb08a0c62489295605b2e234ff5542d",
+                "valid_mask": "1e832e19fff27a43e40ea190e93950ef8e76218828c06a0b545a6db77b04ce64",
+                "bad_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "saturated_mask": "3b6eecacc6ba7ad0b0a1738abd3b8d11e247ab3fe25c4392baf6c2589ccfd508",
+                "frame_ids": "9a943bab3b6a8030cf5a0796adb215872f37b489ac57cfb80129ed4d2c83f370",
+                "new_measurement": "888b7cf18aed913a31ec3939df7eaafd46e029944bc269255059c72be9de917f"
+              }
+            },
+            "actions": "be2a0adf12e393b4b4dbd05783509c34c8cad22172432e8e65cd6eb6c4236f5b",
+            "action_mask": "ce4b80ca5f34e66bb42e2ec958e768d4872ea2d5e0adf2d22b37a9426a59256d",
+            "state": "89f610efc27b03876b49d9a6203f9737bb1ba76812f4d45b1c4d0105d6d71079"
+          },
+          "actual_visual_prefix_shape": [
+            1,
+            768,
+            2048
+          ],
+          "actual_visual_prefix_dtype": "torch.bfloat16",
+          "actual_visual_prefix_mask_sha256": "c70628ae96a81388d768386f35948e83dbac69aede0278563f96f439d51c51f1",
+          "visual_prefix_tokens": 768,
+          "prefix_valid_slots": 768,
+          "token_shape": [
+            1,
+            768,
+            512
+          ],
+          "bridge_encoder_calls": 2,
+          "backend_gradients": 0,
+          "wall_ms": 1208.8390240023728,
+          "source_observe_counts": {
+            "head_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  106,
+                  105,
+                  104,
+                  103,
+                  102,
+                  101,
+                  100,
+                  99
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "left_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  106,
+                  105,
+                  104,
+                  103,
+                  102,
+                  101,
+                  100,
+                  99
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            },
+            "right_camera": {
+              "window_frames": 8,
+              "unique_frames_window": [
+                8
+              ],
+              "unique_new_measurements_window": [
+                8
+              ],
+              "unique_frame_identity_rule": "(episode_id, frame_id)",
+              "adapter_arrivals_lifetime": [
+                8
+              ],
+              "adapter_unique_lifetime": [
+                8
+              ],
+              "unique_matches_window": [
+                true
+              ],
+              "p2_motion_status": "motion_provider",
+              "correspondence": {
+                "mapping_version": "n01-full-v1",
+                "decision_version": "p2-motion-window-v1",
+                "risk_kind": "proxy",
+                "window_frames": 8,
+                "valid_pairs_per_member": [
+                  8
+                ],
+                "source_frame_ids": [
+                  106,
+                  105,
+                  104,
+                  103,
+                  102,
+                  101,
+                  100,
+                  99
+                ],
+                "offsets_shape": [
+                  1,
+                  8,
+                  2,
+                  128,
+                  128
+                ]
+              }
+            }
+          },
+          "prefix_diagnostics": {
+            "config_name": "owac-n01-256x2048",
+            "spatial_branch": [
+              "positions"
+            ],
+            "synthetic_camera_blocks": [],
+            "valid_tokens_total": 768,
+            "prefix_tokens": 768,
+            "language_width": 2048,
+            "visual_prefix_scale": "none",
+            "scale_value": 1.0,
+            "time_slot": -1,
+            "dtype": "torch.float32",
+            "dtype_cast": "torch.float32 -> torch.bfloat16"
+          },
+          "p3_support_applied": false,
+          "aux_raw_loss": false
+        }
+      ],
+      "distinct_train_episodes": 2,
+      "policy_reset_check": {
+        "partial": true,
+        "encoder_reset": "delegated_to_encoder",
+        "encoder_calls": 2,
+        "notes": [],
+        "readout_tokens_dropped": 1,
+        "readout_tokens_cleared": [
+          0
+        ],
+        "action_cache": {
+          "slots": 1,
+          "indices": [
+            0
+          ],
+          "partial": true,
+          "replan_steps": 50
+        }
+      },
+      "repeat_frame_check": {
+        "camera": "head_camera",
+        "unique_before": [
+          8
+        ],
+        "unique_after": [
+          8
+        ],
+        "arrivals_before": [
+          8
+        ],
+        "arrivals_after": [
+          9
+        ],
+        "unique_unchanged": true,
+        "one_arrival_per_step": true,
+        "tokens_identical_after_repeat": true,
+        "mask_identical_after_repeat": true,
+        "readout_repeat_identical": true,
+        "repeated_state_unchanged_by_readout": true,
+        "tokens_sha256": "a3788bfb2d838855a23d243db5b77c7430a465a0bf6b17717830a406c0c255fd",
+        "window_frames_after_repeat": 8,
+        "repeated_this_step": [
+          true
+        ]
+      },
+      "analytic_variance_check": {
+        "unique_sources": 8,
+        "unique_sources_after_repeats": 8,
+        "posterior_variance_unique": 0.125,
+        "posterior_variance_after_repeats": 0.125,
+        "covariance_identical": true,
+        "repeats_sent": 10,
+        "estimator": "unit-noise FP64 dense GLS over registered unique sources"
+      },
+      "episode_change_check": {
+        "camera": "head_camera",
+        "unique_before_switch": [
+          8
+        ],
+        "unique_after_switch": [
+          1
+        ],
+        "window_frames_after_switch": 1,
+        "episode_before": "grab_roller/episode_000001.npz",
+        "episode_after": "grab_roller/episode_000002.npz",
+        "source_frame_ids_after_switch": [
+          33
+        ]
+      },
+      "partial_reset_check": {
+        "camera": "head_camera",
+        "member_reset_filled": 0,
+        "member_kept_filled": 8,
+        "member_kept_filled_unchanged": true,
+        "member_reset_frame_ids_cleared": true,
+        "member_kept_frame_ids_unchanged": true,
+        "member_kept_tokens_unchanged": false,
+        "reset_member_token_mask_false": true
+      },
+      "missing_camera_check": {
+        "present_camera": "head_camera",
+        "missing_cameras": [
+          "left_camera",
+          "right_camera"
+        ],
+        "token_camera_ids": [
+          "head_camera"
+        ],
+        "token_shape": [
+          1,
+          256,
+          512
+        ],
+        "prefix_shape": [
+          1,
+          768,
+          2048
+        ],
+        "prefix_len_is_fixed": true,
+        "missing_block_zero": true,
+        "missing_block_mask_false": true,
+        "present_block_mask_matches_tokens": true,
+        "synthetic_blocks": [
+          "left_camera",
+          "right_camera"
+        ]
+      },
+      "denoise_check": {
+        "num_denoise_steps": 10,
+        "shape": [
+          1,
+          50,
+          32
+        ],
+        "finite": true,
+        "repeat_max_abs": 0.0,
+        "tolerance": 0.001,
+        "encoder_calls_during_denoise": 0,
+        "arrivals_during_denoise": 0,
+        "denoise_steps_two_calls": 20,
+        "prefix_builds_two_calls": 2,
+        "prefix_source": "visual_tokens"
+      },
+      "vision_tower": {
+        "probe": {
+          "embed_image_present": true,
+          "embed_image_calls": 0,
+          "hooked_modules": [],
+          "vision_module_forwards": 0,
+          "vision_parameter_tensors": 0,
+          "method": "wrapped vlm.embed_image + forward hooks on every module named *vision*"
+        },
+        "audit_vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": true,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "replaced_vision_keys": 437,
+        "zero_entry_calls": true,
+        "zero_vision_parameter_tensors": true,
+        "evidence": "wrapped vlm.embed_image + forward hooks installed before the batches"
+      },
+      "validation": {
+        "rows": [
+          {
+            "episode": "grab_roller/episode_000014.npz",
+            "action_loss": 0.2881301939487457,
+            "updated": false,
+            "source_observe_counts": {
+              "head_camera": {
+                "window_frames": 8,
+                "unique_frames_window": [
+                  8
+                ],
+                "unique_new_measurements_window": [
+                  8
+                ],
+                "unique_frame_identity_rule": "(episode_id, frame_id)",
+                "adapter_arrivals_lifetime": [
+                  8
+                ],
+                "adapter_unique_lifetime": [
+                  8
+                ],
+                "unique_matches_window": [
+                  true
+                ],
+                "p2_motion_status": "motion_provider",
+                "correspondence": {
+                  "mapping_version": "n01-full-v1",
+                  "decision_version": "p2-motion-window-v1",
+                  "risk_kind": "proxy",
+                  "window_frames": 8,
+                  "valid_pairs_per_member": [
+                    8
+                  ],
+                  "source_frame_ids": [
+                    8,
+                    7,
+                    6,
+                    5,
+                    4,
+                    3,
+                    2,
+                    1
+                  ],
+                  "offsets_shape": [
+                    1,
+                    8,
+                    2,
+                    128,
+                    128
+                  ]
+                }
+              },
+              "left_camera": {
+                "window_frames": 8,
+                "unique_frames_window": [
+                  8
+                ],
+                "unique_new_measurements_window": [
+                  8
+                ],
+                "unique_frame_identity_rule": "(episode_id, frame_id)",
+                "adapter_arrivals_lifetime": [
+                  8
+                ],
+                "adapter_unique_lifetime": [
+                  8
+                ],
+                "unique_matches_window": [
+                  true
+                ],
+                "p2_motion_status": "motion_provider",
+                "correspondence": {
+                  "mapping_version": "n01-full-v1",
+                  "decision_version": "p2-motion-window-v1",
+                  "risk_kind": "proxy",
+                  "window_frames": 8,
+                  "valid_pairs_per_member": [
+                    8
+                  ],
+                  "source_frame_ids": [
+                    8,
+                    7,
+                    6,
+                    5,
+                    4,
+                    3,
+                    2,
+                    1
+                  ],
+                  "offsets_shape": [
+                    1,
+                    8,
+                    2,
+                    128,
+                    128
+                  ]
+                }
+              },
+              "right_camera": {
+                "window_frames": 8,
+                "unique_frames_window": [
+                  8
+                ],
+                "unique_new_measurements_window": [
+                  8
+                ],
+                "unique_frame_identity_rule": "(episode_id, frame_id)",
+                "adapter_arrivals_lifetime": [
+                  8
+                ],
+                "adapter_unique_lifetime": [
+                  8
+                ],
+                "unique_matches_window": [
+                  true
+                ],
+                "p2_motion_status": "motion_provider",
+                "correspondence": {
+                  "mapping_version": "n01-full-v1",
+                  "decision_version": "p2-motion-window-v1",
+                  "risk_kind": "proxy",
+                  "window_frames": 8,
+                  "valid_pairs_per_member": [
+                    8
+                  ],
+                  "source_frame_ids": [
+                    8,
+                    7,
+                    6,
+                    5,
+                    4,
+                    3,
+                    2,
+                    1
+                  ],
+                  "offsets_shape": [
+                    1,
+                    8,
+                    2,
+                    128,
+                    128
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "parameter_drift_after_validation": 0.0,
+        "before_hashes": {
+          "adapter": "91a77f936d6f6562430abc1dc881f75cc2d2d8666b12544bd20e221f781f41a9",
+          "postprocessor": "f1ec4c2430a3e8f2a91f68c6905a171a6645110cb78267377c95a819c4c3fbd5"
+        },
+        "after_hashes": {
+          "adapter": "91a77f936d6f6562430abc1dc881f75cc2d2d8666b12544bd20e221f781f41a9",
+          "postprocessor": "f1ec4c2430a3e8f2a91f68c6905a171a6645110cb78267377c95a819c4c3fbd5"
+        }
+      },
+      "backend_parameter_hashes": {
+        "before": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b",
+        "after": "817a899f370ed59eaf9e41f9b24da70150f000ced00b3642c256e23befa0622b"
+      },
+      "load_audit": {
+        "loaded_keys": 376,
+        "model_keys": 376,
+        "inactive_keys": [],
+        "active_missing": [],
+        "unexpected": [],
+        "shape_mismatch": [],
+        "replaced_vision_keys": 437,
+        "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+        "replaced_vision_key_sample": [
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+          "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+          "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+        ],
+        "parameter_groups": {
+          "language_model": {
+            "prefixes": [
+              "vlm.model.model.language_model.",
+              "vlm.model.language_model."
+            ],
+            "model_tensors": 164,
+            "checked_tensors": 164,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 2508531712
+          },
+          "language_projection": {
+            "prefixes": [
+              "vlm.model.lm_head.",
+              "vlm.model.model.embed_tokens.",
+              "vlm.lm_head."
+            ],
+            "model_tensors": 1,
+            "checked_tensors": 1,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 526647296
+          },
+          "action_expert": {
+            "prefixes": [
+              "action_head."
+            ],
+            "model_tensors": 209,
+            "checked_tensors": 209,
+            "missing": [],
+            "shape_mismatch": [],
+            "parameters": 693422112
+          }
+        },
+        "vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": true,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "notes": [
+          "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+          "language/action parameters were checked item by item before loading"
+        ]
+      },
+      "ledger_source_check": {
+        "batches": 2,
+        "frames_observed": 48,
+        "registered_frames": 42,
+        "unique_frames_per_camera": {
+          "head_camera": 14,
+          "left_camera": 14,
+          "right_camera": 14
+        },
+        "samples": 2064384,
+        "validity_counts": {
+          "valid": 2064384,
+          "missing": 0,
+          "bad": 0,
+          "saturated": 0
+        },
+        "duplicate_repeat_new_samples": 0,
+        "duplicate_repeat_frames": 1,
+        "arrivals": 49,
+        "skipped_arrivals": 0,
+        "sample_xy_declared": true,
+        "sample_xy_shape": [
+          3,
+          2
+        ],
+        "sample_xy_rule": "per-channel (row,col) offset expanded to (x,y) = pixel + offset",
+        "first_source_example": [
+          1
+        ]
+      }
+    }
+  }
+}

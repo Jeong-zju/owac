@@ -1,0 +1,56 @@
+"""Same trained weights/scales, forced temporal candidate sets; diagnostic only."""
+import hashlib
+import json
+from dataclasses import replace
+from pathlib import Path
+from types import SimpleNamespace
+
+import torch
+
+from owac.baselines.n01 import baseline_registry
+from owac.evaluation import n01 as evaluation
+from owac.frameworks.n01.config import N01Config
+
+root = Path(__file__).resolve().parent
+repo = root.parents[1]
+archive = repo / "outputs/n01-source-repair-20261013/shared-data.pt"
+payload = torch.load(archive, map_location="cpu", weights_only=False)
+checkpoint = torch.load(root / "n01-40.pt", map_location="cpu", weights_only=False)
+config = N01Config.from_dict(payload["config"])
+conditions = [evaluation.Condition(**item) for item in payload["conditions"]]
+original_require = evaluation._require
+torch.set_num_threads(4)
+
+
+class FrozenTask:
+    def __init__(self, config, **kwargs):
+        self.seed = kwargs["seed"]
+
+    def sample(self, batch_size, length, **kwargs):
+        return payload["evaluation"][self.seed]
+
+
+evaluation._require = lambda name, purpose: (
+    SimpleNamespace(SyntheticWeakEdgeTask=FrozenTask)
+    if name == "owac.frameworks.n01.synthetic" else original_require(name, purpose)
+)
+results = {}
+for depths in ((1, 4, 8), (1,), (4,), (8,)):
+    cfg = replace(config, time_depths=depths)
+    method = baseline_registry()["n01"](cfg)
+    heads = evaluation.probe_heads_for(method, cfg, image_size=32, device="cpu")
+    method.load_state_dict(checkpoint["model"], strict=True)
+    heads.load_state_dict(checkpoint["heads"], strict=True)
+    method.eval()
+    heads.eval()
+    result = evaluation.evaluate_probe(method, heads, cfg, conditions, 4, 12, "cpu")
+    key = "adaptive" if len(depths) > 1 else f"forced_{depths[0]}"
+    results[key] = result
+    print(key, result["aggregate"]["position_error_px_mean"], flush=True)
+
+(root / "horizon-intervention.json").write_text(json.dumps({
+    "scope": "One trained N01 checkpoint; no extra optimization or calibration. Spatial selector and graph remain active, including temporal graph state. Forced depth 1 is not a stateless single-frame model.",
+    "checkpoint_sha256": hashlib.sha256((root / "n01-40.pt").read_bytes()).hexdigest(),
+    "shared_data_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+    "results": results,
+}, indent=2) + "\n")

@@ -1,0 +1,58 @@
+{
+  "kind": "p2-motion-platform-recheck",
+  "receipt": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-211/receipt.json",
+  "config": "configs/encoders/n01_full/p2_motion_train.json",
+  "recorded_status": "budget_exhausted",
+  "recorded_reasons": [
+    "platform condition failed: tail_within_delta_val_of_best"
+  ],
+  "recorded_stopped_at_update": 100000,
+  "recomputed_status": "budget_exhausted",
+  "recomputed_reasons": [
+    "platform condition failed: tail_within_delta_val_of_best"
+  ],
+  "recomputed_details": {
+    "validations": 100,
+    "first_value": 0.7345104022667959,
+    "final_value": 0.08987736757486485,
+    "best_value": 0.07585365341331524,
+    "best_update": 91000,
+    "run_improvement": 0.6586567488534807,
+    "tail_drift": 0.014023714161549614,
+    "last_improvements": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "lr_drops": 2,
+    "conditions": {
+      "real_improvement_over_run": true,
+      "tail_within_delta_val_of_best": false,
+      "two_effective_lr_drops": true,
+      "final_low_lr_phase": true,
+      "flat_tail_below_delta_val": true,
+      "best_not_at_budget_end": true,
+      "diagnostics_passed": true
+    },
+    "condition_descriptions": {
+      "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+      "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+      "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+      "final_low_lr_phase": "the run must be in the final low-LR phase",
+      "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+      "best_not_at_budget_end": "the best checkpoint must not sit inside the last plateau_checks validation windows of the budget",
+      "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+    }
+  },
+  "budget": 100000,
+  "val_points": 100,
+  "lr_drops": 2,
+  "diagnostics_passed": true,
+  "needs_continuation": false,
+  "recheck_source": "source-v3 (D1 fix)"
+}

@@ -1,0 +1,83 @@
+"""N01 v1.0 full evidence-integration framework.
+
+Re-exports the shared contracts (``contracts.py``) and the P0 configuration
+(``config.py``).  Importing this package must not import torch or initialize a
+device, so later-phase modules stay out of this ``__init__`` until they are
+importable under the same constraint.
+"""
+
+from owac.frameworks.n01_full.config import (
+    BACKBONES,
+    BASIS_KINDS,
+    BEYOND_EXACT_POLICIES,
+    CFA_PATTERNS,
+    CONTENT_PATHS,
+    EXACT_WINDOW_CHOICES,
+    INPUT_MODES,
+    INTERPOLATIONS,
+    MAPPING_KINDS,
+    PRIOR_KINDS,
+    REPLAY_MODES,
+    TRAINABLE_SCOPES,
+    BasisConfig,
+    ContentConfig,
+    CorrespondenceConfig,
+    HistoryConfig,
+    InputIdentityConfig,
+    N01FullConfig,
+    ReplayConfig,
+    TrainingBudgetConfig,
+    load_config,
+)
+from owac.frameworks.n01_full.contracts import (
+    SUPPORT_ROLES,
+    UNCERTAINTY_KINDS,
+    VALIDITY_KINDS,
+    VERSION_FIELDS,
+    CalibratedMeasurement,
+    CorrespondenceMap,
+    DependencyNode,
+    EvidenceEstimate,
+    MeasurementRecord,
+    ReadoutSnapshot,
+    ReplayRange,
+    SourceKey,
+    SupportDomain,
+)
+
+__all__ = [
+    "BACKBONES",
+    "BASIS_KINDS",
+    "BEYOND_EXACT_POLICIES",
+    "CFA_PATTERNS",
+    "CONTENT_PATHS",
+    "EXACT_WINDOW_CHOICES",
+    "INPUT_MODES",
+    "INTERPOLATIONS",
+    "MAPPING_KINDS",
+    "PRIOR_KINDS",
+    "REPLAY_MODES",
+    "SUPPORT_ROLES",
+    "TRAINABLE_SCOPES",
+    "UNCERTAINTY_KINDS",
+    "VALIDITY_KINDS",
+    "VERSION_FIELDS",
+    "BasisConfig",
+    "CalibratedMeasurement",
+    "ContentConfig",
+    "CorrespondenceConfig",
+    "CorrespondenceMap",
+    "DependencyNode",
+    "EvidenceEstimate",
+    "HistoryConfig",
+    "InputIdentityConfig",
+    "MeasurementRecord",
+    "N01FullConfig",
+    "ReadoutSnapshot",
+    "ReplayConfig",
+    "ReplayRange",
+    "SourceKey",
+    "SupportDomain",
+    "TrainingBudgetConfig",
+    "load_config",
+]

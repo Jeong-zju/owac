@@ -1,0 +1,12 @@
+# Runtime plugin configuration; no job is launched by this file.
+# Use with the accepted RoboTwin eval entry point and policy_name below.
+policy_name: owac.runtime.n01_v12_robotwin
+host: 127.0.0.1
+port: 18022
+window_frames: 32
+norm_stats_path: /workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json
+raw_input_field: raw_rgb10
+raw_units: uint16_divide_1023
+replan_steps: 50
+# The service uses complete/robotwin2-{raw_n01|rgb_n01}-seed101.json and matching weights.
+# Scene/camera/task assets and OptiX remain the frozen deployment dependencies.

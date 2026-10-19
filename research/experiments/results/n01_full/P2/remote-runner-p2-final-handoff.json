@@ -1,0 +1,299 @@
+{
+  "kind": "n01-full-p2-final-handoff",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T18:35:56+00:00",
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "snapshots": {
+    "source": {
+      "role": "phase-A snapshot, superseded",
+      "files": 172
+    },
+    "source-v2": {
+      "role": "phase-B start; seed 101 ran this code",
+      "files": 179,
+      "tar_sha256": "313940f27cca9c26b1453c4a5f8313f48b1596dc3d1c27e8a4f2099d163147bc"
+    },
+    "source-v3": {
+      "parent": "source-v2",
+      "role": "D1 platform criterion + D2 noise fix + rgb3 config; seeds 211/307 and all fixed-criterion verdicts",
+      "changed": {
+        "src/owac/training/n01_motion.py": "cd704066… -> 603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+        "src/owac/raw/n01_noise.py": "b8594d0e… -> 44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d"
+      },
+      "added": {
+        "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd"
+      }
+    },
+    "source-v4": {
+      "parent": "source-v3",
+      "role": "defect fixes A/B/C",
+      "changed": {
+        "src/owac/backends/raw_correspondence.py": "a276b816198c15f7da4e999a53d43acbd75dade10e93305ce0c0deb0889efc79",
+        "src/owac/runtime/n01_full_policy_preflight.py": "4fc91e4876f3af5b15fcc6cff16affc77a07f9c84d1f05565718465ce19f6c93",
+        "tests/encoders/n01_full/test_motion.py": "dcb5ed5cafb69abc47f4a7b635dce70e3b49ea1515eb6375ee9fead027dc3c92"
+      },
+      "added": {
+        "tests/encoders/n01_full/test_preflight_window_counts.py": "8840c5e746ceb7d24818eaf0244828356ea13a29519427e29d3b8717ce683904"
+      }
+    },
+    "source-v5": {
+      "parent": "source-v4",
+      "role": "final: defect D (eval device) + checkpoint-stem diagnostic",
+      "changed": {
+        "src/owac/evaluation/n01_motion.py": "bc54d161d00a0e7ccca02144c08b1073fcf7f059089c618289584fce8085e241",
+        "src/owac/runtime/n01_full_policy_preflight.py": "5fa4d14d7bbb55982a1a2dd821784735036e00561c02fb8fab676f70ede5408a",
+        "tests/encoders/n01_full/test_motion_eval.py": "1476d29696a1421583f2527b2ef0b78867ff67e51063766abafae3a5d307e46f"
+      },
+      "added": {
+        "tests/encoders/n01_full/test_preflight_motion_checkpoint.py": "ee56e76921f8427f713c438d336a50e686c43e05aff05f7325d2dcae612a0e60"
+      }
+    }
+  },
+  "seeds": {
+    "101": {
+      "status": "validation_plateau",
+      "stopped_at_update": 82000,
+      "note": "stopped at 81,000 under source-v2; fixed criterion refused (tail_within_delta_val_of_best) and it was continued 81k->82k under source-v3",
+      "gpu_hours": 3.886,
+      "val_epe_sensor_px": {
+        "first": 0.7747213886334345,
+        "best": 0.06985233220844887,
+        "best_update": 82000,
+        "final": 0.06985233220844887
+      },
+      "checkpoint_sha256": {
+        "best": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+        "last": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09"
+      }
+    },
+    "211": {
+      "status": "budget_exhausted",
+      "stopped_at_update": 100000,
+      "reasons": [
+        "platform condition failed: tail_within_delta_val_of_best"
+      ],
+      "gpu_hours": 1.319,
+      "val_epe_sensor_px": {
+        "first": 0.7345104022667959,
+        "best": 0.07585365341331524,
+        "best_update": 91000,
+        "final": 0.08987736757486485
+      },
+      "checkpoint_sha256": {
+        "best": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+        "last": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8"
+      }
+    },
+    "307": {
+      "status": "validation_plateau",
+      "stopped_at_update": 99000,
+      "note": "server outage 15:20-16:32Z; resumed from last.pt@13000 at 16:40:28Z under source-v3",
+      "gpu_hours": 1.302,
+      "val_epe_sensor_px": {
+        "first": 0.8813337878539012,
+        "best": 0.08289747539227112,
+        "best_update": 83000,
+        "final": 0.08334593675457515
+      },
+      "checkpoint_sha256": {
+        "best": "3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38",
+        "last": "de5410ebb7400209f4db94209d00f1796d188e4e3899c0bc034932675127d6ca"
+      }
+    }
+  },
+  "evaluation_cuda": {
+    "101": {
+      "receipt": "remote-runner-eval-seed-101-cuda-receipt.json",
+      "device": "cuda",
+      "wall_seconds": 3.408994903000348,
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.79045499964559,
+        "p95_ms": 6.811381200532196,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108712960,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      },
+      "test_arms_epe_sensor_px": {
+        "no_alignment": 1.9213245913193986,
+        "old_simplified": 2.9851755538204374,
+        "sea_raft": 0.08688598544186997,
+        "oracle": 0.0
+      },
+      "buckets": [
+        "fast_alignable",
+        "fast_hard",
+        "slow_structural_change",
+        "current_frame_anomaly"
+      ],
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.18826624353705113,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      }
+    },
+    "211": {
+      "receipt": "remote-runner-eval-seed-211-cuda-receipt.json",
+      "device": "cuda",
+      "wall_seconds": 3.400790906000111,
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.840394999926502,
+        "p95_ms": 6.895391800208017,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108712960,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      },
+      "test_arms_epe_sensor_px": {
+        "no_alignment": 1.9213245913193986,
+        "old_simplified": 2.9851755538204374,
+        "sea_raft": 0.0892970108340212,
+        "oracle": 0.0
+      },
+      "buckets": [
+        "fast_alignable",
+        "fast_hard",
+        "slow_structural_change",
+        "current_frame_anomaly"
+      ],
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.19558301276574508,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      }
+    },
+    "307": {
+      "receipt": "remote-runner-eval-seed-307-cuda-receipt.json",
+      "device": "cuda",
+      "wall_seconds": 3.408389017000445,
+      "latency": {
+        "measured": true,
+        "device": "cuda",
+        "iters": 4,
+        "repeats": 5,
+        "p50_ms": 6.80331599960482,
+        "p95_ms": 6.816163800431241,
+        "parameter_count": 19673284,
+        "peak_device_bytes": 108712960,
+        "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+      },
+      "test_arms_epe_sensor_px": {
+        "no_alignment": 1.9213245913193986,
+        "old_simplified": 2.9851755538204374,
+        "sea_raft": 0.0949710619920794,
+        "oracle": 0.0
+      },
+      "buckets": [
+        "fast_alignable",
+        "fast_hard",
+        "slow_structural_change",
+        "current_frame_anomaly"
+      ],
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.20792645573001436,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      }
+    }
+  },
+  "policy_preflight": {
+    "motion": {
+      "snapshot": "source-v5",
+      "cmd_crop": 128,
+      "exit": 0,
+      "receipt": "remote-runner-policy-preflight-motion-receipt.json",
+      "sha256": "704723b12510cb492e21d446a60e982181f43af04dad82b8bcc3cbe39af82b27",
+      "checkpoint": "rgb3-seed-101/checkpoints/best.pt (sha256 133eb47d183e36d041e06749adc7c0a582d92b908c16f3a41fa0841ac7d14cfb, update 256, dev scale)",
+      "fields": {
+        "weights_only_fallback": true,
+        "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+        "pretrained_sha256": "133eb47d183e36d041e06749adc7c0a582d92b908c16f3a41fa0841ac7d14cfb",
+        "loaded_tensors": 472,
+        "missing_key_count": 0,
+        "unexpected_key_count": 0,
+        "motion_mode": "rgb3",
+        "p2_motion_status": "motion_provider",
+        "unique_frame_identity_rule": "(episode_id, frame_id)",
+        "unique_matches_window_all_true": true,
+        "unique_frames_window_examples": {
+          "libero.agentview": [
+            6,
+            8
+          ],
+          "robotwin2.head_camera": [
+            8,
+            8
+          ]
+        },
+        "adapter_unique_lifetime_examples": {
+          "libero.agentview": [
+            6,
+            8
+          ],
+          "robotwin2.head_camera": [
+            8,
+            8
+          ]
+        },
+        "embed_image_calls": 0,
+        "p3_support_applied": false,
+        "offsets_shape": [
+          1,
+          8,
+          2,
+          128,
+          128
+        ]
+      }
+    },
+    "identity_crop128": {
+      "exit": 0,
+      "receipt": "remote-runner-policy-preflight-identity-crop128-receipt.json",
+      "sha256": "12eafe89ceaf066b4a67d413bbaaa16610446a2085c576eda70c7e90a0cb66b8"
+    },
+    "identity_crop32_historical": {
+      "exit": 0,
+      "receipt": "remote-runner-policy-preflight-identity-receipt-v5.json",
+      "sha256": "36ef63a04cd7c40e15a380742e5fb9afb27c6664cfa03d06a01b30ead52344bb"
+    },
+    "stem_mismatch_probe": {
+      "exit": 1,
+      "expected": true,
+      "error": "motion checkpoint stem mismatch: .../seed-101/checkpoints/best.pt is a cfa4 checkpoint (fnet 4 input channels, cnet 8 channels), but this run feeds rgb3 windows with 3 measured channels (a matching cnet needs 6). Protocol rule: correspondence input_channels must be a whole multiple of the measurement channels: CFA 4/8, rawvla_rgb3 3/6. Use a rawvla_rgb3 (3/6) motion checkpoint for this input mode; the stem is never switched or adapted implicitly.",
+      "partial_receipt_files": 0,
+      "log": "remote-runner-policy-preflight-stem-mismatch.log"
+    },
+    "crop_constraint_disclosure": "the vendored 4-level correlation pyramid requires >=128 packed cells per side; rgb3 has SENSOR_PER_PACKED=1 so --crop 32 was geometrically impossible. crop=128 gives 128x128 packed, exactly the rgb3 dev arm's training geometry. This is the declared geometry floor, not a relaxation to pass a check."
+  },
+  "disclosures": [
+    "The rgb3 motion model used by the real-platform preflight is a 256-update dev arm (run_scale=dev, budget_exhausted, reasons 'fewer than two validation points (1)'). It demonstrates interface/gradient/single-arrival connectivity only, not alignment quality.",
+    "Formal motion-quality evidence is the three-seed CFA evaluation on the synthetic-CFA test split; it is reported separately from the real three-channel preflight.",
+    "Whether to train an rgb3 arm at the formal budget (~4 GPU-h at current throughput) is left to the research lead; not started.",
+    "Evaluation latency is end-to-end estimate() wall time on one already-arrived pair, excluding data rendering."
+  ],
+  "outage": {
+    "window_utc": "2026-10-14T15:20Z-16:32Z",
+    "duration_min": 62,
+    "record": "remote-runner-outage-20261014T1520Z.json"
+  },
+  "gpu_hours_total": {
+    "training": 6.507,
+    "select_and_fit_check": 0.159,
+    "rgb3_dev_arm": 0.057,
+    "gpu_probes": 0.064,
+    "final_verification_round": 0.09,
+    "total": 6.88
+  }
+}

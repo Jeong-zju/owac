@@ -1,0 +1,24 @@
+import copy,hashlib,json
+from pathlib import Path
+root=Path('/workspace/owac/research/n01-dbsr-20261013');rows=[];artifacts={}
+for folder in sorted((root/'accepted-baselines').glob('*-*')):
+ if not folder.is_dir() or not (folder/'result.json').exists():continue
+ p=json.loads((folder/'result.json').read_text());row=copy.deepcopy(p)
+ for key in ['train_input_sha256','train_fixture_sha256']:
+  row[key+'_sequence_digest']=hashlib.sha256(json.dumps(row.pop(key)).encode()).hexdigest()
+ row['curves']=[r for r in row['curves'] if 'validation_early_error_px' in r]
+ for split in ['validation','test']:
+  if not row[split]:continue
+  for c in row[split]['cases'].values():
+   c.pop('error_per_member_per_frame');c.pop('supervised_visible_per_member_per_frame')
+ for name in ['best.pt','last.pt','run.json','result.json']:
+  file=folder/name;artifacts[str(file)]={'bytes':file.stat().st_size,'sha256':hashlib.sha256(file.read_bytes()).hexdigest()}
+ # Verify matched training stream prefixes even when operational stop steps differ.
+ for prior in rows:
+  if prior['protocol']['seeds']==row['protocol']['seeds']:
+   old=json.loads((Path(prior['output'])/'result.json').read_text())
+   for key in ['train_input_sha256','train_fixture_sha256']:
+    n=min(len(old[key]),len(p[key]));assert old[key][:n]==p[key][:n]
+ row['output']=str(folder);rows.append(row)
+(root/'baseline-summary.json').write_text(json.dumps({'runs':rows,'artifacts':artifacts,'matched_training_prefixes_verified':True},indent=2)+'\n')
+print('summaries',len(rows),flush=True)

@@ -1,0 +1,75 @@
+{
+  "schema": "owac.n01_full.p2_independent_acceptance.v1",
+  "date": "2026-10-15",
+  "base_git_sha": "791dda921e5507e99696779f7a798d899cf14169",
+  "implementation_status": "REPAIRED_AND_VERIFIED_WITH_DECLARED_LIMITATIONS",
+  "training_status": "NOT_ALL_RUNS_MEET_PLATEAU_CONTRACT",
+  "p2_overall_status": "NOT_FULLY_ACCEPTED",
+  "effect_status": "SYNTHETIC_IN_DISTRIBUTION_ALIGNMENT_ONLY_WITH_STRESS_FAILURES",
+  "formal_training_started": false,
+  "formal_optimizer_updates": 0,
+  "tests": {
+    "before_regressions": "10 failed",
+    "after_regressions": "10 passed",
+    "local_full": "721 passed, 2 skipped (CUDA unavailable)",
+    "remote_n01_full": "375 passed, 0 skipped",
+    "make_check": "passed"
+  },
+  "remote_run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-audit-20261015",
+  "supervisor_program": "owac-n01-v1-p2-audit-20261015",
+  "supervisor_terminal_state": "EXITED",
+  "original_artifacts_verified": 7,
+  "source_files_verified": 290,
+  "numeric_pairs_unchanged": 64,
+  "plateau_accepted_runs": [
+    "seed-307"
+  ],
+  "plateau_unestablished_runs": [
+    "seed-101",
+    "seed-211",
+    "seed-101-rgb3",
+    "seed-211-rgb3",
+    "seed-307-rgb3"
+  ],
+  "early_policy_preflight": {
+    "scope": "existing original receipts independently compared to remote files; no new policy updates performed",
+    "runtime_hash_matches_current_source": true,
+    "formal_rgb3_checkpoint_hash_matches_remote": true,
+    "platforms": [
+      "libero",
+      "robotwin2"
+    ]
+  },
+  "limits": [
+    "No new formal training, no new full-model optimizer-step resume trial",
+    "Stress diagnostics use seed 101 only, two new synthetic scenes per condition and input mode",
+    "No real-camera motion labels, no P3/P7/P8 or closed-loop capability conclusion",
+    "Risk coverage outside the original calibration conditions is unreliable"
+  ],
+  "files": {
+    "source-verification.json": "6cc912f76f0633355852cd76f73648141521802f9d80184c7a8f236b90d99f2a",
+    "remote-review.json": "3f34cc5111c08185356210f4659409842fd26955f727a2edbc97f18e072d879b",
+    "stress-cfa4.json": "e822dba2337077616dc56cd6fe978803993020fc9ea5c75f4ee601ee08a17f35",
+    "make-check.log": "7908648313ea49240cfef2471ce7d560447038f2f1b5c316ae90a40e9b80e0c0",
+    "stress-rgb3.json": "6b79764e08e9bc369d9370eca9c4a5fee2e57bba45555e19587f5e69f81568c7",
+    "pytest-remote.log": "491e7205b696f195e6c3505f2d247786a732ec38c8159da4b56208cf068f0446",
+    "source-manifest.json": "77c599bf6f9fc342b1c120ecee67f484b6fa07526de9ce338601779df1b5f76c",
+    "numeric-identity-comparison.json": "b0b5ec8ea83d66f37c07d8032e20f8506064fb4c8e5d190ab126f891e68f0771",
+    "pytest-local.log": "c024f7e32b816092e4a879a4970c2e56f626d60564e61d6e39d0274d0a295df8",
+    "original-artifact-verification.json": "b3b82b3d612f5b47e8d99f3264a220dc7286c50d24cbd0a178b4e2b9553b8abe",
+    "regressions-before.log": "c7289ca47873bf2528c89ede23ea571b0d6b7eb3ab1337a8c4b64a91a900dd20",
+    "seed-101-rgb3/risk_calibration.json": "69bcf4c71231980b2af0b0106a65f8e04b77e556b9739318e7ebd82a43d38b9f",
+    "seed-101-rgb3/receipt.json": "5e3ac2f20e47e7cba87d5edd7973eb3e30fd17c06a52833af80d3321e7976771",
+    "seed-307/risk_calibration.json": "9e88ce21c7a5fce9fd263e04a27103c8acd8421857b4404348943cf2bae99eaa",
+    "seed-307/receipt.json": "e3872f7d1d01ac1978c0a97661217d88a77542f917a75b1fdd854ff6d4b548cb",
+    "seed-307-rgb3/risk_calibration.json": "c0d62f14eca232544aea1b940e4287fc8020cb1531b77a8e8e24e816b8193a92",
+    "seed-307-rgb3/receipt.json": "92bbf00ab2e6b4e360e6e912f862be71cdbe6501c8b6baf00bad1d229bf0c244",
+    "seed-211-rgb3/risk_calibration.json": "392ee935f4a72368ce156a9e76892eda8bbace060679e5a089df43edf7cce219",
+    "seed-211-rgb3/receipt.json": "0f615d613121a3a4806f0023b14e6030b6840789216d5619699849ad079def85",
+    "seed-211/risk_calibration.json": "a6d473350afc03a47cfe360e72ee12ab534853442cf8543a7cf59e3a10e531f6",
+    "seed-211/receipt.json": "6bea6b3cfdf22470b01be444ca1957a1ee292a4fb0aa7603fa1603355811631c",
+    "seed-101/risk_calibration.json": "fc8820cd94bff8b6230bb0ebb049a76dbabef6e5ad2ddda08838f5fe7b608a8e",
+    "seed-101/receipt.json": "6b72e0edda5af4757d172da428736f8731dfc1237c622b6a95fe67f0bd7d497b"
+  },
+  "implementation_commit": "fe8d534f4c8b0fabcc12279901d20d7b30af4ff1"
+}

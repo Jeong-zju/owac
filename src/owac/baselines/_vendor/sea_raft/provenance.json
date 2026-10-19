@@ -1,0 +1,118 @@
+{
+  "repository": "https://github.com/princeton-vl/SEA-RAFT",
+  "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+  "license": "BSD-3-Clause (LICENSE vendored verbatim; Copyright (c) 2024, Princeton Vision & Learning Lab)",
+  "vendored_by": "N01 v1.0 P2 RAW motion adapter (task motion-core)",
+  "source_layout": "upstream core/ -> this package root; upstream core/utils/ -> this package's utils/",
+  "changes": "Declared changes only. (1) imports rewritten from top-level to package-relative; (2) the HuggingFace Hub dependency and PyTorchModelHubMixin base class removed; (3) the input channel count is a constructor argument (cfa4 builds fnet 4 / cnet 8, rgb3 builds fnet 3 / cnet 6) instead of the hard-coded 3/6; (4) ResNetFPN takes an explicit depth argument and its torchvision ImageNet branch is deleted, so model depth and pretrained-weight loading are independent and no configuration can re-enable a download; (5) the 2 * (x / 255) - 1 RGB rescale is removed from RAFT.forward, so callers must supply calibrated, normalised RAW values; (6) in utils/utils.py the scipy import is local to forward_interpolate because scipy is not a dependency of this repository and no vendored model path calls it; (7) ruff format applied (whitespace/docstring layout only). Author definitions are otherwise unchanged: compare executable_ast_sha256 per file.",
+  "ast_digest_rule": "executable_ast_sha256 = sha256 of '\\n'.join(canonical(node) for each top-level FunctionDef/ClassDef of the module AST after docstring statements are removed), where canonical(node) = (node type name, ((field name, canonical(value)), ...)) over ast.iter_fields, skipping the CPython-version-dependent field 'type_params' (PEP 695, present on FunctionDef/AsyncFunctionDef/ClassDef from 3.12 on, absent on 3.11). Every other field is always emitted, including empty lists, so CPython 3.13's ast.dump show_empty=False default cannot move a digest either. The digest is identical under CPython 3.11 and 3.12.",
+  "files": {
+    "raft.py": {
+      "path": "core/raft.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/raft.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "4bb02c831f04b16a27fd016c8bb4ecfcf5834ea88f40e84fac9d2555864d5979",
+      "local_sha256": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+      "upstream_executable_ast_sha256": "1e42d4c3fe0262e13dbe0d6aa96bd6d9d63f3f6198a62d6b39274b8ef982575e",
+      "executable_ast_sha256": "dddde3e49ccd6984500f20c33e5f4e1a826c43f879be465b6cc8d4b14b5b4c13",
+      "changes": [
+        "package_relative_imports",
+        "huggingface_hub_mixin_removed",
+        "input_channels_parameterised",
+        "depth_argument_separated_from_weights",
+        "remove_255_rgb_rescale",
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "extractor.py": {
+      "path": "core/extractor.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/extractor.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "684cfe479ef6cbe5796397749939676c79626f0c3fcbc033c8fb5cab9475bc7a",
+      "local_sha256": "1ef874b6bd6c90c700966180bc40bc2a85d83b187bf53a6772db3f67f85c3294",
+      "upstream_executable_ast_sha256": "7edd1df4b53760610c73f9cbe3158ff585333bb7d296845b63127e54a92f1b08",
+      "executable_ast_sha256": "0ecbc3e7bd36979999c88c57400cf3d19db19f79c8122abeac14b12d7f2debb4",
+      "changes": [
+        "package_relative_imports",
+        "torchvision_imagenet_autoload_removed",
+        "input_channels_parameterised",
+        "depth_argument_separated_from_weights",
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "corr.py": {
+      "path": "core/corr.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/corr.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "e89bc770f1e6712447d90b8a8c75fd136c98816726d4338972f8ea5d7d6d24fb",
+      "local_sha256": "8e5c700258f8e8da4e2be6c38bc1d1498a73d82c37e9fd4caca668b245bc318d",
+      "upstream_executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "changes": [
+        "package_relative_imports",
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "update.py": {
+      "path": "core/update.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/update.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "978dc580e4ebd394b29894f5d5460153a2fe5a7d4c50e5e83823330298133f69",
+      "local_sha256": "4f94abfc36ac057c481aa5f8e830192b2d1d15b7b88a4172e4895ee8b0d5ecd9",
+      "upstream_executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "changes": [
+        "package_relative_imports",
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "layer.py": {
+      "path": "core/layer.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/layer.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "580f4cced2b5f3551667b4b4b24b8ff7cd024ef4e3f8723bf3c5fbb7baf74563",
+      "local_sha256": "7f70c868e80cee021c8e2e26b5d1e160ff9aff83a8b141f36977ad12405a2859",
+      "upstream_executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "changes": [
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "utils/utils.py": {
+      "path": "core/utils/utils.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/utils/utils.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "04d88de0f161db56f856776e05d4337cecaadabdc1decc104b22c6ea642f11ae",
+      "local_sha256": "f861c1f4b5d186f05118124e530e105a6039bda3f8aa1f6086a757ec0f330747",
+      "upstream_executable_ast_sha256": "bd2a50a27dc83d4b8d6cd6e2e58c173220041beb7353d6eee4a1877cabd94eba",
+      "executable_ast_sha256": "fec046abe81af38ec72996da324a2249dcc8353c356ebaefa40833ae673f89f6",
+      "changes": [
+        "scipy_import_made_local",
+        "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+    },
+    "LICENSE": {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/LICENSE",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "local_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "upstream_executable_ast_sha256": null,
+      "executable_ast_sha256": null,
+      "changes": [],
+      "verbatim_bytes": true
+    }
+  },
+  "owac_files": {
+    "__init__.py": "Package marker added by OWAC; not derived from upstream bytes.",
+    "utils/__init__.py": "Package marker added by OWAC; not derived from upstream bytes."
+  },
+  "runtime_verified": false,
+  "runtime_verified_note": "The vendored model was executed on CPU by the P2 tests; no upstream weight file was downloaded and no author training recipe was reproduced."
+}

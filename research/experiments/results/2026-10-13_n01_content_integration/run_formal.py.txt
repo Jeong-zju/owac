@@ -1,0 +1,36 @@
+"""Run independent paired arms with bounded CPU process concurrency."""
+import concurrent.futures
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+PROTOCOL = json.loads((BASE / 'formal-protocol.json').read_text())
+
+
+def run_one(identity):
+    seed, method = identity
+    name = f'formal-{seed}-{method}'
+    cmd = [str(ROOT / '.venv/bin/python'), '-u', '-m', 'owac.evaluation.n01_content',
+           '--config', str(BASE / f'{name}.json'), '--output', str(BASE / name)]
+    env = os.environ | {'OMP_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1', 'PYTHONPATH': 'src'}
+    started = time.time()
+    print(json.dumps({'event':'started', 'seed':seed, 'method':method, 'time':started}), flush=True)
+    with (BASE / f'{name}.log').open('w') as log:
+        process = subprocess.run(cmd, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+    result = {'seed':seed, 'method':method, 'returncode':process.returncode,
+              'wall_seconds':time.time()-started}
+    print(json.dumps({'event':'finished', **result}), flush=True)
+    return result
+
+
+if __name__ == '__main__':
+    jobs = [(s,m) for s in PROTOCOL['seeds'] for m in PROTOCOL['methods']]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=9) as pool:
+        results = list(pool.map(run_one,jobs))
+    (BASE / 'formal-process-results.json').write_text(json.dumps(results,indent=2)+'\n')
+    if any(r['returncode'] for r in results):
+        raise SystemExit('Some formal arms failed; preserve logs and partial receipts.')

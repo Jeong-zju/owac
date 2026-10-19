@@ -1,0 +1,470 @@
+#!/usr/bin/env python3
+"""Plot N01 content factorial receipts without treating frames as independent runs.
+
+Example (system Python provides matplotlib)::
+    python3 plot_results.py seed202/metrics.json seed303/metrics.json \
+        seed404/metrics.json --output figures-formal
+
+The default accepts complete A--F held-out test runs only. Development/partial
+receipts require explicit flags and every resulting figure is labelled preview.
+No model, source, receipt, checkpoint, or experiment configuration is modified.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from collections import defaultdict
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.lines import Line2D
+
+CONDITIONS = (
+    "static_weak",
+    "translation_oracle_alignment",
+    "occlusion_release",
+    "local_change_stale_history",
+)
+TITLES = {
+    "static_weak": "Static weak signal",
+    "translation_oracle_alignment": (
+        "Translation with exact ORACLE alignment\n(control; excluded from main score)"
+    ),
+    "occlusion_release": "Occlusion release",
+    "local_change_stale_history": "Local change / stale history",
+}
+METHODS = {
+    "A": "gate only / fixed",
+    "B": "gate only / adaptive",
+    "C": "integrated content / fixed",
+    "D": "integrated content / adaptive",
+    "E": "current-content control / fixed",
+    "F": "current-content control / adaptive",
+}
+COLORS = dict(
+    zip(METHODS, ("#4b5563", "#2563eb", "#15803d", "#0e7490", "#d97706", "#be185d"), strict=True)
+)
+STYLES = {method: ("--" if method in "BDF" else "-") for method in METHODS}
+UNIT = "Localization error (packed pixels)"
+FOOTNOTE = (
+    "One packed pixel = two physical sensor pixels. "
+    "Mean and min–max range across training/data seeds; "
+    "frames are repeated observations, not independent replicates."
+)
+
+
+def masked_mean(values, valid, axis=0):
+    sums = np.where(valid, values, 0.0).sum(axis=axis)
+    counts = valid.sum(axis=axis)
+    return np.divide(sums, counts, out=np.full_like(sums, np.nan, dtype=float), where=counts > 0)
+
+
+def seed_summary(values):
+    """Equal weight per training seed; no resampling over correlated frames."""
+    array = np.asarray(values, dtype=float)
+    finite = np.isfinite(array)
+    mean = masked_mean(array, finite)
+    low = np.where(finite, array, np.inf).min(axis=0)
+    high = np.where(finite, array, -np.inf).max(axis=0)
+    return mean, np.where(np.isfinite(low), low, np.nan), np.where(np.isfinite(high), high, np.nan)
+
+
+def load_receipts(paths, allow_development=False, allow_incomplete=False):
+    records, sources = [], []
+    first_protocol, first_manifest = None, None
+    seen = set()
+    preview = False
+    for path in paths:
+        path = Path(path).resolve()
+        raw = path.read_bytes()
+        receipt = json.loads(raw)
+        protocol = receipt["protocol"]
+        if protocol.get("development", False) and not allow_development:
+            raise ValueError(f"Development receipt requires --allow-development: {path}")
+        signature = {k: v for k, v in protocol.items() if k not in {"methods", "seeds"}}
+        if first_protocol is None:
+            first_protocol = signature
+            first_manifest = receipt["source_manifest"]
+        elif signature != first_protocol or receipt["source_manifest"] != first_manifest:
+            raise ValueError("Cannot aggregate different training protocols or source manifests")
+        if int(protocol["event_window"]) != 6:
+            raise ValueError("This figure protocol requires exactly the first six event frames")
+        sources.append({"path": str(path), "sha256": hashlib.sha256(raw).hexdigest()})
+        for run in receipt["runs"]:
+            key = (int(run["seed"]), run["method"])
+            if key in seen:
+                raise ValueError(f"Duplicate training-seed/method run: {key}")
+            seen.add(key)
+            if run["method"] not in METHODS:
+                raise ValueError(f"Unknown factorial method: {run['method']}")
+            split = run["evaluation_split"]
+            if split == "test":
+                evaluation = run["test"]
+            elif split == "validation" and allow_development:
+                preview = True
+                evaluation = run["development_validation"]
+            else:
+                raise ValueError(f"Only held-out test receipts accepted: split={split}")
+            for condition in CONDITIONS:
+                case = evaluation["cases"][condition]
+                expected_event = (
+                    int(protocol["burn_in"])
+                    if condition in CONDITIONS[:2]
+                    else (13 if split == "test" else 12)
+                )
+                if int(case["event_frame"]) != expected_event:
+                    raise ValueError(f"Unexpected event index for {key}/{condition}")
+                if bool(case["oracle_alignment"]) != (condition == CONDITIONS[1]):
+                    raise ValueError("Oracle-control flag disagrees with condition")
+                if "packed" not in case["error_unit"]:
+                    raise ValueError("Expected packed-pixel units, not physical sensor pixels")
+                errors = np.asarray(case["error_per_member_per_frame"], dtype=float)
+                visible = np.asarray(case["supervised_visible_per_member_per_frame"], dtype=bool)
+                if errors.shape != visible.shape or errors.ndim != 2:
+                    raise ValueError(
+                        "Expected matching [episode, frame] error and visibility arrays"
+                    )
+                if not np.isfinite(errors).all():
+                    raise ValueError("Non-finite error receipt")
+                event = int(case["event_frame"])
+                early = masked_mean(
+                    errors[:, event : event + 6], visible[:, event : event + 6], axis=1
+                )
+                if not np.isfinite(early).all():
+                    raise ValueError("No visible scored event frame for an episode")
+                if not np.isclose(early.mean(), case["early_error_px"], atol=1e-5, rtol=1e-5):
+                    raise ValueError("Stored early error disagrees with rederived six-frame mean")
+            records.append({"run": run, "evaluation": evaluation, "protocol": protocol})
+    if not records:
+        raise ValueError("No completed runs in provided receipts")
+    methods = {item["run"]["method"] for item in records}
+    seeds = {int(item["run"]["seed"]) for item in records}
+    expected = {(seed, method) for seed in seeds for method in METHODS}
+    if seen != expected:
+        if not allow_incomplete:
+            raise ValueError(f"Incomplete matched A–F design; missing {sorted(expected - seen)}")
+        preview = True
+    return records, sources, preview, sorted(methods), sorted(seeds)
+
+
+def style():
+    plt.rcParams.update(
+        {
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+            "axes.titlesize": 11,
+            "axes.labelsize": 10,
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.grid": True,
+            "grid.alpha": 0.2,
+            "legend.frameon": False,
+            "svg.fonttype": "none",
+            "figure.dpi": 140,
+            "savefig.dpi": 220,
+        }
+    )
+
+
+def grouped_records(records):
+    grouped = defaultdict(list)
+    for record in records:
+        grouped[record["run"]["method"]].append(record)
+    for values in grouped.values():
+        values.sort(key=lambda x: int(x["run"]["seed"]))
+    return grouped
+
+
+def decorate(fig, title, preview, subtitle):
+    prefix = "DEVELOPMENT / INCOMPLETE PREVIEW — " if preview else ""
+    fig.suptitle(prefix + title, fontsize=15, x=0.5, y=0.985)
+    fig.text(0.5, 0.946, subtitle, ha="center", fontsize=10)
+    fig.text(0.5, 0.018, FOOTNOTE, ha="center", fontsize=8)
+
+
+def save(fig, output, name):
+    for suffix in ("png", "svg"):
+        fig.savefig(output / f"{name}.{suffix}", bbox_inches="tight")
+    plt.close(fig)
+
+
+def frame_curves(grouped, methods, output, preview):
+    fig, axes = plt.subplots(2, 2, figsize=(13, 9.4), sharex=True, sharey=True)
+    highest = 0.0
+    for condition, ax in zip(CONDITIONS, axes.flat, strict=True):
+        event = None
+        length = None
+        for method in methods:
+            curves = []
+            for record in grouped[method]:
+                case = record["evaluation"]["cases"][condition]
+                errors = np.asarray(case["error_per_member_per_frame"])
+                valid = np.asarray(case["supervised_visible_per_member_per_frame"], dtype=bool)
+                curve = masked_mean(errors, valid)
+                curves.append(curve)
+                event = int(case["event_frame"])
+                length = errors.shape[1]
+            mean, low, high = seed_summary(curves)
+            highest = max(highest, float(np.nanmax(high)))
+            x = np.arange(len(mean))
+            ax.fill_between(x, low, high, color=COLORS[method], alpha=0.09, linewidth=0)
+            ax.plot(x, mean, color=COLORS[method], linestyle=STYLES[method], lw=1.8, label=method)
+        ax.axvspan(-0.5, 7.5, color="#9ca3af", alpha=0.10)
+        if condition == "occlusion_release":
+            ax.axvspan(event - 4 - 0.5, event - 0.5, color="#9ca3af", alpha=0.22)
+        ax.axvline(event, color="#111827", linestyle=":", linewidth=1.1)
+        ax.axvspan(event, event + 5, color="#c7d2fe", alpha=0.12)
+        ax.set_title(
+            TITLES[condition], color="#9a3412" if condition == CONDITIONS[1] else "#111827"
+        )
+        ax.set_xlabel("Frame index (zero-based)")
+        ax.set_ylabel(UNIT)
+        ax.set_xlim(-0.5, length - 0.5)
+        ax.set_xticks(sorted(set([0, 4, 8, event if event > 8 else 12, 16, 20, length - 1])))
+        ax.set_ylim(bottom=0)
+        ax.text(0.02, 0.04, f"Window reference: frame {event}", transform=ax.transAxes, fontsize=8)
+    for ax in axes.flat:
+        ax.set_ylim(0, highest * 1.08)
+    handles = [
+        Line2D([0], [0], color=COLORS[m], ls=STYLES[m], lw=2, label=f"{m}: {METHODS[m]}")
+        for m in methods
+    ]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.908), ncol=3, fontsize=9)
+    decorate(
+        fig,
+        "N01: frame-wise localization error",
+        preview,
+        "Best validation checkpoint per seed; shaded band is seed range; "
+        "unscored/occluded frames omitted.",
+    )
+    fig.subplots_adjust(top=0.775, bottom=0.09, hspace=0.35, wspace=0.16)
+    save(fig, output, "frame_error_curves")
+
+
+def event_summary(grouped, methods, output, preview):
+    fig, axes = plt.subplots(2, 2, figsize=(12.5, 8.5), sharey=True)
+    rows = []
+    for condition, ax in zip(CONDITIONS, axes.flat, strict=True):
+        for index, method in enumerate(methods):
+            values = np.asarray(
+                [
+                    record["evaluation"]["cases"][condition]["early_error_px"]
+                    for record in grouped[method]
+                ]
+            )
+            mean, low, high = seed_summary(values)
+            ax.errorbar(
+                index,
+                mean,
+                yerr=[[mean - low], [high - mean]],
+                fmt="o",
+                color=COLORS[method],
+                capsize=5,
+                ms=7,
+                lw=1.5,
+            )
+            offsets = np.linspace(-0.12, 0.12, len(values)) if len(values) > 1 else np.zeros(1)
+            ax.scatter(index + offsets, values, color=COLORS[method], marker="x", s=30, alpha=0.7)
+            ax.annotate(
+                f"{mean:.3f}",
+                (index, high),
+                xytext=(0, 8),
+                textcoords="offset points",
+                ha="center",
+                fontsize=9,
+            )
+            rows.append(
+                {
+                    "condition": condition,
+                    "method": method,
+                    "mean_packed_pixels": float(mean),
+                    "seed_min": float(low),
+                    "seed_max": float(high),
+                    "training_seeds": [int(record["run"]["seed"]) for record in grouped[method]],
+                    "per_seed_early_error": values.tolist(),
+                    "event_frame": int(
+                        grouped[method][0]["evaluation"]["cases"][condition]["event_frame"]
+                    ),
+                }
+            )
+        event = rows[-1]["event_frame"]
+        ax.set_title(
+            TITLES[condition], color="#9a3412" if condition == CONDITIONS[1] else "#111827"
+        )
+        ax.set_xticks(range(len(methods)), methods)
+        ax.set_xlabel(f"Method; score window frames {event}–{event + 5}")
+        ax.set_ylabel("First-six-frame error (packed pixels)")
+        ax.set_ylim(bottom=0)
+        ax.margins(y=0.20, x=0.12)
+    highest = max(row["seed_max"] for row in rows)
+    for ax in axes.flat:
+        ax.set_ylim(0, highest * 1.18 + 0.05)
+    handles = [
+        Line2D([0], [0], color=COLORS[m], marker="o", ls="", label=f"{m}: {METHODS[m]}")
+        for m in methods
+    ]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.908), ncol=3, fontsize=9)
+    decorate(
+        fig,
+        "N01: early response after the event",
+        preview,
+        "Each cross is one training seed; circles = seed means; "
+        "bars = seed range. Lower is better.",
+    )
+    fig.subplots_adjust(top=0.775, bottom=0.10, hspace=0.40, wspace=0.18)
+    save(fig, output, "event_first_six_frames")
+    return rows
+
+
+def learning_curves(grouped, methods, output, preview):
+    fig, axes = plt.subplots(2, 3, figsize=(13.5, 8), sharex=True, sharey=True)
+    selected = []
+    for method, ax in zip(METHODS, axes.flat, strict=True):
+        if method not in grouped:
+            ax.text(0.5, 0.5, "No completed receipt", transform=ax.transAxes, ha="center")
+            ax.set_title(f"{method}: {METHODS[method]}")
+            continue
+        curves, reference_steps = [], None
+        notes = []
+        for record in grouped[method]:
+            run = record["run"]
+            entries = [row for row in run["learning_curve"] if "validation_early_error_px" in row]
+            steps = np.asarray([int(row["step"]) for row in entries])
+            curve = np.asarray([float(row["validation_early_error_px"]) for row in entries])
+            if reference_steps is None:
+                reference_steps = steps
+            elif not np.array_equal(reference_steps, steps):
+                raise ValueError(
+                    "Mismatched validation schedules; do not interpolate seed envelopes"
+                )
+            curves.append(curve)
+            ax.plot(steps, curve, color=COLORS[method], lw=0.7, alpha=0.25)
+            best = int(run["best_step"])
+            best_value = float(run["best_validation_early_error_px"])
+            matches = np.flatnonzero(steps == best)
+            if len(matches) != 1 or not np.isclose(
+                curve[matches[0]], best_value, atol=1e-5, rtol=1e-5
+            ):
+                raise ValueError("Best checkpoint is absent from recorded validation curve")
+            ax.scatter(
+                [best],
+                [best_value],
+                marker="*",
+                color=COLORS[method],
+                edgecolor="white",
+                linewidth=0.3,
+                s=130,
+                zorder=4,
+            )
+            notes.append(f"seed {int(run['seed'])}: step {best}")
+            selected.append(
+                {
+                    "method": method,
+                    "seed": int(run["seed"]),
+                    "best_step": best,
+                    "best_validation_early_error_px": best_value,
+                }
+            )
+        mean, low, high = seed_summary(curves)
+        ax.fill_between(reference_steps, low, high, color=COLORS[method], alpha=0.12, linewidth=0)
+        ax.plot(reference_steps, mean, color=COLORS[method], ls=STYLES[method], lw=2)
+        ax.set_title(f"{method}: {METHODS[method]}")
+        ax.set_xlabel("Training step")
+        ax.set_ylabel("Validation early error (packed pixels)")
+        ax.text(
+            0.96,
+            0.95,
+            "Selected best checkpoint\n" + "\n".join(notes),
+            transform=ax.transAxes,
+            va="top",
+            ha="right",
+            fontsize=8,
+        )
+        ax.set_ylim(bottom=0)
+    decorate(
+        fig,
+        "N01: validation learning curves",
+        preview,
+        "Selection score averages the three ordinary conditions; "
+        "exact-alignment oracle is excluded. Stars mark selected steps.",
+    )
+    fig.subplots_adjust(top=0.865, bottom=0.11, hspace=0.35, wspace=0.16)
+    save(fig, output, "validation_learning_curves")
+    return selected
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "metrics", nargs="+", type=Path, help="One or more official metrics.json receipts"
+    )
+    parser.add_argument(
+        "--output", required=True, type=Path, help="New directory for figures and plot summary"
+    )
+    parser.add_argument(
+        "--allow-development",
+        action="store_true",
+        help="Allow explicitly labelled validation-only preview",
+    )
+    parser.add_argument(
+        "--allow-incomplete",
+        action="store_true",
+        help="Allow explicitly labelled unmatched/partial preview",
+    )
+    args = parser.parse_args()
+    records, sources, preview, methods, seeds = load_receipts(
+        args.metrics, args.allow_development, args.allow_incomplete
+    )
+    args.output.mkdir(parents=True, exist_ok=True)
+    names = [
+        f"{stem}.{suffix}"
+        for stem in ("frame_error_curves", "event_first_six_frames", "validation_learning_curves")
+        for suffix in ("png", "svg")
+    ]
+    names.append("plot_summary.json")
+    if any((args.output / name).exists() for name in names):
+        raise FileExistsError("Output filenames already exist; use a fresh --output directory")
+    style()
+    grouped = grouped_records(records)
+    frame_curves(grouped, methods, args.output, preview)
+    rows = event_summary(grouped, methods, args.output, preview)
+    selected = learning_curves(grouped, methods, args.output, preview)
+    summary = {
+        "preview_only": preview,
+        "sources": sources,
+        "methods": methods,
+        "training_seeds": seeds,
+        "aggregation": (
+            "Equal weight per training seed. Within each seed, errors average episodes "
+            "and visible scored event frames. Min/max are training/data-seed ranges, "
+            "not confidence intervals or pure optimization variability."
+        ),
+        "units": "packed pixels; multiply by two for physical sensor pixels",
+        "oracle": (
+            "translation_oracle_alignment is a labelled exact-correspondence control, "
+            "excluded from validation selection score"
+        ),
+        "early_window_frames": 6,
+        "event_summary": rows,
+        "best_checkpoints": selected,
+        "artifacts": names[:-1],
+    }
+    (args.output / "plot_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    print(
+        json.dumps(
+            {"output": str(args.output.resolve()), "preview_only": preview, "artifacts": names},
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

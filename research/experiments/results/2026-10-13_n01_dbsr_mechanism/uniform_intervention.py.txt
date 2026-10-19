@@ -1,0 +1,22 @@
+import json,dataclasses
+from pathlib import Path
+import torch
+from owac.baselines.burst_features import BurstFeatureConfig
+from owac.evaluation.n01_burst import BurstProbe,parameter_digest
+from owac.evaluation.n01_burst_training import configure_runtime,evaluate
+root=Path('/workspace/owac/research/n01-dbsr-20261013');results=[]
+for seed in [61,73,89]:
+ folder=root/'baseline-runs'/f'{seed}-dbsr_reference';p=json.loads((folder/'result.json').read_text());configure_runtime(p['protocol'])
+ cp=torch.load(folder/'best.pt',map_location='cpu',weights_only=True)
+ model=BurstProbe(BurstFeatureConfig(**cp['encoder_config']));model.load_state_dict(cp['model']);model.cuda().eval()
+ before=parameter_digest(model)
+ learned=evaluate(model,p['protocol'],seed,'test')
+ model.encoder.config=dataclasses.replace(model.encoder.config,fusion='mean')
+ uniform=evaluate(model,p['protocol'],seed,'test')
+ assert parameter_digest(model)==before
+ for condition in learned['cases']:
+  for key in ['input_sha256','fixture_sha256']:assert learned['cases'][condition][key]==uniform['cases'][condition][key]
+ results.append({'seed':seed,'role':'post-hoc frozen fusion intervention; no optimization or model selection','parameter_digest':before,'learned':learned,'uniform_same_backbone_head':uniform})
+ print(seed,learned['main_early_error_px'],uniform['main_early_error_px'],flush=True)
+ del model;torch.cuda.empty_cache()
+(root/'uniform-intervention.json').write_text(json.dumps(results,indent=2)+'\n')

@@ -34,6 +34,75 @@
 
 2026-10-13 16:01:42（北京时间）RawVLA 进度核查：主清单 12,887/13,250；LIBERO 全部 10,000 条完成，成功率 58.20%；RoboTwin 2,887/3,250，状态 running，33 个基础设施异常身份尚未完成。附加原条件 627/632、状态 incomplete，缺 5 条。完成记录身份审计异常 0 个；保留原分母，完整 RoboTwin 成绩仍待补齐。部署/协议标签不移动，详见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。
 
+2026-10-19 **服务器代码已同步留档到本地。** 保留主源码、三个执行快照、配置及版本清单；同名差异保留双方版本，本地较新实现未被覆盖。检查点和数据集未下载，训练保持停止。见[代码同步记录](../research/experiments/n01_v1_2/P3_code_sync_20261019.md)。
+
+
+2026-10-19 **闭环失败有限诊断完成，训练保持停止。** 同四个Normal场景作者预训练策略4/4成功、RAW/RGB均0/4；相同3个Normal专家观测上的完整采样MAE7分别为作者0.0618、RAW0.6149、RGB0.3837。模型在专家观测上已明显偏离，优先查视觉—动作适配；不能仅归因于闭环误差累积。见[诊断与证据](../research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md)。
+
+2026-10-19 **按用户最新要求停止RAW/RGB训练与后续队列。** 已禁用自动启动并保留检查点、原始日志及0/12配对小测结果；只有用户重新授权后才可恢复。见[停止记录](../research/experiments/n01_v1_2/P3_training_stopped_20261019.md)。下方“已恢复训练”为本次停止前的历史。
+
+2026-10-19 **20k附近RAW/RGB检查点的配对闭环小测完成：两臂各0/12。** 实际权重20,800/21,100步，同一组12场、共24次执行；四个LIBERO suite，ExtremeLow/Low/Normal各4场，没有未完成。两路训练均已恢复并实际推进，监控页显示成功率及正常光同场景回放。见[小测记录](../research/experiments/n01_v1_2/P3_20k_closed_loop_probe.md)与[实时监控](http://127.0.0.1:18080/)。这是开发小测，训练重合未知，不作留出泛化或机制优劣结论。
+
+2026-10-17 **按用户最新授权启动完整 N01 训练。** 两张 PRO 6000 分别负责 RAW/RGB，当前 LIBERO、随后 RoboTwin；每 run 50k 步预算，Base 仍留至 P4。新训练使用独立冻结源码与数据清单，不续旧有缺陷的权重。[简洁实时监控](http://127.0.0.1:18080/)只看状态、速度、验证误差和 GPU；[启动、加速与实测记录](../research/experiments/n01_v1_2/P3_training_launch.md)。下文“代码补全后暂停”是本次授权前的状态，旧闭环留出撤回仍有效。
+
+2026-10-17 **N01 v1.2 P3代码已补全，训练按用户要求保持暂停。** 完整SEA-RAFT、局部GLS/有界BOCPD、来源重算、统一原生输入与匹配后端适配已接入；八份配置及两平台运行接点齐全。新模型未训练，旧闭环“留出成立”仍撤回，不能标记P3研究完成。当前入口：[代码补全与无更新验收](../research/experiments/n01_v1_2/P3_code_completion.md)。下方旧实现缺口及数值保留为历史。
+
+
+2026-10-16 **N01 v1.2 P3 独立验收未通过，主体队列已保全并暂停，禁止按原队列自动续训。** 已修补断点/RNG、重复测量证据、reset 后验、参考有效性与留出筛选身份错误；旧“0/96 留出成立”撤回。运动对应/真实支持拟合、训练与服务视野及后端适配仍缺；Base 按既有决定留至 P4。详见[独立验收与修补记录](../research/experiments/n01_v1_2/P3_independent_acceptance.md)。下方 10-15 的“P3待实施”及 DeepSeek 交付记录为历史。
+
+2026-10-15 N01更换至新服务器`154.59.156.21:34302`，两张RTX PRO 6000 Blackwell Server Edition可并行RAW/RGB训练及验证，每轮开发闭环仍总100次。v1.2三份完整提示词与控制台已同步；实际环境/源码/数据恢复及验证见[新机部署记录](N01_new_server_deployment_2026-10-15.md)。本次迁移未启动P3主体训练。
+
+2026-10-15 **N01 v1.2已采用，P3待实施。** [Markdown](N01_full_development_plan_2026-10-15_v1.2.md)、[HTML](N01_full_development_plan_2026-10-15_v1.2.html)、[决议0015](decisions/0015-n01-v1-2-raw-information-route.md)、[完整阶段包](prompts/n01_v1_2/README.md)统一更新。核心为同源RAW/RGB×成熟Base/N01四臂，单种子101，两平台8个主体run，P4核心53,000条；开发期每轮只要求共100次闭环拿成功率，优先当前模型，不按平台/臂乘开，不要求全部覆盖；原B1为补充，不默认第五臂或三种子。RGB由同条件RAW经固定ISP产生，禁用正常光参考误配与RAW中间量泄漏。理论/可视化围绕信息保留、噪声—细节—响应与行动，删除一致性为支撑。控制台显示四臂计划、数据边界及P3完整复制入口；P0—P2历史不改判，未启动新训练、远端监控或正式评测。下方v1.1为历史记录。
+
+2026-10-15 **N01 v1.1 正式采用，P3 尚未实施。** 用户补充当前每平台/方法仅训练1个种子，默认101；P3核心为两平台×N/B0/B1共6个主体训练run，P4主全量矩阵为39,750条，三种子不作为当前门槛。 [Markdown](N01_full_development_plan_2026-10-15_v1.1.md)与[同源 HTML](N01_full_development_plan_2026-10-15_v1.1.html)已更新；[决议 0014](decisions/0014-n01-v1-1-full-model-route.md)取代 v1.0 尚未执行的 P3—P8。P3 一次交付完整编码器、两平台真实 RawVLA-Bench 训练、匹配强对照、开发闭环、主链理论及同步可视化；P4 为冻结 13,250 身份/每 checkpoint 的全量验证，P5 为原生 RAW/跨域等扩展。P0—P2 资产继续复用，P2 未完全通过和运动/风险反例不改判；不为补齐旧字段机械续训。[P3/P4/P5完整执行包](prompts/n01_v1_1/README.md)已经准备，含逐文件参考、远程训练和简单实时监控页的前端专家任务；取消无意义的硬门槛、自定义评分、严苛哈希与固定收敛PASS，保留实质正确性检查。只读核查发现远端8080已被Jupyter占用，建议监控使用远端18080经SSH转发。本次无新模型开发、监控部署、服务器训练或正式评测。
+
+2026-10-15 **N01 v1.0 P2 独立验收：未完全通过，代码已修补，未续训。** 新增 10 项反例在原版本全部失败、修补后全部通过；本地 721 passed / 2 CUDA skipped、服务器 375 passed / 0 skipped。修正实际停止点/最终低 LR 窗口、风险分档、遮挡与静态误拒分母、来源/噪声块身份及恢复校准 hash。现有六组仅 CFA seed 307 满足全部平台条件；12 px 新合成诊断误差约 3.3–11.6 px，风险覆盖明显失准。原训练及后端接入证据保留，暂不建议直接按原配方续到 300k；遵照用户要求，本轮正式训练更新为 0。见[独立验收报告](../research/experiments/n01_full/P2_acceptance_report.md)。下方 2026-10-14 P2 完成断言为修补前历史，以本次复核为准。
+
+2026-10-14 **N01 v1.0 P2（RAW 运动对应与噪声模型）交付并停在交接点**。新增 `backends/raw_correspondence.py`（固定 SEA-RAFT vendor commit `9137517` 的 RAW 适配：CFA 4/8、pseudo-RAW 3/6，关闭 torchvision ImageNet 自动加载与 `/255`，`estimate()` 返回 pull 坐标 + 4-tap SourceKey + proxy 风险并预留独立校准表协议）、`raw/n01_motion_data.py`（解析真值合成运动生成器：平移/旋转/分层遮挡/局部非刚性/重复纹理/曝光/运动模糊，GT 与模型可见输入严格分离）、`raw/n01_noise.py`（`Var(y|mu)=a·max(mu,0)+b` + 共享黑电平块 + 曝光/增益同变换，输出 P1 `NoiseModel`）、`frameworks/n01_full/adapters.py`（`DbsrFeatureAdapter`：显式三通道 stem、16×16 带 mask 池化、共享 `VisualTokenPostprocessor(512→2048, 256/相机)`、P3 硬关闭）、`frameworks/n01_full/motion_builders.py`（窗口 motion provider 与清除后 ledger 上的 correspondence/noise 重算 builder）、`training/n01_motion.py`（作者迭代损失、fit-check/两档 LR 选择/平台判据/完整恢复/`stem-report`）、`evaluation/n01_motion.py`（四臂与风险分档）与 `n01_full_policy_preflight --mode raw_adapter`。本地全仓 **709 passed / 2 skipped**（两个 skip 为 CUDA-only 用例，在 GPU 机上 `-k gpu` → 3 passed / 0 skipped）、`make check` 通过；内部独立验收对手 53 项反例 + 16 个变异矩阵，抓到并修复 D1（平台判据把恒定/恶化曲线判成 `validation_plateau`）与 D2（噪声对角分支漏已审计共享块方差），并按 3.10/3.11/3.12 三解释器修复 AST 摘要的跨版本缺陷；远程集成阶段又修复 A（strict `weights_only` 拒绝含 NumPy RNG 的本项目 checkpoint）、B（预检窗口计数调用不存在的方法）、C/D（estimator 与评测各有多处 CPU/CUDA 设备混用）与 E（裁定 rgb3 窗口↔rgb3 estimator 的配对规则并新增加载前 stem 校验）。远程 `source-v1..v5` 逐文件 hash 全部一致；256 拟合、两档 LR 选择（winner `lr=2.5e-4, iters=4`）、rgb3 dev 臂（stem 参数差 −9,408 与解析一致）通过；CFA 第一段 3 seeds × 100k 全部结束：seed 101 `validation_plateau`@82k（val EPE 0.069852）、seed 211 `budget_exhausted`@100k（best 0.0759@91k，尾部漂移）、seed 307 `validation_plateau`@99k（经历 62 分钟实例失联，从 update 13,000 精确续训）；**pseudo-RAW（rgb3）正式臂三种子**（各臂自己的两档 LR 搜索 winner `lr=5e-5/iters=4`）也全部 `validation_plateau`：85k/81k/85k，val EPE best 0.0394/0.0401/0.0405；两臂 GPU 评测（test 32 pairs）EPE CFA 0.0869/0.0893/0.0950、rgb3 0.0455/0.0426/0.0419，`no_alignment` 1.9213、`old_simplified` 2.9852、`oracle` 0.0 单列，GPU p50 6.79–6.84 ms / p95 6.81–6.90 ms / 峰值 103.7 MiB，静态误拒 0.0；两平台 `raw_adapter` 真实预检（crop=128）、identity 对照与故意错配诊断均通过（motion 路径现用 **正式 rgb3 模型** checkpoint，256-update dev 臂保留为对照）。P2 远程 GPU 时间合计约 **9.9 小时**。**未进入 P3/P4，无 N01 机制增量或闭环结论**；`implementation_status=PASS_P2`、`training_status=P2_SEGMENT_COMPLETE`、`effect_status=NOT_APPLICABLE`。见 [P2 报告](../research/experiments/n01_full/P2_report.md)与[收据](../research/experiments/results/n01_full/P2/receipt.json)。
+
+2026-10-14 **N01 v1.0 P1 独立验收修补后通过**。原交付的 34 项测试通过，但新增首批 14 项反例全部失败；已修复保守方差界、秩亏读出、先验坐标、反事实帧级泄漏、实际 32 帧窗口及策略梯度/更新证据。最终本地 495 passed、服务器 147 passed、解析两端 9/9、verify 22/22、153/153 文件哈希一致；两平台真实来源计数与 encoder/bridge 各自更新、后端冻结及 validation 无更新已重验。实现提交 `2d82bbb`。仍停在 P1，未进入 P2、无长训练或机制/闭环结论。见[独立验收报告](../research/experiments/n01_full/P1_acceptance_report.md)；下方原 P1 完成记录保留为修补前历史。
+
+2026-10-14 **N01 v1.0 P1（可组合与可撤回的解析参考）完成并停在交接点**。新增 `src/owac/frameworks/n01_full/{ledger,domains,statistics,replay,reference,sequence1d}.py`（身份账本与四态 validity、版本化支持域 make/merge/split/retract/restore、逐相位 GLS 与秩/可辨识掩码、`fixed_decision_replay`/`counterfactual_replay` 与 32 帧精确窗口、独立 NumPy FP64 oracle、一维同语义例子）、`src/owac/evaluation/n01_full.py` 的 `analytic` 子命令（阶段 §4 七项 + 插值/先验/保守界 + 一维例，9/9 pass）、`src/owac/runtime/n01_full_ledger_check.py` 与 `src/owac/runtime/n01_full_policy_preflight.py`（`mode=contract`，`raw_adapter` 明确留给 P2）。新增 34 项测试，本地全仓 473 passed、`make check` 通过。远程 `source-v8` 152/152 hash 一致、`verify` 22/22、125 passed、`analytic` 9/9；真实两平台唯一来源计数（LIBERO 33 到达/28 登记、RoboTwin 49/42，重放新增 0）与策略预检（两平台不同真实 episode 的 forward/backward/update、后端梯度 0、validation 参数漂移 0.0、token `[1,512/768,2048]`）通过。检查过程发现并修复 7 个缺陷（含真实 tensor 身份与时间轴两处严重问题），另有 P0 `config.py` 的 Python 3.10 兼容性修改。**未开始 P2、无长训练、无机制效果结论**；`training_status=NOT_STARTED`、`effect_status=NOT_APPLICABLE`。见 [P1 报告](../research/experiments/n01_full/P1_report.md)与[收据](../research/experiments/results/n01_full/P1/receipt.json)。
+
+2026-10-14 P0 独立验收修补完成：修正 RoboTwin 协议归一化键、可执行 profiling、严格数据身份检查、GPU 环境路径/依赖、任务层统计与完整预算。两平台四区真实 loader、远程 55/55 checks、139/139 源包、91 项 P0 测试通过；本地全仓 439 passed。仅接受 P0 工程起点，未开始 P1/长训练。 见[独立验收报告](../research/experiments/n01_full/P0_acceptance_report.md)。
+
+2026-10-14 **N01 v1.0 P0（问题、数据与依赖）完成并停在交接点**。新增 `src/owac/frameworks/n01_full/{contracts,config}.py`（SourceKey / MeasurementRecord / CorrespondenceMap / SupportDomain / EvidenceEstimate / DependencyNode / ReadoutSnapshot）、`src/owac/raw/n01_full_manifest.py`（2,403 条源轨迹 → train/calibration/validation/test 四区，零重叠，真实 loader 可精确消费 `sides`）、`src/owac/runtime/n01_full_preflight.py`（inventory/profile/bundle/verify）、`configs/encoders/n01_full/{protocol_v1.json,upstream_lock.json}`、`research/theory/n01_support_contract_v1.md`（T1–T6）与 4 个测试文件（86 passed）。远程新建独立编码器环境 `envs/encoder` 并完成真实 GPU forward/backward 与全尺寸 DBSR profiling；远程源包 227/227 hash 一致、`inventory --strict` 36/36 通过、bundle/verify passed（含上游许可；DBSR 为 CC-BY-NC-SA-4.0）。全仓 434 passed、`make check` 通过。**未开始 P1 算法、未启动长训练、无机制效果结论**；`training_status=NOT_STARTED`、`effect_status=NOT_APPLICABLE`。已记录待研究负责人处置的前序异常（研究方案文档三个标题的既有未提交误编辑）与任务级共享披露义务（40 个 LIBERO 任务模板 / 13 个 RoboTwin 任务出现在全部四区，P3 配对重采样须含任务层）。见 [P0 报告](../research/experiments/n01_full/P0_report.md)与[收据](../research/experiments/results/n01_full/P0/receipt.json)。
+
+2026-10-14 已准备 [N01 v1.0 DeepSeek 分阶段提示词](prompts/n01_v1_0/README.md)：P0–P8 九阶段、共同实现契约、当前代码审计、上游逐文件导航、远程执行说明及 P1/P2 早期策略预检。只读核查用户服务器的实际数据、权重、环境与服务；新模型/训练尚未执行。主 checkout 已有完整 Default 基线报告，旧条目的 RoboTwin 未完成状态按历史保留，后续以新完整报告和实际审计为准。
+
+2026-10-14 已交付 [N01 全量开发方案 v1.0](N01_full_development_plan_2026-10-14_v1.0.md)（[HTML](N01_full_development_plan_2026-10-14_v1.0.html)）：基于当前 DBSR 与撤回实验，定义来源级时空支持、六项理论义务、P0–P8 实施与充分训练、π0.5 / RawVLA-Bench 最终验证。核查 25 项论文/官方来源；这是后续研究方案，未执行新模型训练，历史负结果保持。
+
+2026-10-13 完成 DBSR 三种子收敛基线（9 组，含 3 组保持训练状态的预算续训）和两层独立冻结干预（CNN 硬拓扑 / 原 RAW 支持域，各 21 组）。基线早期误差：DBSR 1.52998、同容量固定平均 1.75656；同权重强制平均退化 0.55570。原 RAW 域撤回与重算的来源隔离通过，但动态重算仅比旧缓存改善约 0.000995，恢复失败数不变，N01 增量未建立。全仓 348 passed；无新增网络、原核心未改、未改冻结服务器基线。见[完整记录与边界](../research/experiments/2026-10-13_n01_dbsr_mechanism.md)。
+
+2026-10-13 已接入作者规模 DBSR RAW 特征层与融合器，完成五组 × 128 步开发验证：普通条件早期误差，容量补齐固定平均 1.96523、DBSR 参考融合 1.99160；当前尚无学习融合的独立收益。保留全部负结果、逐帧恢复和容量控制；N01 核心源码未变，支持图尚未接入新基线。全仓 330 passed，五个全尺寸检查点恢复结果一致。单种子合成验证不代表充分训练或真实后端验收。见[实验与复用记录](../research/experiments/2026-10-13_n01_dbsr_features.md)。
+
+2026-10-13 N01 外部方法复用审查完成，见[文献与源码审查](../research/reviews/2026-10-13_n01_prior_art_reuse.md)。检查 7 个固定版本仓库、33 个源文件；DBSR `WeightedSum` 与 EDVR `TSAFusion` 的独立 CPU 前向/反向通过。建议先建立逐帧 RAW 特征融合强对照，再检验支持关系撤回增量；解析可靠性参考 IPOL 的局部统计与噪声校准。记录了 RGB 对齐/监督、未来帧、许可与有效性适配边界。本轮未修改 N01 算法或执行新任务训练，接口通过不表示性能提升。
+
+2026-10-13 N01 内容通路与六组配对实验完成：18 个正式运行核验通过，C 比同容量当前内容控制 E 改善 0.05575 packed px，D 比 C 差约 0.00686 px；改善较小，全部最优检查点在预算末端，尚未排除训练不足。工程检查 291 passed。逐来源可靠性探索已完成：同权重新留出实验平均退化 0.01446 px，未采纳为正式算法；全仓 314 passed，新规则关闭时 554 张量逐位一致，62 项核心源码检查通过。完整记录见[逐来源实验](../research/experiments/2026-10-13_n01_source_reliability.md)，未更新冻结基线或机器人任务。见[本轮记录](../research/experiments/2026-10-13_n01_content_integration.md)。
+
+2026-10-13 N01 机制目标复审与补测完成，见[完整记录及改进方案](../research/experiments/2026-10-13_n01_mechanism_reassessment.md)。当前 `189b66d` 同数据、同初始化、同 40 步对照：N01 2.589865 px、固定历史 2.586656 px，仍没有独立调度收益证据。源码/结构夹具发现，历史主要参与门控且四平面统计平均会丢失部分历史颜色区别；建议先验证积分内容直接进入特征，再检验固定/自适应和逐源可靠性规则。本轮保留核心源码，新增诊断收据与实验设计；未实施新架构或执行新服务器/闭环任务。
+
+2026-10-13 N01 快速运动历史响应修复完成，见[本轮验收](../research/experiments/2026-10-13_n01_motion_repair.md)。保留积分、唯一采样、重组与四项代价；改进局部历史预测创新、相关通道/共享插值噪声处理及 motion 校准单位下限，补充实际历史与目标区域指标。18 项受保护源码校验一致，全仓 265 passed、make check 通过。
+
+三组独立种子×24 轨迹、两个对齐配置的前后匹配验证通过，36 对输入哈希相等。候选对齐下目标中心实际历史：静止 7.952、1 px/frame 运动 5.151、停止后 7.932；修复前运动为 7.222。原低光约0.221 px/frame 样例缩短较小。旧 motion 检查点须重新校准/适配；本轮未新增服务器或闭环执行。自动调度相对固定历史的任务收益按用户要求留待后续研究。
+
+2026-10-13 N01 七组源码问题修复与配对验证完成，见[本轮记录](../research/experiments/2026-10-13_n01_source_repair.md)。15 项核心定义/源码不变；修复统计门控饱和、轨迹校准缺失、运动 identity 误读、实验事件/SNR/容差、CFA 邻接、平台参数和伪时序指标。全仓 257 passed，make check 通过；真实两平台解析/学习共 12 batch，服务共 6 次请求通过，冻结基线保留。旧 gate 权重须重新训练。
+
+同一修正数据与 40 步预算，N01 3.041 → 2.590 px，去重组 2.621、固定历史 2.586；六个基线每条件误差逐位一致。定位改善约14.8%，自适应调度仍未通过研究验证：固定历史略优，低 SNR 未训练快速轨迹历史仍长于静止。新生成器与旧矩阵数字不能直接比较，完整机器人任务收益仍未建立。
+
+
+2026-10-12 N01 独立验收与修复：原“全部完成”报告不能验收，原因包括错误的支持域/方差/计数、重复帧挤掉唯一观测、训练与在线历史不同、重复训练同一随机批次、辅助目标泄漏，以及不可执行的真实 NPZ 训练入口。现已直接修复并复跑，见 [完整验收记录](../research/experiments/2026-10-12_n01_encoder.md#2026-10-12-独立验收与修复)与[候选卡](../research/candidates/N01.md)。
+
+- 研究实现与本轮工程验收通过：9 个半径×时间支持域，严格逐源与插值系数核对；迟滞显式开闭，唯一帧/独立相机/部分 reset/零预算正确；一维与 CFA 入口保留；新增可恢复原生动作训练、C3/C4 与独立服务。
+- CPU 在线随机 200 步训练已复跑，末步定位误差 1.113 px；22 条独立条件平均 2.308 px、超容差 0.354。40 步候选 3.026 px，固定期限消融 3.027、去重组 3.026。**联合调度与定位收益仍未获支持**；三条未训练轨迹也未显示可靠的运动缩短历史。
+- 真实 NPZ/π0.5 已在固定服务器 runtime 通过：LIBERO/RoboTwin 各 6 组×20 batch，共240 batch；包含支持域解析/学习×辅助 loss 开/关及 C3/C4。真实 encoder/action 梯度、实际参数更新、冻结后端、padding mask、重复 flow 推理均核验。数据为作者三通道 pseudo-RAW，32×32 明确裁剪；不是全量闭环或原生 Bayer 结果。
+- 独立 WebSocket 服务真实请求、重复帧、新 episode reset 通过；测试后停止。特征桥被纳入独立源码复制/哈希清单，原 C0 冻结代码前后哈希相同、原 RoboTwin 全量/审计进程保留。
+- 锁定 CPU torch 2.9.1+cpu，make check 与全仓 240 项测试通过。tiny CPU 单步/读出 p50=9.96/4.24 ms，状态377044 B；small/medium 有成本采样，未声明规模能力趋势。
+
+上述是实现与真实接入验收。算法有效性、正式 N01 全量闭环、充分调优系统对照、真实 CFA/相机迁移仍待研究；旧实验数字保留为历史证据。
+
+2026-10-12 编码器实现交接：按用户要求准备 N01 自适应时空证据积分、N02 测量约束的循环补全、N04 自运动预测与变化分离三个独立 worktree。共同起点为已固定 RawVLA 部署加最新研究文档快照；三份自包含 DeepSeek 提示词已展开到公式、文件职责、训练步骤、StarVLA 特征接口、参考实现及反证实验。见[工作树与使用入口](prompts/README.md)和[0013 决议](decisions/0013-encoder-research-worktrees.md)。本条表示研究开发环境与提示词准备，不表示编码器实现、训练或机制验收。
+
 2026-10-12 发布固定：本地提交及标签 `owac-rawvla-pi05-v0.1.0` 固定已跑通的 RawVLA-Bench / π0.5 部署和后续比较协议，见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。LIBERO 10,000 条完整成绩为 58.20%；RoboTwin 仍在运行、有基础设施缺口。该标签不表示两平台全量已齐或论文数值复现；旧 `owac-dev-v0.1.0` 的 RAW/特征接口门槛仍待验收。
 
 2026-10-12 10:21:11（北京时间）RawVLA 进度核查：LIBERO 10,000/10,000 完成，成功 5,820、完整成功率 58.20%，身份审计通过。主清单累计 11,745/13,250；RoboTwin 1,745/3,250，仍运行，16 个异常身份未完成；附加原条件 627/632、5 个异常未补齐，状态 incomplete。整套基线尚未完成；见 [最新运行快照](../research/experiments/2026-10-10_rawvla_pi05_full_baseline.md#最新运行快照)。

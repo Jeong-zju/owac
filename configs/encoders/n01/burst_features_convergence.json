@@ -1,0 +1,49 @@
+{
+  "protocol": "n01-dbsr-convergence-v1",
+  "methods": [
+    "dbsr_reference",
+    "mean_capacity",
+    "current"
+  ],
+  "seeds": [
+    61,
+    73,
+    89
+  ],
+  "min_steps": 2048,
+  "max_steps": 8192,
+  "validation_every": 256,
+  "plateau_checks": 6,
+  "plateau_absolute_px": 0.01,
+  "plateau_relative": 0.01,
+  "plateau_learning_rate": 1e-05,
+  "learning_rate": 0.0003,
+  "minimum_learning_rate": 1e-05,
+  "lr_factor": 0.3,
+  "lr_patience": 2,
+  "weight_decay": 0.0001,
+  "batch_size": 2,
+  "evaluation_batch_size": 64,
+  "reference_chunk": 4,
+  "size": 16,
+  "length": 24,
+  "burn_in": 8,
+  "threads": 2,
+  "contrast": 0.08,
+  "noise_sigma": 0.08,
+  "heatmap_sigma": 0.8,
+  "recovery_tolerance_px": 0.75,
+  "recovery_consecutive": 3,
+  "event_window": 6,
+  "device": "cuda:0",
+  "gpu_memory_fraction": 0.12,
+  "encoder": {
+    "stem_width": 64,
+    "residual_blocks": 9,
+    "feature_width": 512,
+    "projection_width": 32,
+    "offset_width": 64,
+    "max_history": 8,
+    "fusion": "dbsr_reference"
+  }
+}

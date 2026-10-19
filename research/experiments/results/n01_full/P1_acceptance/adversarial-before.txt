@@ -1,0 +1,237 @@
+FFFFFFFFFFFFFF                                                           [100%]
+=================================== FAILURES ===================================
+_____________ test_unknown_correlation_affine_bound_cannot_cancel ______________
+
+    def test_unknown_correlation_affine_bound_cannot_cancel():
+        ledger = make_ledger([1.0, 3.0])
+        keys = line_keys(2)
+        fit = fit_structure(
+            affine_domain(keys), ledger, noise_model=NoiseModel.unknown_correlation([1, 1], source_order=keys),
+            dimension=1,
+        )
+        # At the first sample the interpolating affine estimate is exactly y_0.
+        # Its variance is 1 for EVERY allowed correlation, not zero.
+>       assert fit.predict(0, (0, 0))[1] == pytest.approx(1.0)
+E       assert 0.0 == 1.0 ± 1.0e-06
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 1.0 ± 1.0e-06
+
+tests/encoders/n01_full/test_p1_acceptance.py:34: AssertionError
+_________ test_unknown_correlation_interpolation_bound_uses_raw_noise __________
+
+    def test_unknown_correlation_interpolation_bound_uses_raw_noise():
+        ledger = make_ledger([1.0, 3.0])
+        keys = line_keys(2)
+        spec = InterpolationSpec(((0.5, 0.0),), torch.tensor([[0.5, 0.5]], dtype=torch.float64))
+        fit = fit_structure(constant_domain(keys), ledger, spec,
+                            NoiseModel.unknown_correlation([1, 1], source_order=keys))
+        # Perfectly correlated unit noise survives averaging with variance one.
+>       assert fit.predict(0, (0, 0))[1] == pytest.approx(1.0)
+E       assert 0.5000000000000001 == 1.0 ± 1.0e-06
+E         
+E         comparison failed
+E         Obtained: 0.5000000000000001
+E         Expected: 1.0 ± 1.0e-06
+
+tests/encoders/n01_full/test_p1_acceptance.py:44: AssertionError
+_______ test_unknown_correlation_rank_deficiency_has_no_false_covariance _______
+
+    def test_unknown_correlation_rank_deficiency_has_no_false_covariance():
+        ledger = make_ledger([1.0, 3.0])
+        keys = line_keys(2)
+        fit = fit_structure(affine_domain(keys), ledger,
+                            noise_model=NoiseModel.unknown_correlation([1, 1], source_order=keys))
+>       assert fit.estimate.covariance is None
+E       AssertionError: assert tensor([[1., 1., 0.],\n        [1., 1., 0.],\n        [0., 0., 0.]], dtype=torch.float64) is None
+E        +  where tensor([[1., 1., 0.],\n        [1., 1., 0.],\n        [0., 0., 0.]], dtype=torch.float64) = EvidenceEstimate(theta=tensor([2.0000, 1.0000, 0.0000], dtype=torch.float64), uncertainty_kind='proxy', identifiable_m...2b', covariance=tensor([[1., 1., 0.],\n        [1., 1., 0.],\n        [0., 0., 0.]], dtype=torch.float64), prior_id=None).covariance
+E        +    where EvidenceEstimate(theta=tensor([2.0000, 1.0000, 0.0000], dtype=torch.float64), uncertainty_kind='proxy', identifiable_m...2b', covariance=tensor([[1., 1., 0.],\n        [1., 1., 0.],\n        [0., 0., 0.]], dtype=torch.float64), prior_id=None) = StructureFit(estimate=EvidenceEstimate(theta=tensor([2.0000, 1.0000, 0.0000], dtype=torch.float64), uncertainty_kind='...0000000000000004}, 'identifiable': {'0': [True, True, False]}}), domain_id='D', support_version='sv1-5af4aeccd264862b').estimate
+
+tests/encoders/n01_full/test_p1_acceptance.py:52: AssertionError
+____ test_unidentifiable_query_is_invalid_even_when_coefficients_are_finite ____
+
+    def test_unidentifiable_query_is_invalid_even_when_coefficients_are_finite():
+        ledger = make_ledger([1.0, 3.0])
+        fit = fit_structure(affine_domain(line_keys(2)), ledger)
+>       assert math.isnan(fit.predict(0, (0, 1))[0])
+E       assert False
+E        +  where False = <built-in function isnan>(0.9999999999999989)
+E        +    where <built-in function isnan> = math.isnan
+
+tests/encoders/n01_full/test_p1_acceptance.py:59: AssertionError
+_______________ test_oracle_keeps_prior_in_unobserved_direction ________________
+
+    def test_oracle_keeps_prior_in_unobserved_direction():
+        # One measurement of theta_0; theta_1 comes only from the declared prior.
+        result = reference.dense_gls([[1, 0]], [1], [[1]],
+                                     prior_mean=[0, 7], prior_covariance=np.eye(2))
+>       np.testing.assert_allclose(result.theta, [0.5, 7])
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-07, atol=0
+E       
+E       Mismatched elements: 2 / 2 (100%)
+E       Mismatch at indices:
+E        [0]: 1.0 (ACTUAL), 0.5 (DESIRED)
+E        [1]: 0.0 (ACTUAL), 7.0 (DESIRED)
+E       Max absolute difference among violations: 7.
+E       Max relative difference among violations: 1.
+E        ACTUAL: array([1., 0.])
+E        DESIRED: array([0.5, 7. ])
+
+tests/encoders/n01_full/test_p1_acceptance.py:67: AssertionError
+_______________ test_noise_binding_cannot_be_silently_overridden _______________
+
+    def test_noise_binding_cannot_be_silently_overridden():
+        ledger = make_ledger([1.0, 3.0])
+        keys = line_keys(2)
+        domain = make_domain("D", reference_chart="ref", basis="phase_local_constant", phase=0,
+                             evidence_source_ids=keys, decision_version="dv1", mapping_version="mv1",
+                             noise_version="noise-a", prior_id="prior-a")
+>       with pytest.raises(ValueError, match="noise"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n01_full/test_p1_acceptance.py:77: Failed
+________________ test_frame_read_api_cannot_mutate_raw_records _________________
+
+    def test_frame_read_api_cannot_mutate_raw_records():
+        ledger = make_ledger([1.0, 3.0])
+        ledger.frames()[0].values.fill_(999)
+        ledger.get_frame("e0", "c0", 0).validity.fill_(1)
+>       assert ledger.get_source(line_keys(2)[0]).raw_value == 1
+E       AssertionError: assert None == 1
+E        +  where None = MeasurementRecord(key=SourceKey(dataset_id='stats', episode_id='e0', camera_id='c0', frame_id=0, channel_or_phase=0, s...='unit', timestamp=0.0, calibration_version='unknown', time_unit='frame', validity_kind='missing', noise_block_id=None).raw_value
+E        +    where MeasurementRecord(key=SourceKey(dataset_id='stats', episode_id='e0', camera_id='c0', frame_id=0, channel_or_phase=0, s...='unit', timestamp=0.0, calibration_version='unknown', time_unit='frame', validity_kind='missing', noise_block_id=None) = get_source(SourceKey(dataset_id='stats', episode_id='e0', camera_id='c0', frame_id=0, channel_or_phase=0, sensor_y=0, sensor_x=0))
+E        +      where get_source = <owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd102b8e60>.get_source
+
+tests/encoders/n01_full/test_p1_acceptance.py:87: AssertionError
+______ test_counterfactual_frame_api_and_overlay_cannot_resurrect_source _______
+
+    def test_counterfactual_frame_api_and_overlay_cannot_resurrect_source():
+        ledger = make_ledger([1.0, 3.0])
+        key = line_keys(2)[0]
+        removed = ledger.with_content(ContentReplacement("edit", {key: 100})).without([key])
+        assert not removed.has_source(key)
+>       assert math.isnan(float(removed.values_for([key])[0]))
+E       assert False
+E        +  where False = <built-in function isnan>(100.0)
+E        +    where <built-in function isnan> = math.isnan
+E        +    and   100.0 = float(tensor(100., dtype=torch.float64))
+
+tests/encoders/n01_full/test_p1_acceptance.py:96: AssertionError
+_________________ test_unbatched_masks_follow_unbatched_values _________________
+
+    def test_unbatched_masks_follow_unbatched_values():
+        ledger = MeasurementLedger("unbatched")
+>       ledger.observe(MeasurementFrame(values=torch.ones(1, 2, 2), valid_mask=torch.ones(1, 2, 2, dtype=torch.bool),
+                                        episode_ids=["e0"], frame_ids=[0], camera_id="c0"))
+
+tests/encoders/n01_full/test_p1_acceptance.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/owac/frameworks/n01_full/ledger.py:236: in observe
+    valid = _mask(frame.valid_mask, values.shape, batch, "valid_mask")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mask = tensor([[[True, True],
+         [True, True]]])
+shape = torch.Size([1, 1, 2, 2]), batch = 1, name = 'valid_mask'
+
+    def _mask(mask: Any, shape: Sequence[int], batch: int, name: str) -> torch.Tensor | None:
+        if mask is None:
+            return None
+        tensor = _to_tensor(mask, name=name)
+        if tensor.ndim == shape[1:]:
+            tensor = tensor[None]
+        if tuple(tensor.shape) != tuple(shape):
+>           raise ValueError(f"{name} shape {tuple(tensor.shape)} does not match values {tuple(shape)}")
+E           ValueError: valid_mask shape (1, 2, 2) does not match values (1, 1, 2, 2)
+
+src/owac/frameworks/n01_full/ledger.py:555: ValueError
+______________ test_exact_window_actually_bounds_state_and_solve _______________
+
+    def test_exact_window_actually_bounds_state_and_solve():
+        result = replay.full_replay(stream(34), domain_builder=builder_for(all_keys(34)), readout_grid=grid())
+>       assert result.ledger.frame_count() == 32
+E       AssertionError: assert 34 == 32
+E        +  where 34 = frame_count()
+E        +    where frame_count = <owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd1c1059d0>.frame_count
+E        +      where <owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd1c1059d0> = FullReplayResult(ledger=<owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd1c1059d0>, domains=(Version...f72b7e6e6a', 'mapping_version': 'identity', 'calibration_version': 'unknown'}, 'readout': {'q0': 18.000000000000004}})).ledger
+
+tests/encoders/n01_full/test_p1_acceptance.py:111: AssertionError
+________ test_beyond_window_rebuild_drops_old_sources_not_just_a_label _________
+
+    def test_beyond_window_rebuild_drops_old_sources_not_just_a_label():
+        keys = all_keys(10)
+        result = replay.counterfactual_replay(stream(10), domain_builder=builder_for(keys),
+            retracted_ids=[keys[0]], readout_grid=grid(), replay_config=ReplayConfig(exact_window_unique_frames=8))
+>       assert result.result.ledger.frame_count() == 8
+E       AssertionError: assert 10 == 8
+E        +  where 10 = frame_count()
+E        +    where frame_count = <owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd102b8440>.frame_count
+E        +      where <owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd102b8440> = FullReplayResult(ledger=<owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd102b8440>, domains=(Version...s': [['replay', 'e0', 'c0', 0, 0, 0, 0]], 'domains': ['sv1-e3d3cc5fe161709e'], 'readout': {'q0': 6.2631578947368425}})).ledger
+E        +        where FullReplayResult(ledger=<owac.frameworks.n01_full.ledger.MeasurementLedger object at 0x7ddd102b8440>, domains=(Version...s': [['replay', 'e0', 'c0', 0, 0, 0, 0]], 'domains': ['sv1-e3d3cc5fe161709e'], 'readout': {'q0': 6.2631578947368425}})) = CounterfactualReplayResult(manifest=mappingproxy({'kind': 'counterfactual-replay', 'retracted_sources': [['replay', 'e...), claim='rebuild_from_legal_boundary', reference_max_abs_diff=None, matches_reference=None, reference_tolerance=1e-10).result
+
+tests/encoders/n01_full/test_p1_acceptance.py:121: AssertionError
+_____________ test_fixed_replay_rejects_empty_replacement_or_query _____________
+
+    def test_fixed_replay_rejects_empty_replacement_or_query():
+        events = stream(2)
+        ledger, _ = replay.consume(events)
+        keys = all_keys(2)
+>       with pytest.raises(ValueError, match="replacement"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/encoders/n01_full/test_p1_acceptance.py:130: Failed
+__________________ test_large_integer_identity_order_is_exact __________________
+
+    def test_large_integer_identity_order_is_exact():
+        from dataclasses import replace
+        first = replace(line_keys(1)[0], frame_id=2**60)
+        second = replace(first, frame_id=2**60 + 1)
+>       assert canonical_sources([second, first])[0] == (first, second)
+E       AssertionError: assert (SourceKey(da..., sensor_x=0)) == (SourceKey(da..., sensor_x=0))
+E         
+E         At index 0 diff: SourceKey(dataset_id='stats', episode_id='e0', camera_id='c0', frame_id=1152921504606846977, channel_or_phase=0, sensor_y=0, sensor_x=0) != SourceKey(dataset_id='stats', episode_id='e0', camera_id='c0', frame_id=1152921504606846976, channel_or_phase=0, sensor_y=0, sensor_x=0)
+E         Use -v to get more diff
+
+tests/encoders/n01_full/test_p1_acceptance.py:142: AssertionError
+________ test_counterfactual_support_decision_cannot_read_deleted_value ________
+
+    def test_counterfactual_support_decision_cannot_read_deleted_value():
+        keys = all_keys(2)
+        def builder(ledger):
+            frame = ledger.get_frame("e0", "c0", 0)
+            # Deliberate content-sensitive support rule, using the public frame API.
+            chosen = [keys[2]] if float(frame.values[0, 0, 0]) > 10 else [keys[3]]
+            return builder_for(chosen)(ledger)
+        outputs = []
+        for deleted_value in (1.0, 100.0):
+            events = replay.EventStream("replay", (observe_event([deleted_value, 3], 0), observe_event([5, 9], 1)))
+            outputs.append(float(replay.counterfactual_replay(events, domain_builder=builder,
+                retracted_ids=[keys[0]], readout_grid=grid()).result.readout.means[0]))
+>       assert outputs == [9, 9]
+E       assert [9.0, 5.0] == [9, 9]
+E         
+E         At index 1 diff: 5.0 != 9
+E         Use -v to get more diff
+
+tests/encoders/n01_full/test_p1_acceptance.py:157: AssertionError
+=========================== short test summary info ============================
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_affine_bound_cannot_cancel
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_interpolation_bound_uses_raw_noise
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_unknown_correlation_rank_deficiency_has_no_false_covariance
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_unidentifiable_query_is_invalid_even_when_coefficients_are_finite
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_oracle_keeps_prior_in_unobserved_direction
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_noise_binding_cannot_be_silently_overridden
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_frame_read_api_cannot_mutate_raw_records
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_counterfactual_frame_api_and_overlay_cannot_resurrect_source
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_unbatched_masks_follow_unbatched_values
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_exact_window_actually_bounds_state_and_solve
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_beyond_window_rebuild_drops_old_sources_not_just_a_label
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_fixed_replay_rejects_empty_replacement_or_query
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_large_integer_identity_order_is_exact
+FAILED tests/encoders/n01_full/test_p1_acceptance.py::test_counterfactual_support_decision_cannot_read_deleted_value
+14 failed in 0.77s

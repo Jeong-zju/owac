@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-16",
+  "timezone": "Asia/Shanghai",
+  "acceptance": "NOT_ACCEPTED_P3",
+  "formal_training": "STOPPED_WITH_PERSISTENT_AUDIT_HOLD",
+  "base_arms": "deferred_to_P4_by_existing_user_decision",
+  "local_validation": {
+    "make_check": "passed",
+    "tests_passed": 847,
+    "tests_skipped": 6,
+    "skip_boundary": "2 original CUDA, 3 author ISP source, 1 added CUDA resume. CUDA resume and ISP actually ran in remote selected tests."
+  },
+  "remote_selected_tests": {
+    "passed": 62,
+    "skipped": 0
+  },
+  "live_remote_verification": {
+    "timestamp_utc": "2026-10-16T10:24:15Z",
+    "diagnostics": [
+      {
+        "platform": "libero",
+        "arm": "raw_n01",
+        "run_kind": "diagnostic",
+        "optimizer_steps": 3,
+        "samples_consumed": 3,
+        "final_train_action_loss": 0.9661617279052734,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-independent-audit-20261016/outputs/libero-raw_n01/checkpoints/latest.pt",
+        "resume_schema": "n01-v12-training-v2",
+        "cuda_rng_streams": 1,
+        "sample_position_restored": true
+      },
+      {
+        "platform": "libero",
+        "arm": "rgb_n01",
+        "run_kind": "diagnostic",
+        "optimizer_steps": 3,
+        "samples_consumed": 3,
+        "final_train_action_loss": 1.5924063920974731,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-independent-audit-20261016/outputs/libero-rgb_n01/checkpoints/latest.pt",
+        "resume_schema": "n01-v12-training-v2",
+        "cuda_rng_streams": 1,
+        "sample_position_restored": true
+      },
+      {
+        "platform": "robotwin2",
+        "arm": "raw_n01",
+        "run_kind": "diagnostic",
+        "optimizer_steps": 2,
+        "samples_consumed": 2,
+        "final_train_action_loss": 2.995276689529419,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-independent-audit-20261016/outputs/robotwin2-raw_n01/checkpoints/latest.pt",
+        "resume_schema": "n01-v12-training-v2",
+        "cuda_rng_streams": 1,
+        "sample_position_restored": true
+      },
+      {
+        "platform": "robotwin2",
+        "arm": "rgb_n01",
+        "run_kind": "diagnostic",
+        "optimizer_steps": 2,
+        "samples_consumed": 2,
+        "final_train_action_loss": 20.198829650878906,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-independent-audit-20261016/outputs/robotwin2-rgb_n01/checkpoints/latest.pt",
+        "resume_schema": "n01-v12-training-v2",
+        "cuda_rng_streams": 1,
+        "sample_position_restored": true
+      }
+    ],
+    "source_sha256": {
+      "src/owac/training/n01_v12.py": "77637d7e97decd3f4d73b39e743ddd118013f87c887ed645dfdb33e3028e8275",
+      "src/owac/frameworks/n01_full/support.py": "6b2791cfada9825ae8d5806c14b3d50ff17f1004461c5b3bca3632bcf4ff1890",
+      "src/owac/frameworks/n01_full/adapters.py": "944e4415bd89cbaf5b0da967df23c07d59c56772bda9b2b8509327ee7c6c356a",
+      "src/owac/runtime/n01_v12_libero_dev.py": "0173455b7831c57cccb30f80656d8c177882732db56b2c5589cdd218135f9b6a",
+      "configs/backends/n01-v12-runtime/p3-queue.sh": "99487f5a7e44a375037733e49a5b69e9e0bb7842e20342be9abfe2d108b8bba6"
+    },
+    "all_configs": [
+      {
+        "file": "libero-raw_base-seed101.json",
+        "arm": "raw_base",
+        "input_mode": "rawvla_rgb3"
+      },
+      {
+        "file": "libero-raw_n01-seed101.json",
+        "arm": "raw_n01",
+        "input_mode": "rawvla_rgb3"
+      },
+      {
+        "file": "libero-rgb_base-seed101.json",
+        "arm": "rgb_base",
+        "input_mode": "rendered_rgb3"
+      },
+      {
+        "file": "libero-rgb_n01-seed101.json",
+        "arm": "rgb_n01",
+        "input_mode": "rendered_rgb3"
+      },
+      {
+        "file": "robotwin2-raw_base-seed101.json",
+        "arm": "raw_base",
+        "input_mode": "rawvla_rgb3"
+      },
+      {
+        "file": "robotwin2-raw_n01-seed101.json",
+        "arm": "raw_n01",
+        "input_mode": "rawvla_rgb3"
+      },
+      {
+        "file": "robotwin2-rgb_base-seed101.json",
+        "arm": "rgb_base",
+        "input_mode": "rendered_rgb3"
+      },
+      {
+        "file": "robotwin2-rgb_n01-seed101.json",
+        "arm": "rgb_n01",
+        "input_mode": "rendered_rgb3"
+      }
+    ],
+    "validation_points": 10,
+    "main_supervisor": "owac-n01-v12-p3-raw              STOPPED   Not started\nowac-n01-v12-p3-rgb              STOPPED   Not started\n",
+    "hold_present": true,
+    "monitor": {
+      "state": "checking",
+      "activity": "独立验收未通过；主体训练已暂停并保全。0/96 为开发诊断，留出断言撤回。"
+    }
+  },
+  "development": {
+    "identity_error": "episode_idx is a lighting trial index, not a demo/initial-state index",
+    "selected": 100,
+    "completed": 96,
+    "old_selected": {
+      "test": 36,
+      "calibration": 26,
+      "validation": 38
+    },
+    "corrected_selected_metadata_only": {
+      "unknown": 11,
+      "test": 5,
+      "train": 68,
+      "calibration": 7,
+      "validation": 9
+    },
+    "corrected_completed_metadata_only": {
+      "unknown": 10,
+      "test": 5,
+      "train": 65,
+      "calibration": 7,
+      "validation": 9
+    },
+    "source_hdf5_files": 0,
+    "demo_to_initial_state_content_verified": false
+  },
+  "claim_boundary": "state/trainer/split/queue correctness and ten real diagnostic optimizer updates; no complete N01 model, training sufficiency, verified held-out performance, or mechanism/RAW gain",
+  "evidence_root_local": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v12-p3-audit",
+  "evidence_root_remote": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-main/receipts"
+}

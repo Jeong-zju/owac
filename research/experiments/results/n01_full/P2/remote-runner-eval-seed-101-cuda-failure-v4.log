@@ -1,0 +1,18 @@
+/workspace/owac/rawvla/envs/encoder/lib/python3.11/site-packages/torch/functional.py:505: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /pytorch/aten/src/ATen/native/TensorShape.cpp:4317.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/evaluation/n01_motion.py", line 1345, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/evaluation/n01_motion.py", line 1324, in main
+    receipt = run_evaluation(
+              ^^^^^^^^^^^^^^^
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/evaluation/n01_motion.py", line 857, in run_evaluation
+    table_samples = _collect_calibration_samples(evaluator, pairs[FITTING_SPLIT])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/evaluation/n01_motion.py", line 966, in _collect_calibration_samples
+    flow.unsqueeze(0) - target.channel_flow.to(torch.float32), dim=1
+    ~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!

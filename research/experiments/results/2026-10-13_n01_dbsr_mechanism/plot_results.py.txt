@@ -1,0 +1,25 @@
+import json
+from pathlib import Path
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+root=Path('outputs/n01-dbsr-mechanism-20261013')
+p=json.loads((root/'raw-domain-result.json').read_text())
+fig,axes=plt.subplots(1,2,figsize=(10,3.6),sharey=True)
+styles={'baseline':('DBSR','#1f77b4','-'),'duplicate_current':('Extra current control','#ff7f0e','-'),'calibrated_stale':('N01 cached sums','#2ca02c','--'),'calibrated_recompute':('N01 RAW recompute','#d62728',':')}
+for ax,condition,title in zip(axes,['occlusion_release','local_change_stale_history'],['Occlusion release','Local stale history']):
+ for mode,(label,color,style) in styles.items():
+  rows=[r['cases'][condition] for r in p['runs'] if r['mode']==mode]
+  event=rows[0]['event_frame'];curve=np.array([r['error_per_frame'][event:] for r in rows]).mean(0)
+  ax.plot(np.arange(len(curve)),curve,label=label,color=color,linestyle=style,linewidth=1.8)
+ ax.axhline(.75,color='#888888',linewidth=.8,linestyle='--');ax.axvspan(0,5,color='#cccccc',alpha=.2)
+ ax.set_title(title);ax.set_xlabel('Frames since change');ax.grid(alpha=.2);ax.set_ylim(0,7.5)
+axes[0].set_ylabel('Localization error (packed CFA cells)');axes[1].legend(fontsize=8)
+fig.tight_layout();fig.savefig(root/'raw-domain-recovery.png',dpi=180);fig.savefig(root/'raw-domain-recovery.svg');plt.close(fig)
+p=json.loads((root/'baseline-summary.json').read_text());fig,ax=plt.subplots(figsize=(7,3.6))
+for method,color in [('current','#999999'),('mean_capacity','#ff7f0e'),('dbsr_reference','#1f77b4')]:
+ for row in p['runs']:
+  if row['protocol']['methods']!=[method]:continue
+  curve=row['curves'];ax.plot([r['step'] for r in curve],[r['validation_early_error_px'] for r in curve],color=color,alpha=.6,label=method if row['protocol']['seeds']==[61] else None)
+ax.set_xlabel('Optimizer steps');ax.set_ylabel('Validation early error (packed CFA cells)');ax.legend();ax.grid(alpha=.2);fig.tight_layout();fig.savefig(root/'baseline-convergence.png',dpi=180);plt.close(fig)

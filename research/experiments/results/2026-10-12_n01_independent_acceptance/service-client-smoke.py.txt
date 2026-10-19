@@ -1,0 +1,35 @@
+import json
+import time
+import numpy as np
+from pathlib import Path
+from deployment.model_server.tools.websocket_policy_client import WebsocketClientPolicy
+from owac.raw.rawvla_sequence import RawVLASequenceDataset
+root=Path('/workspace/owac/rawvla/research/n01-graph-acceptance-20261012')
+config=json.loads((root/'configs/encoders/n01/rawvla-libero-smoke.json').read_text())
+dataset=RawVLASequenceDataset(root='/workspace/owac/rawvla',window=1,fixture_provenance='real',**config)
+sample=dataset[0]
+frames={camera:{'values':window.values[-1:,:,:32,:32].numpy(),
+ 'value_units':'normalized_raw_measurement','episode_ids':['service-a'],
+ 'frame_ids':[0],'timestamp':[0.]} for camera,window in sample.windows.items()}
+data={'frames':frames,'normalized_state':sample.state.numpy()[None],
+ 'language':[sample.meta['task_description']]}
+client=WebsocketClientPolicy('127.0.0.1',18120)
+metadata=client.get_server_metadata()
+latencies=[]
+def request():
+ tick=time.perf_counter(); response=client.predict_action(data); latencies.append((time.perf_counter()-tick)*1000); return response
+result=request()
+duplicate=request()
+for payload in frames.values():payload['episode_ids']=['service-b']
+new_episode=request()
+for output in (result, duplicate, new_episode):
+ assert output.get('ok',False), output
+ payload=output.get('data',output.get('result',output))
+ assert np.isfinite(payload['normalized_actions']).all()
+ assert all(count==[1] for count in payload['unique_frames'].values()), payload
+record={'metadata':metadata,'responses':[{'unique_frames':o.get('data',o.get('result',o))['unique_frames'],
+ 'action_shape':list(o.get('data',o.get('result',o))['normalized_actions'].shape),
+ 'encoder_steps':o.get('data',o.get('result',o))['encoder_steps']} for o in (result,duplicate,new_episode)],
+ 'requests':3,'physical_control_executed':False,'request_ms':latencies,'request_p50_ms':float(np.median(latencies)),'request_p95_ms':float(np.percentile(latencies,95))}
+(root/'service-smoke.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps(record,indent=2))

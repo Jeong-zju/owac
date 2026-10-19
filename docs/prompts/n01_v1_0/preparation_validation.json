@@ -1,0 +1,142 @@
+{
+  "checked_at": "2026-10-14T11:33:11.034195+08:00",
+  "scope": "prompt preparation, live read-only asset inspection and existing targeted regression checks; no new N01 algorithm or training executed",
+  "git_head": "429591eb1308454b019eebcac6501f84cdb27fcd",
+  "markdown_files": 15,
+  "stage_prompts": 9,
+  "local_markdown_links_checked": 80,
+  "external_unique_links_in_navigation_and_prompts": 85,
+  "broken_local_links": [],
+  "upstream_repositories_pinned": 9,
+  "upstream_files_retrieved": 24,
+  "source_retrieval_scope": "SHA256 records validate retrieved bytes; this is not upstream model runtime validation. Original plan paper links are navigational references, not all independently re-fetched this turn.",
+  "checks": [
+    {
+      "checkout": "n01-evidence-integration",
+      "command": "make check",
+      "status": "passed"
+    },
+    {
+      "checkout": "n01-evidence-integration",
+      "command": "uv run --locked --extra encoder pytest -q tests/baselines/test_burst_features.py tests/encoders/n01/test_rawvla_sequence.py tests/encoders/n01/test_rawvla_features.py",
+      "status": "passed",
+      "tests": 82,
+      "seconds": 2.01
+    },
+    {
+      "checkout": "repo",
+      "command": "uv run --locked pytest -q tests/test_research_hub.py",
+      "status": "passed",
+      "tests": 9,
+      "seconds": 1.12
+    },
+    {
+      "checkout": "repo",
+      "command": "make check",
+      "status": "passed"
+    },
+    {
+      "checkout": "repo",
+      "command": "make research-hub",
+      "status": "passed"
+    },
+    {
+      "checkout": "both",
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "packet_verification": {
+    "checks": [
+      {
+        "stage": "P0",
+        "sources": 5,
+        "chars": 32688,
+        "sha256": "d94895ec39c3f1f3442612d03ff9bb6e87f2f1192e1ea4eec67c9771d56214af",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P0_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P1",
+        "sources": 6,
+        "chars": 33538,
+        "sha256": "186259586fcd607f73a6130d459170f31e5db56b0b54c93661c526c0b51740a9",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P1_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P2",
+        "sources": 6,
+        "chars": 33099,
+        "sha256": "7b6d90f82b958879083e9a8102bc51287078d016104b3f94676936823b83abff",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P2_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P3",
+        "sources": 5,
+        "chars": 31574,
+        "sha256": "73a9c080e05c1588ff777f4944d3ccdb7a1301111c71ea404d46aa40aec9e029",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P3_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P4",
+        "sources": 5,
+        "chars": 32473,
+        "sha256": "423841f158094395bd162ab3db05facfde2c0c161bf26f82db6aaee75299e62a",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P4_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P5",
+        "sources": 5,
+        "chars": 31170,
+        "sha256": "b0a5575d969f7a12426be5ca645b1f6d80e02123ee93fd84fd31fdfe774e0f60",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P5_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P6",
+        "sources": 5,
+        "chars": 30908,
+        "sha256": "c308d6e437f9df0d4a467587f531995e9ccfe81aed7fd6fb3b6eca35d7bc7fb1",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P6_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P7",
+        "sources": 5,
+        "chars": 32583,
+        "sha256": "5b6e4e1a1c22f386f7b3cbb57610a9a90ccf9abb0336abce41859491b700a9af",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P7_COMPLETE_HANDOFF.md"
+      },
+      {
+        "stage": "P8",
+        "sources": 5,
+        "chars": 31709,
+        "sha256": "6efa29548266d068f28abcba57cc9f63d8efcf8f9735eaa101ef37efbbb1f2db",
+        "file": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration/outputs/n01-v1-prompt-preparation/handoffs/P8_COMPLETE_HANDOFF.md"
+      }
+    ],
+    "summary_stale": false,
+    "other_routes_preserved": true
+  },
+  "remote_snapshot": "remote_snapshot.json",
+  "local_source_audit": "local_source_audit.json",
+  "remote_baseline_summary_and_identity_audit_hash_match_local": true,
+  "manual_browser_recheck_this_turn": false,
+  "documents_sha256": {
+    "00_SHARED_CONTRACT.md": "cef8f95ecc660cb2698a9abde5f0081bf8a8dad469b316ffec923eb5c66481dd",
+    "01_CURRENT_IMPLEMENTATION.md": "61cee27a60755a57c1b156cf9c7cebc0e24d61cbaf01004b26ffdf35507fc6d6",
+    "02_REFERENCES.md": "fe6e11c9c485760ac02c293547911c47ceaf42ecea4f0c76d32b48fd590957f2",
+    "03_REMOTE_EXECUTION.md": "f6e3468507e9ee73a48fabc2373dd9f350b670de4374787198e81c10cc7c6a6e",
+    "EARLY_POLICY_PREFLIGHT.md": "75bcca7146e6ccccb35e283898387739eddb3bd4921e0c000f5c7801dc03faa5",
+    "P0_FOUNDATION.md": "e66e862ed5668e6985cdc35220acd4818104baeb301124004894b182ff68eb42",
+    "P1_ANALYTIC_REFERENCE.md": "efd601b4e829734f29edc6cf0e202490048cac8238dc2d6876c5299bd1f41ccc",
+    "P2_RAW_MOTION.md": "54051f140ee4110aba3a0288cf0173a4f473535869ead4a3912e644225565700",
+    "P3_SPATIOTEMPORAL_SUPPORT.md": "44aff6d9ad3cad023063325777dcdb335af077e84f3804fd5021f53491b162b9",
+    "P4_MATCHED_FEATURE_TRAINING.md": "e5d441397c9f6c684e0faa21a307902ea3e3bd489faae1db7b7c54704617d575",
+    "P5_STATE_REPLAY_DEADLINE.md": "9e5126ec9054c658fbe5bcdf82f4ea7caaccc150c87c5ede15ebf3ebeabdda63",
+    "P6_REAL_RAW_TRANSFER.md": "df08df3243d8f85a0b37138407e6c74951ce01d70cd189ca1f27934917132386",
+    "P7_POLICY_TRAINING.md": "111243674a1029b02a251532eb273306b565ca735f8bb065a7fbf4b36465aec9",
+    "P8_FULL_CLOSED_LOOP.md": "d6f2b869bb290e3225c5317a12a5ce624c4b50130c6fa30f4171dcb5d3987a05",
+    "README.md": "3abffea3dc7943821e6d5dd5de206db0aae96a452eaf3f375f0a9aa2dca23ba8"
+  },
+  "new_model_training_started": false,
+  "p0_completed": false,
+  "preserved_existing_change": "docs/OWAC_academic_research_proposal_2026-10-09.md; all other routes retained; no Git commit or push"
+}

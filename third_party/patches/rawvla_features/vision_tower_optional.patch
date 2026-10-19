@@ -1,0 +1,88 @@
+--- a/starVLA/model/framework/VLM4A/PI0.py
++++ b/starVLA/model/framework/VLM4A/PI0.py
+@@ -59,6 +59,9 @@
+ 
+     image_resolution: list[int] = field(default_factory=lambda: [224, 224])
+     image_keys: list[str] = field(default_factory=lambda: list(IMAGE_KEYS))
++    # OWAC: skip constructing the replaced vision tower; the OWAC readout supplies the
++    # language-width prefix instead.  Default True keeps the published baseline.
++    build_vision_tower: bool = True
+ 
+     tokenizer: dict = field(default_factory=lambda: {"model_path": "", "pad_state_value": -2.0})
+     paligemma: dict = field(default_factory=lambda: {"model_name_or_path": ""})
+@@ -208,6 +211,7 @@
+             vlm_config,
+             use_adarms=False,
+             model_name_or_path=str(self.config.framework.paligemma.model_name_or_path),
++            build_vision_tower=bool(self.config.framework.get("build_vision_tower", True)),
+         )
+         self.action_head = self.action_head_cls(
+             expert_config,
+--- a/starVLA/model/modules/vlm/OpenPIPaliGemma.py
++++ b/starVLA/model/modules/vlm/OpenPIPaliGemma.py
+@@ -21,25 +21,37 @@
+ 
+ 
+ class OpenPIPaliGemmaCore(nn.Module):
+-    def __init__(self, hf_config, text_config: GemmaConfig):
++    def __init__(self, hf_config, text_config: GemmaConfig, *, build_vision_tower: bool = True):
+         super().__init__()
+         self.config = hf_config
+-        self.vision_tower = SiglipVisionModel(hf_config.vision_config)
++        # OWAC: the OWAC readout replaces the pi0.5 vision prefix, so the original SigLIP
++        # tower does not have to be constructed at all.  The default keeps the published
++        # RawVLA baseline unchanged.
++        self.vision_tower = (
++            SiglipVisionModel(hf_config.vision_config) if build_vision_tower else None
++        )
+         self.multi_modal_projector = OpenPIMultiModalProjector(hf_config)
+         self.language_model = GemmaModel(text_config)
+         self.vocab_size = text_config.vocab_size
+         self.pad_token_id = hf_config.pad_token_id if hf_config.pad_token_id is not None else -1
+ 
+     def get_image_features(self, pixel_values: torch.Tensor) -> torch.Tensor:
++        if self.vision_tower is None:
++            raise RuntimeError(
++                "vision tower was not built (build_vision_tower=False); use the OWAC feature "
++                "entry points instead of image features"
++            )
+         image_outputs = self.vision_tower(pixel_values)
+         return self.multi_modal_projector(image_outputs.last_hidden_state)
+ 
+ 
+ class OpenPIPaliGemmaContainer(nn.Module):
+-    def __init__(self, hf_config, text_config: GemmaConfig):
++    def __init__(self, hf_config, text_config: GemmaConfig, *, build_vision_tower: bool = True):
+         super().__init__()
+         self.config = hf_config
+-        self.model = OpenPIPaliGemmaCore(hf_config, text_config)
++        self.model = OpenPIPaliGemmaCore(
++            hf_config, text_config, build_vision_tower=build_vision_tower
++        )
+         self.lm_head = nn.Linear(text_config.hidden_size, text_config.vocab_size, bias=False)
+         self.model.language_model.embed_tokens.weight = self.lm_head.weight
+ 
+@@ -62,7 +74,14 @@
+ class OpenPIPaliGemma(nn.Module):
+     """PaliGemma VLM component used by OpenPI PI0/PI05."""
+ 
+-    def __init__(self, config, *, use_adarms: bool = False, model_name_or_path: str = ""):
++    def __init__(
++        self,
++        config,
++        *,
++        use_adarms: bool = False,
++        model_name_or_path: str = "",
++        build_vision_tower: bool = True,
++    ):
+         super().__init__()
+         hf_config = CONFIG_MAPPING["paligemma"]()
+         hf_config._vocab_size = 257152
+@@ -91,6 +110,7 @@
+         self.model = OpenPIPaliGemmaContainer(
+             hf_config,
+             self._build_openpi_text_config(config, use_adarms=use_adarms),
++            build_vision_tower=build_vision_tower,
+         )
+ 
+     @staticmethod

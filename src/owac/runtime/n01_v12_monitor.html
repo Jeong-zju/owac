@@ -1,0 +1,1705 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N01 v1.2 实时进度 · OWAC</title>
+<style>
+:root{color-scheme:light;--bg:#f3f5f7;--panel:#fff;--text:#202a35;--muted:#667585;--border:#e2e7ed;--track:#e8edf2;--green:#0d8177;--green-soft:#e6f4f1;--blue:#526dbc;--blue-soft:#e9edfa;--orange:#a86616;--orange-soft:#fbf1e0;--red:#bd403b;--red-soft:#fbeceb;--shadow:0 3px 16px #1f293307}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#10171e;--panel:#17212b;--text:#e4edf5;--muted:#a1b2c2;--border:#2b3a48;--track:#2b3946;--green:#5cc9b6;--green-soft:#1a3e37;--blue:#94abf2;--blue-soft:#232c46;--orange:#edb35e;--orange-soft:#3d3221;--red:#f6847c;--red-soft:#412425;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC",sans-serif}
+main{max-width:1220px;margin:auto;padding:26px 28px 40px}
+h1,h2,p,figure{margin:0}
+h1{font-size:26px;font-weight:650;letter-spacing:-.6px}
+h2{font-size:15px;font-weight:600}
+button{font:inherit;cursor:pointer;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 12px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px}
+.numbers{font-variant-numeric:tabular-nums}
+.subtle,.hint{color:var(--muted)}
+.hint{font-size:12px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:var(--muted);font-weight:600}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-top:4px}
+.header-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:210px}
+.activity{margin-top:4px;color:var(--muted);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:4px 11px;border-radius:20px;background:var(--track);color:var(--muted);font-weight:600}
+.badge[data-tone=ok]{background:var(--green-soft);color:var(--green)}
+.badge[data-tone=info]{background:var(--blue-soft);color:var(--blue)}
+.badge[data-tone=warn]{background:var(--orange-soft);color:var(--orange)}
+.badge[data-tone=bad]{background:var(--red-soft);color:var(--red)}
+.dot{height:7px;width:7px;border-radius:50%;background:currentColor}
+.chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:20px;background:var(--track);color:var(--muted);margin:0 0 3px 4px}
+.chip[data-tone=ok]{background:var(--green-soft);color:var(--green)}
+.chip[data-tone=warn]{background:var(--orange-soft);color:var(--orange)}
+.chip[data-tone=bad]{background:var(--red-soft);color:var(--red)}
+.chip[data-tone=info]{background:var(--blue-soft);color:var(--blue)}
+.banner{margin-top:16px;padding:11px 15px;background:var(--panel);border-left:3px solid var(--blue);color:var(--blue);border-radius:0 6px 6px 0;font-size:13px}
+.banner[data-tone=warn]{border-color:var(--orange);color:var(--orange)}
+.banner[data-tone=bad]{border-color:var(--red);color:var(--red)}
+.banner[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.stat{background:var(--panel);padding:14px 16px;border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);min-width:0}
+.stat-label{font-size:12px;color:var(--muted)}
+.stat-value{font-size:23px;line-height:1.35;margin:4px 0 3px;font-weight:600;letter-spacing:-.5px;word-break:break-word}
+.stat-note{color:var(--muted);font-size:12px;word-break:break-word}
+.content{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:18px;margin-top:18px}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:17px 18px;box-shadow:var(--shadow);min-width:0}
+.panel-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.panel+.panel,.panel{margin-bottom:0}
+.stack{display:grid;gap:18px;margin-top:18px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:4px}
+.legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px}
+.chart{width:100%;height:238px;display:block;touch-action:none}
+.readout{font-size:12px;color:var(--muted);min-height:18px;margin-top:4px}
+.switch{display:flex}
+.switch button{border-radius:0;padding:3px 10px;font-size:12px}
+.switch button:first-child{border-radius:5px 0 0 5px}
+.switch button:last-child{border-radius:0 5px 5px 0}
+.switch button[aria-pressed=true]{background:var(--track);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;border-bottom:1px solid var(--border);padding:7px 6px;vertical-align:top}
+th{color:var(--muted);font-weight:500;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.arm-table td{vertical-align:top}
+.arm-table .cell-method{font-weight:600}
+.arm-row{display:block;margin:3px 0}
+.arm-empty{color:var(--muted)}
+.case-switch{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.case-switch button{padding:3px 10px;font-size:12px}
+.case-switch button[aria-pressed=true]{background:var(--track);font-weight:600;border-color:var(--muted)}
+.artifact-grid{display:grid;gap:14px}
+.artifact{margin:0;border:1px solid var(--border);border-radius:8px;padding:10px;min-width:0}
+.artifact img,.artifact video{width:100%;height:auto;display:block;border-radius:5px;background:var(--track)}
+.artifact-head{font-size:12.5px;font-weight:600;margin-bottom:7px;display:flex;gap:7px;align-items:baseline}
+.artifact-index{color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+.artifact-meta,.artifact-legend{font-size:11.5px;color:var(--muted);margin-top:7px}
+.artifact-legend{color:var(--text)}
+.artifact-path{display:block;margin-top:6px;color:var(--muted);word-break:break-all}
+.artifact-fail{padding:22px 10px;text-align:center;color:var(--orange);background:var(--orange-soft);border-radius:5px;font-size:12px;word-break:break-all}
+.empty-note{padding:26px 12px;text-align:center;color:var(--muted);font-size:12.5px;background:var(--track);border-radius:7px}
+.kv{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border)}
+.kv:last-child{border-bottom:0}
+.kv b{font-weight:600;text-align:right}
+.log-box{max-height:330px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px}
+.log-line{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;white-space:pre-wrap;word-break:break-word;padding:1px 0;color:var(--text)}
+.log-line .log-time{color:var(--muted)}
+.log-line[data-level=warning],.log-line[data-level=warn]{color:var(--orange)}
+.log-line[data-level=error],.log-line[data-level=critical]{color:var(--red)}
+.footer{margin-top:22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+@media(max-width:980px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.content{grid-template-columns:1fr}}
+@media(max-width:560px){
+  main{padding:18px 13px 30px}
+  h1{font-size:20px}
+  .header{flex-direction:column}
+  .header-right{text-align:left;align-items:flex-start;min-width:0}
+  .stats{grid-template-columns:1fr}
+  .stat-value{font-size:21px}
+  .panel{padding:14px 13px}
+  .chart{height:210px}
+  .legend{gap:12px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">OWAC / N01 研究进度 · 只读</div>
+  <header class="header">
+    <div>
+      <h1>N01 / v1.2 / <span id="hdr-stage">—</span></h1>
+      <p class="activity" id="hdr-activity">等待 api/status…</p>
+      <p class="hint" id="hdr-source">数据来源与阶段由服务端状态提供</p>
+    </div>
+    <div class="header-right">
+      <span class="badge" id="state-badge" data-tone="muted"><span class="dot"></span><span id="state-text">读取中</span></span>
+      <div class="hint numbers" id="conn-line">尚未连接服务</div>
+      <div class="hint" id="stale-line">数据新鲜度未知</div>
+      <button type="button" id="refresh-btn">手动刷新</button>
+    </div>
+  </header>
+  <div class="banner" id="banner" data-tone="info" role="status"></div>
+
+  <section class="stats" aria-label="当前运行四张小卡片">
+    <div class="stat">
+      <div class="stat-label">① 当前方法 / 平台 / 训练种子</div>
+      <div class="stat-value numbers" id="card1-value">尚未测量</div>
+      <div class="stat-note" id="card1-note">等待 current_run</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">② 更新步数 / rollout 完成数</div>
+      <div class="stat-value numbers" id="card2-value">尚未测量</div>
+      <div class="stat-note" id="card2-note">等待 current_run</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">③ 用时 / 速度 / 预计剩余</div>
+      <div class="stat-value numbers" id="card3-value">尚未测量</div>
+      <div class="stat-note" id="card3-note">只在有速度时估算剩余时间</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">④ GPU 显存 / 利用率</div>
+      <div class="stat-value numbers" id="card4-value">尚未测量</div>
+      <div class="stat-note" id="card4-note">等待 resources.gpus</div>
+    </div>
+  </section>
+
+  <div class="content">
+    <div class="col">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>动作损失曲线（训练 / 固定验证）</h2>
+          <div class="switch" role="group" aria-label="损失坐标尺度">
+            <button type="button" id="loss-log" aria-pressed="true">对数</button>
+            <button type="button" id="loss-linear" aria-pressed="false">线性</button>
+          </div>
+        </div>
+        <div class="legend" id="loss-legend"></div>
+        <canvas id="loss-chart" class="chart" aria-label="训练与固定验证动作损失随步数变化"></canvas>
+        <div class="readout" id="loss-readout">把指针移到曲线附近可读取该点数值</div>
+        <p class="hint" id="loss-foot">来源 api/metrics：train_action_loss、val_action_loss。</p>
+      </section>
+      <section class="panel">
+        <div class="panel-header"><h2>开发闭环成功率（独立坐标轴）</h2></div>
+        <div class="legend" id="succ-legend"></div>
+        <canvas id="succ-chart" class="chart" aria-label="开发闭环成功率随步数变化"></canvas>
+        <div class="readout" id="succ-readout">把指针移到曲线附近可读取该点数值</div>
+        <p class="hint" id="succ-foot">来源 api/metrics：dev_success_rate。成功率与 loss 不使用同一张未标注坐标轴；本页不判定收敛。</p>
+      </section>
+    </div>
+    <div class="col">
+      <section class="panel">
+        <div class="panel-header"><h2>最新真实案例</h2><span class="hint" id="case-count"></span></div>
+        <div class="case-switch" id="case-switch"></div>
+        <p class="hint" id="case-note">等待服务端案例列表。</p>
+        <div class="artifact-grid" id="artifact-grid"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="stack">
+    <section class="panel">
+      <div class="panel-header"><h2>四臂矩阵 · RAW / RGB × Base / N01</h2><span class="hint">1 个训练种子，默认 101</span></div>
+      <div class="scroll-x">
+        <table class="arm-table" aria-label="四臂训练与开发闭环矩阵">
+          <thead><tr><th>输入域</th><th>Base</th><th>N01</th></tr></thead>
+          <tbody id="arm-body"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="arm-foot">每格为 runs 中按 method 匹配的真实记录；未出现的臂显示“尚未登记”。</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header"><h2>GPU 与作业（并行 worker 各自记录）</h2><span class="hint" id="devloop-chip"></span></div>
+      <p class="hint" id="devloop-line">等待 resources.dev_loop。</p>
+      <div class="scroll-x">
+        <table aria-label="物理 GPU 与 worker 作业">
+          <thead><tr><th>物理 GPU</th><th>RAW / RGB 作业</th><th>阶段</th><th>step / rollout</th><th class="num">显存</th><th>最后心跳</th></tr></thead>
+          <tbody id="gpu-body"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="gpu-foot">并行 worker 各用各自的分母；本表不把多个 worker 的预算相加。</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header"><h2>运行明细与覆盖率</h2><span class="hint" id="runs-chip"></span></div>
+      <p class="hint" id="runs-note">等待 runs。</p>
+      <div class="scroll-x">
+        <table aria-label="每个 run 的进度与开发闭环结果">
+          <thead><tr><th>方法</th><th>域</th><th>数据来源</th><th>平台</th><th class="num">种子</th><th>状态</th><th class="num">step / 计划</th><th class="num">开发闭环（成功 / 正常失败 / infra 待恢复）</th><th class="num">成功率</th><th>最后心跳</th></tr></thead>
+          <tbody id="runs-body"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="p4-line" hidden></p>
+    </section>
+  </div>
+
+  <div class="content" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+    <section class="panel">
+      <div class="panel-header"><h2>任务矩阵</h2><span class="hint" id="tasks-src"></span></div>
+      <div class="scroll-x">
+        <table aria-label="阶段与任务矩阵">
+          <thead><tr><th>项</th><th>状态</th><th>说明</th></tr></thead>
+          <tbody id="tasks-body"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="tasks-note">阶段行按 status.stage 定位，仅表示阶段顺序，不判定完成。</p>
+    </section>
+    <section class="panel">
+      <div class="panel-header"><h2>最近日志</h2><span class="hint" id="log-count"></span></div>
+      <div class="log-box" id="log-box"><p class="hint">暂无日志。</p></div>
+    </section>
+  </div>
+
+  <p class="footer">
+    <span>本页只读：仅轮询 api/status、api/metrics、api/artifacts，不提供启动 / 停止 / 删除操作。</span>
+    <span id="footer-poll" class="numbers">轮询：状态 3s · 指标 10s · 案例 12s（后台标签页自动降频）</span>
+  </p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var ENDPOINTS = {
+    status: new URL('api/status', location.href).toString(),
+    metrics: new URL('api/metrics', location.href).toString(),
+    artifacts: new URL('api/artifacts', location.href).toString()
+  };
+  var BASE_INTERVAL = { status: 3000, metrics: 10000, artifacts: 12000 };
+  var HIDDEN_FACTOR = 5;
+  var STALE_MS = 60000;
+  var MAX_POINTS_DRAWN = 1500;
+  var MAX_LOG_LINES = 100;
+  var POINT_TIMEOUT_MS = 5000;
+  var CHART_PAD = { l: 62, r: 16, t: 14, b: 40 };
+  var UNIT_LABEL = { ratio: '比例 0–1' };
+
+  var STATES = {
+    implementing: { text: '编程中', tone: 'info' },
+    checking: { text: '检查中', tone: 'info' },
+    waiting_resource: { text: '等待资源', tone: 'warn' },
+    training: { text: '训练中', tone: 'ok' },
+    evaluating: { text: '评测中', tone: 'ok' },
+    stage_end: { text: '阶段结束', tone: 'ok' },
+    failed: { text: '失败', tone: 'bad' },
+    needs_user: { text: '需要用户处理', tone: 'warn' }
+  };
+  var DATA_KIND = {
+    libero_dequantized: 'LIBERO 逆处理/量化缓存',
+    libero_uint8: 'LIBERO 逆处理/量化缓存',
+    hdr_derived: 'RoboTwin HDR 派生',
+    real_cfa: '真实 CFA'
+  };
+  var ARM_KEYS = ['raw_base', 'raw_n01', 'rgb_base', 'rgb_n01'];
+  var STAGES = ['P3', 'P4', 'P5', 'P6', 'P7', 'P8'];
+
+  var S = {
+    status: null,
+    statusError: null,
+    statusOkAt: 0,
+    metrics: null,
+    metricsError: null,
+    metricsOkAt: 0,
+    apiArtifacts: null,
+    artifactsError: null,
+    artifactsUnsupported: false,
+    selectedCase: null,
+    logSignature: ''
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = String(text);
+    return node;
+  }
+  function arr(value) { return Array.isArray(value) ? value : []; }
+  function obj(value) { return (value && typeof value === 'object' && !Array.isArray(value)) ? value : null; }
+  function num(value) {
+    if (value === null || value === undefined || value === '') return null;
+    var n = Number(value);
+    return isFinite(n) ? n : null;
+  }
+  function str(value) {
+    if (value === null || value === undefined) return '';
+    return String(value);
+  }
+  function hasText(value) { return str(value).trim().length > 0; }
+  function fmtInt(value) {
+    var n = num(value);
+    return n === null ? null : Math.round(n).toLocaleString('zh-CN');
+  }
+  function fmtFixed(value, digits) {
+    var n = num(value);
+    if (n === null) return null;
+    return n.toFixed(digits === undefined ? 2 : digits);
+  }
+  function fmtDuration(seconds) {
+    var s = num(seconds);
+    if (s === null || s < 0) return null;
+    s = Math.round(s);
+    var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (d > 0) return d + ' 天 ' + h + ' 小时';
+    if (h > 0) return h + ' 小时 ' + m + ' 分';
+    if (m > 0) return m + ' 分 ' + sec + ' 秒';
+    return sec + ' 秒';
+  }
+  function fmtAge(ms) {
+    if (ms === null || ms === undefined || !isFinite(ms)) return null;
+    var s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60) return s + ' 秒';
+    if (s < 3600) return Math.floor(s / 60) + ' 分 ' + (s % 60) + ' 秒';
+    if (s < 86400) return Math.floor(s / 3600) + ' 小时 ' + Math.floor((s % 3600) / 60) + ' 分';
+    return Math.floor(s / 86400) + ' 天 ' + Math.floor((s % 86400) / 3600) + ' 小时';
+  }
+  function fmtClock(value) {
+    if (!hasText(value)) return null;
+    var ms = Date.parse(value);
+    if (!isFinite(ms)) return str(value) + '（时间格式无法解析）';
+    return new Date(ms).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai' });
+  }
+  function parseMs(value) {
+    if (!hasText(value)) return null;
+    var ms = Date.parse(value);
+    return isFinite(ms) ? ms : null;
+  }
+  function fmtCount(value, suffix) {
+    var out = fmtInt(value);
+    if (out === null) return null;
+    return suffix ? out + ' ' + suffix : out;
+  }
+  function fmtGiB(mib) {
+    var n = num(mib);
+    if (n === null) return null;
+    return (n / 1024).toFixed(1) + ' GiB';
+  }
+  function joinParts(parts, sep) {
+    return parts.filter(function (p) { return hasText(p); }).join(sep === undefined ? ' · ' : sep);
+  }
+  function dataKindLabel(kind) {
+    if (!hasText(kind)) return null;
+    var key = str(kind).trim();
+    return DATA_KIND[key] || (key + '（未登记来源说明）');
+  }
+  function unitLabel(unit) {
+    var key = str(unit).trim();
+    if (!key) return '单位未标注';
+    return UNIT_LABEL[key] || key;
+  }
+  function domainOf(run) {
+    var explicit = str(run && run.input_domain).trim();
+    if (explicit) return explicit.toUpperCase();
+    var method = str(run && run.method).toLowerCase();
+    if (method.indexOf('rgb') >= 0) return 'RGB';
+    if (method.indexOf('raw') >= 0) return 'RAW';
+    return '';
+  }
+  var BENIGN_EXIT = /^(completed?|finished?|done|success(ful)?|normal|正常|正常完成|完成|成功|结束|已停止)$/i;
+  function exitInfo(run) {
+    var alive = run ? run.alive : undefined;
+    var reason = str(run && run.exit_reason).trim();
+    if (alive === true) return { text: '存活', tone: 'ok', abnormal: false };
+    if (alive === false) {
+      if (reason && BENIGN_EXIT.test(reason)) return { text: '已完成（退出原因 ' + reason + '）', tone: 'info', abnormal: false };
+      if (reason) return { text: '已退出：' + reason, tone: 'bad', abnormal: true };
+      return { text: '已退出（未记录退出原因）', tone: 'muted', abnormal: false };
+    }
+    return { text: '存活状态未登记', tone: 'muted', abnormal: false };
+  }
+  function runMethod(run) {
+    if (hasText(run && run.method)) return str(run.method).trim();
+    if (hasText(run && run.role)) return str(run.role).trim();
+    return '';
+  }
+  function armKeyOf(method) {
+    var key = str(method).trim().toLowerCase();
+    if (ARM_KEYS.indexOf(key) >= 0) return key;
+    var domain = key.indexOf('rgb') >= 0 ? 'rgb' : key.indexOf('raw') >= 0 ? 'raw' : '';
+    var variant = key.indexOf('n01') >= 0 ? 'n01' : key.indexOf('base') >= 0 ? 'base' : '';
+    return domain && variant ? domain + '_' + variant : '';
+  }
+  function resolveUrl(url) {
+    var raw = str(url);
+    if (!raw) return '';
+    try { return new URL(raw, location.href).toString(); } catch (err) { return raw; }
+  }
+  function cssVar(name) {
+    var value = getComputedStyle(document.documentElement).getPropertyValue(name);
+    return (value || '').trim() || '#888';
+  }
+  function isVideoArtifact(a) {
+    if (str(a.kind).toLowerCase() === 'video') return true;
+    return /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(str(a.url));
+  }
+
+  /* ---------- fetch ---------- */
+  function getJson(url) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, POINT_TIMEOUT_MS);
+    return fetch(url, { cache: 'no-store', signal: controller.signal, headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        if (!res.ok) {
+          var err = new Error('HTTP ' + res.status);
+          err.status = res.status;
+          throw err;
+        }
+        return res.json();
+      })
+      .finally(function () { clearTimeout(timer); });
+  }
+
+  var inflight = { status: false, metrics: false, artifacts: false };
+
+  function pollStatus() {
+    if (inflight.status) return Promise.resolve();
+    inflight.status = true;
+    return getJson(ENDPOINTS.status).then(function (data) {
+      S.status = data;
+      S.statusError = null;
+      S.statusOkAt = Date.now();
+    }).catch(function (err) {
+      S.statusError = err;
+    }).finally(function () {
+      inflight.status = false;
+      renderStatus();
+    });
+  }
+
+  function pollMetrics() {
+    if (inflight.metrics) return Promise.resolve();
+    inflight.metrics = true;
+    return getJson(ENDPOINTS.metrics).then(function (data) {
+      S.metrics = data;
+      S.metricsError = null;
+      S.metricsOkAt = Date.now();
+    }).catch(function (err) {
+      S.metricsError = err;
+    }).finally(function () {
+      inflight.metrics = false;
+      renderMetrics();
+    });
+  }
+
+  function pollArtifacts() {
+    if (inflight.artifacts || S.artifactsUnsupported) return Promise.resolve();
+    inflight.artifacts = true;
+    return getJson(ENDPOINTS.artifacts).then(function (data) {
+      S.apiArtifacts = data;
+      S.artifactsError = null;
+    }).catch(function (err) {
+      S.artifactsError = err;
+      if (err && err.status === 404) S.artifactsUnsupported = true;
+    }).finally(function () {
+      inflight.artifacts = false;
+      renderArtifacts();
+    });
+  }
+
+  function loop(task, baseMs) {
+    var tick = function () {
+      task().catch(function () { /* 单项失败不阻断轮询 */ })
+        .then(function () { setTimeout(tick, document.hidden ? baseMs * HIDDEN_FACTOR : baseMs); });
+    };
+    return tick();
+  }
+
+  /* ---------- header ---------- */
+  function dataAgeOf(st) {
+    var updatedMs = obj(st) ? parseMs(st.updated_at) : null;
+    return updatedMs === null ? null : Date.now() - updatedMs;
+  }
+
+  function renderClockLines(st) {
+    var lastOkAge = S.statusOkAt ? Date.now() - S.statusOkAt : null;
+    var connParts = [];
+    if (S.statusOkAt) {
+      connParts.push('最后成功读取 ' + new Date(S.statusOkAt).toLocaleTimeString('zh-CN', { hour12: false }) + (lastOkAge !== null ? '（' + fmtAge(lastOkAge) + '前）' : ''));
+    } else {
+      connParts.push('尚未成功读取 api/status');
+    }
+    if (S.statusError) connParts.push('最近一次请求失败：' + (S.statusError.message || S.statusError.name));
+    $('conn-line').textContent = connParts.join(' · ');
+
+    var dataAge = dataAgeOf(st);
+    if (!obj(st)) {
+      $('stale-line').textContent = '数据新鲜度未知';
+    } else if (dataAge === null) {
+      $('stale-line').textContent = 'updated_at 缺失，无法判断新鲜度';
+    } else if (dataAge > STALE_MS) {
+      $('stale-line').textContent = '进度数据较久未更新（' + fmtAge(dataAge) + '）';
+    } else {
+      $('stale-line').textContent = '数据新鲜（' + fmtAge(dataAge) + '前更新）';
+    }
+    return dataAge;
+  }
+
+  function renderStatus() {
+    var st = obj(S.status);
+    var state = obj(st) && hasText(st.state) ? str(st.state).trim() : '';
+    var stage = obj(st) && hasText(st.stage) ? str(st.stage).trim() : '';
+
+    $('hdr-stage').textContent = stage || '阶段未登记';
+    $('hdr-activity').textContent = obj(st) && hasText(st.activity) ? str(st.activity) : (obj(st) ? '尚未登记当前活动' : '等待 api/status…');
+
+    var meta = [];
+    var current = obj(st) && obj(st.current_run);
+    if (current) {
+      if (hasText(current.method)) meta.push('当前 run ' + str(current.method));
+      if (hasText(current.platform)) meta.push('平台 ' + str(current.platform));
+      var kind = dataKindLabel(current.data_kind);
+      if (kind) meta.push('数据来源 ' + kind);
+    }
+    if (obj(st) && hasText(st.updated_at)) meta.push('status.updated_at ' + (fmtClock(st.updated_at) || str(st.updated_at)));
+    $('hdr-source').textContent = meta.length ? meta.join(' · ') : '等待服务端提供 current_run / updated_at';
+
+    var mapped = STATES[state] || { text: state || '状态未知', tone: 'muted' };
+    var badge = $('state-badge');
+    badge.setAttribute('data-tone', mapped.tone);
+    $('state-text').textContent = state ? (STATES[state] ? mapped.text : state + '（未知状态）') : '状态未登记';
+
+    renderClockLines(st);
+    renderBanner(st, state, dataAgeOf(st));
+    renderCards(st);
+    renderArmTable(st);
+    renderGpuTable(st);
+    renderRuns(st);
+    renderTasks(st);
+    renderLog(st);
+    renderArtifacts();
+  }
+
+  function tickClocks() {
+    var st = obj(S.status);
+    var state = st && hasText(st.state) ? str(st.state).trim() : '';
+    renderClockLines(st);
+    renderBanner(st, state, dataAgeOf(st));
+  }
+
+  function renderBanner(st, state, dataAge) {
+    var banner = $('banner');
+    var messages = [];
+    var tone = 'info';
+    var rank = { info: 0, warn: 1, bad: 2 };
+    var push = function (text, nextTone) {
+      if (!hasText(text)) return;
+      messages.push(text);
+      if (rank[nextTone] > rank[tone]) tone = nextTone;
+    };
+    if (!obj(st)) {
+      if (S.statusError) {
+        push('未连接服务：读取 api/status 失败（' + (S.statusError.message || S.statusError.name) + '）。' +
+          (location.protocol === 'file:' ? '本页正以 file:// 直接打开，没有同源 HTTP 服务；请通过服务地址访问，例如 http://127.0.0.1:<端口>/ 。' : '将按正常节奏自动重试，无需刷新。'), 'warn');
+      } else {
+        push('正在连接服务…首次读取 api/status。', 'info');
+      }
+    } else {
+      if (S.statusError) {
+        push('连接中断：保留最后成功读取的进度数据（最后成功 ' +
+          (S.statusOkAt ? new Date(S.statusOkAt).toLocaleTimeString('zh-CN', { hour12: false }) : '未知') +
+          '；错误 ' + (S.statusError.message || S.statusError.name) + '）。正在按正常节奏自动重试，恢复后本提示自动消失。', 'bad');
+      }
+      if (state === 'failed') {
+        push('运行状态为 failed：失败判定来自服务端 state（进程/退出状态），本页不根据数据陈旧自行判定失败。', 'bad');
+      }
+      var dead = arr(obj(st) && st.runs).filter(function (r) { return exitInfo(r).abnormal; });
+      if (dead.length) {
+        push('有 worker 异常退出：' + dead.map(function (r) {
+          return (runMethod(r) || '未登记方法') + '（退出原因 ' + str(r.exit_reason) + '）';
+        }).join('；') + '。正常完成（exit_reason=completed）不计为失败。', 'bad');
+      }
+      if (dataAge !== null && dataAge > STALE_MS) {
+        push('进度数据较久未更新：updated_at 距今约 ' + fmtAge(dataAge) + '。这可能只是写入停顿，不代表训练失败；失败只依据进程/退出状态。', 'warn');
+      }
+    }
+    if (!messages.length) {
+      banner.hidden = true;
+      banner.textContent = '';
+      return;
+    }
+    banner.hidden = false;
+    banner.setAttribute('data-tone', tone);
+    banner.textContent = messages.join(' ');
+  }
+
+  function renderCards(st) {
+    var current = obj(st) && obj(st.current_run);
+    var runs = arr(obj(st) && st.runs);
+    var matched = current && hasText(current.method) ? findRun(runs, current.method, current.platform, current.seed) : null;
+    var rollouts = obj(current) && obj(current.rollouts) ? current.rollouts : (matched ? obj(matched.rollouts) : null);
+
+    /* 卡片 ① */
+    if (obj(current) && (hasText(current.method) || hasText(current.platform))) {
+      $('card1-value').textContent = hasText(current.method) ? str(current.method) : '方法未登记';
+      $('card1-note').textContent = joinParts([
+        hasText(current.input_domain) ? '输入域 ' + str(current.input_domain) : null,
+        hasText(current.platform) ? '平台 ' + str(current.platform) : null,
+        num(current.seed) !== null ? '训练种子 ' + fmtInt(current.seed) : '训练种子未登记',
+        dataKindLabel(current.data_kind) ? '数据来源 ' + dataKindLabel(current.data_kind) : '数据来源未登记'
+      ]);
+    } else {
+      $('card1-value').textContent = '尚未测量';
+      $('card1-note').textContent = '等待 current_run.method / platform / seed';
+    }
+
+    /* 卡片 ② */
+    var step = obj(current) ? num(current.step) : null;
+    var planned = obj(current) ? num(current.planned_steps) : null;
+    var rolloutLine = rollouts
+      ? joinParts([
+        num(rollouts.completed_rollouts) !== null ? '已完成 ' + fmtInt(rollouts.completed_rollouts) + ' / ' + (num(rollouts.expected_rollouts) !== null ? fmtInt(rollouts.expected_rollouts) : '未登记分母') : null,
+        num(rollouts.successes) !== null ? '成功 ' + fmtInt(rollouts.successes) : null,
+        num(rollouts.failures) !== null ? '正常失败 ' + fmtInt(rollouts.failures) : null,
+        num(rollouts.infra_pending) !== null ? 'infra 待恢复 ' + fmtInt(rollouts.infra_pending) : null
+      ])
+      : '';
+    if (step !== null) {
+      $('card2-value').textContent = fmtInt(step) + ' 步';
+      $('card2-note').textContent = joinParts([
+        planned !== null && planned > 0 ? '计划 ' + fmtInt(planned) + ' 步（' + ((step / planned) * 100).toFixed(1) + '%）' : '未登记总量（不显示百分比）',
+        rolloutLine || null
+      ]);
+    } else if (rollouts && num(rollouts.completed_rollouts) !== null) {
+      $('card2-value').textContent = 'rollout ' + fmtInt(rollouts.completed_rollouts) + (num(rollouts.expected_rollouts) !== null ? ' / ' + fmtInt(rollouts.expected_rollouts) : '');
+      $('card2-note').textContent = rolloutLine;
+    } else {
+      $('card2-value').textContent = '尚未测量';
+      $('card2-note').textContent = '等待 current_run.step 或 rollouts 计数';
+    }
+
+    /* 卡片 ③ */
+    var elapsed = obj(current) ? num(current.elapsed_s) : null;
+    var elapsedNote = 'elapsed_s';
+    if (elapsed === null && matched) {
+      var startedMs = parseMs(matched.started_at);
+      if (startedMs !== null) {
+        elapsed = Math.max(0, (Date.now() - startedMs) / 1000);
+        elapsedNote = '按 runs[].started_at 估算';
+      }
+    }
+    var speed = obj(current) ? num(current.speed) : null;
+    var speedUnit = obj(current) && hasText(current.speed_unit) ? str(current.speed_unit) : 'step/s';
+    if (elapsed !== null) {
+      $('card3-value').textContent = fmtDuration(elapsed);
+      $('card3-note').textContent = joinParts([
+        '用时来自 ' + elapsedNote,
+        speed !== null && speed > 0 ? '速度 ' + speed.toFixed(2) + ' ' + speedUnit : '速度尚未测量',
+        speed !== null && speed > 0 && planned !== null && step !== null && planned > step
+          ? '估计剩余 ' + fmtDuration((planned - step) / speed) + '（按当前速度估计，非承诺）'
+          : (planned === null ? '未登记总量，无法估计剩余' : (speed === null ? '无速度，不估计剩余' : '已完成或无需剩余'))
+      ]);
+    } else {
+      $('card3-value').textContent = '尚未测量';
+      $('card3-note').textContent = '等待 current_run.elapsed_s 或 runs[].started_at';
+    }
+
+    /* 卡片 ④ */
+    var gpus = arr(obj(obj(st) && st.resources) && st.resources.gpus);
+    if (gpus.length) {
+      var used = 0, total = 0, maxUtil = null, counted = 0;
+      gpus.forEach(function (g) {
+        var u = num(g && g.memory_used_mib), t = num(g && g.memory_total_mib), util = num(g && g.utilization_pct);
+        if (u !== null) used += u;
+        if (t !== null) total += t;
+        if (u !== null || t !== null) counted += 1;
+        if (util !== null && (maxUtil === null || util > maxUtil)) maxUtil = util;
+      });
+      $('card4-value').textContent = counted ? (fmtGiB(used) || '尚未测量') + (total ? ' / ' + fmtGiB(total) : '') : '尚未测量';
+      $('card4-note').textContent = joinParts([
+        maxUtil !== null ? '最大利用率 ' + maxUtil.toFixed(0) + '%' : '利用率尚未测量',
+        '共 ' + gpus.length + ' 张物理 GPU（求和仅针对不同物理卡）'
+      ]);
+    } else {
+      $('card4-value').textContent = '尚未测量';
+      $('card4-note').textContent = '等待 resources.gpus';
+    }
+  }
+
+  function findRun(runs, method, platform, seed) {
+    var target = str(method).trim().toLowerCase();
+    var candidates = runs.filter(function (r) { return runMethod(r).toLowerCase() === target; });
+    if (platform) {
+      var byPlatform = candidates.filter(function (r) { return str(r.platform).toLowerCase() === str(platform).toLowerCase(); });
+      if (byPlatform.length) candidates = byPlatform;
+    }
+    if (num(seed) !== null) {
+      var bySeed = candidates.filter(function (r) { return num(r.seed) === num(seed); });
+      if (bySeed.length) candidates = bySeed;
+    }
+    return candidates.length ? candidates[0] : null;
+  }
+
+  /* ---------- charts ---------- */
+  function seriesPoints(series) {
+    var raw = arr(series && series.points);
+    var stepAllNull = raw.every(function (p) { return num(p && p.step) === null; });
+    var pts = [];
+    raw.forEach(function (p) {
+      var y = num(p && p.value);
+      var x = num(p && (stepAllNull ? p.t : p.step));
+      if (y === null || x === null) return;
+      pts.push({ x: x, y: y, t: num(p && p.t) });
+    });
+    pts.sort(function (a, b) { return a.x - b.x; });
+    return { points: pts, xIsTime: stepAllNull && pts.length > 0 };
+  }
+
+  function downsample(points) {
+    if (points.length <= MAX_POINTS_DRAWN) return points;
+    var stride = Math.ceil(points.length / MAX_POINTS_DRAWN);
+    var out = [];
+    for (var i = 0; i < points.length; i += stride) out.push(points[i]);
+    if (out[out.length - 1] !== points[points.length - 1]) out.push(points[points.length - 1]);
+    return out;
+  }
+
+  function niceTicks(min, max, count) {
+    if (!isFinite(min) || !isFinite(max)) return { lo: 0, hi: 1, ticks: [0, 1] };
+    if (min === max) {
+      var pad = Math.abs(min) > 0 ? Math.abs(min) * 0.1 : 0.5;
+      min -= pad; max += pad;
+    }
+    var raw = (max - min) / Math.max(1, count);
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var norm = raw / mag;
+    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+    var lo = Math.floor(min / step) * step;
+    var hi = Math.ceil(max / step) * step;
+    var ticks = [];
+    for (var v = lo; v <= hi + step * 1e-9; v += step) ticks.push(Number(v.toFixed(10)));
+    return { lo: lo, hi: hi, ticks: ticks };
+  }
+
+  function fmtTick(value) {
+    var abs = Math.abs(value);
+    if (value === 0) return '0';
+    if (abs >= 100000) return (value / 1000).toFixed(0) + 'k';
+    if (abs >= 1000) return Math.round(value).toLocaleString('zh-CN');
+    if (abs >= 1) return String(Number(value.toFixed(2)));
+    if (abs >= 0.01) return String(Number(value.toFixed(3)));
+    return Number(value.toPrecision(2)).toString();
+  }
+
+  function createChart(canvasId, readoutId, emptyText) {
+    var canvas = $(canvasId);
+    var readout = $(readoutId);
+    var cfg = null;
+    var hover = null;
+
+    function plot() {
+      var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      var width = Math.max(260, canvas.clientWidth || 600);
+      var height = canvas.clientHeight || 238;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      var ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      var gridColor = cssVar('--border');
+      var textColor = cssVar('--muted');
+      var strongColor = cssVar('--text');
+
+      var series = cfg ? cfg.series.filter(function (s) { return s.points.length; }) : [];
+      var pad = CHART_PAD;
+      if (!series.length) {
+        ctx.fillStyle = textColor;
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(emptyText, width / 2, height / 2);
+        ctx.textAlign = 'left';
+        return;
+      }
+
+      var xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+      series.forEach(function (s) {
+        s.points.forEach(function (p) {
+          if (p.x < xMin) xMin = p.x;
+          if (p.x > xMax) xMax = p.x;
+          if (p.y < yMin) yMin = p.y;
+          if (p.y > yMax) yMax = p.y;
+        });
+      });
+      if (xMin === xMax) { xMin -= 1; xMax += 1; }
+      var xPad = (xMax - xMin) * 0.04;
+      xMin -= xPad; xMax += xPad;
+      if (xMin < 0 && xMin + xPad >= 0) xMin = 0;
+
+      var logOk = cfg.logScale && yMin > 0 && yMax > 0;
+      var lo, hi, yTicks;
+      if (logOk) {
+        var e0 = Math.floor(Math.log10(yMin));
+        var e1 = Math.ceil(Math.log10(yMax));
+        if (e1 - e0 > 6) e1 = e0 + 6;
+        lo = Math.pow(10, e0); hi = Math.pow(10, e1);
+        yTicks = [];
+        for (var e = e0; e <= e1; e++) yTicks.push(Math.pow(10, e));
+        if (yTicks.length < 2) yTicks = [lo, hi];
+      } else {
+        var yScale = niceTicks(yMin, yMax * 1.02, 4);
+        lo = yScale.lo; hi = yScale.hi; yTicks = yScale.ticks;
+      }
+
+      var innerW = width - pad.l - pad.r;
+      var innerH = height - pad.t - pad.b;
+      var X = function (v) { return pad.l + innerW * (v - xMin) / (xMax - xMin); };
+      var Y = function (v) {
+        if (logOk) {
+          var a = Math.log10(Math.max(v, lo)), b = Math.log10(lo), c = Math.log10(hi);
+          return pad.t + innerH * (1 - (a - b) / (c - b));
+        }
+        return pad.t + innerH * (1 - (v - lo) / (hi - lo));
+      };
+
+      ctx.font = '11px system-ui, sans-serif';
+      /* 横向网格 + y 轴刻度 */
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      yTicks.forEach(function (v) {
+        var y = Y(v);
+        if (y < pad.t - 1 || y > pad.t + innerH + 1) return;
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(pad.l + innerW, y);
+        ctx.stroke();
+        ctx.fillText(fmtTick(v), pad.l - 8, y);
+      });
+      /* 纵向网格 + x 轴刻度 */
+      var xTickCount = innerW < 380 ? 3 : 5;
+      ctx.textBaseline = 'top';
+      for (var i = 0; i <= xTickCount; i++) {
+        var xv = xMin + (xMax - xMin) * i / xTickCount;
+        var x = X(xv);
+        ctx.strokeStyle = gridColor;
+        ctx.beginPath();
+        ctx.moveTo(x, pad.t);
+        ctx.lineTo(x, pad.t + innerH);
+        ctx.stroke();
+        if (!(cfg.xIsTime)) {
+          ctx.textAlign = i === 0 ? 'left' : (i === xTickCount ? 'right' : 'center');
+          ctx.fillText(fmtTick(xv), x, pad.t + innerH + 7);
+        }
+      }
+      ctx.textAlign = 'center';
+      if (cfg.xIsTime) {
+        ctx.textAlign = 'left';
+        ctx.fillText('时间戳起点 ' + fmtTick(xMin), pad.l, pad.t + innerH + 7);
+        ctx.textAlign = 'right';
+        ctx.fillText('时间戳终点 ' + fmtTick(xMax), pad.l + innerW, pad.t + innerH + 7);
+      }
+      /* 坐标轴 */
+      ctx.strokeStyle = textColor;
+      ctx.beginPath();
+      ctx.moveTo(pad.l, pad.t);
+      ctx.lineTo(pad.l, pad.t + innerH);
+      ctx.lineTo(pad.l + innerW, pad.t + innerH);
+      ctx.stroke();
+      /* 轴标题 */
+      ctx.fillStyle = strongColor;
+      ctx.font = '11.5px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(cfg.xTitle || '', pad.l + innerW / 2, height - 4);
+      ctx.save();
+      ctx.translate(13, pad.t + innerH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(cfg.yTitle || '', 0, 0);
+      ctx.restore();
+      /* 曲线 */
+      series.forEach(function (s) {
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        s.points.forEach(function (p, idx) {
+          var x = X(p.x), y = Y(p.y);
+          if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        if (s.points.length === 1) {
+          ctx.fillStyle = s.color;
+          ctx.beginPath();
+          ctx.arc(X(s.points[0].x), Y(s.points[0].y), 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      /* 悬停读数 */
+      if (hover && hover.seriesIndex < series.length) {
+        var s2 = series[hover.seriesIndex];
+        var p2 = s2.points[hover.pointIndex];
+        if (p2) {
+          var hx = X(p2.x), hy = Y(p2.y);
+          ctx.strokeStyle = gridColor;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(hx, pad.t);
+          ctx.lineTo(hx, pad.t + innerH);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = s2.color;
+          ctx.strokeStyle = cssVar('--panel');
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    }
+
+    function nearestPoint(px, py) {
+      if (!cfg) return null;
+      var best = null;
+      cfg.series.forEach(function (s, si) {
+        if (!s.points.length) return;
+        var span = s.points.length > 1 ? Math.abs(s.points[s.points.length - 1]._px - s.points[0]._px) : 0;
+        var spacing = s.points.length > 1 ? span / (s.points.length - 1) : 60;
+        var limit = Math.max(22, Math.min(80, spacing / 2));
+        s.points.forEach(function (p, pi) {
+          var dx = Math.abs(p._px - px);
+          if (dx > limit) return;
+          var dy = Math.abs(p._py - py);
+          var score = dx + dy * 0.35;
+          if (!best || score < best.score) best = { seriesIndex: si, pointIndex: pi, score: score };
+        });
+      });
+      return best;
+    }
+
+    function computePixels() {
+      if (!cfg) return;
+      var width = Math.max(260, canvas.clientWidth || 600);
+      var height = canvas.clientHeight || 238;
+      var pad = CHART_PAD;
+      var all = cfg.series.filter(function (s) { return s.points.length; });
+      if (!all.length) return;
+      var xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+      all.forEach(function (s) {
+        s.points.forEach(function (p) {
+          if (p.x < xMin) xMin = p.x;
+          if (p.x > xMax) xMax = p.x;
+          if (p.y < yMin) yMin = p.y;
+          if (p.y > yMax) yMax = p.y;
+        });
+      });
+      if (xMin === xMax) { xMin -= 1; xMax += 1; }
+      var xPad = (xMax - xMin) * 0.04;
+      xMin -= xPad; xMax += xPad;
+      if (xMin < 0 && xMin + xPad >= 0) xMin = 0;
+      var logOk = cfg.logScale && yMin > 0 && yMax > 0;
+      var lo, hi;
+      if (logOk) {
+        var e0 = Math.floor(Math.log10(yMin)), e1 = Math.ceil(Math.log10(yMax));
+        if (e1 - e0 > 6) e1 = e0 + 6;
+        lo = Math.pow(10, e0); hi = Math.pow(10, e1);
+      } else {
+        var ys = niceTicks(yMin, yMax * 1.02, 4);
+        lo = ys.lo; hi = ys.hi;
+      }
+      var innerW = width - pad.l - pad.r;
+      var innerH = height - pad.t - pad.b;
+      cfg.series.forEach(function (s) {
+        s.points.forEach(function (p) {
+          p._px = pad.l + innerW * (p.x - xMin) / (xMax - xMin);
+          if (logOk) {
+            var a = Math.log10(Math.max(p.y, lo)), b = Math.log10(lo), c = Math.log10(hi);
+            p._py = pad.t + innerH * (1 - (a - b) / (c - b));
+          } else {
+            p._py = pad.t + innerH * (1 - (p.y - lo) / (hi - lo));
+          }
+        });
+      });
+    }
+
+    canvas.addEventListener('pointermove', function (evt) {
+      if (!cfg || !cfg.series.length) return;
+      var rect = canvas.getBoundingClientRect();
+      var hit = nearestPoint(evt.clientX - rect.left, evt.clientY - rect.top);
+      if (!hit) {
+        if (hover) { hover = null; plot(); readout.textContent = cfg.hint; }
+        return;
+      }
+      hover = hit;
+      var s = cfg.series[hit.seriesIndex];
+      var p = s.points[hit.pointIndex];
+      readout.textContent = s.label + '（' + unitLabel(s.unit) + '）· ' + (cfg.xIsTime ? '时间 ' + new Date(p.x * 1000).toLocaleString('zh-CN', { hour12: false }) : 'step ' + fmtInt(p.x)) + ' = ' + p.y.toFixed(4);
+      plot();
+    });
+    canvas.addEventListener('pointerleave', function () {
+      if (!cfg) return;
+      hover = null;
+      plot();
+      readout.textContent = cfg.hint;
+    });
+
+    return {
+      set: function (nextCfg) {
+        cfg = nextCfg;
+        hover = null;
+        computePixels();
+        plot();
+      },
+      redraw: function () {
+        computePixels();
+        plot();
+      },
+      hint: function () { return cfg ? cfg.hint : ''; }
+    };
+  }
+
+  var lossChart = null, succChart = null;
+
+  function buildSeries(raw, spec) {
+    var parsed = seriesPoints(raw);
+    var points = downsample(parsed.points);
+    return {
+      label: hasText(raw && raw.label) ? str(raw.label) : spec.label,
+      unit: hasText(raw && raw.unit) ? str(raw.unit) : spec.unit,
+      name: str(raw && raw.name),
+      points: points,
+      totalPoints: parsed.points.length,
+      color: cssVar(spec.color),
+      xIsTime: parsed.xIsTime
+    };
+  }
+
+  function findSeries(name) {
+    var list = arr(obj(S.metrics) && S.metrics.series);
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && str(list[i].name).trim() === name) return list[i];
+    }
+    return null;
+  }
+
+  function legendHtml(container, series) {
+    container.replaceChildren();
+    series.forEach(function (s) {
+      if (!s.points.length && !s.totalPoints) return;
+      var span = el('span');
+      var swatch = el('i');
+      swatch.style.background = s.color;
+      swatch.style.display = 'inline-block';
+      span.appendChild(swatch);
+      span.appendChild(document.createTextNode(s.label + '（' + unitLabel(s.unit) + '）'));
+      container.appendChild(span);
+    });
+    if (!container.childNodes.length) {
+      container.appendChild(el('span', null, '暂无数据（曲线尚无点）'));
+    }
+  }
+
+  function renderMetrics() {
+    var hasMetrics = obj(S.metrics);
+    var rawTrain = findSeries('train_action_loss');
+    var rawVal = findSeries('val_action_loss');
+    var rawSucc = findSeries('dev_success_rate');
+
+    var trainSeries = rawTrain ? buildSeries(rawTrain, { label: '训练 action loss', unit: 'loss', color: '--blue' }) : null;
+    var valSeries = rawVal ? buildSeries(rawVal, { label: '固定验证 action loss', unit: 'loss', color: '--green' }) : null;
+    var lossSeries = [trainSeries, valSeries].filter(function (s) { return s && (s.points.length || s.totalPoints); });
+
+    var lossCfg = {
+      series: lossSeries,
+      logScale: window.__n01LossLog !== false,
+      xTitle: lossSeries.some(function (s) { return s.xIsTime; }) ? '时间戳（点序列）' : '训练步数 (step)',
+      yTitle: '动作 loss',
+      xIsTime: lossSeries.length ? lossSeries[0].xIsTime : false,
+      hint: '把指针移到曲线附近可读取该点数值'
+    };
+    if (!lossSeries.length) {
+      lossCfg.hint = hasMetrics ? '暂无数据：api/metrics 未返回 train_action_loss / val_action_loss' : '暂无数据：等待 api/metrics';
+    }
+    legendHtml($('loss-legend'), lossSeries);
+    lossChart.set(lossCfg);
+    var lossFoot = [];
+    lossFoot.push('来源 api/metrics');
+    lossFoot.push(trainSeries && trainSeries.totalPoints ? '训练 ' + fmtInt(trainSeries.totalPoints) + ' 点' : '训练曲线暂无数据');
+    lossFoot.push(valSeries && valSeries.totalPoints ? '固定验证 ' + fmtInt(valSeries.totalPoints) + ' 点' : '固定验证曲线暂无数据');
+    lossFoot.push('绘制上限 ' + fmtInt(MAX_POINTS_DRAWN) + ' 点，超出按等距抽样');
+    if (window.__n01LossLog !== false && ((trainSeries && trainSeries.points.some(function (p) { return p.y <= 0; })) || (valSeries && valSeries.points.some(function (p) { return p.y <= 0; })))) {
+      lossFoot.push('存在非正 loss，坐标自动使用线性');
+    }
+    if (S.metricsError && hasMetrics) lossFoot.push('最近一次指标请求失败：' + (S.metricsError.message || S.metricsError.name) + '，显示上次成功数据');
+    if (!hasMetrics && S.metricsError) lossFoot.push('读取 api/metrics 失败：' + (S.metricsError.message || S.metricsError.name));
+    $('loss-foot').textContent = lossFoot.join(' · ');
+
+    var succSeries = rawSucc ? [buildSeries(rawSucc, { label: '开发闭环成功率', unit: 'ratio', color: '--green' })] : [];
+    var succCfg = {
+      series: succSeries,
+      logScale: false,
+      xTitle: '训练步数 (step)',
+      yTitle: '开发闭环成功率（' + unitLabel(succSeries.length ? succSeries[0].unit : 'ratio') + '）',
+      xIsTime: succSeries.length ? succSeries[0].xIsTime : false,
+      hint: '把指针移到曲线附近可读取该点数值'
+    };
+    if (!succSeries.length) {
+      succCfg.hint = hasMetrics ? '暂无数据：api/metrics 未返回 dev_success_rate' : '暂无数据：等待 api/metrics';
+    }
+    legendHtml($('succ-legend'), succSeries);
+    succChart.set(succCfg);
+    var succFoot = ['来源 api/metrics：dev_success_rate'];
+    if (succSeries.length && succSeries[0].totalPoints) succFoot.push(fmtInt(succSeries[0].totalPoints) + ' 点');
+    succFoot.push('与 loss 分属两张图，两轴均标注单位与名称');
+    $('succ-foot').textContent = succFoot.join(' · ');
+  }
+
+  /* ---------- 四臂矩阵 ---------- */
+  function armCell(runs) {
+    var cell = el('td');
+    if (!runs.length) {
+      cell.appendChild(el('span', 'arm-empty', '尚未登记'));
+      return cell;
+    }
+    runs.forEach(function (run) {
+      var line = el('div', 'arm-row');
+      var method = el('span', 'cell-method', runMethod(run) || '方法未登记');
+      line.appendChild(method);
+      if (hasText(run.platform)) line.appendChild(document.createTextNode(' · ' + str(run.platform)));
+      var stepTxt = num(run.step) === null
+        ? 'step 尚未测量'
+        : 'step ' + fmtInt(run.step) + (num(run.planned_steps) !== null && num(run.planned_steps) > 0 ? ' / ' + fmtInt(run.planned_steps) : ' / 未登记总量');
+      line.appendChild(el('div', 'hint', stepTxt));
+      line.appendChild(el('div', 'hint', runStateText(run)));
+      var rollout = obj(run.rollouts);
+      if (rollout) {
+        line.appendChild(el('div', 'hint', joinParts([
+          num(rollout.successes) !== null ? '开发闭环成功 ' + fmtInt(rollout.successes) : '成功数尚未记录',
+          num(rollout.expected_rollouts) !== null ? '分母 ' + fmtInt(rollout.expected_rollouts) : '分母未登记',
+          num(rollout.failures) !== null ? '正常失败 ' + fmtInt(rollout.failures) : null,
+          num(rollout.infra_pending) !== null ? 'infra 待恢复 ' + fmtInt(rollout.infra_pending) : null,
+          num(rollout.completed_rollouts) !== null ? '已完成 ' + fmtInt(rollout.completed_rollouts) : null
+        ])));
+        if (hasText(rollout.note)) line.appendChild(el('span', 'chip', str(rollout.note)));
+      } else {
+        line.appendChild(el('div', 'hint', '开发闭环尚未记录'));
+      }
+      cell.appendChild(line);
+    });
+    return cell;
+  }
+
+  function runStateText(run) {
+    var parts = [];
+    var phase = hasText(run.phase) ? str(run.phase) : '';
+    if (phase) parts.push('阶段 ' + phase);
+    var info = exitInfo(run);
+    parts.push(info.text);
+    if (hasText(run.exit_reason) && run.alive !== false) parts.push('退出原因 ' + str(run.exit_reason));
+    return parts.join(' · ');
+  }
+
+  function renderArmTable(st) {
+    var runs = arr(obj(st) && st.runs);
+    var body = $('arm-body');
+    body.replaceChildren();
+    [['RAW', 'raw_base', 'raw_n01'], ['RGB', 'rgb_base', 'rgb_n01']].forEach(function (row) {
+      var tr = el('tr');
+      tr.appendChild(el('th', null, row[0]));
+      tr.appendChild(armCell(runs.filter(function (r) { return armKeyOf(runMethod(r)) === row[1]; })));
+      tr.appendChild(armCell(runs.filter(function (r) { return armKeyOf(runMethod(r)) === row[2]; })));
+      body.appendChild(tr);
+    });
+    var seeds = {};
+    runs.forEach(function (r) { var s = num(r && r.seed); if (s !== null) seeds[s] = true; });
+    var seedList = Object.keys(seeds);
+    $('arm-foot').textContent = joinParts([
+      '每格为 runs 中按 method 匹配的真实记录（含各平台分行）',
+      '本矩阵仅 1 个训练种子，默认 101',
+      seedList.length ? '当前出现过的种子：' + seedList.join('、') : '尚未出现种子记录',
+      runs.length ? null : 'runs 尚未登记'
+    ]);
+  }
+
+  /* ---------- GPU / 作业表 ---------- */
+  function renderGpuTable(st) {
+    var resources = obj(obj(st) && st.resources);
+    var gpus = arr(resources && resources.gpus);
+    var runs = arr(obj(st) && st.runs);
+    var devloop = obj(resources && resources.dev_loop);
+    var body = $('gpu-body');
+    body.replaceChildren();
+
+    var domains = [];
+    runs.forEach(function (r) {
+      var d = domainOf(r) || '未标输入域';
+      if (domains.indexOf(d) < 0) domains.push(d);
+    });
+    ['RAW', 'RGB'].forEach(function (d) { if (domains.indexOf(d) < 0 && runs.length) domains.push(d); });
+    if (!runs.length && gpus.length) {
+      gpus.forEach(function (g, idx) {
+        domains.push(hasText(g && g.queue) ? str(g.queue).toUpperCase() : ('物理 GPU #' + (num(g && g.index) !== null ? fmtInt(g.index) : idx)));
+      });
+    }
+
+    if (!domains.length) {
+      var trEmpty = el('tr');
+      var tdEmpty = el('td', 'arm-empty', gpus.length ? '尚未登记 runs（仅有物理 GPU 记录）' : '尚未登记 GPU / 作业记录');
+      tdEmpty.colSpan = 6;
+      trEmpty.appendChild(tdEmpty);
+      body.appendChild(trEmpty);
+    }
+
+    domains.forEach(function (domain) {
+      var workerRuns = runs.filter(function (r) { return (domainOf(r) || '未标输入域') === domain; });
+      var workerGpus = gpus.filter(function (g) {
+        var queue = str(g && g.queue).toUpperCase();
+        if (queue && (queue === domain || queue.indexOf(domain) >= 0)) return true;
+        var job = str(g && g.job).toLowerCase();
+        return workerRuns.some(function (r) { return hasText(runMethod(r)) && job.indexOf(runMethod(r).toLowerCase()) >= 0; });
+      });
+      var tr = el('tr');
+      /* 物理 GPU */
+      var gpuCell = el('td');
+      if (workerGpus.length) {
+        workerGpus.forEach(function (g, i) {
+          var idx = num(g && g.index);
+          gpuCell.appendChild(el('div', null, '#' + (idx === null ? '?' : fmtInt(idx)) + (hasText(g && g.name) ? ' ' + str(g.name) : '')));
+          if (i === 0 && hasText(g && g.job)) gpuCell.appendChild(el('div', 'hint', 'job ' + str(g.job)));
+        });
+      } else {
+        gpuCell.appendChild(el('span', 'arm-empty', '未登记'));
+      }
+      tr.appendChild(gpuCell);
+      /* 作业 */
+      var jobCell = el('td');
+      jobCell.appendChild(el('div', null, domain + ' 作业'));
+      if (workerRuns.length) {
+        jobCell.appendChild(el('div', 'hint', workerRuns.map(function (r) {
+          return runMethod(r) + (hasText(r.platform) ? '(' + str(r.platform) + (num(r.seed) !== null ? ', seed ' + fmtInt(r.seed) : '') + ')' : '');
+        }).join(' · ')));
+      } else {
+        jobCell.appendChild(el('div', 'hint', '尚未登记 runs'));
+      }
+      tr.appendChild(jobCell);
+      /* 阶段 */
+      var phaseCell = el('td');
+      var phases = [];
+      workerRuns.forEach(function (r) { var p = str(r.phase); if (p && phases.indexOf(p) < 0) phases.push(p); });
+      phaseCell.textContent = phases.length ? phases.join(' / ') : '尚未测量';
+      tr.appendChild(phaseCell);
+      /* step / rollout */
+      var stepCell = el('td', 'num');
+      if (workerRuns.length) {
+        workerRuns.slice(0, 2).forEach(function (r) {
+          var parts = [];
+          parts.push(num(r.step) !== null ? 'step ' + fmtInt(r.step) + (num(r.planned_steps) !== null && num(r.planned_steps) > 0 ? ' / ' + fmtInt(r.planned_steps) : ' / 未登记总量') : 'step 尚未测量');
+          var ro = obj(r.rollouts);
+          if (ro && num(ro.completed_rollouts) !== null) parts.push('rollout ' + fmtInt(ro.completed_rollouts) + (num(ro.expected_rollouts) !== null ? ' / ' + fmtInt(ro.expected_rollouts) : ''));
+          stepCell.appendChild(el('div', null, parts.join(' · ')));
+        });
+        if (workerRuns.length > 2) stepCell.appendChild(el('div', 'hint', '另有 ' + (workerRuns.length - 2) + ' 个 run，见运行明细'));
+      } else {
+        stepCell.appendChild(el('div', null, '尚未测量'));
+      }
+      tr.appendChild(stepCell);
+      /* 显存 */
+      var memCell = el('td', 'num');
+      if (workerGpus.length) {
+        workerGpus.forEach(function (g) {
+          var used = fmtGiB(g && g.memory_used_mib);
+          var total = fmtGiB(g && g.memory_total_mib);
+          var util = num(g && g.utilization_pct);
+          memCell.appendChild(el('div', null, used || total ? (used || '?') + ' / ' + (total || '?') : '尚未测量'));
+          memCell.appendChild(el('div', 'hint', util !== null ? '利用率 ' + util.toFixed(0) + '%' : '利用率尚未测量'));
+        });
+      } else {
+        memCell.appendChild(el('div', null, '尚未测量'));
+      }
+      tr.appendChild(memCell);
+      /* 最后心跳 */
+      var hbCell = el('td');
+      if (workerRuns.length) {
+        var times = workerRuns.map(function (r) { return parseMs(r.updated_at); }).filter(function (v) { return v !== null; });
+        if (times.length) {
+          var latest = Math.max.apply(null, times);
+          hbCell.appendChild(el('div', 'numbers', new Date(latest).toLocaleTimeString('zh-CN', { hour12: false })));
+          hbCell.appendChild(el('div', 'hint', fmtAge(Date.now() - latest) + '前'));
+        } else {
+          hbCell.appendChild(el('span', 'arm-empty', '未登记 updated_at'));
+        }
+      } else {
+        hbCell.appendChild(el('span', 'arm-empty', '未登记'));
+      }
+      tr.appendChild(hbCell);
+      body.appendChild(tr);
+    });
+
+    /* 开发闭环全局 */
+    var chip = $('devloop-chip');
+    var line = $('devloop-line');
+    if (devloop) {
+      var completed = num(devloop.completed_rollouts);
+      var budget = num(devloop.budget_rollouts);
+      if (budget === null) budget = 100;
+      chip.textContent = completed !== null ? '开发闭环已完成 ' + fmtInt(completed) + ' / ' + fmtInt(budget) : '开发闭环总量已登记，完成数尚未记录';
+      chip.setAttribute('data-tone', 'ok');
+      var groups = arr(devloop.by_method);
+      var parts = ['全局分母取自 resources.dev_loop.budget_rollouts（缺省 100）：' + (completed !== null ? fmtInt(completed) : '尚未测量') + ' / ' + fmtInt(budget)];
+      if (groups.length) {
+        parts.push('各 worker 各按自己的分母：' + groups.map(function (g) {
+          return str(g && g.method) + ' ' + (num(g && g.completed_rollouts) !== null ? fmtInt(g.completed_rollouts) : '?') + ' / ' + (num(g && g.expected_rollouts) !== null ? fmtInt(g.expected_rollouts) : '未登记分母') +
+            joinParts([
+              num(g && g.successes) !== null ? '成功 ' + fmtInt(g.successes) : null,
+              num(g && g.failures) !== null ? '正常失败 ' + fmtInt(g.failures) : null,
+              num(g && g.infra_pending) !== null ? 'infra 待恢复 ' + fmtInt(g.infra_pending) : null
+            ], '，');
+        }).join('；'));
+      }
+      var mode = hasText(devloop.aggregate) ? str(devloop.aggregate).trim().toLowerCase() : '';
+      if (mode === 'sum') {
+        parts.push('服务端按 method 相加汇总（各 worker 各自占用开发闭环分区），全局分母仍为 budget_rollouts，不把每个 worker 的 100 再乘一遍');
+      } else if (mode === 'max') {
+        parts.push('服务端取最大（保守，不把并行 worker 相加成双倍）');
+      } else {
+        parts.push('并行两个 worker 各自记录，本页不做跨卡求和（不会把两个 100 相加成 200）');
+      }
+      if (hasText(devloop.note)) parts.push('服务端说明：' + str(devloop.note));
+      line.textContent = parts.join('　|　');
+    } else {
+      chip.textContent = '开发闭环总量未登记';
+      chip.setAttribute('data-tone', 'muted');
+      line.textContent = '等待 resources.dev_loop（completed_rollouts / budget_rollouts / by_method）；此处不推算、不填 0。';
+    }
+    $('gpu-foot').textContent = '物理 GPU 显存为各卡自身读数；显存求和只在卡片④对不同物理卡进行，rollout 预算不做任何跨 worker 相加。';
+  }
+
+  /* ---------- 运行明细 ---------- */
+  function renderRuns(st) {
+    var runs = arr(obj(st) && st.runs);
+    var resources = obj(obj(st) && st.resources);
+    var body = $('runs-body');
+    body.replaceChildren();
+    if (!runs.length) {
+      var tr = el('tr');
+      var td = el('td', 'arm-empty', obj(st) ? 'runs 尚未登记' : '等待 api/status');
+      td.colSpan = 10;
+      tr.appendChild(td);
+      body.appendChild(tr);
+    }
+    runs.forEach(function (run) {
+      var tr = el('tr');
+      tr.appendChild(el('td', null, runMethod(run) || '未登记'));
+      tr.appendChild(el('td', null, domainOf(run) || '未登记'));
+      var kindCell = el('td');
+      kindCell.appendChild(el('div', null, dataKindLabel(run.data_kind) || '未登记'));
+      if (hasText(run.data_kind)) kindCell.appendChild(el('code', 'hint', str(run.data_kind)));
+      tr.appendChild(kindCell);
+      tr.appendChild(el('td', null, hasText(run.platform) ? str(run.platform) : '未登记'));
+      tr.appendChild(el('td', 'num', num(run.seed) !== null ? fmtInt(run.seed) : '未登记'));
+      var stateCell = el('td');
+      var chip = el('span', 'chip', !hasText(run.phase) && run.alive === undefined ? '状态未登记' : runStateText(run));
+      chip.setAttribute('data-tone', exitInfo(run).tone);
+      stateCell.appendChild(chip);
+      tr.appendChild(stateCell);
+      tr.appendChild(el('td', 'num', num(run.step) !== null
+        ? fmtInt(run.step) + ' / ' + (num(run.planned_steps) !== null && num(run.planned_steps) > 0 ? fmtInt(run.planned_steps) : '未登记总量')
+        : '尚未测量'));
+      var ro = obj(run.rollouts);
+      var roCell = el('td', 'num');
+      if (ro) {
+        roCell.appendChild(el('div', null, joinParts([
+          (num(ro.completed_rollouts) !== null ? fmtInt(ro.completed_rollouts) : '?') + ' / ' + (num(ro.expected_rollouts) !== null ? fmtInt(ro.expected_rollouts) : '未登记分母'),
+          num(ro.successes) !== null ? '成功 ' + fmtInt(ro.successes) : null,
+          num(ro.failures) !== null ? '正常失败 ' + fmtInt(ro.failures) : null,
+          num(ro.infra_pending) !== null ? 'infra 待恢复 ' + fmtInt(ro.infra_pending) : null
+        ], '　')));
+        if (hasText(ro.note)) roCell.appendChild(el('span', 'chip', str(ro.note)));
+      } else {
+        roCell.appendChild(el('span', 'arm-empty', '尚未记录'));
+      }
+      tr.appendChild(roCell);
+      var rateCell = el('td', 'num');
+      if (ro && num(ro.successes) !== null && num(ro.failures) !== null && (num(ro.successes) + num(ro.failures)) > 0) {
+        rateCell.appendChild(el('div', null, (num(ro.successes) / (num(ro.successes) + num(ro.failures)) * 100).toFixed(1) + '%'));
+        rateCell.appendChild(el('div', 'hint', '暂时结果（按已判定 ' + fmtInt(num(ro.successes) + num(ro.failures)) + ' 次）'));
+        if (num(ro.expected_rollouts) !== null) rateCell.appendChild(el('div', 'hint', '原正式分母 ' + fmtInt(ro.expected_rollouts)));
+      } else {
+        rateCell.appendChild(el('span', 'arm-empty', '尚未测量'));
+      }
+      tr.appendChild(rateCell);
+      var hb = parseMs(run.updated_at);
+      tr.appendChild(el('td', null, hb === null ? '未登记 updated_at' : new Date(hb).toLocaleTimeString('zh-CN', { hour12: false }) + '（' + fmtAge(Date.now() - hb) + '前）'));
+      body.appendChild(tr);
+    });
+
+    $('runs-chip').textContent = runs.length ? fmtInt(runs.length) + ' 个 run' : '等待 runs';
+    var note = [];
+    note.push('每行一个 (方法 × 平台 × 种子) 真实 run；分段分母与全量分母分别显示，不自动按平台或方法乘开。');
+    note.push('数据来源按 data_kind 标注：LIBERO 逆处理/量化缓存（libero_dequantized、libero_uint8）、RoboTwin HDR 派生（hdr_derived）、真实 CFA（real_cfa）。');
+    if (runs.some(function (r) { return obj(r.rollouts) && hasText(r.rollouts.note); })) {
+      note.push('rollouts.note 中的阶段标注（如“P4 正式全量”“P5 迁移实验”）按服务端原文显示。');
+    }
+    $('runs-note').textContent = note.join(' ');
+
+    var p4Line = $('p4-line');
+    var total = obj(st) ? num(st.p4_total) : null;
+    var extra = obj(st) ? num(st.p4_extra) : null;
+    if (total !== null || extra !== null) {
+      var coverage = 0, covered = 0;
+      var seen = {};
+      runs.forEach(function (r) {
+        var ro = obj(r.rollouts);
+        if (!ro || num(ro.completed_rollouts) === null) return;
+        var key = str(r.method) + '|' + str(r.platform) + '|' + str(r.seed);
+        if (seen[key]) return;
+        seen[key] = true;
+        coverage += num(ro.completed_rollouts);
+        covered += 1;
+      });
+      var text = [];
+      if (total !== null) text.push('P4 核心期望总量 ' + fmtInt(total) + '（来自 status.p4_total）');
+      if (extra !== null) text.push('附加 ' + fmtInt(extra) + ' 另列（来自 status.p4_extra，不并入核心分母）');
+      if (covered) text.push('按 runs 去重汇总已完成覆盖 ' + fmtInt(coverage) + (total !== null ? ' / ' + fmtInt(total) + '（' + (coverage / total * 100).toFixed(1) + '%）' : '') + '，覆盖来自 ' + fmtInt(covered) + ' 个 run');
+      text.push('进行中的成功率均为“暂时结果”，原正式分母在明细中始终可见；缺口不等于失败');
+      p4Line.hidden = false;
+      p4Line.textContent = text.join(' · ');
+    } else {
+      p4Line.hidden = true;
+      p4Line.textContent = '';
+    }
+  }
+
+  /* ---------- 任务矩阵 ---------- */
+  function renderTasks(st) {
+    var body = $('tasks-body');
+    body.replaceChildren();
+    var tasks = arr(obj(st) && st.tasks);
+    var stage = obj(st) && hasText(st.stage) ? str(st.stage).trim().toUpperCase() : '';
+    var source = $('tasks-src');
+    if (tasks.length) {
+      source.textContent = '来自 status.tasks';
+      tasks.forEach(function (task) {
+        var tr = el('tr');
+        tr.appendChild(el('td', null, hasText(task.name) ? str(task.name) : (hasText(task.title) ? str(task.title) : '未命名任务')));
+        tr.appendChild(el('td', null, hasText(task.state) ? str(task.state) : (hasText(task.status) ? str(task.status) : '未登记')));
+        tr.appendChild(el('td', 'hint', joinParts([
+          hasText(task.stage) ? str(task.stage) : null,
+          hasText(task.note) ? str(task.note) : null,
+          hasText(task.updated_at) ? '更新 ' + (fmtClock(task.updated_at) || str(task.updated_at)) : null
+        ])));
+        body.appendChild(tr);
+      });
+      $('tasks-note').textContent = '任务条目来自 status.tasks 原文；本页不推断完成度。';
+      return;
+    }
+    source.textContent = '按 status.stage 定位';
+    if (!stage) {
+      var tr0 = el('tr');
+      var td0 = el('td', 'arm-empty', '阶段未登记：等待 status.stage');
+      td0.colSpan = 3;
+      tr0.appendChild(td0);
+      body.appendChild(tr0);
+    } else {
+      var index = STAGES.indexOf(stage);
+      STAGES.forEach(function (name, i) {
+        var tr = el('tr');
+        tr.appendChild(el('td', null, name));
+        var position = index < 0 ? '阶段未登记于 P3–P8' : i === index ? '进行中' : i < index ? '较早阶段' : '后续阶段';
+        tr.appendChild(el('td', null, position + (i === index ? '（当前 status.stage=' + stage + '）' : '')));
+        tr.appendChild(el('td', 'hint', i === index ? (hasText(st.activity) ? str(st.activity) : '当前活动未登记') : (index < 0 ? '—' : i < index ? '已完成更早阶段不在此页判定' : '未到达（按阶段顺序，不判定完成）')));
+        body.appendChild(tr);
+      });
+      if (index < 0) {
+        var tr1 = el('tr');
+        tr1.appendChild(el('td', null, stage));
+        tr1.appendChild(el('td', null, '当前阶段（不在 P3–P8 列表）'));
+        tr1.appendChild(el('td', 'hint', hasText(st.activity) ? str(st.activity) : '当前活动未登记'));
+        body.appendChild(tr1);
+      }
+    }
+    $('tasks-note').textContent = '阶段行按 status.stage 定位，仅表示阶段顺序，不判定完成；若 writer 提供 status.tasks（name / stage / state / note / updated_at），此处改为逐条显示。';
+  }
+
+  /* ---------- 日志 ---------- */
+  function renderLog(st) {
+    var box = $('log-box');
+    var entries = arr(obj(st) && st.recent_log).slice(-MAX_LOG_LINES);
+    var signature = entries.map(function (e) {
+      return str(e && e.ts) + '|' + str(e && e.level) + '|' + str(e && e.message);
+    }).join('\n');
+    $('log-count').textContent = entries.length ? '共 ' + entries.length + ' 条（最多保留 ' + MAX_LOG_LINES + ' 条）' : '';
+    if (signature === S.logSignature) return;
+    S.logSignature = signature;
+    box.replaceChildren();
+    if (!entries.length) {
+      box.appendChild(el('p', 'hint', obj(st) ? '暂无日志（recent_log 为空）。' : '暂无日志：等待 api/status。'));
+      return;
+    }
+    var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 24;
+    entries.forEach(function (entry) {
+      var level = str(entry && entry.level).toLowerCase();
+      var line = el('div', 'log-line');
+      line.setAttribute('data-level', level || 'info');
+      var time = el('span', 'log-time', (fmtClock(entry && entry.ts) || str(entry && entry.ts) || '时间未登记') + '  ');
+      line.appendChild(time);
+      line.appendChild(document.createTextNode('[' + (level || 'info') + '] ' + str(entry && entry.message)));
+      box.appendChild(line);
+    });
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  }
+
+  /* ---------- 案例 ---------- */
+  function collectArtifacts() {
+    var fromApi = obj(S.apiArtifacts) && arr(S.apiArtifacts.artifacts);
+    if (fromApi && fromApi.length) return fromApi;
+    var fromStatus = obj(S.status) && arr(S.status.artifacts);
+    if (fromStatus && fromStatus.length) return fromStatus;
+    return [];
+  }
+
+  function artifactSignature(list) {
+    return str(S.selectedCase) + '|' + list.map(function (a) {
+      return [a && a.case_id, a && a.case, a && a.case_title, a && a.id, a && a.kind, a && a.url, a && a.caption, a && a.legend, a && a.camera, a && a.episode, a && a.frame, a && a.source_time, a && a.unit].join('\u0001');
+    }).join('\u0002');
+  }
+
+  function renderArtifacts() {
+    var list = collectArtifacts();
+    var grid = $('artifact-grid');
+    var switcher = $('case-switch');
+    var note = $('case-note');
+    var count = $('case-count');
+
+    if (!list.length) {
+      switcher.replaceChildren();
+      grid.replaceChildren();
+      count.textContent = '';
+      var reason;
+      if (S.artifactsUnsupported && !(obj(S.status) && arr(S.status.artifacts).length)) {
+        reason = '案例接口未提供：服务端未实现 api/artifacts，且 status.artifacts 为空。';
+      } else if (S.artifactsError && !(obj(S.status) && arr(S.status.artifacts).length)) {
+        reason = '案例读取失败：' + (S.artifactsError.message || S.artifactsError.name) + '，保留说明文字，不显示假图。';
+      } else {
+        reason = '案例尚未生成（服务端 artifacts 列表为空）。';
+      }
+      note.textContent = reason + ' 生成后将在此按顺序显示：同源 RAW 固定预览 → 固定 ISP 的 RGB → 局部细节 → 同一时刻输入预览 → 真实历史融合热图 / 支持区域图 → 视频。';
+      grid.appendChild(el('div', 'empty-note', '案例尚未生成'));
+      return;
+    }
+    var signature = artifactSignature(list);
+    if (signature === S.artifactSig) return;
+    S.artifactSig = signature;
+
+    var groups = [];
+    var index = {};
+    list.forEach(function (a) {
+      var key = hasText(a.case_id) ? str(a.case_id) : (hasText(a.case) ? str(a.case) : (hasText(a.id) ? str(a.id) : '未命名案例'));
+      if (!(key in index)) {
+        index[key] = { key: key, title: hasText(a.case_title) ? str(a.case_title) : key, items: [] };
+        groups.push(index[key]);
+      }
+      index[key].items.push(a);
+    });
+    groups.forEach(function (g) {
+      g.items.sort(function (a, b) { return (isVideoArtifact(a) ? 1 : 0) - (isVideoArtifact(b) ? 1 : 0); });
+    });
+    if (!S.selectedCase || !index[S.selectedCase]) S.selectedCase = groups[0].key;
+
+    switcher.replaceChildren();
+    groups.forEach(function (g) {
+      var btn = el('button', null, g.title);
+      btn.type = 'button';
+      btn.setAttribute('aria-pressed', String(g.key === S.selectedCase));
+      btn.addEventListener('click', function () {
+        S.selectedCase = g.key;
+        renderArtifacts();
+      });
+      switcher.appendChild(btn);
+    });
+
+    var active = index[S.selectedCase];
+    count.textContent = '案例 ' + groups.length + ' 个 · 当前 ' + active.key + ' · 图 ' + active.items.length + ' 张';
+    note.textContent = '顺序由服务端 artifacts 列表给定（同源 RAW 固定预览 → 固定 ISP RGB → 局部细节 → 输入预览 → 平均融合权重热图 → 视频）；图例、相机、episode/frame 与单位随图显示。融合热图图例为“平均融合权重”，不是后验，也不是因果贡献。';
+    grid.replaceChildren();
+    active.items.forEach(function (a, i) {
+      grid.appendChild(artifactCard(a, i));
+    });
+  }
+
+  function artifactCard(a, index) {
+    var card = el('figure', 'artifact');
+    var head = el('figcaption', 'artifact-head');
+    head.appendChild(el('span', 'artifact-index', String(index + 1)));
+    head.appendChild(el('span', null, hasText(a.caption) ? str(a.caption) : (hasText(a.id) ? str(a.id) : '未命名案例')));
+    card.appendChild(head);
+
+    var rawUrl = str(a.url);
+    if (!hasText(rawUrl)) {
+      card.appendChild(el('div', 'artifact-fail', '该案例未提供 url，无法显示图像或视频。'));
+    } else if (isVideoArtifact(a)) {
+      var video = document.createElement('video');
+      video.controls = true;
+      video.preload = 'metadata';
+      video.src = resolveUrl(rawUrl);
+      video.setAttribute('aria-label', hasText(a.caption) ? str(a.caption) : '案例视频');
+      video.addEventListener('error', function () {
+        if (video.parentNode === card) {
+          card.replaceChild(el('div', 'artifact-fail', '视频加载失败：' + rawUrl), video);
+        }
+      });
+      card.appendChild(video);
+    } else {
+      var img = document.createElement('img');
+      img.loading = 'lazy';
+      img.src = resolveUrl(rawUrl);
+      img.alt = joinParts([hasText(a.caption) ? str(a.caption) : str(a.id), hasText(a.legend) ? '图例 ' + str(a.legend) : null], ' · ');
+      img.addEventListener('error', function () {
+        if (img.parentNode === card) {
+          card.replaceChild(el('div', 'artifact-fail', '图像加载失败：' + rawUrl), img);
+        }
+      });
+      card.appendChild(img);
+    }
+
+    var meta = joinParts([
+      hasText(a.camera) ? '相机 ' + str(a.camera) : null,
+      a.episode !== null && a.episode !== undefined && hasText(a.episode) ? 'episode ' + str(a.episode) : null,
+      num(a.frame) !== null ? '帧 ' + fmtInt(a.frame) : null,
+      hasText(a.source_time) ? '源时间 ' + str(a.source_time) : null,
+      hasText(a.unit) ? '单位 ' + str(a.unit) : null,
+      hasText(a.kind) ? '类型 ' + str(a.kind) : null
+    ]);
+    if (meta) card.appendChild(el('div', 'artifact-meta', meta));
+    if (hasText(a.legend)) card.appendChild(el('div', 'artifact-legend', '图例：' + str(a.legend)));
+    if (hasText(rawUrl)) card.appendChild(el('code', 'artifact-path', '服务端路径：' + rawUrl));
+    return card;
+  }
+
+  /* ---------- 启动 ---------- */
+  function refreshAll() {
+    return Promise.all([pollStatus(), pollMetrics(), pollArtifacts()]);
+  }
+
+  function init() {
+    lossChart = createChart('loss-chart', 'loss-readout', '暂无数据（等待 api/metrics）');
+    succChart = createChart('succ-chart', 'succ-readout', '暂无数据（等待 api/metrics）');
+    window.__n01LossLog = true;
+    $('loss-log').addEventListener('click', function () {
+      window.__n01LossLog = true;
+      $('loss-log').setAttribute('aria-pressed', 'true');
+      $('loss-linear').setAttribute('aria-pressed', 'false');
+      renderMetrics();
+    });
+    $('loss-linear').addEventListener('click', function () {
+      window.__n01LossLog = false;
+      $('loss-linear').setAttribute('aria-pressed', 'true');
+      $('loss-log').setAttribute('aria-pressed', 'false');
+      renderMetrics();
+    });
+    $('refresh-btn').addEventListener('click', function () {
+      $('refresh-btn').disabled = true;
+      refreshAll().finally(function () { $('refresh-btn').disabled = false; });
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) refreshAll();
+    });
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        if (lossChart) lossChart.redraw();
+        if (succChart) succChart.redraw();
+      }, 150);
+    });
+    setInterval(tickClocks, 1000);
+    refreshAll();
+    loop(pollStatus, BASE_INTERVAL.status);
+    loop(pollMetrics, BASE_INTERVAL.metrics);
+    loop(pollArtifacts, BASE_INTERVAL.artifacts);
+    window.__n01MonitorReady = true;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

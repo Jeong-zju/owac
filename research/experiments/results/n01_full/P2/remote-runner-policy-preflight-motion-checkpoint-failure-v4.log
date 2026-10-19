@@ -1,0 +1,23 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Traceback (most recent call last):
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/runtime/n01_full_policy_preflight.py", line 1718, in <module>
+    raise SystemExit(main())
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/runtime/n01_full_policy_preflight.py", line 1694, in main
+    report = contract(args) if args.mode == "contract" else raw_adapter(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/runtime/n01_full_policy_preflight.py", line 1689, in raw_adapter
+    return _raw_adapter_real(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/runtime/n01_full_policy_preflight.py", line 1033, in _raw_adapter_real
+    estimator = CorrespondenceEstimator(
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/backends/raw_correspondence.py", line 743, in __init__
+    self._pretrained_report = self._load_pretrained(pretrained_checkpoint)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v4/src/owac/backends/raw_correspondence.py", line 815, in _load_pretrained
+    report = self._model.load_state_dict(state, strict=False)
+  File "/workspace/owac/rawvla/envs/starvla/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2593, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for RAFT:
+	size mismatch for cnet.conv1.weight: copying a param with shape torch.Size([64, 8, 7, 7]) from checkpoint, the shape in current model is torch.Size([64, 6, 7, 7]).
+	size mismatch for fnet.conv1.weight: copying a param with shape torch.Size([64, 4, 7, 7]) from checkpoint, the shape in current model is torch.Size([64, 3, 7, 7]).

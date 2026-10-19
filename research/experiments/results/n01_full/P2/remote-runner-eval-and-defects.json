@@ -1,0 +1,167 @@
+{
+  "kind": "n01-full-p2-eval-and-defects",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T17:53:06+00:00",
+  "device_caveat": "The CUDA evaluation path is blocked by defect C, so the evaluation receipts below were produced with --device cpu. Model-quality numbers (EPE/buckets) are device-independent; the latency_ms numbers are CPU timings and must not be quoted as GPU latency.",
+  "evaluation": {
+    "101": {
+      "device": "cpu",
+      "wall_seconds": 6.77980371600006,
+      "checkpoint_sha256": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+      "checkpoint_update": 82000,
+      "test": {
+        "pairs": 32,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.9213245913193986,
+          "old_simplified": 2.9851755538204374,
+          "sea_raft": 0.08686049198165957,
+          "oracle": 0.0
+        }
+      },
+      "validation": {
+        "pairs": 26,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.4023646675950698,
+          "old_simplified": 1.9495338248572893,
+          "sea_raft": 0.07369069751081035,
+          "oracle": 0.0
+        }
+      },
+      "buckets_sea_raft_epe_sensor_px": {
+        "fast_alignable": 0.11112678189495771,
+        "fast_hard": 0.026651965437009012,
+        "slow_structural_change": 0.07210266594879454,
+        "current_frame_anomaly": 0.06648140150095302
+      },
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.18825167777906063,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      },
+      "sea_raft_latency_ms_p50_cpu": 41.85937449983612
+    },
+    "211": {
+      "device": "cpu",
+      "wall_seconds": 6.748284238999986,
+      "checkpoint_sha256": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+      "checkpoint_update": 91000,
+      "test": {
+        "pairs": 32,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.9213245913193986,
+          "old_simplified": 2.9851755538204374,
+          "sea_raft": 0.08931162918005743,
+          "oracle": 0.0
+        }
+      },
+      "validation": {
+        "pairs": 26,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.4023646675950698,
+          "old_simplified": 1.9495338248572893,
+          "sea_raft": 0.07999452867439566,
+          "oracle": 0.0
+        }
+      },
+      "buckets_sea_raft_epe_sensor_px": {
+        "fast_alignable": 0.12498290078478193,
+        "fast_hard": 0.03186663490614592,
+        "slow_structural_change": 0.05115568803117493,
+        "current_frame_anomaly": 0.07367346367906338
+      },
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.19553474848920707,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      },
+      "sea_raft_latency_ms_p50_cpu": 41.94977099950847
+    },
+    "307": {
+      "device": "cpu",
+      "wall_seconds": 6.75941438999962,
+      "checkpoint_sha256": "3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38",
+      "checkpoint_update": 83000,
+      "test": {
+        "pairs": 32,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.9213245913193986,
+          "old_simplified": 2.9851755538204374,
+          "sea_raft": 0.0949032706591905,
+          "oracle": 0.0
+        }
+      },
+      "validation": {
+        "pairs": 26,
+        "arms_epe_sensor_px": {
+          "no_alignment": 1.4023646675950698,
+          "old_simplified": 1.9495338248572893,
+          "sea_raft": 0.08693205529072061,
+          "oracle": 0.0
+        }
+      },
+      "buckets_sea_raft_epe_sensor_px": {
+        "fast_alignable": 0.118849078798496,
+        "fast_hard": 0.02981879975129674,
+        "slow_structural_change": 0.09920585020727858,
+        "current_frame_anomaly": 0.07017801546533989
+      },
+      "static_false_rejection_validation": {
+        "pairs": 2,
+        "tolerance_sensor_px": 0.5,
+        "false_rejection_rate": 0.0,
+        "mean_predicted_displacement_sensor_px": 0.20793657417974631,
+        "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+      },
+      "sea_raft_latency_ms_p50_cpu": 42.152206000082515
+    }
+  },
+  "defects_blocking_acceptance": [
+    {
+      "id": "C",
+      "file": "src/owac/backends/raw_correspondence.py",
+      "line": 813,
+      "function": "estimate",
+      "code": "per_tap.append(validity[:, ii, jj] | ~contributes)",
+      "error": "RuntimeError: indices should be either on cpu or on the same device as the indexed tensor (cpu)",
+      "repro": "<encoder python> -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/eval-seed-101 --device cuda --checkpoint $RUN/seed-101/checkpoints/best.pt",
+      "note": "validity is on CPU while ii/jj come from flow on CUDA; the same command with --device cpu exits 0",
+      "evidence": "receipts/eval-seed-101.log (remote), remote-runner-eval-seed-101-cuda-failure.log (local)"
+    },
+    {
+      "id": "A",
+      "file": "src/owac/backends/raw_correspondence.py",
+      "line": 732,
+      "function": "_load_pretrained",
+      "code": "state = torch.load(path, map_location=\"cpu\", weights_only=True)",
+      "error": "_pickle.UnpicklingError: Weights only load failed ... Unsupported global: GLOBAL numpy._core.multiarray._reconstruct",
+      "repro": "<starvla python> -m owac.runtime.n01_full_policy_preflight --mode raw_adapter --platform libero --platform robotwin2 --crop 32 --adapter-history 8 --motion-checkpoint $RUN/seed-101/checkpoints/best.pt --motion-iters 4 --motion-calibration-version p2-synth-cfa-v1 --output $RUN/policy-preflight-v2",
+      "note": "the StarVLA env runs torch 2.7.1 where weights_only=True is the strict default; the P2 checkpoint stores numpy-bearing objects",
+      "evidence": "receipts/policy-preflight-v2.log (remote), remote-runner-policy-preflight-motion-checkpoint-failure.log (local)"
+    },
+    {
+      "id": "B",
+      "file": "src/owac/runtime/n01_full_policy_preflight.py",
+      "line": 242,
+      "function": "_adapter_encode_batch",
+      "code": "\"unique_frames_window\": int(window.unique_frame_count()),",
+      "error": "AttributeError: 'MeasurementWindowBatch' object has no attribute 'unique_frame_count'",
+      "repro": "same raw_adapter command without --motion-checkpoint (identity variant)",
+      "note": "MeasurementWindowBatch (src/owac/raw/rawvla_sequence.py:977) exposes no unique_frame_count(); the identity fallback is therefore blocked too",
+      "evidence": "receipts/policy-preflight-v2-identity.log (remote), remote-runner-policy-preflight-identity-failure.log (local)"
+    }
+  ],
+  "gpu_hours": {
+    "training": 2.636,
+    "note": "seed 307 includes ~633 s before the outage; select+fit-check 573 s, rgb3 dev arm 204 s, probes ~4 min, evals are CPU"
+  },
+  "outage": {
+    "window_utc": "2026-10-14T15:20Z-16:32Z",
+    "duration_min": 62,
+    "record": "remote-runner-outage-20261014T1520Z.json",
+    "recovery": "seed 307 resumed from last.pt@13000 at 16:40:28Z, finished 17:48:03Z"
+  }
+}

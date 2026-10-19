@@ -1,0 +1,23 @@
+import json
+from pathlib import Path
+import torch
+from owac.baselines.burst_features import BurstFeatureConfig
+from owac.evaluation.n01_burst import BurstProbe,evaluate
+root=Path('outputs/n01-dbsr-pilot-20261013')
+torch.set_num_threads(1)
+results={}
+for method in ['dbsr_reference','dbsr_consensus']:
+ cp=torch.load(root/method/f'61-{method}-best.pt',weights_only=True)
+ model=BurstProbe(BurstFeatureConfig(**cp['encoder_config']))
+ model.load_state_dict(cp['model']); rows=[]
+ def hook(module,args,out):
+  _,valid,_=args
+  uniform=valid.float()/valid.sum(1,keepdim=True).clamp_min(1)
+  d=(out[1]-uniform).abs()
+  rows.append({'mean_absolute_weight_difference_from_uniform':float(d.mean()),'maximum_absolute_weight_difference_from_uniform':float(d.max())})
+ handle=model.encoder.fusion.register_forward_hook(hook)
+ ev=evaluate(model,cp['protocol'],61,'validation')
+ handle.remove()
+ results[method]={name:rows[index*24:(index+1)*24] for index,name in enumerate(ev['cases'])}
+ print(method,max(r['maximum_absolute_weight_difference_from_uniform'] for r in rows),sum(r['mean_absolute_weight_difference_from_uniform'] for r in rows)/len(rows),flush=True)
+(root/'attention-probe.json').write_text(json.dumps(results,indent=2)+'\n')

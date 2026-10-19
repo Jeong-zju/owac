@@ -1,0 +1,496 @@
+{
+  "format": "owac.n01_full.analytic.v1",
+  "generated_at": "2026-10-14T06:32:56.067966+00:00",
+  "environment": {
+    "python": "3.12.12",
+    "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+    "numpy": "2.5.1",
+    "torch": "2.9.1+cpu"
+  },
+  "tolerances": {
+    "fp64": {
+      "atol": 1e-10,
+      "rtol": 1e-08
+    },
+    "fp32": {
+      "atol": 1e-05,
+      "rtol": 0.0001
+    }
+  },
+  "cases": [
+    {
+      "name": "duplicate_then_new_id",
+      "status": "pass",
+      "expected": {
+        "mean_two_observations": 2.0,
+        "variance_two_observations": 0.5,
+        "variance_after_replay": 0.5,
+        "mean_identical_value_new_exposure": 1.6666666666666667,
+        "variance_three_observations": 0.3333333333333333,
+        "new_samples_from_duplicate": 0
+      },
+      "observed": {
+        "mean": 1.9999999999999993,
+        "variance": 0.4999999999999999,
+        "replay_mean": 1.9999999999999993,
+        "replay_variance": 0.4999999999999999,
+        "duplicate_new_samples": 0,
+        "third_mean": 1.6666666666666665,
+        "third_variance": 0.3333333333333334,
+        "third_observation_count": 3,
+        "unique_frames": 2
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "condition_number": 1.0
+      },
+      "notes": "a repeated packet keeps one identity; an identical value in a new exposure is a new measurement and is counted as one"
+    },
+    {
+      "name": "correlated_two_observation",
+      "status": "pass",
+      "expected": {
+        "mean": 2.0,
+        "variance_from_Sigma": 0.75,
+        "variance_after_retracting_second": 1.0,
+        "precision_slice_is_wrong": true
+      },
+      "observed": {
+        "mean": 1.9999999999999996,
+        "variance": 0.7499999999999997,
+        "mean_after_retract": 1.0,
+        "variance_after_retract": 1.0,
+        "wrong_precision_slice_variance": 0.75,
+        "wrong_version_detected": true,
+        "observation_count": 2
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "condition_number": 1.0
+      },
+      "notes": "retraction takes the remaining sub-block of the observation covariance and re-solves; slicing the old precision gives 0.75 and is rejected"
+    },
+    {
+      "name": "affine_heteroscedastic",
+      "status": "pass",
+      "expected": {
+        "production_matches_oracle_mean": true,
+        "production_matches_oracle_variance": true,
+        "phases_fitted_separately": true
+      },
+      "observed": {
+        "max_abs_mean_difference": 1.7763568394002505e-15,
+        "max_abs_variance_difference": 4.336808689942018e-18,
+        "phases": [
+          "0",
+          "1"
+        ],
+        "condition_numbers": {
+          "0": 2.4742568338593527,
+          "1": 2.4742568338593527
+        },
+        "queries": [
+          [
+            0,
+            1.0,
+            0.5
+          ],
+          [
+            0,
+            2.5,
+            1.5
+          ],
+          [
+            1,
+            0.5,
+            2.0
+          ],
+          [
+            1,
+            3.0,
+            0.0
+          ]
+        ],
+        "production_means": [
+          0.7290836596398157,
+          1.8398634901229283,
+          -0.3643177853621814,
+          4.1756201388246454
+        ],
+        "oracle_means": [
+          0.7290836596398159,
+          1.8398634901229283,
+          -0.3643177853621805,
+          4.175620138824644
+        ]
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "seed": 7,
+        "grid": [
+          3,
+          4
+        ],
+        "phases": 2
+      },
+      "notes": "fractional sample coordinates and per-sample variances; both phases fitted separately"
+    },
+    {
+      "name": "set_algebra",
+      "status": "pass",
+      "expected": {
+        "merge_is_order_independent": true,
+        "merge_deduplicates_shared_sources": 3,
+        "split_then_merge_restores_content": true,
+        "retract_then_restore_restores_content": true,
+        "chunked_events_match_single_frame": true,
+        "declared_version_change_changes_digest": true
+      },
+      "observed": {
+        "merge_versions_equal": true,
+        "merged_evidence_count": 3,
+        "split_then_merge_digest_equal": true,
+        "restore_digest_equal": true,
+        "restore_version_differs": true,
+        "retracted_members": 2,
+        "chunked_values": [
+          1.0,
+          3.0,
+          2.0,
+          4.0
+        ],
+        "single_values": [
+          1.0,
+          3.0,
+          2.0,
+          4.0
+        ],
+        "version_changed": true
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "merge_ab_version": "sv1-5f6b1bb926570e35",
+        "merge_ba_version": "sv1-5f6b1bb926570e35",
+        "restored_version": "sv1-0d8185ed1f1a3018"
+      },
+      "notes": "versions are only compared for fixed declarations; lineage is kept separate from content"
+    },
+    {
+      "name": "validity_semantics",
+      "status": "pass",
+      "expected": {
+        "used_observations": 2,
+        "excluded_reasons": [
+          "missing",
+          "bad",
+          "saturated"
+        ],
+        "mean_from_usable_only": 2.0,
+        "all_invalid_mask": "all false",
+        "rank_deficient_mask": [
+          true,
+          false,
+          true
+        ],
+        "rank_deficient_uncertainty": "none"
+      },
+      "observed": {
+        "used_observations": 2,
+        "excluded": [
+          {
+            "source": [
+              "analytic",
+              "e0",
+              "c0",
+              0,
+              0,
+              0,
+              0
+            ],
+            "reason": "missing"
+          },
+          {
+            "source": [
+              "analytic",
+              "e0",
+              "c0",
+              0,
+              0,
+              0,
+              2
+            ],
+            "reason": "bad"
+          },
+          {
+            "source": [
+              "analytic",
+              "e0",
+              "c0",
+              0,
+              0,
+              0,
+              4
+            ],
+            "reason": "saturated"
+          }
+        ],
+        "mean": 1.9999999999999993,
+        "empty_rank": 0,
+        "empty_mask": [
+          false
+        ],
+        "empty_uncertainty": "none",
+        "rank_deficient_rank": 2,
+        "rank_deficient_mask": [
+          true,
+          false,
+          true
+        ],
+        "rank_deficient_uncertainty": "none",
+        "rank_deficient_covariance": true
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "rank_deficient_condition_number": 1.0000000000000004,
+        "rank_deficient_leverage": {
+          "0": [
+            0.9999999999999996,
+            0.0,
+            1.0
+          ]
+        }
+      },
+      "notes": "bad and saturated win over valid; a missing sample carries no value; a rank-deficient design reports the identifiable subspace instead of fake precision"
+    },
+    {
+      "name": "camera_episode_isolation",
+      "status": "pass",
+      "expected": {
+        "c0_values": [
+          1.0,
+          3.0
+        ],
+        "c1_values": [
+          10.0,
+          30.0
+        ],
+        "e1_values": [
+          1.0,
+          3.0
+        ],
+        "c0_frames": 2,
+        "c1_frames": 1,
+        "batch_second_member_after_partial_reset": 7.0
+      },
+      "observed": {
+        "c0_values": [
+          1.0,
+          3.0
+        ],
+        "c1_values": [
+          10.0,
+          30.0
+        ],
+        "e1_values": [
+          1.0,
+          3.0
+        ],
+        "c0_frames": 2,
+        "c1_frames": 1,
+        "batch_member_before": 7.0,
+        "batch_member_after": 7.0,
+        "reset_removed_first_member": true
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "identity_fields": [
+          [
+            "analytic",
+            "e0",
+            "c0",
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            "analytic",
+            "e0",
+            "c1",
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            "analytic",
+            "e1",
+            "c0",
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "notes": "identity includes dataset, episode, camera and frame id; equal frame ids never collide"
+    },
+    {
+      "name": "replay_interfaces",
+      "status": "pass",
+      "expected": {
+        "fixed_decision_clean_unchanged": true,
+        "fixed_decision_leaky_detected": true,
+        "counterfactual_matches_independent_reference": true,
+        "beyond_exact_window_claim": "rebuild_from_legal_boundary",
+        "parameter_update_invalidates_derived_node": true
+      },
+      "observed": {
+        "clean_unchanged": true,
+        "clean_max_abs_diff": 0.0,
+        "leaky_unchanged": false,
+        "leaky_max_abs_diff": 205.1666666666667,
+        "counterfactual_matches": true,
+        "counterfactual_max_abs_diff": 4.440892098500626e-16,
+        "counterfactual_claim": "exact_independence_in_event_stream",
+        "beyond_exact_range": true,
+        "beyond_claim": "rebuild_from_legal_boundary",
+        "history_loss_frames": 2,
+        "stale_on_parameter": true,
+        "fresh_on_same_versions": true
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "full_replay_range": {
+          "oldest": 0,
+          "newest": 2,
+          "unique_frames": 3
+        },
+        "frozen_domain_versions": [
+          "sv1-56337e0888c81c27"
+        ]
+      },
+      "notes": "content replacement under frozen decisions is falsifiable (the leaky control differs); only counterfactual replay claims whole-result independence"
+    },
+    {
+      "name": "interpolation_and_bounds",
+      "status": "pass",
+      "expected": {
+        "singular_interpolation_falls_back_to_raw_factors": true,
+        "prior_counts_once_not_as_observation": true,
+        "unknown_correlation_uses_proxy_label": true,
+        "conservative_bound_covers_empirical_variance": true
+      },
+      "observed": {
+        "singular_fallback": true,
+        "interpolation_error": "interpolated row covariance is singular (smallest eigenvalue 0.000e+00 <= tolerance 4.441e-16); the independent raw observations are kept as factors instead",
+        "interpolated_observation_count": 3,
+        "prior_id": "prior-v1",
+        "prior_observation_count": 3,
+        "prior_uncertainty": "covariance",
+        "empirical_variance": 0.3389263451099396,
+        "conservative_bound": 0.4999999999999999,
+        "bound_ratio": 1.4752467821225639,
+        "proxy_uncertainty": "proxy"
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "seed": 11,
+        "draws": 4000,
+        "correlation": "equicorrelated 0.5"
+      },
+      "notes": "a singular interpolation block keeps the raw observations as factors; the conservative bound is a labelled proxy, never mixed with the exact covariance"
+    },
+    {
+      "name": "sequence1d",
+      "status": "pass",
+      "expected": {
+        "unique_frames_after_duplicate": 4,
+        "duplicate_measurements_added": 0,
+        "observations": 32,
+        "observations_after_retraction": 31,
+        "raw_record_untouched": true
+      },
+      "observed": {
+        "spec": {
+          "kind": "synthetic_1d_heteroscedastic_sequence",
+          "frames": 4,
+          "length": 8,
+          "frame_ids": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "episode_id": "sequence-episode",
+          "camera_id": "sequence",
+          "seed": 0,
+          "noise": "declared per-sample variance (heteroscedastic along the sequence)"
+        },
+        "basis": "phase_local_affine",
+        "observed_frames": 5,
+        "unique_frames": 4,
+        "duplicate_measurements_added": 0,
+        "independent_observation_count": 32,
+        "condition_number": 2.7753364978448496,
+        "theta": [
+          2.744897460272052,
+          1.142923478845517
+        ],
+        "probe_coordinate": [
+          0.0,
+          0.0
+        ],
+        "probe_mean": 0.9990530084881049,
+        "probe_variance": 1.4175779667881725e-05,
+        "retracted_observation_count": 31,
+        "retracted_probe_mean": 0.9963512939184109,
+        "retracted_probe_variance": 1.651722510618216e-05,
+        "variance_delta": 2.341445438300435e-06,
+        "raw_record_untouched": true,
+        "support_version": "sv1-5c77ddd788edd174",
+        "retracted_support_version": "sv1-209471affa0622cc"
+      },
+      "tolerance": {
+        "atol": 1e-10,
+        "rtol": 1e-08
+      },
+      "conditions": {
+        "second_seed_check": {
+          "seed": 3,
+          "unique_frames": 3
+        }
+      },
+      "notes": "same semantics as the old 1-D adapter, re-expressed in the P1 contract: unique-frame buffer, declared heteroscedastic variance, retraction without rewriting raw"
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "failed": []
+  }
+}

@@ -84,6 +84,7 @@ def prepare(root, output, existing_libero=None):
     for module in (
         "runtime/rawvla_full_eval.py",
         "runtime/rawvla_robotwin.py",
+        "runtime/n01_v12_service.py",
         "backends/rawvla.py",
     ):
         (frozen / module).write_bytes((root / "owac/src/owac" / module).read_bytes())
@@ -197,6 +198,7 @@ def prepare(root, output, existing_libero=None):
         runtime / "robotwin_eval.py",
         runtime / "robotwin_deploy.yml",
         frozen / "runtime/rawvla_robotwin.py",
+        frozen / "runtime/n01_v12_service.py",
         frozen / "backends/rawvla.py",
         frozen / "runtime/rawvla_full_eval.py",
         source / "third_party/RoboTwin/task_config/owac_rawvla_clean.yml",

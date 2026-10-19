@@ -1,0 +1,26 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Traceback (most recent call last):
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/.uv/python_install/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/runtime/n01_full_policy_preflight.py", line 1640, in <module>
+    raise SystemExit(main())
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/runtime/n01_full_policy_preflight.py", line 1616, in main
+    report = contract(args) if args.mode == "contract" else raw_adapter(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/runtime/n01_full_policy_preflight.py", line 1611, in raw_adapter
+    return _raw_adapter_real(args)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/runtime/n01_full_policy_preflight.py", line 955, in _raw_adapter_real
+    estimator = CorrespondenceEstimator(
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/backends/raw_correspondence.py", line 674, in __init__
+    self._pretrained_report = self._load_pretrained(pretrained_checkpoint)
+  File "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v3/src/owac/backends/raw_correspondence.py", line 732, in _load_pretrained
+    state = torch.load(path, map_location="cpu", weights_only=True)
+  File "/workspace/owac/rawvla/envs/starvla/lib/python3.10/site-packages/torch/serialization.py", line 1524, in load
+    raise pickle.UnpicklingError(_get_wo_message(str(e))) from None
+_pickle.UnpicklingError: Weights only load failed. This file can still be loaded, to do so you have two options, [1mdo those steps only if you trust the source of the checkpoint[0m. 
+	(1) In PyTorch 2.6, we changed the default value of the `weights_only` argument in `torch.load` from `False` to `True`. Re-running `torch.load` with `weights_only` set to `False` will likely succeed, but it can result in arbitrary code execution. Do it only if you got the file from a trusted source.
+	(2) Alternatively, to load with `weights_only=True` please check the recommended steps in the following error message.
+	WeightsUnpickler error: Unsupported global: GLOBAL numpy._core.multiarray._reconstruct was not an allowed global by default. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray._reconstruct])` or the `torch.serialization.safe_globals([numpy._core.multiarray._reconstruct])` context manager to allowlist this global if you trust this class/function.
+
+Check the documentation of torch.load to learn more about types accepted by default with weights_only https://pytorch.org/docs/stable/generated/torch.load.html.

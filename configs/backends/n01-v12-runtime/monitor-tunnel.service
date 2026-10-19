@@ -1,0 +1,12 @@
+[Unit]
+Description=N01 private training dashboard SSH tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/ssh -NT -o BatchMode=yes -o Compression=yes -o IPQoS=none -o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -p 34302 -L 127.0.0.1:18080:127.0.0.1:18080 root@154.59.156.21
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

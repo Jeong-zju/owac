@@ -1,0 +1,611 @@
+{
+  "checked_at_utc": "2026-10-15T09:45:59.014164+00:00",
+  "ssh": "ssh -p 34302 root@154.59.156.21 -L 8080:localhost:8080",
+  "scope": "Actual authorized new-server environment/code/data deployment. No P3 formal training or development rollouts.",
+  "gpus": [
+    {
+      "index": "0",
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-98b32be3-cb2d-5f00-eec2-d8714f185f47",
+      "pci_bus_id": "00000000:3F:00.0",
+      "total_mib": "97887",
+      "used_mib": "0",
+      "driver": "580.95.05"
+    },
+    {
+      "index": "1",
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-df301162-9e99-fec5-e269-b05d9a91f7d6",
+      "pci_bus_id": "00000000:9A:00.0",
+      "total_mib": "97887",
+      "used_mib": "0",
+      "driver": "580.95.05"
+    }
+  ],
+  "workspace_disk": {
+    "total_bytes": 1649267441664,
+    "used_bytes": 806969511936,
+    "free_bytes": 842297929728
+  },
+  "workspace_is_volume": false,
+  "code": {
+    "path": "/workspace/owac/rawvla/owac",
+    "branch": "lzh/n01-evidence-integration",
+    "base_commit": "d3dec908d78d0a86a761abc985b83113d836c8cf",
+    "includes_uncommitted_files": true
+  },
+  "environments": [
+    {
+      "python": "3.11.16",
+      "torch": "2.9.1+cu128",
+      "cuda": "12.8",
+      "cuda_available": true,
+      "gpu_count": 2,
+      "name": "encoder",
+      "executable": "/workspace/owac/rawvla/envs/encoder/bin/python"
+    },
+    {
+      "python": "3.10.21",
+      "torch": "2.7.1+cu128",
+      "cuda": "12.8",
+      "cuda_available": true,
+      "gpu_count": 2,
+      "name": "starvla",
+      "executable": "/workspace/owac/rawvla/envs/starvla/bin/python"
+    },
+    {
+      "python": "3.10.21",
+      "torch": "2.7.1+cu128",
+      "cuda": "12.8",
+      "cuda_available": true,
+      "gpu_count": 2,
+      "name": "robotwin",
+      "executable": "/workspace/owac/rawvla/envs/robotwin/bin/python"
+    }
+  ],
+  "dataset": {
+    "repo": "ToferFish/RawVLA-Bench",
+    "revision": "8586c594fff9ce38580e29745f074e82e96e74f7",
+    "files": 4810,
+    "bytes": 713689392570,
+    "expected_files": 4810,
+    "expected_bytes": 713689392570,
+    "missing": [],
+    "size_mismatch": [],
+    "libero_raw_npz": 1771,
+    "robotwin_raw_npz": 632,
+    "verification": "pinned file presence and byte sizes; real train/validation batches read in feature preflights; no whole-dataset rehash"
+  },
+  "gpu_module_checks": [
+    {
+      "kind": "installation_random_tensor_check_not_training_result",
+      "physical_gpu": "0",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "torch": "2.9.1+cu128",
+      "python": "3.11.16",
+      "dbsr": {
+        "config": {
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "feature_width": 512
+        },
+        "feature_shape": [
+          1,
+          512,
+          32,
+          32
+        ],
+        "optimizer_update": true
+      },
+      "sea_raft": {
+        "full_resnet34": true,
+        "flow_shape": [
+          1,
+          2,
+          128,
+          128
+        ],
+        "backward": true
+      },
+      "peak_allocated_mib": 244.35986328125,
+      "seconds": 4.342879056930542,
+      "owac_import": "/workspace/owac/rawvla/owac/src/owac/__init__.py"
+    },
+    {
+      "kind": "installation_random_tensor_check_not_training_result",
+      "physical_gpu": "1",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "torch": "2.7.1+cu128",
+      "python": "3.10.21",
+      "dbsr": {
+        "config": {
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "feature_width": 512
+        },
+        "feature_shape": [
+          1,
+          512,
+          32,
+          32
+        ],
+        "optimizer_update": true
+      },
+      "sea_raft": {
+        "full_resnet34": true,
+        "flow_shape": [
+          1,
+          2,
+          128,
+          128
+        ],
+        "backward": true
+      },
+      "peak_allocated_mib": 489.65185546875,
+      "seconds": 2.8540220260620117,
+      "owac_import": "/workspace/owac/rawvla/owac/src/owac/__init__.py"
+    }
+  ],
+  "policy_feature_checks": {
+    "libero": {
+      "kind": "migration_connectivity_check_not_P3_training",
+      "receipt": "/workspace/owac/rawvla/records/new-server-libero-feature-check/raw-adapter-preflight.json",
+      "real_train_validation_npz": true,
+      "crop": 32,
+      "history": 8,
+      "optimizer_updates": 1,
+      "action_loss": 0.09396664798259735,
+      "encoder_gradient": {
+        "total": 6.562605397744078,
+        "finite": true,
+        "tensors": 56
+      },
+      "bridge_gradient": {
+        "total": 2.6342560183256865,
+        "finite": true,
+        "tensors": 7
+      },
+      "parameter_update_l1": {
+        "adapter": 67.20134417093504,
+        "postprocessor": 92.80949875712395
+      },
+      "backend_gradients": 0,
+      "denoise": {
+        "num_denoise_steps": 10,
+        "shape": [
+          1,
+          10,
+          32
+        ],
+        "finite": true,
+        "repeat_max_abs": 0.0,
+        "tolerance": 0.001,
+        "encoder_calls_during_denoise": 0,
+        "arrivals_during_denoise": 0,
+        "denoise_steps_two_calls": 20,
+        "prefix_builds_two_calls": 2,
+        "prefix_source": "visual_tokens"
+      },
+      "vision_tower": {
+        "probe": {
+          "embed_image_present": true,
+          "embed_image_calls": 0,
+          "hooked_modules": [],
+          "vision_module_forwards": 0,
+          "vision_parameter_tensors": 0,
+          "method": "wrapped vlm.embed_image + forward hooks on every module named *vision*"
+        },
+        "audit_vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": false,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "replaced_vision_keys": 437,
+        "zero_entry_calls": true,
+        "zero_vision_parameter_tensors": true,
+        "evidence": "wrapped vlm.embed_image + forward hooks installed before the batches"
+      },
+      "motion": "identity; old P2 motion checkpoint not recovered"
+    },
+    "robotwin": {
+      "kind": "migration_connectivity_check_not_P3_training",
+      "receipt": "/workspace/owac/rawvla/records/new-server-robotwin-feature-check/raw-adapter-preflight.json",
+      "real_train_validation_npz": true,
+      "crop": 32,
+      "history": 8,
+      "optimizer_updates": 1,
+      "action_loss": 2.8711042404174805,
+      "encoder_gradient": {
+        "total": 924.9960693188436,
+        "finite": true,
+        "tensors": 56
+      },
+      "bridge_gradient": {
+        "total": 478.750422000885,
+        "finite": true,
+        "tensors": 7
+      },
+      "parameter_update_l1": {
+        "adapter": 72.7577412023129,
+        "postprocessor": 98.43199107050896
+      },
+      "backend_gradients": 0,
+      "denoise": {
+        "num_denoise_steps": 10,
+        "shape": [
+          1,
+          50,
+          32
+        ],
+        "finite": true,
+        "repeat_max_abs": 0.0,
+        "tolerance": 0.001,
+        "encoder_calls_during_denoise": 0,
+        "arrivals_during_denoise": 0,
+        "denoise_steps_two_calls": 20,
+        "prefix_builds_two_calls": 2,
+        "prefix_source": "visual_tokens"
+      },
+      "vision_tower": {
+        "probe": {
+          "embed_image_present": true,
+          "embed_image_calls": 0,
+          "hooked_modules": [],
+          "vision_module_forwards": 0,
+          "vision_parameter_tensors": 0,
+          "method": "wrapped vlm.embed_image + forward hooks on every module named *vision*"
+        },
+        "audit_vision_release": {
+          "vision_tower_detected": true,
+          "vision_param_bytes_before": 826831584,
+          "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+          "verified_removed": true,
+          "cuda_cache_cleared": false,
+          "detached_reference_kept": false,
+          "release_path": "vlm.model.model.vision_tower",
+          "vision_param_bytes_after": 0,
+          "bytes_freed": 826831584
+        },
+        "replaced_vision_keys": 437,
+        "zero_entry_calls": true,
+        "zero_vision_parameter_tensors": true,
+        "evidence": "wrapped vlm.embed_image + forward hooks installed before the batches"
+      },
+      "motion": "identity; old P2 motion checkpoint not recovered"
+    }
+  },
+  "libero_render": {
+    "kind": "deployment_render_check_not_policy_rollout",
+    "agentview_shape": [
+      128,
+      128,
+      3
+    ],
+    "wrist_shape": [
+      128,
+      128,
+      3
+    ],
+    "finite": true
+  },
+  "robotwin_render": {
+    "kind": "deployment_scene_check_not_policy_rollout",
+    "task": "grab_roller",
+    "cameras": {
+      "left_camera": {
+        "intrinsic_cv": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "extrinsic_cv": {
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "cam2world_gl": {
+          "shape": [
+            4,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        },
+        "raw_linear": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "raw_rgb10": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint16"
+        },
+        "default_isp": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "isp_perturbed": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "render_rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        }
+      },
+      "right_camera": {
+        "intrinsic_cv": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "extrinsic_cv": {
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "cam2world_gl": {
+          "shape": [
+            4,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        },
+        "raw_linear": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "raw_rgb10": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint16"
+        },
+        "default_isp": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "isp_perturbed": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "render_rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        }
+      },
+      "head_camera": {
+        "intrinsic_cv": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "extrinsic_cv": {
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "cam2world_gl": {
+          "shape": [
+            4,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        },
+        "raw_linear": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "raw_rgb10": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint16"
+        },
+        "default_isp": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "isp_perturbed": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "render_rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        }
+      },
+      "front_camera": {
+        "intrinsic_cv": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "extrinsic_cv": {
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "cam2world_gl": {
+          "shape": [
+            4,
+            4
+          ],
+          "dtype": "float32"
+        },
+        "rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        },
+        "raw_linear": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "raw_rgb10": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint16"
+        },
+        "default_isp": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "isp_perturbed": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "render_rgb": {
+          "shape": [
+            240,
+            320,
+            3
+          ],
+          "dtype": "uint8"
+        }
+      }
+    },
+    "joint_state_shape": [
+      14
+    ],
+    "denoiser": "optix",
+    "physical_cuda_gpu": "1"
+  },
+  "robotwin_render_device": {
+    "cuda_id": 0,
+    "pci_string": "0000:9a:00.0",
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "can_render": true,
+    "can_present": false,
+    "physical_cuda_gpu": 1
+  },
+  "ports": {
+    "8080": "listening",
+    "18080": "not_listening"
+  },
+  "monitor_deployed": false,
+  "formal_training_started": false,
+  "development_rollouts": 0,
+  "missing_historical_assets": [
+    "old-server P2 formal motion checkpoints and large training outputs; absent from local numeric archive"
+  ],
+  "hf_credentials": "server-private token store, mode 0600; authenticated downloads succeeded; value omitted"
+}

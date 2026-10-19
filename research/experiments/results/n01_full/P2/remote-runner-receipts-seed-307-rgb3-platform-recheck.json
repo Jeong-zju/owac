@@ -1,0 +1,58 @@
+{
+  "kind": "p2-motion-platform-recheck",
+  "receipt": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/seed-307-rgb3/receipt.json",
+  "config": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source-v6/configs/encoders/n01_full/p2_motion_train_rgb3_formal.json",
+  "recorded_status": "validation_plateau",
+  "recorded_reasons": [
+    "all platform conditions satisfied"
+  ],
+  "recorded_stopped_at_update": 85000,
+  "recomputed_status": "validation_plateau",
+  "recomputed_reasons": [
+    "all platform conditions satisfied"
+  ],
+  "recomputed_details": {
+    "validations": 85,
+    "first_value": 0.45512530809411633,
+    "final_value": 0.04199087259789499,
+    "best_value": 0.04054191820502568,
+    "best_update": 66000,
+    "run_improvement": 0.41458338988909066,
+    "tail_drift": 0.0014489543928693088,
+    "last_improvements": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "lr_drops": 2,
+    "conditions": {
+      "real_improvement_over_run": true,
+      "tail_within_delta_val_of_best": true,
+      "two_effective_lr_drops": true,
+      "final_low_lr_phase": true,
+      "flat_tail_below_delta_val": true,
+      "best_not_at_budget_end": true,
+      "diagnostics_passed": true
+    },
+    "condition_descriptions": {
+      "real_improvement_over_run": "first_value - best_value must be strictly greater than delta_val",
+      "tail_within_delta_val_of_best": "|final_value - best_value| must not exceed delta_val",
+      "two_effective_lr_drops": "at least two effective LR drops must have been applied",
+      "final_low_lr_phase": "the run must be in the final low-LR phase",
+      "flat_tail_below_delta_val": "the last plateau_checks improvements must each be below delta_val",
+      "best_not_at_budget_end": "the best checkpoint must not sit inside the last plateau_checks validation windows of the budget",
+      "diagnostics_passed": "the small-set fit / input / gradient diagnostics must pass"
+    }
+  },
+  "budget": 100000,
+  "val_points": 85,
+  "lr_drops": 2,
+  "diagnostics_passed": true,
+  "needs_continuation": false,
+  "recheck_source": "source-v3 (D1 fix)"
+}

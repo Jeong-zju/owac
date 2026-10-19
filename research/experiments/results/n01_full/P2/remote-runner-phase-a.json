@@ -1,0 +1,276 @@
+{
+  "kind": "n01-full-p2-remote-phase-a",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T09:08:23+00:00",
+  "host": {
+    "ssh": "root@107.209.104.125:44327",
+    "instance_workspace_is_volume": false,
+    "survey_time_utc": "2026-10-14T09:04:35+00:00",
+    "survey_time_local": "2026-10-14T17:04:35+08:00"
+  },
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "source_package": {
+    "local_bundle": "outputs/n01-full-p2/bundle-v1",
+    "created_at": "2026-10-14T09:04:02+00:00",
+    "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+    "branch": "lzh/n01-evidence-integration",
+    "diff_head_sha256": "be3f256ed39cb9f68911b2794428e2b90f0cdf6b7b9c6682c2524845bac661ff",
+    "file_count": 172,
+    "upstream_files": 24,
+    "total_bytes": 7413153,
+    "archive_sha256": "f47349dad2eb01a1c06c2b2d1b5d12d6eb0adeb496ebfb3c9266a0eebb956eb2",
+    "manifest_sha256": "f9657a26312d42c1878b7265ab0b5107702eaf85fa58dd0944b98fe70b326c97",
+    "untracked_included": 19,
+    "bundle_code_fix": "none; walk-based closure (walk_relative rglob) already included every P2 untracked file",
+    "excluded_counts": {
+      "directory:__pycache__": 128
+    },
+    "not_a_bundle_member_by_design": [
+      "pyproject.toml (modified; only docs/prompts/n01_v1_0/source_manifest.json is in BUNDLE_FILES)"
+    ]
+  },
+  "remote_install": {
+    "extracted_files": 173,
+    "declared_total": 172,
+    "matched": 172,
+    "missing": 0,
+    "mismatched": 0,
+    "hash_compare_status": "passed",
+    "verify_exit": 0,
+    "verify_status": "passed",
+    "files_checked": 172,
+    "archive_members": 173,
+    "verify_archive_sha256": "f47349dad2eb01a1c06c2b2d1b5d12d6eb0adeb496ebfb3c9266a0eebb956eb2",
+    "verify_pending": [],
+    "verify_failures": [],
+    "verify_cmd": "PYTHONPATH=$RUN/source/src <encoder-python> -m owac.runtime.n01_full_preflight verify --bundle $RUN/receipts --source-root $RUN/source"
+  },
+  "environment": {
+    "gpu": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "memory_total_mib": 97887,
+      "memory_used_mib": 81681,
+      "memory_free_mib": 15569,
+      "utilization_pct": 99,
+      "driver_version": "595.84",
+      "compute_mode": "Default"
+    },
+    "gpu_compute_apps_mib": {
+      "47080": 7720,
+      "47002": 8100,
+      "47920": 8100,
+      "48102": 8100,
+      "1751212": 14382,
+      "1756906": 35240
+    },
+    "disk_workspace": {
+      "size": "2.0T",
+      "used": "842G",
+      "avail": "1.2T",
+      "use_pct": "42%"
+    },
+    "encoder_python": {
+      "path": "/workspace/owac/rawvla/envs/encoder/bin/python",
+      "version": "3.11.16",
+      "torch": "2.9.1+cu128",
+      "cuda_available": true,
+      "device_capability": [
+        12,
+        0
+      ]
+    },
+    "starvla_python": {
+      "path": "/workspace/owac/rawvla/envs/starvla/bin/python",
+      "version": "3.10.21",
+      "torch": "2.7.1+cu128",
+      "cuda_available": true
+    },
+    "npz_counts": {
+      "libero_raw": 1771,
+      "robotwin2_raw": 632,
+      "frozen_manifest": {
+        "libero": 1771,
+        "robotwin2": 632
+      }
+    },
+    "assets": {
+      "libero_weights": {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+        "bytes": 8522039320,
+        "mtime": "Oct 10 08:52"
+      },
+      "robotwin_weights": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+        "bytes": 9354050752,
+        "mtime": "Oct 10 08:40"
+      },
+      "tokenizer": {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+        "bytes": 4264023,
+        "mtime": "Oct 10 08:50"
+      }
+    },
+    "supervisor_running_services_untouched": [
+      "owac-rawvla-full-libero-policy",
+      "owac-rawvla-full-robotwin-policy",
+      "owac-rawvla-libero-policy",
+      "owac-rawvla-robotwin-policy",
+      "syncthing",
+      "tensorboard",
+      "tunnel_manager"
+    ]
+  },
+  "smoke": {
+    "pythonpath_owner_proof": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014/source/src/owac/__init__.py",
+    "imports_exit": 0,
+    "imports": [
+      "owac.backends.raw_correspondence",
+      "owac.raw.n01_motion_data",
+      "owac.raw.n01_noise",
+      "owac.frameworks.n01_full.adapters"
+    ],
+    "imports_excluded": [
+      "src/owac/training/* motion modules (absent at snapshot)",
+      "src/owac/evaluation/* motion eval modules (absent at snapshot)"
+    ],
+    "snapshot_module_inventory": {
+      "src/owac/training": [
+        "__init__.py",
+        "n01.py",
+        "n01_action.py",
+        "pi05_sim.py"
+      ],
+      "src/owac/evaluation": [
+        "__init__.py",
+        "baseline_protocol.py",
+        "libero_reference.py",
+        "n01.py",
+        "n01_burst.py",
+        "n01_burst_raw_support.py",
+        "n01_burst_support.py",
+        "n01_burst_training.py",
+        "n01_content.py",
+        "n01_content_data.py",
+        "n01_full.py",
+        "n01_reliability.py",
+        "n01_temporal.py",
+        "n01_trajectories.py",
+        "pi05_diagnostics.py"
+      ],
+      "src/owac/frameworks/n01_full": [
+        "__init__.py",
+        "adapters.py",
+        "config.py",
+        "contracts.py",
+        "domains.py",
+        "ledger.py",
+        "reference.py",
+        "replay.py",
+        "sequence1d.py",
+        "statistics.py"
+      ]
+    },
+    "pytest": {
+      "exit": 1,
+      "passed": 228,
+      "failed": 1,
+      "seconds": 5.76,
+      "cmd": "CUDA_VISIBLE_DEVICES= PYTHONPATH=src OMP_NUM_THREADS=2 <encoder-python> -m pytest -q tests/encoders/n01_full",
+      "failed_test": "tests/encoders/n01_full/test_motion.py::test_vendored_hashes_match_the_recorded_provenance",
+      "root_cause": "executable_ast_sha256 uses ast.dump; Python 3.12 emits type_params=[] for FunctionDef/ClassDef, Python 3.11 has no such field. Bytes are identical (172/172); only the AST digest is version dependent.",
+      "differential_proof": {
+        "local_py312_raw_dump_sha_prefix": "0cbdda904af197cf",
+        "local_py312_dump_without_type_params": "f235e864216b692476a52a8b024142debcd1394f39a897ad5634819e37984254",
+        "remote_py311_dump": "f235e864216b692476a52a8b024142debcd1394f39a897ad5634819e37984254",
+        "remote_reported_value": "716445b7a9b166519a3207cd9ce16b3550b2f2bf060feb959f10b4b10d826e09",
+        "recorded_value": "917d8eb8d03e84c7385578a2be86cb039fb3755e83671147b9878814d6317ae0"
+      },
+      "local_same_test_py312": "32 passed (test_motion.py alone)",
+      "warning": "PytestUnknownMarkWarning for pytest.mark.integration (marker config not shipped in the execution package)"
+    }
+  },
+  "gpu_probe": {
+    "cmd": "PYTHONPATH=src OMP_NUM_THREADS=2 CUDA_VISIBLE_DEVICES=0 <encoder-python> -m owac.runtime.n01_full_preflight profile --config configs/encoders/n01_full/protocol_v1.json --output $RUN/outputs/p2-gpu-probe --mode collect",
+    "exit": 0,
+    "warmup": 3,
+    "iterations_per_point": 20,
+    "batches": 1,
+    "channels": 4,
+    "params": 1497056,
+    "gradients_all_finite": true,
+    "gradients_any_nonzero": true,
+    "gpu_before": {
+      "used_mib": 83449,
+      "free_mib": 13802,
+      "util_pct": 99
+    },
+    "gpu_after": {
+      "used_mib": 83449,
+      "free_mib": 13802,
+      "util_pct": 100
+    },
+    "points": [
+      {
+        "id": "p64-h8",
+        "forward_p50_ms": 4.72,
+        "fwd_bwd_p50_ms": 30.16,
+        "fwd_bwd_p95_ms": 36.15,
+        "peak_allocated_mib": 757.4,
+        "peak_reserved_mib": 990.0
+      },
+      {
+        "id": "p128-h8",
+        "forward_p50_ms": 36.2,
+        "fwd_bwd_p50_ms": 103.3,
+        "fwd_bwd_p95_ms": 117.6,
+        "peak_allocated_mib": 3012.5,
+        "peak_reserved_mib": 3798.0
+      },
+      {
+        "id": "p128-h16",
+        "forward_p50_ms": 95.41,
+        "fwd_bwd_p50_ms": 226.46,
+        "fwd_bwd_p95_ms": 291.27,
+        "peak_allocated_mib": 5983.1,
+        "peak_reserved_mib": 6620.0
+      },
+      {
+        "id": "p128-h32",
+        "forward_p50_ms": 176.35,
+        "fwd_bwd_p50_ms": 455.59,
+        "fwd_bwd_p95_ms": 480.08,
+        "peak_allocated_mib": 11924.4,
+        "peak_reserved_mib": 12822.0
+      },
+      {
+        "id": "p224-h8",
+        "forward_p50_ms": 154.16,
+        "fwd_bwd_p50_ms": 374.55,
+        "fwd_bwd_p95_ms": 400.11,
+        "peak_allocated_mib": 9216.8,
+        "peak_reserved_mib": 12414.0
+      }
+    ],
+    "note": "measured under heavy contention (other services at 99% GPU util); memory peaks match P0, wall times are ~2.2x slower than P0's uncontended numbers"
+  },
+  "post_snapshot_drift": {
+    "checked_at_utc": "2026-10-14T09:07:43+00:00",
+    "content_changed": [
+      {
+        "path": "src/owac/frameworks/n01_full/statistics.py",
+        "snapshot_sha256_prefix": "54e8d1f737d3ba75",
+        "current_sha256_prefix": "d24107dbdf42b3c6"
+      }
+    ],
+    "untracked_new_after_snapshot": [
+      "src/owac/frameworks/n01_full/motion_builders.py"
+    ],
+    "interpretation": "snapshot is a frozen 2026-10-14T09:04Z state; motion-train-eval continued editing afterwards. Phase B must re-bundle."
+  },
+  "risks": [
+    "/workspace is NOT a host volume (workspace_is_volume=false): run dirs and the whole container filesystem are lost on recycle/destroy",
+    "GPU free memory fluctuated 13.8-15.6 GiB while other services hold ~81.7-83.4 GiB; the 32-frame point alone reserves 12.8 GiB, leaving ~1.0-2.8 GiB margin",
+    "provenance AST hash check is Python-version dependent; remote encoder env is 3.11.16 while local is 3.12.12",
+    "pyproject.toml (SEA-RAFT package-data entries) is not part of the bundle; remote runs use PYTHONPATH=src so this is benign for phase A/B but matters for pip-installed deployment"
+  ]
+}

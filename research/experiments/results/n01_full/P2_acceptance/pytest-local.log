@@ -1,0 +1,26 @@
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+........................................................................ [ 39%]
+........................................................................ [ 49%]
+..............s......................................................... [ 59%]
+.............s.......................................................... [ 69%]
+........................................................................ [ 79%]
+........................................................................ [ 89%]
+........................................................................ [ 99%]
+...                                                                      [100%]
+=============================== warnings summary ===============================
+tests/encoders/n01/test_support.py::test_single_frame_statistics_are_exact_for_every_radius
+  /home/jeong/zeno/owac/worktrees/n01-evidence-integration/tests/encoders/n01/test_support.py:332: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+    assert float(statistics.variance_proxy[2, ..., 3, 3]) < 0.02
+
+tests/encoders/n01_full/test_motion.py::test_vendored_forward_keeps_the_supplied_values_and_removes_255
+  /home/jeong/zeno/owac/worktrees/n01-evidence-integration/.venv/lib/python3.12/site-packages/torch/functional.py:505: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /pytorch/aten/src/ATen/native/TensorShape.cpp:4317.)
+    return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/encoders/n01_full/test_motion.py:341: needs an actual CUDA device
+SKIPPED [1] tests/encoders/n01_full/test_motion_eval.py:478: CUDA runtime is not available
+721 passed, 2 skipped, 2 warnings in 43.50s

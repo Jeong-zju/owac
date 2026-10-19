@@ -1,0 +1,824 @@
+{
+  "schema": "n01-v12-p3-training-launch-v1",
+  "verified_at_utc": "2026-10-16T18:00:22.067908+00:00",
+  "research_stage_complete": false,
+  "formal_training_started": true,
+  "authorization": "latest explicit user request; prior no-training request superseded",
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-complete",
+  "source_git_head": "d3dec908d78d0a86a761abc985b83113d836c8cf",
+  "source_manifest_sha256": "dcafdf9dac28f8a737d76c50e814eb9d607962373381546cdc3fac5abffaa250",
+  "frozen_source_file_count": 309,
+  "deployment_revision": 2,
+  "local_checks": {
+    "make_check": "passed",
+    "pytest_passed": 879,
+    "pytest_skipped": 6
+  },
+  "remote_targeted_checks": {
+    "passed": 15,
+    "skipped": 0,
+    "includes_cuda_resume": true,
+    "isp_cross_checks_passed": 4
+  },
+  "initial_formal_run_snapshot": [
+    {
+      "step_seconds": 8.52694951845333,
+      "samples_per_second": 0.4691009359611577,
+      "data_wait_fraction": 0.001381525019527649,
+      "execution": {
+        "precision": "bf16",
+        "physical_statistics": "fp32",
+        "skip_empty_sources": true,
+        "flow_pair_batch_size": 8,
+        "content_batch_size": 4,
+        "batch_size": 2,
+        "accum": 2,
+        "effective_batch_size": 4
+      },
+      "action_loss": 0.7521096467971802,
+      "motion_loss": 701.4821395874023,
+      "validation_loss": 0.625444246456027,
+      "validation_step": 10,
+      "baseline_validation_loss": 0.6490710815414786,
+      "history_accepted_fraction": 0.0,
+      "peak_gpu_gib": 68.09938383102417,
+      "step_progress_at": 1792173601.4938912,
+      "checkpoint_step": 2,
+      "checkpoint_at": 1792173477.219,
+      "activity": "训练中 action loss=0.7521",
+      "role": "libero-raw_n01-seed101",
+      "method": "raw_n01",
+      "input_domain": "RAW",
+      "data_kind": "libero_dequantized",
+      "platform": "libero",
+      "seed": 101,
+      "pid": 161025,
+      "gpu_index": 0,
+      "alive": true,
+      "finished": false,
+      "suspicious": false,
+      "phase": "encoder_warmup",
+      "state": "training",
+      "step": 15,
+      "planned_steps": 50000,
+      "started_at": "2026-10-16T17:56:29Z",
+      "updated_at": "2026-10-16T18:00:01Z",
+      "finished_at": null,
+      "exit_reason": null,
+      "heartbeat_age_s": 3.936,
+      "elapsed_s": 215.936,
+      "speed": 0.13095255512445297,
+      "speed_unit": "step/s",
+      "rollouts": null,
+      "recent_log": []
+    },
+    {
+      "step_seconds": 6.196594838611782,
+      "samples_per_second": 0.6455158202494512,
+      "data_wait_fraction": 0.003145190007748432,
+      "execution": {
+        "precision": "bf16",
+        "physical_statistics": "fp32",
+        "skip_empty_sources": true,
+        "flow_pair_batch_size": 8,
+        "content_batch_size": 4,
+        "batch_size": 2,
+        "accum": 2,
+        "effective_batch_size": 4
+      },
+      "action_loss": 0.4608634412288666,
+      "motion_loss": 1124.2415161132812,
+      "validation_loss": 0.5987104335799813,
+      "validation_step": 10,
+      "baseline_validation_loss": 0.6015678765252233,
+      "history_accepted_fraction": 0.03865297379032258,
+      "peak_gpu_gib": 68.09938383102417,
+      "step_progress_at": 1792173602.6964338,
+      "checkpoint_step": 2,
+      "checkpoint_at": 1792173473.194495,
+      "activity": "训练中 action loss=0.1620",
+      "role": "libero-rgb_n01-seed101",
+      "method": "rgb_n01",
+      "input_domain": "RGB",
+      "data_kind": "libero_dequantized",
+      "platform": "libero",
+      "seed": 101,
+      "pid": 161169,
+      "gpu_index": 1,
+      "alive": true,
+      "finished": false,
+      "suspicious": false,
+      "phase": "encoder_warmup",
+      "state": "training",
+      "step": 22,
+      "planned_steps": 50000,
+      "started_at": "2026-10-16T17:56:35Z",
+      "updated_at": "2026-10-16T18:00:02Z",
+      "finished_at": null,
+      "exit_reason": null,
+      "heartbeat_age_s": 2.936,
+      "elapsed_s": 209.936,
+      "speed": 0.16538617552204,
+      "speed_unit": "step/s",
+      "rollouts": null,
+      "recent_log": []
+    }
+  ],
+  "initial_metrics": {
+    "series": [
+      {
+        "name": "val_action_loss",
+        "role": "libero-raw_n01-seed101",
+        "label": "固定验证 action loss [libero-raw_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 0,
+            "value": 0.6490710815414786,
+            "t": 1792173446
+          },
+          {
+            "step": 10,
+            "value": 0.625444246456027,
+            "t": 1792173555
+          }
+        ],
+        "point_count": 2,
+        "downsampled": false
+      },
+      {
+        "name": "val_action_loss",
+        "role": "libero-rgb_n01-seed101",
+        "label": "固定验证 action loss [libero-rgb_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 0,
+            "value": 0.6015678765252233,
+            "t": 1792173450
+          },
+          {
+            "step": 10,
+            "value": 0.5987104335799813,
+            "t": 1792173530
+          }
+        ],
+        "point_count": 2,
+        "downsampled": false
+      },
+      {
+        "name": "train_action_loss",
+        "role": "libero-raw_n01-seed101",
+        "label": "训练 action loss [libero-raw_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 1,
+            "value": 0.34226807951927185,
+            "t": 1792173464
+          },
+          {
+            "step": 2,
+            "value": 0.43949685990810394,
+            "t": 1792173473
+          },
+          {
+            "step": 5,
+            "value": 0.18120857328176498,
+            "t": 1792173507
+          },
+          {
+            "step": 10,
+            "value": 0.650331437587738,
+            "t": 1792173549
+          },
+          {
+            "step": 15,
+            "value": 0.7521096467971802,
+            "t": 1792173601
+          }
+        ],
+        "point_count": 5,
+        "downsampled": false
+      },
+      {
+        "name": "train_action_loss",
+        "role": "libero-rgb_n01-seed101",
+        "label": "训练 action loss [libero-rgb_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 1,
+            "value": 0.32302163541316986,
+            "t": 1792173465
+          },
+          {
+            "step": 2,
+            "value": 0.44456861913204193,
+            "t": 1792173468
+          },
+          {
+            "step": 5,
+            "value": 0.1740223690867424,
+            "t": 1792173497
+          },
+          {
+            "step": 10,
+            "value": 0.6758261173963547,
+            "t": 1792173523
+          },
+          {
+            "step": 15,
+            "value": 0.7285760641098022,
+            "t": 1792173561
+          },
+          {
+            "step": 20,
+            "value": 0.4608634412288666,
+            "t": 1792173592
+          }
+        ],
+        "point_count": 6,
+        "downsampled": false
+      },
+      {
+        "name": "random_val_action_loss",
+        "role": "libero-rgb_n01-seed101",
+        "label": "随机验证 action loss [libero-rgb_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 10,
+            "value": 0.23115285113453865,
+            "t": 1792173533
+          }
+        ],
+        "point_count": 1,
+        "downsampled": false
+      },
+      {
+        "name": "random_val_action_loss",
+        "role": "libero-raw_n01-seed101",
+        "label": "随机验证 action loss [libero-raw_n01-seed101]",
+        "unit": "loss",
+        "points": [
+          {
+            "step": 10,
+            "value": 0.22039660438895226,
+            "t": 1792173558
+          }
+        ],
+        "point_count": 1,
+        "downsampled": false
+      }
+    ]
+  },
+  "checkpoint_parameter_update_proof": [
+    {
+      "role": "libero-raw_n01-seed101",
+      "step": 2,
+      "samples_consumed": 8,
+      "checkpoint_bytes": 3043664249,
+      "resume_schema": "n01-v12-training-v2",
+      "optimizer_state_entries": 341,
+      "training_contract": {
+        "implementation": "p3-complete-code-20261017",
+        "diagnostic": false,
+        "config": {
+          "arm": "raw_n01",
+          "method": "raw_n01",
+          "model_factory": "owac.frameworks.n01_full.model:build_model",
+          "platform": "libero",
+          "seed": 101,
+          "input_domain": "RAW",
+          "data_kind": "libero_dequantized",
+          "support_enabled": true,
+          "window_frames": 32,
+          "feature_width": 512,
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "fusion": "dbsr_reference",
+          "pool_grid": 16,
+          "tokens_per_camera": 256,
+          "readout_width": 2048,
+          "input_mode": "rawvla_rgb3",
+          "camera_order": [
+            "agentview",
+            "wrist"
+          ],
+          "support": {
+            "implementation": "gls_window",
+            "region_grid": 16,
+            "multiscale_radii": [
+              0,
+              1,
+              2
+            ],
+            "receptive_field_radius": 1,
+            "hazard": 0.03125,
+            "keep_run_lengths": 16,
+            "prior_mean": 1.0,
+            "prior_var": 1.0,
+            "obs_var": 0.25,
+            "robust_omega": 4.0,
+            "robust_scale": 1.5,
+            "accept_logodds": 0.5,
+            "retract_logodds": 1.0,
+            "large_residual_threshold": 3.0,
+            "recent_run_fraction": 2.0,
+            "defer_observations": 2,
+            "noise_floor": 0.001,
+            "min_region_cells": 4,
+            "affine": true,
+            "source": "Truncated BOCPD and GaussianUnknownMean transcribed from DSM-bocd 9d05117bc8c6e971c836ee1df0c49e2d2950862b (MIT); bounded-influence generalized-Bayes update and the thresholds/scales are this project's"
+          },
+          "motion": {
+            "depth": "resnet34",
+            "iters": 4,
+            "checkpoint": null,
+            "checkpoint_domain": null,
+            "trainable": true,
+            "pair_chunk": 1,
+            "max_cycle_error": 3.0,
+            "cycle_check": true,
+            "activation_checkpointing": true,
+            "version": "same-domain-sea-raft-action-v1"
+          },
+          "observation": {
+            "native_shape": [
+              256,
+              256
+            ],
+            "output_shape": [
+              0,
+              0
+            ],
+            "history_stride": 1,
+            "shot": 0.0004,
+            "read_variance": 1.1281558374983982e-05,
+            "noise_provenance": "author_libero_shot_read_plus_quantisation",
+            "version": "native-isp-full-field-v1"
+          },
+          "training": {
+            "warmup_steps": 2000,
+            "total_steps": 50000,
+            "encoder_lr": 1e-05,
+            "backend_lr": 1e-06,
+            "lr_warmup_steps": 200,
+            "min_lr_ratio": 0.1,
+            "backend_prefixes": [
+              "action_head."
+            ],
+            "gradient_clip": 1.0,
+            "motion_aux_weight": 0.05,
+            "version": "matched-encoder-warmup-action-expert-v1"
+          },
+          "supported_logic_version": "n01-v1.2-p3-complete-20261017"
+        },
+        "dataset_length": 39296,
+        "accum": 2,
+        "batch_size": 2,
+        "precision": "bf16",
+        "flow_batch_size": 8,
+        "backend_master_weights": true,
+        "crop": 0,
+        "tbptt": 8,
+        "lr": 1e-05,
+        "weight_decay": 0.0,
+        "dataset_path_count": 1228,
+        "dataset_paths_sha256": "1ab27bcad8dcf7a272d80577bf8d6df47971e0c557139d0ed3d303557a69e7cb"
+      },
+      "changed_parameter_tensor_counts": {
+        "encoder": 56,
+        "bridge": 6,
+        "motion": 276
+      },
+      "representative_deltas": {
+        "encoder": [
+          {
+            "name": "encoder.backbone.upstream.init_layer.0.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          },
+          {
+            "name": "encoder.backbone.upstream.init_layer.0.bias",
+            "max_abs_delta": 1.5087425708770752e-07
+          }
+        ],
+        "bridge": [
+          {
+            "name": "bridge.in_proj.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          },
+          {
+            "name": "bridge.norm.weight",
+            "max_abs_delta": 1.7881393432617188e-07
+          }
+        ],
+        "motion": [
+          {
+            "name": "encoder.motion_provider.network.cnet.conv1.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          },
+          {
+            "name": "encoder.motion_provider.network.cnet.conv1.bias",
+            "max_abs_delta": 1.501241513324203e-07
+          }
+        ]
+      }
+    },
+    {
+      "role": "libero-rgb_n01-seed101",
+      "step": 2,
+      "samples_consumed": 8,
+      "checkpoint_bytes": 3043664249,
+      "resume_schema": "n01-v12-training-v2",
+      "optimizer_state_entries": 341,
+      "training_contract": {
+        "implementation": "p3-complete-code-20261017",
+        "diagnostic": false,
+        "config": {
+          "arm": "rgb_n01",
+          "method": "rgb_n01",
+          "model_factory": "owac.frameworks.n01_full.model:build_model",
+          "platform": "libero",
+          "seed": 101,
+          "input_domain": "RGB",
+          "data_kind": "libero_dequantized",
+          "support_enabled": true,
+          "window_frames": 32,
+          "feature_width": 512,
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "fusion": "dbsr_reference",
+          "pool_grid": 16,
+          "tokens_per_camera": 256,
+          "readout_width": 2048,
+          "input_mode": "rendered_rgb3",
+          "camera_order": [
+            "agentview",
+            "wrist"
+          ],
+          "support": {
+            "implementation": "gls_window",
+            "region_grid": 16,
+            "multiscale_radii": [
+              0,
+              1,
+              2
+            ],
+            "receptive_field_radius": 1,
+            "hazard": 0.03125,
+            "keep_run_lengths": 16,
+            "prior_mean": 1.0,
+            "prior_var": 1.0,
+            "obs_var": 0.25,
+            "robust_omega": 4.0,
+            "robust_scale": 1.5,
+            "accept_logodds": 0.5,
+            "retract_logodds": 1.0,
+            "large_residual_threshold": 3.0,
+            "recent_run_fraction": 2.0,
+            "defer_observations": 2,
+            "noise_floor": 0.001,
+            "min_region_cells": 4,
+            "affine": true,
+            "source": "Truncated BOCPD and GaussianUnknownMean transcribed from DSM-bocd 9d05117bc8c6e971c836ee1df0c49e2d2950862b (MIT); bounded-influence generalized-Bayes update and the thresholds/scales are this project's"
+          },
+          "motion": {
+            "depth": "resnet34",
+            "iters": 4,
+            "checkpoint": null,
+            "checkpoint_domain": null,
+            "trainable": true,
+            "pair_chunk": 1,
+            "max_cycle_error": 3.0,
+            "cycle_check": true,
+            "activation_checkpointing": true,
+            "version": "same-domain-sea-raft-action-v1"
+          },
+          "observation": {
+            "native_shape": [
+              256,
+              256
+            ],
+            "output_shape": [
+              0,
+              0
+            ],
+            "history_stride": 1,
+            "shot": 0.0,
+            "read_variance": 0.0001,
+            "noise_provenance": "declared_same_domain_proxy_unfitted",
+            "version": "native-isp-full-field-v1"
+          },
+          "training": {
+            "warmup_steps": 2000,
+            "total_steps": 50000,
+            "encoder_lr": 1e-05,
+            "backend_lr": 1e-06,
+            "lr_warmup_steps": 200,
+            "min_lr_ratio": 0.1,
+            "backend_prefixes": [
+              "action_head."
+            ],
+            "gradient_clip": 1.0,
+            "motion_aux_weight": 0.05,
+            "version": "matched-encoder-warmup-action-expert-v1"
+          },
+          "supported_logic_version": "n01-v1.2-p3-complete-20261017"
+        },
+        "dataset_length": 39296,
+        "accum": 2,
+        "batch_size": 2,
+        "precision": "bf16",
+        "flow_batch_size": 8,
+        "backend_master_weights": true,
+        "crop": 0,
+        "tbptt": 8,
+        "lr": 1e-05,
+        "weight_decay": 0.0,
+        "dataset_path_count": 1228,
+        "dataset_paths_sha256": "1ab27bcad8dcf7a272d80577bf8d6df47971e0c557139d0ed3d303557a69e7cb"
+      },
+      "changed_parameter_tensor_counts": {
+        "encoder": 56,
+        "bridge": 7,
+        "motion": 274
+      },
+      "representative_deltas": {
+        "encoder": [
+          {
+            "name": "encoder.backbone.upstream.init_layer.0.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          },
+          {
+            "name": "encoder.backbone.upstream.init_layer.0.bias",
+            "max_abs_delta": 1.4901161193847656e-07
+          }
+        ],
+        "bridge": [
+          {
+            "name": "bridge.camera_gain",
+            "max_abs_delta": 1.7881393432617188e-07
+          },
+          {
+            "name": "bridge.in_proj.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          }
+        ],
+        "motion": [
+          {
+            "name": "encoder.motion_provider.network.cnet.conv1.weight",
+            "max_abs_delta": 1.5087425708770752e-07
+          },
+          {
+            "name": "encoder.motion_provider.network.cnet.conv1.bias",
+            "max_abs_delta": 1.5012344078968454e-07
+          }
+        ]
+      }
+    }
+  ],
+  "gpu_short_window": [
+    {
+      "gpu": 0,
+      "samples": 20,
+      "interval_seconds": 2,
+      "mean_utilization_pct": 78.5,
+      "peak_memory_gib": 71.2900390625,
+      "mean_power_w": 325.1275
+    },
+    {
+      "gpu": 1,
+      "samples": 20,
+      "interval_seconds": 2,
+      "mean_utilization_pct": 69.05,
+      "peak_memory_gib": 72.2666015625,
+      "mean_power_w": 258.64
+    }
+  ],
+  "isolated_performance_probes": [
+    {
+      "platform": "libero",
+      "rows": [
+        {
+          "precision": "fp32",
+          "batch_size": 1,
+          "all_content_stress": false,
+          "seconds": [
+            6.558089848142117,
+            1.763459918089211
+          ],
+          "samples_per_second": 0.2403398472861338,
+          "peak_gib": 18.46974515914917,
+          "action_losses": [
+            0.4016805589199066,
+            0.10970540344715118
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 1,
+          "all_content_stress": false,
+          "seconds": [
+            2.834527769125998,
+            1.6511777150444686
+          ],
+          "samples_per_second": 0.4458607474471446,
+          "peak_gib": 14.852269649505615,
+          "action_losses": [
+            0.40253591537475586,
+            0.1093117743730545
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": false,
+          "seconds": [
+            3.7031024298630655,
+            2.411869625095278
+          ],
+          "samples_per_second": 0.6541321798448102,
+          "peak_gib": 15.595977306365967,
+          "action_losses": [
+            0.2623066306114197,
+            0.18245413899421692
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": true,
+          "seconds": [
+            13.578577399253845
+          ],
+          "samples_per_second": 0.14729083476078295,
+          "peak_gib": 69.43724298477173,
+          "action_losses": [
+            0.25728747248649597
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": true,
+          "seconds": [
+            4.975782715715468,
+            4.887598879169673
+          ],
+          "samples_per_second": 0.40554042865727535,
+          "peak_gib": 72.81562805175781,
+          "action_losses": [
+            0.25728747248649597,
+            0.21226339042186737
+          ],
+          "optimizer_updates": 2,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": 1.998618245124817e-06
+        }
+      ],
+      "scope": "isolated performance probe; optimizer updates are discarded",
+      "same_real_sample_repeated_for_batch_memory_probe": true
+    },
+    {
+      "platform": "robotwin2",
+      "rows": [
+        {
+          "precision": "fp32",
+          "batch_size": 1,
+          "all_content_stress": false,
+          "seconds": [
+            8.038677582982928,
+            2.5122247841209173
+          ],
+          "samples_per_second": 0.18955724642431576,
+          "peak_gib": 19.556244373321533,
+          "action_losses": [
+            3.6851701736450195,
+            1.6955679655075073
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 1,
+          "all_content_stress": false,
+          "seconds": [
+            3.8031493281014264,
+            2.5760325524024665
+          ],
+          "samples_per_second": 0.3135198270662914,
+          "peak_gib": 16.128626346588135,
+          "action_losses": [
+            3.6847620010375977,
+            1.6963733434677124
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": false,
+          "seconds": [
+            5.363121394068003,
+            3.634907797910273
+          ],
+          "samples_per_second": 0.44454178961388474,
+          "peak_gib": 17.278557777404785,
+          "action_losses": [
+            2.6412317752838135,
+            2.2257626056671143
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": true,
+          "seconds": [
+            15.02997654909268
+          ],
+          "samples_per_second": 0.1330674065569806,
+          "peak_gib": 80.36968231201172,
+          "action_losses": [
+            2.641408681869507
+          ],
+          "optimizer_updates": 0,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": null
+        },
+        {
+          "precision": "bf16",
+          "batch_size": 2,
+          "all_content_stress": true,
+          "seconds": [
+            7.470785636920482,
+            7.485582301393151
+          ],
+          "samples_per_second": 0.26744461064997105,
+          "peak_gib": 83.74808263778687,
+          "action_losses": [
+            2.641408681869507,
+            2.153653621673584
+          ],
+          "optimizer_updates": 2,
+          "finite_gradients": true,
+          "backend_probe_dtype": "torch.float32",
+          "backend_parameter_delta_max": 1.9976869225502014e-06
+        }
+      ],
+      "scope": "isolated performance probe; optimizer updates are discarded",
+      "same_real_sample_repeated_for_batch_memory_probe": true
+    }
+  ],
+  "persistence": {
+    "supervisor_programs": [
+      "owac-n01-v12-complete-raw",
+      "owac-n01-v12-complete-rgb"
+    ],
+    "autostart": true,
+    "autorestart": false,
+    "monitor_autorestart": "unexpected",
+    "local_tunnel_user_service": "owac-n01-monitor-tunnel.service",
+    "enabled": true,
+    "active": true,
+    "linger": true,
+    "actual_host_reboot_tested": false
+  },
+  "boundaries": [
+    "No new closed-loop score",
+    "Base arms deferred to P4",
+    "8 fixed validation samples; initial trend is not convergence or task success",
+    "RoboTwin future queue handover not yet physically observed",
+    "Old failed implementation weights and old hold preserved",
+    "First launch failed before optimizer because snapshot lacked manifests; archived and corrected"
+  ]
+}

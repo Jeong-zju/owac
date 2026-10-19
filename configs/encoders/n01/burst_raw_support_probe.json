@@ -1,0 +1,35 @@
+{
+  "protocol": "n01-dbsr-raw-domain-frozen-probe-v1",
+  "seeds": [
+    61,
+    73,
+    89
+  ],
+  "required_baselines": [
+    "dbsr_reference",
+    "mean_capacity",
+    "current"
+  ],
+  "probe_seed_offset": 2000,
+  "device": "cuda:0",
+  "gpu_memory_fraction": 0.12,
+  "threads": 2,
+  "freeze_frame": 8,
+  "batch_size": 2,
+  "evaluation_batch_size": 24,
+  "size": 16,
+  "length": 24,
+  "burn_in": 8,
+  "contrast": 0.08,
+  "noise_sigma": 0.08,
+  "heatmap_sigma": 0.8,
+  "recovery_tolerance_px": 0.75,
+  "recovery_consecutive": 3,
+  "event_window": 6,
+  "calibrated_support": {
+    "edge_temperature": 3.9740435495127926,
+    "edge_beta": 8.0
+  },
+  "reliability_noise_weight": 2.0,
+  "reliability_age_weight": 0.15
+}

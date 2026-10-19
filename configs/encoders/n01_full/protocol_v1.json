@@ -1,0 +1,1202 @@
+{
+  "protocol_version": "n01-full-v1.0-protocol-v1",
+  "stage": "P0",
+  "created_on": "2026-10-14",
+  "source_documents": [
+    "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
+    "docs/prompts/n01_v1_0/P0_FOUNDATION.md",
+    "docs/prompts/n01_v1_0/02_REFERENCES.md",
+    "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
+    "docs/prompts/n01_v1_0/source_manifest.json"
+  ],
+  "stage_status": {
+    "state": "p0_accepted_after_independent_repair",
+    "frozen": false,
+    "frozen_required_before": "start of the P4 formal matrix",
+    "note": "Only P3 thresholds and statistics calibration remain pending. P0 profiling factory is executable.",
+    "pending_fields": [
+      "metrics.planned_gates.*.value",
+      "statistics.alpha",
+      "statistics.min_paired_units",
+      "thresholds.fields.*"
+    ],
+    "state_note": "P0 engineering acceptance only; see research/experiments/n01_full/P0_acceptance_report.md and results/n01_full/P0/acceptance.json."
+  },
+  "input_identity": {
+    "source_key_fields": [
+      "dataset_id",
+      "episode_id",
+      "camera_id",
+      "frame_id",
+      "channel_or_phase",
+      "sensor_y",
+      "sensor_x"
+    ],
+    "identity_naming_rule": {
+      "rule": "dataset_id, episode_id and camera_id are always non-empty strings; \"\" is never an identity",
+      "metadata_free": "use the literal \"unknown_metadata\" when the sensor/metadata identity is genuinely unknown",
+      "single_camera": "a known single-camera dataset declares its real camera key (for example \"front\"), never \"\" and never \"unknown_metadata\"",
+      "distinguishable": "unknown_metadata (no sensor metadata) and a real camera key (known single camera) are different values and stay distinguishable",
+      "enforced_by": "src/owac/frameworks/n01_full/contracts.py SourceKey.__post_init__ rejects empty dataset_id/episode_id/camera_id",
+      "config_module": "src/owac/frameworks/n01_full/config.py InputIdentityConfig"
+    },
+    "dataset_id_default": "rawvla_bench",
+    "forbidden_identifiers": [
+      "pixel value",
+      "batch slot",
+      "interpolated sample",
+      "file stem alone"
+    ],
+    "validity_kinds": [
+      "valid",
+      "missing",
+      "bad",
+      "saturated"
+    ],
+    "input_modes": {
+      "bayer_cfa": {
+        "channels": 4,
+        "cfa_pattern_required": true,
+        "keeps_cfa_phase": true,
+        "keeps_true_sampling_coordinates": true,
+        "note": "real CFA measurement; phase and real sampling coordinates preserved"
+      },
+      "synthetic_cfa": {
+        "channels": 4,
+        "cfa_pattern_required": true,
+        "keeps_cfa_phase": true,
+        "keeps_true_sampling_coordinates": true,
+        "note": "synthetic CFA; same phase/coordinate discipline, always disclosed as synthetic"
+      },
+      "rawvla_rgb3": {
+        "channels": 3,
+        "cfa_pattern_required": false,
+        "keeps_cfa_phase": false,
+        "keeps_true_sampling_coordinates": false,
+        "forbid_fourth_measurement": true,
+        "value_units": "pseudo_raw_hdr",
+        "note": "author HDR-derived / pseudo-RAW; must not fabricate a fourth measurement or CFA phase"
+      }
+    },
+    "input_mode_names_source": "src/owac/frameworks/n01_full/config.py INPUT_MODES",
+    "forbidden_input_modes": [
+      "rgb",
+      "srgb",
+      "xyz"
+    ],
+    "cfa_patterns": [
+      "RGGB",
+      "BGGR",
+      "GRBG",
+      "GBRG"
+    ],
+    "window_layout": "[B, T, C, H, W] (batch_layout BTCHW)",
+    "time_order": "oldest_first",
+    "fusion_time_order": "newest_first",
+    "time_order_adapter": "oldest_first_to_newest_first",
+    "time_order_rule": "the window is always oldest_first; the DBSR fusion entry is newest_first; only the named adapter oldest_first_to_newest_first converts, no implicit flips elsewhere",
+    "measurement_record_fields": [
+      "key",
+      "raw_value",
+      "value_units",
+      "timestamp",
+      "time_unit",
+      "validity_kind",
+      "calibration_version",
+      "noise_block_id"
+    ],
+    "coordinate_units": "sensor_pixel",
+    "main_chain_produces_rgb": false,
+    "cross_camera_raw_merge_without_accepted_geometry": false,
+    "camera_id_vocabulary": {
+      "values": [
+        "unknown_metadata",
+        "no_camera",
+        "<protocol camera name>",
+        "multi_camera"
+      ],
+      "exact_names_field": "camera_ids",
+      "source": "n01-full-v1-index.json identity_fields (B manifest delivery, 2026-10-14)"
+    }
+  },
+  "coordinate_units": {
+    "spatial_unit": "sensor_pixel (integer sample index on the full sensor grid)",
+    "coordinate_units": "sensor_pixel",
+    "coordinate_convention": "pull",
+    "push_convention": "refused",
+    "pull_convention": "source_xy is the pull coordinate used to sample the historical source from the current reference position; source_xy[i] points into the historical frame",
+    "packed_grid_relation": "one packed-cell displacement equals two sensor pixels; each CFA phase has its own offset",
+    "interpolation": "bilinear",
+    "mapping_kinds": [
+      "identity",
+      "sea_raft"
+    ],
+    "input_channels_multiple_rule": "correspondence input_channels must be a whole multiple of the measurement channels: CFA 4/8, rawvla_rgb3 3/6",
+    "forward_backward_check": "current and the past two frames only; a future frame is never read",
+    "interpolation_taps": "return the actual four taps as SourceKey plus weights; zero padding at borders, no wrap-around",
+    "temporal_unit": "integer frame_id within an episode; timestamp carries the metadata time_unit and is not silently rebased",
+    "reference_time": "episode-local; no future frame may be read for a causal estimate",
+    "correspondence_outputs": [
+      "source_xy",
+      "tap_source_ids",
+      "tap_weights",
+      "valid",
+      "visibility",
+      "flow_risk"
+    ],
+    "flow_risk_status": "proxy until validated against the independent calibration split"
+  },
+  "data": {
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+    "data_root_scope": "remote server path; not present in the local worktree",
+    "count_rule": "npz counts cover only the declared raw_roots; data/<format>/rgb mirrors data/<format>/raw 1:1 and is reported separately, never summed into a frozen count",
+    "raw_roots": {
+      "libero": "libero/raw",
+      "robotwin2": "robotwin2/raw"
+    },
+    "rgb_mirror_roots": {
+      "libero": "libero/rgb",
+      "robotwin2": "robotwin2/rgb"
+    },
+    "rgb_mirror_evidence": {
+      "source": "n01-full-v1-index.json rgb_mirror",
+      "status": "verified identical relative path sets",
+      "libero_files": 1771,
+      "robotwin2_files": 632
+    },
+    "platforms": {
+      "libero": {
+        "dataset_format": "libero",
+        "expected_npz": 1771,
+        "expected_npz_frozen": 1771,
+        "expected_npz_source": "recomputed from manifest.sides and rows on 2026-10-14 (1228+175+206+162 = 1771), matching index.datasets.libero.files and two independent lead counts",
+        "model_input_mode": "rawvla_rgb3"
+      },
+      "robotwin2": {
+        "dataset_format": "robotwin2",
+        "expected_npz": 632,
+        "expected_npz_frozen": 632,
+        "expected_npz_source": "recomputed from manifest.sides and rows on 2026-10-14 (450+48+58+76 = 632), matching index.datasets.robotwin2.files and two independent lead counts",
+        "model_input_mode": "rawvla_rgb3"
+      }
+    },
+    "manifest_index": {
+      "manifest_path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+      "sha256": "33de7d02c86f993a562686037271f540ac5d850ddebed0c9e8641475d2e4e30d",
+      "schema": "owac.n01_full.manifest_index.v1",
+      "hash_source": "recomputed_by_preflight_owner_2026-10-14",
+      "region_digest_note": "no per-region digest is declared: the platform manifests expose `regions` as a region-name list and index.datasets.<p>.regions carries file/group counts only; the per-file content anchor is rows[].inventory_hash (recipe in index.inventory_hash)"
+    },
+    "platform_manifests": {
+      "libero": {
+        "dataset_format": "libero",
+        "manifest_path": "data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+        "manifest_sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9",
+        "manifest_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.libero.manifest_sha256",
+          "status": "match"
+        },
+        "inventory_path": "data/manifests/n01-full-v1/n01-full-v1-libero-inventory.json",
+        "inventory_sha256": "a3cbefe59421c811d04f8451940a010c8d08e37bb51570fe339ea4451af01129",
+        "inventory_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.libero.inventory_sha256",
+          "status": "match"
+        },
+        "loader_evidence_path": "data/manifests/n01-full-v1/n01-full-v1-loader-evidence-libero.json",
+        "loader_evidence_sha256": "24a7f1aeb4fc896bb73caac86fecfb39a32867e9374d875e5a70b5133a23543b",
+        "loader_evidence_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.libero.loader_evidence_sha256",
+          "status": "match"
+        }
+      },
+      "robotwin2": {
+        "dataset_format": "robotwin2",
+        "manifest_path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-manifest.json",
+        "manifest_sha256": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97",
+        "manifest_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.robotwin2.manifest_sha256",
+          "status": "match"
+        },
+        "inventory_path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-inventory.json",
+        "inventory_sha256": "1e176c61d2b36ec17211ee81837ab079f9b9063e57844998f39486476374a98a",
+        "inventory_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.robotwin2.inventory_sha256",
+          "status": "match"
+        },
+        "loader_evidence_path": "data/manifests/n01-full-v1/n01-full-v1-loader-evidence-robotwin2.json",
+        "loader_evidence_sha256": "034a476be16be38c3533dad46c8433e713ce0994527ec40bbc4270de3d11cf33",
+        "loader_evidence_sha256_declared_in": {
+          "path": "data/manifests/n01-full-v1/n01-full-v1-index.json",
+          "field": "datasets.robotwin2.loader_evidence_sha256",
+          "status": "match"
+        }
+      }
+    },
+    "splits": {
+      "train": {
+        "platform_manifests": {
+          "libero": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+            "sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9"
+          },
+          "robotwin2": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-manifest.json",
+            "sha256": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97"
+          }
+        },
+        "counts": {
+          "libero": 1228,
+          "robotwin2": 450
+        },
+        "cross_platform_total": 1678,
+        "counts_source": "recomputed from manifest.sides on 2026-10-14",
+        "region_digest": {
+          "value": null,
+          "source": "no per-region digest is declared: the platform manifests expose `regions` as a region-name list and index.datasets.<p>.regions carries file/group counts only; the per-file content anchor is rows[].inventory_hash (recipe in index.inventory_hash)"
+        }
+      },
+      "calibration": {
+        "platform_manifests": {
+          "libero": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+            "sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9"
+          },
+          "robotwin2": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-manifest.json",
+            "sha256": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97"
+          }
+        },
+        "counts": {
+          "libero": 175,
+          "robotwin2": 48
+        },
+        "cross_platform_total": 223,
+        "counts_source": "recomputed from manifest.sides on 2026-10-14",
+        "region_digest": {
+          "value": null,
+          "source": "no per-region digest is declared: the platform manifests expose `regions` as a region-name list and index.datasets.<p>.regions carries file/group counts only; the per-file content anchor is rows[].inventory_hash (recipe in index.inventory_hash)"
+        }
+      },
+      "validation": {
+        "platform_manifests": {
+          "libero": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+            "sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9"
+          },
+          "robotwin2": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-manifest.json",
+            "sha256": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97"
+          }
+        },
+        "counts": {
+          "libero": 206,
+          "robotwin2": 58
+        },
+        "cross_platform_total": 264,
+        "counts_source": "recomputed from manifest.sides on 2026-10-14",
+        "region_digest": {
+          "value": null,
+          "source": "no per-region digest is declared: the platform manifests expose `regions` as a region-name list and index.datasets.<p>.regions carries file/group counts only; the per-file content anchor is rows[].inventory_hash (recipe in index.inventory_hash)"
+        }
+      },
+      "test": {
+        "platform_manifests": {
+          "libero": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+            "sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9"
+          },
+          "robotwin2": {
+            "path": "data/manifests/n01-full-v1/n01-full-v1-robotwin2-manifest.json",
+            "sha256": "f04ba21530c4b9b47e4d3c70c834396e65c050b3752d44af7fa704d393bcdd97"
+          }
+        },
+        "counts": {
+          "libero": 162,
+          "robotwin2": 76
+        },
+        "cross_platform_total": 238,
+        "counts_source": "recomputed from manifest.sides on 2026-10-14",
+        "region_digest": {
+          "value": null,
+          "source": "no per-region digest is declared: the platform manifests expose `regions` as a region-name list and index.datasets.<p>.regions carries file/group counts only; the per-file content anchor is rows[].inventory_hash (recipe in index.inventory_hash)"
+        }
+      }
+    },
+    "split_grouping": {
+      "unit": "source trajectory / scene / session",
+      "lighting_variants": "same group as the base trajectory",
+      "method": "metadata first, then the audited source_group; file stem equality is never automatic evidence of same origin",
+      "camera_holdout": "explicit table; random frame splitting is not a cross-camera holdout"
+    },
+    "split_ratios_plan": {
+      "train": 0.7,
+      "calibration": 0.1,
+      "validation": 0.1,
+      "test": 0.1
+    },
+    "split_ratio_status": "first candidate ratio; frozen by P0 only after non-empty conditions, scale and source coverage are checked; existing official partitions take precedence",
+    "regions_must_be_disjoint": true,
+    "region_union_must_equal_platform_total": true,
+    "manifest_schema": "owac.n01_full.manifest.v1",
+    "manifest_owner": "src/owac/raw/n01_full_manifest.py (build_manifest / verify_manifest / region_paths / loader_split_manifest)",
+    "manifest_columns": [
+      "relative_path",
+      "inventory_hash",
+      "size_bytes",
+      "mtime_ns",
+      "dataset_id",
+      "input_mode",
+      "source_group",
+      "episode",
+      "episode_id",
+      "camera_id",
+      "camera_ids",
+      "camera_count",
+      "scene",
+      "session",
+      "sensor",
+      "sensor_metadata_present",
+      "lighting",
+      "units",
+      "calibration_version",
+      "split",
+      "num_frames"
+    ],
+    "manifest_missing_metadata_rule": "scene/session/sensor are null in the RawVLA cache metadata (index.known_gaps); null means absent metadata, never 'single camera'; camera_id uses the vocabulary below and camera_ids carries the exact protocol camera names",
+    "loader_contract": {
+      "class": "owac.raw.rawvla_sequence.RawVLASequenceDataset",
+      "sides_builder": "owac.raw.n01_full_manifest.loader_split_manifest(manifest, raw_cache_root)",
+      "explicit_parameters": [
+        "raw_cache_root",
+        "stats_path",
+        "split_manifest"
+      ],
+      "sides_keys": [
+        "train",
+        "calibration",
+        "validation",
+        "test"
+      ],
+      "per_platform_call": "one call per platform manifest; loader_split_manifest resolves the manifest's relative_path_base against raw_cache_root",
+      "note": "the default root derivation (root/data/...) does not match the server layout; each region is requested separately and the instance paths must equal exactly that region of that platform's manifest"
+    },
+    "stats": {
+      "libero": {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/dataset_statistics.json",
+        "stats_key": "openpi_pi05_libero_franka",
+        "action_stats_key": "action",
+        "sha256": "7e596e50c00c5407daed5809f6cc55b57877903bbadcd39ac30f13bb821411a9",
+        "value_status": "measured_by_lead_2026-10-14",
+        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策"
+      },
+      "robotwin2": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "stats_key": "",
+        "action_stats_key": "actions",
+        "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "value_status": "measured_by_lead_2026-10-14",
+        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策",
+        "selection_note": "Explicit empty stats_key selects norm_stats; action key is actions. Verified against real loader in P0 independent audit."
+      }
+    },
+    "official_closed_loop_identities": 13250,
+    "generator": {
+      "namespace": "n01-full-v1/<split>/<case>/<sequence>",
+      "old_offsets_retired": [
+        1000,
+        2000
+      ],
+      "old_offsets_status": "consumed; must not be reused"
+    },
+    "model_input_mode_vs_storage_encoding": {
+      "model_input_mode": {
+        "layer": "model contract (00_SHARED_CONTRACT.md section 3 / input_identity.input_modes)",
+        "value_in_this_pool": "rawvla_rgb3",
+        "semantics": "C=3 pseudo-RAW model input; a fourth measurement or CFA phase is never fabricated",
+        "other_entry": "bayer_cfa / synthetic_cfa (C=4) is a different model-input entry and is not in this pool",
+        "location": "data.platforms.<platform>.model_input_mode"
+      },
+      "storage_encoding": {
+        "layer": "per-file cache storage encoding (B manifest row level, field name stays `input_mode`)",
+        "observed_values": {
+          "libero": [
+            "raw_uint8_pseudo_raw"
+          ],
+          "robotwin2": [
+            "raw_float32_hdr_derived"
+          ]
+        },
+        "observed_on": "2026-10-14, recomputed from the frozen manifest rows (each pool has exactly one value)",
+        "source": "data/manifests/n01-full-v1/n01-full-v1-index.json input_mode_source and each manifest row.input_mode",
+        "location": "row-level `input_mode` in data.platforms.<platform>.manifest_* and in data.manifest_columns"
+      },
+      "rule": "the two names are never interchangeable: model_input_mode is constant for the pool and is a model contract, while row-level input_mode describes how one cache file stores its RAW values"
+    },
+    "manifest_columns_note": "row-level `input_mode` is the per-file cache storage encoding (raw_uint8_pseudo_raw / raw_float32_hdr_derived); it is not the model input mode, which is data.platforms.<platform>.model_input_mode",
+    "region_checks_scope": "checks are per platform: the two datasets have independent relative-path namespaces and the loader serves one protocol at a time, so cross-platform path-level dedup would manufacture false identities; disjointness/union are computed inside each platform manifest"
+  },
+  "seeds": {
+    "separated": true,
+    "non_overlap_rule": "set(model_seeds) & set(data_seeds) must be empty; enforced by TrainingBudgetConfig.validate",
+    "model": {
+      "stream": "n01-full-v1/model",
+      "field": "model_seeds",
+      "values": [
+        101,
+        211,
+        307
+      ],
+      "scope": "initialisation, dataloader shuffling, augmentation"
+    },
+    "data": {
+      "stream": "n01-full-v1/data",
+      "field": "data_seeds",
+      "values": [
+        1101,
+        1211,
+        1307
+      ],
+      "value_status": "confirmed_by_lead_2026-10-14: 沿用仓库既有 +1000 偏移约定，且与 model_seeds 不相交",
+      "scope": "generation, split sampling, noise/exposure synthesis"
+    },
+    "namespace": "n01-full-v1",
+    "old_probe_seed_offsets": [
+      1000,
+      2000
+    ],
+    "old_probe_seed_offsets_status": "consumed by the old N01 probes; the new n01-full-v1 namespace does not reuse their streams",
+    "note": "distinct streams and disjoint values; one RNG is never shared between data and model roles"
+  },
+  "unique_source_policy": {
+    "rule": "one RAW sample may be referenced by several candidate domains but counts once in a single estimate",
+    "dedup_key": "SourceKey.identity()",
+    "independent_observation_count": "deduplicated by SourceKey across a single estimate; repeated transmission of one frame is one key",
+    "priors": "listed separately; never added to the independent observation count",
+    "prior_kinds": [
+      "none",
+      "gaussian"
+    ],
+    "rejected_source": "a support-relation status, never a rewrite of the original sensor state",
+    "duplicate_control": "domain_content must be compared against a same-node duplicate_current control"
+  },
+  "exact_replay": {
+    "exact_window_unique_frames": 32,
+    "unique_frames_choices": [
+      8,
+      16,
+      32
+    ],
+    "default_unique_frames": 32,
+    "default_rule": "the formal estimate uses 32 unique frames; algorithm comparison may use 8/16/32",
+    "algorithm_comparison_windows": [
+      8,
+      16,
+      32
+    ],
+    "config_field": "ReplayConfig.exact_window_unique_frames (src/owac/frameworks/n01_full/config.py)",
+    "older_information": "kept only as a sourced summary with declared provenance",
+    "retraction_beyond_range": "invalidate the contaminated summary and rebuild from the legal boundary; record the history loss",
+    "unlimited_exact_retraction": "forbidden",
+    "parameter_update_invalidates_derived_caches": true,
+    "modes": {
+      "fixed_decision_replay": "motion/support decisions frozen; replace the retracted source content, re-encode, recompute fusion weights and readout; the result must not change",
+      "counterfactual_replay": "remove the source from the input event stream and recompute motion, support, normalisation and all state; only this mode may claim the whole result no longer depends on that source"
+    },
+    "nonlinear_features_recomputed_from_retained_raw": true,
+    "spatial_retraction_first_version": "invalidate by domain support on the source RAW, re-encode the whole affected source and recompute fusion weights (convolution receptive fields crossing domains)",
+    "context_sources": "any retained neighbourhood context must be declared in context_source_ids and covered by the content-isolation test",
+    "beyond_exact_policy": "invalidate_summary_and_rebuild"
+  },
+  "models_and_upstream": {
+    "lock": "configs/encoders/n01_full/upstream_lock.json",
+    "content_backbone": {
+      "implementation": "owac.baselines._vendor.dbsr (vendored)",
+      "backbone": "dbsr",
+      "channels": 64,
+      "num_blocks": 9,
+      "feature_width": 512,
+      "readout_tokens": 256,
+      "readout_width": 2048,
+      "path": "source_features",
+      "trainable_scope": "frozen_backbone",
+      "fusion_time_order": "newest_first",
+      "time_order_adapter": "oldest_first_to_newest_first",
+      "upstream_commit": "16f158e0553b6702cc1693c43f733c2830973278",
+      "license": "CC-BY-NC-SA-4.0",
+      "adapter": "src/owac/baselines/burst_features.py",
+      "config_module": "src/owac/frameworks/n01_full/config.py ContentConfig",
+      "non_full_size_rule": "ContentConfig.validate refuses a non-full-size dbsr (channels != 64, num_blocks != 9, feature_width != 512) and any readout other than 256x2048; change the backbone field instead of relaxing the contract"
+    },
+    "readout": {
+      "implementation": "VisualTokenPostprocessor",
+      "readout_tokens": 256,
+      "readout_width": 2048,
+      "bridge_in_dim_rule": "bridge_in_dim must equal feature_width (=512)",
+      "bridge_width_rule": "bridge_width must equal readout_width (=2048)",
+      "note": "pass VisualPrefixConfig(in_dim=512, width=2048) or from_readout_config(in_dim=512); the backend default in_dim=readout_width must never be relied on"
+    },
+    "motion": {
+      "implementation": "SEA-RAFT",
+      "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+      "p0_decision": "fixed",
+      "p2_required_changes": [
+        "4/8 channel CFA stems and 3/6 channel pseudo-RAW stems",
+        "remove the /255 RGB-style normalisation",
+        "explicitly disable the ImageNet weight download/load (ResNetFPN init_weight=False and no torchvision branch)",
+        "separate depth selection (args.pretrain) from pretrained weight loading"
+      ]
+    },
+    "temporal_rules": {
+      "default": "BOCPD",
+      "robust_control": "DSM-bocd",
+      "sequential_test_branch": "confseq",
+      "guarantee_scope": "the sequential branch keeps its own conditions; it does not transfer a neural confidence guarantee"
+    },
+    "spatial_rule": "local affine predictive compatibility test; the connected graph only proposes candidates",
+    "state_models": {
+      "mamba": {
+        "commit": "e9594ce1c732d97440f0332fdc43170a2294dbfa",
+        "p0_scope": "lock source and dependency availability only",
+        "integration_stage": "P5"
+      },
+      "bsrt": {
+        "commit": "da8d5154478a1214bccdf7a54c716dad3a015985",
+        "p0_scope": "lock source and dependency availability only",
+        "integration_stage": "P6"
+      }
+    },
+    "rgb_teacher_or_reconstruction": false,
+    "correspondence": {
+      "mapping_kinds": [
+        "identity",
+        "sea_raft"
+      ],
+      "coordinate_convention": "pull",
+      "input_channels_multiple_rule": "a whole multiple of the measurement channels (CFA 4/8, rawvla_rgb3 3/6)",
+      "future_frames": "never read; forward/backward consistency uses the current and the past two frames"
+    }
+  },
+  "arms": {
+    "method_map": {
+      "B0": "current",
+      "B1": "mean_capacity",
+      "B2": "dbsr_reference",
+      "B3": "dbsr_reset",
+      "N-T": "temporal",
+      "N-S": "spatial",
+      "N-TS": "spatiotemporal"
+    },
+    "main": [
+      {
+        "id": "B0",
+        "content_rule": "current frame full DBSR features",
+        "shared": [
+          "backbone initialisation",
+          "task head",
+          "supervision",
+          "effective batch"
+        ],
+        "known_difference": "no history; retained as a stated difference"
+      },
+      {
+        "id": "B1",
+        "content_rule": "fixed-history equal-weight fusion with active residual blocks for capacity",
+        "shared": [
+          "public parameter initial values",
+          "data stream identity"
+        ],
+        "known_difference": "parameter difference recorded; no idle parameters"
+      },
+      {
+        "id": "B2",
+        "content_rule": "mature DBSR learned fusion over all legal history",
+        "shared": [
+          "motion checkpoint and calibration with N01",
+          "backbone/fusion/head"
+        ]
+      },
+      {
+        "id": "B3",
+        "content_rule": "same as B2 plus the P3 standard detector with whole-domain reset",
+        "shared": [
+          "detector and calibration with N01",
+          "same tuning budget"
+        ]
+      },
+      {
+        "id": "N-T",
+        "content_rule": "source-level temporal support, full recompute, spatial support off",
+        "priority": "first group to validate"
+      },
+      {
+        "id": "N-S",
+        "content_rule": "fixed temporal window, spatial-domain rule",
+        "relation": "orthogonal to N-T"
+      },
+      {
+        "id": "N-TS",
+        "content_rule": "temporal and spatial support together",
+        "role": "complete main group"
+      }
+    ],
+    "seeds": [
+      101,
+      211,
+      307
+    ],
+    "main_runs": 21,
+    "development_submatrix": [
+      "B2",
+      "B3",
+      "N-T"
+    ],
+    "interventions": {
+      "N-stale": "N-TS with identical weights and decisions but deliberately retained stale dependency; contamination diagnostic only, never averaged into the deployable main group"
+    },
+    "shared_factors": [
+      "backbone initialisation",
+      "task head",
+      "supervision",
+      "effective batch",
+      "data stream identity",
+      "common parameter initial values",
+      "two-step learning-rate development search"
+    ],
+    "reporting": [
+      "same-update comparison",
+      "per-platform budget comparison",
+      "parameter/FLOPs/memory/history/readout capacity separately"
+    ]
+  },
+  "metrics": {
+    "primary": [
+      {
+        "id": "static_error",
+        "note": "error on static stretches"
+      },
+      {
+        "id": "post_event_error_1",
+        "frames_after_event": 1
+      },
+      {
+        "id": "post_event_error_2",
+        "frames_after_event": 2
+      },
+      {
+        "id": "post_event_error_4",
+        "frames_after_event": 4
+      },
+      {
+        "id": "post_event_error_8",
+        "frames_after_event": 8
+      },
+      {
+        "id": "post_event_error_16",
+        "frames_after_event": 16
+      },
+      {
+        "id": "auc_first_8_frames",
+        "note": "event AUC over the first eight frames"
+      },
+      {
+        "id": "recovery_time"
+      },
+      {
+        "id": "censored_unrecovered_fraction"
+      },
+      {
+        "id": "false_retraction_rate"
+      },
+      {
+        "id": "stale_history_residue",
+        "note": "wrong-history residue"
+      }
+    ],
+    "planned_gates": {
+      "auc_improvement_vs_B2_B3": {
+        "value": "pending_calibration",
+        "planned": 0.05,
+        "planned_source": "shared contract section 5 first planning gate; frozen by P0/P3 development variance",
+        "frozen_on": "P3"
+      },
+      "static_and_current_degradation_max": {
+        "value": "pending_calibration",
+        "planned": 0.02,
+        "planned_source": "shared contract section 5 first planning gate; frozen by P0/P3 development variance",
+        "frozen_on": "P3"
+      }
+    },
+    "negative_result_policy": "a failed gate is reported with the completed controls and diagnostics; tests or thresholds are never edited to manufacture a pass"
+  },
+  "thresholds": {
+    "policy": "any threshold that needs measurement stays pending_calibration until P3 freezes it; the formal matrix must not start with a placeholder",
+    "fields": {
+      "static_noise_floor": "pending_calibration",
+      "event_detectability": "pending_calibration",
+      "delta_val": "pending_calibration",
+      "false_retraction_max": "pending_calibration",
+      "detector_selection": "pending_calibration",
+      "spatial_compatibility_quantile": "pending_calibration"
+    }
+  },
+  "validation_interval": {
+    "updates_between_validations": 1000,
+    "plateau_conditions": [
+      "at least two effective learning-rate drops",
+      "the final low-LR phase has eight consecutive improvements below the locked delta_val",
+      "best checkpoint is not pinned to the budget end",
+      "small-set fit, input and gradient diagnostics pass"
+    ],
+    "plateau_label": "validation_plateau",
+    "budget_label": "budget_exhausted",
+    "resume_requirements": [
+      "checkpoint stores model, bridge, backend trainable parameters, optimizer, scheduler, scaler",
+      "Python/NumPy/CPU/CUDA RNG states are stored",
+      "sampler permutation and cursor are stored",
+      "data/calibration/support/source hashes and consumed sample count are stored",
+      "resume check verifies the next batch identity, the next loss/update and run continuity, not just a reload forward"
+    ]
+  },
+  "platform_rules": {
+    "platforms": [
+      "libero",
+      "robotwin2"
+    ],
+    "same_budget": "identical arms, learning-rate search, shared-layer initialisation, data flow and supervision",
+    "seed_execution": "seeds may run serially; one resource-checked job at a time",
+    "remote_root": "/workspace/owac/rawvla/research/n01-v1",
+    "remote_layout": {
+      "encoder_env": "/workspace/owac/rawvla/envs/encoder",
+      "policy_env": "envs/policy",
+      "run_source": "runs/<run_id>/source",
+      "run_outputs": "runs/<run_id>/outputs",
+      "run_receipts": "runs/<run_id>/receipts"
+    },
+    "supervisor_naming": "owac-n01-v1-<stage>-<run>",
+    "gpu": {
+      "device": "RTX PRO 6000 Blackwell",
+      "total_memory_mib": 97887,
+      "observed_used_mib_at_recon": 32047,
+      "rule": "re-measure free memory before each run; count existing services into the budget; never stop other projects' services"
+    },
+    "torch": {
+      "remote_runtime": "torch 2.7.1+cu128 / Python 3.10.21 (existing StarVLA env, read-only reuse)",
+      "local_encoder_extra": "torch 2.9.1 CPU pinned by uv.lock",
+      "rule": "the local CPU lock must not overwrite the remote CUDA torch; the GPU environment has its own separate requirements/lock (configs/backends/n01-full-runtime/)"
+    },
+    "policy_backend": "frozen RawVLA PI0/PI05 adapter; no upgrade to a floating latest backend",
+    "readout_binding": "server-side readout binds loopback; the existing -L tunnel is enough"
+  },
+  "budget": {
+    "planning_envelope": {
+      "mechanism": {
+        "start_updates": 20000,
+        "max_updates": 100000
+      },
+      "motion": {
+        "min_updates": 100000,
+        "max_updates": 300000
+      },
+      "action": {
+        "per_platform_per_seed_updates": [
+          30000,
+          100000
+        ]
+      },
+      "source": "shared contract section 5 planning candidates, not sufficient-training evidence"
+    },
+    "profiling_resolution_plan": {
+      "spatial_candidates_packed_cells": [
+        64,
+        128,
+        224
+      ],
+      "history_candidates": [
+        8,
+        16,
+        32
+      ],
+      "batch_start": 1,
+      "preferred_first_start": {
+        "resolution": 128,
+        "history": 8
+      },
+      "note": "the measured values replace the pending fields; the CPU tiny path only covers numerical tests"
+    },
+    "pending_profiling": {
+      "status": "filled_from_p0_measurement",
+      "note": "the section name is historical; every value below is measured, locked at P0, or a declared estimate",
+      "source": "E remote run 2026-10-14: runs/p0-20261014/outputs/profile_dbsr_p0-20261014.json and runs/p0-20261014/receipts/06_cost_estimate.md",
+      "resolution": {
+        "value": 128,
+        "unit": "packed_cells",
+        "value_status": "locked_at_p0",
+        "source": "P0 首选起点 128/history=8；机制通路 20k 起、上限 100k（共同契约第 5 节规划候选，非充分训练证据）"
+      },
+      "step_time_seconds": {
+        "value": 0.046073,
+        "value_status": "measured",
+        "source": "runs/p0-20261014/outputs/profile_dbsr_p0-20261014.json 的 128/8 point，forward_backward.p50_s；entry=encoder、fp32、batch=1、单相机视角、20 次同步迭代、3 次预热；设备 RTX PRO 6000 Blackwell、torch 2.9.1+cu128"
+      },
+      "measured_micro_batch": {
+        "value": 1,
+        "value_status": "measured",
+        "source": "E remote run 2026-10-14: runs/p0-20261014/outputs/profile_dbsr_p0-20261014.json and runs/p0-20261014/receipts/06_cost_estimate.md"
+      },
+      "effective_batch": {
+        "value": 8,
+        "value_status": "planned_from_measured_micro_batch",
+        "formula": "实测 micro-batch 1 × 梯度累计 8",
+        "source": "E remote run 2026-10-14: runs/p0-20261014/outputs/profile_dbsr_p0-20261014.json and runs/p0-20261014/receipts/06_cost_estimate.md"
+      },
+      "max_steps": {
+        "value": 100000,
+        "value_status": "locked_at_p0",
+        "source": "P0 首选起点 128/history=8；机制通路 20k 起、上限 100k（共同契约第 5 节规划候选，非充分训练证据）"
+      },
+      "gpu_hours": {
+        "twenty_k": 215.0073,
+        "hundred_k": 1075.0367,
+        "three_hundred_k": 3225.11,
+        "value_status": "estimated_from_measured_step_time",
+        "basis": "128/8, microbatch=1, accumulation=8, 7 arms x 3 seeds x 2 platforms, cameras=2/3",
+        "runs": {
+          "total": 42,
+          "libero_runs": 21,
+          "robotwin2_runs": 21
+        },
+        "gradient_accumulation": 8,
+        "excludes": [
+          "policy/action head",
+          "optimizer",
+          "评测",
+          "checkpoint",
+          "loader I/O",
+          "SEA-RAFT/Mamba"
+        ],
+        "source": "Original P0 measurement; corrected matrix and optimizer-update accounting in independent audit"
+      },
+      "io_mib_per_second": {
+        "throughput": "measured",
+        "scope": "single process, warmed decoded episode cache, 20 real loader samples per split; throughput of returned RAW value tensors, not physical disk bandwidth",
+        "historical_wall_time": {
+          "libero": 0.0812,
+          "robotwin2": 0.0344
+        },
+        "source": "runs/p0-audit-20261014/outputs/inventory-v2/inventory.json",
+        "measurements": {
+          "libero": {
+            "train": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 2.1173003129661083,
+              "p50_seconds": 0.07068441715091467,
+              "p95_seconds": 0.22492255084216595,
+              "decoded_raw_mib_per_second": 113.35189369701929
+            },
+            "calibration": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 1.9565359046682715,
+              "p50_seconds": 0.07471744529902935,
+              "p95_seconds": 0.1639982715714723,
+              "decoded_raw_mib_per_second": 122.6657785463394
+            },
+            "validation": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 2.4071224331855774,
+              "p50_seconds": 0.0791170746088028,
+              "p95_seconds": 0.21490986798889938,
+              "decoded_raw_mib_per_second": 99.70411005741192
+            },
+            "test": {
+              "samples": 20,
+              "raw_output_bytes": 251658240,
+              "seconds": 1.6666450081393123,
+              "p50_seconds": 0.08178561413660645,
+              "p95_seconds": 0.08653061371296646,
+              "decoded_raw_mib_per_second": 144.00187132108147
+            }
+          },
+          "robotwin2": {
+            "train": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.7053910680115223,
+              "p50_seconds": 0.03509713523089886,
+              "p95_seconds": 0.038653918216004966,
+              "decoded_raw_mib_per_second": 598.0725006757654
+            },
+            "calibration": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.7492476124316454,
+              "p50_seconds": 0.037701903842389584,
+              "p95_seconds": 0.03900816515088081,
+              "decoded_raw_mib_per_second": 563.0648573317784
+            },
+            "validation": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.694366286508739,
+              "p50_seconds": 0.03472835896536708,
+              "p95_seconds": 0.036113024782389404,
+              "decoded_raw_mib_per_second": 607.5683802581773
+            },
+            "test": {
+              "samples": 20,
+              "raw_output_bytes": 442368000,
+              "seconds": 0.6617661919444799,
+              "p50_seconds": 0.03294250322505832,
+              "p95_seconds": 0.03387186783365905,
+              "decoded_raw_mib_per_second": 637.4985684300324
+            }
+          }
+        }
+      },
+      "historical_30run_cost_estimate": {
+        "twenty_k": 19.2,
+        "hundred_k": 95.99,
+        "three_hundred_k": 287.96,
+        "value_status": "estimated_from_measured_step_time",
+        "basis": "每次 update = 相机数 × 0.046073 s（LIBERO 2 相机 → 0.09215 s；RoboTwin 3 相机 → 0.13822 s）；30 runs = 3 种子 × 5 方法 × 2 平台",
+        "runs": {
+          "total": 30,
+          "libero_runs": 15,
+          "robotwin2_runs": 15
+        },
+        "variants": {
+          "six_run_minimum_start": {
+            "twenty_k": 3.84,
+            "hundred_k": 19.2,
+            "three_hundred_k": 57.59
+          },
+          "effective_batch_8": {
+            "twenty_k": 153.6,
+            "hundred_k": 767.9,
+            "three_hundred_k": 2303.7
+          },
+          "bf16_autocast": {
+            "measured_step_time_seconds": 0.0301,
+            "speedup_factor": 0.653,
+            "note": "128/8 从 0.046073 s → 0.03010 s（实测 autocast）"
+          }
+        },
+        "excludes": [
+          "policy/action head",
+          "optimizer",
+          "评测",
+          "checkpoint",
+          "loader I/O",
+          "SEA-RAFT/Mamba"
+        ],
+        "source": "runs/p0-20261014/receipts/06_cost_estimate.md（由实测 step time 推算）"
+      }
+    }
+  },
+  "statistics": {
+    "paired_unit": "platform / task_template / source_group, crossed with training seed",
+    "resampling": "Within each platform resample task clusters, then source trajectories within tasks; resample training seed as a crossed factor shared across tasks. Reuse identical resampling indices for every arm; never bootstrap frames/cameras as independent units.",
+    "alpha": "pending_calibration",
+    "alpha_planned": 0.05,
+    "min_paired_units": "pending_calibration",
+    "variance_source": "P0/P3 development variance determines detectability",
+    "report": "effect sizes with the paired uncertainty, censored/unrecovered cases retained in the table",
+    "estimand": "In-distribution held-out trajectories within the observed task pool. Task templates are shared across splits; no unseen-task/scene generalization claim.",
+    "task_groups": {
+      "path": "data/manifests/n01-full-v1/n01-full-v1-task-groups.json",
+      "sha256": "55d8c14e5a4e98279b8788cd9aa8f973c3b55e7cfcdb37287b40f2927dad7f66",
+      "source": "All 2403 real NPZ metadata records re-read during independent P0 audit"
+    }
+  },
+  "multi_comparison": {
+    "correction": "Holm",
+    "family": [
+      "N-TS vs B3",
+      "N-T vs B3",
+      "N-S vs B3",
+      "N-TS vs B2",
+      "B3 vs B2",
+      "B2 vs B1",
+      "B1 vs B0"
+    ],
+    "order_policy": "pre-registered in the order above; the primary comparison is first; Holm is applied over the whole family",
+    "primary_comparison": "N-TS vs B3"
+  },
+  "backend_protocol": {
+    "backend": "frozen RawVLA PI0/PI05 (StarVLA adapter)",
+    "weights": {
+      "libero": {
+        "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+        "sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+        "value_status": "measured_by_lead_2026-10-14",
+        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策"
+      },
+      "robotwin2": {
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+        "sha256": "9a5381c3260fc58fdb4b90d17b93f9090bcbfbcd8e0287f9bf2acea2477a2bc3",
+        "value_status": "measured_by_lead_2026-10-14",
+        "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策"
+      }
+    },
+    "tokenizer": {
+      "path": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+      "value_status": "measured_by_lead_2026-10-14",
+      "source": "服务器 sha256sum 实测；本地 docs/prompts/n01_v1_0/remote_snapshot.json 的转录值逐条一致；configs/encoders/n01_full/upstream_lock.json 的 hash_verification 记录同一政策"
+    },
+    "token_contract": {
+      "tokens_per_valid_camera": 256,
+      "token_width": 2048,
+      "dbsr_feature_projection": "512 -> 2048 explicit",
+      "camera_combination": "concatenate tokens at the backend when no accepted cross-camera geometry exists; never merge RAW statistics across cameras"
+    },
+    "frozen_default_assets": "read-only reuse of the complete Default numbers; new models never write into the frozen output directories",
+    "comparison_policy": "P7 compares the frozen backend against the same-range unfrozen variant; P8 is the full closed loop"
+  },
+  "profiling": {
+    "device_required": "cuda",
+    "local_cpu_policy": "refuse with an explicit error; never report a CPU fallback as a GPU profile",
+    "encoder_factory": "owac.runtime.n01_full_profile:dbsr_factory",
+    "encoder_contract": {
+      "factory_call": "factory(protocol=..., point=..., device=..., backbone=...)",
+      "step_output": "tensor or a dict/list of tensors (backward uses the sum)"
+    },
+    "points": [
+      {
+        "id": "p64-h8",
+        "resolution": 64,
+        "history": 8,
+        "batch": 1,
+        "warmup": 3,
+        "iterations": 20
+      },
+      {
+        "id": "p128-h8",
+        "resolution": 128,
+        "history": 8,
+        "batch": 1,
+        "warmup": 3,
+        "iterations": 20
+      },
+      {
+        "id": "p128-h16",
+        "resolution": 128,
+        "history": 16,
+        "batch": 1,
+        "warmup": 3,
+        "iterations": 20
+      },
+      {
+        "id": "p128-h32",
+        "resolution": 128,
+        "history": 32,
+        "batch": 1,
+        "warmup": 3,
+        "iterations": 20
+      },
+      {
+        "id": "p224-h8",
+        "resolution": 224,
+        "history": 8,
+        "batch": 1,
+        "warmup": 3,
+        "iterations": 20
+      }
+    ],
+    "measurements": [
+      "p50/p95 forward+backward after warm-up with explicit device synchronisation",
+      "allocated / reserved / peak device memory",
+      "I/O throughput on the real NPZ read path when --io-root is given",
+      "valid batch and camera count"
+    ],
+    "cost_model": {
+      "units": [
+        {
+          "id": "p4_libero_20000",
+          "updates": 20000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_robotwin2_20000",
+          "updates": 20000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_libero_100000",
+          "updates": 100000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_robotwin2_100000",
+          "updates": 100000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_libero_300000",
+          "updates": 300000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 2,
+          "gradient_accumulation": 8
+        },
+        {
+          "id": "p4_robotwin2_300000",
+          "updates": 300000,
+          "max_updates": 100000,
+          "runs": 21,
+          "camera_count": 3,
+          "gradient_accumulation": 8
+        }
+      ],
+      "excluded_from_estimate": [
+        "SEA-RAFT adaptation and support-replay costs not yet executable",
+        "evaluation and I/O costs unless measured"
+      ],
+      "note": "21 runs per platform = 7 declared arms x 3 seeds; 42 total. Costs include 8 microsteps and per-platform cameras. 300k is an extrapolation, not P4 authorization.",
+      "basis_point_id": "p128-h8"
+    },
+    "gpu_hours": {
+      "twenty_k": 215.0073,
+      "hundred_k": 1075.0367,
+      "three_hundred_k": 3225.11,
+      "value_status": "estimated_from_measured_step_time",
+      "detail": "budget.pending_profiling.gpu_hours"
+    },
+    "second_batch_rule": "an occasional idle moment on the shared server is not a dedicated GPU; record still-running services and the memory assigned to this task",
+    "backbone": "dbsr",
+    "backbone_choices": [
+      "dbsr",
+      "bsrt"
+    ],
+    "backbone_contract": {
+      "channels": 64,
+      "num_blocks": 9,
+      "feature_width": 512,
+      "readout_tokens": 256,
+      "readout_width": 2048
+    },
+    "backbone_override_rule": "non-full-size DBSR profiling is refused; an explicit profiling.backbone / --backbone override selects a different backbone (the P6 BSRT backbone) instead of silently relaxing the full-size contract",
+    "measurement_channels": 4,
+    "channel_multiple_rule": "encoder input_channels must be a whole multiple of the measurement channels (CFA 4/8, rawvla_rgb3 3/6)",
+    "encoder_factory_status": "Executable P0 probe of existing DBSR, not N01FullEncoder; four-channel synthetic CFA only. history>8 uses direct backbone/fusion modules."
+  }
+}

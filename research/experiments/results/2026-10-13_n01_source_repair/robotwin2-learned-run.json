@@ -1,0 +1,423 @@
+{
+  "suite": "robotwin2",
+  "method": "n01",
+  "config": {
+    "input_mode": "rawvla_rgb3",
+    "channels": 3,
+    "planes": 1,
+    "cfa_pattern": "RGGB",
+    "width": 32,
+    "num_blocks": 2,
+    "neighbourhood_radius": 2,
+    "spatial_radii": [
+      0,
+      1,
+      2
+    ],
+    "time_depths": [
+      1,
+      4,
+      8
+    ],
+    "max_history": 8,
+    "support_power": 2.0,
+    "support_floor": 0.05,
+    "merge_threshold": 0.55,
+    "split_threshold": 0.35,
+    "edge_temperature": 0.1,
+    "edge_alpha": 0.35,
+    "edge_beta": 0.35,
+    "edge_forget": 0.1,
+    "learnable_gate": true,
+    "gate_hidden": 8,
+    "alignment": "none",
+    "correspondence_window": 3,
+    "correspondence_width": 16,
+    "fractional_alignment": false,
+    "soft_argmax": true,
+    "soft_argmax_temperature": 0.05,
+    "selection": "learned",
+    "selection_use_learned": false,
+    "selector_temperature": 0.1,
+    "cost_weights": {
+      "noise": 2.0,
+      "edge": 0.5,
+      "age": 0.15,
+      "motion": 0.5
+    },
+    "budget_conditioning": false,
+    "trainable_support": true,
+    "aux_measurement_prediction": true,
+    "readout_tokens": 256,
+    "readout_width": 2048,
+    "require_unique_frames": true,
+    "max_domain_pixels": 0,
+    "loss_weights": {
+      "location": 1.0,
+      "measurement_prediction": 0.1,
+      "budget": 0.0
+    },
+    "noise_shot": 0.0,
+    "noise_read": 0.001,
+    "deadline_ms": null,
+    "task_precision": null
+  },
+  "git_sha": "unknown",
+  "source_manifest": "/workspace/owac/rawvla/research/n01-source-repair-20261013/source-manifest.json",
+  "source_manifest_sha256": "e9b751704517dc1295d3cc6bba22caed8a9ed55446072bc1785384d73e621a8e",
+  "input_hashes": {
+    "npz": "0d0c834f5d0c1b22207663eeae34f0b0c7564beacffa279166f6afc6957b3316",
+    "statistics": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+    "tokenizer": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+  },
+  "rows": [
+    {
+      "step": 1,
+      "action_loss": 1.330594539642334,
+      "aux_loss": 1.5236014127731323,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 28.92914041486955,
+        "readout": 8.189520835876465,
+        "gate": 0.16063755191862583,
+        "selector": 0.08083456874186368
+      },
+      "wall_ms": 968.6443526297808,
+      "frames": [
+        [
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 2,
+      "action_loss": 2.055607557296753,
+      "aux_loss": 1.3940294981002808,
+      "valid_actions": 50,
+      "gradient_norms": {
+        "stem": 14.342780580673804,
+        "readout": 7.494769871234894,
+        "gate": 0.45528455075873353,
+        "selector": 0.8881050717039827
+      },
+      "wall_ms": 820.8713997155428,
+      "frames": [
+        [
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    },
+    {
+      "step": 3,
+      "action_loss": 1.6328082084655762,
+      "aux_loss": 1.2625058889389038,
+      "valid_actions": 16,
+      "gradient_norms": {
+        "stem": 16.267792295790912,
+        "readout": 4.1520532965660095,
+        "gate": 0.9001305220153881,
+        "selector": 0.3164393365864271
+      },
+      "wall_ms": 923.0017755180597,
+      "frames": [
+        [
+          73,
+          74,
+          75,
+          76
+        ]
+      ],
+      "episodes": [
+        "grab_roller/episode_000000.npz"
+      ]
+    }
+  ],
+  "inference": {
+    "shape": [
+      1,
+      50,
+      32
+    ],
+    "finite": true,
+    "repeat_max_abs": 0.0,
+    "encoder_calls_during_denoising": 0,
+    "actual_denoise_steps_two_calls": 20,
+    "denoising_steps": 10,
+    "physical_control_executed": false
+  },
+  "load_audit": {
+    "loaded_keys": 376,
+    "model_keys": 376,
+    "inactive_keys": [],
+    "active_missing": [],
+    "unexpected": [],
+    "shape_mismatch": [],
+    "replaced_vision_keys": 437,
+    "replaced_vision_key_sha256": "3238210d2021691e7177b2bd9b0329923a111af7ed5fdc286b134aedc3174694",
+    "replaced_vision_key_sample": [
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+      "vlm.model.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.layer_norm2.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.bias",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc1.weight",
+      "vlm.model.model.vision_tower.vision_model.encoder.layers.0.mlp.fc2.bias"
+    ],
+    "parameter_groups": {
+      "language_model": {
+        "prefixes": [
+          "vlm.model.model.language_model.",
+          "vlm.model.language_model."
+        ],
+        "model_tensors": 164,
+        "checked_tensors": 164,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 2508531712
+      },
+      "language_projection": {
+        "prefixes": [
+          "vlm.model.lm_head.",
+          "vlm.model.model.embed_tokens.",
+          "vlm.lm_head."
+        ],
+        "model_tensors": 1,
+        "checked_tensors": 1,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 526647296
+      },
+      "action_expert": {
+        "prefixes": [
+          "action_head."
+        ],
+        "model_tensors": 209,
+        "checked_tensors": 209,
+        "missing": [],
+        "shape_mismatch": [],
+        "parameters": 693422112
+      }
+    },
+    "vision_release": {
+      "vision_tower_detected": true,
+      "vision_param_bytes_before": 826831584,
+      "release_method": "nn.Module.__setattr__(target, 'vision_tower', None) + gc",
+      "verified_removed": true,
+      "cuda_cache_cleared": false,
+      "detached_reference_kept": false,
+      "release_path": "vlm.model.model.vision_tower",
+      "vision_param_bytes_after": 0,
+      "bytes_freed": 826831584
+    },
+    "notes": [
+      "vision tower weights from the checkpoint are intentionally not loaded; the OWAC readout replaces the pi0.5 vision prefix",
+      "language/action parameters were checked item by item before loading"
+    ]
+  },
+  "input_provenance": "author three-channel pseudo-RAW NPZ, no Bayer claim",
+  "noise_provenance": "assumed constant variance, not calibrated sensor noise",
+  "crop": 32,
+  "data_spec": {
+    "loader": "owac.raw.rawvla_sequence.RawVLASequenceDataset",
+    "dataset_format": "robotwin2",
+    "root": "/workspace/owac/rawvla",
+    "raw_cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw",
+    "rgb_cache_root": "/workspace/owac/rawvla/data/robotwin2/rgb",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+    "stats_available": true,
+    "statistics": {
+      "normalization": "zscore",
+      "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "action_stats_key": "actions",
+      "state_stats_key": "state",
+      "available": {
+        "action": true,
+        "state": true
+      },
+      "fields": {
+        "action": [
+          "max",
+          "mean",
+          "min",
+          "std"
+        ],
+        "state": [
+          "max",
+          "mean",
+          "min",
+          "std"
+        ]
+      },
+      "source": {
+        "stats_key": "",
+        "selection": "author _load_stats rules",
+        "file": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+      }
+    },
+    "normalization": "zscore",
+    "camera_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "head_camera",
+      "left_camera",
+      "right_camera"
+    ],
+    "camera_dtype": "floating",
+    "raw_value_policy": {
+      "mode": "author_float32_passthrough",
+      "unit": "hdr_derived_raw_float32_author_units",
+      "evidence": "author cache stores head/left/right_camera_raw_float32 as HDR-derived RAW float32 in its own units; the author loader divides only uint8 bursts and never rescales float32. Recorded sample data/robotwin2/raw/grab_roller/episode_000018.npz (RawVLA-Bench 8586c59, dataset-check.json): head max 0.4332, left max 0.3744, right max 0.3738, min 0.0 (right min 2.6e-4). Dividing by 255 would push the whole scene below 1.7e-3, and a per-frame max scaling would destroy the lighting-domain information, so OWAC passes these arrays through and applies only a calibration declared in the metadata.",
+      "forbidden": [
+        "dividing RoboTwin float32 RAW by 255",
+        "per-frame max normalisation of any RAW array",
+        "renaming three-channel pseudo-RAW as Bayer CFA"
+      ]
+    },
+    "channels_per_camera": 3,
+    "sampling_geometry": "per_pixel_trichromatic_collocated",
+    "supported_input_modes": {
+      "rawvla_rgb3": "this loader: co-located three-channel measurement windows",
+      "bayer_cfa": "owac.raw.cfa plane stacks wrapped by measurement_window_from_cfa; the RawVLA NPZ cache itself is three-channel and is never called Bayer",
+      "sequence1d": "owned by the one-dimensional adapter, not by this loader"
+    },
+    "state_source_key": "actions",
+    "state_dim": 14,
+    "state_kind": "cached_joint_target_channel",
+    "state_note": "actions[t][:14] is the cached 14-dim joint target channel that the author reuses as the current state; the 16-dim robot_states is an end-pose representation and is never used as the joint state. The cache records commands, not measured executed actions.",
+    "proprio_available": false,
+    "executed_action_available": false,
+    "executed_action_note": "the cache holds commands and future supervision; no measured executed action is recorded, so the flag is False and executed_action stays None",
+    "action_dim": 14,
+    "action_offset": 1,
+    "action_horizon": 50,
+    "window": 4,
+    "observation_stride": 1,
+    "observation_stride_verified": false,
+    "time_unit_observed": {
+      "frame": 4
+    },
+    "timestamp_keys_checked": [
+      "timestamps",
+      "timestamps_seconds",
+      "timestamp",
+      "time_stamps",
+      "observation_timestamps",
+      "time"
+    ],
+    "time_unit_policy": "seconds when the episode declares a finite, monotone timestamp array, otherwise 'frame' with the frame index in the timestamp field; seconds are never invented and no nominal frame rate is assumed",
+    "noise_model": null,
+    "episodes": 632,
+    "episodes_in_split": 508,
+    "split": {
+      "split_version": "n01-rawvla-split-v1",
+      "requested": "train",
+      "counts": {
+        "files": 632,
+        "groups": 632,
+        "train_files": 508,
+        "validation_files": 124,
+        "train_groups": 508,
+        "validation_groups": 124
+      },
+      "rule": [
+        "rule: sha256(split_version + '|' + source_group) -> u64/2**64 < train_fraction",
+        "paired RGB/RAW files and lighting variants of one source share a group by construction",
+        "official RawVLA closed-loop manifests are kept separate and never mixed into this split"
+      ],
+      "manifest_path": null,
+      "source_groups": 632
+    },
+    "identity_fields": {
+      "path": "data/<format>/{raw,rgb}/ prefix dropped, variant_NN/lighting suffixes stripped",
+      "metadata": [
+        "source_group",
+        "capture_session",
+        "session_id",
+        "acquisition_id"
+      ]
+    },
+    "identity_fields_observed": {
+      "lighting_domain": [],
+      "source_group": [],
+      "capture_session": [],
+      "session_id": [],
+      "acquisition_id": []
+    },
+    "identity_fields_available": {
+      "relative_path": true,
+      "source_group": false,
+      "capture_session": false,
+      "session_id": false,
+      "acquisition_id": false,
+      "lighting_domain": false
+    },
+    "official_closed_loop_manifest": {
+      "used": false,
+      "note": "the official RawVLA closed-loop manifest is kept separate and never mixed into this loader's split"
+    },
+    "data_present": true,
+    "real_data_available": null,
+    "real_data_available_note": "True means the provenance scan covered every episode and found no synthetic declaration; None means the scan has not covered the inventory on this machine, so availability is unverified rather than claimed",
+    "synthetic_fixture_episodes": [],
+    "provenance_scanned_episodes": 1,
+    "fixture_provenance": "real",
+    "range_evidence": null,
+    "missing_assets": [
+      {
+        "kind": "root",
+        "path": "/workspace/owac/rawvla",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "RawVLA server snapshot root holding the RawVLA-Bench download"
+      },
+      {
+        "kind": "raw_cache",
+        "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "robotwin2 raw NPZ cache; expected author keys head_camera_raw_float32, left_camera_raw_float32, right_camera_raw_float32"
+      },
+      {
+        "kind": "stats",
+        "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "required": true,
+        "satisfied": true,
+        "env_var": null,
+        "note": "author normalisation statistics (zscore)"
+      },
+      {
+        "kind": "rgb_cache",
+        "path": "/workspace/owac/rawvla/data/robotwin2/rgb",
+        "required": false,
+        "satisfied": false,
+        "env_var": null,
+        "note": "author paired RGB chroma cache; OWAC never loads it because the main path produces no RGB target"
+      }
+    ]
+  },
+  "encoder_parameter_update": 1.909694779838901,
+  "backend_gradients": 0,
+  "torch": "2.7.1+cu128",
+  "python_runtime": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+  "peak_gpu_bytes": 10309221376
+}

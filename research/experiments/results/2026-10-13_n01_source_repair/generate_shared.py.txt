@@ -1,0 +1,17 @@
+import dataclasses
+import hashlib
+import json
+from pathlib import Path
+import torch
+from owac.evaluation.n01 import build_conditions, pregenerate_batches
+from owac.frameworks.n01.config import load_config
+from owac.frameworks.n01.synthetic import SyntheticWeakEdgeTask
+root=Path(__file__).resolve().parent
+torch.set_num_threads(4)
+cfg=load_config(Path('configs/encoders/n01/tiny.json'))
+conditions=build_conditions(1234)
+training=pregenerate_batches(cfg,steps=40,batch_size=4,length=12,image_size=32,seed=1234)
+evaluation={c.seed:SyntheticWeakEdgeTask(cfg,**c.task_kwargs()).sample(4,12,seed=c.seed) for c in conditions}
+protocol={'train_steps':40,'batch_size':4,'length':12,'image_size':32,'seed':1234,'lr':3e-4,'weight_decay':1e-4,'grad_clip':1,'objective':'huber_final_frame','head_seed':101237,'calibration':'first_training_batch','dataset':'corrected_synthetic_linear_pixel_footprint_v2','tuned':False,'alignment':cfg.alignment,'identical_input_tensors':True}
+torch.save({'config':cfg.to_dict(),'conditions':[dataclasses.asdict(c) for c in conditions],'training':training,'evaluation':evaluation,'protocol':protocol},root/'shared-data.pt')
+(root/'shared-data-manifest.json').write_text(json.dumps({'sha256':hashlib.sha256((root/'shared-data.pt').read_bytes()).hexdigest(),'protocol':protocol,'conditions':[dataclasses.asdict(c) for c in conditions]},indent=2)+'\n')

@@ -1,0 +1,29 @@
+import json
+import sys
+from pathlib import Path
+import torch
+import owac.evaluation.n01_trajectories as trajectories
+from owac.frameworks.n01.config import N01Config
+
+root=Path(__file__).resolve().parent
+label=sys.argv[1]
+torch.set_num_threads(4)
+if label=='generate':
+    config=trajectories._default_config()
+    batches={spec['seed']:trajectories.SyntheticWeakEdgeTask(config,image_size=32,snr=spec['snr'],motion=spec['motion'],tolerance=spec['tolerance'],seed=spec['seed']).sample(1,spec['length']) for spec in trajectories.TRAJECTORIES}
+    batches[500000]=trajectories.SyntheticWeakEdgeTask(config,image_size=32,snr='low',motion='slow',seed=500000).sample(1,8)
+    torch.save({'config':config.to_dict(),'batches':batches},root/'trajectory-data.pt')
+    sys.exit(0)
+payload=torch.load(root/'trajectory-data.pt',weights_only=False)
+config=N01Config.from_dict(payload['config'])
+class Task:
+    def __init__(self,*args,**kwargs): self.seed=kwargs['seed']
+    def sample(self,*args,**kwargs): return payload['batches'][self.seed]
+trajectories.SyntheticWeakEdgeTask=Task
+rows=[]
+for spec in trajectories.TRAJECTORIES:
+    encoder=trajectories.build_encoder(config,seed=0)
+    result=trajectories.run_trajectory(spec,config=config,encoder=encoder)
+    rows.append(result.summary())
+(root/f'{label}-trajectory-comparison.json').write_text(json.dumps({'training_performed':False,'weight_initialization_seed':0,'conditions':rows},indent=2)+'\n')
+print(label,[(row['name'],row['selected_history_frames_mean']) for row in rows])

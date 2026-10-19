@@ -1,0 +1,41 @@
+import hashlib,json,subprocess,zipfile
+from pathlib import Path
+import torch
+from owac.baselines.burst_features import BurstFeatureConfig
+from owac.evaluation.n01_burst import BurstProbe,evaluate,parameter_digest,source_manifest
+root=Path('outputs/n01-dbsr-pilot-20261013')
+p=json.loads((root/'metrics.json').read_text())
+assert p['source_manifest']==source_manifest()
+torch.set_num_threads(1)
+torch.use_deterministic_algorithms(True)
+base=p['runs'][0]
+checks=[]
+for r in p['runs']:
+    assert r['train_input_sha256']==base['train_input_sha256']
+    assert r['train_fixture_sha256']==base['train_fixture_sha256']
+    assert len(r['curves'])==128 and r['evaluation_split']=='validation'
+    for c in base['evaluation']['cases']:
+        for key in ['input_sha256','fixture_sha256']:
+            assert r['evaluation']['cases'][c][key]==base['evaluation']['cases'][c][key]
+    assert r['initial_parameter_hashes']['head']==base['initial_parameter_hashes']['head']
+    if r['method']!='mean_capacity':
+        assert r['initial_parameter_hashes']['backbone']==base['initial_parameter_hashes']['backbone']
+    file=root/r['method']/f"61-{r['method']}-best.pt"
+    cp=torch.load(file,weights_only=True)
+    model=BurstProbe(BurstFeatureConfig(**cp['encoder_config']))
+    model.load_state_dict(cp['model'],strict=True)
+    assert parameter_digest(model)==r['best_parameter_hash']
+    assert evaluate(model,p['protocol'],61,'validation')==r['evaluation']
+    checks.append({'method':r['method'],'checkpoint_sha256':hashlib.sha256(file.read_bytes()).hexdigest(),'metrics_identical':True})
+    print(r['method'],'restored metrics identical',flush=True)
+unchanged={}
+for file in Path('src/owac/frameworks/n01').glob('*.py'):
+    assert file.read_bytes()==subprocess.check_output(['git','show',f"{p['git_head']}:{file}"])
+    unchanged[str(file)]=hashlib.sha256(file.read_bytes()).hexdigest()
+with zipfile.ZipFile(next(Path('outputs/n01-literature-20261013/wheel-check').glob('*.whl'))) as w:
+    for name in ['LICENSE','provenance.json']:
+        rel=f'owac/baselines/_vendor/dbsr/{name}'
+        assert w.read(rel)==Path('src',rel).read_bytes()
+receipt={'all_training_and_validation_inputs_paired':True,'source_hashes_unchanged':True,'core_n01_unchanged':unchanged,'full_size_checkpoint_replays':checks,'wheel_contains_upstream_license_and_provenance':True,'tests':{'passed':330,'warnings':1,'log':'outputs/n01-literature-20261013/burst-full-tests-final.log'}}
+(root/'verification.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print('verified',flush=True)

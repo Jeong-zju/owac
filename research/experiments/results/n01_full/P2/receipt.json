@@ -1,0 +1,1461 @@
+{
+ "schema": "owac.n01-full.p2-receipt.v1",
+ "stage": "P2",
+ "date": "2026-10-14",
+ "branch": "lzh/n01-evidence-integration",
+ "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+ "base_head": "01e0316",
+ "files": {
+  "src/owac/backends/raw_correspondence.py": "a276b816198c15f7da4e999a53d43acbd75dade10e93305ce0c0deb0889efc79",
+  "src/owac/raw/n01_motion_data.py": "27e44636087fd03cd57d425faeaa76c6dbd56723afbd45280a41082cc0861795",
+  "src/owac/raw/n01_noise.py": "44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d",
+  "src/owac/training/n01_motion.py": "c06c158fd1184343719940bdae77766d4c0daeb0c68fcf2e067adbd852c13085",
+  "src/owac/evaluation/n01_motion.py": "bc54d161d00a0e7ccca02144c08b1073fcf7f059089c618289584fce8085e241",
+  "src/owac/frameworks/n01_full/adapters.py": "ff460ee397c6e94a87e859a22aff4dc51a952a1802274a13956f36c844638f50",
+  "src/owac/frameworks/n01_full/motion_builders.py": "fefbfd3c8ffd3ad11d4bfcea70cf39de25a300164cfd3e900e1a3876ccb6d842",
+  "src/owac/frameworks/n01_full/statistics.py": "d24107dbdf42b3c60f4aad0cdcc9b6158ffeda76614ee785ea258d1539e85d50",
+  "src/owac/runtime/n01_full_policy_preflight.py": "5fa4d14d7bbb55982a1a2dd821784735036e00561c02fb8fab676f70ede5408a",
+  "configs/encoders/n01_full/p2_motion_noise.json": "658f51f0f28fbebcb5d06019c9ac6367192f34e03d91beaf72b8699f506fe74f",
+  "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+  "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+  "configs/encoders/n01_full/p2_motion_train_rgb3_formal.json": "52351c5c06cdf08dac82a37cbfdb81b3b72bde2c69fefbd21c7535daab36d48e",
+  "pyproject.toml": "ea2e887fd1a7a8d8f74d98ffc49f979167e00813fd7f5731fe3097e55f293ff5",
+  "tests/encoders/n01_full/test_motion.py": "dcb5ed5cafb69abc47f4a7b635dce70e3b49ea1515eb6375ee9fead027dc3c92",
+  "tests/encoders/n01_full/test_motion_bridge.py": "eb32f5034b6560550ba12bd4b3d33da87bd6bca88e6c92d824ce25bbcb4967d0",
+  "tests/encoders/n01_full/test_motion_data.py": "96e684d2f335eaa9b32c7bc15526f3a00232fc5113ce4cea2cdb055dabfb6d57",
+  "tests/encoders/n01_full/test_motion_eval.py": "1476d29696a1421583f2527b2ef0b78867ff67e51063766abafae3a5d307e46f",
+  "tests/encoders/n01_full/test_motion_training.py": "f51e53448e1648bfbdd3b06ebb501bc269a43ec893f17169cf3a6b103bd54937",
+  "tests/encoders/n01_full/test_noise.py": "720f6ed48a896796e637ac961ae21498cede9f6abeb96400c90143f07cb91d01",
+  "tests/encoders/n01_full/test_raw_adapter.py": "ea8153808df11a4ea1672ecee9f5a3a32ccc4e5e491d607b0661dd1aad8c7d85",
+  "tests/encoders/n01_full/test_p2_acceptance.py": "6761a5a0cc84185cfe5d1884d1e82349c01e61f3002ddc8a990ecb8455bf2015",
+  "tests/encoders/n01_full/test_preflight_motion_checkpoint.py": "ee56e76921f8427f713c438d336a50e686c43e05aff05f7325d2dcae612a0e60",
+  "tests/encoders/n01_full/test_preflight_window_counts.py": "8840c5e746ceb7d24818eaf0244828356ea13a29519427e29d3b8717ce683904",
+  "src/owac/baselines/_vendor/sea_raft/LICENSE": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+  "src/owac/baselines/_vendor/sea_raft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/__init__.cpython-312.pyc": "0cc95789182d3b4e653e68d7e229e90d47b6c0043edf4b8d6b4deae10f2c4ef8",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/corr.cpython-312.pyc": "82662643afcd8137374b09251a178420bcdea9a0540e9b0b7fa239e077799d18",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/extractor.cpython-312.pyc": "835709ea5c94520f3121d16f67683a2576070f75327c1cacf3988c0b8c6e6da3",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/layer.cpython-312.pyc": "58a3691c12a29b2da19bdb2cbc97a569b0c2fec1592ccf9168012b673e495208",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/raft.cpython-312.pyc": "c731fabc8d2556d03023fe79652d3b00f2754b2bb943ffba053bff03f79af091",
+  "src/owac/baselines/_vendor/sea_raft/__pycache__/update.cpython-312.pyc": "a5dd518a671a1bfdc5f96abcbd17a152c824c6188b95cf1412223b9e1006d158",
+  "src/owac/baselines/_vendor/sea_raft/corr.py": "8e5c700258f8e8da4e2be6c38bc1d1498a73d82c37e9fd4caca668b245bc318d",
+  "src/owac/baselines/_vendor/sea_raft/extractor.py": "1ef874b6bd6c90c700966180bc40bc2a85d83b187bf53a6772db3f67f85c3294",
+  "src/owac/baselines/_vendor/sea_raft/layer.py": "7f70c868e80cee021c8e2e26b5d1e160ff9aff83a8b141f36977ad12405a2859",
+  "src/owac/baselines/_vendor/sea_raft/provenance.json": "4cb19842fa49c5c145cb886be4e3bdcc314480a4a7a543a2494341f57132e4a7",
+  "src/owac/baselines/_vendor/sea_raft/raft.py": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+  "src/owac/baselines/_vendor/sea_raft/update.py": "4f94abfc36ac057c481aa5f8e830192b2d1d15b7b88a4172e4895ee8b0d5ecd9",
+  "src/owac/baselines/_vendor/sea_raft/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "src/owac/baselines/_vendor/sea_raft/utils/__pycache__/__init__.cpython-312.pyc": "0c84da34b2938d18872ab84a6fa80d3b904719f8af5ecd59f2962140f5f5aac4",
+  "src/owac/baselines/_vendor/sea_raft/utils/__pycache__/utils.cpython-312.pyc": "fd06f41741def392943e1c432dc0b1d932491204efb6c6ce1f3eeef816ceae9e",
+  "src/owac/baselines/_vendor/sea_raft/utils/utils.py": "f861c1f4b5d186f05118124e530e105a6039bda3f8aa1f6086a757ec0f330747",
+  "research/experiments/results/n01_full/P2/motion-train-eval-local-smoke.json": "6ffb2e080aa5a79e6c888ff252244d37c2e6097e9bc887af4b1d6a549ca4f2e4",
+  "research/experiments/results/n01_full/P2/motion-train-eval-stem-rgb3.json": "e6771196ec4c6096c3a9fbe8741970aad1c2407334c006282fce5e40a820ac61",
+  "research/experiments/results/n01_full/P2/p2-verifier-acceptance-receipt.json": "bf3dfbc57ebf5b98e8e01e669b1bf562ecd7602c9556eeb461dc67b66bfd65fa",
+  "research/experiments/results/n01_full/P2/receipt.json": "77cf86873a62bf75c7f354cf85b088c017ef3eb5b70b0c321e4fe1bf1e747198",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-and-defects.json": "86e71641b2f231dad7f9eef908121838a9f21ee5114e726dde58ed73e6b9f8b2",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cpu-receipt.json": "b4278a8ac3a66d43c4a85f2aed75a8d81d6cef003d1962fb12236411aa1a6a7e",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cpu-risk-calibration.json": "5a9e1a1f732a47f4337d714f28c8e1017d38806d5dab861a8d9457e8d9c0e7a4",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cuda-failure-v4.log": "8341718e64d9c431e640ab8123f58f110e0842128e8db522101e15580eff0859",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cuda-failure.log": "b798696157e0cd7b618f1471faf2825ccacb4d4b3cdacea99b612ace6deca661",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cuda-receipt.json": "91973ff3770c1abef6bf2969226f0fcf4786b36d7f9abe0e6a9d86e139f4d816",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-cuda-risk-calibration.json": "3d5f751b34a7140d42affde5401b506cabbf19d00675bed0f57685e7632c5074",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-rgb3-receipt.json": "e74920238796493da195104fcb0e378fe69ea4585f09252eb06cfc095b527041",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-101-rgb3-risk_calibration.json": "d36c708280319bd10d4b81cd55c2344c619c9f01ad0c088569758be3ac6c1f89",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-cpu-receipt.json": "ebc316e15a9ad79adbddf08123d033ca3ebda7827578ab464213e6aff87c3450",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-cpu-risk-calibration.json": "9fab57aa1dec65ab6f0a75a07503792c57a7f954c31e41a610aaa96378057ebe",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-cuda-receipt.json": "4437d84ca9da6d012264a80a20f31fa96107352deb9d2685d07ac695fef253b5",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-cuda-risk-calibration.json": "457e141afcca357f17c284d86ba00fc90b6763642baf97f01c64f230cfb74d35",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-rgb3-receipt.json": "56a67dbed7232bdf8cea3b58436d3a57869201b254fdf6bf7c69222c1170c822",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-211-rgb3-risk_calibration.json": "909d5afff411029038808958e7ea338504cb6bf3e2a3448b917b5d739c3c7c35",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-cpu-receipt.json": "772ec6bf31f1d98e09c7a770d4430a38ac3edc0edab8c4ece50b076708c92b91",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-cpu-risk-calibration.json": "d7b353031fcf47835994a1c4f2dc85bd13a5ba0c147a4b9e3b8e19c561fcca80",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-cuda-receipt.json": "51c2acce2be98b19969cf862e1809e4c54352d4a0020085da0ce3cab370d822b",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-cuda-risk-calibration.json": "9bc9dee635e4381bcd842dbd9284af0e8ba194e6330237a2e0ec1bffbc733bde",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-rgb3-receipt.json": "7af8afd2edfbc6c39ab28781f69a566cd58c12b21f688d0b217b5e83a6592c9c",
+  "research/experiments/results/n01_full/P2/remote-runner-eval-seed-307-rgb3-risk_calibration.json": "88f11f22ca7d12f9c7e2b4b141bc7e0517c7447b7ef5702f55e72f074b42e4a1",
+  "research/experiments/results/n01_full/P2/remote-runner-outage-20261014T1520Z.json": "d4221a9970cee7734f9f6d6748ea46b3ae26befe54f5cc01bdbe1e5e0364532b",
+  "research/experiments/results/n01_full/P2/remote-runner-p2-final-handoff.json": "2bab70ff198b740dd44647e3df9bcd95283cf7186ad4ffd294872e09257cc590",
+  "research/experiments/results/n01_full/P2/remote-runner-phase-a.json": "7419e8cc6efb29cdb1df0e577e617a9bb7decc50a672ce10888d2cc69dc7e644",
+  "research/experiments/results/n01_full/P2/remote-runner-phase-b-v3-rgb3.json": "ebbe6bae3bf1a4ab0624895e47244661dca4e370fdfd8627158b8d62bd477443",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-identity-crop128-receipt.json": "12eafe89ceaf066b4a67d413bbaaa16610446a2085c576eda70c7e90a0cb66b8",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-identity-crop128.log": "03de20cdd86942a69fafc0fd4414844df505b6288e59634ea776e5bb46eb8c25",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-identity-failure.log": "26cb795ba207e24a4929ba9dbe07d16247085d2054b3e0a63b766c9f9ece2b0e",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-identity-receipt-v5.json": "36ef63a04cd7c40e15a380742e5fb9afb27c6664cfa03d06a01b30ead52344bb",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-identity-receipt.json": "e27e67f57d536c9ecd4d6c19dea747c92bd0d4edbabefd5d5658dac42c07d9fc",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-motion-checkpoint-failure-v4.log": "dace8a0d621e582b9d02f2bc5af8a8af57c00da00c0fc472c14f737e4ec8c00b",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-motion-checkpoint-failure.log": "7be777956f3392bcce5ee500eea0a9b632a9c8bd62f58d6c6e16204fc306ed59",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-motion-crop128.log": "9d4e3475b419d526ff1594c66b42cd165655869390879b0bb5b4e799948d6128",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-motion-receipt.json": "704723b12510cb492e21d446a60e982181f43af04dad82b8bcc3cbe39af82b27",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-motion-rgb3-failure-v5.log": "95eee56c39cd2ce56a78f34821bddeeb7fa7cfb228a0b1443cf72498ffef2210",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-stem-mismatch.log": "bd9b6a68f5127c6436d7b40ca1e264a55e976e882acb04f652e1278d29edf612",
+  "research/experiments/results/n01_full/P2/remote-runner-policy-preflight-v3-formal-rgb3-raw-adapter-preflight.json": "56451d4ebef77932f4b108caafee8fef1f4c84471f833828a3b0ec641170eab0",
+  "research/experiments/results/n01_full/P2/remote-runner-pytest-cuda-v4.log": "f49fa47a4ecf165708efd276ccd511462c8d42435a42f079f020e4618a95e5d6",
+  "research/experiments/results/n01_full/P2/remote-runner-pytest-gpu-v5.log": "04885e46e65745a6d07d9c3ba0b39335056245e2363c05719ffc2790a8c9ecbc",
+  "research/experiments/results/n01_full/P2/remote-runner-receipts-seed-307-rgb3-platform-recheck.json": "1fcb944fd6f6105738b30c5e0d89e438a59f69930bfc58b7636a149bfaf87f62",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-101-platform-recheck.json": "741edaaf0a6173c9f38f96b02b3e7ecf69799103d8741fe318c2f1b2c7338096",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-101-receipt-pre-continuation.json": "e00272a7eb81b57e2d87b77b6ff2e40b33b46d8f7ff50142045c67ad95128e45",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-101-receipt.json": "db9106c24b0290478ff697c7ecf39edbcafb3689b5488cab5cfe7da263118e74",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-101-rgb3-platform-recheck.json": "0e7b81983b3e49ee5e13341ed70e81b0829f838962548d1efa855e6753d886df",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-101-rgb3-receipt.json": "a960d4399568f31b655cd495eb2b63e4c7c97650f3617000db2fc0153b192b60",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-211-platform-recheck.json": "8725380f7e4b87e56d8c9ae226e1244a438227ee6b13635e870eafc5f2a11b54",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-211-receipt.json": "3816232204a89fa556177d575a513fb8df2e52c7ddef9954e56e5b7db3e56948",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-211-rgb3-platform-recheck.json": "c076cea7b81ed5fb9afc8bb52814e5cc0bdf0c26e276ee17109b9166d80bd765",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-211-rgb3-receipt.json": "a528a8c36bf6fb7f1fa3205f1c4abd7c78fe1e9325fb2943bd28d3a11b5878f7",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-307-platform-recheck.json": "6038fdd232592154d7e52d68f1fe35bb2f9c0c21ce6f053b6219ab26b2af288f",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-307-receipt.json": "9b6ce38ccd3733e9deb49245e8dbe44f03ba2d3617ba2a20277e3c5870c46ac9",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-307-rgb3-receipt.json": "4df43bac34159ff3ed2a037d5afafacbabfcc2f5209b7a62728bedae3d625fe0",
+  "research/experiments/results/n01_full/P2/remote-runner-seed-summaries.json": "7beb336ac2ee83ba314698cb286da9f47f73389ca4c832f3201c317ffcb64b42",
+  "research/experiments/results/n01_full/P2/remote-runner-select-rgb3-selection.json": "1aa3881a707471ec177a577a28b829c5bed28e6f8acf6d8913f9fdee3e1d4d9d",
+  "research/experiments/results/n01_full/P2/remote-runner-select-rgb3-winner.json": "33e9696cfa4568bd58131b68cbeab029682b53c1b3046de201d2b930b6c6b0c2",
+  "research/experiments/results/n01_full/P2/remote-runner-source-v3-vs-v4-diff.json": "3f018630b1b024d5e609fea2c3e37b979fc749849ccadf84ce7a370a95df2624",
+  "research/experiments/results/n01_full/P2/remote-runner-source-v4-vs-v5-diff.json": "2932d1c87418087531e78811e79ce75cf57fb42dcb029add1682715146b750cd",
+  "research/experiments/results/n01_full/P2/remote-runner-source-v5-vs-v6-diff.json": "b720a0d45dd4698f5bca2055b1689320d83834b1edf09081597b63da39b8489e"
+ },
+ "upstream": {
+  "sea_raft": {
+   "repository": "https://github.com/princeton-vl/SEA-RAFT",
+   "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+   "license": "BSD-3-Clause",
+   "vendored": "src/owac/baselines/_vendor/sea_raft",
+   "provenance": {
+    "repository": "https://github.com/princeton-vl/SEA-RAFT",
+    "commit": "9137517ba24e628442aec097d3afe71d03503b75",
+    "license": "BSD-3-Clause (LICENSE vendored verbatim; Copyright (c) 2024, Princeton Vision & Learning Lab)",
+    "vendored_by": "N01 v1.0 P2 RAW motion adapter (task motion-core)",
+    "source_layout": "upstream core/ -> this package root; upstream core/utils/ -> this package's utils/",
+    "changes": "Declared changes only. (1) imports rewritten from top-level to package-relative; (2) the HuggingFace Hub dependency and PyTorchModelHubMixin base class removed; (3) the input channel count is a constructor argument (cfa4 builds fnet 4 / cnet 8, rgb3 builds fnet 3 / cnet 6) instead of the hard-coded 3/6; (4) ResNetFPN takes an explicit depth argument and its torchvision ImageNet branch is deleted, so model depth and pretrained-weight loading are independent and no configuration can re-enable a download; (5) the 2 * (x / 255) - 1 RGB rescale is removed from RAFT.forward, so callers must supply calibrated, normalised RAW values; (6) in utils/utils.py the scipy import is local to forward_interpolate because scipy is not a dependency of this repository and no vendored model path calls it; (7) ruff format applied (whitespace/docstring layout only). Author definitions are otherwise unchanged: compare executable_ast_sha256 per file.",
+    "ast_digest_rule": "executable_ast_sha256 = sha256 of '\\n'.join(canonical(node) for each top-level FunctionDef/ClassDef of the module AST after docstring statements are removed), where canonical(node) = (node type name, ((field name, canonical(value)), ...)) over ast.iter_fields, skipping the CPython-version-dependent field 'type_params' (PEP 695, present on FunctionDef/AsyncFunctionDef/ClassDef from 3.12 on, absent on 3.11). Every other field is always emitted, including empty lists, so CPython 3.13's ast.dump show_empty=False default cannot move a digest either. The digest is identical under CPython 3.11 and 3.12.",
+    "files": {
+     "raft.py": {
+      "path": "core/raft.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/raft.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "4bb02c831f04b16a27fd016c8bb4ecfcf5834ea88f40e84fac9d2555864d5979",
+      "local_sha256": "849cdf9c56234810091814c768777be372ff9e1aa6a86afb261cf3c023b76fdc",
+      "upstream_executable_ast_sha256": "1e42d4c3fe0262e13dbe0d6aa96bd6d9d63f3f6198a62d6b39274b8ef982575e",
+      "executable_ast_sha256": "dddde3e49ccd6984500f20c33e5f4e1a826c43f879be465b6cc8d4b14b5b4c13",
+      "changes": [
+       "package_relative_imports",
+       "huggingface_hub_mixin_removed",
+       "input_channels_parameterised",
+       "depth_argument_separated_from_weights",
+       "remove_255_rgb_rescale",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "extractor.py": {
+      "path": "core/extractor.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/extractor.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "684cfe479ef6cbe5796397749939676c79626f0c3fcbc033c8fb5cab9475bc7a",
+      "local_sha256": "1ef874b6bd6c90c700966180bc40bc2a85d83b187bf53a6772db3f67f85c3294",
+      "upstream_executable_ast_sha256": "7edd1df4b53760610c73f9cbe3158ff585333bb7d296845b63127e54a92f1b08",
+      "executable_ast_sha256": "0ecbc3e7bd36979999c88c57400cf3d19db19f79c8122abeac14b12d7f2debb4",
+      "changes": [
+       "package_relative_imports",
+       "torchvision_imagenet_autoload_removed",
+       "input_channels_parameterised",
+       "depth_argument_separated_from_weights",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "corr.py": {
+      "path": "core/corr.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/corr.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "e89bc770f1e6712447d90b8a8c75fd136c98816726d4338972f8ea5d7d6d24fb",
+      "local_sha256": "8e5c700258f8e8da4e2be6c38bc1d1498a73d82c37e9fd4caca668b245bc318d",
+      "upstream_executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "executable_ast_sha256": "b39435feaae0825c2b8f72392eceda580d34d0ae5cb4aba87e23403541ca6543",
+      "changes": [
+       "package_relative_imports",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "update.py": {
+      "path": "core/update.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/update.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "978dc580e4ebd394b29894f5d5460153a2fe5a7d4c50e5e83823330298133f69",
+      "local_sha256": "4f94abfc36ac057c481aa5f8e830192b2d1d15b7b88a4172e4895ee8b0d5ecd9",
+      "upstream_executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "executable_ast_sha256": "2133d6854c4dfd0a0553c6202936724f69b7caa1a26236ef1a463f4f31348bea",
+      "changes": [
+       "package_relative_imports",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "layer.py": {
+      "path": "core/layer.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/layer.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "580f4cced2b5f3551667b4b4b24b8ff7cd024ef4e3f8723bf3c5fbb7baf74563",
+      "local_sha256": "7f70c868e80cee021c8e2e26b5d1e160ff9aff83a8b141f36977ad12405a2859",
+      "upstream_executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "executable_ast_sha256": "544bde02340d9335448d828059f688b48d29c4331b438e6d30cc5871ced2dbd3",
+      "changes": [
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "utils/utils.py": {
+      "path": "core/utils/utils.py",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/core/utils/utils.py",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "04d88de0f161db56f856776e05d4337cecaadabdc1decc104b22c6ea642f11ae",
+      "local_sha256": "f861c1f4b5d186f05118124e530e105a6039bda3f8aa1f6086a757ec0f330747",
+      "upstream_executable_ast_sha256": "bd2a50a27dc83d4b8d6cd6e2e58c173220041beb7353d6eee4a1877cabd94eba",
+      "executable_ast_sha256": "fec046abe81af38ec72996da324a2249dcc8353c356ebaefa40833ae673f89f6",
+      "changes": [
+       "scipy_import_made_local",
+       "ruff_format_whitespace"
+      ],
+      "verbatim_bytes": false
+     },
+     "LICENSE": {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/princeton-vl/SEA-RAFT/9137517ba24e628442aec097d3afe71d03503b75/LICENSE",
+      "retrieval": "github_contents_api",
+      "upstream_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "local_sha256": "1786969fe81508ad087053434ebf56e556372156010dbf3039c3b48ae612eeb2",
+      "upstream_executable_ast_sha256": null,
+      "executable_ast_sha256": null,
+      "changes": [],
+      "verbatim_bytes": true
+     }
+    },
+    "owac_files": {
+     "__init__.py": "Package marker added by OWAC; not derived from upstream bytes.",
+     "utils/__init__.py": "Package marker added by OWAC; not derived from upstream bytes."
+    },
+    "runtime_verified": false,
+    "runtime_verified_note": "The vendored model was executed on CPU by the P2 tests; no upstream weight file was downloaded and no author training recipe was reproduced."
+   }
+  }
+ },
+ "local_checks": {
+  "make_check": "passed",
+  "pytest_full": "711 passed, 2 skipped",
+  "skipped": "2 CUDA-only tests (run on the GPU host: 3 passed / 0 skipped)",
+  "pytest_n01_full": "363 passed, 2 skipped",
+  "acceptance_file": "53 passed, 0 xfail",
+  "final_make_check_and_suite_rerun_by_lead": true,
+  "lead_adversarial_probe": {
+   "A_schema_gate": "forged model-not-tensors / no-model / no-fingerprint / foreign schema / empty all refused; genuine and plain state dict accepted",
+   "E_stem_gate": "cfa4 and rgb3 inferred correctly; (fnet 5, cnet 9) refused with a clear message",
+   "B_window_counts": "duplicate arrival counted once, same frame_id across episodes counted twice (3/3); missing identity arrays use the declared fallback",
+   "D_align_to": "moves a CPU tensor to a foreign device and is identity when devices already match"
+  }
+ },
+ "independent_acceptance": {
+  "receipt": "p2-verifier-acceptance",
+  "generated_on": "2026-10-14",
+  "role": "independent adversarial verifier (did not modify implementation code)",
+  "worktree": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+  "branch": "lzh/n01-evidence-integration",
+  "test_file": "tests/encoders/n01_full/test_p2_acceptance.py",
+  "test_file_sha256": "6761a5a0cc84185cfe5d1884d1e82349c01e61f3002ddc8a990ecb8455bf2015",
+  "test_file_lines": 1694,
+  "tests_collected": 53,
+  "local_commands": {
+   "pytest_n01_full": "uv run --locked pytest -q tests/encoders/n01_full",
+   "pytest_repo": "uv run --locked pytest -q",
+   "check": "make check"
+  },
+  "counts": {
+   "new_file_only": "53 passed in 2.48s",
+   "n01_full": "334 passed, 1 warning in 14.65s",
+   "repo": "682 passed, 2 warnings in 40.62s",
+   "make_check": "exit 0 (ruff check, ruff format --check, compileall)",
+   "xfail_count": 0,
+   "baseline_before_this_file": "277 passed (n01_full) / 625 passed (repo)"
+  },
+  "xfail_tripwires_strict": [],
+  "defects": [
+   {
+    "id": "D1",
+    "severity": "major",
+    "status": "FIXED_AND_VERIFIED",
+    "where": "src/owac/training/n01_motion.py::decide_platform",
+    "fix": "two new conditions: real_improvement_over_run (first - best > delta_val) and tail_within_delta_val_of_best (|final - best| <= delta_val)",
+    "converted_assertions": [
+     "test_a_degrading_validation_curve_is_not_a_plateau",
+     "test_a_constant_validation_curve_is_not_a_plateau",
+     "test_a_flat_tail_that_drifts_away_from_its_best_is_not_converged (new)"
+    ]
+   },
+   {
+    "id": "D2",
+    "severity": "medium",
+    "status": "FIXED_AND_VERIFIED",
+    "where": "src/owac/raw/n01_noise.py::build_noise_model",
+    "fix": "one marginal rule for every branch: audited block variance (or the declared upper bound while unaudited) is added to each sample's own variance",
+    "converted_assertions": [
+     "test_a_single_sample_block_still_carries_its_black_level_variance"
+    ]
+   }
+  ],
+  "mutation_experiments": {
+   "method": "pristine src copied to /tmp/mutant/src, one mutation applied there, tests run with PYTHONPATH=/tmp/mutant/src from the worktree (no mutation entered the worktree)",
+   "results": [
+    [
+     "M1 variance-map interpolation replaces a.T Sigma a",
+     3
+    ],
+    [
+     "M2 pull sign flipped in source_xy",
+     9
+    ],
+    [
+     "M3 author-loss legal mask loosened",
+     1
+    ],
+    [
+     "M4 plateau additionally requires best_index > 0 (D1 fix)",
+     2
+    ],
+    [
+     "M5 resume drops numpy/torch RNG restore",
+     1
+    ],
+    [
+     "M6 diagonal branch adds block variance (D2 fix)",
+     1
+    ],
+    [
+     "M7 ledger.without skips physical redaction",
+     3
+    ],
+    [
+     "M8 pooled mask loosened to always-true",
+     2
+    ],
+    [
+     "M9 proxy ignores the declared var_min clamp",
+     1
+    ],
+    [
+     "M10 builder columns unfiltered",
+     1
+    ],
+    [
+     "M11 readout in_dim defaults to readout_width",
+     3
+    ],
+    [
+     "M12 step counts two arrivals per event",
+     1
+    ],
+    [
+     "M13 supervision leaked into visible metadata",
+     1
+    ],
+    [
+     "M14 selection split check dropped",
+     1
+    ],
+    [
+     "M15 calibrated flag ignored for a supplied table",
+     1
+    ],
+    [
+     "M16 exposure gain applied once to the variance",
+     1
+    ]
+   ],
+   "tripwire_note": "M4 and M6 make the D1/D2 xfail tests fail as strict XPASS, so fixing either defect forces the marker to be removed",
+   "revert_checks_after_fix": {
+    "method": "the fixed src was copied to /tmp/mutant/src and the fix locally reverted; the converted assertions must fail (no mutation entered the worktree)",
+    "results": [
+     [
+      "R1 revert both D1 conditions",
+      "3 failed: degrading, constant, drift"
+     ],
+     [
+      "R2 revert only the D1 drift condition (partial fix)",
+      "2 failed: degrading (wrong condition value) and the new drift test; the constant test still passes, showing the drift test's added value"
+     ],
+     [
+      "R3 revert the D2 diagonal block term",
+      "1 failed: single-sample-block marginal"
+     ]
+    ]
+   }
+  },
+  "not_covered": [
+   "real SEA-RAFT weights / any GPU or server run (CPU-only local verification)",
+   "the raw_adapter real (non-smoke) preflight on both platforms; only its missing-asset hard-failure and the local smoke receipt are checked",
+   "motion evaluation four-arm metrics (EPE quantiles, AUC, p50/p95 latency, memory) beyond the calibration-only fit refusal and the static/o rbit labels",
+   "the checkpoint selection winner identity across real training runs (only the guard paths)",
+   "32-frame window behaviour under multiple cameras/episodes in one stream"
+  ],
+  "uncommitted_only": true
+ },
+ "local_smoke": {
+  "kind": "n01-full-p2-motion-train-eval-local-smoke",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T09:30:37Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "files_sha256": {
+   "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+   "src/owac/evaluation/n01_motion.py": "8c1f5f9b2dee74087045fbb75f3febe8ca0c28e245614da5ac43ccbf41edf5f5",
+   "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+   "tests/encoders/n01_full/test_motion_eval.py": "d74e341244522538f5c93941b315228089a3d8be6471334f0b4f8242131ed67b"
+  },
+  "local_checks": {
+   "make_check": "passed (ruff check, ruff format --check, compileall)",
+   "pytest_tests_encoders_n01_full": "277 passed",
+   "pytest_full_repo": "625 passed",
+   "environment": "Python 3.12.12, torch 2.9.1+cpu, numpy 2.5.1, CPU only"
+  },
+  "recipe": {
+   "loss": "author sequence_loss re-implemented at training/n01_motion.py::sequence_loss; gamma**(n-i-1) iteration weights, masked mean per iteration, mag<max_flow exclusion, packed-cell unit for both prediction and target",
+   "optimizer": "AdamW(lr from selection, weight_decay=1e-4, eps=1e-8), clip_grad=1.0, gamma=0.8, bf16 autocast on CUDA",
+   "lr_tiers": [
+    0.00025,
+    5e-05
+   ],
+   "iteration_tiers": [
+    4,
+    8
+   ],
+   "lr_drops": [
+    [
+     50000,
+     0.1
+    ],
+    [
+     80000,
+     0.01
+    ]
+   ],
+   "budget_updates": 100000,
+   "budget_ceiling": 300000,
+   "validation_interval": 1000,
+   "plateau_checks": 8,
+   "delta_val": 0.002,
+   "monitor": "val_epe_sensor_px",
+   "seeds": [
+    101,
+    211,
+    307
+   ]
+  },
+  "local_results": {
+   "fit_check_shipped_config_256_updates": {
+    "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output outputs/n01-full-p2/motion-train-eval/fit-check-real --device cpu --seed 101",
+    "passed": true,
+    "initial_window_mean": 12.995,
+    "final_window_mean": 2.449,
+    "samples_consumed": 512,
+    "wall_seconds": 96.8
+   },
+   "smoke_chain_minimal_config": {
+    "config": "outputs/n01-full-p2/motion-train-eval/smoke_config.json (resnet34, iters 4, 256x256 sensor, batch 1, 2-4 updates)",
+    "fit_check_passed": true,
+    "selection_winner": {
+     "lr": 0.00025,
+     "iters": 4
+    },
+    "selection_split": "validation",
+    "train_platform": "budget_exhausted",
+    "train_updates": 2,
+    "train_loss_first_last": [
+     45.53,
+     13.68
+    ],
+    "train_parameter_abs_update": 12430.4,
+    "resume": "loaded update 2 of 4; next batch identity and per-update loss equal to the continuous run in the unit test",
+    "evaluation_arms_test_epe_sensor_px": {
+     "no_alignment": 2.11,
+     "old_simplified": 2.85,
+     "sea_raft": 149.48,
+     "oracle": 0.0
+    },
+    "evaluation_latency_cpu_p50_p95_ms": [
+     62.03,
+     62.14
+    ],
+    "evaluation_buckets": {
+     "fast_alignable": [
+      "translation_subpixel",
+      "exposure_gain",
+      "motion_blur"
+     ],
+     "fast_hard": [
+      "layered_occlusion",
+      "repeated_texture"
+     ],
+     "slow_structural_change": [
+      "rotation",
+      "local_nonrigid"
+     ],
+     "current_frame_anomaly": [
+      "combined_hard"
+     ]
+    },
+    "note": "the smoke model is trained for two updates only; its EPE is not a research result"
+   }
+  },
+  "remote_bundle_gap": {
+   "existing_bundle": "outputs/n01-full-p2/bundle-v1 (git head 01e0316, 172 files)",
+   "contains_my_files": false,
+   "required_action": "re-bundle (or overlay) the five files listed in files_sha256 before the remote run"
+  },
+  "remote_command_sequence": {
+   "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+   "environment": "new encoder env with CUDA torch and Python >= 3.11; PYTHONPATH=<snapshot>/src",
+   "fit_check": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/fit-check --device cuda",
+   "select": "python -m owac.training.n01_motion select --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/select --device cuda",
+   "formal_seed": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json",
+   "formal_seed_211": "same with --seed 211 --output $RUN/seed-211",
+   "formal_seed_307": "same with --seed 307 --output $RUN/seed-307",
+   "resume_continuation": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/seed-101 --device cuda --seed 101 --selection $RUN/select/selection.json --resume $RUN/seed-101/checkpoints/last.pt --max-updates <authorised total>",
+   "evaluation": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train.json --output $RUN/eval-seed-101 --device cuda --checkpoint $RUN/seed-101/checkpoints/best.pt",
+   "expected_outputs": {
+    "fit_check": "$RUN/fit-check/fit_check.json",
+    "select": "$RUN/select/selection.json + winner.json",
+    "train": "$RUN/seed-<seed>/receipt.json + train_loss_curve.json + checkpoints/{best,last}.pt",
+    "eval": "$RUN/eval-seed-<seed>/receipt.json + risk_calibration.json + pairs.jsonl"
+   }
+  },
+  "known_differences_and_risks": [
+   "the vendored tree ships no core/loss.py, so sequence_loss is re-implemented with the fetched upstream sha256 recorded in the module docstring; the only declared difference is a mask-sum clamp so an empty mask contributes zero instead of NaN",
+   "no upstream pretrained or ImageNet weights are loaded (model.pretrained_checkpoint = null); every seed starts from its seeded random initialisation",
+   "the shipped noise-config geometry is 64x64 sensor (32x32 packed), below the vendored 4-level correlation pyramid minimum of 128 packed cells at iters>0; the training config overrides to 256x256 sensor and scales every pixel-valued recipe length by 4 (translation_subpixel tokens stay absolute)",
+   "LR drops are declared at absolute updates (50k, 80k); extending a resumed run therefore replays the same LR trajectory instead of moving phase boundaries",
+   "checkpoint size is ~226 MB per file (19.7M params + AdamW moments); last.pt is overwritten every 1000 updates and best.pt on every improvement",
+   "validation_plateau is a stop condition, not a quality verdict: a run whose validation only degrades also has 'no improvements' for eight checks; the receipt carries the whole validation history and the best checkpoint",
+   "the old_simplified arm is a global integer correlation alignment on the delivered RAW planes (the old align_planes path needs a given offset field, so this arm supplies it); its variance shortcut is not reused",
+   "the evaluation caps region sizes case-balanced so every case (and every bucket) keeps at least one pair"
+  ],
+  "d1_platform_criteria_fix": {
+   "defect": "D1: decide_platform accepted a constant or monotonically degrading validation curve as validation_plateau",
+   "fix": [
+    "real_improvement_over_run: first_value - best_value > delta_val (strictly)",
+    "tail_within_delta_val_of_best: |final_value - best_value| <= delta_val",
+    "flat_tail_below_delta_val stays literal: slow persistent improvement below delta_val is still a plateau"
+   ],
+   "reasons_are_named_per_condition": [
+    "platform condition failed: real_improvement_over_run",
+    "platform condition failed: tail_within_delta_val_of_best",
+    "platform condition failed: flat_tail_below_delta_val",
+    "platform condition failed: two_effective_lr_drops",
+    "platform condition failed: final_low_lr_phase",
+    "platform condition failed: best_not_at_budget_end",
+    "platform condition failed: diagnostics_passed"
+   ],
+   "observed_verdicts": {
+    "constant_5.0_x12": "budget_exhausted (real_improvement_over_run)",
+    "monotonic_worsening_1..12": "budget_exhausted (real_improvement_over_run, tail_within_delta_val_of_best)",
+    "improve_then_degrade": "budget_exhausted (tail_within_delta_val_of_best)",
+    "slow_improvement_0.5x_delta_per_step": "validation_plateau"
+   },
+   "operational_note": "decide_platform is called only with the validation history; the fix changes neither the training trajectory nor any checkpoint's tensor content. An already-finished run whose old receipt says validation_plateau on a zero-improvement or drifting curve must have its status re-derived (the checkpoint stores val_history/lr_drops, so this is a pure recomputation), and a run that is still executing keeps the old function in memory until restarted; it never needs an update rerun."
+  },
+  "later_additions": "the rgb3 (pseudo-RAW) dev-scale stem arm and the stem-report entry point were added after this receipt; they change no loss, schedule or checkpoint semantics, so the platform statuses recorded here are unaffected. See motion-train-eval-stem-rgb3.json"
+ },
+ "stem_rgb3": {
+  "kind": "n01-full-p2-motion-stem-rgb3",
+  "owner": "motion-train-eval",
+  "written_at_utc": "2026-10-14T10:03:46Z",
+  "git_head": "01e031656a12f988f4d8354eb1b208f19d970bc1",
+  "branch": "lzh/n01-evidence-integration",
+  "requirement": "P2 section 2: the CFA and pseudo-RAW stems are configured and trained separately and the parameter difference is reported",
+  "files_sha256": {
+   "src/owac/training/n01_motion.py": "603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+   "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd",
+   "configs/encoders/n01_full/p2_motion_train.json": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "tests/encoders/n01_full/test_motion_training.py": "ffe068618f94fa48ecad4db4436ec5f09b9d48b95b0c43e73d5ddee4f0480eb4",
+   "outputs/n01-full-p2/motion-train-eval/stem-report/stem_report.json": "2c3f9a30689adb341c28e8d1c90ba771068c95cd5df56eb8087455dc52affa66"
+  },
+  "cfa_config_unchanged": {
+   "sha256": "c37786f03af6dccecb3cccc42fc2c3314d1d5fcca3f1a24ab0ae72775fa23de2",
+   "statement": "the CFA configuration is bit-identical to the D1 revision; the only added config field is `scale`, which defaults to 'formal' and stays out of core_fingerprint"
+  },
+  "stem_report": {
+   "command": "python -m owac.training.n01_motion stem-report --config configs/encoders/n01_full/p2_motion_train.json --compare configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/stem-report --device cpu",
+   "stem_convolutions": {
+    "kernel": [
+     7,
+     7
+    ],
+    "out_channels": 64,
+    "fnet_input": [
+     4,
+     3
+    ],
+    "cnet_input": [
+     8,
+     6
+    ]
+   },
+   "channels": {
+    "cfa4": 4,
+    "rgb3": 3
+   },
+   "total_trainable": {
+    "cfa4": 19673284,
+    "rgb3": 19663876,
+    "delta": -9408,
+    "analytic_delta": -9408,
+    "matches_analytic": true
+   },
+   "groups": {
+    "cnet": {
+     "cfa4_params": 8256704,
+     "rgb3_params": 8250432,
+     "delta": -6272,
+     "analytic_delta": -6272,
+     "matches_analytic": true,
+     "shapes_equal": false,
+     "differing_tensors": {
+      "cnet.conv1.weight": {
+       "cfa4": [
+        64,
+        8,
+        7,
+        7
+       ],
+       "rgb3": [
+        64,
+        6,
+        7,
+        7
+       ]
+      }
+     }
+    },
+    "fnet": {
+     "cfa4_params": 8244160,
+     "rgb3_params": 8241024,
+     "delta": -3136,
+     "analytic_delta": -3136,
+     "matches_analytic": true,
+     "shapes_equal": false,
+     "differing_tensors": {
+      "fnet.conv1.weight": {
+       "cfa4": [
+        64,
+        4,
+        7,
+        7
+       ],
+       "rgb3": [
+        64,
+        3,
+        7,
+        7
+       ]
+      }
+     }
+    },
+    "init_conv": {
+     "cfa4_params": 590080,
+     "rgb3_params": 590080,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "update_block": {
+     "cfa4_params": 1830142,
+     "rgb3_params": 1830142,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "flow_head": {
+     "cfa4_params": 308998,
+     "rgb3_params": 308998,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    },
+    "upsample_weight": {
+     "cfa4_params": 443200,
+     "rgb3_params": 443200,
+     "delta": 0,
+     "analytic_delta": 0,
+     "matches_analytic": true,
+     "shapes_equal": true,
+     "differing_tensors": {}
+    }
+   },
+   "differing_parameter_names": [
+    "cnet.conv1.weight",
+    "fnet.conv1.weight"
+   ],
+   "only_stem_input_channels_differ": true,
+   "verdict": {
+    "only_expected_config_differences": true,
+    "only_stem_parameters_differ": true,
+    "analytic_matches_measured": true,
+    "evidence_scale": {
+     "cfa4": "formal",
+     "rgb3": "dev",
+     "statement": "the cfa4 arm carries the authorised formal budget; the rgb3 arm is a development-scale arm (same budget/schedule/criteria, dev-scale evidence)"
+    }
+   },
+   "analytic_expectation": "both stems are Conv2d(C, 64, 7, stride=2, padding=3): fnet C = RAW channels (4->3) gives (3-4)*64*49 = -3136; cnet C = 2*channels (8->6) gives (6-8)*64*49 = -6272; total -9408, and every other group is delta 0 with identical shapes"
+  },
+  "local_rgb3_fit_check": {
+   "command": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output outputs/n01-full-p2/motion-train-eval/fit-check-rgb3 --device cpu --seed 101",
+   "passed": true,
+   "run_scale": "dev",
+   "updates": 256,
+   "initial_window_mean": 18.384477195739745,
+   "final_window_mean": 2.4443642711639404,
+   "checks": {
+    "small_set_fit_decreased": true,
+    "small_set_fit_target": true,
+    "inputs_finite": true,
+    "inputs_within_limit": true,
+    "gradient_groups_nonzero": true,
+    "unit_round_trip_exact": true
+   },
+   "gradient_groups_first_step": {
+    "cnet": 0.32883310690716855,
+    "fnet": 0.21786860575968883,
+    "update_block": 1.2609106041439955,
+    "flow_head": 1.0113435140810907,
+    "init_conv": 0.2523330415133387,
+    "upsample_weight": 0.0006247068713491899
+   },
+   "samples_consumed": 512,
+   "wall_seconds": 108.41700946600031,
+   "specs": [
+    "x+0.25",
+    "x+0.25"
+   ]
+  },
+  "remote_commands": {
+   "rgb3_fit_check_dev": "python -m owac.training.n01_motion fit-check --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-fit-check --device cuda",
+   "rgb3_dev_train_256": "python -m owac.training.n01_motion train --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-seed-101 --device cuda --seed 101 --max-updates 256",
+   "rgb3_dev_train_resume": "add --resume $RUN/rgb3-seed-101/checkpoints/last.pt --max-updates <authorised total>",
+   "rgb3_optional_eval": "python -m owac.evaluation.n01_motion --config configs/encoders/n01_full/p2_motion_train_rgb3.json --output $RUN/rgb3-eval-seed-101 --device cuda --checkpoint $RUN/rgb3-seed-101/checkpoints/best.pt",
+   "note": "the 256-update dev run never reaches the 50k/80k LR drops, so its platform status must be budget_exhausted; it is a dev-scale stem-arm run, not a formal result"
+  },
+  "evidence_scale_boundary": {
+   "formal": "cfa4: three seeds x 100k authorised; train/select/fit-check commands unchanged",
+   "dev_rgb3_done_here": [
+    "configuration exists and loads (128x128 pseudo-RAW geometry, empty phase, packed 1:1)",
+    "stem-report with measured vs analytic parameter difference",
+    "real 256-update CPU fit-check on the rgb3 stem (all diagnostics pass)",
+    "real rgb3 forward/backward/parameter-update test on CPU"
+   ],
+   "dev_rgb3_not_done_here": [
+    "the 256-update dev training run itself (remote-runner, command above)",
+    "three-seed rgb3 runs and any platform/plateau claim (needs the 50k/80k drops)",
+    "rgb3 evaluation on the test region (command given as optional)"
+   ],
+   "naming_caveat": "the shipped noise calibration version is named 'p2-synth-cfa-v1' and is shared by both stems as the declared synthetic calibration artifact; the geometry and material class differ (synthetic CFA vs rawvla_rgb3_hdr_derived), and the receipts record both"
+  }
+ },
+ "remote": {
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "source_snapshots": {
+   "source": {
+    "files": 172,
+    "remote_hash_compare": "172/172 matched",
+    "verify": "passed"
+   },
+   "source-v2": {
+    "files": 179,
+    "remote_hash_compare": "179/179 matched",
+    "verify": "passed"
+   },
+   "source-v3": {
+    "parent": "source-v2",
+    "changed": [
+     "src/owac/training/n01_motion.py",
+     "src/owac/raw/n01_noise.py"
+    ],
+    "added": [
+     "configs/encoders/n01_full/p2_motion_train_rgb3.json"
+    ],
+    "note": "3 项替换/新增，其余与 v2 逐字节相同"
+   },
+   "source-v4": {
+    "parent": "source-v3",
+    "changed": 3,
+    "added": 1,
+    "removed": 0,
+    "status": "ok"
+   },
+   "source-v5": {
+    "parent": "source-v4",
+    "changed": 3,
+    "added": 1,
+    "removed": 0,
+    "status": "ok"
+   }
+  },
+  "short_tasks": {
+   "fit_check": {
+    "passed": true,
+    "loss_first": 13.039,
+    "loss_final": 2.414,
+    "samples": 512,
+    "wall_s": 96.6,
+    "diagnostics": "6/6 true"
+   },
+   "select": {
+    "winner": {
+     "lr": 0.00025,
+     "iters": 4
+    },
+    "val_epe_sensor_px": {
+     "2.5e-4/4": 1.2079,
+     "2.5e-4/8": 1.4641,
+     "5e-5/4": 2.7207,
+     "5e-5/8": 1.8965
+    },
+    "wall_s": 476.4
+   },
+   "rgb3_fit_check": {
+    "passed": true,
+    "loss_first": 18.746,
+    "loss_final": 2.429,
+    "wall_s": 88.7
+   },
+   "rgb3_train_256": {
+    "platform": "budget_exhausted",
+    "loss_first": 8.462,
+    "loss_final": 4.438,
+    "peak_mib": 723.9,
+    "wall_s": 115.8
+   },
+   "stem_report": {
+    "cfa4_total": 19673284,
+    "rgb3_total": 19663876,
+    "delta": -9408,
+    "only_stem_input_channels_differ": true
+   }
+  },
+  "training": {
+   "101": {
+    "status": "validation_plateau",
+    "stopped_at_update": 82000,
+    "wall_s": 13990.8,
+    "gpu_hours": 3.886,
+    "val_epe_first": 0.774721,
+    "val_epe_best": 0.069852,
+    "val_epe_final": 0.069852,
+    "best_sha256": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+    "last_sha256": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09",
+    "note": "旧判据 81k 判平台；source-v3 重算拒绝并续训 1,000 updates 至 82k"
+   },
+   "211": {
+    "status": "budget_exhausted",
+    "stopped_at_update": 100000,
+    "wall_s": 4749.3,
+    "gpu_hours": 1.319,
+    "updates_per_s": 21.06,
+    "val_epe_first": 0.73451,
+    "val_epe_best": 0.0758537,
+    "val_epe_best_update": 91000,
+    "val_epe_final": 0.089877,
+    "lr_drops": 2,
+    "peak_mib": 725.1,
+    "best_sha256": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+    "last_sha256": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8"
+   },
+   "307": {
+    "status": "validation_plateau",
+    "stopped_at_update": 99000,
+    "wall_s": 4686,
+    "gpu_hours": 1.302,
+    "updates_per_s": 21.2,
+    "val_epe_first": 0.881334,
+    "val_epe_best": 0.082897,
+    "val_epe_best_update": 83000,
+    "val_epe_final": 0.083346,
+    "lr_drops": 2,
+    "peak_mib": 722.8,
+    "best_sha256": "3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38",
+    "last_sha256": "de5410ebb7400209f4db94209d00f1796d188e4e3899c0bc034932675127d6ca",
+    "note": "13,000 updates at the instance outage; --resume last.pt to 99,000 after recovery (no step-0 restart)"
+   }
+  },
+  "evaluation": {
+   "device": "cuda",
+   "acceptance": "P2_end_early_policy_preflight",
+   "seeds": {
+    "101": {
+     "sea_raft_epe": 0.08689,
+     "p50_ms": 6.79,
+     "p95_ms": 6.811
+    },
+    "211": {
+     "sea_raft_epe": 0.0893,
+     "p50_ms": 6.84,
+     "p95_ms": 6.895
+    },
+    "307": {
+     "sea_raft_epe": 0.09497,
+     "p50_ms": 6.803,
+     "p95_ms": 6.816
+    }
+   },
+   "peak_device_bytes": 108712960,
+   "arms": {
+    "no_alignment": 1.92132,
+    "old_simplified": 2.98518,
+    "oracle": 0.0,
+    "oracle_role": "upper bound only, not an inference input"
+   },
+   "static_false_rejection_rate": 0.0,
+   "risk_calibration_regions": {
+    "fitted_on": "calibration",
+    "validated_on": "validation",
+    "reported_on": "test",
+    "test_used_only_for_reporting": true
+   },
+   "cpu_cuda_epe_delta": "3e-5 to 7e-5",
+   "receipts": [
+    "remote-runner-eval-seed-101-cuda-receipt.json",
+    "remote-runner-eval-seed-211-cuda-receipt.json",
+    "remote-runner-eval-seed-307-cuda-receipt.json"
+   ]
+  },
+  "raw_adapter_preflight": {
+   "acceptance": "P2_end_early_policy_preflight",
+   "motion_path": {
+    "platforms": [
+     "libero",
+     "robotwin2"
+    ],
+    "crop": 128,
+    "exit": 0,
+    "motion_status": "motion_provider",
+    "offsets_shape": [
+     1,
+     8,
+     2,
+     128,
+     128
+    ],
+    "checkpoint": {
+     "mode": "rgb3",
+     "update": 256,
+     "run_scale": "dev",
+     "sha256": "133eb47d183e36d041e06749adc7c0a582d92b908c16f3a41fa0841ac7d14cfb",
+     "weights_only_fallback": true,
+     "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+     "missing_keys": 0,
+     "unexpected_keys": 0
+    },
+    "vision_tower_calls": 0,
+    "p3_support_applied": false,
+    "unique_identity_rule": "(episode_id, frame_id)",
+    "unique_matches_window_all_true": true,
+    "disclosure": "rgb3 motion model is a 256-update dev arm: interface/gradient/single-arrival connectivity only, no alignment-quality claim",
+    "sha256": "704723b12510cb492e21d446a60e982181f43af04dad82b8bcc3cbe39af82b27",
+    "crop_note": "motion path requires crop>=128 (128x128 packed at rgb3): the vendored 4-level pyramid geometric minimum, not a relaxation"
+   },
+   "identity_control": {
+    "crop128_sha256": "12eafe89ceaf066b4a67d413bbaaa16610446a2085c576eda70c7e90a0cb66b8",
+    "crop32_sha256": "36ef63a04cd7c40e15a380742e5fb9afb27c6664cfa03d06a01b30ead52344bb"
+   },
+   "stem_mismatch_diagnostic": {
+    "exit": 1,
+    "files_written": 0,
+    "message": "motion checkpoint stem mismatch: ... is a cfa4 checkpoint (fnet 4 input channels, cnet 8 channels), but this run feeds rgb3 windows with 3 measured channels (a matching cnet needs 6). Protocol rule: correspondence input_channels must be a whole multiple of the measurement channels: CFA 4/8, rawvla_rgb3 3/6. Use a rawvla_rgb3 (3/6) motion checkpoint for this input mode; the stem is never switched or adapted implicitly."
+   },
+   "motion_path_formal_rgb3": {
+    "checkpoint": {
+     "path": "seed-101-rgb3/checkpoints/best.pt",
+     "update": 74000,
+     "mode": "rgb3",
+     "sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a",
+     "weights_only_fallback": true,
+     "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+     "missing_keys": 0,
+     "unexpected_keys": 0
+    },
+    "platforms": [
+     "libero",
+     "robotwin2"
+    ],
+    "crop": 128,
+    "exit": 0,
+    "vision_tower_calls": 0,
+    "receipt": "remote-runner-policy-preflight-v3-formal-rgb3-raw-adapter-preflight.json",
+    "note": "replaces the 256-update dev arm as the formal real-data preflight; the dev receipt is kept as a control"
+   }
+  },
+  "receipts_local": [
+   "remote-runner-seed-101-receipt.json",
+   "remote-runner-seed-101-receipt-pre-continuation.json",
+   "remote-runner-seed-101-platform-recheck.json",
+   "remote-runner-seed-211-receipt.json",
+   "remote-runner-seed-211-platform-recheck.json",
+   "remote-runner-phase-a.json",
+   "remote-runner-phase-b-v3-rgb3.json"
+  ],
+  "gpu_hours": {
+   "training_cfa": 6.507,
+   "training_rgb3_formal": 2.937,
+   "select_and_fit_check": 0.177,
+   "rgb3_dev_arm": 0.057,
+   "memory_probes": 0.064,
+   "eval_preflight_and_regression": 0.16,
+   "total": 9.9
+  },
+  "training_rgb3_formal": {
+   "config": "configs/encoders/n01_full/p2_motion_train_rgb3_formal.json",
+   "stage": "P2-rgb3-formal",
+   "source_snapshot": "source-v6",
+   "selection": {
+    "winner": {
+     "lr": 5e-05,
+     "iters": 4
+    },
+    "candidates": {
+     "2.5e-4/4": 1.3567,
+     "2.5e-4/8": 1.2976,
+     "5e-5/4": 1.2503,
+     "5e-5/8": 3.1221
+    },
+    "note": "own dev search, different winner from the CFA arm"
+   },
+   "seeds": {
+    "101": {
+     "status": "validation_plateau",
+     "stopped_at_update": 85000,
+     "wall_s": 3557.6,
+     "gpu_hours": 0.988,
+     "val_epe_first": 0.359643,
+     "val_epe_best": 0.039441,
+     "val_epe_best_update": 74000,
+     "val_epe_final": 0.040836,
+     "test_epe_sea_raft": 0.04553,
+     "gpu_p50_ms": 7.799,
+     "peak_device_bytes": 108413440,
+     "best_sha256": "ecd3c1b69948293c53f50812da594d5938029a7bfedf5dd98676a742bd0aa04a"
+    },
+    "211": {
+     "status": "validation_plateau",
+     "stopped_at_update": 81000,
+     "wall_s": 3414.3,
+     "gpu_hours": 0.948,
+     "val_epe_first": 0.349788,
+     "val_epe_best": 0.040112,
+     "val_epe_best_update": 72000,
+     "val_epe_final": 0.04114,
+     "test_epe_sea_raft": 0.04255,
+     "gpu_p50_ms": 7.73,
+     "peak_device_bytes": 108413440,
+     "best_sha256": "8b6bfa87a49498e9b92bfca7a20ac71987344cab46be587d7c13a7a1164c3e14"
+    },
+    "307": {
+     "status": "validation_plateau",
+     "stopped_at_update": 85000,
+     "wall_s": 3605.4,
+     "gpu_hours": 1.001,
+     "val_epe_first": 0.455125,
+     "val_epe_best": 0.040542,
+     "val_epe_best_update": 66000,
+     "val_epe_final": 0.041991,
+     "test_epe_sea_raft": 0.04191,
+     "gpu_p50_ms": 6.764,
+     "peak_device_bytes": 108413440,
+     "best_sha256": null
+    }
+   },
+   "baselines_consistent_across_seeds": {
+    "no_alignment": 0.98445,
+    "old_simplified": 8.70804,
+    "oracle": 0.0
+   },
+   "comparability": "CFA and rgb3 EPE are not directly comparable: different input regime and packed geometry; report per protocol"
+  }
+ },
+ "decisions": {
+  "budget": "分级授权：256 拟合 + 两档 LR 选择 → 3 seeds × 100k 第一段；续训需再授权（不上 300k）",
+  "initialization": "从零训练，主结论不使用任何 RGB/ImageNet 权重",
+  "gpu_cleanup": "用户明确授权停止 N04 seed17 与 N02 进程/编排脚本；4 个 rawvla policy 服务保留"
+ },
+ "defects_found_and_fixed": [
+  {
+   "id": "D1",
+   "severity": "major",
+   "where": "training/n01_motion.py::decide_platform",
+   "found_by": "independent verifier",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "D2",
+   "severity": "medium",
+   "where": "raw/n01_noise.py::build_noise_model",
+   "found_by": "independent verifier",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "X1",
+   "severity": "minor",
+   "where": "vendor AST digest (3.11 vs 3.12)",
+   "found_by": "remote pytest on 3.11",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "A",
+   "severity": "major",
+   "where": "backends/raw_correspondence.py::_load_pretrained",
+   "found_by": "remote raw_adapter preflight",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "B",
+   "severity": "major",
+   "where": "runtime/n01_full_policy_preflight.py window counts",
+   "found_by": "remote raw_adapter preflight",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "C",
+   "severity": "major",
+   "where": "backends/raw_correspondence.py::estimate device mixing",
+   "found_by": "remote CUDA evaluation",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "D",
+   "severity": "major",
+   "where": "evaluation/n01_motion.py device mixing (5 sites)",
+   "found_by": "remote CUDA evaluation",
+   "status": "fixed_and_verified"
+  },
+  {
+   "id": "E",
+   "severity": "design",
+   "where": "preflight stem pairing",
+   "found_by": "remote raw_adapter preflight",
+   "status": "ruled (rgb3 window <-> rgb3 estimator) and diagnosed"
+  }
+ ],
+ "status": {
+  "implementation_status": "PASS_P2",
+  "training_status": "P2_SEGMENT_COMPLETE",
+  "effect_status": "NOT_APPLICABLE"
+ },
+ "incident": {
+  "kind": "instance_outage",
+  "window_utc": "2026-10-14T15:20Z..2026-10-14T16:32Z",
+  "duration_min": 62,
+  "evidence": "remote-runner-outage-20261014T1520Z.json (67 probes)",
+  "handling": "read-only survey after recovery; run root intact and /workspace not recycled; seed 307 resumed from last.pt (update 13,000); 101/211 not rerun"
+ },
+ "final_handoff": {
+  "kind": "n01-full-p2-final-handoff",
+  "owner": "remote-runner",
+  "written_at_utc": "2026-10-14T18:35:56+00:00",
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/p2-motion-20261014",
+  "snapshots": {
+   "source": {
+    "role": "phase-A snapshot, superseded",
+    "files": 172
+   },
+   "source-v2": {
+    "role": "phase-B start; seed 101 ran this code",
+    "files": 179,
+    "tar_sha256": "313940f27cca9c26b1453c4a5f8313f48b1596dc3d1c27e8a4f2099d163147bc"
+   },
+   "source-v3": {
+    "parent": "source-v2",
+    "role": "D1 platform criterion + D2 noise fix + rgb3 config; seeds 211/307 and all fixed-criterion verdicts",
+    "changed": {
+     "src/owac/training/n01_motion.py": "cd704066… -> 603c8521deae670441f2604bf80d1301b5cae54c2ba0dc0392ba1439e4ce046b",
+     "src/owac/raw/n01_noise.py": "b8594d0e… -> 44dd76f2bace2f09667e78297177cdb410af492c22d2c16ce8439511a0ece52d"
+    },
+    "added": {
+     "configs/encoders/n01_full/p2_motion_train_rgb3.json": "15a3703b65a1fc7816ffc2f0705e5b20078ce00b66649657b96fede7c92bbcfd"
+    }
+   },
+   "source-v4": {
+    "parent": "source-v3",
+    "role": "defect fixes A/B/C",
+    "changed": {
+     "src/owac/backends/raw_correspondence.py": "a276b816198c15f7da4e999a53d43acbd75dade10e93305ce0c0deb0889efc79",
+     "src/owac/runtime/n01_full_policy_preflight.py": "4fc91e4876f3af5b15fcc6cff16affc77a07f9c84d1f05565718465ce19f6c93",
+     "tests/encoders/n01_full/test_motion.py": "dcb5ed5cafb69abc47f4a7b635dce70e3b49ea1515eb6375ee9fead027dc3c92"
+    },
+    "added": {
+     "tests/encoders/n01_full/test_preflight_window_counts.py": "8840c5e746ceb7d24818eaf0244828356ea13a29519427e29d3b8717ce683904"
+    }
+   },
+   "source-v5": {
+    "parent": "source-v4",
+    "role": "final: defect D (eval device) + checkpoint-stem diagnostic",
+    "changed": {
+     "src/owac/evaluation/n01_motion.py": "bc54d161d00a0e7ccca02144c08b1073fcf7f059089c618289584fce8085e241",
+     "src/owac/runtime/n01_full_policy_preflight.py": "5fa4d14d7bbb55982a1a2dd821784735036e00561c02fb8fab676f70ede5408a",
+     "tests/encoders/n01_full/test_motion_eval.py": "1476d29696a1421583f2527b2ef0b78867ff67e51063766abafae3a5d307e46f"
+    },
+    "added": {
+     "tests/encoders/n01_full/test_preflight_motion_checkpoint.py": "ee56e76921f8427f713c438d336a50e686c43e05aff05f7325d2dcae612a0e60"
+    }
+   }
+  },
+  "seeds": {
+   "101": {
+    "status": "validation_plateau",
+    "stopped_at_update": 82000,
+    "note": "stopped at 81,000 under source-v2; fixed criterion refused (tail_within_delta_val_of_best) and it was continued 81k->82k under source-v3",
+    "gpu_hours": 3.886,
+    "val_epe_sensor_px": {
+     "first": 0.7747213886334345,
+     "best": 0.06985233220844887,
+     "best_update": 82000,
+     "final": 0.06985233220844887
+    },
+    "checkpoint_sha256": {
+     "best": "012cad03a79df7fc42e93c17a8e7545e51a3bcdb2f414e80bab8b30bf44a7141",
+     "last": "a1a0f372f0519ef5aa2e46f18b4713aa8f04c9ffd8ee998fa173c788770bce09"
+    }
+   },
+   "211": {
+    "status": "budget_exhausted",
+    "stopped_at_update": 100000,
+    "reasons": [
+     "platform condition failed: tail_within_delta_val_of_best"
+    ],
+    "gpu_hours": 1.319,
+    "val_epe_sensor_px": {
+     "first": 0.7345104022667959,
+     "best": 0.07585365341331524,
+     "best_update": 91000,
+     "final": 0.08987736757486485
+    },
+    "checkpoint_sha256": {
+     "best": "8729c97bf9899a69e03fe48f6b382a55d836d332443de3897bf4df61e36729b4",
+     "last": "40113f753f68d9c66c568ef36846c62e8c84ee9315de0b825378fcbbdb060de8"
+    }
+   },
+   "307": {
+    "status": "validation_plateau",
+    "stopped_at_update": 99000,
+    "note": "server outage 15:20-16:32Z; resumed from last.pt@13000 at 16:40:28Z under source-v3",
+    "gpu_hours": 1.302,
+    "val_epe_sensor_px": {
+     "first": 0.8813337878539012,
+     "best": 0.08289747539227112,
+     "best_update": 83000,
+     "final": 0.08334593675457515
+    },
+    "checkpoint_sha256": {
+     "best": "3d6c27c3778c9cbca0e22967c72db6635073a93504e76160d4356fbe4ccd2e38",
+     "last": "de5410ebb7400209f4db94209d00f1796d188e4e3899c0bc034932675127d6ca"
+    }
+   }
+  },
+  "evaluation_cuda": {
+   "101": {
+    "receipt": "remote-runner-eval-seed-101-cuda-receipt.json",
+    "device": "cuda",
+    "wall_seconds": 3.408994903000348,
+    "latency": {
+     "measured": true,
+     "device": "cuda",
+     "iters": 4,
+     "repeats": 5,
+     "p50_ms": 6.79045499964559,
+     "p95_ms": 6.811381200532196,
+     "parameter_count": 19673284,
+     "peak_device_bytes": 108712960,
+     "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+    },
+    "test_arms_epe_sensor_px": {
+     "no_alignment": 1.9213245913193986,
+     "old_simplified": 2.9851755538204374,
+     "sea_raft": 0.08688598544186997,
+     "oracle": 0.0
+    },
+    "buckets": [
+     "fast_alignable",
+     "fast_hard",
+     "slow_structural_change",
+     "current_frame_anomaly"
+    ],
+    "static_false_rejection_validation": {
+     "pairs": 2,
+     "tolerance_sensor_px": 0.5,
+     "false_rejection_rate": 0.0,
+     "mean_predicted_displacement_sensor_px": 0.18826624353705113,
+     "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+    }
+   },
+   "211": {
+    "receipt": "remote-runner-eval-seed-211-cuda-receipt.json",
+    "device": "cuda",
+    "wall_seconds": 3.400790906000111,
+    "latency": {
+     "measured": true,
+     "device": "cuda",
+     "iters": 4,
+     "repeats": 5,
+     "p50_ms": 6.840394999926502,
+     "p95_ms": 6.895391800208017,
+     "parameter_count": 19673284,
+     "peak_device_bytes": 108712960,
+     "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+    },
+    "test_arms_epe_sensor_px": {
+     "no_alignment": 1.9213245913193986,
+     "old_simplified": 2.9851755538204374,
+     "sea_raft": 0.0892970108340212,
+     "oracle": 0.0
+    },
+    "buckets": [
+     "fast_alignable",
+     "fast_hard",
+     "slow_structural_change",
+     "current_frame_anomaly"
+    ],
+    "static_false_rejection_validation": {
+     "pairs": 2,
+     "tolerance_sensor_px": 0.5,
+     "false_rejection_rate": 0.0,
+     "mean_predicted_displacement_sensor_px": 0.19558301276574508,
+     "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+    }
+   },
+   "307": {
+    "receipt": "remote-runner-eval-seed-307-cuda-receipt.json",
+    "device": "cuda",
+    "wall_seconds": 3.408389017000445,
+    "latency": {
+     "measured": true,
+     "device": "cuda",
+     "iters": 4,
+     "repeats": 5,
+     "p50_ms": 6.80331599960482,
+     "p95_ms": 6.816163800431241,
+     "parameter_count": 19673284,
+     "peak_device_bytes": 108712960,
+     "note": "end-to-end estimate() wall time on one already-arrived pair, excluding data rendering"
+    },
+    "test_arms_epe_sensor_px": {
+     "no_alignment": 1.9213245913193986,
+     "old_simplified": 2.9851755538204374,
+     "sea_raft": 0.0949710619920794,
+     "oracle": 0.0
+    },
+    "buckets": [
+     "fast_alignable",
+     "fast_hard",
+     "slow_structural_change",
+     "current_frame_anomaly"
+    ],
+    "static_false_rejection_validation": {
+     "pairs": 2,
+     "tolerance_sensor_px": 0.5,
+     "false_rejection_rate": 0.0,
+     "mean_predicted_displacement_sensor_px": 0.20792645573001436,
+     "note": "a static pair is rendered twice from the same scene state; the declared truth is zero"
+    }
+   }
+  },
+  "policy_preflight": {
+   "motion": {
+    "snapshot": "source-v5",
+    "cmd_crop": 128,
+    "exit": 0,
+    "receipt": "remote-runner-policy-preflight-motion-receipt.json",
+    "sha256": "704723b12510cb492e21d446a60e982181f43af04dad82b8bcc3cbe39af82b27",
+    "checkpoint": "rgb3-seed-101/checkpoints/best.pt (sha256 133eb47d183e36d041e06749adc7c0a582d92b908c16f3a41fa0841ac7d14cfb, update 256, dev scale)",
+    "fields": {
+     "weights_only_fallback": true,
+     "schema": "owac.n01_full.p2_motion_checkpoint.v1",
+     "pretrained_sha256": "133eb47d183e36d041e06749adc7c0a582d92b908c16f3a41fa0841ac7d14cfb",
+     "loaded_tensors": 472,
+     "missing_key_count": 0,
+     "unexpected_key_count": 0,
+     "motion_mode": "rgb3",
+     "p2_motion_status": "motion_provider",
+     "unique_frame_identity_rule": "(episode_id, frame_id)",
+     "unique_matches_window_all_true": true,
+     "unique_frames_window_examples": {
+      "libero.agentview": [
+       6,
+       8
+      ],
+      "robotwin2.head_camera": [
+       8,
+       8
+      ]
+     },
+     "adapter_unique_lifetime_examples": {
+      "libero.agentview": [
+       6,
+       8
+      ],
+      "robotwin2.head_camera": [
+       8,
+       8
+      ]
+     },
+     "embed_image_calls": 0,
+     "p3_support_applied": false,
+     "offsets_shape": [
+      1,
+      8,
+      2,
+      128,
+      128
+     ]
+    }
+   },
+   "identity_crop128": {
+    "exit": 0,
+    "receipt": "remote-runner-policy-preflight-identity-crop128-receipt.json",
+    "sha256": "12eafe89ceaf066b4a67d413bbaaa16610446a2085c576eda70c7e90a0cb66b8"
+   },
+   "identity_crop32_historical": {
+    "exit": 0,
+    "receipt": "remote-runner-policy-preflight-identity-receipt-v5.json",
+    "sha256": "36ef63a04cd7c40e15a380742e5fb9afb27c6664cfa03d06a01b30ead52344bb"
+   },
+   "stem_mismatch_probe": {
+    "exit": 1,
+    "expected": true,
+    "error": "motion checkpoint stem mismatch: .../seed-101/checkpoints/best.pt is a cfa4 checkpoint (fnet 4 input channels, cnet 8 channels), but this run feeds rgb3 windows with 3 measured channels (a matching cnet needs 6). Protocol rule: correspondence input_channels must be a whole multiple of the measurement channels: CFA 4/8, rawvla_rgb3 3/6. Use a rawvla_rgb3 (3/6) motion checkpoint for this input mode; the stem is never switched or adapted implicitly.",
+    "partial_receipt_files": 0,
+    "log": "remote-runner-policy-preflight-stem-mismatch.log"
+   },
+   "crop_constraint_disclosure": "the vendored 4-level correlation pyramid requires >=128 packed cells per side; rgb3 has SENSOR_PER_PACKED=1 so --crop 32 was geometrically impossible. crop=128 gives 128x128 packed, exactly the rgb3 dev arm's training geometry. This is the declared geometry floor, not a relaxation to pass a check."
+  },
+  "disclosures": [
+   "The rgb3 motion model used by the real-platform preflight is a 256-update dev arm (run_scale=dev, budget_exhausted, reasons 'fewer than two validation points (1)'). It demonstrates interface/gradient/single-arrival connectivity only, not alignment quality.",
+   "Formal motion-quality evidence is the three-seed CFA evaluation on the synthetic-CFA test split; it is reported separately from the real three-channel preflight.",
+   "Whether to train an rgb3 arm at the formal budget (~4 GPU-h at current throughput) is left to the research lead; not started.",
+   "Evaluation latency is end-to-end estimate() wall time on one already-arrived pair, excluding data rendering."
+  ],
+  "outage": {
+   "window_utc": "2026-10-14T15:20Z-16:32Z",
+   "duration_min": 62,
+   "record": "remote-runner-outage-20261014T1520Z.json"
+  },
+  "gpu_hours_total": {
+   "training": 6.507,
+   "select_and_fit_check": 0.159,
+   "rgb3_dev_arm": 0.057,
+   "gpu_probes": 0.064,
+   "final_verification_round": 0.09,
+   "total": 6.88
+  }
+ },
+ "files_note": "104 files hashed: 62 P2 result artifacts, 14 implementation/config, 10 test, 18 vendored"
+}

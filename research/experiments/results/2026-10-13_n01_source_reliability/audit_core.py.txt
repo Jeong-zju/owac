@@ -1,0 +1,31 @@
+"""Read-only source invariance audit against the completed A-F experiment."""
+import ast, copy, hashlib, json, subprocess
+from pathlib import Path
+root=Path.cwd(); base='849e11c'; rows=[]
+def check(name, a, b):
+ if not isinstance(a,bytes):a=ast.dump(a,include_attributes=False).encode()
+ if not isinstance(b,bytes):b=ast.dump(b,include_attributes=False).encode()
+ rows.append(dict(name=name,equal=a==b,before_sha256=hashlib.sha256(a).hexdigest(),after_sha256=hashlib.sha256(b).hexdigest()))
+ assert a==b,name
+prefix='src/owac/frameworks/n01/'
+for name in ['state.py','motion.py','temporal.py','content.py']:
+ p=prefix+name; check(p,subprocess.check_output(['git','show',base+':'+p]),(root/p).read_bytes())
+for name in ['model.py','support.py']:
+ p=prefix+name; old=ast.parse(subprocess.check_output(['git','show',base+':'+p]));new=ast.parse((root/p).read_bytes())
+ for a in old.body:
+  if not isinstance(a,(ast.ClassDef,ast.FunctionDef)):continue
+  b=next(b for b in new.body if getattr(b,'name',None)==a.name)
+  if not isinstance(a,ast.ClassDef):check(a.name,a,b);continue
+  for f in a.body:
+   if not isinstance(f,ast.FunctionDef):continue
+   g=next(g for g in b.body if getattr(g,'name',None)==f.name)
+   if name=='model.py' and a.name=='N01Encoder' and f.name in ['__init__','_load_from_state_dict']:continue
+   if name=='support.py' and f.name in ['domain_statistics','reference_domains']:
+    g=copy.deepcopy(g)
+    additions=[t for t in g.body if isinstance(t,ast.If) and 'source_reliability' in ast.unparse(t.test)]
+    assert len(additions)==1
+    g.body.remove(additions[0])
+   check(a.name+'.'+f.name,f,g)
+result={'reference_commit':base,'checks':rows,'all_passed':all(r['equal'] for r in rows),'scope':'AST whitelist audit by implementing agent; not a separate external reviewer. Optional dispatch and checkpoint identity intentionally added; all old numerical method bodies and orchestration unchanged.'}
+Path('outputs/n01-source-reliability-20261013/core-audit.json').write_text(json.dumps(result,indent=2)+'\n')
+print(len(rows),'core checks passed')
