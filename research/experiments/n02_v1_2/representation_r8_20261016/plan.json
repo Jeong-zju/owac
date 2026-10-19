@@ -1,0 +1,25 @@
+{
+  "version": "r8",
+  "pilot": {
+    "updates_per_arm": 4,
+    "batch_anchors": 16
+  },
+  "representation_budget": {
+    "updates_per_arm": 400,
+    "arms": [
+      "reset-deep",
+      "fresh"
+    ],
+    "seed": 1103,
+    "batch_anchors": 32
+  },
+  "representation_gate": {
+    "deep_flip_relative_l2_min": 0.05,
+    "fused_flip_relative_l2_min": 0.1,
+    "crop_match_accuracy_min": 0.2,
+    "patch_loss_vs_blank_max_ratio": 0.9
+  },
+  "next_stage": "backend low-rank adaptation only after representation gate; no RGB teacher; preserve original physical acceptance",
+  "closed_loop_task": "grab_roller/seed0/Normal; development acceptance",
+  "nondegenerate_views": "second crop differs in origin or orientation"
+}

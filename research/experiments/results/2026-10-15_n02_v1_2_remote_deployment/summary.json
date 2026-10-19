@@ -1,0 +1,492 @@
+{
+  "updated_at": "2026-10-15T10:50:04Z",
+  "host": "93.91.156.102",
+  "ssh_port": 51584,
+  "hostname": "15eadaf35577",
+  "gpu": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887 MiB, 2 MiB\n1, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887 MiB, 2 MiB",
+  "owac_head": "861c46f67fff552c81fff89c5116c63b815224c5",
+  "branch": "lzh/n02-measurement-completion",
+  "real_pi05_bridge_checks": {
+    "libero": {
+      "status": "ran",
+      "suite": "libero",
+      "checkpoint": "/workspace/owac/rawvla/source/openpi_converted_protocol/pi05_libero_starvla/bfloat16/model.safetensors",
+      "observation_source": "SYNTHETIC random tokens (wiring smoke test only, not a measurement)",
+      "last_action_loss": 0.5035852193832397,
+      "visual_token_gradient_l1": 257.69525146484375,
+      "control_actions_shape": [
+        1,
+        10,
+        7
+      ],
+      "peak_gpu_bytes": 9036486144,
+      "note": "real backend weights and a real forward/backward; the observation is synthetic unless --tokens-npz was given, so this is not a benchmark result and not a π0.5 acceptance of any encoder"
+    },
+    "robotwin": {
+      "status": "ran",
+      "suite": "robotwin",
+      "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "observation_source": "SYNTHETIC random tokens (wiring smoke test only, not a measurement)",
+      "last_action_loss": 0.852782666683197,
+      "visual_token_gradient_l1": 398.33648681640625,
+      "control_actions_shape": [
+        1,
+        50,
+        14
+      ],
+      "peak_gpu_bytes": 9132603392,
+      "note": "real backend weights and a real forward/backward; the observation is synthetic unless --tokens-npz was given, so this is not a benchmark result and not a π0.5 acceptance of any encoder"
+    }
+  },
+  "official_raw_windows": {
+    "libero": {
+      "dataset_format": "libero",
+      "split": "train",
+      "episode_group_id": "libero_goal_no_noops_1.0.0_lerobot/episode_000000/variant_00",
+      "acquisition_source": "libero_goal_no_noops_1.0.0_lerobot",
+      "num_frames": 127,
+      "observation_indices": [
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "burst_indices": [
+        [
+          46
+        ],
+        [
+          47
+        ],
+        [
+          48
+        ],
+        [
+          49
+        ],
+        [
+          50
+        ],
+        [
+          51
+        ],
+        [
+          52
+        ],
+        [
+          53
+        ]
+      ],
+      "new_measurement": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unique_measurement_count": 8,
+      "burst_shape": [
+        [
+          8,
+          1,
+          3,
+          256,
+          256
+        ],
+        [
+          8,
+          1,
+          3,
+          256,
+          256
+        ]
+      ],
+      "supervision_indices": [
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62
+      ],
+      "supervision_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "padding_contribution": 0.0,
+      "proprio_available": true,
+      "executed_action_available": false,
+      "variance_available": false,
+      "range_evidence": [
+        {
+          "dtype": "uint8",
+          "min": 0.0,
+          "max": 255.0,
+          "units": "cache units (as stored in the NPZ)",
+          "checked_on": "the loaded episode array of this sample",
+          "method": "min/max over all elements of the loaded array"
+        },
+        {
+          "dtype": "uint8",
+          "min": 0.0,
+          "max": 255.0,
+          "units": "cache units (as stored in the NPZ)",
+          "checked_on": "the loaded episode array of this sample",
+          "method": "min/max over all elements of the loaded array"
+        }
+      ],
+      "cfa_plane_names": null,
+      "normalisation": {
+        "normalisation": "quantile",
+        "action_stats_source": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+        "action_stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+        "delta_action_indices": [],
+        "gripper_rule": "(action + 1) * 0.5",
+        "gripper_index": 6,
+        "state_normalisation": "quantile",
+        "state_stats_source": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json"
+      },
+      "value_ranges": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "scope": "Two existing official episodes for deployment IO only; not a replacement training partition or N02 result."
+    },
+    "robotwin": {
+      "dataset_format": "robotwin",
+      "split": "train",
+      "episode_group_id": "lift_pot/episode_000000",
+      "acquisition_source": "lift_pot",
+      "num_frames": 114,
+      "observation_indices": [
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "burst_indices": [
+        [
+          41
+        ],
+        [
+          42
+        ],
+        [
+          43
+        ],
+        [
+          44
+        ],
+        [
+          45
+        ],
+        [
+          46
+        ],
+        [
+          47
+        ],
+        [
+          48
+        ]
+      ],
+      "new_measurement": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unique_measurement_count": 8,
+      "burst_shape": [
+        [
+          8,
+          1,
+          3,
+          240,
+          320
+        ],
+        [
+          8,
+          1,
+          3,
+          240,
+          320
+        ],
+        [
+          8,
+          1,
+          3,
+          240,
+          320
+        ]
+      ],
+      "supervision_indices": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98
+      ],
+      "supervision_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "padding_contribution": 0.0,
+      "proprio_available": true,
+      "executed_action_available": false,
+      "variance_available": false,
+      "range_evidence": [
+        {
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.4923328161239624,
+          "units": "cache units (as stored in the NPZ)",
+          "checked_on": "the loaded episode array of this sample",
+          "method": "min/max over all elements of the loaded array"
+        },
+        {
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.4994080662727356,
+          "units": "cache units (as stored in the NPZ)",
+          "checked_on": "the loaded episode array of this sample",
+          "method": "min/max over all elements of the loaded array"
+        },
+        {
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.4976365268230438,
+          "units": "cache units (as stored in the NPZ)",
+          "checked_on": "the loaded episode array of this sample",
+          "method": "min/max over all elements of the loaded array"
+        }
+      ],
+      "cfa_plane_names": null,
+      "normalisation": {
+        "normalisation": "zscore",
+        "action_stats_source": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "action_stats_sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+        "delta_action_indices": [],
+        "epsilon": 1e-08,
+        "epsilon_mode": "add",
+        "state_normalisation": "zscore",
+        "state_stats_source": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+      },
+      "value_ranges": [
+        [
+          0.0,
+          0.4698141813278198
+        ],
+        [
+          0.0022063767537474632,
+          0.4354805052280426
+        ],
+        [
+          0.000791523139923811,
+          0.4119222164154053
+        ]
+      ],
+      "scope": "Two existing official episodes for deployment IO only; not a replacement training partition or N02 result."
+    }
+  },
+  "libero_smoke": {
+    "model": "PI05",
+    "host": "127.0.0.1",
+    "port": 18000,
+    "task_suite": "libero_spatial",
+    "task_start": 0,
+    "task_end": 1,
+    "image_mode": "rgb",
+    "exposure_ev": 0.0,
+    "ev_representation": "raw_direct",
+    "image_quantize_bits": 0,
+    "chromatic_family": "none",
+    "chromatic_setting": "",
+    "chromatic_theta_deg": 0,
+    "noise_capture_ev": -2.0,
+    "tonal_mode": "raw_reprocess_isp_tone",
+    "tonal_setting": "",
+    "tonal_c": 1.0,
+    "tonal_pivot": 0.18,
+    "rawvla_bench_manifest": null,
+    "rawvla_bench_representation": "raw",
+    "raw_sensor_noise_seed": 1695213855,
+    "total_successes": 1,
+    "total_episodes": 1,
+    "success_rate": 1.0,
+    "per_task": {
+      "pick up the black bowl between the plate and the ramekin and place it on the plate": {
+        "success": 1,
+        "total": 1
+      }
+    }
+  },
+  "robotwin_smoke": {
+    "success": 1,
+    "total": 1,
+    "task": "grab_roller",
+    "seed": 0,
+    "lighting": "Normal",
+    "representation": "default_isp",
+    "denoiser": "optix",
+    "evidence_root": "/workspace/owac/deployment/robotwin-smoke/grab_roller/rollout",
+    "note": "Original RGB policy deployment only, not N02 research."
+  },
+  "dataset_download": {
+    "ToferFish/RawVLA-Bench": {
+      "status": "downloading",
+      "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "updated_at": "2026-10-15T10:43:56Z",
+      "files": 4810,
+      "bytes": 713689392570
+    },
+    "SidneyXie/pi05_robotwin": {
+      "status": "complete",
+      "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin",
+      "updated_at": "2026-10-15T10:43:56Z",
+      "files": 9,
+      "bytes": 9354082616
+    },
+    "TianxingChen/RoboTwin2.0": {
+      "status": "complete",
+      "path": "/workspace/owac/rawvla/downloads/robotwin-assets",
+      "updated_at": "2026-10-15T10:43:56Z",
+      "files": 3,
+      "bytes": 14928313317
+    },
+    "pi05_libero_jax": {
+      "status": "complete",
+      "updated_at": "2026-10-15T10:43:56Z",
+      "path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax"
+    }
+  },
+  "n02_v12_implemented": false,
+  "n02_v12_training_started": false,
+  "monitor": "http://127.0.0.1:18080/"
+}

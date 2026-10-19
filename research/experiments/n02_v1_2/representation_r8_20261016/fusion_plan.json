@@ -1,0 +1,18 @@
+{
+  "prerequisite": "accepted RAW encoder from representation stage",
+  "seed": 1103,
+  "updates_per_arm": 100,
+  "batch": 4,
+  "arms": [
+    "inherited readout with scale balancing",
+    "freshly initialized readout with scale balancing"
+  ],
+  "frozen": [
+    "accepted RAW encoder",
+    "original pi0.5 backend"
+  ],
+  "backend_adapters": "absent",
+  "selection": "fixed development sampled_control_mse; inspect same-image spatial ablation and flow-noise behavior before backend adaptation",
+  "backend_stage": "load the accepted frontend, then add declared LoRA; initial backend_plan comparison from untrained fusion superseded before formal training; integration pilots remain recorded",
+  "batch_selection": "real warmed update: B4 3.50s readout, B12 18.20s; choose higher anchors/s at B4"
+}

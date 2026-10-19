@@ -1,10 +1,12 @@
 # N02 v1.1共同实现契约
 
-这是所有阶段提示词的一部分。你是实现者，按本文件和本轮阶段提示词开发；不自行重选研究路线，不把实现通过解释为机制或机器人能力成立。本文新文件名和API是**待实现契约**，现有文件见[源码审计](01_CURRENT_IMPLEMENTATION.md)。
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+这是所有阶段提示词的一部分。你是实现者，按本文件和本轮阶段提示词开发；不自行重选研究路线，不把实现通过解释为机制或机器人能力成立。P0 已有验收实现；后续文件名和 API 是分阶段实现契约，现有状态见[源码审计](01_CURRENT_IMPLEMENTATION.md)顶部更新。所有阶段同时执行[远程开发说明](03_REMOTE_DEVELOPMENT.md)。
 
 ## 1. 工作范围与默认决策
 
-进入 `/home/jeong/zeno/owac/worktrees/n02-measurement-completion`，读该checkout的AGENTS、README、status及[v1.1方案](../../plans/N02_full_development_plan_2026-10-13.md)。先保存当前 `git status --short --branch`、HEAD和本轮涉及文件哈希到新输出目录。已有未提交规划、边界诊断和其他任务文件保留。按本轮明确任务开发、验证、运行阶段内实验；本提示词不要求提交、推送、创建定时任务或修改冻结基线服务。
+使用 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，优先在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发。目录尚不存在时按[远程开发说明](03_REMOTE_DEVELOPMENT.md)从已验收提交建立；本地 `/home/jeong/zeno/owac/worktrees/n02-measurement-completion` 仅作交接和验收副本。读远端 checkout 的 AGENTS、README、status 及[v1.1方案](../../plans/N02_full_development_plan_2026-10-13.md)。先保存当前 `git status --short --branch`、HEAD和本轮涉及文件哈希到新输出目录。已有未提交规划、边界诊断和其他任务文件保留。按本轮明确任务开发、验证、运行阶段内实验；本提示词不要求提交、推送、创建定时任务或修改冻结基线服务。
 
 正式主线固定：ConvNeXt V2-Base RAW观测 → SAVi式循环实体 → 完整世界候选 → Theseus连续提议与完整目标接受 → 结构搜索 → 实际来源撤回和重建 → Perceiver式读出 → 固定RawVLA/StarVLA π0.5。P2—P4用全局求解/重放，P5才比较局部执行。DeepSeek不需要再为这一串组件进行选型。
 
@@ -101,8 +103,8 @@ Theseus LM只提议固定结构的连续步。其二次子问题可固定当前�
 
 ## 7. 每阶段统一交付
 
-每阶段在 `research/experiments/` 保存中文报告和小型 `results/<run>/` 清单；大数组/权重/日志放 `outputs/n02-full/<stage>/<run_id>/`。报告依次写：本轮原要求、实际实现与文件、复用来源及差异、实际命令、数据/种子/资源、原始计数与区间、失败与下一交接条件。至少有 `run_manifest.json`、`metrics.json`、`stage_decision.json` 和可运行复现命令。
+每阶段在远端 checkout 的 `research/experiments/` 保存中文报告和小型 `results/<run>/` 清单；大数组/权重/日志放 `outputs/n02-full/<stage>/<run_id>/`。报告依次写：本轮原要求、实际实现与文件、复用来源及差异、实际命令、数据/种子/资源、原始计数与区间、失败与下一交接条件。至少有 `run_manifest.json`、`metrics.json`、`stage_decision.json` 和可运行复现命令。
 
 `stage_decision.json`分别记录 `implementation`、`numerical`、`behavior`、`closed_loop`，值用pass/fail/not_run/incomplete；列出证据路径与代码/config/data SHA。DeepSeek可报告测得事实，不自行把“pass”写成总体研究验收。
 
-每轮按改动运行目标测试及 `make check`；跨数据/后端公共接口时加旧回归。不安装整套无关环境或无限加通用异常包装。重点是上面具体数值、因果、概率、状态和行为契约。缺真实数据/运行时可继续完成独立本地实现与测试，真实部分报告未运行，不用stub替代收据。
+每轮按改动运行目标测试及 `make check`；跨数据/后端公共接口时加旧回归。不安装整套无关环境或无限加通用异常包装。重点是上面具体数值、因果、概率、状态和行为契约。数据已在指定服务器，优先直接使用该机真实缓存、独立 GPU 环境和既有权重。SSH 暂时不可达时记录具体错误并继续可做的代码工作，未运行项目如实记录；本机没有 RAW 不构成跳过远端验证的理由。完整输出留远端，向本地回传源码 diff、文件哈希及紧凑收据。

@@ -1,0 +1,39 @@
+{
+  "scope": "absolute-fit boundary diagnostic; archived scheduler unchanged",
+  "scene_seeds": [
+    28000,
+    28001,
+    28002,
+    28003,
+    28004,
+    28005,
+    28006,
+    28007,
+    28008,
+    28009,
+    28010,
+    28011,
+    28012,
+    28013,
+    28014,
+    28015
+  ],
+  "scorer_seeds": [
+    0,
+    1,
+    2
+  ],
+  "source": "outputs/n02-retrained-20261013/controls",
+  "threshold": 2.5,
+  "cases": {
+    "normal": "unmodified measured final frame",
+    "gain": "final measured frame multiplied by1.25; same world",
+    "translation": "integer circular translation2pixels; same world",
+    "noise": "additional independent Gaussian sigma.03; same world",
+    "two_markers": "reference plus two separated positive PSFs; outside single-PSF family",
+    "bright_field": "reference plus constant.15; outside single-PSF family"
+  },
+  "gate": "each nuisance false-rejection<=10%; each structural rejection>=90%",
+  "interpretation": "rejection is model inadequacy, not semantic contradiction; ratio-confidence and world correctness reported separately",
+  "budget": "zero training; frozen score checkpoints and threshold; CPU2threads"
+}

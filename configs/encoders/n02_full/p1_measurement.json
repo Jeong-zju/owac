@@ -1,0 +1,305 @@
+{
+  "version": "n02-full-v1.1",
+  "seeds": [
+    1103,
+    2207,
+    3301
+  ],
+  "worlds": 8,
+  "slots": 16,
+  "slot_dim": 512,
+  "depths": [
+    3,
+    3,
+    27,
+    3
+  ],
+  "dims": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "input_size": 256,
+  "scales": [
+    "stride8",
+    "stride16"
+  ],
+  "partitions": {
+    "train": 0.8,
+    "dev": 0.1,
+    "calibration": 0.1
+  },
+  "data": {
+    "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "dataset_format": "libero",
+    "protocol_verified": true,
+    "notes": "v1.1 P1 consumes the frozen v2 four-partition manifests and the six frozen anchor tables; no re-partitioning",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+    "formal_normalisation": "quantile; gripper (a+1)/2"
+  },
+  "runtime": {
+    "dtype": "float32",
+    "device": "cuda",
+    "amp": false,
+    "acceptance_budgets": {
+      "decision_p95_ms_per_episode": 200,
+      "persistent_state_bytes_per_episode": 268435456,
+      "scope": "development budget from P0; integrated P1 decision cost still to be measured",
+      "frozen_date": "2026-10-14"
+    }
+  },
+  "profile": {
+    "updates": 200,
+    "warmup_updates": 20,
+    "batch_size": 2,
+    "sequence_length": 8
+  },
+  "paths": {
+    "output_root": "outputs/n02-full"
+  },
+  "training": {
+    "pretrain": {},
+    "measurement": {
+      "updates": 50000,
+      "effective_batch_episodes": 32,
+      "frames_per_episode": 8,
+      "micro_batch_episodes": 8,
+      "lr_base": 3e-05,
+      "lr_head": 0.0003,
+      "lr_grid_scales": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "weight_decay": 0.01,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "warmup_fraction": 0.05,
+      "schedule": "cosine",
+      "min_lr_ratio": 0.0,
+      "grad_clip": 1.0,
+      "loss_weights": {
+        "raw_proper_prediction": 1.0,
+        "candidate_ce": 1.0,
+        "geometry_aux": 0.1
+      },
+      "sources": [
+        "synthetic",
+        "real"
+      ],
+      "synthetic_scenes": 200,
+      "synthetic_sensors": [
+        {
+          "camera_id": "cam0",
+          "height": 64,
+          "width": 64,
+          "input_mode": "bayer_cfa",
+          "cfa_pattern": "RGGB",
+          "black_level": 64.0,
+          "white_level": 4095.0,
+          "bit_depth": 12,
+          "read_noise_e": 2.0,
+          "gain": 1.0,
+          "exposure_ms": 1.0
+        },
+        {
+          "camera_id": "cam1",
+          "height": 64,
+          "width": 64,
+          "input_mode": "bayer_cfa",
+          "cfa_pattern": "GRBG",
+          "black_level": 64.0,
+          "white_level": 4095.0,
+          "bit_depth": 12,
+          "read_noise_e": 3.0,
+          "gain": 1.0,
+          "exposure_ms": 1.0
+        }
+      ],
+      "measurement_model": {
+        "kind": "cfa"
+      },
+      "canvas": [
+        64,
+        64
+      ],
+      "action_horizon": 4,
+      "grad_conflict_every": 5000,
+      "amp": "off",
+      "checkpoint_every": 1000,
+      "dev_eval_every": 5000,
+      "log_every": 50,
+      "units": "raw_dn_uint16_mosaic",
+      "real_units": "normalised_pseudo_raw_float32",
+      "real_density_verified": false,
+      "ce_temperature": 1.0
+    },
+    "checkpoint": {
+      "every": 5000,
+      "keep_last": 3,
+      "save_final": true
+    },
+    "selection": {
+      "stage": "p1-measurement",
+      "grid_scales": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "criterion": "primary: dev RAW proper-prediction score and candidate-CE on the fixed dev task set (lower is better); secondary: geometry aux; tie-break: the lower learning-rate scale. Rule frozen before the grid was launched.",
+      "mode_resolution": "one encoder mode per run: every declared synthetic camera is bayer_cfa, so the run takes the CFA4 path; camera mode comes from SensorSpec.input_mode, and a source whose mode differs from training.model.input_mode is recorded as skipped",
+      "camera_shape_note": "both synthetic cameras are 64x64 bayer_cfa with different phases (RGGB/GRBG): the declared query grid must match across cameras of one decision time, and the different phase keeps the CFA-phase requirement covered",
+      "sensor_model_note": "saturation_level/floor_level/quantisation_step mirror the synthetic CFA declaration (white 4095, black 64, 1 DN step) so the score can treat clipped samples explicitly",
+      "scene_pool_note": "the pinned object count filters the generator's vocabulary, so the scene pool must be large enough to fill one micro-batch (micro_batch_episodes=32 needs >=32 matching scenes); the harness refuses to repeat a scene inside one batch"
+    },
+    "data": {
+      "libero": {
+        "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+        "manifest": "research/experiments/results/2026-10-14_n02_p0_independent_acceptance/manifest-libero.json.gz",
+        "manifest_hash": "ff61cef7ad75e6d71581089677b05a1cd0fdb662e89d2e6a91a0d5c6fee26b52",
+        "dataset_format": "libero",
+        "anchors": {
+          "train": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/libero-train-anchors.json.gz",
+            "anchors": 204301,
+            "gzip_sha256": "5bfb889b5e53b5a78e8bc294c0cd1cd28a3e8137164a5fd29ba46627145eee43",
+            "json_sha256": "27c3985885bbc904f4e7159be599b97029cb86a03fc104d73a68ce817446fb45",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 10,
+              "action_offset": 0
+            }
+          },
+          "dev": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/libero-dev-anchors.json.gz",
+            "anchors": 28394,
+            "gzip_sha256": "9fa508a891668984f59ec65ad0534ecc4e537f993c48c41f990ca33f0eebc6fb",
+            "json_sha256": "c4e2acba85e916c76bfcd7ce70e884a68f6efb9cd83ac1802f21f6eb57302837",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 10,
+              "action_offset": 0
+            }
+          },
+          "calibration": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/libero-calibration-anchors.json.gz",
+            "anchors": 28436,
+            "gzip_sha256": "9ce71ee58640ef3509032e3b8475399c259c86aebc9d916e8217288f707472ef",
+            "json_sha256": "e963ce93bc81ef2eeb8192c11463c5ca33d62b9dbd215fee8d77809b53a51a67",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 10,
+              "action_offset": 0
+            }
+          }
+        },
+        "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+        "window_options": {},
+        "formal_normalisation": "quantile; gripper (a+1)/2"
+      },
+      "robotwin": {
+        "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+        "manifest": "research/experiments/results/2026-10-14_n02_p0_independent_acceptance/manifest-robotwin.json.gz",
+        "manifest_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+        "dataset_format": "robotwin",
+        "anchors": {
+          "train": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/robotwin-train-anchors.json.gz",
+            "anchors": 116117,
+            "gzip_sha256": "fdac10761736a2c863bf4d92ee75e3fcbcc8a406bb2cd34614515d151edaaddf",
+            "json_sha256": "57f1576da96026810339a5925b7390545149cba3095056b382b7b176c024d230",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 50,
+              "action_offset": 1
+            }
+          },
+          "dev": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/robotwin-dev-anchors.json.gz",
+            "anchors": 15414,
+            "gzip_sha256": "a3ed6a11a85a79c72d320e6a95537fcb3dee4ed5c672d66cef92f2d5cda5e945",
+            "json_sha256": "32c1bae7ee1fbc708e2fe7fc42409575090a3fafd68afcb85a2888c7e155c8be",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 50,
+              "action_offset": 1
+            }
+          },
+          "calibration": {
+            "path": "outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+            "anchors": 15413,
+            "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+            "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+            "window": {
+              "observation_stride": 1,
+              "burst_frames": 1,
+              "rnn_frames": 1,
+              "action_horizon": 50,
+              "action_offset": 1
+            }
+          }
+        },
+        "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+        "window_options": {},
+        "formal_normalisation": "checkpoint MEAN_STD/zscore (explicit, not the loader default)"
+      }
+    },
+    "instrumentation": {
+      "grad_conflict_every": 5000
+    },
+    "model": {
+      "candidate_world_size": 8,
+      "input_mode": "cfa4",
+      "patch_size": 32,
+      "decoder_embed_dim": 512,
+      "decoder_depth": 1,
+      "norm_pix_loss": false,
+      "note": "P1 frozen FCMAE starting values; raw3 is the RawVLA pseudo-RAW 3-channel mode",
+      "sensor_shape": {
+        "cam0": [
+          64,
+          64
+        ],
+        "cam1": [
+          64,
+          64
+        ]
+      },
+      "saturation_level": 4095.0,
+      "floor_level": 64.0,
+      "quantisation_step": 1.0,
+      "per_camera_sensor": {
+        "cam0": {
+          "read_noise_signal": 8.062,
+          "read_noise_e": 2.0,
+          "shot_noise_scale": 0.24808
+        },
+        "cam1": {
+          "read_noise_signal": 12.093,
+          "read_noise_e": 3.0,
+          "shot_noise_scale": 0.24808
+        }
+      },
+      "dn_mean_convention": "SensorModel parameters are declared in the query units (raw_dn_uint16_mosaic): read_noise_signal is DN sigma (read_noise_e / gain), shot_noise_scale is e-/DN of the declared signal including black level, quantisation_step/saturation_level/floor_level are DN, min/max_variance are DN^2 guards. The mean is the declared-signal value in DN (black level included); the sensor never re-normalises, and the only affine is factors' UnitAffine (black/white -> declared units).",
+      "per_camera_note": "one SensorModel instance carries one unit family; the per-camera read-noise difference is declared here and recorded in the manifest, and a per-camera sensor model is a T2/T3 interface question if the density must differ per camera within one run"
+    }
+  },
+  "evaluation": {
+    "scenarios": {},
+    "thresholds": {},
+    "artifacts": {}
+  }
+}

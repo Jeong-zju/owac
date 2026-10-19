@@ -1,0 +1,21 @@
+{
+  "title": "r11 RAW重新训练",
+  "phase": "task_adaptation",
+  "phase_detail": "原生π在固定采样噪声、原生50步执行下已通过91步持续抓持。当前RAW仍用第850步权重，零训练更新；其余训练设置保持不变。先验证衔接，再做少量示范拟合。",
+  "runs": [
+    {
+      "run_id": "raw-task-r11-task-s1103-a1",
+      "stage": "P2",
+      "label": "RAW表征＋动作适配",
+      "effective_batch_size": 12,
+      "target": 1000
+    },
+    {
+      "run_id": "raw-task-r11-control-s1103-a1",
+      "stage": "P2",
+      "label": "冻结RAW前端对照",
+      "effective_batch_size": 12,
+      "target": 1000
+    }
+  ]
+}

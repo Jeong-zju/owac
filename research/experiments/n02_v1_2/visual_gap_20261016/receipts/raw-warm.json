@@ -1,0 +1,117 @@
+{
+  "mode": "raw-warm",
+  "optimizer_updates": 0,
+  "new_rollouts": 0,
+  "input_file": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/policy-audit-20261016/original-normal/initial_observation.npz",
+  "input_sha256": "4e78c06e23cc08daab4adfd18175775b99e0c9d9882544e3aff18c8698e6593b",
+  "flow_seed": 188390828,
+  "language": "Grab the light brown cylindrical roller on the table.",
+  "raw_sha256": [
+    "e5248b2279bbc3514b73c6b42783d6a285ac4968f4d0f8fd03302b59a13d8a16",
+    "3357f45d4dce9d33b1d64c519ab19f44470cbb90bb387282210476270eb1f4a2",
+    "9d6b6f62a0ad831f97238e549c8a63a0a04469778de63fa6e95c1b58143d0b53"
+  ],
+  "readout": {
+    "local_rms": 4.0,
+    "context_contribution_rms": 0.3918684720993042,
+    "tanh_context_gate": 0.09796718508005142,
+    "q": [
+      [
+        0.2519378364086151,
+        0.2519378364086151,
+        0.2519378364086151,
+        0.24418650567531586
+      ]
+    ],
+    "encoder_spatial_std_over_rms": {
+      "robotwin_head::stride4": 0.2450643926858902,
+      "robotwin_head::stride8": 0.20832642912864685,
+      "robotwin_head::stride16": 0.2123338133096695,
+      "robotwin_left::stride4": 0.24324387311935425,
+      "robotwin_left::stride8": 0.20959553122520447,
+      "robotwin_left::stride16": 0.21235837042331696,
+      "robotwin_right::stride4": 0.2429121732711792,
+      "robotwin_right::stride8": 0.20955438911914825,
+      "robotwin_right::stride16": 0.21235664188861847
+    }
+  },
+  "checkpoint_sha256": "aa3819af1380ba0d05f381ea4b83c3fb145a42d4a0bf9a730d64587dad9207bd",
+  "optimizer_state_loaded_without_updates": true,
+  "language_ids_sha256": "3e35c3a2db12bc46e86f214cfdcecc350927c91aa5e86032f6322c64bbc257a0",
+  "language_mask_sha256": "295ce8e2e59adcd91e5648be15aacb45f0e279d29fc482ce4267a5692677b717",
+  "state_sha256": "763e8784a8b3caf031223319e174f64b1695b02a89f68a76e5457711148326c3",
+  "active_language_tokens": 139,
+  "tokens": {
+    "shape": [
+      1,
+      768,
+      2048
+    ],
+    "rms": 4.135491847991943,
+    "abs_max": 14.769878387451172,
+    "camera_rms": [
+      4.135486602783203,
+      4.135493755340576,
+      4.135493755340576
+    ],
+    "spatial_centred_energy_fraction": 0.0008817281341180205,
+    "per_camera_position_std_mean": [
+      0.1043735072016716,
+      0.10447514057159424,
+      0.1044626533985138
+    ],
+    "per_camera_position_pair_cosine_mean": [
+      0.9990582466125488,
+      0.9990567564964294,
+      0.999056875705719
+    ],
+    "spatial_effective_rank": 1.475972056388855,
+    "bf16_equal_first_position_fraction": 0.00390625
+  },
+  "action_baseline": {
+    "first_target_vs_current_joint_max_rad": 2.001519203186035,
+    "within_chunk_max_joint_target_delta_rad": 0.030977487564086914
+  },
+  "counterfactuals": {
+    "noise_50": {
+      "joint_target_delta_rms_rad": 0.5246477723121643,
+      "first_target_delta_max_rad": 1.0936646461486816,
+      "all_target_delta_max_rad": 1.21989905834198
+    },
+    "noise_100": {
+      "joint_target_delta_rms_rad": 0.5361761450767517,
+      "first_target_delta_max_rad": 1.5758590698242188,
+      "all_target_delta_max_rad": 2.0217909812927246
+    },
+    "noise_150": {
+      "joint_target_delta_rms_rad": 0.6558987498283386,
+      "first_target_delta_max_rad": 1.5810678005218506,
+      "all_target_delta_max_rad": 1.6434547901153564
+    },
+    "noise_200": {
+      "joint_target_delta_rms_rad": 0.8266717195510864,
+      "first_target_delta_max_rad": 1.4850393533706665,
+      "all_target_delta_max_rad": 1.6903982162475586
+    },
+    "all_zero": {
+      "joint_target_delta_rms_rad": 0.7469907402992249,
+      "first_target_delta_max_rad": 1.9404538869857788,
+      "all_target_delta_max_rad": 1.9839367866516113
+    },
+    "spatial_mean": {
+      "joint_target_delta_rms_rad": 0.007444450166076422,
+      "first_target_delta_max_rad": 0.01457524299621582,
+      "all_target_delta_max_rad": 0.023320436477661133
+    },
+    "camera_swap_head_left": {
+      "joint_target_delta_rms_rad": 0.0029853067826479673,
+      "first_target_delta_max_rad": 0.007833242416381836,
+      "all_target_delta_max_rad": 0.015425562858581543
+    },
+    "spatial_reverse": {
+      "joint_target_delta_rms_rad": 0.018535004928708076,
+      "first_target_delta_max_rad": 0.047612667083740234,
+      "all_target_delta_max_rad": 0.05538630485534668
+    }
+  }
+}

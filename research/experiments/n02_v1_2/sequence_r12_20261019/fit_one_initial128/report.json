@@ -1,0 +1,456 @@
+{
+  "run_id": "raw-fewshot-r12-one-s1103-a1",
+  "config": {
+    "version": "n02-v12-p2-v1",
+    "run_id": "raw-fewshot-r12-one-s1103-a1",
+    "stage": "P2",
+    "arm": "raw_n02",
+    "platform": "robotwin",
+    "representation": {
+      "kind": "raw3",
+      "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+      "isp": null
+    },
+    "model": {
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "input_mode": "RAW3",
+      "in_chans": 3,
+      "input_size": [
+        256,
+        320
+      ],
+      "dims": [
+        128,
+        256,
+        512,
+        1024
+      ],
+      "depths": [
+        3,
+        3,
+        27,
+        3
+      ],
+      "d_model": 512,
+      "alignment": 32,
+      "k": 4,
+      "n_slots": 16,
+      "slot_dim": 512,
+      "tau": 1.0,
+      "rounds": 4,
+      "history": 8,
+      "query_stride": 1,
+      "max_queries_per_camera": 0,
+      "n_latents": 128,
+      "n_queries": 256,
+      "out_dim": 2048,
+      "decoder_hidden": 256,
+      "measurement_channels": 3,
+      "channel_reduction": "select",
+      "saturation_level": null,
+      "units": "sensor_units",
+      "min_variance": null,
+      "max_variance": null,
+      "action_dim": 0,
+      "action_horizon": 50,
+      "strict_check": true,
+      "disclosure": "RoboTwin HDR-derived RAW3, not native Bayer. ConvNeXt V2-Base originally initialised from scratch, then transferred from the declared RAW-only 400-step representation checkpoint; prior fusion weights from the declared B2 100-step checkpoint. No RGB weights, teacher or reconstruction. r11 adds a fresh learned image-global path and learned multiscale weights. Trainable scope: last six stride16 blocks, all level projections, fusion/readout, decoder and state modules. Original pi0.5 weights frozen; declared LoRA adapters trained with native 32-dimensional masked flow supervision. Fixed-weight independent calibration triggers one bounded explanation reset at the decision anchor; no claim of learned task benefit before training and physical validation.",
+      "batch_cameras": true,
+      "group_camera_queries": true,
+      "checkpoint_decoder": true,
+      "preserve_spatial_tokens": true,
+      "output_token_rms": 4.0,
+      "context_gate_init": 0.1,
+      "scale_balance": true,
+      "scale_balance_mode": "contrast",
+      "learned_global_fusion": true,
+      "revision_policy": "reset_explanations",
+      "fast_prefix": true
+    },
+    "data": {
+      "dataset_format": "robotwin",
+      "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+      "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+      "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+      "manifest_seed": 1103,
+      "partitions": {
+        "train": 0.8,
+        "dev": 0.1,
+        "calibration": 0.1
+      },
+      "history": 8,
+      "declared_prior": null,
+      "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+      "protocol": {
+        "cameras": 3,
+        "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+        "offset": 1,
+        "horizon": 50,
+        "action_mask": "the loader's per-action padding mask",
+        "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+      },
+      "task_names": [
+        "grab_roller"
+      ],
+      "exclude_episode_ids": [
+        "grab_roller/episode_000000"
+      ]
+    },
+    "policy": {
+      "suite": "robotwin",
+      "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+      "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+      "token_dim": 2048,
+      "tokens_per_camera": 256,
+      "freeze_backend": true,
+      "language_state_contract": "pi05-native-language-state-v1",
+      "freeze_encoder": false,
+      "backend_adapter": {
+        "kind": "lora",
+        "rank": 8,
+        "alpha": 16,
+        "targets": [
+          "q_proj",
+          "v_proj"
+        ]
+      },
+      "freeze_frontend": false,
+      "task_instructions": {
+        "grab_roller": "Grab the light brown cylindrical roller on the table."
+      }
+    },
+    "aux": {
+      "lambda_raw": 0.0,
+      "lambda_pred": 0.0,
+      "lambda_noise": 0.0,
+      "noise_note": "Noise targets remain disabled; independent sensor redraws are diagnostic only.",
+      "mask_ratio": 0.6,
+      "patch_size": 32,
+      "decoder_embed_dim": 512,
+      "decoder_depth": 1,
+      "grn_scope": "sparse",
+      "audit_disabled_terms": false
+    },
+    "optim": {
+      "lr": 1e-05,
+      "lr_head": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "weight_decay": 0.01,
+      "warmup_updates": 8,
+      "grad_clip": 1.0,
+      "clip_scope": "parameter_group",
+      "lr_backend_adapter": 0.0001
+    },
+    "loop": {
+      "seed": 1103,
+      "max_updates": 128,
+      "profile_updates": 4,
+      "batch_size": 12,
+      "grad_accum": 1,
+      "validate_every": 64,
+      "save_every": 64,
+      "dev_windows": 20,
+      "calibration_windows": 16,
+      "previews": 0,
+      "profile_note": "r12 fewshot fit, source RAW850; fresh optimizer/cursor; 128 initial updates, at most256 per arm",
+      "bptt_steps": 2,
+      "sampled_dev": true,
+      "monitor_metric": "sampled_control_mse"
+    },
+    "runtime": {
+      "device": "cuda",
+      "dtype": "float32",
+      "amp": false,
+      "threads": 4,
+      "gpu_note": "GPU0 dedicated to this arm",
+      "performance": {
+        "tf32": true,
+        "batch_cameras": true,
+        "cudnn_benchmark": true,
+        "fused_adam": true,
+        "gradient_stats_every": 50,
+        "prefetch": 2,
+        "group_camera_queries": true
+      }
+    },
+    "paths": {
+      "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+    },
+    "execution_revision": "n02-v12-p2-spatial-r7",
+    "initialisation": {
+      "kind": "fewshot_r12",
+      "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-task-r11-task-s1103-a1/checkpoint_0000850.pt",
+      "checkpoint_sha256": "a660f0a0c6dc3d7006f1cda391de27c2b35d31fb7b1d51163e7f480e16b0068c",
+      "optimizer": "fresh"
+    },
+    "task_adaptation": {
+      "protocol": "n02-task-repair-r11-v1",
+      "objective": "native_flow_32",
+      "train_deep_blocks": 6,
+      "balanced_sampling": true,
+      "validation": "all5_frozen_dev_episodes_four_landmarks",
+      "selection": "executed50_plus_first10_joints_grippers_nonregression",
+      "train_state_modules": true,
+      "prefix_max_ratio": 1.0,
+      "fewshot": {
+        "episode_paths": [
+          "data/robotwin2/raw/grab_roller/episode_000005.npz"
+        ],
+        "selection": "lexicographically first Normal train episodes, no outcome selection",
+        "fit_gate": {
+          "joint_rms_deg_max": 3.0,
+          "gripper_mae_max": 0.05,
+          "gripper_max_error_max": 0.15,
+          "first_joint_max_deg_max": 5.0,
+          "flow_seeds": [
+            188390828,
+            188390878,
+            188390928,
+            188390978
+          ]
+        },
+        "scope": "training-sample fit only; all5 dev episodes remain independent"
+      }
+    },
+    "execution": {
+      "version": "n02-control-r11-v1",
+      "horizon": 50,
+      "replan_interval": 50,
+      "max_joint_delta": null,
+      "max_gripper_delta": null,
+      "clip_grippers": false
+    },
+    "online_checks": {
+      "enabled": true,
+      "scope": "fixed_weight_anchor_check",
+      "training": "invalidate_before_each_update",
+      "revision": "once_per_decision_keep_prelocked_verdict"
+    }
+  },
+  "overview": {
+    "updates_this_run": 128,
+    "final_step": 128,
+    "wall_seconds": 2038.117087627761,
+    "step_seconds_mean": 15.922789747091883,
+    "step_seconds_p50": 19.034924016799778,
+    "step_seconds_p95": 21.55638052821159,
+    "last_terms": {
+      "action": 0.091336
+    },
+    "final_loss_mean_last10": 0.059949417412281034,
+    "peak_gpu_bytes": 84784446464,
+    "skipped_all_padding_anchors": 0,
+    "loss_is_not_a_capability_score": true
+  },
+  "final": {
+    "checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fewshot-r12-one-s1103-a1/checkpoint_0000128.pt",
+    "checkpoint_bytes": 750582504,
+    "dev_action_error": 0.15824252124875784,
+    "previews": {
+      "status": "disabled"
+    }
+  },
+  "trained_parameters": {
+    "encoder": 13242880,
+    "decoder": 1243851,
+    "readout": 10319366,
+    "proposals_corrector": 9754112,
+    "masked_branch": 0,
+    "bridge_projection": 0,
+    "backend_adapter": 1548288
+  },
+  "training_sample_fit": {
+    "step": 128,
+    "passed": false,
+    "scope": "training-sample fit, not closed loop",
+    "limits": {
+      "joint_rms_deg_max": 3.0,
+      "gripper_mae_max": 0.05,
+      "gripper_max_error_max": 0.15,
+      "first_joint_max_deg_max": 5.0,
+      "flow_seeds": [
+        188390828,
+        188390878,
+        188390928,
+        188390978
+      ]
+    },
+    "maxima": {
+      "joint_rms_deg": 18.40082459365781,
+      "first_joint_max_deg": 42.728097112201645,
+      "gripper_mae": 0.34428813766758204,
+      "gripper_max_error": 1.0021518247281165
+    },
+    "rows": [
+      {
+        "index": 288,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 0,
+        "seed": 188390828,
+        "joint_rms_deg": 17.1239319709706,
+        "first_joint_max_deg": 35.18748655565428,
+        "gripper_mae": 0.09002878169991614,
+        "gripper_max_error": 0.1374374365035358
+      },
+      {
+        "index": 288,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 0,
+        "seed": 188390878,
+        "joint_rms_deg": 14.314064986812793,
+        "first_joint_max_deg": 17.58485654089652,
+        "gripper_mae": 0.10365743522891084,
+        "gripper_max_error": 0.15858110223181043
+      },
+      {
+        "index": 288,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 0,
+        "seed": 188390928,
+        "joint_rms_deg": 15.47171723541365,
+        "first_joint_max_deg": 33.08059116770927,
+        "gripper_mae": 0.06842043096522747,
+        "gripper_max_error": 0.10644050819681894
+      },
+      {
+        "index": 288,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 0,
+        "seed": 188390978,
+        "joint_rms_deg": 18.40082459365781,
+        "first_joint_max_deg": 39.66487090651981,
+        "gripper_mae": 0.0551545631193467,
+        "gripper_max_error": 0.1339147745271454
+      },
+      {
+        "index": 298,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 10,
+        "seed": 188390828,
+        "joint_rms_deg": 17.23560949850098,
+        "first_joint_max_deg": 35.86185267651202,
+        "gripper_mae": 0.054215042107859684,
+        "gripper_max_error": 0.13689420786266737
+      },
+      {
+        "index": 298,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 10,
+        "seed": 188390878,
+        "joint_rms_deg": 14.666150590703678,
+        "first_joint_max_deg": 21.248214460962483,
+        "gripper_mae": 0.0757122935470871,
+        "gripper_max_error": 0.1668575871255058
+      },
+      {
+        "index": 298,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 10,
+        "seed": 188390928,
+        "joint_rms_deg": 14.077462090532483,
+        "first_joint_max_deg": 37.03204089760664,
+        "gripper_mae": 0.026620327972906886,
+        "gripper_max_error": 0.1143491193609556
+      },
+      {
+        "index": 298,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 10,
+        "seed": 188390978,
+        "joint_rms_deg": 16.899772699229263,
+        "first_joint_max_deg": 42.728097112201645,
+        "gripper_mae": 0.022169584679459148,
+        "gripper_max_error": 0.12020676111833595
+      },
+      {
+        "index": 336,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 48,
+        "seed": 188390828,
+        "joint_rms_deg": 7.53641885258143,
+        "first_joint_max_deg": 18.46738579834206,
+        "gripper_mae": 0.09133011066462238,
+        "gripper_max_error": 0.31295880060954673
+      },
+      {
+        "index": 336,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 48,
+        "seed": 188390878,
+        "joint_rms_deg": 7.9421299390139,
+        "first_joint_max_deg": 26.756816317442556,
+        "gripper_mae": 0.34428813766758204,
+        "gripper_max_error": 1.0021518247281165
+      },
+      {
+        "index": 336,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 48,
+        "seed": 188390928,
+        "joint_rms_deg": 5.223996963919474,
+        "first_joint_max_deg": 11.104119965890844,
+        "gripper_mae": 0.1788238485336051,
+        "gripper_max_error": 0.583892572435369
+      },
+      {
+        "index": 336,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 48,
+        "seed": 188390978,
+        "joint_rms_deg": 6.331875298230902,
+        "first_joint_max_deg": 10.00519413782185,
+        "gripper_mae": 0.11503205091772872,
+        "gripper_max_error": 0.47211959986580254
+      },
+      {
+        "index": 373,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 85,
+        "seed": 188390828,
+        "joint_rms_deg": 9.298947044285834,
+        "first_joint_max_deg": 9.576417879586488,
+        "gripper_mae": 0.046506447923278314,
+        "gripper_max_error": 0.1190183983739459
+      },
+      {
+        "index": 373,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 85,
+        "seed": 188390878,
+        "joint_rms_deg": 9.324369253461905,
+        "first_joint_max_deg": 23.358479008688857,
+        "gripper_mae": 0.01586838346049859,
+        "gripper_max_error": 0.03343579194485358
+      },
+      {
+        "index": 373,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 85,
+        "seed": 188390928,
+        "joint_rms_deg": 5.542144374452973,
+        "first_joint_max_deg": 9.401044055387025,
+        "gripper_mae": 0.021240787551181483,
+        "gripper_max_error": 0.06540640821398824
+      },
+      {
+        "index": 373,
+        "path": "data/robotwin2/raw/grab_roller/episode_000005.npz",
+        "t": 85,
+        "seed": 188390978,
+        "joint_rms_deg": 5.593174245926096,
+        "first_joint_max_deg": 13.626719115811676,
+        "gripper_mae": 0.1459874992051679,
+        "gripper_max_error": 0.3711464412271681
+      }
+    ]
+  },
+  "closed_loop": "not run by this training process"
+}

@@ -1,5 +1,13 @@
 # 给DeepSeek：P7，全量闭环与机制因果验证
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+候选策略服务和仿真闭环均在指定远端运行，复用已有资产及已核对依赖，为 N02 设置独立作业名、空闲端口和结果目录。保留冻结基线服务；全量视频/轨迹在远端归档，本地只接收报告及抽样证据。
+
 读[共同契约](00_SHARED_CONTRACT.md)、P5/P6正式交付、原方案P7/9，以及原始冻结评测实验。你的任务是实现并执行指定闭环评测、核对分母和给出实际结果；不由进程PASS推出能力成功。
 
 主要新增`evaluation/n02_full/closed_loop.py`和配置，复用作者仿真/成功判据与现有评测身份逻辑。先读`src/owac/runtime/rawvla_full_eval.py`、`rawvla_robotwin.py`、`rawvla_eval_audit.py`、`rawvla_job_guard.py`，以及`tests/test_rawvla_full_eval.py`和`test_baseline_protocol.py`。原冻结基线源码/结果不覆盖。

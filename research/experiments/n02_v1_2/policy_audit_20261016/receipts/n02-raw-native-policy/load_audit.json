@@ -1,0 +1,25 @@
+{
+  "checkpoint": "outputs/n02-v12/P2/raw-n02-robotwin-r5-s1103/checkpoint_0000900.pt",
+  "checkpoint_sha256": "4d792463f5d65ab0822e2f56644bb86ad246cb870b5b0d8279b200987c64c66b",
+  "step": 900,
+  "execution_revision": "n02-v12-p2-train-r5",
+  "runtime_execution_revision": "n02-v12-p2-policy-r6",
+  "legacy_weights_probe": true,
+  "policy_input_contract": "pi05-native-language-state-v1",
+  "training_contract_sha256": "c7ffb096663445ca8a030f2502de0717dd720b3f1cba5022d6117e95080b5e44",
+  "representation": {
+    "kind": "raw3",
+    "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+    "isp": null
+  },
+  "history": 8,
+  "action_horizon": 50,
+  "replan_interval": 50,
+  "denoise_steps": 10,
+  "optimizer_updates": 0,
+  "restore": "strict model/data/backend weights only; no optimizer or RNG",
+  "observation": "live float32 raw_linear; 3 cameras; 8 most recent control frames",
+  "proprio_context": "current normalized joint vector, broadcast as during training",
+  "sensor_metadata": "same undeclared noise/float saturation fields as frozen loader",
+  "torch_version": "2.11.0+cu128"
+}

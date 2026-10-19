@@ -1,0 +1,35 @@
+{
+  "state": "completed",
+  "training_command": [
+    "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+    "-m",
+    "owac.training.n02_v12",
+    "--config",
+    "configs/encoders/n02_v12/raw_fixedfront_r8_narrow_robotwin.json",
+    "--output",
+    "outputs/n02-v12/P2/raw-backend-r8-fixedfront-narrow-s1103-d1"
+  ],
+  "rollout_command": [
+    "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+    "/workspace/owac/worktrees/n02-measurement-completion/research/experiments/n02_v1_2/representation_r8_20261016/rollout.py",
+    "--config",
+    "configs/encoders/n02_v12/raw_fixedfront_r8_narrow_robotwin.json",
+    "--checkpoint",
+    "outputs/n02-v12/P2/raw-backend-r8-fixedfront-narrow-s1103-d1/checkpoint_0000050.pt",
+    "--output",
+    "outputs/n02-v12/representation-r8-rollouts/backend-narrow-d1-step0050",
+    "--port",
+    "18420",
+    "--max-steps",
+    "200",
+    "--replan",
+    "10",
+    "--joint-delta",
+    "0.05"
+  ],
+  "physical_accepted": false,
+  "case": "outputs/n02-v12/representation-r8-rollouts/backend-narrow-d1-step0050",
+  "selected_step": 50,
+  "selected_sampled_control_mse": 0.8206982016563416,
+  "wall_seconds": 937.1362609630451
+}

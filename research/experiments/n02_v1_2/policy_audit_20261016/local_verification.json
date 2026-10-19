@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-16",
+  "checks": [
+    {
+      "command": "make check",
+      "exit_code": 0
+    },
+    {
+      "command": "OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 uv run --locked pytest tests/encoders/n02_full tests/test_rawvla_language.py tests/test_n02_closed_loop.py tests/test_n02_training_monitor.py -q",
+      "exit_code": 0,
+      "passed": 627,
+      "skipped": 6,
+      "failed": 0,
+      "seconds": 26.93,
+      "warnings": 1
+    }
+  ],
+  "skip_reasons": [
+    "numba unavailable",
+    "CUDA not available on local machine"
+  ],
+  "browser": {
+    "url": "http://127.0.0.1:8081/closed-loop",
+    "new_videos": 4,
+    "ready_state_all": 4,
+    "video_errors": 0,
+    "durations_seconds": [
+      8.5,
+      8.5,
+      40,
+      40
+    ],
+    "screenshot": "policy_audit_page.png"
+  }
+}

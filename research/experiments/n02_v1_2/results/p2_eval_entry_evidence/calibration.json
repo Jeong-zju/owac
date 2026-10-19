@@ -1,0 +1,493 @@
+{
+ "status": "calibrated",
+ "fitted_on": "the model's own causal (round-0, pre-fit) standardised residuals of the anchor row, taken from the check-labelled step (constant declared window label); the anchors' earlier causal rows were replayed with their real frame indices before it",
+ "source_identity": {
+  "module": "owac.frameworks.n02_full.data_v12",
+  "dataset_format": "robotwin",
+  "partition": "calibration",
+  "history": 8,
+  "batch_size": 1,
+  "stride": 1,
+  "observation_stride": 1,
+  "window": {
+   "observation_stride": 1,
+   "burst_frames": 1,
+   "rnn_frames": 8,
+   "action_horizon": 50,
+   "action_offset": 1,
+   "state_source_key": "actions",
+   "executed_action_available": 0
+  },
+  "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+  "measurement_keys": [
+   "head_camera_raw_float32",
+   "left_camera_raw_float32",
+   "right_camera_raw_float32"
+  ],
+  "camera_ids": [
+   "robotwin_head",
+   "robotwin_left",
+   "robotwin_right"
+  ],
+  "manifest": {
+   "version": "n02-full-partition-v2",
+   "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+   "seed": 1103,
+   "fractions": {
+    "calibration": 0.1,
+    "dev": 0.1,
+    "train": 0.8
+   },
+   "partition_sizes": {
+    "calibration": 67,
+    "dev": 65,
+    "train": 500
+   },
+   "source": {
+    "kind": "receipt_file",
+    "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+    "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+   }
+  },
+  "partition_verification": {
+   "disjoint": 1,
+   "groups_single_partition": 1,
+   "violations": [],
+   "counts": {
+    "partitions": {
+     "calibration": {
+      "files": 67,
+      "frames": 15413,
+      "groups": 67
+     },
+     "dev": {
+      "files": 65,
+      "frames": 15414,
+      "groups": 65
+     },
+     "train": {
+      "files": 500,
+      "frames": 116117,
+      "groups": 500
+     }
+    },
+    "groups": 632,
+    "files": 632,
+    "frames": 146944
+   }
+  },
+  "anchor_table": {
+   "version": "n02-full-anchor-v1",
+   "sha256": "3436898e2c174f6d635e3ce8f0ddb18a77a54f77a32cd4464f61009207ee1e40",
+   "entries": 15413,
+   "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+  },
+  "frozen_anchor_receipt": {
+   "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+   "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+   "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+   "version": "n02-full-anchor-v1",
+   "partition": "calibration",
+   "dataset_format": "robotwin",
+   "entries": 15413,
+   "window": {
+    "action_horizon": 50,
+    "action_offset": 1,
+    "burst_frames": 1,
+    "executed_action_available": 0,
+    "observation_stride": 1,
+    "rnn_frames": 1,
+    "state_source_key": "actions"
+   },
+   "reproduced_from_manifest": 1,
+   "reproduced_entries": 15413
+  },
+  "frozen_anchor_identity_preserved": 1,
+  "stats": {
+   "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+   "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+   "mode": "zscore",
+   "epsilon": 0.0,
+   "epsilon_mode": "add"
+  }
+ },
+ "anchor_indices": [
+  2201,
+  4403,
+  6605,
+  8807,
+  11009,
+  13211
+ ],
+ "anchors": [
+  {
+   "anchor_index": 2201,
+   "identity": {
+    "episode_id": "lift_pot/episode_000047",
+    "relative_path": "data/robotwin2/raw/lift_pot/episode_000047.npz",
+    "t": 89,
+    "current_frame_index": 89,
+    "history_indices": [
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89
+    ],
+    "action_start": 90,
+    "action_stop": 140,
+    "action_mask_hash": "9251147258d1150161c00755d59bb603c968b46a07c8543a0fc051bacf95a6c8",
+    "partition": "calibration",
+    "anchor_index": 2201
+   },
+   "rows": 8,
+   "frame_index": [
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.26041,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  },
+  {
+   "anchor_index": 4403,
+   "identity": {
+    "episode_id": "pick_dual_bottles/episode_000016",
+    "relative_path": "data/robotwin2/raw/pick_dual_bottles/episode_000016.npz",
+    "t": 74,
+    "current_frame_index": 74,
+    "history_indices": [
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74
+    ],
+    "action_start": 75,
+    "action_stop": 125,
+    "action_mask_hash": "910601b94c1090dda6d1e60f07a072969137d1317333ee5db893d1e775fa75f1",
+    "partition": "calibration",
+    "anchor_index": 4403
+   },
+   "rows": 8,
+   "frame_index": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.289255,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  },
+  {
+   "anchor_index": 6605,
+   "identity": {
+    "episode_id": "place_object_basket/episode_000022",
+    "relative_path": "data/robotwin2/raw/place_object_basket/episode_000022.npz",
+    "t": 229,
+    "current_frame_index": 229,
+    "history_indices": [
+     222,
+     223,
+     224,
+     225,
+     226,
+     227,
+     228,
+     229
+    ],
+    "action_start": 230,
+    "action_stop": 280,
+    "action_mask_hash": "118ffaded10294a776041047af9974640a7a486fc89863f71c0fc6819c27270a",
+    "partition": "calibration",
+    "anchor_index": 6605
+   },
+   "rows": 8,
+   "frame_index": [
+    222,
+    223,
+    224,
+    225,
+    226,
+    227,
+    228,
+    229
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.01434,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  },
+  {
+   "anchor_index": 8807,
+   "identity": {
+    "episode_id": "put_bottles_dustbin/episode_000010",
+    "relative_path": "data/robotwin2/raw/put_bottles_dustbin/episode_000010.npz",
+    "t": 395,
+    "current_frame_index": 395,
+    "history_indices": [
+     388,
+     389,
+     390,
+     391,
+     392,
+     393,
+     394,
+     395
+    ],
+    "action_start": 396,
+    "action_stop": 446,
+    "action_mask_hash": "37e621099148c44b8769d6f8851ca7a19db370eedf038316df6744d6c7452951",
+    "partition": "calibration",
+    "anchor_index": 8807
+   },
+   "rows": 8,
+   "frame_index": [
+    388,
+    389,
+    390,
+    391,
+    392,
+    393,
+    394,
+    395
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.819808,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  },
+  {
+   "anchor_index": 11009,
+   "identity": {
+    "episode_id": "put_object_cabinet/episode_000003",
+    "relative_path": "data/robotwin2/raw/put_object_cabinet/episode_000003.npz",
+    "t": 88,
+    "current_frame_index": 88,
+    "history_indices": [
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88
+    ],
+    "action_start": 89,
+    "action_stop": 139,
+    "action_mask_hash": "f99fdb6c504d8f8df4f1c636fbdf620adb8b0e6d853b6809af8eefaf7a87ab57",
+    "partition": "calibration",
+    "anchor_index": 11009
+   },
+   "rows": 8,
+   "frame_index": [
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.013996,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  },
+  {
+   "anchor_index": 13211,
+   "identity": {
+    "episode_id": "stack_blocks_two/episode_000022",
+    "relative_path": "data/robotwin2/raw/stack_blocks_two/episode_000022.npz",
+    "t": 5,
+    "current_frame_index": 5,
+    "history_indices": [
+     0,
+     0,
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "action_start": 6,
+    "action_stop": 56,
+    "action_mask_hash": "4982b572dabf3c7865bb91925cb80e67576d959b7c3ab9b6b348734da22dd8ef",
+    "partition": "calibration",
+    "anchor_index": 13211
+   },
+   "rows": 8,
+   "frame_index": [
+    0,
+    0,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "view_labels": [
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_head"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_left"
+    ],
+    [
+     "sensor_stride8",
+     0,
+     "robotwin_right"
+    ]
+   ],
+   "locked_residual_mean_abs": 0.23938,
+   "check_status": "insufficient_information",
+   "check_valid": 0
+  }
+ ],
+ "n_sequences": 6,
+ "n_anchors": 6,
+ "calibration_ids": 18,
+ "statistics": {
+  "finite": 6,
+  "min": 0.015968,
+  "median": 0.309657,
+  "max": 0.91736
+ },
+ "calibration": {
+  "version": "n02-v12-windowed-check-v1",
+  "partition": "calibration",
+  "threshold": 0.91736,
+  "quantile": 0.95,
+  "n_sequences": 6,
+  "finite_sequences": 6,
+  "viewing_rule_hash": "49276cf6f03d44f7ff9708dd6d91b7f675ce7be036915ef2401f8656dc34d335"
+ },
+ "rule": {
+  "version": 1,
+  "scales": [
+   "sensor_stride8"
+  ],
+  "frames": [
+   0
+  ],
+  "regions": [
+   "robotwin_head",
+   "robotwin_left",
+   "robotwin_right"
+  ],
+  "window": 4,
+  "statistic": "max_local_or_global_abs_standardised_residual",
+  "use_global_mean": 1,
+  "use_local_maximum": 0,
+  "min_valid_samples": 1
+ },
+ "rule_hash": "49276cf6f03d44f7ff9708dd6d91b7f675ce7be036915ef2401f8656dc34d335",
+ "elapsed_seconds": 19.15
+}

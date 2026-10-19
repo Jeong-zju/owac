@@ -1,0 +1,29 @@
+{
+  "state": "completed",
+  "training_command": [
+    "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+    "-m",
+    "owac.training.n02_v12",
+    "--config",
+    "configs/encoders/n02_v12/raw_adaptation_r8_lora_robotwin.json",
+    "--output",
+    "outputs/n02-v12/P2/raw-backend-r8-lora-s1103-c1"
+  ],
+  "rollout_command": [
+    "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/runtime/py310-cu128/bin/python",
+    "/workspace/owac/worktrees/n02-measurement-completion/research/experiments/n02_v1_2/representation_r8_20261016/rollout.py",
+    "--config",
+    "configs/encoders/n02_v12/raw_adaptation_r8_lora_robotwin.json",
+    "--checkpoint",
+    "outputs/n02-v12/P2/raw-backend-r8-lora-s1103-c1/checkpoint_0000100.pt",
+    "--output",
+    "outputs/n02-v12/representation-r8-rollouts/backend-lora0100-c1",
+    "--port",
+    "18411",
+    "--max-steps",
+    "200"
+  ],
+  "physical_accepted": false,
+  "case": "outputs/n02-v12/representation-r8-rollouts/backend-lora0100-c1",
+  "wall_seconds": 1087.15540346317
+}

@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-17",
+  "cause": "local SSH forward process absent; remote monitor healthy",
+  "service": "owac-n02-monitor-tunnel.service",
+  "source_config": "configs/runtime/owac_n02_monitor_tunnel.service",
+  "source_config_sha256": "80136512126b553fc907511591cd102a2a2f5ac23c4faa4e4a17d109510e0c2c",
+  "installed_unit": "/home/jeong/.config/systemd/user/owac-n02-monitor-tunnel.service",
+  "status": {
+    "Restart": "always",
+    "MainPID": "1020403",
+    "NRestarts": "0",
+    "ActiveState": "active",
+    "SubState": "running",
+    "UnitFileState": "enabled"
+  },
+  "remote_http_status": 200,
+  "local_http_checks": [
+    {
+      "url": "http://127.0.0.1:8081/api/representation-cases",
+      "http_status": 200,
+      "seconds": 13.504922
+    },
+    {
+      "url": "http://localhost:54864/",
+      "http_status": 200,
+      "seconds": 12.976744
+    }
+  ],
+  "binding": "127.0.0.1 only",
+  "training_updates": 0,
+  "browser_verified": {
+    "url": "http://localhost:54864/",
+    "visible": "training completed, both100/100, validation metrics and curves restored"
+  },
+  "training_payload_runs": [
+    {
+      "run_id": "raw-backend-r8-fixedfront-narrow-s1103-d1",
+      "state": "completed",
+      "step": 100
+    },
+    {
+      "run_id": "raw-backend-r8-fixedfront-wide-s1103-d1",
+      "state": "completed",
+      "step": 100
+    }
+  ]
+}

@@ -1,5 +1,13 @@
 # 给DeepSeek：P4，学习依赖并真正撤回错误推断链
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在远端续做 P3 的实际版本；关系训练、全局重放、缓存一致性、流式快照/恢复均在远端运行。重放所需 RAW、choice tape、状态检查点与历史测量必须能从远端路径解析。
+
 阅读[共同契约](00_SHARED_CONTRACT.md)、P3交付、原方案3.2/3.5/T3/P4。主要实现`relations.py/provenance.py`，扩展state/factors/model/policy；新增`evaluation/n02_full/p4.py`和`research/theory/n02_full/t3.md`。
 
 参考[R06 dNRI](02_REFERENCES.md#r06)、[R12 ATMS](02_REFERENCES.md#r12)、[R13 Gen trace](02_REFERENCES.md#r13)、[R11 GTSAM](02_REFERENCES.md#r11)。本轮先全局重放正确性，不要求局部提速。

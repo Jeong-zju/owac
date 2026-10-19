@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N02 v1.2 实时进度</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+  body{background:#f2f5f2;color:#17352a;font:16px/1.6 system-ui,-apple-system,"Noto Sans CJK SC",sans-serif}
+  main{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+  h1{font-size:22px;margin:0 0 4px}
+  h2{font-size:17px;margin:0 0 12px;color:#17352a}
+  h3{font-size:14px;margin:18px 0 6px;color:#4b6357}
+  .card{background:#fff;border:1px solid #dbe4dc;border-radius:12px;padding:16px;margin:14px 0}
+  .topbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+  .banner{border-radius:8px;padding:9px 12px;font-size:14px;margin:8px 0;background:#e8efea;color:#2b4a3c;border:1px solid #cfdcd3}
+  .banner.warn{background:#fff4e0;border-color:#f0d3a1;color:#7a5312}
+  .banner.bad{background:#fdeceb;border-color:#f0bdb9;color:#8a2b22}
+  .banner.ok{background:#e7f3ea;border-color:#bfdcc7;color:#205c37}
+  .badge{display:inline-block;border-radius:6px;padding:2px 7px;font-size:12px;background:#e3eee7;color:#2e5a45}
+  .badge.sample{background:#ffe9c7;color:#8a5a00;border:1px solid #f0cd94}
+  .badge.err{background:#fdeceb;color:#8a2b22}
+  .badge.ok{background:#e7f3ea;color:#205c37}
+  .badge.run{background:#e4eefb;color:#1d4f86}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grow{min-width:0}
+  .row{display:flex;gap:10px;font-size:14px;padding:3px 0;align-items:baseline}
+  .row .k{color:#5c7365;flex:0 0 92px}
+  .row .v{font-weight:600;overflow-wrap:anywhere;min-width:0}
+  .small{font-size:13px;color:#5c7365}
+  .muted{color:#8b9a91}
+  .card-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .sample-card{border-color:#f0cd94;background:#fffaf0}
+  .card-h b{font-size:15px}
+  progress{width:100%;height:8px;border:0;border-radius:4px;background:#e8eee9;overflow:hidden}
+  progress::-webkit-progress-bar{background:#e8eee9}
+  progress::-webkit-progress-value{background:#3f8a63}
+  progress::-moz-progress-bar{background:#3f8a63}
+  canvas.chart{display:block;width:100%;max-width:100%;height:150px;touch-action:none}
+  .chartwrap{margin-bottom:4px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{background:#fafcfa;border:1px solid #e0e8e2;border-radius:10px;padding:8px;min-width:0}
+  .tile img{display:block;width:100%;height:auto;max-width:100%;border-radius:6px;background:#eef2ef}
+  .tile .cap{font-size:13px;color:#3f5b4d;margin-bottom:6px;font-weight:600}
+  .tile .miss{border:1px dashed #cfd9d2;border-radius:6px;color:#8b9a91;font-size:13px;text-align:center;padding:26px 8px}
+  select{font:inherit;padding:5px 8px;border:1px solid #cfdbd3;border-radius:8px;background:#fff;max-width:100%}
+  .selrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px;font-size:14px}
+  .selrow label{color:#5c7365;font-size:13px}
+  pre.log{margin:0;background:#0f1f19;color:#d9e7df;border-radius:8px;padding:10px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow-y:auto;overflow-x:hidden}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin:6px 0 10px}
+  .kv div{background:#f7faf8;border:1px solid #e3eae5;border-radius:8px;padding:8px}
+  .kv .n{font-size:20px;font-weight:700}
+  .kv .l{font-size:12px;color:#5c7365}
+  a{color:#2e6a4d}
+  @media (max-width:650px){
+    .cols,.tiles{grid-template-columns:1fr}
+    main{padding:14px 11px 40px}
+    .row .k{flex:0 0 78px}
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <h1>N02 v1.2 实时进度</h1>
+    <span class="small" id="clock"></span>
+  </div>
+  <div class="banner" id="banner">正在连接状态服务…</div>
+
+  <section class="card grow">
+    <div class="card-h">
+      <h2>① 当前阶段</h2>
+      <span class="small" id="s1pick"></span>
+    </div>
+    <div id="s1"></div>
+    <div class="small" id="deploy" style="margin-top:10px"></div>
+  </section>
+
+  <section class="grow">
+    <div class="card-h"><h2>② RAW / RGB 两路训练</h2><span class="small">GPU 采样每 10 秒</span></div>
+    <div class="cols" id="cards"></div>
+  </section>
+
+  <section class="card grow">
+    <div class="card-h">
+      <h2>③ 训练 loss 与 dev 动作误差</h2>
+      <span class="small" id="chartNote"></span>
+    </div>
+    <div class="chartwrap">
+      <div class="small" id="capLoss">训练 loss（原始点，不做平滑；横轴 = optimizer step）</div>
+      <canvas class="chart" id="chartLoss" height="150"></canvas>
+    </div>
+    <div class="chartwrap">
+      <div class="small" id="capDev">固定 dev 动作误差（与 loss 单位不同，单独一张）</div>
+      <canvas class="chart" id="chartDev" height="150"></canvas>
+    </div>
+  </section>
+
+  <section class="card grow">
+    <div class="card-h"><h2>④ 官方轨迹预览</h2><span class="small" id="prevNote"></span></div>
+    <div class="selrow" id="selectors"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section class="card grow">
+    <div class="card-h"><h2>⑤ 闭环与日志</h2><span class="small" id="loopNote"></span></div>
+    <div id="loop"></div>
+    <h3>最近 30 行日志</h3>
+    <pre class="log" id="log"></pre>
+  </section>
+
+  <p class="small">浏览器每 3 秒轮询 /api/status；数据超过 30 秒未更新会提示查看日志，不自动判定训练失败。</p>
+</main>
+<script>
+"use strict";
+const STALE_MS = 30000;
+const S = { snap: null, fetchedAt: 0, error: null, sel: null, hist: {}, histAt: 0, histPending: false, cam: null, frame: null, loop: null };
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v === null || v === undefined ? "" : v)
+  .replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const blank = (v) => (v === null || v === undefined || v === "" ? null : v);
+/* 只在内容变化时改写 DOM：避免每 3 秒重建预览 <img> 触发重复下载与闪烁 */
+const _drawn = {};
+function setHtml(id, html) { if (_drawn[id] === html) return; _drawn[id] = html; const el = $(id); if (el) el.innerHTML = html; }
+function setText(id, text) { if (_drawn[id] === text) return; _drawn[id] = text; const el = $(id); if (el) el.textContent = text; }
+
+function fmtNum(v, digits) {
+  if (v === null || v === undefined || v === "" ) return "—";
+  const n = Number(v);
+  if (!isFinite(n)) return esc(v);
+  const a = Math.abs(n);
+  if (digits !== undefined) return n.toFixed(digits);
+  if (a >= 1000) return n.toFixed(0);
+  if (a >= 1) return n.toFixed(3);
+  if (a >= 0.001) return n.toFixed(4);
+  return n.toExponential(2);
+}
+function fmtDur(sec) {
+  if (sec === null || sec === undefined || !isFinite(sec)) return "—";
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  if (h) return h + " 小时 " + m + " 分";
+  if (m) return m + " 分 " + s + " 秒";
+  return s + " 秒";
+}
+function stateText(rec) {
+  if (!rec) return "未运行";
+  const t = String(rec.state === null || rec.state === undefined ? "" : rec.state).trim().toLowerCase();
+  const label = t ? String(rec.state) : "";
+  if (["running", "run", "train", "training", "in_progress", "busy"].includes(t)) return "运行中";
+  if (["done", "complete", "completed", "finished", "success", "succeeded"].includes(t)) return "已完成";
+  if (["error", "failed", "failure", "crashed", "exception"].includes(t)) return "异常：" + label;
+  return t ? "状态：" + label : "未运行";
+}
+function ageOf(rec) {
+  if (!rec || rec.age_seconds === null || rec.age_seconds === undefined) return null;
+  return rec.age_seconds + (Date.now() - S.fetchedAt) / 1000;
+}
+function stamp(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return esc(iso);
+  const p = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+}
+function anyRealRun() { return ((S.snap && S.snap.runs) || []).some((r) => !r.is_sample); }
+/* 是否允许自动展示界面测试样例：没有任何真实作业，或用户显式选了样例 run */
+function sampleMode() {
+  const sel = S.sel ? byName(S.sel) : null;
+  return !anyRealRun() || !!(sel && sel.is_sample);
+}
+/* 曲线序列：只画同一类（真实或样例），绝不把样例混进真实曲线 */
+function seriesKeys() {
+  const d = (S.snap && S.snap.display) || {};
+  const primary = (S.sel && byName(S.sel)) || byName(d.current);
+  if (!primary) return [];
+  const same = (name) => {
+    const r = byName(name);
+    return r && r.dir_name !== primary.dir_name && r.is_sample === primary.is_sample ? r.dir_name : null;
+  };
+  return [primary.dir_name, same(d.raw), same(d.rgb)].filter(Boolean);
+}
+function byName(name) {
+  if (!S.snap) return null;
+  return (S.snap.runs || []).find((r) => r.dir_name === name) || null;
+}
+function currentRun() {
+  if (!S.snap) return null;
+  if (S.sel) return byName(S.sel);
+  return byName((S.snap.display || {}).current);
+}
+function badges(rec) {
+  let out = "";
+  if (rec && rec.is_sample) out += ' <span class="badge sample">界面测试</span>';
+  if (rec && rec.run_id) out += ' <span class="badge">' + esc(rec.run_id) + "</span>";
+  return out;
+}
+
+/* ---------- ① 当前阶段 ---------- */
+function renderTop() {
+  const rec = currentRun();
+  const stages = ["P2", "P3", "P4"];
+  let html = "";
+  const stateCls = rec && rec.state_kind === "error" ? "err" : (rec && rec.state_kind === "done" ? "ok" : (rec && rec.state_kind === "running" ? "run" : ""));
+  html += '<div class="row"><span class="k">阶段</span><span class="v">' + esc(rec ? (rec.stage || "—") : "—") +
+          ' <span class="small">（' + stages.join(" / ") + " 白名单）</span></span></div>";
+  html += '<div class="row"><span class="k">作业</span><span class="v">' + (rec ? esc(rec.run_id) + (rec.is_sample ? ' <span class="badge sample">界面测试</span>' : "") : "未运行") + "</span></div>";
+  const noStatus = !!(rec && !rec.has_status);
+  html += '<div class="row"><span class="k">正在做的事</span><span class="v">' + esc(noStatus
+    ? "该目录暂无 status.json（可能刚创建，或不是 run 目录）"
+    : (rec && blank(rec.activity) ? rec.activity : (rec ? "未写入 activity" : "未运行"))) + "</span></div>";
+  html += '<div class="row"><span class="k">运行/完成/异常</span><span class="v"><span class="badge ' + stateCls + '">' + esc(stateText(rec)) + "</span></span></div>";
+  html += '<div class="row"><span class="k">最后心跳</span><span class="v">' + (rec ? esc(stamp(rec.updated_at)) + (ageOf(rec) !== null ? ' <span class="small">（' + fmtDur(ageOf(rec)) + "前）</span>" : "") : "—") + "</span></div>";
+  html += '<div class="row"><span class="k">开始时间</span><span class="v">' + (rec ? esc(stamp(rec.started_at)) : "—") + "</span></div>";
+  html += '<div class="row"><span class="k">进度</span><span class="v">' + fmtNum(rec && rec.step, 0) + " / " + fmtNum(rec && rec.target_steps, 0) + " step</span></div>";
+  html += '<div class="row"><span class="k">arm / 平台</span><span class="v">' + esc((rec && rec.arm) || "—") + " · " + esc((rec && rec.platform) || "—") + " · seed " + esc((rec && rec.seed !== null && rec.seed !== undefined) ? rec.seed : "—") + "</span></div>";
+
+  const runs = (S.snap && S.snap.runs) || [];
+  if (runs.length) {
+    const opts = runs.map((r) => '<option value="' + esc(r.dir_name) + '"' + (rec && r.dir_name === rec.dir_name ? " selected" : "") + ">" +
+      esc(r.run_id) + " · " + esc(r.stage) + (r.is_sample ? "（界面测试）" : "") + " · " + esc(stateText(r)) +
+      (r.has_status ? "" : "（无 status.json）") + "</option>").join("");
+    html += '<div class="selrow"><label for="runSel">查看作业</label><select id="runSel">' + opts + "</select>" +
+            '<span class="small">默认自动跟随最近更新的真实作业</span></div>';
+  }
+  setHtml("s1", html);
+  const sel = $("runSel");
+  if (sel) sel.onchange = () => { S.sel = sel.value; S.hist = {}; S.histAt = 0; renderBanner(); renderTop(); renderCards(); renderLoop(); renderPreview(); loadHistory(true); };
+  setText("s1pick", rec ? "当前显示：" + rec.run_id : "当前显示：无");
+}
+
+/* ---------- ② 两路卡片 ---------- */
+function gpuBlock(rec) {
+  const list = (rec && rec.gpu_detail) || [];
+  const all = (S.snap && S.snap.gpus) || [];
+  if (!rec) return '<div class="small">未运行</div>';
+  if (!list.length) {
+    return '<div class="small">GPU：未分配' + (all.length ? '（本机 ' + all.length + " 张卡）" : "（nvidia-smi 无数据）") + "</div>";
+  }
+  return list.map((g) => '<div class="small">GPU ' + esc(g.index) + " · " + esc(g.name) +
+    " · 显存 " + fmtNum(g.memory_used_mib, 0) + " / " + fmtNum(g.memory_total_mib, 0) + " MiB" +
+    " · 利用率 " + fmtNum(g.utilization, 0) + "%" + (g.assigned_by === "arm" ? ' <span class="muted">(按 arm 推断)</span>' : "") + "</div>").join("");
+}
+function card(label, rec, blocked) {
+  if (blocked) {
+    return '<div class="card grow"><div class="card-h"><b>' + label + '</b><span class="badge">未运行</span></div>' +
+      '<div class="small">该 arm 暂无真实作业<span class="muted">（界面测试样例 ' + esc(blocked.run_id) +
+      ' 不计入真实数据，可在「查看作业」中选择查看）</span></div></div>';
+  }
+  const cls = rec && rec.state_kind === "error" ? "err" : (rec && rec.state_kind === "running" ? "run" : "");
+  let h = '<div class="card grow' + (rec && rec.is_sample ? " sample-card" : "") + '"><div class="card-h"><b>' + label + "</b>" +
+          '<span class="badge ' + cls + '">' + esc(stateText(rec)) + "</span></div>";
+  h += '<div class="small" style="margin-bottom:6px">' + (rec ? esc(rec.run_id) + (rec.is_sample ? ' <span class="badge sample">界面测试样例数据（非训练结果）</span>' : "") : "未运行") + "</div>";
+  h += gpuBlock(rec);
+  h += '<div class="row"><span class="k">step / 目标</span><span class="v">' + fmtNum(rec && rec.step, 0) + " / " + fmtNum(rec && rec.target_steps, 0) + "</span></div>";
+  const step = rec && Number(rec.step), target = rec && Number(rec.target_steps);
+  if (isFinite(step) && isFinite(target) && target > 0) h += '<progress value="' + Math.min(step, target) + '" max="' + target + '"></progress>';
+  h += '<div class="row"><span class="k">已用时间</span><span class="v">' + fmtDur(rec && rec.elapsed_seconds) + "</span></div>";
+  h += '<div class="row"><span class="k">ETA（按最近 step 速度）</span><span class="v">' +
+       (rec && rec.eta_seconds !== null && rec.eta_seconds !== undefined ? esc(fmtDur(rec.eta_seconds)) : "") + "</span></div>";
+  h += '<div class="row"><span class="k">每 step 秒</span><span class="v">' + fmtNum(rec && rec.step_seconds, 3) + "</span></div>";
+  h += '<div class="row"><span class="k">checkpoint</span><span class="v">' + esc((rec && blank(rec.checkpoint)) || "—") + "</span></div>";
+  h += '<div class="row"><span class="k">当前 loss</span><span class="v">' + fmtNum(rec && rec.loss) + "</span></div>";
+  h += '<div class="row"><span class="k">dev 动作误差</span><span class="v">' + fmtNum(rec && rec.dev_action_error) + "</span></div>";
+  h += "</div>";
+  return h;
+}
+function renderCards() {
+  const d = (S.snap && S.snap.display) || {};
+  const pick = (name) => {
+    const rec = byName(name);
+    if (rec && rec.is_sample && !sampleMode()) return { rec: null, blocked: rec };
+    return { rec, blocked: null };
+  };
+  const raw = pick(d.raw), rgb = pick(d.rgb);
+  setHtml("cards", card("RAW", raw.rec, raw.blocked) + card("RGB", rgb.rec, rgb.blocked));
+}
+
+/* ---------- ③ 曲线 ---------- */
+function sizeCanvas(c) {
+  const w = Math.max(240, c.clientWidth || 320), h = 150, dpr = window.devicePixelRatio || 1;
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  const ctx = c.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+function drawChart(canvas, series, xmax, showX, pending) {
+  const { ctx, w, h } = sizeCanvas(canvas);
+  const padL = 52, padR = 8, padT = 8, padB = showX ? 22 : 8;
+  const pts = series.flatMap((s) => s.points);
+  if (!pts.length) {
+    ctx.fillStyle = "#8b9a91"; ctx.font = "13px system-ui,sans-serif";
+    ctx.fillText(pending ? "历史数据加载中…" : "暂无数据", padL, h / 2);
+    return;
+  }
+  let lo = Infinity, hi = -Infinity;
+  pts.forEach(([, y]) => { if (y < lo) lo = y; if (y > hi) hi = y; });
+  if (!isFinite(lo) || !isFinite(hi)) return;
+  if (hi === lo) { hi = lo + (Math.abs(lo) || 1) * 0.1; lo = lo - (Math.abs(lo) || 1) * 0.1; }
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+  const xr = xmax > 0 ? xmax : 1;
+  const X = (x) => padL + (w - padL - padR) * Math.max(0, Math.min(1, x / xr));
+  const Y = (y) => padT + (h - padT - padB) * (1 - (y - lo) / (hi - lo));
+  ctx.strokeStyle = "#e6ece8"; ctx.fillStyle = "#7c8d84"; ctx.lineWidth = 1;
+  ctx.font = "11px system-ui,sans-serif";
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (h - padT - padB) * i / 4;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    const val = hi - (hi - lo) * i / 4;
+    ctx.fillText(fmtNum(val, Math.abs(val) >= 100 ? 0 : 3), 4, y + 4);
+  }
+  ctx.strokeStyle = "#c9d6cd";
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+  if (showX) {
+    ctx.fillStyle = "#7c8d84";
+    [0, 0.5, 1].forEach((f) => {
+      const x = padL + (w - padL - padR) * f;
+      const label = String(Math.round(xr * f));
+      ctx.fillText(label, Math.min(w - padR - 26, Math.max(padL - 6, x - 8)), h - 6);
+    });
+  }
+  series.forEach((s) => {
+    if (!s.points.length) return;
+    ctx.strokeStyle = s.color; ctx.lineWidth = 1.6; ctx.beginPath();
+    s.points.forEach(([x, y], i) => { const px = X(x), py = Y(y); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.stroke();
+    if (s.points.length <= 60) {
+      ctx.fillStyle = s.color;
+      s.points.forEach(([x, y]) => { ctx.beginPath(); ctx.arc(X(x), Y(y), 2, 0, Math.PI * 2); ctx.fill(); });
+    }
+  });
+}
+function renderCharts() {
+  const d = (S.snap && S.snap.display) || {};
+  const keys = seriesKeys();
+  const plotted = keys.map(byName).filter(Boolean);
+  const plottedSample = plotted.some((r) => r.is_sample);
+  const hiddenSample = !plottedSample && anyRealRun() &&
+    [d.raw, d.rgb].some((n) => { const r = byName(n); return r && r.is_sample; });
+  const series = { loss: [], dev: [] };
+  const colors = { raw: "#2f7d55", rgb: "#b4762a" };
+  let xmax = 0;
+  keys.forEach((k) => {
+    const rec = byName(k), rows = S.hist[k] || [];
+    const color = k === d.rgb ? colors.rgb : colors.raw;
+    const label = (rec && rec.arm ? rec.arm : k) + (rec && rec.is_sample ? "（界面测试）" : "（真实）");
+    const lp = [], dp = [];
+    rows.forEach((r) => {
+      const x = Number(r.step); if (!isFinite(x)) return;
+      if (x > xmax) xmax = x;
+      const l = Number(r.train_loss), dv = Number(r.dev_action_error);
+      if (r.train_loss !== null && r.train_loss !== undefined && isFinite(l)) lp.push([x, l]);
+      if (r.dev_action_error !== null && r.dev_action_error !== undefined && isFinite(dv)) dp.push([x, dv]);
+    });
+    if (lp.length) series.loss.push({ label, color, points: lp });
+    if (dp.length) series.dev.push({ label, color, points: dp });
+  });
+  const pending = !!S.histPending && !(series.loss.length || series.dev.length);
+  drawChart($("chartLoss"), series.loss, xmax, false, pending);
+  drawChart($("chartDev"), series.dev, xmax, true, pending);
+  const bits = [];
+  if (series.loss.length || series.dev.length) {
+    series.loss.concat(series.dev).forEach((s) => { if (!bits.includes(s.label)) bits.push(s.label); });
+    setText("chartNote", "共 " + xmax + " step · " + bits.join(" / ") + "（原始点，未平滑）" +
+      (plottedSample ? " · 当前为界面测试样例数据" : (hiddenSample ? " · 已排除界面测试样例" : "")));
+  } else {
+    setText("chartNote", S.histPending ? "历史数据加载中…" : "暂无数据");
+  }
+}
+function loadHistory(force) {
+  const keys = seriesKeys();
+  if (!keys.length) { S.hist = {}; renderCharts(); return; }
+  const changed = Object.keys(S.hist).sort().join() !== keys.slice().sort().join();
+  const now = Date.now();
+  if (!force && !changed && now - S.histAt < 9000 && Object.keys(S.hist).length) { renderCharts(); return; }
+  S.histAt = now;
+  S.histPending = true;
+  Promise.all(keys.map((k) => fetch("/api/history?run_id=" + encodeURIComponent(k))
+    .then((r) => (r.ok ? r.json() : []))
+    .then((rows) => [k, Array.isArray(rows) ? rows : []])
+    .catch(() => [k, S.hist[k] || []])))
+    .then((pairs) => { pairs.forEach(([k, rows]) => { S.hist[k] = rows; }); S.histPending = false; renderCharts(); });
+}
+
+/* ---------- ④ 预览 ---------- */
+function pickTile(previews) {
+  const tiles = (previews && previews.tiles) || [];
+  if (!tiles.length) return null;
+  const match = (t) =>
+    (S.cam === null || String(t.camera) === String(S.cam)) &&
+    (S.frame === null || String(t.frame) === String(S.frame)) &&
+    (S.loop === null || String(t.loop) === String(S.loop));
+  return tiles.find(match) || tiles[0];
+}
+function tileHtml(previews) {
+  const t = pickTile(previews);
+  const slots = [["raw", "RAW 显示"], ["rgb", "同源 RGB"], ["attention", "attention 叠加"], ["residual", "残差预览"]];
+  return slots.map(([key, cap]) => {
+    const items = t && t.slots && t.slots[key] ? t.slots[key] : [];
+    const body = items.length
+      ? items.map((it) => '<a href="' + esc(it.url) + '" target="_blank" rel="noopener"><img src="' + esc(it.url) + '" alt="' + esc(cap) + '" ' +
+          'onerror="this.parentNode.innerHTML=\'<div class=&quot;miss&quot;>图片加载失败</div>\'"></a>').join("")
+      : '<div class="miss">尚未生成</div>';
+    return '<div class="tile"><div class="cap">' + esc(cap) + "</div>" + body + "</div>";
+  }).join("");
+}
+function renderPreview() {
+  const rec = currentRun();
+  const previews = (rec && rec.previews) || { options: {}, tiles: [] };
+  const opt = previews.options || {};
+  const mk = (label, key, values, current) => {
+    if (!values || values.length < 2) return "";
+    const opts = values.map((v) => '<option value="' + esc(v) + '"' + (String(current) === String(v) ? " selected" : "") + ">" + esc(v) + "</option>").join("");
+    return '<label for="sel_' + key + '">' + esc(label) + '</label><select id="sel_' + key + '">' + opts + "</select>";
+  };
+  let html = mk("相机", "cam", opt.cameras, S.cam) + mk("帧", "frame", opt.frames, S.frame) + mk("内循环", "loop", opt.loops, S.loop);
+  const tiles = (previews.tiles || []).length;
+  html += '<span class="small">' + (rec ? esc(rec.run_id) + " · 预览组 " + tiles + " 个" : "未运行") + "</span>";
+  setHtml("selectors", html);
+  ["cam", "frame", "loop"].forEach((k) => {
+    const el = $("sel_" + k);
+    if (el) el.onchange = () => { S[k] = el.value; renderPreview(); };
+  });
+  const t = pickTile(previews);
+  const extra = (previews.other || []).length
+    ? '<div class="tiles" style="margin-top:12px">' + previews.other.map((it) =>
+        '<div class="tile"><div class="cap">' + esc(it.key || it.name) + '</div><a href="' + esc(it.url) + '" target="_blank" rel="noopener">' +
+        '<img src="' + esc(it.url) + '" alt="' + esc(it.name) + '" loading="lazy"></a></div>').join("") + "</div>"
+    : "";
+  setHtml("tiles", tileHtml(previews) + extra);
+  setText("prevNote", (t ? (t.camera || "默认相机") + " · 帧 " + (t.frame === null || t.frame === undefined ? "—" : t.frame) +
+    " · 内循环 " + (t.loop === null || t.loop === undefined ? "—" : t.loop) : "尚未生成") + (rec && rec.is_sample ? "（界面测试样例图）" : ""));
+}
+
+/* ---------- ⑤ 闭环与日志 ---------- */
+function renderLoop() {
+  const rec = currentRun();
+  const ev = (rec && rec.eval) || {};
+  const n = Number(ev.completed), s = Number(ev.success), f = Number(ev.task_failure), e = Number(ev.infrastructure_error), planned = Number(ev.planned);
+  const hasPlanned = isFinite(planned) && planned > 0;
+  const rate = isFinite(n) && n > 0 && isFinite(s) ? (100 * s / n).toFixed(1) + "%" : "—（暂无已完成回合）";
+  let h = '<div class="kv">';
+  h += '<div><div class="n">' + (isFinite(n) ? n : 0) + " / " + (hasPlanned ? planned : "—") + '</div><div class="l">闭环已完成</div></div>';
+  h += '<div><div class="n">' + (isFinite(s) ? s : 0) + '</div><div class="l">成功 s</div></div>';
+  h += '<div><div class="n">' + (isFinite(f) ? f : 0) + '</div><div class="l">失败 f（任务失败）</div></div>';
+  h += '<div><div class="n">' + (isFinite(e) ? e : 0) + '</div><div class="l">基础设施错误 e</div></div>';
+  h += '<div><div class="n">' + esc(rate) + '</div><div class="l">当前成功率 s / n</div></div>';
+  h += "</div>";
+  if (hasPlanned) h += '<progress value="' + Math.min(isFinite(n) ? n : 0, planned) + '" max="' + planned + '"></progress>';
+  h += '<div class="small" style="margin-top:8px">分母是已完成回合 n' + (rec ? "；`planned` 仅用于进度条，不把待跑项算进成功率" : "") + "</div>";
+  setHtml("loop", h);
+  setText("loopNote", rec ? (rec.is_sample ? "界面测试样例计数" : "真实作业计数") : "未运行");
+  const lines = (rec && rec.log_tail) || [];
+  setText("log", lines.length ? lines.join("\n") : (rec ? "（日志为空）" : "未运行"));
+}
+
+/* ---------- 顶部横幅 ---------- */
+function renderBanner() {
+  const b = $("banner");
+  const rec = currentRun();
+  const head = ["网络异常：保留最后有效快照（" + stamp(new Date(S.fetchedAt).toISOString()) + "）", "warn"];
+  const age = ageOf(rec);
+  if (S.error) { b.textContent = head[0] + "：" + S.error; b.className = "banner warn"; return; }
+  if (!rec) { b.textContent = "未运行：白名单 run 目录下暂无 status.json（这不是训练失败）"; b.className = "banner"; return; }
+  if (rec.state_kind === "error") {
+    b.textContent = "训练报错：" + stateText(rec) + "（由训练端写入，非超时推断）· 最后心跳 " + stamp(rec.updated_at);
+    b.className = "banner bad";
+    return;
+  }
+  if (rec.stale || (age !== null && age > 30)) {
+    b.textContent = "数据未更新，请查看日志：最后心跳 " + stamp(rec.updated_at) + (age !== null ? "（" + fmtDur(age) + "前）" : "") + "，超过 30 秒未更新；此处不判定训练失败。";
+    b.className = "banner warn";
+    return;
+  }
+  if (rec.state_kind === "done") { b.textContent = "已完成：" + (rec.activity || "作业结束") + " · 最后心跳 " + stamp(rec.updated_at); b.className = "banner ok"; return; }
+  if (rec.is_sample) { b.textContent = "当前显示「界面测试」样例（非训练结果）：用于验证页面渲染，不计入训练指标。"; b.className = "banner warn"; return; }
+  b.textContent = "运行中：" + (rec.activity || "—") + " · 最后心跳 " + stamp(rec.updated_at);
+  b.className = "banner ok";
+}
+
+/* ---------- 部署状态（保留原 bootstrap 页信息） ---------- */
+function renderDeploy() {
+  const dep = (S.snap && S.snap.deployment) || {};
+  const keys = Object.keys(dep);
+  const gpus = (S.snap && S.snap.gpus) || [];
+  let h = "部署资产（来自 bootstrap downloads.json）：";
+  if (!keys.length) h += "暂无";
+  else h += keys.map((k) => {
+    const row = dep[k] || {};
+    const done = row.status === "complete";
+    return '<span class="badge ' + (done ? "ok" : "") + '">' + esc(k.split("/").pop()) + " " + esc(row.status || "未知") + "</span>";
+  }).join(" ");
+  const gpuTxt = gpus.length ? gpus.map((g) => "GPU" + esc(g.index) + " " + fmtNum(g.memory_used_mib, 0) + "/" + fmtNum(g.memory_total_mib, 0) + "MiB " + fmtNum(g.utilization, 0) + "%").join(" · ") : "nvidia-smi 无数据";
+  h += '<div style="margin-top:4px">本机：' + gpuTxt + ((S.snap && S.snap.cpu) ? " · load1 " + esc(S.snap.cpu.load1) + " / " + esc(S.snap.cpu.cores) + " 核" : "") + "</div>";
+  setHtml("deploy", h);
+}
+
+function renderAll() { renderBanner(); renderTop(); renderCards(); renderLoop(); renderPreview(); renderDeploy(); }
+async function poll() {
+  try {
+    const res = await fetch("/api/status", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    S.snap = await res.json();
+    S.fetchedAt = Date.now();
+    S.error = null;
+    setText("clock", "服务器快照 " + stamp(S.snap.updated_at) + " · 服务启动 " + stamp(S.snap.server && S.snap.server.started_at) + " · 轮询 3 秒");
+    renderAll();
+    loadHistory(false);
+  } catch (err) {
+    if (!S.snap) { $("banner").textContent = "无法连接状态服务：" + err.message; $("banner").className = "banner bad"; return; }
+    S.error = err.message;
+    renderBanner();
+  }
+}
+poll();
+setInterval(poll, 3000);
+window.addEventListener("resize", () => { renderCharts(); });
+</script>
+</body>
+</html>

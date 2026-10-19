@@ -837,6 +837,7 @@ class RawVLAFeaturePolicy:
     def trainable_records(self) -> list:
         """Name/count list of every bridge-added trainable parameter."""
         records = _module_records(self.projection, "bridge.projection")
+        records += _module_records(self.base, "backend", trainable_only=True)
         source_records = getattr(self.token_source, "trainable_records", None)
         if callable(source_records):
             records += list(source_records())
@@ -848,7 +849,13 @@ class RawVLAFeaturePolicy:
         added = _module_records(self.projection, "bridge.projection")
         source = getattr(self.token_source, "trainable_records", None)
         source_records = list(source()) if callable(source) else []
-        frozen_records = _module_records(self.base, "backend")
+        trainable_names = {name for name, p in self.base.named_parameters() if p.requires_grad}
+        backend_trainable = _module_records(self.base, "backend", trainable_only=True)
+        frozen_records = [
+            r
+            for r in _module_records(self.base, "backend")
+            if r["name"].removeprefix("backend.") not in trainable_names
+        ]
         return {
             "bridge_added": {
                 "tensors": len(added),
@@ -873,6 +880,12 @@ class RawVLAFeaturePolicy:
             },
             "frozen_backend_parameters": sum(record["parameters"] for record in frozen_records),
             "frozen_backend_tensors": len(frozen_records),
+            "backend_trainable": {
+                "tensors": len(backend_trainable),
+                "parameters": sum(r["parameters"] for r in backend_trainable),
+                "names": [r["name"] for r in backend_trainable],
+                "disclosure": "only explicitly configured backend adapters may be trainable",
+            },
         }
 
     # -- prefix construction ---------------------------------------------- #
@@ -2557,6 +2570,14 @@ def _build_real_bridge(args: Any) -> tuple:
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
     bridge.base.to(device)
+    for module in bridge.bridge_modules():
+        module.to(device)
+    # The CLI probes the derivative at the visual input of the frozen backend.
+    # It does not instantiate or train an encoder.
+    tokens.values = tokens.values.to(device).detach().requires_grad_(True)
+    tokens.mask = tokens.mask.to(device)
+    if tokens.positions is not None:
+        tokens.positions = tokens.positions.to(device)
     return bridge, {"audit": audit, "device": device, "token_source": source}
 
 
@@ -2623,15 +2644,16 @@ def single_batch(args: Any) -> int:
     torch.manual_seed(int(args.seed))
     protocol = bridge.protocol
     batch = int(args.batch_size)
-    lang_tokens = torch.zeros((batch, 8), dtype=torch.long)
-    lang_masks = torch.ones((batch, 8), dtype=torch.bool)
-    state = torch.zeros((batch, bridge._max_state_dim()))
+    lang_tokens = torch.zeros((batch, 8), dtype=torch.long, device=info["device"])
+    lang_masks = torch.ones((batch, 8), dtype=torch.bool, device=info["device"])
+    state = torch.zeros((batch, bridge._max_state_dim()), device=info["device"])
     actions = bridge.prepare_control_targets(
         torch.randn(batch, protocol.action_horizon, protocol.control_dim)
     )
     losses = []
     for _ in range(int(args.steps)):
         bridge.base.zero_grad(set_to_none=True)
+        info["token_source"].tokens.values.grad = None
         out = bridge.forward_from_visual_tokens(
             info["token_source"].tokens, lang_tokens, lang_masks, state, actions
         )
@@ -2662,6 +2684,9 @@ def single_batch(args: Any) -> int:
         "load_audit": info["audit"],
         "losses": losses,
         "last_action_loss": losses[-1] if losses else None,
+        "visual_token_gradient_l1": (
+            float(info["token_source"].tokens.values.grad.abs().sum()) if losses else None
+        ),
         "run_stats": bridge.last_run_stats,
         "trainable": bridge.trainable_records(),
         "parameter_report": bridge.parameter_report(),

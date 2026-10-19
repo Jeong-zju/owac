@@ -1,0 +1,317 @@
+{
+  "execution_revision": "n02-v12-p2-causal-r4",
+  "platform": "libero",
+  "initialisation": "seed1103 fresh full frontend; no backend constructed",
+  "optimizer_constructed": false,
+  "optimizer_updates": 0,
+  "frontend_weights_unchanged": true,
+  "frontend_sha256": "b5558ccbe5ddea3940cc57557ae865c2fc7e665f834262ced16b5f3e03ec8ced",
+  "checks": {
+    "units_and_shapes": {
+      "dataset_format": "libero",
+      "partition": "train",
+      "cameras": [
+        "libero_agentview",
+        "libero_wrist"
+      ],
+      "camera_count": 2,
+      "rows": 8,
+      "history": 8,
+      "anchors": 1,
+      "frame_index": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "current_frame_indices": [
+        0
+      ],
+      "channel_values": {
+        "libero_agentview": {
+          "shape": [
+            8,
+            3,
+            256,
+            256
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.0235294122248888,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        },
+        "libero_wrist": {
+          "shape": [
+            8,
+            3,
+            256,
+            256
+          ],
+          "dtype": "float32",
+          "min": 0.0,
+          "max": 0.019607843831181526,
+          "finite": true,
+          "scale_note": "loader units kept; this entry does not rescale RAW values"
+        }
+      },
+      "action_shape_unpadded": [
+        10,
+        7
+      ],
+      "action_control_dim": 7,
+      "action_offset": 0,
+      "action_mask_valid": 10,
+      "action_mask_shape": [
+        10
+      ],
+      "normalisation": "official loader statistics only; the training entry never normalises or de-normalises (prepare_control_targets pads to 32 dims)",
+      "finite": true
+    },
+    "causality": {
+      "windows_checked": 12,
+      "all_checks_passed": true,
+      "meaning": "history rows are earlier-or-equal real frame indices of their anchor and never a future frame"
+    },
+    "partition_isolation": {
+      "train_dev_overlap": 0,
+      "train_calibration_overlap": 0,
+      "dev_calibration_overlap": 0,
+      "train_measurements": 12,
+      "dev_measurements": 12,
+      "calibration_measurements": 12
+    },
+    "episode_reset": {
+      "selected_rows_zeroed": true,
+      "unselected_rows_bit_identical": true,
+      "version_incremented": true
+    }
+  },
+  "coverage_and_tokens": [
+    {
+      "anchor_index": 51075,
+      "train_eval_token_max_abs_delta": 0.0,
+      "total_scalar_queries": 393216,
+      "data_valid_scalars": 393216,
+      "saturated_excluded_scalars": 77943,
+      "scorable_scalars": 315273,
+      "actual_scored_per_candidate": [
+        315273,
+        315273,
+        315273,
+        315273
+      ],
+      "frame_indices": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "anchors": [
+        {
+          "episode_id": "libero_10_no_noops_1.0.0_lerobot/episode_000323/variant_00",
+          "relative_path": "data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000323/variant_00.npz",
+          "t": 14,
+          "current_frame_index": 14,
+          "history_indices": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "action_start": 14,
+          "action_stop": 24,
+          "action_mask_hash": "bee8bf66a6b21578813a44e4a46835f64bc12d330662cd96f54c7b4186bc2bf9",
+          "partition": "train"
+        }
+      ]
+    },
+    {
+      "anchor_index": 102150,
+      "train_eval_token_max_abs_delta": 0.0,
+      "total_scalar_queries": 393216,
+      "data_valid_scalars": 393216,
+      "saturated_excluded_scalars": 0,
+      "scorable_scalars": 393216,
+      "actual_scored_per_candidate": [
+        393216,
+        393216,
+        393216,
+        393216
+      ],
+      "frame_indices": [
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79
+      ],
+      "anchors": [
+        {
+          "episode_id": "libero_goal_no_noops_1.0.0_lerobot/episode_000288/variant_00",
+          "relative_path": "data/libero/raw/libero_goal_no_noops_1.0.0_lerobot/episode_000288/variant_00.npz",
+          "t": 79,
+          "current_frame_index": 79,
+          "history_indices": [
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79
+          ],
+          "action_start": 79,
+          "action_stop": 89,
+          "action_mask_hash": "3ba762ab69df08906374ce128bd7273e9b0afa9664895e8e3dd7d90146c312b9",
+          "partition": "train"
+        }
+      ]
+    },
+    {
+      "anchor_index": 153225,
+      "train_eval_token_max_abs_delta": 0.0,
+      "total_scalar_queries": 393216,
+      "data_valid_scalars": 393216,
+      "saturated_excluded_scalars": 49767,
+      "scorable_scalars": 343449,
+      "actual_scored_per_candidate": [
+        343449,
+        343449,
+        343449,
+        343449
+      ],
+      "frame_indices": [
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33
+      ],
+      "anchors": [
+        {
+          "episode_id": "libero_object_no_noops_1.0.0_lerobot/episode_000365/variant_00",
+          "relative_path": "data/libero/raw/libero_object_no_noops_1.0.0_lerobot/episode_000365/variant_00.npz",
+          "t": 33,
+          "current_frame_index": 33,
+          "history_indices": [
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33
+          ],
+          "action_start": 33,
+          "action_stop": 43,
+          "action_mask_hash": "3654420b21c828298ec8ec43ccc06cf559915853881e063af443f2a24b55b06a",
+          "partition": "train"
+        }
+      ]
+    }
+  ],
+  "prior": {
+    "max_abs_log_p0_difference": 2.014903,
+    "max_abs_q_difference": 0.679451,
+    "prior_reaches_log_p0": true,
+    "prior_changes_support": true,
+    "note": "same real window, same weights; only the declared prior differs",
+    "runs": {
+      "uniform": {
+        "log_p0": [
+          -1.386294,
+          -1.386294,
+          -1.386294,
+          -1.386294
+        ],
+        "q": [
+          0.158478,
+          0.296076,
+          0.335498,
+          0.209949
+        ],
+        "check_status": "insufficient_information",
+        "check_valid": false,
+        "calibration_version": "uncalibrated"
+      },
+      "biased": {
+        "log_p0": [
+          -0.10536,
+          -3.401197,
+          -3.401197,
+          -3.401197
+        ],
+        "q": [
+          0.837929,
+          0.057022,
+          0.064614,
+          0.040435
+        ],
+        "check_status": "insufficient_information",
+        "check_valid": false,
+        "calibration_version": "uncalibrated"
+      }
+    }
+  },
+  "training_calibration": {
+    "status": "fitted",
+    "sequences": 4,
+    "threshold": 0.5784051647452109,
+    "quantile": 0.95,
+    "version": "n02-v12-windowed-check-v1",
+    "partition": "calibration",
+    "viewing_rule_hash": "d12f7ed08d5a9f01c1e2e0dc490ca3b1a15b28249228857eeae221cb2aceff9a",
+    "frame_axis_note": "relative check axis 0; actual decoder source time is unchanged",
+    "prediction_version": "causal_pre_locked",
+    "execution_revision": "n02-v12-p2-causal-r4",
+    "scale": "sensor_stride1",
+    "regions": [
+      "libero_agentview",
+      "libero_wrist"
+    ],
+    "verdicts": {
+      "calibration": {
+        "sequences": 4,
+        "by_status": {
+          "compatible": 4
+        },
+        "invalid_no_prefix": 0,
+        "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+      },
+      "dev": {
+        "sequences": 4,
+        "by_status": {
+          "compatible": 3,
+          "model_inadequate": 1
+        },
+        "invalid_no_prefix": 0,
+        "meaning": "three-state verdicts of the frozen calibrator; 'compatible' means no residual window exceeded the frozen threshold, not that the model is right"
+      },
+      "per_step_check": "uncalibrated on purpose: see the comment in calibration_pass; an uncalibrated check returns AbsoluteCheckResult.invalid and is never counted as a zero"
+    }
+  },
+  "eval_calibration_threshold": 0.5784051647452109,
+  "threshold_max_abs_delta": 0.0,
+  "claim_boundary": "fixed fresh weights, four calibration windows; consistency only, no calibration validity or capability claim"
+}

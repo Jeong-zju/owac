@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-16",
+  "timezone": "Asia/Shanghai",
+  "execution_revision": "n02-v12-p2-causal-r2",
+  "original_delivery_acceptance": "fail",
+  "repair_validation": "bounded_real_checks_passed",
+  "formal_repaired_1000_updates": "not_run",
+  "p3": "not_run",
+  "p4_closed_loop": "not_run",
+  "make_check": {
+    "exit_code": 0,
+    "commands": [
+      "ruff check .",
+      "ruff format --check .",
+      "python -m compileall -q src"
+    ]
+  },
+  "pytest": {
+    "command": "OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 uv run --locked pytest tests/encoders/n02_full -q",
+    "passed": 602,
+    "skipped": 6,
+    "failed": 0,
+    "seconds": 23.24,
+    "skip_reasons": [
+      "numba absent for upstream particles resampling",
+      "local CUDA unavailable for legacy P1 GPU tests"
+    ]
+  },
+  "git_diff_check": {
+    "exit_code": 0
+  },
+  "real_receipts": [
+    "robotwin_repair_receipt.json",
+    "libero_repair_receipt.json",
+    "robotwin_final_probe.json",
+    "libero_final_probe.json",
+    "causal_scale_diagnosis.json",
+    "svg_encoding_repair.json",
+    "attention_render_repair.json"
+  ],
+  "optional_research_hub_check": {
+    "status": "not_run",
+    "reason": "tests/test_research_hub.py does not exist in this checkout; attempted command exited 4 and was not counted as passed"
+  },
+  "visual_qa": {
+    "png_decoding": "passed",
+    "all_64_image_payloads_valid_after_encoding_repair": true,
+    "floating_attention_regenerated": true,
+    "embedded_overlay_visually_inspected": true
+  },
+  "source_sync": {
+    "files": 22,
+    "mismatches": []
+  },
+  "committed": false,
+  "pushed": false
+}

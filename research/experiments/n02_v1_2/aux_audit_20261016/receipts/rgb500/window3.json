@@ -1,0 +1,200 @@
+{
+  "label": "rgb360_logged_window",
+  "window": {
+    "start": 38342,
+    "stop": 38344,
+    "rows": 16,
+    "partition": "train",
+    "current_frame_indices": [
+      74,
+      75
+    ],
+    "unique_measurements": 27,
+    "anchors": [
+      "data/robotwin2/raw/place_dual_shoes/episode_000011.npz",
+      "data/robotwin2/raw/place_dual_shoes/episode_000011.npz"
+    ]
+  },
+  "terms": {
+    "action": 0.07432602345943451,
+    "masked_raw": 0.3693805932998657,
+    "causal_raw": 5.792146682739258,
+    "noise": null
+  },
+  "roles": {
+    "encoder": {
+      "action_l2": 0.00014213733375455524,
+      "masked_l2": 0.005011555593738423,
+      "causal_l2": 6.955363130480968e-07,
+      "total_l2": 0.0050136084287085905,
+      "cosine_action_masked": 0.00026373556583374197,
+      "cosine_action_causal": 0.012003138218686411,
+      "action_dot_total": 2.0392074828678265e-08,
+      "action_dot_action": 2.0203021646853832e-08,
+      "combined_aux_to_action_l2": 35.25854432149758
+    },
+    "decoder": {
+      "action_l2": 2.4805243710336433e-07,
+      "masked_l2": 0.0,
+      "causal_l2": 103.04161469334099,
+      "total_l2": 103.04161469998137,
+      "cosine_action_masked": null,
+      "cosine_action_causal": 0.026770071820753936,
+      "action_dot_total": 6.842356992988768e-07,
+      "action_dot_action": 6.153001155291851e-14,
+      "combined_aux_to_action_l2": 415402549.14086246
+    },
+    "readout": {
+      "action_l2": 0.0399418921840282,
+      "masked_l2": 0.0,
+      "causal_l2": 0.0,
+      "total_l2": 0.0399418921840282,
+      "cosine_action_masked": null,
+      "cosine_action_causal": null,
+      "action_dot_total": 0.001595354751240533,
+      "action_dot_action": 0.001595354751240533,
+      "combined_aux_to_action_l2": 0.0
+    },
+    "proposals_corrector": {
+      "action_l2": 5.6647507304605625e-08,
+      "masked_l2": 0.0,
+      "causal_l2": 0.9587020757213229,
+      "total_l2": 0.9587020764011935,
+      "cosine_action_masked": null,
+      "cosine_action_causal": 0.012001744264931972,
+      "action_dot_total": 6.517949306728702e-10,
+      "action_dot_action": 3.208940083825348e-15,
+      "combined_aux_to_action_l2": 16923994.035009857
+    },
+    "masked_branch": {
+      "action_l2": 0.0,
+      "masked_l2": 0.41946761746082734,
+      "causal_l2": 0.0,
+      "total_l2": 0.41946761746082734,
+      "cosine_action_masked": null,
+      "cosine_action_causal": null,
+      "action_dot_total": 0.0,
+      "action_dot_action": 0.0,
+      "combined_aux_to_action_l2": null
+    },
+    "bridge_projection": {
+      "action_l2": 0.0,
+      "masked_l2": 0.0,
+      "causal_l2": 0.0,
+      "total_l2": 0.0,
+      "cosine_action_masked": null,
+      "cosine_action_causal": null,
+      "action_dot_total": 0.0,
+      "action_dot_action": 0.0,
+      "combined_aux_to_action_l2": null
+    },
+    "all": {
+      "action_l2": 0.0399421450892027,
+      "masked_l2": 0.4194975539710954,
+      "causal_l2": 103.04607449234024,
+      "total_l2": 103.0469361175956,
+      "cosine_action_masked": 1.1212142257417737e-08,
+      "cosine_action_causal": 1.66401451637812e-07,
+      "action_dot_total": 0.0015960600308095913,
+      "action_dot_action": 0.001595374954326919,
+      "combined_aux_to_action_l2": 2579.9047131745565
+    }
+  },
+  "virtual_adam": {
+    "action_only": {
+      "gradient_l2_before_clip": 0.0399421450892027,
+      "clip_coefficient": 1.0,
+      "delta_l2": 0.1443235570993483,
+      "first_order_action_loss_change": -0.0019173757991171084,
+      "action_gradient_cosine_with_delta": -0.33261255037005777
+    },
+    "action_masked": {
+      "gradient_l2_before_clip": 0.42139479483946185,
+      "clip_coefficient": 1.0,
+      "delta_l2": 0.30457197390964036,
+      "first_order_action_loss_change": -0.0019173658076888718,
+      "action_gradient_cosine_with_delta": -0.1576099587942455
+    },
+    "action_causal": {
+      "gradient_l2_before_clip": 103.0460822333752,
+      "clip_coefficient": 0.009704396019936388,
+      "delta_l2": 0.12087066464723349,
+      "first_order_action_loss_change": -0.0001926928459421812,
+      "action_gradient_cosine_with_delta": -0.03991290109285811
+    },
+    "full": {
+      "gradient_l2_before_clip": 103.04693611090865,
+      "clip_coefficient": 0.009704315606428045,
+      "delta_l2": 0.15084129550594214,
+      "first_order_action_loss_change": -0.00019269256377956357,
+      "action_gradient_cosine_with_delta": -0.03198256686027985
+    }
+  },
+  "action_path_l2": {
+    "full": 0.0399421450892027,
+    "without_current_q_derivative": 0.03994214508647395,
+    "via_current_q": 2.5617925851010136e-07
+  },
+  "top_action_gradients": [
+    [
+      0.037779007107019424,
+      "inference.readout.decoder.final_layer.weight"
+    ],
+    [
+      0.010567639023065567,
+      "inference.readout.decoder.cross_attention.attention._out.weight"
+    ],
+    [
+      0.005495466757565737,
+      "inference.readout.decoder.cross_attention.mlp.output.weight"
+    ],
+    [
+      0.004241883754730225,
+      "inference.readout.decoder.cross_attention.attention._v.weight"
+    ],
+    [
+      0.002501567592844367,
+      "inference.readout.decoder.cross_attention.mlp.input.weight"
+    ],
+    [
+      0.0009265915141440928,
+      "inference.readout.encoder.self_attends.0.attention._out.weight"
+    ],
+    [
+      0.0006308136507868767,
+      "inference.readout.encoder.self_attends.0.mlp.output.weight"
+    ],
+    [
+      0.0004334799014031887,
+      "inference.readout.encoder.self_attends.0.attention._v.weight"
+    ]
+  ],
+  "current_q": [
+    [
+      [
+        0.10679805278778076,
+        0.7891368269920349,
+        0.06477629393339157,
+        0.03928880766034126
+      ]
+    ],
+    [
+      [
+        0.2662128806114197,
+        0.1257500797510147,
+        0.2662128806114197,
+        0.34182411432266235
+      ]
+    ]
+  ],
+  "current_energy_range": [
+    [
+      3952976.0,
+      3952979.0
+    ],
+    [
+      4054467.0,
+      4054468.0
+    ]
+  ]
+}

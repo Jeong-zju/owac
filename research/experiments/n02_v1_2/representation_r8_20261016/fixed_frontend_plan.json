@@ -1,0 +1,45 @@
+{
+  "reason": "C1 allowed fusion readout to drift during backend adaptation; both200-command grasp checks failed and final dev errors worsened. Freeze the complete frontend before adapting the backend.",
+  "source": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fusion-r8-contrast-s1103-b1/checkpoint_0000100.pt",
+  "source_sha256": "b2a54b35858947f7cec746b373a58fdacafc8c5cee9dba8ace55ee284e2e55cd",
+  "encoder_checkpoint": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-representation-r8-fresh-main-a1/checkpoint_0000400.pt",
+  "frontend_frozen": "all RAW/N02 weights, including readout and decoder; recurrent activations still follow observations",
+  "arms": {
+    "narrow": {
+      "rank": 8,
+      "alpha": 16,
+      "targets": [
+        "q_proj",
+        "v_proj"
+      ]
+    },
+    "wide": {
+      "rank": 16,
+      "alpha": 32,
+      "targets": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj"
+      ]
+    }
+  },
+  "learning_rate": 5e-05,
+  "batch": 4,
+  "updates_per_arm": 100,
+  "seed": 1103,
+  "data_cursor_start": 100,
+  "flow_rng": "same source state as C1",
+  "optimizer": "fresh; adapter weights only",
+  "selection": "lowest sampled_control_mse among actually saved25/50/75/100; no closed-loop-based selection",
+  "pilot": "two actual updates; verify complete frontend and original backend hashes unchanged, nonzero adapter gradients, exact save/reload actions",
+  "rollout": {
+    "Normal_seed": 0,
+    "max_commands": 200,
+    "timeout": 1800,
+    "physical_acceptance": "same contact/height1s plus passive2s",
+    "replan_interval": 10,
+    "max_joint_delta_per_command": 0.05,
+    "note": "same existing execution guard for both D1 arms; C1 used50/no limit, so D1 vsC1 closed-loop changes do not isolate training alone"
+  }
+}

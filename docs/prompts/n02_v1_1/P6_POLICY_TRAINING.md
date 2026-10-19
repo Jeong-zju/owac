@@ -1,5 +1,13 @@
 # 给DeepSeek：P6，π0.5正式离线适配
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在远端 N02 独立同进程运行时完成两平台全部离线适配；直接读取服务器的 RAW、π0.5 权重、tokenizer 与正式 stats。数据 loader、模型、优化器及 checkpoint 都在远端，不通过 SSH 流式拉 RAW 到本地训练。
+
 读[共同契约](00_SHARED_CONTRACT.md)、[E1/E2接口规范](EARLY_POLICY_PREFLIGHT.md)、P5通过的实际版本和原方案P6/8/9。复用早期适配代码，扩大真实训练覆盖与公平预算；不重写第二套token/flow入口。
 
 主要修改`training/n02_full.py`、`n02_full/policy.py/readout.py`、`evaluation/n02_full/policy.py`和两平台配置。参考[固定RawVLA源码](02_REFERENCES.md#r25)，现有`training/n02_raw.py`只作历史连通性参考。
@@ -10,7 +18,7 @@
 
 LIBERO两相机，robot_states[t]8维，actions[t:t+10]7维，quantile及原夹爪转换，执行前5步；RoboTwin三相机，actions[t]14维作者关节代理，监督t+1开始50步，显式MEAN_STD，执行50步。内部32维padding和10次flow denoise不变。记录实际stats/checkpoint/tokenizer hash。
 
-NPZ当前观测与动作对齐不等于真实连续rollout状态。随机window使用burn-in重建；burn-in长度与有效历史按P0冻结（起点16帧），只在锚点算动作loss。连续训练块可carry state，在TBPTT边界detach，episode/参数版本变更时按契约重建。
+NPZ当前观测与动作对齐不等于真实连续rollout状态。随机window使用burn-in重建；P0已验收窗口为rnn_frames=1；本阶段从16帧burn-in起点建立显式窗口配置，在原分区和锚点身份上生成版本化表，经开发验证后冻结，只在锚点算动作loss。连续训练块可carry state，在TBPTT边界detach，episode/参数版本变更时按契约重建。
 
 专家动作只用于TrainingTargets，历史动作context必须有真正的执行来源；无记录时保持不可用，不因动作训练启动而填入未来标签。
 

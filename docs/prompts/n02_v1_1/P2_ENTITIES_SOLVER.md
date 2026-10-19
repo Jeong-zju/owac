@@ -1,5 +1,13 @@
 # 给DeepSeek：P2，循环实体与固定结构全局求解
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在远端续训同 seed 的 P1 检查点，读取 E1 收据；SAVi/Theseus 参考、固定结构全局求解、序列训练及 200 步资源画像均在远端执行。需要增加历史窗口时显式版本化 anchor/WindowOptions，沿用 P0 分区身份。
+
 阅读[共同契约](00_SHARED_CONTRACT.md)、P1和E1真实交付。实现固定实体数/固定关系内的实体循环与连续求解，先获得可信全局重算结果。本轮不启用出生/拆分、关系学习或学习局部区域选择。
 
 ## 1. 文件和原始实现

@@ -46,7 +46,7 @@ import json
 import math
 import time
 import tracemalloc
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -810,6 +810,67 @@ class RenderState:
     noise_seed: int
 
 
+#: Geometry fields a candidate hypothesis may override, using the same names and
+#: semantics as the declared world geometry of the public candidate dictionary
+#: (``world_px`` is the renderer's ``RenderShape.position_px``).
+HYPOTHESIS_GEOMETRY_FIELDS = ("world_px", "scale_px", "depth")
+
+
+def _state_with_geometry_hypothesis(
+    state: RenderState, hypothesis: Mapping[str, Any]
+) -> RenderState:
+    """Return ``state`` with the hypothesis geometry applied to its declared shapes.
+
+    Only per-entity geometry changes (world position, scale, depth); every appearance,
+    visibility, occlusion, exposure, illumination and noise parameter stays exactly as
+    rendered.  Unknown entity ids or unknown field names raise instead of being invented.
+    """
+    if not isinstance(hypothesis, Mapping):
+        raise TypeError(f"hypothesis must be a mapping, got {type(hypothesis).__name__}")
+    shapes_by_id = {shape.shape_id: shape for shape in state.shapes}
+    replacements: dict[str, dict[str, Any]] = {}
+    for shape_id, declared in hypothesis.items():
+        key = str(shape_id)
+        if key not in shapes_by_id:
+            raise ValueError(f"hypothesis names an entity not present in the frame state: {key!r}")
+        if not isinstance(declared, Mapping):
+            raise TypeError(f"hypothesis[{key!r}] must be a mapping of geometry fields")
+        update: dict[str, Any] = {}
+        for field_name, value in declared.items():
+            name = str(field_name)
+            if name in ("world_px", "position_px"):
+                try:
+                    position = tuple(float(item) for item in value)
+                except TypeError as error:
+                    raise ValueError(f"hypothesis[{key!r}].{name} must be two numbers") from error
+                if len(position) != 2:
+                    raise ValueError(f"hypothesis[{key!r}].{name} must have two entries")
+                update["position_px"] = position
+            elif name == "scale_px":
+                scale = float(value)
+                if not scale > 0.0:
+                    raise ValueError(f"hypothesis[{key!r}].scale_px must be positive")
+                update["scale_px"] = scale
+            elif name == "depth":
+                update["depth"] = int(value)
+            else:
+                raise ValueError(
+                    f"hypothesis[{key!r}] field {name!r} is not one of the declared entity "
+                    f"geometry fields {HYPOTHESIS_GEOMETRY_FIELDS}"
+                )
+        if update:
+            replacements[key] = update
+    if not replacements:
+        return state
+    shapes = tuple(
+        dataclasses.replace(shape, **replacements[shape.shape_id])
+        if shape.shape_id in replacements
+        else shape
+        for shape in state.shapes
+    )
+    return dataclasses.replace(state, shapes=shapes)
+
+
 @dataclass(frozen=True, slots=True)
 class MeasurementModel:
     """One declared observation model for the controlled mechanism set.
@@ -902,7 +963,15 @@ class MeasurementModel:
             for sensor in scene_state.sensors
         }
 
-    def _render_sensor(self, sensor: SensorSpec, state: RenderState) -> SensorMeasurement:
+    def _expected_signal(
+        self, sensor: SensorSpec, state: RenderState
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Noise-free normalised-signal mean and declared shot+read variance.
+
+        This is the single projection/response/exposure/noise-parameter code path shared
+        with :meth:`_render_sensor`; it draws **no** random numbers and never reads or
+        advances ``state.noise_seed``, so calling it cannot change a seeded render.
+        """
         if sensor.input_mode != self.input_mode:
             raise ValueError(
                 f"model kind {self.kind!r} cannot render a {sensor.input_mode!r} sensor "
@@ -922,7 +991,6 @@ class MeasurementModel:
             * float(sensor.gain)
         )
         read_noise_e = float(state.read_noise_e)
-        rng = np.random.default_rng(state.noise_seed)
 
         if self.kind == "cfa":
             plane_index = cfa_pixel_plane_index(sensor.cfa_pattern, height, width)
@@ -934,17 +1002,74 @@ class MeasurementModel:
                 * response[plane_index]
                 * albedo[channel_index, np.arange(height)[:, None], np.arange(width)[None, :]]
             )
-            shape: tuple[int, ...] = (height, width)
         else:
             response = np.asarray(self.response, dtype=np.float32)[:, None, None]
             mean_signal = exposure * response * albedo
-            shape = (3, height, width)
 
         mean_signal = np.clip(mean_signal.astype(np.float32), 0.0, None)
         variance = (
             mean_signal / float(self.shot_noise_scale)
             + (read_noise_e / float(self.shot_noise_scale)) ** 2
         )
+        return mean_signal, variance
+
+    def mean_variance(
+        self,
+        sensor: SensorSpec,
+        state: RenderState,
+        *,
+        hypothesis: Mapping[str, Mapping[str, Any]] | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Noise-free expectation of one camera's measurement, in the declared unit.
+
+        Returns ``(mean, variance)`` as float32 arrays whose unit string is
+        ``self.unit()`` - the same declared domain as the ``SensorMeasurement`` produced
+        by :meth:`render` for this sensor (DN for both declared kinds):
+
+        * ``mean = black_level + mean_signal * dn_scale``;
+        * ``variance = (mean_signal / shot_noise_scale
+          + (read_noise_e / shot_noise_scale) ** 2) * dn_scale ** 2``,
+
+        with ``mean_signal`` produced by the exact projection/response/exposure path of
+        :meth:`render`.  The value is the *linear* expectation: the ADC rounding and the
+        saturation clip applied by :meth:`render` are measurement effects and are not part
+        of it.  No random number is drawn here and no generator state is advanced, so the
+        hook can be called any number of times before, between or after seeded renders
+        without changing any rendered value.
+
+        ``hypothesis`` overrides the **geometry** of declared entities for this
+        evaluation only, using the same field names and semantics as the declared world
+        geometry of the public candidate dictionary (``world_px``/``scale_px``/``depth``)::
+
+            hypothesis = {"shape_a": {"world_px": (12.0, 20.0), "scale_px": 6.0}}
+
+        ``world_px`` is the entity's declared world position - the same quantity the truth
+        geometry carries - and is mapped to the renderer's ``RenderShape.position_px``;
+        ``position_px`` is accepted as an alias.  Entities not named keep the frame
+        state's geometry, and kind, colour, visibility, artefact flag, occlusion,
+        exposure, illumination and noise parameters always come from ``state``.  Unknown
+        entity ids or field names raise ``ValueError`` instead of being invented.
+        ``hypothesis=None`` (and an empty mapping) use the unchanged path and are
+        bit-identical to the plain call.
+        """
+        if not isinstance(sensor, SensorSpec):
+            raise TypeError(f"mean_variance() expects a SensorSpec, got {type(sensor).__name__}")
+        if not isinstance(state, RenderState):
+            raise TypeError(f"mean_variance() expects a RenderState, got {type(state).__name__}")
+        if hypothesis is not None:
+            state = _state_with_geometry_hypothesis(state, hypothesis)
+        mean_signal, variance = self._expected_signal(sensor, state)
+        dn_scale = float(sensor.dn_scale)
+        mean_dn = float(sensor.black_level) + mean_signal * dn_scale
+        variance_dn = variance * dn_scale * dn_scale
+        return np.asarray(mean_dn, dtype=np.float32), np.asarray(variance_dn, dtype=np.float32)
+
+    def _render_sensor(self, sensor: SensorSpec, state: RenderState) -> SensorMeasurement:
+        mean_signal, variance = self._expected_signal(sensor, state)
+        shift = state.camera_shift_px.get(sensor.camera_id, (0.0, 0.0))
+        shape: tuple[int, ...] = tuple(mean_signal.shape)
+        read_noise_e = float(state.read_noise_e)
+        rng = np.random.default_rng(state.noise_seed)
         electrons = rng.poisson(lam=mean_signal * float(self.shot_noise_scale)).astype(np.float32)
         if read_noise_e > 0.0:
             electrons = electrons + rng.normal(0.0, read_noise_e, size=shape).astype(np.float32)
@@ -1822,7 +1947,11 @@ class SyntheticSequence:
 
     ``frames`` keeps the rich declared measurements and ``inference`` the
     shared-contract payloads built from them; the two share the pixel arrays but
-    nothing from ``truth``/``targets``.
+    nothing from ``truth``/``targets``.  ``render_states`` keeps, per frame, the exact
+    :class:`RenderState` object that was rendered (no reconstruction), so a consumer can
+    ask a measurement model for the noise-free expectation of that frame or derive a
+    truth-geometry hypothesis.  It defaults to empty so sequences built before this field
+    existed keep constructing unchanged.
     """
 
     sequence_id: str
@@ -1835,6 +1964,7 @@ class SyntheticSequence:
     targets: tuple[TrainingTargets, ...]
     truth: tuple[EvaluationTruth, ...]
     manifest: dict
+    render_states: tuple[RenderState, ...] = ()
 
     @property
     def num_frames(self) -> int:
@@ -2216,6 +2346,7 @@ def generate_sequence(
     inference: list[InferenceInput] = []
     targets: list[TrainingTargets] = []
     truth: list[EvaluationTruth] = []
+    render_states: list[RenderState] = []
 
     for step in range(int(frames)):
         state["labels"] = []
@@ -2254,6 +2385,9 @@ def generate_sequence(
             )
         frame_measurements = model.render(render_state)
         measurements.append(frame_measurements)
+        # keep the very state that was rendered (never a reconstruction) so the
+        # noise-free expectation and truth-geometry hypotheses can be recovered
+        render_states.append(render_state)
 
         world_px = np.asarray(
             [tracks[shape_id].position for shape_id in scene.shape_ids], dtype=np.float64
@@ -2409,6 +2543,7 @@ def generate_sequence(
         targets=tuple(targets),
         truth=tuple(truth),
         manifest=manifest,
+        render_states=tuple(render_states),
     )
 
 

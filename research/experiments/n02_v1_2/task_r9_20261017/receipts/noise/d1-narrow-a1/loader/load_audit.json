@@ -1,0 +1,26 @@
+{
+  "checkpoint": "outputs/n02-v12/P2/raw-backend-r8-fixedfront-narrow-s1103-d1/checkpoint_0000050.pt",
+  "checkpoint_sha256": "4d0dff2e20507dd2b4bc0da09453705a0d93db3129e8c95f86a8c4cf67a87595",
+  "step": 50,
+  "execution_revision": "n02-v12-p2-spatial-r7",
+  "runtime_execution_revision": "n02-v12-p2-spatial-r7",
+  "legacy_weights_probe": false,
+  "policy_input_contract": "pi05-native-language-state-v1",
+  "training_contract_sha256": "3871be7d3a50ac77957e43a3c9faa3fe20eaca5dbfa2c84d69b098472affdf13",
+  "representation": {
+    "kind": "raw3",
+    "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+    "isp": null
+  },
+  "history": 8,
+  "action_horizon": 50,
+  "replan_interval": 50,
+  "client_max_joint_delta_rad_per_command": null,
+  "denoise_steps": 10,
+  "optimizer_updates": 0,
+  "restore": "strict training contract and state_dict",
+  "observation": "live float32 raw_linear; 3 cameras; 8 most recent control frames",
+  "proprio_context": "current normalized joint vector, broadcast as during training",
+  "sensor_metadata": "same undeclared noise/float saturation fields as frozen loader",
+  "torch_version": "2.11.0+cu128"
+}

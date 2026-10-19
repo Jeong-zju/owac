@@ -1,0 +1,443 @@
+{
+  "step": 128,
+  "action_error": 0.11300597619265318,
+  "sampled_control_mse": 0.3385753967468683,
+  "sampled_full_control_mse": 0.3385753967468683,
+  "sampled_metric": "balanced_sampled_control14_mse",
+  "executed_prefix_proxy": {
+    "windows": 20,
+    "valid_actions": 781,
+    "mse": 0.3535878432134159,
+    "first10_mse": 0.35114144725665863,
+    "prefix_joint_mse": 0.31774886337373065,
+    "prefix_gripper_mse": 0.5514969505542264,
+    "joint_mse": 0.37622112557594234,
+    "gripper_mse": 0.2177881490382583,
+    "strata": {
+      "Normal/approach": {
+        "windows": 3,
+        "valid_actions": 150,
+        "mse": 0.4800676064559919,
+        "first10_mse": 0.3822866833314869,
+        "prefix_joint_mse": 0.4377666501225171,
+        "prefix_gripper_mse": 0.049406882585305456,
+        "joint_mse": 0.5512940973110138,
+        "gripper_mse": 0.05270866132586114
+      },
+      "Normal/middle": {
+        "windows": 3,
+        "valid_actions": 137,
+        "mse": 0.32949591757589525,
+        "first10_mse": 0.45212939022481563,
+        "prefix_joint_mse": 0.2978853413663623,
+        "prefix_gripper_mse": 1.3775936833755356,
+        "joint_mse": 0.3155877929237386,
+        "gripper_mse": 0.4129446654888351
+      },
+      "Normal/opening": {
+        "windows": 3,
+        "valid_actions": 150,
+        "mse": 0.24750652679990956,
+        "first10_mse": 0.1333882754117466,
+        "prefix_joint_mse": 0.1474703589773322,
+        "prefix_gripper_mse": 0.04889577401823286,
+        "joint_mse": 0.28394764273834594,
+        "gripper_mse": 0.028859831169291753
+      },
+      "Normal/tail": {
+        "windows": 3,
+        "valid_actions": 30,
+        "mse": 0.28053410371224585,
+        "first10_mse": 0.2805341037122458,
+        "prefix_joint_mse": 0.32638806301914114,
+        "prefix_gripper_mse": 0.0054103478708737406,
+        "joint_mse": 0.3263880630191412,
+        "gripper_mse": 0.0054103478708737406
+      },
+      "Over/approach": {
+        "windows": 2,
+        "valid_actions": 100,
+        "mse": 0.5412914811528599,
+        "first10_mse": 0.6597776087545045,
+        "prefix_joint_mse": 0.7576736756040905,
+        "prefix_gripper_mse": 0.07240120765698972,
+        "joint_mse": 0.6251603493639171,
+        "gripper_mse": 0.03807827188651667
+      },
+      "Over/middle": {
+        "windows": 2,
+        "valid_actions": 94,
+        "mse": 0.25767916972536814,
+        "first10_mse": 0.5578119406612315,
+        "prefix_joint_mse": 0.13027451735886783,
+        "prefix_gripper_mse": 3.1230364804754136,
+        "joint_mse": 0.1444517905056939,
+        "gripper_mse": 0.9370434450434134
+      },
+      "Over/opening": {
+        "windows": 2,
+        "valid_actions": 100,
+        "mse": 0.29584330610240844,
+        "first10_mse": 0.14513219101459862,
+        "prefix_joint_mse": 0.16087608750167576,
+        "prefix_gripper_mse": 0.050668812092135695,
+        "joint_mse": 0.3313279064146073,
+        "gripper_mse": 0.08293570422921576
+      },
+      "Over/tail": {
+        "windows": 2,
+        "valid_actions": 20,
+        "mse": 0.2761850531158089,
+        "first10_mse": 0.2761850531158089,
+        "prefix_joint_mse": 0.31439873304464283,
+        "prefix_gripper_mse": 0.04690297354280517,
+        "joint_mse": 0.31439873304464283,
+        "gripper_mse": 0.04690297354280517
+      }
+    },
+    "balanced_mse": 0.338575395580061,
+    "balanced_prefix_mse": 0.3609056557783048,
+    "missing_lighting": [
+      "ExtremeLow",
+      "ExtremeOver",
+      "Low"
+    ]
+  },
+  "execution_contract": {
+    "version": "n02-control-r11-v1",
+    "horizon": 50,
+    "replan_interval": 50,
+    "max_joint_delta": null,
+    "max_gripper_delta": null,
+    "clip_grippers": false
+  },
+  "calibration_weights_sha256": "d1ae07891217e70895208462ec8598854f40e9fb27994535a553bf4dfc7266f2",
+  "online_checks": {
+    "rows": [
+      {
+        "window": 0,
+        "expected_causal": false,
+        "status": "insufficient_information",
+        "valid": false,
+        "explanation": "invalid result: no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None' (no_causal_prefix)",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 1,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 2,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 3,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 4,
+        "expected_causal": false,
+        "status": "insufficient_information",
+        "valid": false,
+        "explanation": "invalid result: no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None' (no_causal_prefix)",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 5,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 6,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 7,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 8,
+        "expected_causal": false,
+        "status": "insufficient_information",
+        "valid": false,
+        "explanation": "invalid result: no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None' (no_causal_prefix)",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 9,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 10,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 11,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 12,
+        "expected_causal": false,
+        "status": "insufficient_information",
+        "valid": false,
+        "explanation": "invalid result: no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None' (no_causal_prefix)",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 13,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 14,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 15,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 16,
+        "expected_causal": false,
+        "status": "insufficient_information",
+        "valid": false,
+        "explanation": "invalid result: no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None' (no_causal_prefix)",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 17,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 18,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      },
+      {
+        "window": 19,
+        "expected_causal": true,
+        "status": "compatible",
+        "valid": true,
+        "explanation": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+        "revision": {
+          "triggered": false,
+          "rows": []
+        }
+      }
+    ],
+    "valid": 15,
+    "invalid": 5,
+    "expected_causal": 15,
+    "revisions": 0
+  },
+  "task_control": {
+    "windows": 20,
+    "valid_actions": 781,
+    "mse": 0.35358784520144493,
+    "first10_mse": 0.35114145006224035,
+    "prefix_joint_mse": 0.3177488669609797,
+    "prefix_gripper_mse": 0.5514969486698046,
+    "joint_mse": 0.37622112813780345,
+    "gripper_mse": 0.21778814758329304,
+    "strata": {
+      "Normal/approach": {
+        "windows": 3,
+        "valid_actions": 150,
+        "mse": 0.4800676125382855,
+        "first10_mse": 0.3822866875280595,
+        "prefix_joint_mse": 0.43776665502392625,
+        "prefix_gripper_mse": 0.0494068825528591,
+        "joint_mse": 0.5512941046999125,
+        "gripper_mse": 0.05270865956852363
+      },
+      "Normal/middle": {
+        "windows": 3,
+        "valid_actions": 137,
+        "mse": 0.3294959240979774,
+        "first10_mse": 0.4521293959532818,
+        "prefix_joint_mse": 0.2978853471847282,
+        "prefix_gripper_mse": 1.3775936885646043,
+        "joint_mse": 0.31558780061239744,
+        "gripper_mse": 0.41294466501145705
+      },
+      "Normal/opening": {
+        "windows": 3,
+        "valid_actions": 150,
+        "mse": 0.24750652596521577,
+        "first10_mse": 0.13338827443550225,
+        "prefix_joint_mse": 0.14747035790396504,
+        "prefix_gripper_mse": 0.04889577362472541,
+        "joint_mse": 0.2839476419026105,
+        "gripper_mse": 0.028859830340847114
+      },
+      "Normal/tail": {
+        "windows": 3,
+        "valid_actions": 30,
+        "mse": 0.2805341006181526,
+        "first10_mse": 0.2805341006181526,
+        "prefix_joint_mse": 0.3263880593880608,
+        "prefix_gripper_mse": 0.005410347998703221,
+        "joint_mse": 0.32638805938806087,
+        "gripper_mse": 0.005410347998703221
+      },
+      "Over/approach": {
+        "windows": 2,
+        "valid_actions": 100,
+        "mse": 0.5412914791373785,
+        "first10_mse": 0.6597776236630608,
+        "prefix_joint_mse": 0.757673692948174,
+        "prefix_gripper_mse": 0.07240120795238218,
+        "joint_mse": 0.625160347442899,
+        "gripper_mse": 0.038078269304256174
+      },
+      "Over/middle": {
+        "windows": 2,
+        "valid_actions": 94,
+        "mse": 0.25767917196407175,
+        "first10_mse": 0.5578119469311599,
+        "prefix_joint_mse": 0.13027452805089726,
+        "prefix_gripper_mse": 3.1230364602127354,
+        "joint_mse": 0.1444517937949122,
+        "gripper_mse": 0.9370434409790295
+      },
+      "Over/opening": {
+        "windows": 2,
+        "valid_actions": 100,
+        "mse": 0.29584330544247367,
+        "first10_mse": 0.14513218801429745,
+        "prefix_joint_mse": 0.16087608510430854,
+        "prefix_gripper_mse": 0.05066880547423096,
+        "joint_mse": 0.3313279057358626,
+        "gripper_mse": 0.0829357036821396
+      },
+      "Over/tail": {
+        "windows": 2,
+        "valid_actions": 20,
+        "mse": 0.2761850542113911,
+        "first10_mse": 0.2761850542113911,
+        "prefix_joint_mse": 0.31439873425539644,
+        "prefix_gripper_mse": 0.04690297394735943,
+        "joint_mse": 0.31439873425539644,
+        "gripper_mse": 0.04690297394735943
+      }
+    },
+    "balanced_mse": 0.3385753967468683,
+    "balanced_prefix_mse": 0.36090565891936316,
+    "missing_lighting": [
+      "ExtremeLow",
+      "ExtremeOver",
+      "Low"
+    ]
+  },
+  "task_dev_manifest_sha256": "b59e3693d63c2b27056aff16e70dee85619ae81f908c99a8fc6e9c1a7560806c"
+}

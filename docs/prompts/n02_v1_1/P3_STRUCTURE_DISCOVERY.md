@@ -1,5 +1,13 @@
 # 给DeepSeek：P3，发现初始候选之外的解释
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在远端加载 P2/E2 检查点和同分区序列；枚举/Gen/particles 数值参考与结构训练都在远端对应独立环境运行。粒子轨迹、完整提议账本和大 checkpoint 写入远端阶段输出。
+
 读[共同契约](00_SHARED_CONTRACT.md)、P2/E2交付和原方案T5/T6、P3、8.2。实现世界候选的结构变化，先数值正确，再学习提议。主要修改`hypotheses.py/proposals.py/state.py/model.py`；新增训练stage p3、`evaluation/n02_full/p3.py`及`research/theory/n02_full/t5_t6.md`。
 
 来源：[R04 SCALOR discovery/propagation](02_REFERENCES.md#r04)、[R28 particles](02_REFERENCES.md#r28)、[R13 Gen SMC/MH/trace translator](02_REFERENCES.md#r13)、[R14 RJMCMC](02_REFERENCES.md#r14)。不用“多几个固定embedding”替代结构发现。

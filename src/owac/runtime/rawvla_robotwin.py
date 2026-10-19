@@ -112,7 +112,13 @@ class Policy:
         }
         with (self.evidence / "inference.jsonl").open("a") as stream:
             stream.write(json.dumps(record) + "\n")
-        return {"actions": actions}
+        from owac.runtime.n02_control import ControlProtocol
+
+        protocol = os.environ.get("N02_EXECUTION_PROTOCOL")
+        return {
+            "actions": actions,
+            "execution_contract": ControlProtocol.parse(protocol).as_dict() if protocol else None,
+        }
 
 
 class ModelClient:
@@ -122,9 +128,14 @@ class ModelClient:
         self.client = WebsocketClientPolicy(args.get("host", "127.0.0.1"), args.get("port", 18005))
         self.actions = None
         self.chunk_start = 0
+        from owac.runtime.n02_control import ActionExecution, ControlProtocol
+
+        setting = os.environ.get("N02_EXECUTION_PROTOCOL")
+        self.execution = ActionExecution(ControlProtocol.parse(setting)) if setting else None
 
     def step(self, example, step):
-        if self.actions is None or step - self.chunk_start >= 50:
+        interval = self.execution.protocol.replan_interval if self.execution else 50
+        if self.actions is None or step - self.chunk_start >= interval:
             if os.environ.get("RAWVLA_FLOW_SEED") is not None:
                 example = dict(example)
                 example["flow_seed"] = (int(os.environ["RAWVLA_FLOW_SEED"]) + step) % (2**32)
@@ -132,9 +143,15 @@ class ModelClient:
             response = self.client.predict_action({"examples": [example]})
             if not response.get("ok"):
                 raise RuntimeError(f"π0.5 inference failed: {response}")
+            if (
+                self.execution
+                and response["data"].get("execution_contract") != self.execution.protocol.as_dict()
+            ):
+                raise ValueError("native policy execution contract mismatch")
             self.actions = np.asarray(response["data"]["actions"], dtype=np.float32)
             self.chunk_start = step
-        return self.actions[step - self.chunk_start].copy()
+        requested = self.actions[step - self.chunk_start].copy()
+        return self.execution.step(requested, example["state"]) if self.execution else requested
 
 
 def get_model(usr_args):
@@ -158,6 +175,8 @@ def get_model(usr_args):
 def reset_model(model):
     model.actions = None
     model.chunk_start = 0
+    if getattr(model, "execution", None):
+        model.execution.reset()
 
 
 def eval(TASK_ENV, model, observation):
@@ -183,6 +202,7 @@ def eval(TASK_ENV, model, observation):
     key = os.environ.get("ROBOTWIN_IMAGE_OBS_KEY", "rgb")
     cameras = ("head_camera", "left_camera", "right_camera")
     example = {
+        "task_name": str(TASK_ENV.task_name),
         "lang": str(TASK_ENV.get_instruction()),
         "image": [observation["observation"][camera][key] for camera in cameras],
         "state": observation["joint_action"]["vector"],

@@ -1,0 +1,30 @@
+{
+  "stage": "C1 backend adaptation after representation and fusion",
+  "source": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fusion-r8-contrast-s1103-b1/checkpoint_0000100.pt",
+  "source_sha256": "b2a54b35858947f7cec746b373a58fdacafc8c5cee9dba8ace55ee284e2e55cd",
+  "frontend_selection": {
+    "contrast": 0.8487546890974045,
+    "rms": 1.6799876391887665
+  },
+  "selection_rule": "lowest final sampled development control MSE; new RMS branch did not win at this budget",
+  "frontend_probe": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/representation-r8-probes/fusion-contrast-0100-b1/raw-r8/report.json",
+  "frontend_probe_sha256": "599af945d4658bf4f5c9a2f7583088f5b5fa8125952c990dfae513e6a86eb1c7",
+  "representation": "accepted fresh RAW400 encoder, remains frozen",
+  "arms": [
+    "frozen backend control",
+    "q/v LoRA rank8 alpha16"
+  ],
+  "updates_per_arm": 100,
+  "batch": 4,
+  "seed": 1103,
+  "data_order": "continue source dataset cursor and flow RNG, fresh optimizer",
+  "rollout_per_arm": {
+    "task": "grab_roller",
+    "seed": 0,
+    "lighting": "Normal",
+    "max_commands": 200,
+    "timeout_seconds": 1800,
+    "acceptance": "two-hand contact, off table, z>=.83m continuously1s then passive2s; upstream flag alone is not accepted"
+  },
+  "claim_boundary": "bounded repair and development acceptance, not P3/P4 or stable success rate"
+}

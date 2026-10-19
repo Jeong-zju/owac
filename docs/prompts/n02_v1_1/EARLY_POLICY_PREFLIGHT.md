@@ -1,5 +1,13 @@
 # 给DeepSeek：E1/E2，π0.5早期适配预检
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+E1/E2 都在远端用真实 NPZ、既有 π0.5 权重/tokenizer/stats，验证同进程前端梯度、采样和缓存；随后执行每平台不超过 2000 次更新的预检。使用 N02 独立环境与候选服务，直接读取服务器资产。
+
 读[共同契约](00_SHARED_CONTRACT.md)、P1或P2实际报告、[正式系统协议](P6_POLICY_TRAINING.md)。本提示词执行两次：P1后`mode=direct`为E1；P2末`mode=objects`为E2。每次1个工程seed、每平台最多2000次optimizer更新；属于排查接口风险，不作为正式三seed能力证据。
 
 ## 1. 文件与固定后端
@@ -33,7 +41,7 @@ RoboTwin真实NPZ当前state读取actions[t]而监督从t+1起；显式MEAN_STD�
 
 随后工程seed7101，预检有效batch8个动作锚点、lr前端1e-5/readout1e-4起点，AdamW、100步warmup、2000更新上限；保持RAW/结构loss以P1/P2冻结权重继续约束。E1/E2用同样样本/flow噪声清单、backend初值和readout初始化；E2多出的前端训练量明确披露，额外保留冻结前端仅训读出的对照。
 
-只在P0指定少量开发任务/初态跑连通性闭环，任务/照明/cadence相同，预算执行前冻结，不能使用P7测试身份。若本轮授权环境只支持离线，离线完成并列出闭环未运行，不补造分数。
+只在P0指定少量开发任务/初态跑连通性闭环，任务/照明/cadence相同，预算执行前冻结，不能使用P7测试身份。在指定远端先验证候选仿真入口和可用资源；具体仿真依赖或资源确实阻塞时列出实际错误及闭环未运行，离线真实数据检查继续完成。
 
 测试：同tokens/noise/time的桥训练结果一致；改变无效相机值不改输出；batch部分reset；恢复后下一个更新；连续两个锚点与重放一致；整世界MAP不跨相机混合；每次预测encoder1次、prefix1次、denoise10次；动作维、夹爪及尾padding。对象化前后比较全horizon和执行前缀误差，分单位与夹爪报告。
 

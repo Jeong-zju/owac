@@ -1,6 +1,10 @@
 # 论文、官方实现与固定文件导航
 
-本轮按固定版本取回52个文件（包括许可证），见[source_manifest.json](source_manifest.json)。源码缓存位于ignored `outputs/n02-v11-prompt-audit-20261013/sources/`。清单记录文件内容hash；本次只做指定语义审阅，没有运行这些上游网络、Julia或CUDA求解器。论文核对以摘要/项目和原方案来源为主，正式理论推导仍需阅读全文。
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+2026-10-13 提示词编写时按固定版本取回52个文件（包括许可证），见[source_manifest.json](source_manifest.json)。源码缓存位于ignored `outputs/n02-v11-prompt-audit-20261013/sources/`。清单记录文件内容hash；本次只做指定语义审阅，没有运行这些上游网络、Julia或CUDA求解器。论文核对以摘要/项目和原方案来源为主，正式理论推导仍需阅读全文。
+
+2026-10-14 更新：P0 已实跑参考与 parity，见[独立验收](../../../research/experiments/2026-10-14_n02_p0_independent_acceptance.md)和[参考环境锁](../../../configs/backends/n02-full-runtime/INDEPENDENT_ACCEPTANCE.md)。后续在[指定远端](03_REMOTE_DEVELOPMENT.md)阅读/运行参考；所需缓存可按本清单固定 SHA 在远端获取，或选择性同步既有源码，旧缓存路径相对于接入后的远端 worktree。下载/编译结果与实际数值验证仍分别记录。
 
 引用编号与v1.1方案一致，不要求实现全部30种方法。下面直接指明各阶段需要阅读的文件；其他相关工作见[原方案参考文献](../../plans/N02_full_development_plan_2026-10-13.md#12-参考文献与可复用实现)。
 

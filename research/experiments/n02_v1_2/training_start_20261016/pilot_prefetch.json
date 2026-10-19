@@ -1,0 +1,148 @@
+{
+  "version": "n02-v12-p2-v1",
+  "run_id": "pilot-prefetch-robotwin-20261016",
+  "stage": "P2",
+  "arm": "raw_n02",
+  "platform": "robotwin",
+  "representation": {
+    "kind": "raw3",
+    "declared": "RAW3 triplet exactly as the frozen loader serves it: RoboTwin HDR-derived three-channel float32 measurement in its own scale, no /255, no per-frame max, no ISP",
+    "isp": null
+  },
+  "model": {
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "input_mode": "RAW3",
+    "in_chans": 3,
+    "input_size": [
+      256,
+      320
+    ],
+    "dims": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "depths": [
+      3,
+      3,
+      27,
+      3
+    ],
+    "d_model": 512,
+    "alignment": 32,
+    "k": 4,
+    "n_slots": 16,
+    "slot_dim": 512,
+    "tau": 1.0,
+    "rounds": 4,
+    "history": 8,
+    "query_stride": 1,
+    "max_queries_per_camera": 0,
+    "n_latents": 128,
+    "n_queries": 256,
+    "out_dim": 2048,
+    "decoder_hidden": 256,
+    "measurement_channels": 3,
+    "channel_reduction": "select",
+    "saturation_level": null,
+    "units": "sensor_units",
+    "min_variance": null,
+    "max_variance": null,
+    "action_dim": 0,
+    "action_horizon": 50,
+    "strict_check": true,
+    "disclosure": "ConvNeXt V2-Base (depths 3/3/27/3, dims 128/256/512/1024) raw backbone initialised from scratch, no RGB weights and no RGB teacher; the 1x1 per-level projection to d_model and the inference proposal/corrector layers are the disclosed new layers; the readout is the ported Perceiver IO core"
+  },
+  "data": {
+    "dataset_format": "robotwin",
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+    "anchor_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+    "manifest_dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion",
+    "manifest_seed": 1103,
+    "partitions": {
+      "train": 0.8,
+      "dev": 0.1,
+      "calibration": 0.1
+    },
+    "history": 8,
+    "declared_prior": null,
+    "normalisation": "loader statistics only, RoboTwin checkpoint rule MEAN_STD; the training entry never normalises or de-normalises actions (prepare_control_targets pads to 32 dims, control_actions slices back)",
+    "protocol": {
+      "cameras": 3,
+      "action": "actions[t] is the current 14-dim online joint vector (left 6 joints, left gripper, right 6 joints, right gripper)",
+      "offset": 1,
+      "horizon": 50,
+      "action_mask": "the loader's per-action padding mask",
+      "unit_note": "the cached 16-dim robot_states is NOT the online 14-dim joint state and never enters the policy"
+    }
+  },
+  "policy": {
+    "suite": "robotwin",
+    "checkpoint": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors",
+    "tokenizer": "/workspace/owac/rawvla/source/openpi_converted_protocol/paligemma_tokenizer.model",
+    "token_dim": 2048,
+    "tokens_per_camera": 256,
+    "freeze_backend": true
+  },
+  "aux": {
+    "lambda_raw": 1.0,
+    "lambda_pred": 1.0,
+    "lambda_noise": 0.0,
+    "noise_note": "the official RoboTwin cache declares no sensor noise model, so the noise term stays off and no target is invented",
+    "mask_ratio": 0.6,
+    "patch_size": 32,
+    "decoder_embed_dim": 512,
+    "decoder_depth": 1,
+    "grn_scope": "sparse"
+  },
+  "optim": {
+    "lr": 0.00015,
+    "lr_head": 0.0003,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "weight_decay": 0.01,
+    "warmup_updates": 50,
+    "grad_clip": 1.0
+  },
+  "loop": {
+    "seed": 1103,
+    "max_updates": 10,
+    "profile_updates": 10,
+    "batch_size": 1,
+    "grad_accum": 2,
+    "validate_every": 0,
+    "save_every": 0,
+    "dev_windows": 4,
+    "calibration_windows": 4,
+    "previews": 0,
+    "profile_note": "r4 fresh zero-update profiling is separate: use --profile-only. Training throughput and stability require optimizer updates started by the user; old-path timing is not valid for r4.",
+    "bptt_steps": 2
+  },
+  "runtime": {
+    "device": "cuda",
+    "dtype": "float32",
+    "amp": false,
+    "threads": 4,
+    "gpu_note": "one process per GPU: CUDA_VISIBLE_DEVICES=0 for this RAW arm, in-process device cuda:0",
+    "performance": {
+      "tf32": true,
+      "batch_cameras": true,
+      "cudnn_benchmark": true,
+      "fused_adam": true,
+      "gradient_stats_every": 50,
+      "prefetch": 2
+    }
+  },
+  "paths": {
+    "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+  },
+  "execution_revision": "n02-v12-p2-causal-r4"
+}

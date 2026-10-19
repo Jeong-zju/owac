@@ -1,0 +1,513 @@
+{
+ "module": "owac.evaluation.n02_full.v12",
+ "module_file": "/workspace/owac/worktrees/n02-measurement-completion/owac/evaluation/n02_full/v12.py",
+ "stage": "P2",
+ "status": "ran",
+ "created_at": "2026-10-15T17:54:58Z",
+ "command": [
+  "python",
+  "-m",
+  "owac.evaluation.n02_full.v12"
+ ],
+ "dataset_format": "robotwin",
+ "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+ "stats_path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+ "manifest_path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+ "anchors": {
+  "dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data",
+  "calibration": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+  "dev": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-dev-anchors.json.gz"
+ },
+ "config": {
+  "path": "configs/encoders/n02_v12/raw_n02_robotwin.json",
+  "present": 1,
+  "sha256": "a7cad7e61218476761962a9a425801b941a11039193f921f499e441678d71701"
+ },
+ "notes": [],
+ "not_run": [],
+ "preview": {
+  "dir": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-n02-robotwin-uninit/preview",
+  "files": [
+   "preview/01_raw_rgb_zoom_11560_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_11560_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_11560_robotwin_right.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_right.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_right.svg",
+   "preview/02_attention_11560_robotwin_head.svg",
+   "preview/02_attention_11560_robotwin_left.svg",
+   "preview/02_attention_11560_robotwin_right.svg",
+   "preview/02_attention_3853_robotwin_head.svg",
+   "preview/02_attention_3853_robotwin_left.svg",
+   "preview/02_attention_3853_robotwin_right.svg",
+   "preview/02_attention_7707_robotwin_head.svg",
+   "preview/02_attention_7707_robotwin_left.svg",
+   "preview/02_attention_7707_robotwin_right.svg",
+   "preview/03_prediction_residual_11560_robotwin_head.svg",
+   "preview/03_prediction_residual_11560_robotwin_left.svg",
+   "preview/03_prediction_residual_11560_robotwin_right.svg",
+   "preview/03_prediction_residual_3853_robotwin_head.svg",
+   "preview/03_prediction_residual_3853_robotwin_left.svg",
+   "preview/03_prediction_residual_3853_robotwin_right.svg",
+   "preview/03_prediction_residual_7707_robotwin_head.svg",
+   "preview/03_prediction_residual_7707_robotwin_left.svg",
+   "preview/03_prediction_residual_7707_robotwin_right.svg",
+   "preview/04_rounds_support_11560.svg",
+   "preview/04_rounds_support_3853.svg",
+   "preview/04_rounds_support_7707.svg",
+   "preview/05_action_curve_11560.svg",
+   "preview/05_action_curve_3853.svg",
+   "preview/05_action_curve_7707.svg"
+  ]
+ },
+ "summary": {
+  "status": "ran",
+  "check_counts": {
+   "total": 3,
+   "valid": 3,
+   "invalid": 0,
+   "compatible": 3,
+   "insufficient_information": 0,
+   "model_inadequate": 0,
+   "status_interpretation": {
+    "compatible": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+    "insufficient_information": "the usable measurements cannot separate the explanations under the declared viewing rule (no usable valid samples / declared views): keep the ambiguity and do not force a confident choice",
+    "model_inadequate": "the residual sequence exceeds the frozen threshold and the declared interference does not explain it: the current explanation family cannot account for the observation, so propose an alternative explanation or rebuild the affected state",
+    "invalid": "no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None'"
+   },
+   "counting_contract": "invalid rows carry no verdict: they are counted here and excluded from every false-positive and detection count; no status count is compared with a threshold"
+  },
+  "check_counts_all_rows": {
+   "total": 24,
+   "valid": 24,
+   "invalid": 0,
+   "compatible": 24,
+   "insufficient_information": 0,
+   "model_inadequate": 0,
+   "status_interpretation": {
+    "compatible": "the declared candidate family and measurement model still explain the observed residual pattern under the frozen window threshold: keep the usable explanations and continue the action readout",
+    "insufficient_information": "the usable measurements cannot separate the explanations under the declared viewing rule (no usable valid samples / declared views): keep the ambiguity and do not force a confident choice",
+    "model_inadequate": "the residual sequence exceeds the frozen threshold and the declared interference does not explain it: the current explanation family cannot account for the observation, so propose an alternative explanation or rebuild the affected state",
+    "invalid": "no usable verdict was produced (missing or unfitted calibrator, missing verdict, or a status outside the three declared states): counted separately, never as a false positive and never as a detection, and never rendered as the string 'None'"
+   },
+   "counting_contract": "invalid rows carry no verdict: they are counted here and excluded from every false-positive and detection count; no status count is compared with a threshold"
+  },
+  "invalid_reasons": [],
+  "calibration": {
+   "status": "calibrated",
+   "n_sequences": 6,
+   "threshold": 0.91736,
+   "statistics": {
+    "finite": 6,
+    "min": 0.015968,
+    "median": 0.309657,
+    "max": 0.91736
+   }
+  },
+  "action_error": {
+   "mean": 2.813329,
+   "median": 2.295501,
+   "values": [
+    4.261521,
+    1.882966,
+    2.295501
+   ]
+  },
+  "interventions": {
+   "cue_swap": {
+    "status": "ran",
+    "applied": 1,
+    "raw_diff_norm": [
+     206.347756
+    ]
+   },
+   "no_information": {
+    "status": "ran",
+    "applied": 1,
+    "raw_diff_norm": [
+     458.186631
+    ]
+   },
+   "exposure_shift": {
+    "status": "ran",
+    "applied": 1,
+    "raw_diff_norm": [
+     893.285036
+    ]
+   },
+   "noise_shift": {
+    "status": "ran",
+    "applied": 1,
+    "raw_diff_norm": [
+     23.987062
+    ]
+   },
+   "translation_shift": {
+    "status": "ran",
+    "applied": 1,
+    "raw_diff_norm": [
+     255.407013
+    ]
+   }
+  },
+  "preview_files": [
+   "preview/01_raw_rgb_zoom_11560_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_11560_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_11560_robotwin_right.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_3853_robotwin_right.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_head.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_left.svg",
+   "preview/01_raw_rgb_zoom_7707_robotwin_right.svg",
+   "preview/02_attention_11560_robotwin_head.svg",
+   "preview/02_attention_11560_robotwin_left.svg",
+   "preview/02_attention_11560_robotwin_right.svg",
+   "preview/02_attention_3853_robotwin_head.svg",
+   "preview/02_attention_3853_robotwin_left.svg",
+   "preview/02_attention_3853_robotwin_right.svg",
+   "preview/02_attention_7707_robotwin_head.svg",
+   "preview/02_attention_7707_robotwin_left.svg",
+   "preview/02_attention_7707_robotwin_right.svg",
+   "preview/03_prediction_residual_11560_robotwin_head.svg",
+   "preview/03_prediction_residual_11560_robotwin_left.svg",
+   "preview/03_prediction_residual_11560_robotwin_right.svg",
+   "preview/03_prediction_residual_3853_robotwin_head.svg",
+   "preview/03_prediction_residual_3853_robotwin_left.svg",
+   "preview/03_prediction_residual_3853_robotwin_right.svg",
+   "preview/03_prediction_residual_7707_robotwin_head.svg",
+   "preview/03_prediction_residual_7707_robotwin_left.svg",
+   "preview/03_prediction_residual_7707_robotwin_right.svg",
+   "preview/04_rounds_support_11560.svg",
+   "preview/04_rounds_support_3853.svg",
+   "preview/04_rounds_support_7707.svg",
+   "preview/05_action_curve_11560.svg",
+   "preview/05_action_curve_3853.svg",
+   "preview/05_action_curve_7707.svg"
+  ],
+  "not_run": []
+ },
+ "passes": {
+  "data_identity": {},
+  "model": {
+   "camera_ids": [
+    "robotwin_head",
+    "robotwin_left",
+    "robotwin_right"
+   ],
+   "history": 8,
+   "query_stride": 8,
+   "k": 4,
+   "rounds": 4,
+   "d_model": 512,
+   "n_slots": 16,
+   "slot_dim": 512,
+   "n_candidates": 4,
+   "readout": {
+    "spatial_dims": {
+     "stride4": 512,
+     "stride8": 512,
+     "stride16": 512
+    },
+    "latent_dim": 512,
+    "n_latents": 128,
+    "n_queries": 256,
+    "out_dim": 2048,
+    "num_heads": 8,
+    "depth": 2,
+    "query_grid": [
+     16,
+     16
+    ],
+    "input_max_resolution": [
+     64,
+     64
+    ],
+    "parameters": 7173632
+   },
+   "parameters": {
+    "total": 106324683,
+    "trainable": 106324683
+   },
+   "device": "cuda",
+   "settings": {
+    "camera_ids": [
+     "robotwin_head",
+     "robotwin_left",
+     "robotwin_right"
+    ],
+    "dims": [
+     128,
+     256,
+     512,
+     1024
+    ],
+    "depths": [
+     3,
+     3,
+     27,
+     3
+    ],
+    "in_chans": 3,
+    "input_mode": "RAW3",
+    "d_model": 512,
+    "alignment": 32,
+    "channel_reduction": "mean",
+    "decoder_hidden": 256,
+    "n_latents": 128,
+    "n_queries": 256,
+    "out_dim": 2048,
+    "measurement_channels": 3,
+    "units": "sensor_units",
+    "n_slots": 16,
+    "slot_dim": 512,
+    "tau": 1.0,
+    "rounds": 4,
+    "k": 4,
+    "action_dim": 0,
+    "history": 8,
+    "query_stride": 8,
+    "strict_check": 1
+   },
+   "calibrator": "NoneType",
+   "strict_check": 1
+  },
+  "checkpoint": {
+   "path": null,
+   "loaded": 0,
+   "reason": "no checkpoint given: the weights are the freshly built ones"
+  },
+  "backend": {
+   "status": "ready"
+  },
+  "calibration": {
+   "status": "calibrated",
+   "fitted_on": "the model's own causal (round-0, pre-fit) standardised residuals of the anchor row, taken from the check-labelled step (constant declared window label); the anchors' earlier causal rows were replayed with their real frame indices before it",
+   "source_identity": {
+    "module": "owac.frameworks.n02_full.data_v12",
+    "dataset_format": "robotwin",
+    "partition": "calibration",
+    "history": 8,
+    "batch_size": 1,
+    "stride": 1,
+    "observation_stride": 1,
+    "window": {
+     "observation_stride": 1,
+     "burst_frames": 1,
+     "rnn_frames": 8,
+     "action_horizon": 50,
+     "action_offset": 1,
+     "state_source_key": "actions",
+     "executed_action_available": 0
+    },
+    "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "measurement_keys": [
+     "head_camera_raw_float32",
+     "left_camera_raw_float32",
+     "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+     "robotwin_head",
+     "robotwin_left",
+     "robotwin_right"
+    ],
+    "manifest": {
+     "version": "n02-full-partition-v2",
+     "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+     "seed": 1103,
+     "fractions": {
+      "calibration": 0.1,
+      "dev": 0.1,
+      "train": 0.8
+     },
+     "partition_sizes": {
+      "calibration": 67,
+      "dev": 65,
+      "train": 500
+     },
+     "source": {
+      "kind": "receipt_file",
+      "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+      "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+     }
+    },
+    "partition_verification": {
+     "disjoint": 1,
+     "groups_single_partition": 1,
+     "violations": [],
+     "counts": {
+      "partitions": {
+       "calibration": {
+        "files": 67,
+        "frames": 15413,
+        "groups": 67
+       },
+       "dev": {
+        "files": 65,
+        "frames": 15414,
+        "groups": 65
+       },
+       "train": {
+        "files": 500,
+        "frames": 116117,
+        "groups": 500
+       }
+      },
+      "groups": 632,
+      "files": 632,
+      "frames": 146944
+     }
+    },
+    "anchor_table": {
+     "version": "n02-full-anchor-v1",
+     "sha256": "3436898e2c174f6d635e3ce8f0ddb18a77a54f77a32cd4464f61009207ee1e40",
+     "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50"
+    },
+    "frozen_anchor_receipt": {
+     "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+     "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+     "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+     "version": "n02-full-anchor-v1",
+     "partition": "calibration",
+     "dataset_format": "robotwin",
+     "window": {
+      "action_horizon": 50,
+      "action_offset": 1,
+      "burst_frames": 1,
+      "executed_action_available": 0,
+      "observation_stride": 1,
+      "rnn_frames": 1,
+      "state_source_key": "actions"
+     },
+     "reproduced_from_manifest": 1,
+     "reproduced_entries": 15413
+    },
+    "frozen_anchor_identity_preserved": 1,
+    "stats": {
+     "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+     "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+     "mode": "zscore",
+     "epsilon": 0.0,
+     "epsilon_mode": "add"
+    }
+   },
+   "anchor_indices": [
+    2201,
+    4403,
+    6605,
+    8807,
+    11009,
+    13211
+   ],
+   "n_sequences": 6,
+   "n_anchors": 6,
+   "calibration_ids": 18,
+   "statistics": {
+    "finite": 6,
+    "min": 0.015968,
+    "median": 0.309657,
+    "max": 0.91736
+   },
+   "calibration": {
+    "version": "n02-v12-windowed-check-v1",
+    "partition": "calibration",
+    "threshold": 0.91736,
+    "quantile": 0.95,
+    "n_sequences": 6,
+    "finite_sequences": 6,
+    "viewing_rule_hash": "49276cf6f03d44f7ff9708dd6d91b7f675ce7be036915ef2401f8656dc34d335"
+   },
+   "rule": {
+    "version": 1,
+    "scales": [
+     "sensor_stride8"
+    ],
+    "frames": [
+     0
+    ],
+    "regions": [
+     "robotwin_head",
+     "robotwin_left",
+     "robotwin_right"
+    ],
+    "window": 4,
+    "statistic": "max_local_or_global_abs_standardised_residual",
+    "use_global_mean": 1,
+    "use_local_maximum": 0,
+    "min_valid_samples": 1
+   },
+   "rule_hash": "49276cf6f03d44f7ff9708dd6d91b7f675ce7be036915ef2401f8656dc34d335",
+   "elapsed_seconds": 19.35
+  },
+  "dev": {
+   "status": "ran"
+  },
+  "dev_action_check": {
+   "status": "ran",
+   "loss": {
+    "mean": 2.813329,
+    "median": 2.295501,
+    "values": [
+     4.261521,
+     1.882966,
+     2.295501
+    ]
+   },
+   "conditions": {
+    "noise": "torch.Generator(seed=1103) normal sample, reused for every sample",
+    "flow_time": 0.5,
+    "samples": "the same fixed dev anchors as the check"
+   },
+   "audit": {
+    "loaded_keys": 374,
+    "unexpected": [],
+    "active_missing": []
+   }
+  },
+  "interventions": {
+   "status": "ran"
+  },
+  "figures": {
+   "status": "ran",
+   "count": 33,
+   "files": [
+    "01_raw_rgb_zoom_3853_robotwin_head.svg",
+    "02_attention_3853_robotwin_head.svg",
+    "03_prediction_residual_3853_robotwin_head.svg",
+    "01_raw_rgb_zoom_3853_robotwin_left.svg",
+    "02_attention_3853_robotwin_left.svg",
+    "03_prediction_residual_3853_robotwin_left.svg",
+    "01_raw_rgb_zoom_3853_robotwin_right.svg",
+    "02_attention_3853_robotwin_right.svg",
+    "03_prediction_residual_3853_robotwin_right.svg",
+    "04_rounds_support_3853.svg",
+    "05_action_curve_3853.svg",
+    "01_raw_rgb_zoom_7707_robotwin_head.svg",
+    "02_attention_7707_robotwin_head.svg",
+    "03_prediction_residual_7707_robotwin_head.svg",
+    "01_raw_rgb_zoom_7707_robotwin_left.svg",
+    "02_attention_7707_robotwin_left.svg",
+    "03_prediction_residual_7707_robotwin_left.svg",
+    "01_raw_rgb_zoom_7707_robotwin_right.svg",
+    "02_attention_7707_robotwin_right.svg",
+    "03_prediction_residual_7707_robotwin_right.svg",
+    "04_rounds_support_7707.svg",
+    "05_action_curve_7707.svg",
+    "01_raw_rgb_zoom_11560_robotwin_head.svg",
+    "02_attention_11560_robotwin_head.svg",
+    "03_prediction_residual_11560_robotwin_head.svg",
+    "01_raw_rgb_zoom_11560_robotwin_left.svg",
+    "02_attention_11560_robotwin_left.svg",
+    "03_prediction_residual_11560_robotwin_left.svg",
+    "01_raw_rgb_zoom_11560_robotwin_right.svg",
+    "02_attention_11560_robotwin_right.svg",
+    "03_prediction_residual_11560_robotwin_right.svg",
+    "04_rounds_support_11560.svg",
+    "05_action_curve_11560.svg"
+   ]
+  }
+ }
+}

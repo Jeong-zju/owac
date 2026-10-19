@@ -1,0 +1,12 @@
+{
+  "reason": "contrast fusion fixed local RMS and removed scene-wide channel means; actual token spatial energy97% vs native3.4%, noise-sensitive actions",
+  "source": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/raw-fusion-r8-warm-s1103-a1/checkpoint_0000100.pt",
+  "source_sha256": "97095e53c8327724db2788c3c0ec20916dbec9a286b7b462efaf8e46ef88ee17",
+  "source_selection": "lowest final sampled development MSE among two100-step frontend arms",
+  "comparison": "only scale_balance_mode changes: contrast vs rms; same full frontend weights, seed, optimizer, data, frozen backend",
+  "zero_update_probe": true,
+  "updates_per_arm": 100,
+  "batch": 4,
+  "backend_adapter": "absent",
+  "criterion": "sampled dev action error and image/noise interventions; true grasp scored separately"
+}

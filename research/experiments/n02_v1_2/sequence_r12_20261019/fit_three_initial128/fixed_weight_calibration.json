@@ -1,0 +1,161 @@
+{
+  "format": "n02-fixed-weight-calibration-r11-v1",
+  "weights_sha256": "d1ae07891217e70895208462ec8598854f40e9fb27994535a553bf4dfc7266f2",
+  "source_identity": {
+    "module": "owac.frameworks.n02_full.data_v12",
+    "dataset_format": "robotwin",
+    "partition": "calibration",
+    "history": 8,
+    "batch_size": 12,
+    "stride": 1,
+    "observation_stride": 1,
+    "window": {
+      "observation_stride": 1,
+      "burst_frames": 1,
+      "rnn_frames": 8,
+      "action_horizon": 50,
+      "action_offset": 1,
+      "state_source_key": "actions",
+      "executed_action_available": false
+    },
+    "cache_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench",
+    "measurement_keys": [
+      "head_camera_raw_float32",
+      "left_camera_raw_float32",
+      "right_camera_raw_float32"
+    ],
+    "camera_ids": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "manifest": {
+      "version": "n02-full-partition-v2",
+      "content_hash": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602",
+      "seed": 1103,
+      "fractions": {
+        "calibration": 0.1,
+        "dev": 0.1,
+        "train": 0.8
+      },
+      "partition_sizes": {
+        "calibration": 67,
+        "dev": 65,
+        "train": 500
+      },
+      "source": {
+        "kind": "receipt_file",
+        "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12/P2/measurement-completion/manifest-robotwin.json",
+        "sha256": "84433c778b0f2c40c127614c36b189dd67396dfd4fe656cbb53e1e3895867602"
+      }
+    },
+    "partition_verification": {
+      "disjoint": true,
+      "groups_single_partition": true,
+      "violations": [],
+      "counts": {
+        "partitions": {
+          "calibration": {
+            "files": 67,
+            "frames": 15413,
+            "groups": 67
+          },
+          "dev": {
+            "files": 65,
+            "frames": 15414,
+            "groups": 65
+          },
+          "train": {
+            "files": 500,
+            "frames": 116117,
+            "groups": 500
+          }
+        },
+        "groups": 632,
+        "files": 632,
+        "frames": 146944
+      }
+    },
+    "anchor_table": {
+      "version": "n02-full-anchor-v1",
+      "sha256": "bb68a83dcdc4f7f4dad2e237be3069535c1b19331101fa830d849221c738df41",
+      "entries": 548,
+      "notes": "anchor grid stride=1; history spacing=1; action window t+1 .. t+1+50; explicit task subset of verified frozen parent"
+    },
+    "frozen_anchor_receipt": {
+      "path": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-full/p0-independent-audit/frozen-data/robotwin-calibration-anchors.json.gz",
+      "gzip_sha256": "b1bbe7ae1bb6508f8f2c629ed803891a430331528648019052b6dc66d550cce7",
+      "json_sha256": "a2283f00386fbf78d6a9a1fff692262fdf3a0fb0a7c7c798714e8eac51f5e6b1",
+      "version": "n02-full-anchor-v1",
+      "partition": "calibration",
+      "dataset_format": "robotwin",
+      "entries": 15413,
+      "window": {
+        "action_horizon": 50,
+        "action_offset": 1,
+        "burst_frames": 1,
+        "executed_action_available": false,
+        "observation_stride": 1,
+        "rnn_frames": 1,
+        "state_source_key": "actions"
+      },
+      "reproduced_from_manifest": true,
+      "reproduced_entries": 15413
+    },
+    "frozen_anchor_identity_preserved": false,
+    "stats": {
+      "path": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json",
+      "sha256": "229a4a2d6cfd1ba4eb2bc0b3aa57f049094032939130e4901485e9ea9910f5f7",
+      "mode": "zscore",
+      "epsilon": 1e-08,
+      "epsilon_mode": "add"
+    },
+    "selection": {
+      "tasks": [
+        "grab_roller"
+      ],
+      "excluded_episodes": [
+        "grab_roller/episode_000000"
+      ],
+      "parent_anchor_sha256": "3436898e2c174f6d635e3ce8f0ddb18a77a54f77a32cd4464f61009207ee1e40",
+      "parent_entries": 15413,
+      "selected_entries": 548,
+      "selected_episodes": [
+        "grab_roller/episode_000002",
+        "grab_roller/episode_000027",
+        "grab_roller/episode_000030",
+        "grab_roller/episode_000037",
+        "grab_roller/episode_000041",
+        "grab_roller/episode_000048"
+      ]
+    }
+  },
+  "calibration": {
+    "version": "n02-fixed-weight-r11-v1",
+    "partition": "calibration",
+    "threshold": 1.3448585683035001,
+    "quantile": 0.95,
+    "n_sequences": 16,
+    "finite_sequences": 16,
+    "viewing_rule_hash": "c77a261ead1e57b379016797b75b54cf20e8b183790a0c1a7bd1c59e30372973"
+  },
+  "rule": {
+    "version": 1,
+    "scales": [
+      "sensor_stride1"
+    ],
+    "frames": [
+      0
+    ],
+    "regions": [
+      "robotwin_head",
+      "robotwin_left",
+      "robotwin_right"
+    ],
+    "window": 4,
+    "statistic": "max_local_or_global_abs_standardised_residual",
+    "use_global_mean": true,
+    "use_local_maximum": false,
+    "min_valid_samples": 1
+  }
+}

@@ -25,6 +25,7 @@ from typing import Any
 
 __all__ = [
     "CONFIG_VERSION",
+    "P1_CONFIG_VERSION",
     "ConfigError",
     "N02FullConfig",
     "as_dict",
@@ -36,9 +37,26 @@ __all__ = [
 #: Version of this config schema, not of the model. Stage decisions record it.
 CONFIG_VERSION = "n02-full-p0-v1"
 
+#: Schema version once the P1 ``training``/``evaluation`` sections exist. The P0
+#: constant above is frozen because P0 receipts and stage decisions record it.
+P1_CONFIG_VERSION = "n02-full-p1-v1"
+
 _RUNTIME_DTYPES = ("float32", "float16", "bfloat16")
 
 _PARTITION_NAMES = ("train", "dev", "calibration")
+
+#: Sections the P1 training/evaluation entry points read. They are validated for
+#: structure here and resolved into strict dataclasses by their owning module, so
+#: a typo in a nested hyper-parameter name fails there with the full key path.
+_TRAINING_SECTIONS = (
+    "pretrain",
+    "measurement",
+    "selection",
+    "data",
+    "checkpoint",
+    "instrumentation",
+)
+_EVALUATION_SECTIONS = ("scenarios", "thresholds", "artifacts")
 
 
 class ConfigError(ValueError, TypeError):
@@ -89,6 +107,20 @@ def _default_profile() -> dict:
     }
 
 
+def _default_training() -> dict:
+    """P1 training sections; empty means "the owner module's declared default".
+
+    The P1 entry points resolve each section into a strict dataclass, so an empty
+    section keeps the frozen P1 starting values from the stage prompt and a
+    partially specified section overrides only the keys it names.
+    """
+    return {name: {} for name in _TRAINING_SECTIONS}
+
+
+def _default_evaluation() -> dict:
+    return {name: {} for name in _EVALUATION_SECTIONS}
+
+
 @dataclass(frozen=True, slots=True)
 class N02FullConfig:
     """Resolved configuration. Frozen: a run derives a new config instead.
@@ -115,6 +147,8 @@ class N02FullConfig:
     runtime: dict = field(default_factory=_default_runtime)
     profile: dict = field(default_factory=_default_profile)
     paths: dict = field(default_factory=lambda: {"output_root": "outputs/n02-full"})
+    training: dict = field(default_factory=_default_training)
+    evaluation: dict = field(default_factory=_default_evaluation)
 
 
 _FIELD_NAMES = tuple(item.name for item in dataclasses.fields(N02FullConfig))
@@ -219,12 +253,30 @@ def _check_paths(value: Any, key: str) -> dict:
     return mapping
 
 
+def _check_sections(value: Any, key: str, known: tuple[str, ...]) -> dict:
+    """A named-section map: every known section, when present, is an object.
+
+    It stays open for extra keys (a run may record derived notes there), but a
+    known section that is not an object is rejected here with its key path so the
+    failure is attributed before the owner module resolves the section.
+    """
+    mapping = _expect_mapping(value, key)
+    for name in known:
+        if name in mapping and not isinstance(mapping[name], dict):
+            raise ConfigError(
+                f"config key {key}.{name}: expected an object, got {type(mapping[name]).__name__}"
+            )
+    return mapping
+
+
 _DICT_FIELDS = {
     "partitions": _check_partitions,
     "data": _check_data,
     "runtime": _check_runtime,
     "profile": _check_profile,
     "paths": _check_paths,
+    "training": lambda value, key: _check_sections(value, key, _TRAINING_SECTIONS),
+    "evaluation": lambda value, key: _check_sections(value, key, _EVALUATION_SECTIONS),
 }
 
 
@@ -352,5 +404,42 @@ def validate_config(cfg: N02FullConfig) -> list[str]:
     if dtype not in _RUNTIME_DTYPES:
         allowed = ", ".join(_RUNTIME_DTYPES)
         issues.append(f"runtime.dtype: must be one of {allowed}, got {dtype!r}")
+
+    for field_name, known in (
+        ("training", _TRAINING_SECTIONS),
+        ("evaluation", _EVALUATION_SECTIONS),
+    ):
+        sections = getattr(cfg, field_name, None)
+        if not isinstance(sections, dict):
+            issues.append(f"{field_name}: must be an object, got {type(sections).__name__}")
+            continue
+        for name in known:
+            entry = sections.get(name)
+            if entry is None:
+                continue
+            if not isinstance(entry, dict):
+                issues.append(f"{field_name}.{name}: must be an object, got {type(entry).__name__}")
+                continue
+            if field_name != "training" or name not in ("pretrain", "measurement"):
+                continue
+            for key in ("lr", "weight_decay", "warmup_fraction", "mask_ratio"):
+                if key not in entry:
+                    continue
+                value = entry[key]
+                if isinstance(value, bool) or not isinstance(value, (int, float)):
+                    issues.append(
+                        f"{field_name}.{name}.{key}: expected a number, got {type(value).__name__}"
+                    )
+                elif value < 0:
+                    issues.append(f"{field_name}.{name}.{key}: must be non-negative, got {value}")
+            if "updates" in entry:
+                value = entry["updates"]
+                if isinstance(value, bool) or not isinstance(value, int):
+                    issues.append(
+                        f"{field_name}.{name}.updates: expected an integer, "
+                        f"got {type(value).__name__}"
+                    )
+                elif value <= 0:
+                    issues.append(f"{field_name}.{name}.updates: must be positive, got {value}")
 
     return issues

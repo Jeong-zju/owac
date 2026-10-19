@@ -1,5 +1,13 @@
 # 给DeepSeek：P5，集成机制与独有收益审计
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在同一远端 GPU/软件环境上完成全部强基线、五 seed 训练和全链路计时。记录并发负载条件；全局/局部路径配对运行，不能拿本地 RTX5090 耗时和远端 RTX PRO 6000 耗时比较提速。
+
 读[共同契约](00_SHARED_CONTRACT.md)、P3/P4实际报告、原方案T3–T7及P5。你负责实现和产生可审计比较，不自行决定创新成立。主要扩展model/solver/provenance，新增`evaluation/n02_full/p5.py`与基线适配`baselines/n02_full/`。
 
 ## 1. 先固定N02相对标准算法的实际差异

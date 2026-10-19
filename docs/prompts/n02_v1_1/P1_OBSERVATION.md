@@ -1,12 +1,20 @@
 # 给DeepSeek：P1，可靠RAW观测和绝对拟合
 
+> 历史 v1.1 文档。2026-10-15 当前路线已切换到 [N02 v1.2](../../plans/N02_full_development_v1.2.md)，当前 P2 完整实现待实施。以下正文中的启动语、服务器、阶段门槛和预算保留原始版本语境，不得作为当前执行包。新版[P2—P4自包含包](../n02_v1_2/README.md)已备，当前执行单种子与所选模型100次闭环；P1 独立验收未通过的记录保留。
+
+## 本阶段执行位置
+
+优先连接 `ssh -p 44327 root@107.209.104.125 -L 8080:localhost:8080`，在远端 `/workspace/owac/worktrees/n02-measurement-completion` 开发、测试和运行。先完整阅读[远程开发执行说明](03_REMOTE_DEVELOPMENT.md)，按其步骤准备尚未建立的 worktree、解释器与 P0 资产；随后读取远端 AGENTS.md、README.md、docs/status.md。本文命令、相对路径及 `python` 均指远端 checkout 和对应阶段的独立运行时，GPU 命令显式使用 `"$N02_PY"`。
+
+在远端消费 P0 v2 分区、六份冻结 anchor 与正式归一化统计；Base 预训练、measurement 训练、真实 NPZ 检查、三 seed 评价和 GPU profile 均在该服务器执行。P0 本地 profile 仅作历史参考。
+
 先读[共同契约](00_SHARED_CONTRACT.md)、P0真实交付、原方案3.4/7-P1/8节。P0的数据分区、GPU运行时和核心算子parity通过后开始。本轮完成P1的实现、训练和评价；E1另发提示词。固定实体候选，不加入出生、拆分或学习局部调度。
 
 ## 1. 指定修改与来源
 
 实现`observation.py`、`sensor.py`、`factors.py`、`checks.py`、最小`model.py`；训练入口`training/n02_full.py`支持`--stage p1-pretrain|p1-measurement`；评测`evaluation/n02_full/p1.py`；配置`p1_pretrain.json`、`p1_measurement.json`、`p1_eval.json`。
 
-参考[R01 ConvNeXt/FCMAE](02_REFERENCES.md#r01)、[R10 DeepInverse](02_REFERENCES.md#r10)、[R27 NRE/BNRE](02_REFERENCES.md#r27)。本地`baselines/n02_measurement.py`和`evaluation/n02_refutation_boundary.py`只用于重现旧反例；旧mean-residual和首帧差分不作为主概率模型。
+参考[R01 ConvNeXt/FCMAE](02_REFERENCES.md#r01)、[R10 DeepInverse](02_REFERENCES.md#r10)、[R27 NRE/BNRE](02_REFERENCES.md#r27)。项目内`baselines/n02_measurement.py`和`evaluation/n02_refutation_boundary.py`只用于重现旧反例；旧mean-residual和首帧差分不作为主概率模型。
 
 ## 2. RAW Base与掩码预训练
 

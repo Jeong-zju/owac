@@ -1,0 +1,2593 @@
+--- a/configs/encoders/n02_v12/raw_n02_libero.json
++++ b/configs/encoders/n02_v12/raw_n02_libero.json
+@@ -40,14 +40,14 @@
+     "tau": 1.0,
+     "rounds": 4,
+     "history": 8,
+-    "query_stride": 8,
+-    "max_queries_per_camera": 8192,
++    "query_stride": 1,
++    "max_queries_per_camera": 0,
+     "n_latents": 128,
+     "n_queries": 256,
+     "out_dim": 2048,
+     "decoder_hidden": 256,
+     "measurement_channels": 3,
+-    "channel_reduction": "mean",
++    "channel_reduction": "select",
+     "saturation_level": null,
+     "units": "sensor_units",
+     "min_variance": null,
+@@ -134,5 +134,6 @@
+   },
+   "paths": {
+     "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+-  }
++  },
++  "execution_revision": "n02-v12-p2-causal-r2"
+ }
+--- a/configs/encoders/n02_v12/raw_n02_robotwin.json
++++ b/configs/encoders/n02_v12/raw_n02_robotwin.json
+@@ -41,14 +41,14 @@
+     "tau": 1.0,
+     "rounds": 4,
+     "history": 8,
+-    "query_stride": 8,
+-    "max_queries_per_camera": 8192,
++    "query_stride": 1,
++    "max_queries_per_camera": 0,
+     "n_latents": 128,
+     "n_queries": 256,
+     "out_dim": 2048,
+     "decoder_hidden": 256,
+     "measurement_channels": 3,
+-    "channel_reduction": "mean",
++    "channel_reduction": "select",
+     "saturation_level": null,
+     "units": "sensor_units",
+     "min_variance": null,
+@@ -134,5 +134,6 @@
+   },
+   "paths": {
+     "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+-  }
++  },
++  "execution_revision": "n02-v12-p2-causal-r2"
+ }
+--- a/configs/encoders/n02_v12/rgb_n02_libero.json
++++ b/configs/encoders/n02_v12/rgb_n02_libero.json
+@@ -49,14 +49,14 @@
+     "tau": 1.0,
+     "rounds": 4,
+     "history": 8,
+-    "query_stride": 8,
+-    "max_queries_per_camera": 8192,
++    "query_stride": 1,
++    "max_queries_per_camera": 0,
+     "n_latents": 128,
+     "n_queries": 256,
+     "out_dim": 2048,
+     "decoder_hidden": 256,
+     "measurement_channels": 3,
+-    "channel_reduction": "mean",
++    "channel_reduction": "select",
+     "saturation_level": null,
+     "units": "sensor_units",
+     "min_variance": null,
+@@ -143,5 +143,6 @@
+   },
+   "paths": {
+     "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+-  }
++  },
++  "execution_revision": "n02-v12-p2-causal-r2"
+ }
+--- a/configs/encoders/n02_v12/rgb_n02_robotwin.json
++++ b/configs/encoders/n02_v12/rgb_n02_robotwin.json
+@@ -50,14 +50,14 @@
+     "tau": 1.0,
+     "rounds": 4,
+     "history": 8,
+-    "query_stride": 8,
+-    "max_queries_per_camera": 8192,
++    "query_stride": 1,
++    "max_queries_per_camera": 0,
+     "n_latents": 128,
+     "n_queries": 256,
+     "out_dim": 2048,
+     "decoder_hidden": 256,
+     "measurement_channels": 3,
+-    "channel_reduction": "mean",
++    "channel_reduction": "select",
+     "saturation_level": null,
+     "units": "sensor_units",
+     "min_variance": null,
+@@ -143,5 +143,6 @@
+   },
+   "paths": {
+     "output_root": "/workspace/owac/worktrees/n02-measurement-completion/outputs/n02-v12"
+-  }
++  },
++  "execution_revision": "n02-v12-p2-causal-r2"
+ }
+--- a/src/owac/backends/n02_v12_tokens.py
++++ b/src/owac/backends/n02_v12_tokens.py
+@@ -19,11 +19,9 @@
+   the candidates, the decoder and the readout.  ``detach()`` is only for callers that
+   deliberately cut the recurrent state between steps (an online rollout), never for training.
+ 
+-Row bookkeeping: one loader window carries ``history`` causal rows per anchor, oldest first
+-(``data_v12.V12WindowBatch``), so the *current* measurement of anchor ``i`` is row
+-``i * history + history - 1``.  The chain runs on the whole window (that is what its frozen
+-interface declares), and the tokens handed to pi0.5 are the current-row ones: the policy
+-scores one action chunk per decision moment, not one per history frame.
++Window batches execute chronologically, carrying state across distinct observations.
++The prefix is detached (one-step truncated BPTT); the current frame stays differentiable.
++A bridge call still builds one language/action prefix regardless of denoising iterations.
+ """
+ 
+ from __future__ import annotations
+@@ -152,6 +150,7 @@
+         self.state = state
+         self.states: dict[str, Any] = {}
+         self.last_output: Any = None
++        self.last_outputs: list[Any] = []
+         self.last_anchor_rows: list[int] = []
+         self.last_batch_rows = 0
+ 
+@@ -160,6 +159,37 @@
+     def __call__(self, observation: Any) -> Any:
+         from owac.core.encoder_contract import VisualTokens
+         from owac.frameworks.n02_full.inference_v12 import V12InferenceInput
++
++        if hasattr(observation, "history") and hasattr(observation, "frame_index"):
++            from owac.frameworks.n02_full.sequence_v12 import replay_inputs, window_inputs
++
++            anchors = len(observation.frame_index) // int(observation.history)
++            replays = [
++                replay_inputs(
++                    self.model,
++                    window_inputs(observation, anchor),
++                    grad_anchor=torch.is_grad_enabled(),
++                )
++                for anchor in range(anchors)
++            ]
++            self.last_outputs = [replay["rows"][-1] for replay in replays]
++            self.last_output = self.last_outputs[0]
++            current = torch.cat([output.tokens for output in self.last_outputs])
++            self.last_batch_rows = len(observation.frame_index)
++            self.last_anchor_rows = anchor_row_indices(self.last_batch_rows, self.history)
++            self.states = {str(i): output.state for i, output in enumerate(self.last_outputs)}
++            self.state = None  # independent windows have independent episode state
++            self.calls += 1
++            expected = (anchors, len(self.camera_ids) * 256, 2048)
++            if tuple(current.shape) != expected or not bool(torch.isfinite(current).all()):
++                raise ValueError(
++                    f"invalid window tokens {tuple(current.shape)}, expected {expected}"
++                )
++            return VisualTokens(
++                current,
++                torch.ones(current.shape[:2], dtype=torch.bool, device=current.device),
++                self.camera_ids,
++            )
+ 
+         bundle, declared_prior, frame_index, measurement_ids = _split_observation(observation)
+         rows = _frame_rows(bundle)
+@@ -194,6 +224,7 @@
+ 
+         self.calls += 1
+         self.last_output = output
++        self.last_outputs = [output]
+         self.last_anchor_rows = indices
+         self.last_batch_rows = rows
+         self.states = {"latest": output.state}
+--- a/src/owac/evaluation/n02_full/v12.py
++++ b/src/owac/evaluation/n02_full/v12.py
+@@ -7,17 +7,10 @@
+   anchor's history rows are fed one at a time with the carried state, so the decision time sees
+   its real causal history instead of a batch of unrelated rows. The chosen anchors are written
+   to ``dev_samples.json`` on the first run and reused afterwards; no run re-samples silently.
+-* The **absolute check** runs with a declared constant window label (``frame_index = 0``). A
+-  frozen :class:`~owac.frameworks.n02_full.checks_v12.WindowedCalibration` carries one viewing
+-  rule, ``select_views`` requires every declared ``(scale, frame, region)`` view in each
+-  assessed sequence, and one causal row is exactly one frame - so a rule that names real source
+-  frame indices cannot be identical for the calibration and the dev partition. The label is a
+-  *window* label; the real identity travels in the measurement ids (episode/frame/camera) and is
+-  recorded per sample.
+-* The **threshold is frozen on the independent ``calibration`` partition** (never on dev) from
+-  the model's own causal, round-0 (pre-fit) residuals - the same statistic the model's own check
+-  uses. Without a fitted calibrator the run says ``uncalibrated`` and keeps the energies and the
+-  residual figures; it never counts a missing verdict as a zero.
++* The **absolute check** uses a prefix-only prediction, chosen using prior state support.
++  Its viewing rule uses relative frame zero without changing decoder source time. Calibration
++  and evaluation share this exact computation at fixed weights on isolated partitions.
++  A missing prefix or fitted threshold is counted as invalid.
+ * The **action error** uses the model's own tokens through the frozen pi0.5 feature bridge, on
+   the same fixed dev samples, with a fixed noise sample and a fixed flow time.
+ * An **intervention** is reported only with the real ``raw_diff_norm`` it produced on the real
+@@ -99,6 +92,7 @@
+     "action_dim",
+     "history",
+     "query_stride",
++    "max_queries_per_camera",
+     "strict_check",
+ )
+ 
+@@ -302,6 +296,7 @@
+     backend_checkpoint: str | None = None
+     tokenizer: str | None = None
+     lang_max_len: int = 48
++    representation: dict = field(default_factory=dict)
+     model: dict = field(default_factory=dict)
+     notes: list = field(default_factory=list)
+     argv: list = field(default_factory=list)
+@@ -314,7 +309,7 @@
+ 
+     @property
+     def query_stride(self) -> int:
+-        return int(self.model.get("query_stride", 8))
++        return int(self.model.get("query_stride", 1))
+ 
+     @property
+     def history(self) -> int:
+@@ -349,6 +344,7 @@
+     config = load_config(getattr(args, "config", None))
+     settings = EvalSettings(config_path=getattr(args, "config", None))
+     settings.config_present = bool(config)
++    settings.representation = dict(config.get("representation", {}))
+     if settings.config_path and Path(settings.config_path).is_file():
+         settings.config_sha256 = _sha256_file(settings.config_path)
+ 
+@@ -505,7 +501,9 @@
+         batch_size=1,
+         max_windows=max_windows,
+     )
+-    return source
++    from owac.frameworks.n02_full.data_v12 import RepresentedWindowSource
++
++    return RepresentedWindowSource(source, settings.representation)
+ 
+ 
+ def anchor_indices(source: Any, count: int) -> list[int]:
+@@ -579,48 +577,35 @@
+         return receipt
+     candidate = Path(path)
+     if not candidate.is_file():
+-        receipt["reason"] = f"checkpoint {candidate} does not exist"
+-        return receipt
+-    if candidate.suffix.lower() not in (".pt", ".pth", ".bin", ".ckpt"):
+-        # never hand a safetensors/json/text file to torch.load: the config's policy checkpoint
+-        # is the pi0.5 backend, not this model
+-        receipt["reason"] = (
+-            f"checkpoint {candidate} has suffix {candidate.suffix!r}, not a torch checkpoint; "
+-            "refusing to load it as the N02 model"
+-        )
+-        return receipt
++        raise EvalError(f"requested checkpoint is missing: {candidate}")
++    if candidate.suffix not in (".pt", ".pth", ".bin", ".ckpt"):
++        raise EvalError(f"{candidate} is not a torch checkpoint")
+     try:
+         payload = torch.load(str(candidate), map_location="cpu", weights_only=False)
+-    except Exception as exc:  # noqa: BLE001 - a broken file is a declared reason, not a crash
+-        receipt["reason"] = f"{type(exc).__name__}: {exc}"
+-        return receipt
+-    if isinstance(payload, Mapping) and "model" in payload:
+-        payload = payload["model"]
+-    if isinstance(payload, Mapping) and "state_dict" in payload:
+-        payload = payload["state_dict"]
+-    if not isinstance(payload, Mapping):
+-        receipt["reason"] = f"checkpoint payload is {type(payload).__name__}, not a state dict"
+-        return receipt
+-    state = {str(key): value for key, value in payload.items()}
+-    missing, unexpected = model.load_state_dict(state, strict=False)
+-    step = None
+-    for key in ("updates", "step", "global_step", "update"):
+-        candidate_step = payload.get(key) if isinstance(payload, Mapping) else None
+-        if isinstance(candidate_step, (int, float)):
+-            step = int(candidate_step)
+-            break
++    except Exception as exc:  # noqa: BLE001 - a requested file must never fall back to random
++        raise EvalError(f"cannot load requested checkpoint {candidate}: {exc}") from exc
++    metadata = payload
++    state = payload.get("model", payload.get("state_dict", payload))
++    step = metadata.get(
++        "step", metadata.get("global_step", state.get("step", state.get("global_step")))
++    )
++    state = {
++        key: value
++        for key, value in state.items()
++        if key not in ("step", "global_step", "updates", "update")
++    }
++    model.load_state_dict(state, strict=True)
+     receipt.update(
+-        {
+-            "loaded": True,
+-            "sha256": _sha256_file(candidate),
+-            "training_step_recorded_in_file": step,
+-            "tensors_in_file": len(state),
+-            "loaded_keys": len(state) - len(unexpected),
+-            "missing_keys": list(missing)[:20],
+-            "n_missing_keys": len(missing),
+-            "unexpected_keys": list(unexpected)[:20],
+-            "n_unexpected_keys": len(unexpected),
+-        }
++        loaded=True,
++        sha256=_sha256_file(candidate),
++        training_step_recorded_in_file=step,
++        execution_revision=metadata.get("execution_revision", "legacy_p2"),
++        tensors_in_file=len(state),
++        loaded_keys=len(state),
++        missing_keys=[],
++        n_missing_keys=0,
++        unexpected_keys=[],
++        n_unexpected_keys=0,
+     )
+     return receipt
+ 
+@@ -681,10 +666,7 @@
+     if rows is not None:
+         source = np.asarray(batch.frame_index).reshape(-1)
+         selected = [int(row) for row in rows]
+-        if frame_label is None:
+-            frame_index = torch.tensor([int(source[row]) for row in selected], dtype=torch.long)
+-        else:
+-            frame_index = torch.full((len(selected),), int(frame_label), dtype=torch.long)
++        frame_index = torch.tensor([int(source[row]) for row in selected], dtype=torch.long)
+     return V12InferenceInput(
+         observation=observation,
+         declared_prior=batch.declared_prior,
+@@ -752,62 +734,17 @@
+     check_label: int,
+     check: bool = True,
+ ) -> dict:
+-    """Feed the rows of one window one at a time, carrying the real causal state.
+-
+-    The causal rows are replayed with their **real** frame indices. The three-state check is only
+-    defined under the declared constant window label (one frozen viewing rule cannot name the real
+-    frame index of two different partitions), so the calibrator is detached for the causal rows and
+-    every row then gets its own label-``check_label`` step from its own causal pre-state. The
+-    anchor row's check-labelled step is the primary result; the others are kept as a secondary
+-    table, and none of them is silently counted as a zero.
+-    """
+-    from owac.frameworks.n02_full.inference_v12 import empty_v12_state
+-
+-    inference = model.inference
+-    calibrator = getattr(inference, "calibrator", None)
+-    rows = int(np.asarray(batch.frame_index).reshape(-1).size)
+-    state = empty_v12_state(
+-        batch=1,
+-        k=int(inference.k),
+-        n_slots=int(inference.n_slots),
+-        slot_dim=int(inference.slot_dim),
+-        device=torch.device(device),
+-    )
+-    outputs: list[Any] = []
+-    pre_states: list[Any] = []
+-    inference.calibrator = None
+-    try:
+-        for row in range(rows):
+-            pre_states.append(state)
+-            observation = row_observation(batch.observation, row)
+-            inp = inference_input(batch, observation=observation, rows=[row])
+-            with torch.no_grad():
+-                out = model.step(inp, state)
+-            outputs.append(out)
+-            state = out.state
+-    finally:
+-        inference.calibrator = calibrator
+-    payload: dict[str, Any] = {
+-        "rows": outputs,
+-        "state": state,
+-        "check_backend": None,
+-        "check_input": None,
+-        "check_state": pre_states[-1] if pre_states else state,
+-        "row_checks": [],
+-    }
+-    if check:
+-        for row in range(rows):
+-            observation = row_observation(batch.observation, row)
+-            inp = inference_input(
+-                batch, observation=observation, rows=[row], frame_label=check_label
+-            )
+-            with torch.no_grad():
+-                checked = model.step(inp, pre_states[row])
+-            payload["row_checks"].append(checked.check)
+-            if row == rows - 1:
+-                payload["check_backend"] = checked
+-                payload["check_input"] = inp
+-    return payload
++    """Replay distinct causal acquisitions through the same executor as training."""
++    from owac.frameworks.n02_full.sequence_v12 import replay_inputs, window_inputs
++
++    replay = replay_inputs(model, window_inputs(batch))
++    replay.update(
++        check_backend=replay["rows"][-1],
++        check_input=replay["inputs"][-1],
++        check_state=replay["pre_states"][-1],
++        row_checks=[output.check for output in replay["rows"]] if check else [],
++    )
++    return replay
+ 
+ 
+ # ---------------------------------------------------------------------------------------
+@@ -816,76 +753,42 @@
+ 
+ 
+ def build_check_rule(settings: EvalSettings):
+-    from owac.frameworks.n02_full.checks import ViewingRule
+-
+-    return ViewingRule(
+-        scales=(f"sensor_stride{settings.query_stride}",),
+-        frames=(int(settings.check_label),),
+-        regions=tuple(settings.camera_ids()),
+-        window=int(settings.window),
+-        use_local_maximum=False,
+-    )
++    from owac.frameworks.n02_full.checks_v12 import v12_viewing_rule
++
++    return v12_viewing_rule(settings.query_stride, settings.camera_ids(), settings.window)
+ 
+ 
+ def locked_residual_groups(inference: Any, inp: Any, state: Any, q: torch.Tensor) -> dict:
+-    """The causal (round-0) residual views of one decision time, exactly as ``step`` builds them.
+-
+-    Read-only use of frozen internals: it repeats ``N02V12Inference.step``'s query/encode/propose/
+-    decode lines and its ``_residual_views`` labelling, so a threshold fitted here is fitted on
+-    the very statistic the model's own check uses (a fit-residual threshold would be smaller and
+-    would inflate ``model_inadequate``). A missing internal raises instead of fitting a wrong
+-    threshold.
+-    """
+-    from owac.frameworks.n02_full import inference_v12 as inference_module
+-
+-    required = (
+-        "_prepare_state",
+-        "_corrector_tokens",
+-        "_evidence",
+-        "_renew_proposals",
+-        "_decode",
+-        "_residuals",
+-        "_residual_views",
+-        "_supported_index",
+-    )
+-    missing = [name for name in required if not hasattr(inference, name)]
+-    if missing or not hasattr(inference_module, "_frame_index_tensor"):
+-        raise EvalError(
+-            "the frozen inference internals changed; the calibration cannot be fitted on the "
+-            f"locked residuals: missing {missing or ['_frame_index_tensor']}"
+-        )
++    """Return the core's prefix-only residuals; q from the current image is not used."""
++    from owac.frameworks.n02_full.inference_v12 import _frame_index_tensor
++
+     prepared = inference._prepare_state(inp, state)
+-    batch = int(q.shape[0])
++    batch = int(prepared.slot_hidden.shape[0])
+     queries = inference.build_queries(inp, batch=batch)
+-    spatial = inference.encoder(inp.observation)
+-    tokens_in = inference._corrector_tokens(spatial)
+-    evidence = inference._evidence(spatial, inp.observation)
+-    slots0 = inference._renew_proposals(
+-        prepared.slot_hidden, evidence=evidence, residual_stats=None, tokens=tokens_in
+-    )
+-    frame_index = inference_module._frame_index_tensor(
+-        inp, observation=inp.observation, batch=batch
+-    )
++    frame_index = _frame_index_tensor(inp, observation=inp.observation, batch=batch)
+     with torch.no_grad():
+-        mean0, variance0, valid0, _ = inference._decode(spatial, slots0, frame_index, queries)
+-        residuals = inference._residuals(queries.target, mean0, variance0)
+-        chosen = inference._supported_index(q)
+-        index = chosen.view(-1, 1, 1)
+-        supported = torch.gather(residuals, 1, index.expand(-1, 1, residuals.shape[-1])).squeeze(1)
+-        supported_valid = torch.gather(valid0, 1, index.expand(-1, 1, valid0.shape[-1])).squeeze(1)
+-        groups = inference._residual_views(supported, supported_valid, queries, frame_index)
++        causal = inference.causal_prediction(prepared, queries, frame_index)
++    if causal is None:
++        raise EvalError("no distinct causal prefix: absolute check is uncalibrated")
++    chosen = causal["chosen"]
++    index = chosen.view(-1, 1, 1)
++    residuals, valid = causal["residuals"], causal["valid"]
++    supported = torch.gather(residuals, 1, index.expand(-1, 1, residuals.shape[-1])).squeeze(1)
++    supported_valid = torch.gather(valid, 1, index.expand(-1, 1, valid.shape[-1])).squeeze(1)
++    groups = inference._residual_views(supported, supported_valid, queries, frame_index)
+     return {
+         "groups": groups,
+-        "frame_index": [int(item) for item in frame_index.tolist()],
++        "frame_index": frame_index.tolist(),
+         "measurement_ids": [item for row in queries.ids for item in row],
+         "labels": [
+             [(view.scale, int(view.frame_index), view.region_id) for view in group]
+             for group in groups
+         ],
+-        "per_camera_query_count": [int(item) for item in queries.per_camera_query_count],
+-        "coverage": [float(item) for item in queries.coverage],
+-        "chosen": [int(item) for item in chosen.tolist()],
++        "per_camera_query_count": list(queries.per_camera_query_count),
++        "coverage": list(queries.coverage),
++        "chosen": chosen.tolist(),
+         "locked_residual_mean_abs": float(supported.abs().mean()),
++        "prediction_version": "causal_pre_locked",
+     }
+ 
+ 
+@@ -955,8 +858,8 @@
+     return {
+         "status": "calibrated",
+         "fitted_on": (
+-            "the model's own causal (round-0, pre-fit) standardised residuals of the anchor row, "
+-            "taken from the check-labelled step (constant declared window label); the anchors' "
++            "the causal prefix prediction residuals of the anchor row, "
++            "using actual source time and a separate relative diagnostic axis; the anchors' "
+             "earlier causal rows were replayed with their real frame indices before it"
+         ),
+         "source_identity": source.identity(),
+@@ -1087,45 +990,31 @@
+     )
+ 
+ 
++def official_prompts(settings: EvalSettings, identities: Sequence[Mapping]) -> list[str]:
++    from owac.frameworks.n02_full.data_v12 import read_task_prompts
++
++    return read_task_prompts(
++        [str(item["relative_path"]) for item in identities], settings.data_root
++    )
++
++
+ def _language_batch(policy: Any, texts: Sequence[str], proprio: Any, settings: EvalSettings):
+     """The pinned runtime's own prompt format, tokenised with the pinned sentencepiece model."""
+-    batch = len(texts)
+-    max_len = int(settings.lang_max_len)
+-    prompt_text = None
+-    try:
+-        import sentencepiece
+-
+-        with open(settings.tokenizer, "rb") as handle:
+-            tokenizer = sentencepiece.SentencePieceProcessor(model_proto=handle.read())
+-        rows, masks = [], []
+-        for index, text in enumerate(texts):
+-            cleaned = str(text).strip().replace("_", " ").replace("\n", " ")
+-            state_values = np.asarray(proprio[index], dtype=np.float32).reshape(-1)
+-            bins = np.linspace(-1, 1, 256 + 1)[:-1]
+-            discretized = (np.digitize(state_values, bins=bins) - 1).tolist()
+-            prompt_text = f"Task: {cleaned}, State: {' '.join(map(str, discretized))};\nAction: "
+-            tokens = list(tokenizer.encode(prompt_text, add_bos=True))[:max_len]
+-            mask = [True] * len(tokens)
+-            tokens = tokens + [0] * (max_len - len(tokens))
+-            mask = mask + [False] * (max_len - len(mask))
+-            rows.append(tokens)
+-            masks.append(mask)
+-        return (
+-            torch.tensor(rows, dtype=torch.long),
+-            torch.tensor(masks, dtype=torch.bool),
+-            {"source": "pinned_sentencepiece_prompt", "max_len": max_len, "text": prompt_text},
+-        )
+-    except Exception as exc:  # noqa: BLE001 - a declared fallback, never a silent one
+-        return (
+-            torch.zeros((batch, 8), dtype=torch.long),
+-            torch.ones((batch, 8), dtype=torch.bool),
+-            {
+-                "source": "placeholder_zero_ids",
+-                "max_len": 8,
+-                "reason": f"{type(exc).__name__}: {exc}",
+-                "text": prompt_text,
+-            },
+-        )
++    rows, masks = [], []
++    for index, text in enumerate(texts):
++        if not text:
++            raise EvalError("official task instruction is missing; no placeholder token fallback")
++        token_state = np.asarray(proprio[index]) if policy.protocol.name == "robotwin" else None
++        tokens, mask = policy.base.tokenizer.tokenize(str(text), token_state)
++        rows.append(torch.as_tensor(np.asarray(tokens)).reshape(-1))
++        masks.append(torch.as_tensor(np.asarray(mask)).reshape(-1).bool())
++    width = max(row.numel() for row in rows)
++    padded = torch.zeros((len(rows), width), dtype=torch.long)
++    padded_mask = torch.zeros_like(padded, dtype=torch.bool)
++    for index, (row, mask) in enumerate(zip(rows, masks, strict=True)):
++        padded[index, : row.numel()] = row
++        padded_mask[index, : row.numel()] = mask
++    return padded, padded_mask, {"source": "official_policy_tokenizer", "text": list(texts)}
+ 
+ 
+ def load_backend(settings: EvalSettings, *, device: str) -> dict:
+@@ -1235,7 +1124,7 @@
+         action_mask = torch.as_tensor(targets["action_mask"]).reshape(-1)[: actions.shape[1]]
+         action_mask = action_mask.unsqueeze(0).expand(actions.shape[0], -1)
+         proprio = _anchor_proprio(batch, policy)
+-        texts = [str(item["identity"].get("relative_path", "")).rsplit("/", 1)[0]]
++        texts = official_prompts(settings, [item["identity"]])
+         lang_tokens, lang_masks, lang_info = _language_batch(
+             policy, texts, _anchor_proprio(batch, policy, pad=False), settings
+         )
+@@ -1386,12 +1275,14 @@
+         entries: list[dict[str, Any]] = []
+         transform = plan[name]
+         for index in indices:
+-            batch = source.window(index, index + 1)
++            raw_batch = source.raw_window(index, index + 1)
++            batch = source.represent(raw_batch)
+             baseline = replay_window(
+                 model, batch, device=device, check_label=settings.check_label, check=True
+             )
+             try:
+-                changed, record = transform(batch)
++                changed, record = transform(raw_batch)
++                changed = source.represent(changed)
+             except Exception as exc:  # noqa: BLE001 - a refused intervention is reported
+                 entries.append(
+                     {
+--- a/src/owac/evaluation/n02_full/v12_viz.py
++++ b/src/owac/evaluation/n02_full/v12_viz.py
+@@ -131,7 +131,7 @@
+ 
+ 
+ def _resize(image: np.ndarray, size: tuple[int, int], *, mode: str = "area") -> np.ndarray:
+-    """torch-based resize so no image library is needed; returns uint8."""
++    """Resize display pixels or floating scientific maps without quantising the latter."""
+     tensor = torch.as_tensor(np.asarray(image, dtype=np.float32))
+     squeeze = tensor.ndim == 2
+     if squeeze:
+@@ -141,7 +141,9 @@
+     out = out[0].permute(1, 2, 0).numpy()
+     if squeeze:
+         out = out[..., 0]
+-    return np.ascontiguousarray(np.clip(out, 0, 255).astype(np.uint8))
++    if np.asarray(image).dtype == np.uint8:
++        out = np.clip(out, 0, 255).astype(np.uint8)
++    return np.ascontiguousarray(out)
+ 
+ 
+ def rasterise(
+@@ -217,7 +219,13 @@
+     )
+ 
+ 
+-def _image(png: bytes, x: float, y: float, width: float, height: float, label: str) -> str:
++def _image(
++    png: bytes | np.ndarray, x: float, y: float, width: float, height: float, label: str
++) -> str:
++    if isinstance(png, np.ndarray):
++        png = png_bytes(png)
++    if not png.startswith(b"\x89PNG\r\n\x1a\n"):
++        raise ValueError("SVG image payload must be an encoded PNG, not raw pixel bytes")
+     payload = base64.b64encode(png).decode("ascii")
+     return (
+         f"<image x='{x:.0f}' y='{y:.0f}' width='{width:.0f}' height='{height:.0f}' "
+@@ -332,7 +340,7 @@
+     with torch.no_grad():
+         queries = inference.build_queries(inp, batch=1)
+         spatial = inference.encoder(inp.observation)
+-    output = replay["rows"][anchor_index]
++    output = replay["rows"][-1]
+     aux = dict(output.diagnostics.get("readout_aux") or {})
+     return {
+         "rows": rows,
+@@ -1013,7 +1021,7 @@
+         positions=torch.zeros(tokens.shape[:2] + (2,)),
+     )
+     proprio = v12_eval._anchor_proprio(batch, policy)
+-    texts = [str(identity.get("relative_path", "")).rsplit("/", 1)[0]]
++    texts = v12_eval.official_prompts(settings, [identity])
+     lang_tokens, lang_masks, _ = v12_eval._language_batch(
+         policy, texts, v12_eval._anchor_proprio(batch, policy, pad=False), settings
+     )
+--- a/src/owac/frameworks/n02_full/checks_v12.py
++++ b/src/owac/frameworks/n02_full/checks_v12.py
+@@ -770,3 +770,19 @@
+             "false-positive and detection count; no status count is compared with a threshold"
+         ),
+     }
++
++
++def v12_viewing_rule(query_stride: int, camera_ids: Sequence[str], window: int = 4) -> ViewingRule:
++    """One shared rule for flattened per-camera query residuals.
++
++    Local image windows require a spatial raster, which these residual vectors do not
++    claim to provide. Keep that statistic disabled on both sides; never silently use
++    a local maximum for calibration and a global mean for evaluation.
++    """
++    return ViewingRule(
++        scales=(f"sensor_stride{query_stride}",),
++        frames=(0,),
++        regions=tuple(camera_ids),
++        window=window,
++        use_local_maximum=False,
++    )
+--- a/src/owac/frameworks/n02_full/data_v12.py
++++ b/src/owac/frameworks/n02_full/data_v12.py
+@@ -34,6 +34,7 @@
+ import dataclasses
+ import gzip
+ import hashlib
++import json
+ from collections.abc import Iterator, Sequence
+ from dataclasses import dataclass, field
+ from pathlib import Path
+@@ -635,3 +636,97 @@
+         hypothesis_prior=None,
+         hypothesis_prior_available=False,
+     )
++
++
++def read_task_prompts(relative_paths: list[str], data_root: str) -> list[str]:
++    """Per-anchor task instruction, read the way the frozen loader reads it.
++
++    Only the small ``metadata_json`` member of each NPZ is opened, so this does not duplicate the
++    window load.  The fallback rule is the loader's own: ``task_description`` first and, for
++    RoboTwin, ``task_name`` with underscores turned into spaces.
++    """
++    prompts: list[str] = []
++    for relative in relative_paths:
++        metadata: dict = {}
++        try:
++            with np.load(Path(data_root) / str(relative), allow_pickle=False) as archive:
++                metadata = json.loads(str(np.asarray(archive["metadata_json"]).item()))
++        except (OSError, KeyError, ValueError, TypeError, json.JSONDecodeError):
++            metadata = {}
++        text = ""
++        if isinstance(metadata, dict):
++            text = str(metadata.get("task_description") or "")
++            if not text and "robotwin" in str(relative):
++                text = str(metadata.get("task_name") or "").replace("_", " ")
++        prompts.append(text)
++    return prompts
++
++
++def apply_declared_isp(bundle: Any, spec: dict) -> Any:
++    """Apply the arm's declared, per-frame-independent ISP to the loader's RAW values.
++
++    The RAW arm declares ``kind="raw3"`` and nothing is touched.  The controlled RGB arm declares
++    ``kind="raw3_fixed_isp"``: the *same* RAW measurement of the *same* acquisition passes through
++    one written-down transform with no per-frame statistic in it (clip / fixed scale, per-channel
++    gain, gamma encoding, 8-bit quantisation).  No official normal-light RGB pair is substituted.
++    """
++    import dataclasses
++
++    kind = str(spec.get("kind", "raw3"))
++    if kind in ("", "raw3"):
++        return bundle
++    if kind != "raw3_fixed_isp":
++        raise ValueError(f"unknown representation kind {kind!r}")
++    isp = dict(spec.get("isp") or {})
++    scale = float(isp.get("input_scale", 1.0))
++    gain = torch.as_tensor(isp.get("gain", (1.0, 1.0, 1.0)), dtype=torch.float32).view(1, -1, 1, 1)
++    gamma = float(isp.get("gamma", 2.2))
++    levels = float(2 ** int(isp.get("quantise_bits", 8)) - 1)
++    frames = {}
++    for camera_id, frame in bundle.frames.items():
++        values = torch.as_tensor(frame.values).to(torch.float32)
++        if values.ndim < 4 or int(values.shape[1]) < 3:
++            frames[camera_id] = frame
++            continue
++        transformed = (values / scale).clamp(0.0, 1.0)
++        transformed = (transformed * gain.to(transformed.device)).clamp(0.0, 1.0)
++        if gamma != 1.0:
++            transformed = transformed.clamp_min(0.0).pow(1.0 / gamma)
++        transformed = torch.round(transformed * levels) / levels
++        frames[camera_id] = dataclasses.replace(
++            frame,
++            values=transformed,
++            metadata={
++                **dict(getattr(frame, "metadata", {}) or {}),
++                "declared_isp": "raw3_fixed_isp",
++                "isp_scale": scale,
++                "isp_gamma": gamma,
++                "isp_quantise_bits": int(isp.get("quantise_bits", 8)),
++            },
++        )
++    return dataclasses.replace(bundle, frames=frames)
++
++
++class RepresentedWindowSource:
++    """Same frozen sample identities/targets, with the arm's explicitly declared ISP."""
++
++    def __init__(self, source: Any, representation: dict) -> None:
++        self.source = source
++        self.representation = representation
++
++    def __getattr__(self, name: str) -> Any:
++        return getattr(self.source, name)
++
++    def raw_window(self, start: int, stop: int) -> Any:
++        return self.source.window(start, stop)
++
++    def represent(self, batch: Any) -> Any:
++        return dataclasses.replace(
++            batch, observation=apply_declared_isp(batch.observation, self.representation)
++        )
++
++    def window(self, start: int, stop: int) -> Any:
++        return self.represent(self.raw_window(start, stop))
++
++    def identity(self) -> dict:
++        return {**self.source.identity(), "representation": self.representation}
+--- a/src/owac/frameworks/n02_full/inference_v12.py
++++ b/src/owac/frameworks/n02_full/inference_v12.py
+@@ -117,6 +117,7 @@
+     support_hash: str
+     tokens: torch.Tensor
+     valid: torch.Tensor
++    inference_input: Any = None
+ 
+     def equals(self, other: object) -> bool:
+         if not isinstance(other, V12HistoryEntry):
+@@ -139,6 +140,7 @@
+     tokens: torch.Tensor | None = None  # readout token cache of the last frame
+     attention: torch.Tensor | None = None  # readout attention cache of the last frame
+     cache_version: int = 0
++    spatial: Any = None  # previous observation only; owned and detached
+ 
+     def zero_(self) -> V12RowHistory:
+         """Cleared copy; named ``zero_`` so ``SequenceState.reset_batch`` can clear this row."""
+@@ -251,7 +253,13 @@
+ 
+ 
+ def _flat_mask(
+-    frame: MeasurementFrame, name: str, batch: int, size: int, *, default: bool
++    frame: MeasurementFrame,
++    name: str,
++    batch: int,
++    size: int,
++    *,
++    default: bool,
++    channel: int | None = None,
+ ) -> torch.Tensor:
+     """The named condition, ``(B, H*W)``.
+ 
+@@ -264,6 +272,12 @@
+     if raw is None:
+         return torch.full((batch, size), bool(default), dtype=torch.bool)
+     mask = torch.as_tensor(raw).to(torch.bool)
++    if mask.ndim == 4:
++        mask = (
++            mask[:, channel]
++            if channel is not None
++            else (mask.all(dim=1) if name == "valid_mask" else mask.any(dim=1))
++        )
+     if mask.ndim == 3:
+         if int(mask.shape[0]) != batch:
+             raise N02V12InferenceError(
+@@ -291,14 +305,11 @@
+     measurement_channels: int | None = None,
+     device: torch.device | None = None,
+ ) -> QuerySet:
+-    """Sample the whole measurement space with a shared raster grid of mixed sampling phases.
+-
+-    The P1 blind spot came from a fixed ``row % 8 == 0 and col % 8 == 0`` grid, which only ever
+-    saw one CFA phase. A flat raster index stepping by ``stride`` walks through every phase and
+-    covers the whole sensor area, valid or not; per-query validity masks carry the difference, so
+-    every row keeps the same query shape. ``channel_reduction`` mirrors the decoder's declaration:
+-    ``"mean"`` scores the co-sited triplet mean (one query per pixel), ``"select"`` emits one query
+-    per sensor channel and passes the channel index to the decoder.
++    """Build a disclosed sensor target set; stride=1 and cap=0 score every channel/cell.
++
++    Dense primary configs retain every channel. Explicit sparse diagnostic settings
++    use evenly distributed raster locations and report their sensor-relative coverage;
++    they do not claim to score the unqueried cells.
+     """
+     if channel_reduction not in ("mean", "select"):
+         raise N02V12InferenceError(f"unknown channel_reduction {channel_reduction!r}")
+@@ -324,17 +335,16 @@
+         values = _frame_values(frame, batch)
+         n_channels, height, width = int(values.shape[1]), int(values.shape[2]), int(values.shape[3])
+         flat = values.reshape(batch, n_channels, height * width)
+-        pixels = torch.arange(height * width, device=flat.device)[::stride][:max_queries_per_camera]
++        count = max(1, (height * width + stride - 1) // stride)
++        if max_queries_per_camera > 0:
++            count = min(count, max_queries_per_camera)
++        # Include the entire image extent when explicitly requesting a sparse diagnostic.
++        # This is still sparse; coverage below is relative to the real sensor, not this set.
++        pixels = torch.linspace(0, height * width - 1, count, device=flat.device).round().long()
+         if pixels.numel() == 0:
+             continue
+         rows = torch.div(pixels, width, rounding_mode="floor")
+         cols = pixels - rows * width
+-        valid = _flat_mask(frame, "valid_mask", batch, height * width, default=True)[:, pixels]
+-        bad = _flat_mask(frame, "bad_mask", batch, height * width, default=False)[:, pixels]
+-        saturated = _flat_mask(frame, "saturated_mask", batch, height * width, default=False)[
+-            :, pixels
+-        ]
+-        missing = _flat_mask(frame, "missing_mask", batch, height * width, default=False)[:, pixels]
+         frame_ids = tuple(str(item) for item in frame.frame_ids)
+         channels = int(measurement_channels or n_channels)
+         if channels > n_channels:
+@@ -363,10 +373,21 @@
+                 )
+                 fresh_rows.append(True)
+         fresh = torch.tensor(fresh_rows, dtype=torch.bool, device=flat.device).unsqueeze(-1)
+-        valid = valid & fresh
+         sampled.append(int(pixels.numel()))
+         coverage.append(float(pixels.numel()) / float(height * width))
+         for channel in selected_channels:
++            channel_masks = {
++                name: _flat_mask(
++                    frame,
++                    f"{name}_mask",
++                    batch,
++                    height * width,
++                    default=name == "valid",
++                    channel=channel,
++                )[:, pixels]
++                for name in masks
++            }
++            channel_masks["valid"] = channel_masks["valid"] & fresh
+             coords_parts.append(
+                 torch.stack([cols.to(torch.float32), rows.to(torch.float32)], dim=-1)
+             )
+@@ -378,10 +399,8 @@
+             )
+             channel_parts.append(index)
+             target_parts.append((reduced if channel is None else flat[:, int(channel)])[:, pixels])
+-            masks["valid"].append(valid)
+-            masks["bad"].append(bad)
+-            masks["missing"].append(missing)
+-            masks["saturated"].append(saturated)
++            for name in masks:
++                masks[name].append(channel_masks[name])
+     if not coords_parts:
+         raise N02V12InferenceError("measurement set is empty; no sensor cell was sampled")
+     coords = torch.cat(coords_parts, dim=0).unsqueeze(0).expand(batch, -1, -1)
+@@ -452,7 +471,7 @@
+     :class:`data_v12.V12WindowBatch.measurement_ids`, which name one measurement per camera of the
+     decision time and are therefore mapped by camera ID.
+     """
+-    if value is None:
++    if value is None or (isinstance(value, (tuple, list)) and not value):
+         return tuple(() for _ in range(batch))
+     if isinstance(value, str):
+         raise N02V12InferenceError("measurement_ids must be a per-row sequence, got one string")
+@@ -505,6 +524,7 @@
+     tokens: torch.Tensor  # (B, n_cameras*256, 2048) readout tokens
+     state: SequenceState
+     diagnostics: dict = field(default_factory=dict)
++    causal: dict | None = None
+ 
+ 
+ def empty_v12_state(
+@@ -545,8 +565,8 @@
+         evidence_dim: int | None = None,
+         action_dim: int = 0,
+         history: int = 8,
+-        query_stride: int = 8,
+-        max_queries_per_camera: int = 8192,
++        query_stride: int = 1,
++        max_queries_per_camera: int = 0,
+         calibrator: Any = None,
+         strict_check: bool = True,
+     ) -> None:
+@@ -614,6 +634,10 @@
+ 
+         # 1. current measurement set with unique IDs, plus the existing state
+         queries = self.build_queries(inp, batch=batch)
++        frame_index = _frame_index_tensor(inp, observation=inp.observation, batch=batch)
++        # This prediction uses only the retained PREVIOUS observation and state.
++        # The current measurement supplies query locations/masks and labels, never features.
++        causal = self.causal_prediction(state, queries, frame_index)
+         # 2. Base multi-scale features with real sensor coordinates and validity
+         spatial = self.encoder(inp.observation)
+         frame_index = _frame_index_tensor(inp, observation=inp.observation, batch=batch)
+@@ -630,9 +654,9 @@
+         # 4.-6. inner loop on one fixed measurement set: predict the same sensor space, cost it,
+         # propose a learned correction and accept it only when the complete objective does not rise.
+         mean, variance, valid, decoder_masks = self._decode(spatial, slots, frame_index, queries)
+-        # the round-0 prediction is the causal/pre-fit view the absolute check inspects: it was
+-        # produced before any residual of this frame fed back into the candidate state.
+-        locked_mean, locked_variance, locked_valid = mean, variance, valid
++        # Round zero already consumes current image features: it is a fitted diagnostic,
++        # separate from the strictly causal prediction built above.
++        locked_mean, locked_variance = mean, variance
+         energies = self._energies(mean, variance, valid, queries)
+         objective = self._complete_objective(energies, log_p0)
+         rounds: list[dict[str, Any]] = []
+@@ -673,7 +697,13 @@
+         # 9. real three-state check on the supported explanation's *locked* residuals
+         chosen = self._supported_index(q)
+         locked_residuals = self._residuals(queries.target, locked_mean, locked_variance)
+-        check = self._absolute_check(locked_residuals, locked_valid, queries, chosen, frame_index)
++        check = (
++            self._absolute_check(
++                causal["residuals"], causal["valid"], queries, causal["chosen"], frame_index
++            )
++            if causal is not None
++            else _invalid_check("no_causal_prefix", self.calibrator)
++        )
+         fit_residuals = self._residuals(queries.target, mean, variance)
+ 
+         # 7. direct spatial features + K states + support enter the Perceiver readout; the readout
+@@ -700,6 +730,10 @@
+             locked_residuals,
+             chosen,
+         )
++        diagnostics["prediction_version"] = (
++            "causal_pre_locked" if causal is not None else "no_causal_prefix"
++        )
++        diagnostics["prefit_prediction_version"] = "current_observation_pre_correction"
+         new_state = self._commit_state(inp, state, spatial, queries, slots, q, tokens, readout_aux)
+         self._last_state = new_state
+         return N02V12StepOutput(
+@@ -713,7 +747,38 @@
+             tokens=tokens,
+             state=new_state,
+             diagnostics=diagnostics,
+-        )
++            causal=causal,
++        )
++
++    def causal_prediction(self, state, queries, frame_index):
++        """Predict before seeing this frame; candidate selection also uses prior support."""
++        means, variances, valids, choices = [], [], [], []
++        from owac.frameworks.n02_full.sequence_v12 import subset_queries
++
++        for row, history in enumerate(state.geometry):
++            if not isinstance(history, V12RowHistory) or history.spatial is None:
++                return None
++            selected = subset_queries(queries, torch.tensor([row], device=queries.target.device))
++            slots = state.slot_hidden[row : row + 1]
++            predicted = self.predictor(slots.flatten(0, 1)).reshape_as(slots)
++            mean, variance, valid, _ = self._decode(
++                history.spatial, predicted, frame_index[row : row + 1], selected
++            )
++            means.append(mean)
++            variances.append(variance)
++            valids.append(valid)
++            choices.append(state.existence[row : row + 1].argmax(dim=-1))
++        if not means:
++            return None
++        mean, variance, valid = map(lambda parts: torch.cat(parts), (means, variances, valids))
++        return {
++            "mean": mean,
++            "variance": variance,
++            "valid": valid,
++            "chosen": torch.cat(choices),
++            "residuals": self._residuals(queries.target, mean, variance),
++            "queries": queries,
++        }
+ 
+     def reset(self, mask: Any, state: SequenceState | None = None) -> SequenceState:
+         """Row-wise episode reset with :meth:`SequenceState.reset_batch` semantics.
+@@ -741,34 +806,41 @@
+         state = self._prepare_state(inp, state)
+         batch = _bundle_batch(inp.observation)
+         selected = tuple(range(batch)) if rows is None else tuple(int(row) for row in rows)
+-        queries = self.build_queries(inp, batch=batch)
+-        spatial = self.encoder(inp.observation)
+-        frame_index = _frame_index_tensor(inp, observation=inp.observation, batch=batch)
+-        tokens_in = self._corrector_tokens(spatial)
+-        evidence = self._evidence(spatial, inp.observation)
+-        slots = self._scan_history(state, tokens_in, evidence, selected, batch)
+-        log_p0, prior_info = self._log_prior(inp, batch=batch, device=slots.device)
+-        mean, variance, valid, decoder_masks = self._decode(spatial, slots, frame_index, queries)
+-        energies = self._energies(mean, variance, valid, queries)
+-        q = self._support(log_p0, energies)
+-        chosen = self._supported_index(q)
+-        residuals = self._residuals(queries.target, mean, variance)
+-        check = self._absolute_check(residuals, valid, queries, chosen, frame_index)
+-        tokens, readout_aux = self.readout(
+-            features=spatial, state_tokens=slots, support=q, masks=None
+-        )
+-        new_state = self._commit_state(inp, state, spatial, queries, slots, q, tokens, readout_aux)
+-        self._last_state = new_state
+-        diagnostics = {
+-            "rows": selected,
+-            "recomputed": True,
+-            "energies": energies,
+-            "q": q,
+-            "check": check,
+-            "meas_id_hash": _hash_ids(queries.ids),
+-            "prior": prior_info,
+-        }
+-        return new_state, diagnostics
++        from owac.frameworks.n02_full.sequence_v12 import snapshot
++
++        slots, support = state.slot_hidden.clone(), state.existence.clone()
++        geometry = list(state.geometry)
++        checks = []
++        for row in selected:
++            history = geometry[row]
++            retained = list(history.entries) if isinstance(history, V12RowHistory) else []
++            current = self._snapshot_input(inp, row)
++            current_time = int(current.frame_index[0])
++            # Replace an existing acquisition at this time; never replay a removed state.
++            inputs = [
++                entry.inference_input for entry in retained if entry.frame_index != current_time
++            ]
++            if any(item is None for item in inputs):
++                raise N02V12InferenceError("legacy state has no replayable observations; reset it")
++            inputs.append(current)
++            inputs.sort(key=lambda item: int(item.frame_index[0]))
++            fresh = empty_v12_state(
++                batch=1,
++                k=self.k,
++                n_slots=self.n_slots,
++                slot_dim=self.slot_dim,
++                device=self._device(),
++            )
++            for item in inputs:
++                output = self.step(item, fresh)
++                fresh = snapshot(output.state)
++            slots[row] = fresh.slot_hidden[0]
++            support[row] = fresh.existence[0]
++            geometry[row] = fresh.geometry[0]
++            checks.append(output.check)
++        rebuilt = _replace_state(state, slot_hidden=slots, existence=support, geometry=geometry)
++        self._last_state = rebuilt
++        return rebuilt, {"rows": selected, "recomputed": True, "from_zero": True, "checks": checks}
+ 
+     def drop_measurements(
+         self, state: SequenceState, measurement_ids: Any, *, rows: Sequence[int] | None = None
+@@ -1131,7 +1203,8 @@
+         prior = prior.to(device)
+         mass = prior.sum(dim=-1, keepdim=True)
+         normalised = prior / mass
+-        log_p0 = normalised.clamp_min(_PRIOR_FLOOR).log()
++        zero_mass = normalised == 0
++        log_p0 = normalised.masked_fill(zero_mass, 1.0).log().masked_fill(zero_mass, -torch.inf)
+         log_p0 = log_p0 - torch.logsumexp(log_p0, dim=-1, keepdim=True)
+         info = {
+             "source": source,
+@@ -1146,7 +1219,7 @@
+     def _complete_objective(self, energies: torch.Tensor, log_p0: torch.Tensor) -> torch.Tensor:
+         """``J = -tau logsumexp(log_p0 - E/tau)``: the complete objective on one measurement set.
+ 
+-        ``argmin_q E_q[E] + tau KL(q||p0)`` equals ``-J``; a state update is accepted only when
++        ``min_q E_q[E] + tau KL(q||p0)`` equals ``J``; a state update is accepted only when
+         ``J`` does not increase. No convergence claim follows from that.
+         """
+         return -self.tau * torch.logsumexp(log_p0 - energies / self.tau, dim=-1)
+@@ -1157,9 +1230,9 @@
+     def _absolute_check(self, residuals, valid, queries: QuerySet, chosen, frame_index) -> Any:
+         """Three-state check on the supported explanation's locked residuals.
+ 
+-        The residual map is the *supported* candidate's, taken from the round-0 (pre-fit) decode, so
+-        the check never inherits a window that was fitted on this frame. A missing or unfitted
+-        calibrator yields an explicitly invalid result, never a zero.
++        The prediction and chosen candidate are locked from the preceding state.
++        Diagnostic relative time is zero; decoder conditioning retains real source time.
++        Missing prefix/calibration produces an invalid result.
+         """
+         supported = torch.gather(
+             residuals, 1, chosen.view(-1, 1, 1).expand(-1, 1, residuals.shape[-1])
+@@ -1211,7 +1284,7 @@
+                         standardised_residual=residuals[row, cursor:stop].reshape(1, -1),
+                         valid=valid[row, cursor:stop].reshape(1, -1),
+                         scale=f"sensor_stride{self.query_stride}",
+-                        frame_index=int(frame_index[row]),
++                        frame_index=0,  # relative diagnostic axis; decoder keeps real source time
+                         region_id=str(camera_id),
+                         origin=(0, 0),
+                     )
+@@ -1299,6 +1372,7 @@
+                 support_hash=support_hash,
+                 tokens=features[row].detach().clone(),
+                 valid=valid[row].detach().clone(),
++                inference_input=self._snapshot_input(inp, row),
+             )
+             geometry[row] = V12RowHistory(
+                 entries=(history.entries + (entry,))[-max(1, self.history) :],
+@@ -1306,52 +1380,32 @@
+                 tokens=tokens[row].detach().clone(),
+                 attention=attention,
+                 cache_version=history.cache_version + 1,
++                spatial=self._snapshot_spatial(spatial, row),
+             )
+         return _replace_state(
+             state, slot_hidden=slots, existence=q.detach(), geometry=list(geometry)
+         )
+ 
+-    def _scan_history(
+-        self,
+-        state: SequenceState,
+-        tokens_in: tuple[torch.Tensor, torch.Tensor],
+-        evidence: torch.Tensor,
+-        rows: Sequence[int],
+-        batch: int,
+-    ) -> torch.Tensor:
+-        """Recompute the recurrent state of the selected rows from their retained history."""
+-        slots = torch.zeros(
+-            (batch, self.k, self.n_slots, self.slot_dim),
+-            device=evidence.device,
+-            dtype=evidence.dtype,
+-        )
+-        if torch.is_tensor(state.slot_hidden) and tuple(state.slot_hidden.shape) == tuple(
+-            slots.shape
+-        ):
+-            slots = state.slot_hidden.detach().clone().to(evidence.device)
+-        for raw_row in rows:
+-            row = int(raw_row)
+-            history = state.geometry[row] if row < len(state.geometry) else V12RowHistory()
+-            if not isinstance(history, V12RowHistory):
+-                history = V12RowHistory()
+-            row_slots = slots[row : row + 1]
+-            for entry in history.entries:
+-                row_slots = self._renew_proposals(
+-                    row_slots,
+-                    evidence=evidence[row : row + 1],
+-                    residual_stats=None,
+-                    tokens=(entry.tokens.unsqueeze(0), entry.valid.unsqueeze(0)),
+-                )
+-            if not history.entries:
+-                # No retained measurement: the causal state is a fresh proposal from the evidence.
+-                row_slots = self._renew_proposals(
+-                    row_slots,
+-                    evidence=evidence[row : row + 1],
+-                    residual_stats=None,
+-                    tokens=tokens_in,
+-                )
+-            slots[row : row + 1] = row_slots
+-        return slots
++    @staticmethod
++    def _snapshot_spatial(spatial, row):
++        from owac.frameworks.n02_full.sequence_v12 import select_spatial, snapshot
++
++        return snapshot(select_spatial(spatial, row))
++
++    @staticmethod
++    def _snapshot_input(inp, row):
++        from owac.frameworks.n02_full.sequence_v12 import select_observation, snapshot
++
++        batch = _bundle_batch(inp.observation)
++        frames = _frame_index_tensor(inp, observation=inp.observation, batch=batch)
++        prior = inp.declared_prior
++        if prior is not None and torch.as_tensor(prior).ndim == 2:
++            prior = prior[row : row + 1]
++        return snapshot(
++            V12InferenceInput(
++                select_observation(inp.observation, [row]), prior, [int(frames[row])], None
++            )
++        )
+ 
+ 
+ # ---------------------------------------------------------------------------------------
+--- a/src/owac/frameworks/n02_full/model_v12.py
++++ b/src/owac/frameworks/n02_full/model_v12.py
+@@ -268,7 +268,8 @@
+         evidence_dim: int | None = None,
+         action_dim: int = 0,
+         history: int = 8,
+-        query_stride: int = 8,
++        query_stride: int = 1,
++        max_queries_per_camera: int = 0,
+         calibrator: Any = None,
+         strict_check: bool = True,
+     ) -> None:
+@@ -288,6 +289,7 @@
+             action_dim=action_dim,
+             history=history,
+             query_stride=query_stride,
++            max_queries_per_camera=max_queries_per_camera,
+             calibrator=calibrator,
+             strict_check=strict_check,
+         )
+@@ -409,7 +411,7 @@
+         n_candidates=k,
+         hidden=int(settings.get("decoder_hidden", 256)),
+         measurement_channels=int(settings.get("measurement_channels", 3)),
+-        channel_reduction=str(settings.get("channel_reduction", "mean")),
++        channel_reduction=str(settings.get("channel_reduction", "select")),
+         saturation_level=settings.get("saturation_level"),
+         units=str(settings.get("units", "sensor_units")),
+         max_cameras=max(MAX_CAMERAS, len(camera_ids)),
+@@ -444,7 +446,8 @@
+         evidence_dim=sum(level_dims.values()) * len(camera_ids),
+         action_dim=int(settings.get("action_dim", 0)),
+         history=int(settings.get("history", 8)),
+-        query_stride=int(settings.get("query_stride", 8)),
++        query_stride=int(settings.get("query_stride", 1)),
++        max_queries_per_camera=int(settings.get("max_queries_per_camera", 0)),
+         calibrator=calibrator,
+         strict_check=bool(settings.get("strict_check", True)),
+     )
+--- a/src/owac/frameworks/n02_full/sequence_v12.py
++++ b/src/owac/frameworks/n02_full/sequence_v12.py
+@@ -0,0 +1,148 @@
++"""Shared causal-window execution for training and evaluation.
++
++Each row is one time step, not an independent batch example. Prefix state is
++detached at the anchor (one-step truncated BPTT); the action still depends on
++every distinct prefix measurement. No future frame enters the prefix state.
++"""
++
++from __future__ import annotations
++
++import dataclasses
++from typing import Any
++
++import numpy as np
++import torch
++
++EXECUTION_REVISION = "n02-v12-p2-causal-r2"
++
++
++def snapshot(value: Any) -> Any:
++    """Detached, owned state, including dataclasses with tensor payloads."""
++    if torch.is_tensor(value):
++        return value.detach().clone()
++    if isinstance(value, np.ndarray):
++        return value.copy()
++    if dataclasses.is_dataclass(value):
++        return dataclasses.replace(
++            value, **{f.name: snapshot(getattr(value, f.name)) for f in dataclasses.fields(value)}
++        )
++    if isinstance(value, dict):
++        return {k: snapshot(v) for k, v in value.items()}
++    if isinstance(value, (tuple, list)):
++        return type(value)(snapshot(v) for v in value)
++    return value
++
++
++def select_observation(observation: Any, rows: list[int]) -> Any:
++    total = int(next(iter(observation.frames.values())).values.shape[0])
++
++    def select(value: Any) -> Any:
++        if torch.is_tensor(value) and value.ndim and value.shape[0] == total:
++            return value[torch.tensor(rows, device=value.device)]
++        if isinstance(value, np.ndarray) and value.ndim and value.shape[0] == total:
++            return value[rows]
++        if isinstance(value, (tuple, list)) and len(value) == total:
++            return type(value)(value[row] for row in rows)
++        return value
++
++    def record(value: Any) -> Any:
++        return dataclasses.replace(
++            value, **{f.name: select(getattr(value, f.name)) for f in dataclasses.fields(value)}
++        )
++
++    return dataclasses.replace(
++        observation,
++        frames={camera: record(frame) for camera, frame in observation.frames.items()},
++        context=record(observation.context),
++        episode_ids=select(observation.episode_ids),
++        anchor_ids=select(observation.anchor_ids),
++        new_time_mask=select(observation.new_time_mask),
++    )
++
++
++def select_spatial(spatial: Any, row: int) -> Any:
++    updates = {
++        name: {key: value[row : row + 1] for key, value in getattr(spatial, name).items()}
++        for name in ("levels", "coords", "valid")
++    }
++    if hasattr(spatial, "support_ids"):
++        updates["support_ids"] = {k: v[row : row + 1] for k, v in spatial.support_ids.items()}
++    return dataclasses.replace(spatial, **updates)
++
++
++def window_inputs(batch: Any, anchor: int = 0) -> list[Any]:
++    from owac.frameworks.n02_full.inference_v12 import V12InferenceInput
++
++    history = int(getattr(batch, "history", len(batch.frame_index)))
++    indices = np.asarray(batch.frame_index).reshape(-1)
++    prior = getattr(batch, "declared_prior", None)
++    result = []
++    seen = set()
++    for row in range(anchor * history, (anchor + 1) * history):
++        obs = select_observation(batch.observation, [row])
++        identity = tuple((c, tuple(f.episode_ids), str(f.frame_ids)) for c, f in obs.frames.items())
++        if identity in seen:
++            continue  # left-padding is one acquisition, not several observations
++        seen.add(identity)
++        selected_prior = prior
++        if prior is not None and torch.as_tensor(prior).ndim == 2:
++            selected_prior = prior[anchor : anchor + 1]
++        result.append(V12InferenceInput(obs, selected_prior, [int(indices[row])], None))
++    return result
++
++
++def replay_inputs(model: Any, inputs: list[Any], *, grad_anchor: bool = False) -> dict:
++    if not inputs:
++        raise ValueError("a causal window must contain a measurement")
++    device = next(model.parameters()).device
++    state = model.build_state(batch=1, device=device)
++    outputs, pre_states = [], []
++    for index, inp in enumerate(inputs):
++        pre_states.append(state)
++        with torch.set_grad_enabled(grad_anchor and index == len(inputs) - 1):
++            output = model.step(inp, state)
++        outputs.append(output)
++        state = snapshot(output.state) if index < len(inputs) - 1 else output.state
++    return {"rows": outputs, "pre_states": pre_states, "inputs": inputs, "state": state}
++
++
++def subset_queries(queries: Any, rows: torch.Tensor):
++    """``QuerySet`` restricted to ``rows`` (same measurement space, fewer decision rows)."""
++    from owac.frameworks.n02_full.inference_v12 import QuerySet
++
++    def take_ids(value: Any) -> Any:
++        if not value:
++            return value
++        index = rows.tolist()
++        return tuple(value[int(item)] for item in index)
++
++    return QuerySet(
++        coords=queries.coords.index_select(0, rows),
++        camera_index=queries.camera_index.index_select(0, rows),
++        query_channel=queries.query_channel.index_select(0, rows),
++        target=queries.target.index_select(0, rows),
++        masks={name: value.index_select(0, rows) for name, value in queries.masks.items()},
++        ids=take_ids(queries.ids),
++        camera_ids=queries.camera_ids,
++        sampled_per_camera=queries.sampled_per_camera,
++        coverage=queries.coverage,
++        duplicates_dropped=queries.duplicates_dropped,
++        channel_reduction=queries.channel_reduction,
++        per_camera_query_count=queries.per_camera_query_count,
++    )
++
++
++def training_anchor_order(count: int, seed: int, cursor: int, batch_size: int = 1) -> list[int]:
++    """Seeded epoch permutation; cursor counts consumed anchors, including padding skips."""
++    selected = []
++    for offset in range(batch_size):
++        absolute = cursor * batch_size + offset
++        epoch, position = divmod(absolute, count)
++        selected.append(
++            int(
++                np.random.default_rng(np.random.SeedSequence([seed, epoch])).permutation(count)[
++                    position
++                ]
++            )
++        )
++    return selected
+--- a/src/owac/training/n02_v12.py
++++ b/src/owac/training/n02_v12.py
+@@ -51,9 +51,9 @@
+       --seed 1103 --max-updates 1000 \\
+       --output <repo>/outputs/n02-v12/P2/raw-n02-robotwin-s1103
+ 
+-The working directory matters: the checkout root carries a stale untracked copy of the package
+-named ``owac/`` which shadows ``src/owac`` for ``python -m`` (python puts the current directory
+-first).  :func:`package_identity_error` checks the imported package identity before anything runs
++A previous sync created a shadow package at the checkout root; it has been archived.
++The import identity guard detects any recurrence before running a job.
++:func:`package_identity_error` checks the imported package identity before anything runs
+ and refuses to run shadowed, printing the working alternative.
+ 
+ Status output
+@@ -81,11 +81,15 @@
+ import numpy as np
+ import torch
+ 
++from owac.frameworks.n02_full.data_v12 import apply_declared_isp as apply_declared_isp
++from owac.frameworks.n02_full.data_v12 import read_task_prompts as read_task_prompts
++from owac.frameworks.n02_full.sequence_v12 import EXECUTION_REVISION
+ from owac.frameworks.n02_full.state import ObservationBundle
+ 
+ #: Status/history schema written by this entry (frozen by owac.runtime.n02_v12_status).
+ STATUS_VERSION = "n02-v12-p2-status-v1"
+ CHECKPOINT_FORMAT = "n02-v12-p2-checkpoint-v1"
++
+ STAGE = "P2"
+ MAX_STATE_DIM = 32
+ ACTION_DIM_PADDED = 32
+@@ -354,75 +358,6 @@
+     )
+ 
+ 
+-def read_task_prompts(relative_paths: list[str], data_root: str) -> list[str]:
+-    """Per-anchor task instruction, read the way the frozen loader reads it.
+-
+-    Only the small ``metadata_json`` member of each NPZ is opened, so this does not duplicate the
+-    window load.  The fallback rule is the loader's own: ``task_description`` first and, for
+-    RoboTwin, ``task_name`` with underscores turned into spaces.
+-    """
+-    prompts: list[str] = []
+-    for relative in relative_paths:
+-        metadata: dict = {}
+-        try:
+-            with np.load(Path(data_root) / str(relative), allow_pickle=False) as archive:
+-                metadata = json.loads(str(np.asarray(archive["metadata_json"]).item()))
+-        except (OSError, KeyError, ValueError, TypeError, json.JSONDecodeError):
+-            metadata = {}
+-        text = ""
+-        if isinstance(metadata, dict):
+-            text = str(metadata.get("task_description") or "")
+-            if not text and "robotwin" in str(relative):
+-                text = str(metadata.get("task_name") or "").replace("_", " ")
+-        prompts.append(text)
+-    return prompts
+-
+-
+-def apply_declared_isp(bundle: Any, spec: dict) -> Any:
+-    """Apply the arm's declared, per-frame-independent ISP to the loader's RAW values.
+-
+-    The RAW arm declares ``kind="raw3"`` and nothing is touched.  The controlled RGB arm declares
+-    ``kind="raw3_fixed_isp"``: the *same* RAW measurement of the *same* acquisition passes through
+-    one written-down transform with no per-frame statistic in it (clip / fixed scale, per-channel
+-    gain, gamma encoding, 8-bit quantisation).  No official normal-light RGB pair is substituted.
+-    """
+-    import dataclasses
+-
+-    kind = str(spec.get("kind", "raw3"))
+-    if kind in ("", "raw3"):
+-        return bundle
+-    if kind != "raw3_fixed_isp":
+-        raise ValueError(f"unknown representation kind {kind!r}")
+-    isp = dict(spec.get("isp") or {})
+-    scale = float(isp.get("input_scale", 1.0))
+-    gain = torch.as_tensor(isp.get("gain", (1.0, 1.0, 1.0)), dtype=torch.float32).view(1, -1, 1, 1)
+-    gamma = float(isp.get("gamma", 2.2))
+-    levels = float(2 ** int(isp.get("quantise_bits", 8)) - 1)
+-    frames = {}
+-    for camera_id, frame in bundle.frames.items():
+-        values = torch.as_tensor(frame.values).to(torch.float32)
+-        if values.ndim < 4 or int(values.shape[1]) < 3:
+-            frames[camera_id] = frame
+-            continue
+-        transformed = (values / scale).clamp(0.0, 1.0)
+-        transformed = (transformed * gain.to(transformed.device)).clamp(0.0, 1.0)
+-        if gamma != 1.0:
+-            transformed = transformed.clamp_min(0.0).pow(1.0 / gamma)
+-        transformed = torch.round(transformed * levels) / levels
+-        frames[camera_id] = dataclasses.replace(
+-            frame,
+-            values=transformed,
+-            metadata={
+-                **dict(getattr(frame, "metadata", {}) or {}),
+-                "declared_isp": "raw3_fixed_isp",
+-                "isp_scale": scale,
+-                "isp_gamma": gamma,
+-                "isp_quantise_bits": int(isp.get("quantise_bits", 8)),
+-            },
+-        )
+-    return dataclasses.replace(bundle, frames=frames)
+-
+-
+ def anchor_action_targets(targets: dict, anchors: int) -> tuple[np.ndarray, np.ndarray]:
+     """One ``[anchors, h, control_dim]`` block and its ``[anchors, h]`` padding mask.
+ 
+@@ -789,14 +724,7 @@
+         )
+ 
+     def anchor_bundle(self, batch: Any, prior: Any = None) -> Any:
+-        """The decision bundle of one loader window: one current row per anchor.
+-
+-        The frozen chain is per-row (one camera set, one decision moment), so running it on all
+-        ``anchors * history`` rows would multiply the decoder and readout cost by the history
+-        length while producing exactly the same tokens for the current row.  The history rows are
+-        not discarded: :meth:`encode_window` encodes them once and the causal-prediction branch
+-        consumes those features.
+-        """
++        """Current-row input for the isolated prior probe, never the action training path."""
+         from owac.backends.n02_v12_tokens import anchor_row_indices
+         from owac.frameworks.n02_full.inference_v12 import V12InferenceInput
+ 
+@@ -931,10 +859,8 @@
+         noise = torch.randn(padded.shape, generator=generator, device=self.device)
+         flow_time = torch.rand((anchors,), generator=generator, device=self.device)
+         flow_time = (flow_time.pow(1 / 1.5) * 0.999 + 0.001).to(torch.float32)
+-        spatial = self.encode_window(batch)
+-        decision = self.anchor_bundle(batch, prior=batch.declared_prior)
+         result = self.bridge.forward(
+-            observation=decision,
++            observation=batch,
+             lang_tokens=lang_tokens,
+             lang_masks=lang_masks,
+             state=state,
+@@ -949,7 +875,7 @@
+         terms: dict[str, Any] = {"action": result["action_loss"]}
+         terms["masked_raw"], masked_info = self._masked_raw_loss(batch, anchor_rows)
+         terms["causal_raw"], causal_info = self._causal_loss(
+-            batch, anchor_rows, anchor_rows, output, spatial
++            batch, anchor_rows, anchor_rows, output, None
+         )
+         terms["noise"], noise_info = self._noise_loss(batch)
+         weights = self._aux_weights()
+@@ -1016,70 +942,30 @@
+         spatial: Any,
+     ):
+         """Prediction of the current frame from features locked before it was observed."""
+-        from owac.frameworks.n02_full.inference_v12 import build_query_sets
+-
+-        history = int(batch.history)
+-        anchors = int(anchor_rows.numel())
+-        if history < 2:
+-            return None, {"enabled": False, "reason": "no causal prefix at history < 2"}
+-        inference = self.model.inference
+-        prefix_rows = torch.cat(
+-            [
+-                torch.arange(
+-                    index * history,
+-                    index * history + history - 1,
+-                    device=self.device,
+-                    dtype=torch.long,
+-                )
+-                for index in range(anchors)
+-            ]
+-        )
+-        pick = slice(history - 2, None, history - 1)
+-        prefix_reference = subset_spatial(spatial, prefix_rows[pick])
+-        full_queries = build_query_sets(
+-            batch.observation,
+-            stride=inference.query_stride,
+-            max_queries_per_camera=inference.max_queries_per_camera,
+-            # ``declared_ids`` must be None here: the frozen reader compares the declared row
+-            # count with the bundle's, and its empty-tuple default raises for a multi-row window.
+-            # The measurement identity of the current rows is reported from the window batch.
+-            declared_ids=None,
+-            channel_reduction=str(getattr(inference.decoder, "channel_reduction", "mean")),
+-            measurement_channels=int(getattr(inference.decoder, "measurement_channels", 3)),
+-            device=self.device,
+-        )
+-        current_queries = subset_queries(full_queries, current_rows)
+-        prefix_spatial = subset_spatial(spatial, prefix_rows)
+-        tokens = inference._corrector_tokens(prefix_spatial)
+-        evidence = inference._evidence(prefix_spatial, batch.observation)
+-        zero_state = self.model.build_state(batch=int(prefix_rows.numel()), device=self.device)
+-        slots = inference._renew_proposals(
+-            zero_state.slot_hidden, evidence=evidence, residual_stats=None, tokens=tokens
+-        )
+-        frame_index = torch.as_tensor(
+-            list(batch.current_frame_indices()), device=self.device, dtype=torch.long
+-        )
+-        mean, variance, valid, _ = inference._decode(
+-            prefix_reference, slots[pick], frame_index, current_queries
+-        )
+-        energy, objective_info = inference.measurement.objective(
+-            mean=mean, variance=variance, masks=valid, target=current_queries.target
+-        )
+-        mass = valid.sum(dim=-1).clamp_min(1).to(energy.dtype)
+-        per_candidate = energy / mass.unsqueeze(-1)
+-        support = output.q.detach().to(per_candidate.dtype)
+-        loss = (support * per_candidate).sum(dim=-1).mean()
+-        return loss, {
++        losses, samples = [], 0
++        for anchor_output in self.token_source.last_outputs:
++            causal = anchor_output.causal
++            if causal is None:
++                continue
++            energy, _ = self.model.inference.measurement.objective(
++                mean=causal["mean"],
++                variance=causal["variance"],
++                masks=causal["valid"],
++                target=causal["queries"].target,
++            )
++            mass = causal["valid"].sum(dim=-1).clamp_min(1).to(energy.dtype)
++            # Candidate weights are locked before observing this target; no current-q leakage.
++            candidate_loss = energy / mass
++            losses.append(candidate_loss.mean())
++            samples += int(causal["valid"].sum())
++        if not losses:
++            return None, {"enabled": False, "reason": "no distinct causal prefix"}
++        return torch.stack(losses).mean(), {
+             "enabled": True,
+-            "target_frame_index": [int(value) for value in frame_index.tolist()],
+-            "prefix_rows_per_anchor": history - 1,
+-            "scored_samples": int(valid.sum()),
+-            "kind": objective_info.get("kind"),
+-            "mean_support": [round(float(value), 6) for value in support.mean(dim=0).tolist()],
+-            "leak_guard": (
+-                "features come from prefix rows only; the current frame contributes its query "
+-                "positions and its pixel values as the label, never as input"
+-            ),
++            "scored_samples": samples,
++            "leak_guard": "previous spatial features/state only; current values are labels",
++            "execution_revision": EXECUTION_REVISION,
++            "gradient_boundary": "prefix detached; current step/predictor/decoder differentiable",
+         }
+ 
+     def _noise_loss(self, batch: Any):
+@@ -1271,7 +1157,7 @@
+ 
+     def calibration_pass(self) -> dict:
+         """Fit the windowed absolute check on the independent calibration partition."""
+-        from owac.frameworks.n02_full.checks_v12 import ViewingRule, calibrate_windowed
++        from owac.frameworks.n02_full.checks_v12 import calibrate_windowed, v12_viewing_rule
+ 
+         source = self.sources["calibration"]
+         windows = min(self.plan.calibration_windows, len(source.anchor_table))
+@@ -1282,46 +1168,40 @@
+         # contain, so the calibration sequences are built with the frame axis fixed at the
+         # sequence origin: one view per camera per decision moment, the same rule for every
+         # window.  The real source frame index of each row stays in the step diagnostics.
+-        rule = ViewingRule(
+-            scales=(f"sensor_stride{inference.query_stride}",),
+-            frames=(0,),
+-            regions=tuple(str(camera) for camera in inference.encoder.camera_ids),
+-        )
+-        groups = []
++        rule = v12_viewing_rule(inference.query_stride, inference.encoder.camera_ids)
++        from owac.evaluation.n02_full.v12 import anchor_indices
++
++        groups, calibration_ids = [], []
+         with torch.no_grad():
+-            for index in range(windows):
+-                groups.append(self._residual_views_of_window(source, index, rule))
+-        if not groups or not groups[0]:
++            for index in anchor_indices(source, windows):
++                views = self._residual_views_of_window(source, int(index), rule)
++                if views:
++                    groups.append(views)
++                    calibration_ids.extend(
++                        source.window(int(index), int(index) + 1).measurement_ids
++                    )
++        if len(groups) < 2 or not groups[0]:
+             return {"status": "not_run", "reason": "the calibration residual views are empty"}
+         calibration = calibrate_windowed(
+             groups,
+             partition="calibration",
+             rule=rule,
+-            calibration_ids=source.window(0, windows).measurement_ids,
++            calibration_ids=calibration_ids,
+             test_ids=self.sources["dev"].window(0, self.plan.dev_windows).measurement_ids,
+         )
+-        # The calibrator is deliberately NOT installed on the model.  The frozen
+-        # ``inference_v12._residual_views`` stamps each view with the decision moment's *real*
+-        # source frame index, and the frozen rule requires every declared view to be present, so
+-        # one frozen rule cannot match the varying frames of a training run; a mismatched rule
+-        # raises instead of returning a verdict.  The step check therefore stays explicitly
+-        # uncalibrated (``AbsoluteCheckResult.invalid``, counted separately, never as zero false
+-        # alarms / zero detections) while the threshold above is real and is really applied to
+-        # the held-out views recorded under ``verdicts``.
++        # Training changes the predictor weights: this threshold is a diagnostic snapshot,
++        # not a valid threshold for subsequent optimizer updates. Eval fits at fixed weights.
+         return {
+             "status": "fitted",
+-            "sequences": int(windows),
++            "sequences": len(groups),
+             "threshold": float(calibration.calibrator.threshold()),
+             "quantile": float(calibration.quantile),
+             "version": str(calibration.version),
+             "partition": str(calibration.partition),
+             "viewing_rule_hash": str(calibration.viewing_rule_hash),
+-            "frame_axis_note": (
+-                "the frozen ViewingRule requires every declared (scale, frame, region) view to be "
+-                "present in the sequence it judges, so the frame axis is fixed at the sequence "
+-                "origin here; the real source frame index of each row stays in the step "
+-                "diagnostics"
+-            ),
++            "frame_axis_note": "relative check axis 0; actual decoder source time is unchanged",
++            "prediction_version": "causal_pre_locked",
++            "execution_revision": EXECUTION_REVISION,
+             "scale": rule.scales[0],
+             "regions": list(rule.regions),
+             "verdicts": self._calibration_verdicts(calibration, groups, rule),
+@@ -1346,6 +1226,7 @@
+             verdicts[name] = {
+                 "sequences": len(items),
+                 "by_status": tally,
++                "invalid_no_prefix": sum(not group for group in items),
+                 "meaning": (
+                     "three-state verdicts of the frozen calibrator; 'compatible' means no "
+                     "residual window exceeded the frozen threshold, not that the model is right"
+@@ -1359,49 +1240,19 @@
+ 
+     def _residual_views_of_window(self, source: Any, index: int, rule: Any) -> list:
+         """Locked residual views of one window's current frame, in the rule's own frame axis."""
+-        from owac.frameworks.n02_full.checks import ResidualView
+-
+-        inference = self.model.inference
++        from owac.evaluation.n02_full.v12 import locked_residual_groups
++        from owac.frameworks.n02_full.sequence_v12 import replay_inputs, window_inputs
++
+         batch = self.window(source, index, index + 1)
+-        spatial = self.decision_features(batch, self.encode_window(batch))
+-        decision = self.anchor_bundle(batch, prior=batch.declared_prior)
+-        rows = self.bundle_rows(decision)
+-        queries = inference.build_queries(decision, batch=rows)
+-        tokens = inference._corrector_tokens(spatial)
+-        evidence = inference._evidence(spatial, decision.observation)
+-        zero_state = self.model.build_state(batch=rows, device=self.device)
+-        slots = inference._renew_proposals(
+-            zero_state.slot_hidden, evidence=evidence, residual_stats=None, tokens=tokens
+-        )
+-        frame_index = torch.as_tensor(
+-            list(batch.current_frame_indices()), device=self.device, dtype=torch.long
+-        )
+-        mean, variance, valid, _ = inference._decode(spatial, slots, frame_index, queries)
+-        residuals = (queries.target.unsqueeze(1) - mean) / variance.clamp_min(1e-12).sqrt()
+-        energies = inference._energies(mean, variance, valid, queries)
+-        prior = torch.full((rows, inference.k), 1.0 / inference.k, device=self.device)
+-        support = inference._support(prior.log(), energies)
+-        chosen = support.argmax(dim=-1).view(-1, 1, 1)
+-        picked = torch.gather(residuals, 1, chosen.expand(-1, 1, residuals.shape[-1])).squeeze(1)
+-        picked_valid = torch.gather(valid, 1, chosen.expand(-1, 1, valid.shape[-1])).squeeze(1)
+-        views = []
+-        cursor = 0
+-        for slot, camera_id in enumerate(queries.camera_ids):
+-            count = int(queries.per_camera_query_count[slot])
+-            if count <= 0:
+-                continue
+-            views.append(
+-                ResidualView(
+-                    standardised_residual=picked[0, cursor : cursor + count].reshape(1, -1),
+-                    valid=picked_valid[0, cursor : cursor + count].reshape(1, -1),
+-                    scale=rule.scales[0],
+-                    frame_index=0,
+-                    region_id=str(camera_id),
+-                    origin=(0, 0),
+-                )
+-            )
+-            cursor += count
+-        return views
++        replay = replay_inputs(self.model, window_inputs(batch))
++        if replay["rows"][-1].causal is None:
++            return []
++        return locked_residual_groups(
++            self.model.inference,
++            replay["inputs"][-1],
++            replay["pre_states"][-1],
++            replay["rows"][-1].q,
++        )["groups"][0]
+ 
+     # -- save / resume ------------------------------------------------------------------
+ 
+@@ -1413,6 +1264,10 @@
+         torch.save(
+             {
+                 "format": CHECKPOINT_FORMAT,
++                "execution_revision": EXECUTION_REVISION,
++                "training_generator": getattr(self, "train_generator", None).get_state()
++                if hasattr(self, "train_generator")
++                else None,
+                 "step": int(step),
+                 "cursor": int(cursor),
+                 "stage": STAGE,
+@@ -1448,6 +1303,11 @@
+         payload = torch.load(path, map_location="cpu", weights_only=False)
+         if str(payload.get("format")) != CHECKPOINT_FORMAT:
+             raise ValueError(f"{path} is not a {CHECKPOINT_FORMAT} checkpoint")
++        if payload.get("execution_revision") != EXECUTION_REVISION:
++            raise ValueError(
++                "legacy execution path: use weights only for a labelled probe; "
++                "do not resume as corrected training"
++            )
+         self.model.load_state_dict(payload["model"])
+         current = self.masked.state_dict()
+         current.update(payload["masked_branch"])
+@@ -1507,9 +1367,8 @@
+             )
+             actions = self.bridge.prepare_control_targets(raw_actions, device=self.device)
+             mask = torch.as_tensor(raw_mask, device=self.device)
+-            decision = self.anchor_bundle(batch, prior=batch.declared_prior)
+             result = self.bridge.forward(
+-                observation=decision,
++                observation=batch,
+                 lang_tokens=lang_tokens,
+                 lang_masks=lang_masks,
+                 state=state,
+@@ -1589,101 +1448,69 @@
+         """Real RAW display frame plus the real encoder attention overlay."""
+         if self.plan.previews <= 0:
+             return {"status": "disabled"}
++        from owac.evaluation.n02_full import v12_viz
++        from owac.frameworks.n02_full.sequence_v12 import window_inputs
++
++        files = []
+         try:
+-            from PIL import Image
+-        except ImportError:
+-            return {"status": "skipped", "reason": "Pillow is unavailable"}
+-        try:
+-            files: dict[str, Any] = {}
+-            camera_id = list(batch.observation.frames)[0]
+-            frame = batch.observation.frames[camera_id]
+-            values = np.asarray(frame.values, dtype=np.float32)
+-            display = values[-1]
+-            if display.ndim == 3 and display.shape[0] == 3:
+-                display = np.moveaxis(display, 0, -1)
+-            low, high = (float(item) for item in np.percentile(display, [1.0, 99.0]))
+-            grey = np.clip((display - low) / max(high - low, 1e-6), 0.0, 1.0)
+-            grey = (grey * 255.0).astype(np.uint8)
+-            raw_path = self.run_dir / f"preview_raw_{camera_id}.png"
+-            Image.fromarray(grey).save(raw_path)
+-            files["raw"] = [
+-                {
+-                    "camera": camera_id,
+-                    "frame": int(batch.current_frame_indices()[0]),
+-                    "path": raw_path.name,
+-                    "display_mapping": (
+-                        f"fixed declared display mapping: per-frame 1-99 percentile "
+-                        f"[{low:.6g}, {high:.6g}] linear stretch to 8-bit (display only)"
+-                    ),
+-                }
+-            ]
+-            diagnostics = output.diagnostics
+-            aux = dict(diagnostics.get("readout_aux", {}))
+-            attention = aux.get("encoder_attention")
+-            if attention is not None:
+-                camera_index = list(self.model.inference.encoder.camera_ids).index(camera_id)
+-                weights = torch.as_tensor(attention).float().mean(dim=1)[-1]
+-                token_valid = aux.get("token_valid")
+-                if token_valid is not None:
+-                    token_valid = torch.as_tensor(token_valid)[-1].bool()
+-                    weights = torch.where(token_valid, weights, torch.zeros_like(weights))
+-                token_camera = torch.as_tensor(aux["token_camera_index"])
+-                token_level = torch.as_tensor(aux["token_level_index"])
+-                selected = (token_camera == camera_index) & (token_level == 0)
+-                spatial = self.encode_window(batch)
+-                key = (
+-                    f"{camera_id}::stride4"
+-                    if spatial is not None and f"{camera_id}::stride4" in spatial.levels
+-                    else "stride4"
+-                )
+-                height, width = spatial.levels[key].shape[-2:] if spatial is not None else (64, 64)
+-                cell = (
+-                    weights[selected]
+-                    .detach()
+-                    .cpu()
+-                    .numpy()[: height * width]
+-                    .reshape(height, width)
+-                )
+-                cell = np.maximum(cell, 0.0)
+-                if cell.max() > 0:
+-                    cell = cell / cell.max()
+-                heat = (
+-                    np.asarray(
+-                        Image.fromarray((cell * 255).astype(np.uint8)).resize(
+-                            (grey.shape[1], grey.shape[0]), resample=Image.BILINEAR
+-                        ),
+-                        dtype=np.float32,
+-                    )
+-                    / 255.0
+-                )
+-                base = grey.astype(np.float32) if grey.ndim == 3 else np.stack([grey] * 3, axis=-1)
+-                red = np.stack(
+-                    [np.full_like(heat, 255.0), np.zeros_like(heat), np.zeros_like(heat)], axis=-1
+-                )
+-                overlay = np.clip(
+-                    base * (1.0 - 0.5 * heat[..., None]) + red * (0.5 * heat[..., None]), 0, 255
+-                )
+-                attention_path = self.run_dir / f"preview_attention_{camera_id}.png"
+-                Image.fromarray(overlay.astype(np.uint8)).save(attention_path)
+-                files["attention"] = [
+-                    {
+-                        "camera": camera_id,
+-                        "level": key,
+-                        "path": attention_path.name,
+-                        "pseudo_color": "red overlay",
+-                        "normalisation": (
+-                            "real encoder cross-attention; softmax over tokens, mean over "
+-                            "latents, then max-normalised per frame"
+-                        ),
+-                    }
+-                ]
+-            support = output.q.detach().float().cpu().numpy()
+-            files["support"] = {
+-                "q_last_row": [round(float(value), 6) for value in support[-1].tolist()],
+-                "note": "support weights, not a calibrated posterior",
++            inp = window_inputs(batch)[-1]
++            camera = next(iter(inp.observation.frames))
++            frame = inp.observation.frames[camera]
++            values = np.asarray(frame.values)
++            if not hasattr(self, "display_white_level"):
++                self.display_white_level = max(float(np.quantile(values, 0.99)), 1e-8)
++            labels = (
++                f"episode={inp.observation.episode_ids[0]}; camera={camera}; "
++                f"frame={inp.frame_index[0]}; iteration={self.model.inference.rounds}; "
++                f"model step={getattr(self, 'current_step', 0)}; {EXECUTION_REVISION}"
++            )
++            capture = {
++                "model": self.model,
++                "output": output,
++                "spatial": output.state.geometry[0].spatial,
++                "aux": output.diagnostics["readout_aux"],
++                "queries": self.model.inference.build_queries(inp, batch=1),
++                "stride": self.model.inference.query_stride,
+             }
+-            return {"status": "written", "files": files}
+-        except Exception as error:  # noqa: BLE001 - a preview never fails a training run
++            attention = v12_viz._attention_maps(capture, None)
++            directory = self.run_dir / "preview"
++            directory.mkdir(exist_ok=True)
++            figures = {
++                "raw": v12_viz.figure_raw_display(
++                    frame,
++                    camera_id=camera,
++                    labels=labels,
++                    title="fixed display from first preview, same-source RGB",
++                    gamma=2.2,
++                    gains=[1.0, 1.0, 1.0],
++                    zoom_box=(0, values.shape[-2] // 2, 0, values.shape[-1] // 2),
++                    white_level=self.display_white_level,
++                ),
++                "attention": v12_viz.figure_attention(
++                    frame,
++                    attention,
++                    camera_id=camera,
++                    labels=labels,
++                    title="real Perceiver cross-attention",
++                    white_level=self.display_white_level,
++                ),
++                "rounds": v12_viz.figure_rounds(
++                    output,
++                    labels=labels,
++                    title="support and corrections",
++                    rounds=self.model.inference.rounds,
++                ),
++            }
++            for name, svg in figures.items():
++                path = directory / f"{name}_{camera}.svg"
++                path.write_bytes(svg)
++                files.append(str(path.relative_to(self.run_dir)))
++            return {
++                "status": "written",
++                "files": files,
++                "display_white_level": self.display_white_level,
++            }
++        except Exception as error:  # noqa: BLE001 - preserve the error and checkpoint
+             return {"status": "failed", "reason": f"{type(error).__name__}: {error}"}
+ 
+     # -- main loop ----------------------------------------------------------------------
+@@ -1710,6 +1537,7 @@
+             * 0.999
+             + 0.001
+         )
++        # These weights change on the next update; no fitted threshold stays installed.
+         self.checks["calibration"] = self.calibration_pass()
+         log(f"calibration: {json.dumps(self.checks['calibration'], ensure_ascii=False)}")
+         self.checks["prior_wiring"] = self.prior_wiring_check()
+@@ -1747,6 +1575,9 @@
+                 )
+         train_source = self.sources["train"]
+         generator = torch.Generator(device=self.device).manual_seed(int(plan.seed) + 1)
++        if plan.resume is not None and payload.get("training_generator") is not None:
++            generator.set_state(payload["training_generator"])
++        self.train_generator = generator
+         budget = int(plan.max_updates)
+         log(
+             f"training {budget - step} more updates: microbatch={plan.batch_size} anchors, "
+@@ -1756,10 +1587,13 @@
+         step_times: list[float] = []
+         losses: list[float] = []
+         skipped: list[int] = []
++        consecutive_padding = 0
+         profile: dict[str, Any] = {}
+         last_status = 0.0
+         last_terms: dict[str, Any] = {}
+-        max_start = max(1, int(train_source.anchor_count) - plan.batch_size)
++        anchor_count = int(train_source.anchor_count)
++        from owac.frameworks.n02_full.sequence_v12 import training_anchor_order
++
+         with Heartbeat(self.run_dir, "训练中"):
+             self.status(state="running", activity=f"训练更新 {step}/{budget}", step=int(step))
+             while step < budget:
+@@ -1771,17 +1605,33 @@
+                 last: dict[str, Any] = {}
+                 micro = 0
+                 while micro < plan.grad_accum:
+-                    start = (cursor * plan.batch_size) % max_start
+-                    result = self.microbatch(start, plan.batch_size + start, generator=generator)
++                    # Shuffle contiguous anchor blocks; every anchor, including the final
++                    # partial block, occurs once per epoch. Windows remain independent.
++                    blocks = (anchor_count + plan.batch_size - 1) // plan.batch_size
++                    start = training_anchor_order(blocks, plan.seed, cursor)[0] * plan.batch_size
++                    stop = min(anchor_count, start + plan.batch_size)
++                    result = self.microbatch(start, stop, generator=generator)
+                     cursor += 1
+                     if result is None:
+                         skipped.append(start)
+-                        if len(skipped) > 256:
++                        consecutive_padding += 1
++                        if consecutive_padding > 256:
+                             raise RuntimeError(
+-                                f"{len(skipped)} consecutive anchors carry no supervised action; "
++                                f"{consecutive_padding} consecutive padding windows; "
+                                 "the mask path is suspect, refusing to keep skipping"
+                             )
+                         continue
++                    consecutive_padding = 0
++                    if not bool(torch.isfinite(result["loss"])):
++                        self._write_json(
++                            "failure_context.json",
++                            {
++                                "step": step + 1,
++                                "terms": result["terms"],
++                                "window": result["info"]["window"],
++                            },
++                        )
++                        raise RuntimeError(f"non-finite loss before backward at update {step + 1}")
+                     (result["loss"] / plan.grad_accum).backward()
+                     for name, value in result["terms"].items():
+                         if value is not None:
+@@ -1812,17 +1662,22 @@
+                         "frozen π0.5 parameters received gradients: "
+                         f"{self.frozen_with_grad[:5]} (count {len(self.frozen_with_grad)})"
+                     )
++                if not all(item["finite"] for item in gradient_stats.values()):
++                    raise RuntimeError(f"non-finite gradients before optimizer update {step + 1}")
++                grad_norm = None
+                 if self.grad_clip > 0:
+-                    torch.nn.utils.clip_grad_norm_(
++                    grad_norm = torch.nn.utils.clip_grad_norm_(
+                         [
+                             parameter
+                             for group in self.optimizer.param_groups
+                             for parameter in group["params"]
+                         ],
+                         self.grad_clip,
++                        error_if_nonfinite=True,
+                     )
+                 self.optimizer.step()
+                 step += 1
++                self.current_step = step
+                 elapsed = time.perf_counter() - update_start
+                 step_times.append(elapsed)
+                 means = {name: float(np.mean(values)) for name, values in collected.items()}
+@@ -1837,6 +1692,21 @@
+                         total_loss += weights[name] * means[key]
+                 if not math.isfinite(total_loss):
+                     raise RuntimeError(f"non-finite training loss at update {step}")
++                with (self.run_dir / "optimization.jsonl").open("a") as handle:
++                    handle.write(
++                        json.dumps(
++                            {
++                                "step": step,
++                                "terms": means,
++                                "grad_norm_before_clip": None
++                                if grad_norm is None
++                                else float(grad_norm),
++                                "window": info.get("window"),
++                                "execution_revision": EXECUTION_REVISION,
++                            }
++                        )
++                        + "\n"
++                    )
+                 losses.append(total_loss)
+                 last_terms = {name: round(value, 6) for name, value in means.items()}
+                 dev_record = None
+@@ -1964,9 +1834,7 @@
+         )
+ 
+     def _set_lr(self, step: int) -> None:
+-        if self.warmup <= 0 or step >= self.warmup:
+-            return
+-        scale = float(step + 1) / float(self.warmup)
++        scale = 1.0 if self.warmup <= 0 else min(1.0, float(step + 1) / self.warmup)
+         for group, base in zip(self.optimizer.param_groups, self.base_lrs, strict=True):
+             group["lr"] = base * scale
+ 
+@@ -2106,6 +1974,7 @@
+             {
+                 "run_id": plan.run_id,
+                 "stage": STAGE,
++                "execution_revision": EXECUTION_REVISION,
+                 "arm": plan.arm,
+                 "platform": plan.platform,
+                 "seed": int(plan.seed),
+--- a/tests/encoders/n02_full/test_v12_eval.py
++++ b/tests/encoders/n02_full/test_v12_eval.py
+@@ -143,128 +143,65 @@
+ # ---------------------------------------------------------------------------------------
+ 
+ 
+-def test_check_rule_matches_the_views_the_frozen_inference_builds() -> None:
+-    model = tiny_model()
+-    settings = v12_eval.resolve_settings(
+-        v12_eval.build_parser().parse_args(["--dataset-format", "robotwin"])
+-    )
+-    settings.model = tiny_settings()
+-    rule = v12_eval.build_check_rule(settings)
+-    assert rule.scales == ("sensor_stride8",)
+-    assert rule.frames == (0,)
+-    assert set(rule.regions) == set(CAMERAS)
+-    assert rule.use_local_maximum is False
+-
++def test_check_rule_matches_without_changing_decoder_time() -> None:
++    model = tiny_model()
+     batch = FakeBatch()
+-    state = model.build_state(batch=1)
+-    observation = v12_eval.row_observation(batch.observation, ROWS - 1)
+-    # the real-frame pass labels the views with the real frame index: the frozen rule (which is
+-    # shared between calibration and dev) cannot name it, and that is stated, not hidden
+-    real_inp = v12_eval.inference_input(batch, observation=observation, rows=[ROWS - 1])
+-    real_output = model.step(real_inp, state)
+-    real_locked = v12_eval.locked_residual_groups(model.inference, real_inp, state, real_output.q)
+-    real_frame = int(batch.frame_index[-1])
+-    assert real_locked["labels"][0] == [
+-        ("sensor_stride8", real_frame, "cam_a"),
+-        ("sensor_stride8", real_frame, "cam_b"),
+-    ]
+-    with pytest.raises(Exception, match="viewing rule"):
+-        select_views(real_locked["groups"][0], rule=rule)
+-
+-    # the check-labelled pass declares the constant window label, so the rule selects exactly
+-    # those views (the real identity stays in the declared measurement ids)
+-    check_inp = v12_eval.inference_input(
+-        batch, observation=observation, rows=[ROWS - 1], frame_label=0
+-    )
+-    check_output = model.step(check_inp, state)
+-    locked = v12_eval.locked_residual_groups(model.inference, check_inp, state, check_output.q)
+-    assert locked["labels"][0] == [
+-        ("sensor_stride8", 0, "cam_a"),
+-        ("sensor_stride8", 0, "cam_b"),
+-    ]
++    replay = v12_eval.replay_window(model, batch, device="cpu", check_label=0)
++    locked = v12_eval.locked_residual_groups(
++        model.inference, replay["check_input"], replay["check_state"], replay["check_backend"].q
++    )
++    assert locked["frame_index"] == [1002]
++    assert locked["labels"][0] == [("sensor_stride8", 0, camera) for camera in CAMERAS]
++    rule = ViewingRule(scales=("sensor_stride8",), frames=(0,), regions=CAMERAS)
+     assert len(select_views(locked["groups"][0], rule=rule)) == 2
+-    assert all(item.startswith("episode_007/cam_") for item in locked["measurement_ids"]), locked[
+-        "measurement_ids"
+-    ]
+-
+-
+-def test_calibrated_check_is_valid_and_uncalibrated_is_counted_separately() -> None:
+-    model = tiny_model()
++    assert replay["rows"][0].check.valid is False  # no prefix is not a valid check
++
++
++def _fit_causal_check(model):
+     rule = ViewingRule(
+         scales=("sensor_stride8",), frames=(0,), regions=CAMERAS, window=4, use_local_maximum=False
+     )
+     groups, ids = [], []
+     for seed in range(6):
+-        batch = FakeBatch(seed=seed)
+-        state = model.build_state(batch=1)
+-        observation = v12_eval.row_observation(batch.observation, ROWS - 1)
+-        inp = v12_eval.inference_input(
+-            batch, observation=observation, rows=[ROWS - 1], frame_label=0
++        replay = v12_eval.replay_window(model, FakeBatch(seed=seed), device="cpu", check_label=0)
++        locked = v12_eval.locked_residual_groups(
++            model.inference, replay["check_input"], replay["check_state"], replay["check_backend"].q
+         )
+-        output = model.step(inp, state)
+-        locked = v12_eval.locked_residual_groups(model.inference, inp, state, output.q)
+         groups.extend(locked["groups"])
+         ids.extend(locked["measurement_ids"])
+-    frozen = calibrate_windowed(
++    return calibrate_windowed(
+         groups, partition="calibration", rule=rule, calibration_ids=ids, test_ids=[]
+     )
++
++
++def test_calibrated_check_is_valid_and_uncalibrated_is_counted_separately() -> None:
++    model = tiny_model()
++    frozen = _fit_causal_check(model)
+     assert np.isfinite(frozen.threshold)
+-
+     model.inference.calibrator = frozen
+-    batch = FakeBatch(seed=99)
+-    state = model.build_state(batch=1)
+-    observation = v12_eval.row_observation(batch.observation, ROWS - 1)
+-    inp = v12_eval.inference_input(batch, observation=observation, rows=[ROWS - 1], frame_label=0)
+-    checked = model.step(inp, state)
+-    assert checked.check.valid is True
+-    assert checked.check.status in STATUSES
+-    summary = summarise_results([checked.check])
+-    assert summary["total"] == 1 and summary["valid"] == 1 and summary["invalid"] == 0
+-
++    checked = v12_eval.replay_window(model, FakeBatch(seed=99), device="cpu", check_label=0)[
++        "check_backend"
++    ]
++    assert checked.check.valid is True and checked.check.status in STATUSES
+     model.inference.calibrator = None
+-    uncalibrated = model.step(
+-        v12_eval.inference_input(batch, observation=observation, rows=[ROWS - 1], frame_label=0),
+-        state,
+-    )
++    uncalibrated = v12_eval.replay_window(model, FakeBatch(seed=99), device="cpu", check_label=0)[
++        "check_backend"
++    ]
+     assert uncalibrated.check.valid is False
+     record = v12_eval.check_record(uncalibrated.check)
+-    assert record["valid"] is False
+     assert record["statistics"]["reason"] == "no_fitted_calibrator"
++    summary = summarise_results([checked.check, uncalibrated.check])
++    assert summary["valid"] == 1 and summary["invalid"] == 1
+     assert not _contains_none_string(record)
+-    separate = summarise_results([uncalibrated.check])
+-    assert separate["invalid"] == 1
+-    assert separate["compatible"] == 0 and separate["model_inadequate"] == 0
+ 
+ 
+ def test_a_label_that_does_not_match_the_frozen_rule_is_an_explicit_failure() -> None:
+     model = tiny_model()
+-    batch = FakeBatch()
+-    state = model.build_state(batch=1)
+-    observation = v12_eval.row_observation(batch.observation, ROWS - 1)
+-    rule = ViewingRule(
+-        scales=("sensor_stride8",), frames=(0,), regions=CAMERAS, window=4, use_local_maximum=False
+-    )
+-    groups, ids = [], []
+-    for seed in range(4):
+-        item = FakeBatch(seed=seed)
+-        item_state = model.build_state(batch=1)
+-        obs = v12_eval.row_observation(item.observation, ROWS - 1)
+-        inp = v12_eval.inference_input(item, observation=obs, rows=[ROWS - 1], frame_label=0)
+-        output = model.step(inp, item_state)
+-        locked = v12_eval.locked_residual_groups(model.inference, inp, item_state, output.q)
+-        groups.extend(locked["groups"])
+-        ids.extend(locked["measurement_ids"])
+-    model.inference.calibrator = calibrate_windowed(
+-        groups, partition="calibration", rule=rule, calibration_ids=ids, test_ids=[]
+-    )
+-    with pytest.raises(Exception) as excinfo:
+-        model.step(
+-            v12_eval.inference_input(
+-                batch, observation=observation, rows=[ROWS - 1], frame_label=4242
+-            ),
+-            state,
+-        )
+-    assert "viewing rule" in str(excinfo.value)
++    frozen = _fit_causal_check(model)
++    frozen.rule = ViewingRule(scales=("sensor_stride8",), frames=(4242,), regions=CAMERAS)
++    model.inference.calibrator = frozen
++    with pytest.raises(Exception, match="viewing rule"):
++        v12_eval.replay_window(model, FakeBatch(), device="cpu", check_label=0)
+ 
+ 
+ def test_invalid_results_never_enter_the_status_counts() -> None:
+@@ -301,7 +238,7 @@
+     # the measurement ids of the check step
+     observation = v12_eval.row_observation(batch.observation, ROWS - 1)
+     inp = v12_eval.inference_input(batch, observation=observation, rows=[ROWS - 1], frame_label=0)
+-    assert [int(item) for item in inp.frame_index.tolist()] == [0]
++    assert [int(item) for item in inp.frame_index.tolist()] == [int(batch.frame_index[-1])]
+     assert all(item[2] == str(int(batch.frame_index[-1])) for item in inp.measurement_ids), (
+         inp.measurement_ids
+     )
+@@ -377,14 +314,14 @@
+     model = tiny_model()
+     bad = tmp_path / "model.safetensors"
+     bad.write_bytes(b"not a torch checkpoint")
+-    receipt = v12_eval.load_checkpoint_into(model, bad)
+-    assert receipt["loaded"] is False
+-    assert "not a torch checkpoint" in receipt["reason"]
+-
++    with pytest.raises(v12_eval.EvalError, match="not a torch checkpoint"):
++        v12_eval.load_checkpoint_into(model, bad)
+     broken = tmp_path / "broken.pt"
+     broken.write_bytes(b"not a torch checkpoint either")
+-    receipt = v12_eval.load_checkpoint_into(model, broken)
+-    assert receipt["loaded"] is False and receipt["reason"]
++    with pytest.raises(v12_eval.EvalError, match="cannot load"):
++        v12_eval.load_checkpoint_into(model, broken)
++    with pytest.raises(v12_eval.EvalError, match="missing"):
++        v12_eval.load_checkpoint_into(model, tmp_path / "absent.pt")
+ 
+ 
+ def test_model_step_prefers_the_file_then_the_flag_then_stays_unknown(tmp_path: Path) -> None:
+@@ -561,3 +498,227 @@
+     (preview / "figures.json").write_text("{}", encoding="utf-8")
+     files = v12_eval._preview_files(preview)
+     assert files == ["preview/01_raw_rgb_zoom_000_cam_a.svg"]
++
++
++def test_real_window_tokens_use_prefix_and_match_evaluation_without_prefix_gradients():
++    from owac.backends.n02_v12_tokens import N02V12TokenSource
++    from owac.frameworks.n02_full.sequence_v12 import replay_inputs, window_inputs
++
++    model = tiny_model(n_queries=256, out_dim=2048)
++    batch = FakeBatch()
++    batch.history = ROWS
++    for frame in batch.observation.frames.values():
++        frame.values.requires_grad_()
++    source = N02V12TokenSource(model, camera_ids=CAMERAS, history=ROWS)
++    tokens = source(batch).values
++    reference = replay_inputs(model, window_inputs(batch))["rows"][-1].tokens
++    torch.testing.assert_close(tokens, reference, rtol=0, atol=0)
++    tokens.square().mean().backward()
++    for frame in batch.observation.frames.values():
++        assert frame.values.grad[: ROWS - 1].abs().sum() == 0
++        assert frame.values.grad[ROWS - 1].abs().sum() > 0
++    changed = FakeBatch()
++    changed.history = ROWS
++    for camera in CAMERAS:
++        changed.observation.frames[camera].values[-1] = (
++            batch.observation.frames[camera].values[-1].detach()
++        )
++        changed.observation.frames[camera].values[:-1] += 3
++    changed_tokens = source(changed).values
++    assert float((changed_tokens - tokens.detach()).detach().abs().max()) > 1e-7
++
++
++def test_causal_prediction_is_independent_of_current_pixels_and_candidate_selection():
++    first, changed = FakeBatch(), FakeBatch()
++    for frame in changed.observation.frames.values():
++        frame.values[-1] += 10
++    model = tiny_model()
++    a = v12_eval.replay_window(model, first, device="cpu", check_label=0)["rows"][-1]
++    b = v12_eval.replay_window(model, changed, device="cpu", check_label=0)["rows"][-1]
++    for name in ("mean", "variance", "chosen"):
++        torch.testing.assert_close(a.causal[name], b.causal[name], rtol=0, atol=0)
++    assert not torch.equal(a.causal["residuals"], b.causal["residuals"])
++    assert not torch.equal(a.mean, b.mean)
++
++
++def test_dense_queries_preserve_all_channels_last_rows_and_pixel_masks():
++    from owac.frameworks.n02_full.inference_v12 import build_query_sets
++
++    obs = bundle(rows=1, side=32, cameras=(CAMERAS[0],))
++    frame = obs.frames[CAMERAS[0]]
++    frame.valid_mask = torch.ones_like(frame.values, dtype=torch.bool)
++    frame.valid_mask[0, 1, 31, 1] = False
++    queries = build_query_sets(obs, stride=1, max_queries_per_camera=0, channel_reduction="select")
++    assert queries.coverage == (1.0,)
++    assert queries.target.numel() == 3 * 32 * 32
++    torch.testing.assert_close(queries.target, frame.values.flatten(1))
++    assert int(queries.masks["valid"].sum()) == 3 * 32 * 32 - 1
++    assert int(queries.coords[0, :, 1].max()) == 31
++    assert set(queries.query_channel.flatten().tolist()) == {0, 1, 2}
++
++
++def test_retraction_replay_matches_a_clean_run_without_the_removed_measurement():
++    from owac.frameworks.n02_full.sequence_v12 import window_inputs
++
++    model = tiny_model()
++    inputs = window_inputs(FakeBatch())
++    with torch.no_grad():
++        first = model.step(inputs[0], model.build_state(1))
++        second = model.step(inputs[1], first.state)
++        third = model.step(inputs[2], second.state)
++        pruned = model.drop_measurements(third.state, second.diagnostics["meas_ids"][0])
++        rebuilt, receipt = model.rebuild(inputs[2], pruned)
++        clean_first = model.step(inputs[0], model.build_state(1))
++        clean = model.step(inputs[2], clean_first.state)
++    assert receipt["from_zero"] is True
++    assert len(rebuilt.geometry[0].entries) == 2
++    torch.testing.assert_close(rebuilt.slot_hidden, clean.state.slot_hidden, rtol=0, atol=0)
++    torch.testing.assert_close(rebuilt.geometry[0].tokens, clean.tokens[0], rtol=0, atol=0)
++
++
++def test_training_permutation_covers_all_anchors_and_resume_cursor():
++    from owac.frameworks.n02_full.sequence_v12 import training_anchor_order
++
++    order = [training_anchor_order(97, 1103, cursor)[0] for cursor in range(194)]
++    assert sorted(order[:97]) == list(range(97))
++    assert sorted(order[97:]) == list(range(97))
++    assert order[:97] != list(range(97)) and order[:97] != order[97:]
++    assert [training_anchor_order(97, 1103, cursor)[0] for cursor in range(40, 45)] == order[40:45]
++
++
++def test_training_preview_uses_real_attention_without_channel_broadcasting(tmp_path):
++    from types import SimpleNamespace
++
++    from owac.training.n02_v12 import N02V12Trainer
++
++    model = tiny_model()
++    batch = FakeBatch()
++    batch.history = ROWS
++    output = v12_eval.replay_window(model, batch, device="cpu", check_label=0)["rows"][-1]
++    trainer = N02V12Trainer.__new__(N02V12Trainer)
++    trainer.model, trainer.run_dir = model, tmp_path
++    trainer.plan = SimpleNamespace(previews=1)
++    trainer.current_step = 2
++    receipt = trainer.write_previews(batch, output)
++    assert receipt["status"] == "written", receipt
++    assert len(receipt["files"]) == 3
++    for filename in receipt["files"]:
++        text = (tmp_path / filename).read_text()
++        assert text.startswith("<svg") and "model step=2" in text
++    attention = (tmp_path / receipt["files"][1]).read_text()
++    assert "cross-attention" in attention and "<image" in attention
++
++
++def test_eval_rgb_source_uses_the_declared_isp_and_official_prompt_reader(tmp_path):
++    from dataclasses import make_dataclass
++
++    from owac.frameworks.n02_full.data_v12 import (
++        RepresentedWindowSource,
++        apply_declared_isp,
++        read_task_prompts,
++    )
++
++    batch = make_dataclass("ServedBatch", [("observation", object)])(FakeBatch().observation)
++
++    class Source:
++        def window(self, start, stop):
++            return batch
++
++    spec = {"kind": "raw3_fixed_isp", "isp": {"input_scale": 1, "gamma": 2.2}}
++    represented = RepresentedWindowSource(Source(), spec).window(0, 1)
++    expected = apply_declared_isp(batch.observation, spec)
++    for camera in CAMERAS:
++        torch.testing.assert_close(
++            represented.observation.frames[camera].values,
++            expected.frames[camera].values,
++            rtol=0,
++            atol=0,
++        )
++        assert not torch.equal(
++            represented.observation.frames[camera].values, batch.observation.frames[camera].values
++        )
++    np.savez(
++        tmp_path / "episode.npz", metadata_json=json.dumps({"task_description": "open the drawer"})
++    )
++    assert read_task_prompts(["episode.npz"], str(tmp_path)) == ["open the drawer"]
++
++
++def test_language_tokenizer_failure_cannot_be_replaced_by_placeholder_tokens():
++    from types import SimpleNamespace
++
++    class BrokenTokenizer:
++        def tokenize(self, *args):
++            raise RuntimeError("tokenizer unavailable")
++
++    policy = SimpleNamespace(
++        base=SimpleNamespace(tokenizer=BrokenTokenizer()), protocol=SimpleNamespace(name="libero")
++    )
++    with pytest.raises(RuntimeError, match="tokenizer unavailable"):
++        v12_eval._language_batch(policy, ["open the drawer"], np.zeros((1, 8)), None)
++
++
++def test_multiple_windows_do_not_mix_episodes_or_discard_anchor_rows():
++    from owac.backends.n02_v12_tokens import N02V12TokenSource
++    from owac.frameworks.n02_full.sequence_v12 import replay_inputs, window_inputs
++
++    batch = FakeBatch(rows=6)
++    batch.history = 3
++    model = tiny_model(n_queries=256, out_dim=2048)
++    source = N02V12TokenSource(model, camera_ids=CAMERAS, history=3)
++    with torch.no_grad():
++        tokens = source(batch).values
++        expected = torch.cat(
++            [
++                replay_inputs(model, window_inputs(batch, anchor))["rows"][-1].tokens
++                for anchor in range(2)
++            ]
++        )
++    assert tokens.shape == (2, 512, 2048)
++    torch.testing.assert_close(tokens, expected, rtol=0, atol=0)
++    assert len(source.last_outputs) == 2
++
++
++def test_zero_prior_mass_stays_zero_even_with_a_large_energy_advantage():
++    from owac.frameworks.n02_full.inference_v12 import V12InferenceInput
++
++    model = tiny_model()
++    prior = torch.tensor([[0.0, 0.5, 0.5]])
++    inp = V12InferenceInput(
++        v12_eval.row_observation(FakeBatch().observation, 0), declared_prior=prior
++    )
++    log_prior, _ = model.inference._log_prior(inp, batch=1, device=torch.device("cpu"))
++    support = model.inference._support(log_prior, torch.tensor([[-1e9, 0.0, 0.0]]))
++    assert support[0, 0] == 0
++    torch.testing.assert_close(support[0, 1:], torch.tensor([0.5, 0.5]))
++
++
++def test_svg_embeds_a_decodable_png_rather_than_raw_pixels():
++    import base64
++    import struct
++    import xml.etree.ElementTree as ET
++    import zlib
++
++    pixels = np.arange(18, dtype=np.uint8).reshape(2, 3, 3)
++    fragment = v12_viz._image(pixels, 0, 0, 3, 2, "real pixels")
++    svg = f"<svg xmlns:xlink='http://www.w3.org/1999/xlink'>{fragment}</svg>"
++    href = ET.fromstring(svg)[0].attrib["{http://www.w3.org/1999/xlink}href"]
++    encoded = base64.b64decode(href.split(",", 1)[1])
++    assert encoded.startswith(b"\x89PNG\r\n\x1a\n")
++    assert struct.unpack(">II", encoded[16:24]) == (3, 2)
++    offset, compressed = 8, b""
++    while offset < len(encoded):
++        length = struct.unpack(">I", encoded[offset : offset + 4])[0]
++        kind = encoded[offset + 4 : offset + 8]
++        payload = encoded[offset + 8 : offset + 8 + length]
++        if kind == b"IDAT":
++            compressed += payload
++        offset += length + 12
++    rows = np.frombuffer(zlib.decompress(compressed), dtype=np.uint8).reshape(2, 10)
++    assert np.array_equal(rows[:, 1:].reshape(2, 3, 3), pixels)
++
++
++def test_resize_preserves_subunit_attention_values_until_colour_mapping():
++    values = np.array([[0.0, 0.0001], [0.0002, 0.0003]], dtype=np.float32)
++    resized = v12_viz._resize(values, (8, 8), mode="nearest")
++    assert resized.dtype == np.float32 and resized.max() == values.max()
++    assert v12_viz.heat_rgb(resized).max() > 0
+--- a/tests/encoders/n02_full/test_v12_inference.py
++++ b/tests/encoders/n02_full/test_v12_inference.py
+@@ -482,6 +482,7 @@
+         def absolute_check(self, **_: object):
+             return NoVerdictCheck()
+ 
++    state = model.step(make_input(prior=torch.full((BATCH, K), 1.0 / K)), state).state
+     model.inference.measurement = Malformed()
+     with pytest.raises(v12.N02V12InferenceError):
+         model.step(make_input(prior=torch.full((BATCH, K), 1.0 / K)), state)
+--- a/tests/encoders/n02_full/test_v12_training.py
++++ b/tests/encoders/n02_full/test_v12_training.py
+@@ -497,7 +497,9 @@
+         payload = json.loads((root / name).read_text())
+         assert payload["model"]["dims"] == [128, 256, 512, 1024]
+         assert payload["model"]["depths"] == [3, 3, 27, 3]
+-        assert payload["model"]["query_stride"] in (4, 8)
++        assert payload["model"]["query_stride"] == 1
++        assert payload["model"]["channel_reduction"] == "select"
++        assert payload["model"]["max_queries_per_camera"] == 0
+         assert payload["model"]["k"] >= 2 and payload["model"]["rounds"] >= 1
+         assert payload["model"]["history"] == 8
+         assert payload["policy"]["freeze_backend"] is True

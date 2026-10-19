@@ -1,0 +1,22 @@
+{
+  "version": "r8-backend-predeclared",
+  "prerequisite": "final 400-update representation passes the unchanged representation gate",
+  "selection": "among passing final encoders, highest crop_match_accuracy; patch_loss / blank_patch_loss breaks ties",
+  "encoder": "freeze accepted RAW encoder in both arms",
+  "arms": {
+    "readout": "balanced spatial readout adapts; original backend frozen",
+    "lora": "same frontend, plus q_proj/v_proj LoRA rank8 alpha16; original backend frozen"
+  },
+  "seed": 1103,
+  "max_updates_per_arm": 400,
+  "pilot_updates": 2,
+  "batch": "choose after actual GPU memory/speed pilot, same effective batch in both arms",
+  "aux_losses": {
+    "raw": 0,
+    "prediction": 0,
+    "noise": 0
+  },
+  "backend_adapter_lr": 5e-05,
+  "readout_lr": 0.0001,
+  "closed_loop": "grab_roller seed0 Normal at 100/400 updates, same actual grasp/hold acceptance; no credit for upstream instantaneous success"
+}
