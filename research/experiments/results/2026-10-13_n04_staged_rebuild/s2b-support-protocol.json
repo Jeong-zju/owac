@@ -1,0 +1,125 @@
+{
+  "stage": "s2b-support",
+  "source_commit": "318700255d0fdcf90439be00ec90c26bb77d2779",
+  "source_sha256": {
+    "src/owac/frameworks/n04/proprio.py": "e96494ede9668f1f60af5c47841601f55a78502bbdee8e9ecad650cb6897b630",
+    "src/owac/frameworks/n04/ego.py": "3efd53e58478c3000cf75e55e0bfcd8709a98671c7e54ba6ba3d9948f64ca105",
+    "src/owac/frameworks/n04/synthetic.py": "73cafc698350322b498ec504fe654faf7e35feed797cd3420da30569f6f39a68",
+    "src/owac/frameworks/n04/geometry.py": "35c2596ec815df23095ec9e63f889702dff902185c16b4298edb799b8f0788c3",
+    "src/owac/frameworks/n04/config.py": "b82740229be4d3635570f21f2c10e935ef0a93a9068022d6a8887a223b2d5971",
+    "src/owac/frameworks/n04/state.py": "bf00eaeadc8492b837bf7cb8374f10c5fe9369071dabd25c2cfbff86b10c128b",
+    "src/owac/frameworks/n04/__init__.py": "199dd999af3b0d1f3d07fcef42549605d3ad383415d95c7f27d3a6a560cb919a",
+    "src/owac/frameworks/n04/innovation.py": "7eb5100bc51bfc09cef598b628b5359b6f7a5b58ee491178b1de59e2df63310b",
+    "src/owac/frameworks/n04/model.py": "16ed875bdd61e1350de87e5e7bf6ba8353bcb678f4ab62adb03c776657fc24c2",
+    "src/owac/training/n04.py": "882ab7e71c7b62dd930fd906d5f09069f3d91419fb2e4e01e2f6631f00fef7c7",
+    "src/owac/baselines/n04.py": "c4c64280e524a0e1b1fd5d5c5144ece9e54bf9b124a034e41a8ad203519d09b6",
+    "src/owac/evaluation/n04.py": "daa401c5f50fce81a29c26a0d0094824cfbac1ca148e9fc80de4f6ab0a3c4a56"
+  },
+  "model_config": {
+    "name": "n04-tiny",
+    "width": 32,
+    "blocks": 2,
+    "scales": 2,
+    "scale_strides": [
+      1,
+      2
+    ],
+    "coarse_stride": 4,
+    "hidden": 64,
+    "camera_embedding": 8,
+    "sigma_floor": 0.05,
+    "illumination_branch": true,
+    "change_branch": true,
+    "innovation_reference": "sensor_history",
+    "match_observation_support": true,
+    "readout_tokens": 64,
+    "readout_dim": 128,
+    "predictor": "learned_proprio",
+    "use_previous_features": true,
+    "motion_dim": null,
+    "loss_weights": {
+      "location": 1.0,
+      "future_measurement": 0.5,
+      "change": 0.1,
+      "ego_warp": 0.1
+    }
+  },
+  "recipe": {
+    "sequence_length": 12,
+    "tbptt": 8,
+    "batch_size": 4,
+    "steps": 200,
+    "lr": 0.0003,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "freeze_propagation": false,
+    "future_measurement_loss": true,
+    "cfa": false,
+    "device": "cuda",
+    "dtype": "float32",
+    "log_every": 25,
+    "checkpoint_every": 100,
+    "seed": 0,
+    "threads": 4,
+    "synthetic": {
+      "camera_translation": [
+        1.2,
+        1.2
+      ],
+      "camera_rotation": [
+        0.0,
+        0.4
+      ],
+      "object_velocity": [
+        0.8,
+        1.2
+      ],
+      "illumination": [
+        0.7,
+        1.3
+      ],
+      "noise_sigma": 0.01,
+      "action_delay": 2,
+      "calibration_scale": 1.08
+    },
+    "output": "outputs/n04"
+  },
+  "initialization_seeds": [
+    0,
+    1,
+    2
+  ],
+  "training_data_seeds": [
+    41000,
+    41001,
+    41002
+  ],
+  "development_seeds": [
+    42000,
+    42001,
+    42002
+  ],
+  "final_test_seeds_reserved": [
+    45000,
+    45001,
+    45002
+  ],
+  "models": [
+    "candidate"
+  ],
+  "updates": 200,
+  "detector_threshold": 0.5,
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 5090",
+  "data_revision": "sample-independent-render-label-v1",
+  "data_sha256": {
+    "0": "e8c56e6c2f0742a01f1e9024fc6f3370490f0ea990fa9dc0972379ccbb6159e4",
+    "1": "4ec876cc0b1d3d4a9fa710f2ee06cda3c6b4f8cf69b84ddaf0a5388fb431e166",
+    "2": "b5da7ea5a68b0e397585cccdc3576c590b352abd702b44314c0475c7bd14b4d9"
+  },
+  "complete": true,
+  "note": "Same data per paired model; three independent data sets and initializations. Final test remains unobserved until all stages are frozen. Equal updates, not capacity or FLOPs.",
+  "checkpoints": 3,
+  "suites": 9
+}

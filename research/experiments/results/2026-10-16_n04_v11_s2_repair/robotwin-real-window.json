@@ -1,0 +1,129 @@
+{
+  "platform": "robotwin",
+  "source": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/place_dual_shoes/episode_000023.npz",
+  "window": [
+    64,
+    48
+  ],
+  "loss": 2.7103967666625977,
+  "info": {
+    "terms": {
+      "action": 2.372453212738037,
+      "correspondence": 2.0005335807800293,
+      "forecast": 1.2818219661712646,
+      "representation": 0.9707902669906616
+    },
+    "applied_terms": {
+      "action": 2.372453212738037,
+      "correspondence": 2.0005335807800293,
+      "forecast": 1.2818219661712646,
+      "representation": 0.9707902669906616
+    },
+    "applied_train_loss": 2.7103967666625977,
+    "term_sources": {
+      "correspondence": "encoder.losses(all gradient frames)",
+      "forecast": "causal forecast, live source / stop-grad target",
+      "representation": "VICReg across observations at fixed query"
+    },
+    "supervision_points": 4,
+    "forecast": {
+      "created": 267,
+      "settled": 267,
+      "skipped": 21,
+      "skip_reasons": {
+        "window_too_short": 21
+      },
+      "diagnostics": {
+        "1": {
+          "forecast_quad": 12.29885163871191,
+          "forecast_logdet": 117.76152186239919,
+          "forecast_mode_w0": 0.9488521160617951,
+          "forecast_mode_w1": 0.05114785141201429,
+          "forecast_S_mean": 1.6343622066641366,
+          "forecast_S_min": 1.151556311115142,
+          "forecast_S_max": 2.424816308483001,
+          "forecast_R_mean": 1.0017273336328485,
+          "forecast_R_min": 0.6806736011658946,
+          "forecast_R_max": 1.3931772042346258,
+          "count": 93.0
+        },
+        "2": {
+          "forecast_quad": 19.265070131089953,
+          "forecast_logdet": 156.31509263780382,
+          "forecast_mode_w0": 0.9167506840493944,
+          "forecast_mode_w1": 0.0832493130531576,
+          "forecast_S_mean": 1.9053932216432359,
+          "forecast_S_min": 1.387967750761244,
+          "forecast_S_max": 2.666828311814202,
+          "forecast_R_mean": 1.001728610197703,
+          "forecast_R_min": 0.6815509981579251,
+          "forecast_R_max": 1.3911493672264947,
+          "count": 90.0
+        },
+        "4": {
+          "forecast_quad": 36.121831712268644,
+          "forecast_logdet": 226.24624633789062,
+          "forecast_mode_w0": 0.8824593651862371,
+          "forecast_mode_w1": 0.1175405964964912,
+          "forecast_S_mean": 2.5004017636889504,
+          "forecast_S_min": 1.9310885596842993,
+          "forecast_S_max": 3.3114790405545915,
+          "forecast_R_mean": 1.0017293521336146,
+          "forecast_R_min": 0.6827010888428915,
+          "forecast_R_max": 1.3902413476081121,
+          "count": 84.0
+        }
+      }
+    },
+    "windows": 1,
+    "segments": 4,
+    "valid_loss_counts": {
+      "correspondence": 32,
+      "forecast": 267,
+      "action": 4,
+      "representation": 4
+    },
+    "denominators": {
+      "windows": 1.0,
+      "points": 4,
+      "gradient_frames": 32,
+      "forecast_anchors": 267
+    }
+  },
+  "gradients": {
+    "encoder.measurement": {
+      "elements": 88647040,
+      "abs_sum": 7494659922.337775
+    },
+    "encoder.quality_head": {
+      "elements": 58240,
+      "abs_sum": 1.6948994691483676
+    },
+    "encoder.correspondence": {
+      "elements": 5257536,
+      "abs_sum": 17.544241207315366
+    },
+    "encoder.state_stack": {
+      "elements": 378882,
+      "abs_sum": 78.27498947543566
+    },
+    "encoder.readout": {
+      "elements": 66637824,
+      "abs_sum": 711096.108797051
+    },
+    "backend.vlm": {
+      "elements": 3620864,
+      "abs_sum": 678.2987866401672
+    },
+    "backend.action_head": {
+      "elements": 432605216,
+      "abs_sum": 135241.53613894433
+    }
+  },
+  "peak_gb": 81.221565952,
+  "seconds": 64.8425141684711,
+  "optimizer_updates": 0,
+  "parameter_versions_unchanged": true,
+  "checkpoint_written": false,
+  "weights": "fresh N04 encoder and official pretrained pi05; no encoder migration"
+}

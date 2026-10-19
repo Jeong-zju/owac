@@ -1,0 +1,33 @@
+{
+  "input": "random normalized three-channel fixture, not dataset accuracy",
+  "config": "configs/encoders/n04/libero_npz_smoke.json",
+  "device": "NVIDIA GeForce RTX 5090",
+  "batch": 1,
+  "cameras_timed": 1,
+  "warmup": 5,
+  "samples": 40,
+  "visual_shape": [
+    1,
+    256,
+    2048
+  ],
+  "parameters": 1000970,
+  "readout_parameters": 727040,
+  "state_bytes_per_camera": 3555336,
+  "peak_cuda_bytes": 60305408,
+  "scope": "encoder + readout; excludes transfer, tokenizer and frozen backend",
+  "metrics": {
+    "encoder_ms": {
+      "p50": 2.0393029999468126,
+      "p95": 2.6460179997229716
+    },
+    "readout_ms": {
+      "p50": 0.0732334992790129,
+      "p95": 0.12503600009949878
+    },
+    "combined_ms": {
+      "p50": 2.1187890006331145,
+      "p95": 2.8077579991077073
+    }
+  }
+}

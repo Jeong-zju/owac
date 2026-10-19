@@ -1,0 +1,66 @@
+{
+  "repository": "https://github.com/princeton-vl/RAFT",
+  "commit": "2888e15a51fa41140771d3f498ed8023cff098d1",
+  "license": "BSD-3-Clause",
+  "fetched": "2026-10-15 via `git clone --depth 1` of the pinned commit (upstream HEAD at fetch time)",
+  "scope": "作者完整主模型（small=False：hidden_dim=128, context_dim=128, corr_levels=4, corr_radius=4，BasicEncoder/BasicUpdateBlock，默认 12 iterations），不使用 tiny/SmallEncoder 路径。未 vendored：alt_cuda_corr（AlternateCorrBlock 需要编译的 CUDA 扩展，项目不使用）、数据集/训练脚本/demo。",
+  "changes": [
+    "包内相对导入：该 commit 的 core/ 使用脚本式扁平导入（from update import ...），本地改为 from .update import ...；core/utils/utils.py 落到 utils.py。",
+    "删除上游未使用的导入：raft.py 的 numpy 与 bilinear_sampler，corr.py 的 coords_grid（ruff F401）。",
+    "extractor.py：BasicEncoder / SmallEncoder 增加 in_channels=3 参数（默认与上游一致），只替换第一层 7x7 conv 的输入通道数，以支持平台 RAW 通道数；其余层与初始化不变。",
+    "raft.py：RAFT.__init__ 增加 in_channels=3 透传；RAFT.forward 增加 normalized=False 参数。normalized=True 时跳过上游 `2 * (x / 255) - 1`，由项目侧按平台固定尺度归一化（correspondence.RawScale；LIBERO uint8 路径与上游公式一致）。默认 False 保持上游 RGB uint8/255 行为。",
+    "utils.py::bilinear_sampler：xgrid/ygrid 的 (W-1)/(H-1) 改为 max(W-1, 1)/max(H-1, 1)。相关金字塔最粗层级在 64x96 等小输入下会退化到 1x1，上游会除零产生 NaN；单像素轴在 align_corners=True 下唯一合法坐标仍映射到该像素。H,W>=2 时结果与上游逐位一致。",
+    "corr.py：alt_cuda_corr 的裸 `except:` 改为 `except ImportError:`（未编译扩展，不吞掉其它异常）。",
+    "文件头加 attribution docstring，指向本 provenance.json。",
+    "ruff format + ruff check --fix：引号/空白/导入排序/super(...) 显式参数/未使用循环变量改名；均为行为等价的风格修复，网络结构与数值逻辑未改。"
+  ],
+  "notes": [
+    "坐标约定：作者 bilinear_sampler 内部用 align_corners=True 与自身像素坐标（整数值即像素中心，x in [0, W-1]），与契约 §2 的 px_to_grid/align_corners=False 在像素坐标上等价但网格归一化不同；项目侧坐标换算只在 correspondence.py 定义，vendored 内部保持作者约定不动。",
+    "许可证：LICENSE 原样复制（BSD-3-Clause, Copyright (c) 2020, princeton-vl）。"
+  ],
+  "files": [
+    {
+      "upstream_path": "core/raft.py",
+      "local_path": "raft.py",
+      "upstream_sha256": "e7280b82d0e224eff760ae8de5e8ea68923a7928c1e34920378b6f3a039a8633",
+      "local_sha256": "05879e5461cf7cffb9273f9ae09a729b9f2ca72a4e9bf68e5d230f46ebc1517a"
+    },
+    {
+      "upstream_path": "core/corr.py",
+      "local_path": "corr.py",
+      "upstream_sha256": "66f85489672e8fbf531135b53cda710594cfd1d900e855200e2bf6268dd7264a",
+      "local_sha256": "792ba0a631c7988df75762b1f799e3cfa81ca20beb6fcfb5b2332d4389277099"
+    },
+    {
+      "upstream_path": "core/extractor.py",
+      "local_path": "extractor.py",
+      "upstream_sha256": "f6b65d4f4df27001d9c11194f71b84a9799de3231f9d1672cbcf3a052fec79dc",
+      "local_sha256": "e0b1c2ee7cfac2da12558a8a16866fa5bcf3aa89811435f6b7e22d960f35fd27"
+    },
+    {
+      "upstream_path": "core/update.py",
+      "local_path": "update.py",
+      "upstream_sha256": "7302f91ffc24c85cf739a25feb17d9d1e537f7344a2ddc331daf8ab9db6c3f74",
+      "local_sha256": "cfe83c96568f698adea96fa34d95ea5ef5273a2f98de3f28b291cb29f6de0f95"
+    },
+    {
+      "upstream_path": "core/utils/utils.py",
+      "local_path": "utils.py",
+      "upstream_sha256": "125ca33c84f60c19359c875002e9301fe0404b3256c6efec718b26589d7fdd5a",
+      "local_sha256": "42f4e9a9f3df5dcd4e12dad4ed0c46d1f2aea1c0a763100d94b48fcbe27c063f"
+    },
+    {
+      "upstream_path": "LICENSE",
+      "local_path": "LICENSE",
+      "upstream_sha256": "399af7e243d625e8dea2b3f81fec676ea19bacf7d9ce8cfd4ce15530d8a66173",
+      "local_sha256": "399af7e243d625e8dea2b3f81fec676ea19bacf7d9ce8cfd4ce15530d8a66173"
+    },
+    {
+      "upstream_path": null,
+      "local_path": "__init__.py",
+      "local_sha256": "6087bd7206ed4d030b4cdaff394c99fe9c41eaa5d719de383b3d0e6ddba922d0",
+      "note": "本仓库新增的包装导出（上游无此文件）。"
+    }
+  ],
+  "local_sha256_note": "local_sha256 覆盖包含 attribution docstring 与上述修改的本地文件；上游文件哈希取自 2888e15 的 git 对象。"
+}

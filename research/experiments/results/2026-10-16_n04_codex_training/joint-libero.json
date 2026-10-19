@@ -1,0 +1,130 @@
+{
+  "platform": "libero",
+  "source": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000359/variant_00.npz",
+  "window": [
+    64,
+    48
+  ],
+  "loss": 1.9351272583007812,
+  "info": {
+    "terms": {
+      "action": 1.5323326587677002,
+      "correspondence": 2.6170802116394043,
+      "forecast": 1.3120511770248413,
+      "representation": 0.9881534576416016
+    },
+    "applied_terms": {
+      "action": 1.5323326587677002,
+      "correspondence": 2.6170802116394043,
+      "forecast": 1.3120511770248413,
+      "representation": 0.9881534576416016
+    },
+    "applied_train_loss": 1.9351272583007812,
+    "term_sources": {
+      "correspondence": "encoder.losses(all gradient frames)",
+      "forecast": "causal forecast, live source / stop-grad target",
+      "representation": "VICReg across observations at fixed query"
+    },
+    "supervision_points": 4,
+    "forecast": {
+      "created": 178,
+      "settled": 178,
+      "skipped": 14,
+      "skip_reasons": {
+        "window_too_short": 14
+      },
+      "diagnostics": {
+        "1": {
+          "forecast_quad": 19.005869803890103,
+          "forecast_logdet": 118.38692868140436,
+          "forecast_mode_w0": 0.9487680225603042,
+          "forecast_mode_w1": 0.05123197924225561,
+          "forecast_S_mean": 1.6346827418573442,
+          "forecast_S_min": 1.429088504083695,
+          "forecast_S_max": 2.131388031667279,
+          "forecast_R_mean": 1.0015031445410945,
+          "forecast_R_min": 0.8852397876401101,
+          "forecast_R_max": 1.1253232494477303,
+          "count": 62.0
+        },
+        "2": {
+          "forecast_quad": 32.0477837562561,
+          "forecast_logdet": 156.47623697916666,
+          "forecast_mode_w0": 0.9169777542352676,
+          "forecast_mode_w1": 0.08302223943173885,
+          "forecast_S_mean": 1.9030610958735148,
+          "forecast_S_min": 1.6750802357991537,
+          "forecast_S_max": 2.3772019584973654,
+          "forecast_R_mean": 1.0015021761258442,
+          "forecast_R_min": 0.8863664617141088,
+          "forecast_R_max": 1.1239453872044882,
+          "count": 60.0
+        },
+        "4": {
+          "forecast_quad": 63.0070082119533,
+          "forecast_logdet": 226.21343885149275,
+          "forecast_mode_w0": 0.8824352281434196,
+          "forecast_mode_w1": 0.11756474032465901,
+          "forecast_S_mean": 2.4972933871405467,
+          "forecast_S_min": 2.225028233868735,
+          "forecast_S_max": 3.0058269458157674,
+          "forecast_R_mean": 1.0015036655323846,
+          "forecast_R_min": 0.8866167685815266,
+          "forecast_R_max": 1.1238781554358346,
+          "count": 56.0
+        }
+      }
+    },
+    "windows": 1,
+    "segments": 4,
+    "valid_loss_counts": {
+      "correspondence": 32,
+      "forecast": 178,
+      "action": 4,
+      "representation": 4
+    },
+    "gradient_fast_path": true,
+    "denominators": {
+      "windows": 1.0,
+      "points": 4,
+      "gradient_frames": 32,
+      "forecast_anchors": 178
+    }
+  },
+  "gradients": {
+    "encoder.measurement": {
+      "elements": 88647040,
+      "abs_sum": 99541.28662836942
+    },
+    "encoder.quality_head": {
+      "elements": 58240,
+      "abs_sum": 0.47476212034234777
+    },
+    "encoder.correspondence": {
+      "elements": 5257536,
+      "abs_sum": 160.11828252267458
+    },
+    "encoder.state_stack": {
+      "elements": 376578,
+      "abs_sum": 24.919743385764363
+    },
+    "encoder.readout": {
+      "elements": 66636800,
+      "abs_sum": 351304.1600216627
+    },
+    "backend.vlm": {
+      "elements": 3620864,
+      "abs_sum": 390.89068000763655
+    },
+    "backend.action_head": {
+      "elements": 432605216,
+      "abs_sum": 69343.86928609293
+    }
+  },
+  "peak_gb": 55.14289152,
+  "seconds": 31.902989838272333,
+  "optimizer_updates": 0,
+  "parameter_versions_unchanged": true,
+  "checkpoint_written": false,
+  "weights": "fresh N04 encoder and official pretrained pi05; no encoder migration"
+}

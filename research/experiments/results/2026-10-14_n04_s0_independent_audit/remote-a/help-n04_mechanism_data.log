@@ -1,0 +1,22 @@
+usage: python -m owac.raw.n04_mechanism_data [-h] --config CONFIG --output
+                                             OUTPUT [--frames FRAMES]
+                                             [--batch BATCH]
+                                             [--audit-batches AUDIT_BATCHES]
+                                             [--remote-evidence REMOTE_EVIDENCE]
+                                             [--skip-d0] [--no-write]
+
+N04 S0 D0 analytic 3-D mechanism data and D1 collection feasibility
+
+options:
+  -h, --help            show this help message and exit
+  --config CONFIG       configs/n04/full/s0_data.json
+  --output OUTPUT       output directory, for example <run_dir>/mechanism-data
+  --frames FRAMES       override D0 frame count
+  --batch BATCH         override D0 batch size
+  --audit-batches AUDIT_BATCHES
+                        comma separated batch sizes
+  --remote-evidence REMOTE_EVIDENCE
+                        JSON file with observed remote evidence for the D1
+                        feasibility report
+  --skip-d0             only build D1 outputs
+  --no-write            render without writing npz files

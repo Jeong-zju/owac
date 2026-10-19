@@ -1,0 +1,50 @@
+"""Complete the existing eight canonical updates after strict deterministic reload controls."""
+import json,os,sys
+from pathlib import Path
+import torch
+from owac.training.n04_v11 import V11Trainer,load_config,write_json_atomic
+p=sys.argv[1]; root=Path('/workspace/owac/research/n04-v1'); run=root/f'runs/v1.1/codex-diagnosis/v5-exact-{p}-seed101'
+control_path=root/f'runs/v1.1/codex-diagnosis/v5-deterministic-dev-{p}-seed101/verification.json'
+control=json.loads(control_path.read_text()); assert control['complete'] and control['optimizer_updates']==0
+assert len(control['evaluations'])==6 and control['spread']<=1e-5
+original=json.loads((run/'continuous-verification.json').read_text()); assert not original['complete'] and original['checkpoint_step']==8
+cfg=load_config(f'configs/n04/v1_1/codex_v5_{p}.json'); assert cfg==json.loads((run/'config.used.json').read_text())
+receipt={k:original[k] for k in ('platform','configured_budget','batch','warmup','loss_weights','checkpoint_step','checkpoint')}
+receipt.update(complete=False,original_failed_verification=original,deterministic_control=str(control_path),dev_reference='native_deterministic_v1',source=str(Path.cwd()))
+(run/'train.pid').write_text(str(os.getpid())+'\n'); trainer=None
+try:
+ trainer=V11Trainer(cfg,seed=101,run_dir=run)
+ trainer._heartbeat('validate',note='Establishing native deterministic reference; no optimizer update')
+ baseline=trainer.evaluate_dev_action_loss()['dev_loss']
+ trainer.load_checkpoint(run/'checkpoint-step0000008.pt')
+ payload=torch.load(run/'checkpoint-step0000008.pt',map_location='cpu',mmap=True,weights_only=False)
+ terminal=torch.load(run/'checkpoint-final.pt',map_location='cpu',mmap=True,weights_only=False)
+ receipt['state_identity']={}
+ for name,module in [('encoder',trainer.encoder),('backend',trainer.backend)]:
+  actual=module.state_dict();stored=payload[name]
+  mismatches=[key for key,value in actual.items() if value.dtype!=stored[key].dtype or not torch.equal(value.cpu(),stored[key])]
+  changed=[key for key,value in terminal[name].items() if not torch.equal(value,stored[key])]
+  assert not mismatches and not changed,(name,mismatches,changed)
+  receipt['state_identity'][name]={'keys':len(actual),'loaded_mismatches':mismatches,'terminal_evaluation_changes':changed}
+ assert trainer.scheduler.state_dict()==payload['scheduler']
+ del payload,terminal
+ old_initial=trainer.initial_dev_loss
+ actual=trainer.evaluate_dev_action_loss()['dev_loss'];reference=control['evaluations'][0]['dev_loss']
+ assert abs(actual-reference)<=1e-5*max(1,abs(reference)),(actual,reference)
+ trainer.initial_dev_loss=baseline
+ trainer.activity['dev_reference']='native_deterministic_v1'
+ receipt['reload']={'step':8,'dev_before':reference,'dev_after':actual,'scheduler_restored':True,'independent_control_instances':2,'independent_control_evaluations':6,'native_initial_dev_loss':baseline,'historical_compiled_initial_dev_loss':old_initial}
+ write_json_atomic(run/'reload-verification.json',receipt['reload'])
+ write_json_atomic(run/'dev-reference-transition.json',receipt['reload'])
+ info=trainer.train_step(trainer.step)
+ trainer._write_monitor(run/'metrics.jsonl',run/'progress.json',trainer.budget_steps,info)
+ trainer.last_checkpoint_step=trainer.step
+ checkpoint=run/f'checkpoint-step{trainer.step:07d}.pt';trainer.save_checkpoint(checkpoint)
+ receipt['next_update']={'step':trainer.step,'terms':info['applied_terms'],'coverage':info['objective_coverage'],'forecast_diag':info['forecast_diag']}
+ receipt['resume_checkpoint']=str(checkpoint);receipt['complete']=True
+ trainer._heartbeat('diagnosing',validation_complete=True,note='Eight full updates, strict deterministic independent reload and ninth update passed')
+ write_json_atomic(run/'continuous-recovery-verification.json',receipt);print(json.dumps(receipt),flush=True)
+except Exception as error:
+ receipt['error']=f'{type(error).__name__}: {error}';write_json_atomic(run/'continuous-recovery-verification.json',receipt)
+ if trainer is not None:trainer._heartbeat('error',error=receipt['error'])
+ raise

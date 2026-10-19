@@ -1,0 +1,65 @@
+{
+  "stage": "N04 v1.0 S0",
+  "status": "passed",
+  "scope": "original S0 data and causal contract; new named simulator extensions",
+  "paired": {
+    "sequences": 40,
+    "sources": 40,
+    "frames": 960,
+    "camera_frames": 2880,
+    "split": {
+      "train": 32,
+      "dev": 4,
+      "final": 4
+    }
+  },
+  "rendered_factors": {
+    "sequences": 152,
+    "sources": 10,
+    "factors": 16,
+    "frames": 1824,
+    "camera_frames": 3648,
+    "source_split": {
+      "train": 8,
+      "dev": 1,
+      "final": 1
+    }
+  },
+  "contracts": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "partial": 0,
+    "required_total": 7
+  },
+  "local_tests": 361,
+  "remote_tests": 361,
+  "make_check": "passed; 246 files formatted",
+  "timing": {
+    "decisions": 1920,
+    "actual_out_of_order_pairs": 320,
+    "control_replay_entries": 2120,
+    "future_poison_checks": 1920
+  },
+  "geometry": {
+    "libero_max_numerical_bound_ratio": 0.6453125697065863,
+    "robotwin_max_projection_error_px": 0.0004547045176366282,
+    "factor_independent_numpy_max_bound_ratio": 0.07772581658194065
+  },
+  "final_runtime_snapshot": "n04-s0-20261014T062313Z-cc61897ab1cb",
+  "package_sha256": "cc61897ab1cbcd02282c9ecdf8af742bb6d44187bbd7b5b000eab708fc28a95d",
+  "verified_files": 936,
+  "frozen_assets_unchanged": 8,
+  "limitations": [
+    "Original 2403 NPZ missing historical telemetry remain unchanged; no correspondence sidecars assigned.",
+    "Simulated instantaneous sampling, host arrival queue and physics seconds are distinct; no hardware exposure claim.",
+    "Transparent LIBERO pixels retain RAW/visibility but have no unique depth supervision support.",
+    "Controlled rig is scripted kinematic intervention; live control diagnostics are not expert-success demonstrations.",
+    "Original official source-pool overlap and narrow scene/camera holdouts remain generalization limits.",
+    "S1 training sufficiency/convergence and H1/H2/H3/benchmark performance are untested."
+  ],
+  "network_training_started": false,
+  "committed": false,
+  "pushed": false
+}

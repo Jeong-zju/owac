@@ -1,0 +1,141 @@
+{
+  "stage": "s3c-combined-hint",
+  "source_commit": "f2815364c13a1403b98a592d30a221d132ae1451",
+  "source_sha256": {
+    "src/owac/frameworks/n04/proprio.py": "e96494ede9668f1f60af5c47841601f55a78502bbdee8e9ecad650cb6897b630",
+    "src/owac/frameworks/n04/ego.py": "3efd53e58478c3000cf75e55e0bfcd8709a98671c7e54ba6ba3d9948f64ca105",
+    "src/owac/frameworks/n04/synthetic.py": "0167012c449d6c575b21e46a28906f0bb4de20107975bc8acb8563f8b0dac43c",
+    "src/owac/frameworks/n04/geometry.py": "35c2596ec815df23095ec9e63f889702dff902185c16b4298edb799b8f0788c3",
+    "src/owac/frameworks/n04/config.py": "dc7cfe676218c2f451d2bc86f5f6c6152faacec085a8b27b120de4170a4c27e4",
+    "src/owac/frameworks/n04/state.py": "bf00eaeadc8492b837bf7cb8374f10c5fe9369071dabd25c2cfbff86b10c128b",
+    "src/owac/frameworks/n04/__init__.py": "199dd999af3b0d1f3d07fcef42549605d3ad383415d95c7f27d3a6a560cb919a",
+    "src/owac/frameworks/n04/innovation.py": "d6746f8befe1d19a8fff8e84dcf01074004a1ef34aa196da52c2eb5d3001e515",
+    "src/owac/frameworks/n04/model.py": "768c8203967c8dcf54af208833caeab61bfb9e80b08b88077656981729492c60",
+    "src/owac/training/n04.py": "73a2dfd828e7fb661a11cd512ea9984683ab45dbee654f9636ecffaf29efe832",
+    "src/owac/baselines/n04.py": "c4c64280e524a0e1b1fd5d5c5144ece9e54bf9b124a034e41a8ad203519d09b6",
+    "src/owac/evaluation/n04.py": "daa401c5f50fce81a29c26a0d0094824cfbac1ca148e9fc80de4f6ab0a3c4a56"
+  },
+  "model_config": {
+    "name": "n04-tiny",
+    "width": 32,
+    "blocks": 2,
+    "scales": 2,
+    "scale_strides": [
+      1,
+      2
+    ],
+    "coarse_stride": 4,
+    "hidden": 64,
+    "camera_embedding": 8,
+    "sigma_floor": 0.05,
+    "illumination_branch": true,
+    "change_branch": true,
+    "innovation_reference": "sensor_history",
+    "match_observation_support": true,
+    "illumination_explanation": false,
+    "readout_tokens": 64,
+    "readout_dim": 128,
+    "predictor": "learned_proprio",
+    "use_previous_features": true,
+    "motion_dim": null,
+    "loss_weights": {
+      "location": 1.0,
+      "future_measurement": 0.5,
+      "change": 0.1,
+      "ego_warp": 0.1
+    }
+  },
+  "recipe": {
+    "sequence_length": 12,
+    "tbptt": 8,
+    "batch_size": 4,
+    "steps": 200,
+    "lr": 0.0003,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "freeze_propagation": false,
+    "future_measurement_loss": true,
+    "cfa": false,
+    "device": "cuda",
+    "dtype": "float32",
+    "log_every": 25,
+    "checkpoint_every": 100,
+    "seed": 0,
+    "threads": 4,
+    "synthetic": {
+      "camera_translation": [
+        1.2,
+        1.2
+      ],
+      "camera_rotation": [
+        0.0,
+        0.4
+      ],
+      "object_velocity": [
+        0.8,
+        1.2
+      ],
+      "illumination": [
+        0.7,
+        1.3
+      ],
+      "noise_sigma": 0.01,
+      "action_delay": 2,
+      "calibration_scale": 1.08,
+      "conditions": [
+        "camera_only",
+        "object_only",
+        "both",
+        "illumination",
+        "same_direction",
+        "occlusion",
+        "calibration_error",
+        "action_delay",
+        "exposure_step",
+        "static",
+        "camera_illumination",
+        "object_illumination",
+        "both_illumination"
+      ]
+    },
+    "output": "outputs/n04"
+  },
+  "initialization_seeds": [
+    0,
+    1,
+    2
+  ],
+  "training_data_seeds": [
+    41000,
+    41001,
+    41002
+  ],
+  "development_seeds": [
+    42000,
+    42001,
+    42002
+  ],
+  "final_test_seeds_reserved": [
+    45000,
+    45001,
+    45002
+  ],
+  "models": [
+    "candidate"
+  ],
+  "updates": 200,
+  "detector_threshold": 0.5,
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 5090",
+  "data_revision": "sample-independent-render-label-v1",
+  "data_sha256": {
+    "0": "eff9e9ec85b942a131d518036d1738d9ec41590c9a035bc49a14b671ced0849f",
+    "1": "edfc9b9fb9214faee39c7cd9c7138674d4240cab2c1087cf1d7f40dbd563a0e8",
+    "2": "6220efced9b7897ff9d075b8ec72fe0ea0a3a982ceb0cdf15a509cff6e74bdce"
+  },
+  "complete": true,
+  "note": "Same data per paired model; three independent data sets and initializations. Final test remains unobserved until all stages are frozen. Equal updates, not capacity or FLOPs.",
+  "checkpoints": 3,
+  "suites": 9
+}

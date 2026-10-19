@@ -1,0 +1,129 @@
+{
+  "platform": "libero",
+  "source": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000359/variant_00.npz",
+  "window": [
+    64,
+    48
+  ],
+  "loss": 1.932956576347351,
+  "info": {
+    "terms": {
+      "action": 1.5301662683486938,
+      "correspondence": 2.6170272827148438,
+      "forecast": 1.3120601177215576,
+      "representation": 0.9881550073623657
+    },
+    "applied_terms": {
+      "action": 1.5301662683486938,
+      "correspondence": 2.6170272827148438,
+      "forecast": 1.3120601177215576,
+      "representation": 0.9881550073623657
+    },
+    "applied_train_loss": 1.932956576347351,
+    "term_sources": {
+      "correspondence": "encoder.losses(all gradient frames)",
+      "forecast": "causal forecast, live source / stop-grad target",
+      "representation": "VICReg across observations at fixed query"
+    },
+    "supervision_points": 4,
+    "forecast": {
+      "created": 178,
+      "settled": 178,
+      "skipped": 14,
+      "skip_reasons": {
+        "window_too_short": 14
+      },
+      "diagnostics": {
+        "1": {
+          "forecast_quad": 19.005672977816673,
+          "forecast_logdet": 118.40044070828345,
+          "forecast_mode_w0": 0.9487651999919645,
+          "forecast_mode_w1": 0.05123479850590229,
+          "forecast_S_mean": 1.6347692685742532,
+          "forecast_S_min": 1.429008795369056,
+          "forecast_S_max": 2.131390610048848,
+          "forecast_R_mean": 1.0015029541907772,
+          "forecast_R_min": 0.8851284134772516,
+          "forecast_R_max": 1.1254423356825305,
+          "count": 62.0
+        },
+        "2": {
+          "forecast_quad": 32.04318361282348,
+          "forecast_logdet": 156.48561401367186,
+          "forecast_mode_w0": 0.9169847925504049,
+          "forecast_mode_w1": 0.08301520211001237,
+          "forecast_S_mean": 1.9031271517276764,
+          "forecast_S_min": 1.6749629159768422,
+          "forecast_S_max": 2.377299690246582,
+          "forecast_R_mean": 1.0015019496281943,
+          "forecast_R_min": 0.8862367947896321,
+          "forecast_R_max": 1.12409166097641,
+          "count": 60.0
+        },
+        "4": {
+          "forecast_quad": 62.99299349103655,
+          "forecast_logdet": 226.22204371861048,
+          "forecast_mode_w0": 0.8824336613927569,
+          "forecast_mode_w1": 0.11756631199802671,
+          "forecast_S_mean": 2.4973816914217815,
+          "forecast_S_min": 2.225252811397825,
+          "forecast_S_max": 3.0063097264085497,
+          "forecast_R_mean": 1.001502975821495,
+          "forecast_R_min": 0.8864797332457134,
+          "forecast_R_max": 1.1240369826555252,
+          "count": 56.0
+        }
+      }
+    },
+    "windows": 1,
+    "segments": 4,
+    "valid_loss_counts": {
+      "correspondence": 32,
+      "forecast": 178,
+      "action": 4,
+      "representation": 4
+    },
+    "denominators": {
+      "windows": 1.0,
+      "points": 4,
+      "gradient_frames": 32,
+      "forecast_anchors": 178
+    }
+  },
+  "gradients": {
+    "encoder.measurement": {
+      "elements": 88647040,
+      "abs_sum": 99237.12753064885
+    },
+    "encoder.quality_head": {
+      "elements": 58240,
+      "abs_sum": 0.4743237780057825
+    },
+    "encoder.correspondence": {
+      "elements": 5257536,
+      "abs_sum": 161.0518248116121
+    },
+    "encoder.state_stack": {
+      "elements": 376578,
+      "abs_sum": 24.36140675347389
+    },
+    "encoder.readout": {
+      "elements": 66636800,
+      "abs_sum": 350784.1368594691
+    },
+    "backend.vlm": {
+      "elements": 3620864,
+      "abs_sum": 390.69961857330054
+    },
+    "backend.action_head": {
+      "elements": 432605216,
+      "abs_sum": 69189.04095247667
+    }
+  },
+  "peak_gb": 53.905743872,
+  "seconds": 42.681622728705406,
+  "optimizer_updates": 0,
+  "parameter_versions_unchanged": true,
+  "checkpoint_written": false,
+  "weights": "fresh N04 encoder and official pretrained pi05; no encoder migration"
+}

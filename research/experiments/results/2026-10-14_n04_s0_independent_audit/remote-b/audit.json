@@ -1,0 +1,155 @@
+{
+  "source": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T050411Z-357e5289dbbb",
+  "reuses_data_audit": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a",
+  "commands": [
+    {
+      "name": "tests",
+      "command": [
+        "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/encoders/n04",
+        "tests/encoders/n04_full"
+      ],
+      "exit_code": 0,
+      "seconds": 6.67251181602478
+    },
+    {
+      "name": "contracts",
+      "command": [
+        "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+        "-m",
+        "owac.evaluation.n04_contracts",
+        "--config",
+        "configs/n04/full/s0_data.json",
+        "--manifest",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/inventory-a/splits.json",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/contracts.json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.9661457538604736
+    },
+    {
+      "name": "capture-0",
+      "command": [
+        "/workspace/owac/rawvla/envs/starvla/bin/python",
+        "-c",
+        "from owac.raw.n04_mechanism_data import d1_main; raise SystemExit(d1_main())",
+        "--platform",
+        "libero",
+        "--npz",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000101/variant_00.npz",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-0",
+        "--trace-steps",
+        "8",
+        "--warmstart-mode",
+        "saved_before_step",
+        "--capture-measurements"
+      ],
+      "exit_code": 0,
+      "seconds": 3.1675021648406982
+    },
+    {
+      "name": "capture-1",
+      "command": [
+        "/workspace/owac/rawvla/envs/starvla/bin/python",
+        "-c",
+        "from owac.raw.n04_mechanism_data import d1_main; raise SystemExit(d1_main())",
+        "--platform",
+        "libero",
+        "--npz",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-1",
+        "--trace-steps",
+        "8",
+        "--warmstart-mode",
+        "zeroed_each_step",
+        "--capture-measurements"
+      ],
+      "exit_code": 0,
+      "seconds": 2.9681475162506104
+    },
+    {
+      "name": "capture-2",
+      "command": [
+        "/workspace/owac/rawvla/envs/starvla/bin/python",
+        "-c",
+        "from owac.raw.n04_mechanism_data import d1_main; raise SystemExit(d1_main())",
+        "--platform",
+        "libero",
+        "--npz",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000150/variant_00.npz",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-2",
+        "--trace-steps",
+        "8",
+        "--warmstart-mode",
+        "disabled_by_flag",
+        "--capture-measurements"
+      ],
+      "exit_code": 0,
+      "seconds": 3.569352865219116
+    },
+    {
+      "name": "capture-3",
+      "command": [
+        "/workspace/owac/rawvla/envs/starvla/bin/python",
+        "-c",
+        "from owac.raw.n04_mechanism_data import d1_main; raise SystemExit(d1_main())",
+        "--platform",
+        "libero",
+        "--npz",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-3",
+        "--trace-steps",
+        "8",
+        "--warmstart-mode",
+        "saved_before_step",
+        "--capture-measurements"
+      ],
+      "exit_code": 0,
+      "seconds": 3.469360828399658
+    }
+  ],
+  "captures": [
+    {
+      "source_trajectory_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it:demo_1",
+      "split": "train",
+      "task": "libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it",
+      "mode": "saved_before_step",
+      "output": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-0",
+      "exit_code": 0
+    },
+    {
+      "source_trajectory_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it:demo_11",
+      "split": "train",
+      "task": "libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it",
+      "mode": "zeroed_each_step",
+      "output": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-1",
+      "exit_code": 0
+    },
+    {
+      "source_trajectory_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it:demo_0",
+      "split": "train",
+      "task": "libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+      "mode": "disabled_by_flag",
+      "output": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-2",
+      "exit_code": 0
+    },
+    {
+      "source_trajectory_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it:demo_10",
+      "split": "train",
+      "task": "libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+      "mode": "saved_before_step",
+      "output": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-3",
+      "exit_code": 0
+    }
+  ]
+}

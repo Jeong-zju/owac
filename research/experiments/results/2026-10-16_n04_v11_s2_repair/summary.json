@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-16",
+  "implementation_version": "n04-v1.1-s2-repair-v3",
+  "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+  "source_checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "base_commit": "a81cf25148870fd83fbc06a4fabf374510493978",
+  "uncommitted_source": true,
+  "remote_repair_snapshot": "/workspace/owac/research/n04-v1/source/n04-v11-s2-repair-20261016",
+  "status": "code_and_gradient_contracts_verified_training_stopped",
+  "formal_optimizer_updates_after_user_stop": 0,
+  "training_restarted": false,
+  "entered_S3": false,
+  "latest_saved_historical_checkpoint_step": {
+    "libero": 200,
+    "robotwin": 100
+  },
+  "tests": {
+    "passed": 220,
+    "skipped": 1,
+    "skip_reason": "local websockets dependency absent",
+    "log": "tests-final.log"
+  },
+  "make_check": "passed",
+  "real_full_window": {
+    "libero": {
+      "peak_gb": 53.905743872,
+      "seconds": 42.681622728705406,
+      "optimizer_updates": 0,
+      "parameter_versions_unchanged": true,
+      "checkpoint_written": false,
+      "valid_loss_counts": {
+        "correspondence": 32,
+        "forecast": 178,
+        "action": 4,
+        "representation": 4
+      }
+    },
+    "robotwin": {
+      "peak_gb": 81.221565952,
+      "seconds": 64.8425141684711,
+      "optimizer_updates": 0,
+      "parameter_versions_unchanged": true,
+      "checkpoint_written": false,
+      "valid_loss_counts": {
+        "correspondence": 32,
+        "forecast": 267,
+        "action": 4,
+        "representation": 4
+      }
+    }
+  },
+  "isolated_selfsup_real_input": "selfsup-real-input.json",
+  "stop_and_checkpoint_barrier": "stop-and-compatibility.json",
+  "historical_closed_loop": {
+    "completed": 100,
+    "successes": 0,
+    "failures": 100,
+    "final_infrastructure_errors": 0,
+    "unchanged": true
+  },
+  "limitations": [
+    "repair version remains untrained and has no new closed-loop results",
+    "one real dev window per platform; no measured optimizer-state peak or effective-batch8 throughput",
+    "crop Gaussian self-supervision is a declared adaptation, not complete SMURF reproduction",
+    "software and gradient checks do not establish useful representation or action improvements"
+  ],
+  "final_state": "final-idle-state.json",
+  "final_gpu_state": "0, 0 MiB, 0 %\n1, 0 MiB, 0 %",
+  "final_checked_at": "2026-10-16T03:14:03Z"
+}

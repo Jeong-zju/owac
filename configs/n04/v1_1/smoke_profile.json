@@ -1,0 +1,22 @@
+{
+  "include": [
+    "base.json",
+    "platform_libero.json",
+    "arm_D.json"
+  ],
+  "notes": "20—50 步资源 profile：显存／步速／梯度贯通，不冒充正式训练",
+  "optim": {
+    "steps": 30,
+    "batch": 8,
+    "micro_batch": 1
+  },
+  "monitor": {
+    "log_every": 1,
+    "checkpoint_every": 15,
+    "eval_every": 15,
+    "profile": true
+  },
+  "data": {
+    "dev_windows": 1
+  }
+}

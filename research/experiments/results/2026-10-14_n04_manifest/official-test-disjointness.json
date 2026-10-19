@@ -1,0 +1,985 @@
+{
+  "code_path_isolation": {
+    "claim": "官方测试清单从不被清单/拆分代码读取",
+    "evidence": [
+      "src/owac/raw/n04_manifest.py 只读取配置 remote.data.libero_raw / robotwin_raw 下的 **/*.npz",
+      "grep records_frozen_protocol|libero-manifest|robotwin-manifest src/owac/raw/n04_manifest.py → 0 命中",
+      "splits.json 的 2403 个 source_trajectory_id 全部来自训练数据根"
+    ],
+    "verified_by": "grep + 代码路径检查（非运行时插桩）"
+  },
+  "command": "PYTHONPATH=<snapshot>/src /usr/bin/python3.12 official_test_disjointness.py --run-dir /workspace/owac/research/n04-v1/data/s0-manifest/run-20261014T040654Z --output <this file>",
+  "counts": {
+    "test_entries": {
+      "libero": 10000,
+      "robotwin": 3250
+    },
+    "train_sources": {
+      "libero": 1771,
+      "robotwin": 632
+    }
+  },
+  "cross_checks": {
+    "libero_index_mapping": {
+      "evidence_for_same_indexing": [
+        "两侧每个 task 的索引基数都是 50（测试 init_state_index 0..49；训练 demo_index 0..49）",
+        "测试清单无 task_name，只有 suite/task_id；训练侧 task_id ↔ task_name 对照见 train_side",
+        "LIBERO 标准评测使用数据集初始状态；但清单未声明 init_state_index 指向哪一份列表"
+      ],
+      "test_manifest_source_name": "protocol.json manifests.libero.source 末尾为 libero_manifest_50_init_states_10000_rollouts.json",
+      "test_side_fields": [
+        "suite",
+        "task_id",
+        "init_state_index"
+      ],
+      "train_side_fields": [
+        "metadata.suite",
+        "metadata.task_id",
+        "metadata.demo_index"
+      ],
+      "verdict": "语义级『同一源 episode』为高可能性推断，未经生产者代码确认；结构级包含关系（训练身份全部落在测试网格内）与该推断无关，恒成立"
+    },
+    "robotwin_dataset_seed_agreement": {
+      "n_compared": 632,
+      "n_equal": 632,
+      "note": "训练 metadata.dataset_seed 与测试同 (task, dataset_episode_index) 条目的 dataset_seed 相等数"
+    },
+    "robotwin_episode_template": {
+      "test_manifest_dataset_block": {
+        "episode_data_template": "data/episode{dataset_episode_index}.hdf5",
+        "relative_dir_template": "{task_name}/aloha-agilex_clean_50",
+        "trajectory_template": "_traj_data/episode{dataset_episode_index}.pkl"
+      },
+      "train_metadata_fields": {
+        "source_hdf5": "episode{N}.hdf5",
+        "source_trajectory": "episode{N}.pkl"
+      },
+      "verdict": "测试 dataset_episode_index == 训练 source_trajectory 的 episode 编号：由测试清单自身的模板字段声明，不是推断"
+    }
+  },
+  "generated_utc": "2026-10-14T04:13:12Z",
+  "identity_definitions": {
+    "caveat": "测试清单不携带训练侧 source_trajectory_id 字符串，也不携带 task_name（LIBERO）；source_episode 级比较依赖『训练 demo_index 与测试 init_state_index、训练 episode 与测试 dataset_episode_index 指向同一源 episode』这一未由生产者代码确认的假设",
+    "test_source_episode_level": {
+      "libero": "(entry.suite, entry.task_id, entry.init_state_index)",
+      "robotwin": "(entry.task_name, entry.dataset_episode_index)"
+    },
+    "test_task_level": {
+      "libero": "(entry.suite, entry.task_id)",
+      "robotwin": "entry.task_name"
+    },
+    "train_source_episode_level": {
+      "libero": "(metadata.suite, metadata.task_id, metadata.demo_index)",
+      "robotwin": "(metadata.task_name, metadata.episode)"
+    },
+    "train_source_trajectory_id": {
+      "libero": "libero:<dataset_name>:<task_name>:<demo_key>（NPZ metadata）",
+      "robotwin": "robotwin:<task_name>:<source_trajectory>（NPZ metadata）"
+    },
+    "train_task_level": {
+      "libero": "(metadata.suite, metadata.task_id)",
+      "robotwin": "metadata.task_name"
+    }
+  },
+  "inputs": {
+    "test_manifests": {
+      "libero": {
+        "benchmark": "rawvla-bench-light-libero-v1",
+        "benchmark_seed": 20260813,
+        "entries": 10000,
+        "frozen_protocol_reference": "records_frozen_protocol: /workspace/owac/rawvla/records/pi05-full-20261010-v3",
+        "path": "/workspace/owac/rawvla/records/pi05-full-20261010-v3/libero-manifest.json",
+        "sha256": "e3a054f43060912d668e57d35873b573a289c6d3c941fec9c029569c82971168",
+        "version": 1
+      },
+      "robotwin": {
+        "benchmark": "rawvla-bench-light-robotwin2-v1",
+        "benchmark_seed": 20260824,
+        "entries": 3250,
+        "frozen_protocol_reference": "records_frozen_protocol: /workspace/owac/rawvla/records/pi05-full-20261010-v3",
+        "path": "/workspace/owac/rawvla/records/pi05-full-20261010-v3/robotwin-manifest.json",
+        "sha256": "632b8360836595a868affffd24f9ecf1262d68a52a505ef5ffe801598d8317e5",
+        "version": 1
+      }
+    },
+    "train_inventory": {
+      "path": "/workspace/owac/research/n04-v1/data/s0-manifest/run-20261014T040654Z/inventory.json",
+      "sha256": "e0154ab7815e2019201bfde9cf391e23b2805d6f19aba2b849b66ae3a77b3c69",
+      "size_bytes": 62057281
+    },
+    "train_splits": {
+      "path": "/workspace/owac/research/n04-v1/data/s0-manifest/run-20261014T040654Z/splits.json",
+      "sha256": "7465309422e973edcf423db597305469eec18babed1fa51698bcfa047a97f9fe"
+    }
+  },
+  "interpretation": {
+    "semantic_overlap": "RoboTwin：字段级确认（测试模板 episode{dataset_episode_index}.pkl/.hdf5 与训练 source_trajectory/source_hdf5 同名）→ 同一源 episode。LIBERO：高可能性推断（50/任务基数、无 task_name、标准评测使用数据集初始状态），未经生产者代码确认",
+    "structural_overlap": "恒成立：测试清单覆盖 (suite, task_id, init_state_index) 的完整网格 4×10×50=2000 与 (task_name, dataset_episode_index) 的 13×50=650，训练侧身份必然落在网格内，因此该层交集等于训练侧全部条目；此结论不依赖两侧编号是否同序",
+    "what_is_not_claimed": "测试 rollout 的观测/动作不在训练集中；训练拆分代码从未读取测试清单（见 code_path_isolation）"
+  },
+  "intersection_members": {
+    "libero": {
+      "libero_10/task_id=0#demo=1": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=1",
+      "libero_10/task_id=0#demo=11": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=11",
+      "libero_10/task_id=0#demo=12": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=12",
+      "libero_10/task_id=0#demo=13": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=13",
+      "libero_10/task_id=0#demo=16": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=16",
+      "libero_10/task_id=0#demo=17": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=17",
+      "libero_10/task_id=0#demo=18": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=18",
+      "libero_10/task_id=0#demo=2": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=2",
+      "libero_10/task_id=0#demo=20": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=20",
+      "libero_10/task_id=0#demo=22": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=22",
+      "libero_10/task_id=0#demo=23": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=23",
+      "libero_10/task_id=0#demo=24": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=24",
+      "libero_10/task_id=0#demo=26": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=26",
+      "libero_10/task_id=0#demo=28": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=28",
+      "libero_10/task_id=0#demo=29": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=29",
+      "libero_10/task_id=0#demo=30": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=30",
+      "libero_10/task_id=0#demo=5": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=5",
+      "libero_10/task_id=0#demo=6": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=6",
+      "libero_10/task_id=0#demo=7": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=7",
+      "libero_10/task_id=0#demo=8": "libero_10 | LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket | demo_index=8"
+    },
+    "robotwin": {
+      "grab_roller#episode=0": "episode0.pkl",
+      "grab_roller#episode=1": "episode1.pkl",
+      "grab_roller#episode=10": "episode10.pkl",
+      "grab_roller#episode=11": "episode11.pkl",
+      "grab_roller#episode=12": "episode12.pkl",
+      "grab_roller#episode=13": "episode13.pkl",
+      "grab_roller#episode=14": "episode14.pkl",
+      "grab_roller#episode=15": "episode15.pkl",
+      "grab_roller#episode=16": "episode16.pkl",
+      "grab_roller#episode=17": "episode17.pkl",
+      "grab_roller#episode=18": "episode18.pkl",
+      "grab_roller#episode=19": "episode19.pkl",
+      "grab_roller#episode=2": "episode2.pkl",
+      "grab_roller#episode=3": "episode3.pkl",
+      "grab_roller#episode=4": "episode4.pkl",
+      "grab_roller#episode=5": "episode5.pkl",
+      "grab_roller#episode=6": "episode6.pkl",
+      "grab_roller#episode=7": "episode7.pkl",
+      "grab_roller#episode=8": "episode8.pkl",
+      "grab_roller#episode=9": "episode9.pkl"
+    }
+  },
+  "per_task_counts": {
+    "libero": {
+      "libero_10/task_id=0": {
+        "test_entries": 250,
+        "train_files": 34
+      },
+      "libero_10/task_id=1": {
+        "test_entries": 250,
+        "train_files": 47
+      },
+      "libero_10/task_id=2": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "libero_10/task_id=3": {
+        "test_entries": 250,
+        "train_files": 41
+      },
+      "libero_10/task_id=4": {
+        "test_entries": 250,
+        "train_files": 40
+      },
+      "libero_10/task_id=5": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "libero_10/task_id=6": {
+        "test_entries": 250,
+        "train_files": 36
+      },
+      "libero_10/task_id=7": {
+        "test_entries": 250,
+        "train_files": 44
+      },
+      "libero_10/task_id=8": {
+        "test_entries": 250,
+        "train_files": 27
+      },
+      "libero_10/task_id=9": {
+        "test_entries": 250,
+        "train_files": 33
+      },
+      "libero_goal/task_id=0": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_goal/task_id=1": {
+        "test_entries": 250,
+        "train_files": 47
+      },
+      "libero_goal/task_id=2": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "libero_goal/task_id=3": {
+        "test_entries": 250,
+        "train_files": 37
+      },
+      "libero_goal/task_id=4": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "libero_goal/task_id=5": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_goal/task_id=6": {
+        "test_entries": 250,
+        "train_files": 46
+      },
+      "libero_goal/task_id=7": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "libero_goal/task_id=8": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "libero_goal/task_id=9": {
+        "test_entries": 250,
+        "train_files": 42
+      },
+      "libero_object/task_id=0": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_object/task_id=1": {
+        "test_entries": 250,
+        "train_files": 46
+      },
+      "libero_object/task_id=2": {
+        "test_entries": 250,
+        "train_files": 47
+      },
+      "libero_object/task_id=3": {
+        "test_entries": 250,
+        "train_files": 46
+      },
+      "libero_object/task_id=4": {
+        "test_entries": 250,
+        "train_files": 44
+      },
+      "libero_object/task_id=5": {
+        "test_entries": 250,
+        "train_files": 43
+      },
+      "libero_object/task_id=6": {
+        "test_entries": 250,
+        "train_files": 47
+      },
+      "libero_object/task_id=7": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_object/task_id=8": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "libero_object/task_id=9": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "libero_spatial/task_id=0": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "libero_spatial/task_id=1": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_spatial/task_id=2": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "libero_spatial/task_id=3": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "libero_spatial/task_id=4": {
+        "test_entries": 250,
+        "train_files": 45
+      },
+      "libero_spatial/task_id=5": {
+        "test_entries": 250,
+        "train_files": 41
+      },
+      "libero_spatial/task_id=6": {
+        "test_entries": 250,
+        "train_files": 47
+      },
+      "libero_spatial/task_id=7": {
+        "test_entries": 250,
+        "train_files": 42
+      },
+      "libero_spatial/task_id=8": {
+        "test_entries": 250,
+        "train_files": 43
+      },
+      "libero_spatial/task_id=9": {
+        "test_entries": 250,
+        "train_files": 46
+      }
+    },
+    "robotwin": {
+      "grab_roller": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "handover_mic": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "lift_pot": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "move_can_pot": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "open_laptop": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "pick_dual_bottles": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "place_dual_shoes": {
+        "test_entries": 250,
+        "train_files": 46
+      },
+      "place_object_basket": {
+        "test_entries": 250,
+        "train_files": 44
+      },
+      "place_phone_stand": {
+        "test_entries": 250,
+        "train_files": 49
+      },
+      "put_bottles_dustbin": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "put_object_cabinet": {
+        "test_entries": 250,
+        "train_files": 48
+      },
+      "stack_blocks_two": {
+        "test_entries": 250,
+        "train_files": 50
+      },
+      "stack_bowls_two": {
+        "test_entries": 250,
+        "train_files": 48
+      }
+    }
+  },
+  "question": "官方 10000(LIBERO)+3250(RoboTwin) 仿真测试清单是否参与 S0 训练拆分",
+  "schema": "n04-s0-official-test-disjointness-v1",
+  "source_episode_level": {
+    "libero": {
+      "intersection": {
+        "count": 1771,
+        "sample": [
+          [
+            "libero_10",
+            0,
+            11
+          ],
+          [
+            "libero_10",
+            0,
+            12
+          ],
+          [
+            "libero_10",
+            0,
+            13
+          ],
+          [
+            "libero_10",
+            0,
+            16
+          ],
+          [
+            "libero_10",
+            0,
+            17
+          ],
+          [
+            "libero_10",
+            0,
+            18
+          ],
+          [
+            "libero_10",
+            0,
+            1
+          ],
+          [
+            "libero_10",
+            0,
+            20
+          ],
+          [
+            "libero_10",
+            0,
+            22
+          ],
+          [
+            "libero_10",
+            0,
+            23
+          ],
+          [
+            "libero_10",
+            0,
+            24
+          ],
+          [
+            "libero_10",
+            0,
+            26
+          ],
+          [
+            "libero_10",
+            0,
+            28
+          ],
+          [
+            "libero_10",
+            0,
+            29
+          ],
+          [
+            "libero_10",
+            0,
+            2
+          ],
+          [
+            "libero_10",
+            0,
+            30
+          ],
+          [
+            "libero_10",
+            0,
+            31
+          ],
+          [
+            "libero_10",
+            0,
+            32
+          ],
+          [
+            "libero_10",
+            0,
+            33
+          ],
+          [
+            "libero_10",
+            0,
+            34
+          ]
+        ]
+      },
+      "n_intersection": 1771,
+      "n_test": 2000,
+      "n_train": 1771
+    },
+    "robotwin": {
+      "intersection": {
+        "count": 632,
+        "sample": [
+          [
+            "grab_roller",
+            0
+          ],
+          [
+            "grab_roller",
+            10
+          ],
+          [
+            "grab_roller",
+            11
+          ],
+          [
+            "grab_roller",
+            12
+          ],
+          [
+            "grab_roller",
+            13
+          ],
+          [
+            "grab_roller",
+            14
+          ],
+          [
+            "grab_roller",
+            15
+          ],
+          [
+            "grab_roller",
+            16
+          ],
+          [
+            "grab_roller",
+            17
+          ],
+          [
+            "grab_roller",
+            18
+          ],
+          [
+            "grab_roller",
+            19
+          ],
+          [
+            "grab_roller",
+            1
+          ],
+          [
+            "grab_roller",
+            20
+          ],
+          [
+            "grab_roller",
+            21
+          ],
+          [
+            "grab_roller",
+            22
+          ],
+          [
+            "grab_roller",
+            23
+          ],
+          [
+            "grab_roller",
+            24
+          ],
+          [
+            "grab_roller",
+            25
+          ],
+          [
+            "grab_roller",
+            26
+          ],
+          [
+            "grab_roller",
+            27
+          ]
+        ]
+      },
+      "n_intersection": 632,
+      "n_test": 650,
+      "n_train": 632
+    }
+  },
+  "task_level": {
+    "libero": {
+      "intersection": {
+        "count": 40,
+        "sample": [
+          [
+            "libero_10",
+            0
+          ],
+          [
+            "libero_10",
+            1
+          ],
+          [
+            "libero_10",
+            2
+          ],
+          [
+            "libero_10",
+            3
+          ],
+          [
+            "libero_10",
+            4
+          ],
+          [
+            "libero_10",
+            5
+          ],
+          [
+            "libero_10",
+            6
+          ],
+          [
+            "libero_10",
+            7
+          ],
+          [
+            "libero_10",
+            8
+          ],
+          [
+            "libero_10",
+            9
+          ],
+          [
+            "libero_goal",
+            0
+          ],
+          [
+            "libero_goal",
+            1
+          ],
+          [
+            "libero_goal",
+            2
+          ],
+          [
+            "libero_goal",
+            3
+          ],
+          [
+            "libero_goal",
+            4
+          ],
+          [
+            "libero_goal",
+            5
+          ],
+          [
+            "libero_goal",
+            6
+          ],
+          [
+            "libero_goal",
+            7
+          ],
+          [
+            "libero_goal",
+            8
+          ],
+          [
+            "libero_goal",
+            9
+          ]
+        ]
+      },
+      "n_intersection": 40,
+      "n_test": 40,
+      "n_train": 40
+    },
+    "robotwin": {
+      "intersection": {
+        "count": 13,
+        "sample": [
+          [
+            "g",
+            "r",
+            "a",
+            "b",
+            "_",
+            "r",
+            "o",
+            "l",
+            "l",
+            "e",
+            "r"
+          ],
+          [
+            "h",
+            "a",
+            "n",
+            "d",
+            "o",
+            "v",
+            "e",
+            "r",
+            "_",
+            "m",
+            "i",
+            "c"
+          ],
+          [
+            "l",
+            "i",
+            "f",
+            "t",
+            "_",
+            "p",
+            "o",
+            "t"
+          ],
+          [
+            "m",
+            "o",
+            "v",
+            "e",
+            "_",
+            "c",
+            "a",
+            "n",
+            "_",
+            "p",
+            "o",
+            "t"
+          ],
+          [
+            "o",
+            "p",
+            "e",
+            "n",
+            "_",
+            "l",
+            "a",
+            "p",
+            "t",
+            "o",
+            "p"
+          ],
+          [
+            "p",
+            "i",
+            "c",
+            "k",
+            "_",
+            "d",
+            "u",
+            "a",
+            "l",
+            "_",
+            "b",
+            "o",
+            "t",
+            "t",
+            "l",
+            "e",
+            "s"
+          ],
+          [
+            "p",
+            "l",
+            "a",
+            "c",
+            "e",
+            "_",
+            "d",
+            "u",
+            "a",
+            "l",
+            "_",
+            "s",
+            "h",
+            "o",
+            "e",
+            "s"
+          ],
+          [
+            "p",
+            "l",
+            "a",
+            "c",
+            "e",
+            "_",
+            "o",
+            "b",
+            "j",
+            "e",
+            "c",
+            "t",
+            "_",
+            "b",
+            "a",
+            "s",
+            "k",
+            "e",
+            "t"
+          ],
+          [
+            "p",
+            "l",
+            "a",
+            "c",
+            "e",
+            "_",
+            "p",
+            "h",
+            "o",
+            "n",
+            "e",
+            "_",
+            "s",
+            "t",
+            "a",
+            "n",
+            "d"
+          ],
+          [
+            "p",
+            "u",
+            "t",
+            "_",
+            "b",
+            "o",
+            "t",
+            "t",
+            "l",
+            "e",
+            "s",
+            "_",
+            "d",
+            "u",
+            "s",
+            "t",
+            "b",
+            "i",
+            "n"
+          ],
+          [
+            "p",
+            "u",
+            "t",
+            "_",
+            "o",
+            "b",
+            "j",
+            "e",
+            "c",
+            "t",
+            "_",
+            "c",
+            "a",
+            "b",
+            "i",
+            "n",
+            "e",
+            "t"
+          ],
+          [
+            "s",
+            "t",
+            "a",
+            "c",
+            "k",
+            "_",
+            "b",
+            "l",
+            "o",
+            "c",
+            "k",
+            "s",
+            "_",
+            "t",
+            "w",
+            "o"
+          ],
+          [
+            "s",
+            "t",
+            "a",
+            "c",
+            "k",
+            "_",
+            "b",
+            "o",
+            "w",
+            "l",
+            "s",
+            "_",
+            "t",
+            "w",
+            "o"
+          ]
+        ]
+      },
+      "n_intersection": 13,
+      "n_test": 13,
+      "n_train": 13
+    }
+  },
+  "test_entries_matching_train_source_episode": {
+    "libero": {
+      "matching_entries": 8855,
+      "matching_fraction": 0.8855,
+      "note": "每个源 episode 身份在测试清单中出现 5 次（5 个照明域）",
+      "total_entries": 10000
+    },
+    "robotwin": {
+      "matching_entries": 3160,
+      "matching_fraction": 0.972308,
+      "note": "每个源 episode 身份在测试清单中出现 5 次（5 个照明域）",
+      "total_entries": 3250
+    }
+  },
+  "train_side": {
+    "libero_task_id_to_train_task_name": {
+      "libero_10": {
+        "0": "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket",
+        "1": "LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket",
+        "2": "KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it",
+        "3": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+        "4": "LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate",
+        "5": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy",
+        "6": "LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate",
+        "7": "LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket",
+        "8": "KITCHEN_SCENE8_put_both_moka_pots_on_the_stove",
+        "9": "KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it"
+      },
+      "libero_goal": {
+        "0": "open_the_middle_drawer_of_the_cabinet",
+        "1": "put_the_bowl_on_the_stove",
+        "2": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "3": "open_the_top_drawer_and_put_the_bowl_inside",
+        "4": "put_the_bowl_on_top_of_the_cabinet",
+        "5": "push_the_plate_to_the_front_of_the_stove",
+        "6": "put_the_cream_cheese_in_the_bowl",
+        "7": "turn_on_the_stove",
+        "8": "put_the_bowl_on_the_plate",
+        "9": "put_the_wine_bottle_on_the_rack"
+      },
+      "libero_object": {
+        "0": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+        "1": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+        "2": "pick_up_the_salad_dressing_and_place_it_in_the_basket",
+        "3": "pick_up_the_bbq_sauce_and_place_it_in_the_basket",
+        "4": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "5": "pick_up_the_tomato_sauce_and_place_it_in_the_basket",
+        "6": "pick_up_the_butter_and_place_it_in_the_basket",
+        "7": "pick_up_the_milk_and_place_it_in_the_basket",
+        "8": "pick_up_the_chocolate_pudding_and_place_it_in_the_basket",
+        "9": "pick_up_the_orange_juice_and_place_it_in_the_basket"
+      },
+      "libero_spatial": {
+        "0": "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate",
+        "1": "pick_up_the_black_bowl_next_to_the_ramekin_and_place_it_on_the_plate",
+        "2": "pick_up_the_black_bowl_from_table_center_and_place_it_on_the_plate",
+        "3": "pick_up_the_black_bowl_on_the_cookie_box_and_place_it_on_the_plate",
+        "4": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+        "5": "pick_up_the_black_bowl_on_the_ramekin_and_place_it_on_the_plate",
+        "6": "pick_up_the_black_bowl_next_to_the_cookie_box_and_place_it_on_the_plate",
+        "7": "pick_up_the_black_bowl_on_the_stove_and_place_it_on_the_plate",
+        "8": "pick_up_the_black_bowl_next_to_the_plate_and_place_it_on_the_plate",
+        "9": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate"
+      }
+    },
+    "n_records": 2403,
+    "n_source_trajectory_ids": 2403,
+    "split_membership": {
+      "dev": 251,
+      "final": 235,
+      "train": 1917
+    }
+  },
+  "verdict": {
+    "note": "测试清单不在训练拆分中；但若 source_episode 级交集非空，说明部分测试 episode 与训练 episode 共享同一源 episode（同样的初始状态/数据集 episode），这是数据协议事实，不是拆分代码泄漏；是否可接受需由 Lead 记录到 S0 结论与后续 S1/S6 泛化表述中",
+    "source_episode_identity_overlap": 2403,
+    "test_manifest_participates_in_training_split": false
+  }
+}

@@ -1,0 +1,77 @@
+"""Promote only a completed exact-config v5 segment and start its supervised resume."""
+import argparse
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+
+import torch
+
+parser = argparse.ArgumentParser()
+parser.add_argument('platform', choices=['libero', 'robotwin'])
+args = parser.parse_args()
+platform = args.platform
+root = Path('/workspace/owac/research/n04-v1')
+source_run = root / f'runs/v1.1/codex-diagnosis/v5-exact-{platform}-seed101'
+formal_run = root / f'runs/v1.1/codex-s2/{platform}-D-stable-v5-seed101'
+assert source_run.is_dir() and not source_run.is_symlink()
+assert not formal_run.exists()
+validation = json.loads((source_run / 'continuous-recovery-verification.json').read_text())
+assert validation['complete'] and 'error' not in validation
+assert validation['batch'] == 8 and validation['warmup'] == 200
+assert validation['configured_budget'] == 2000
+assert validation['reload']['step'] == 8 and validation['reload']['scheduler_restored']
+assert validation['next_update']['step'] == 9
+status = subprocess.run(['supervisorctl', 'status', f'owac-n04-v5-recover-{platform}'], capture_output=True, text=True).stdout
+assert 'EXITED' in status, status
+cfg = json.loads((source_run / 'config.used.json').read_text())
+assert cfg['optim']['batch'] == 8 and cfg['optim']['steps'] == 2000
+assert cfg['loss']['require_all_objectives'] and cfg['seed'] == 101
+rows = [json.loads(line) for line in (source_run / 'metrics.jsonl').read_text().splitlines()]
+updates = [row for row in rows if row.get('applied_terms')]
+assert [row['step'] for row in updates] == list(range(1, 10))
+for row in updates:
+    assert set(row['applied_terms']) == {'action', 'correspondence', 'forecast', 'representation'}
+    assert all(value['windows'] > 0 and value['valid_items'] > 0 for value in row['objective_coverage'].values())
+checkpoint = source_run / 'checkpoint-step0000009.pt'
+payload = torch.load(checkpoint, map_location='cpu', mmap=True, weights_only=False)
+assert payload['step'] == 9 and payload['implementation_version'] == 'n04-v1.1-s2-stability-repair-v5'
+assert payload['config'] == cfg and payload['loss_definition'] == cfg['loss_definition']
+metadata = {'step': payload['step'], 'implementation_version': payload['implementation_version'], 'encoder_keys': len(payload['encoder']), 'backend_keys': len(payload['backend']), 'optimizer_groups': len(payload['optimizer']['param_groups']), 'scheduler': payload['scheduler'], 'bytes': checkpoint.stat().st_size}
+del payload
+# Retain immutable weights that the reload/next-update receipts refer to, outside
+# the ordinary rolling numbered-checkpoint retention policy.
+if (source_run / 'checkpoint-best.pt').is_file():
+    os.link(source_run / 'checkpoint-best.pt', source_run / 'checkpoint-verified-initial-compiled-best.pt')
+for step in (8, 9):
+    os.link(source_run / f'checkpoint-step{step:07d}.pt', source_run / f'checkpoint-verified-initial-step{step:07d}.pt')
+(source_run / 'checkpoint-final.pt').rename(source_run / 'checkpoint-continuous-validation-final-step0000008.pt')
+shutil.copy2(source_run / 'metrics.jsonl', source_run / 'initial-segment-metrics.jsonl')
+(source_run / 'train-report.json').rename(source_run / 'initial-segment-train-report.json')
+receipt = {'platform': platform, 'promoted_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'source_run': str(source_run), 'formal_run': str(formal_run), 'initial_updates': 9, 'retained_checkpoint_mapping': {f'checkpoint-step{step:07d}.pt': f'checkpoint-verified-initial-step{step:07d}.pt' for step in (8, 9)}, 'budget_steps': 2000, 'validation': validation, 'checkpoint': metadata, 'initial_metrics_sha256': hashlib.sha256((source_run / 'initial-segment-metrics.jsonl').read_bytes()).hexdigest(), 'note': 'Same full batch8, warmup200, scheduler2000 and v5 source/config. Old failed/prototype weights excluded. Original diagnostic path remains a compatibility symlink; initial-segment metrics and reload-tested weights preserved.'}
+(source_run / 'promotion.json').write_text(json.dumps(receipt, indent=2) + '\n')
+formal_run.parent.mkdir(parents=True, exist_ok=True)
+shutil.move(str(source_run), str(formal_run))
+source_run.symlink_to(formal_run, target_is_directory=True)
+(formal_run / 'logs').mkdir(exist_ok=True)
+text = (root / 'control-history/codex_v5_training.supervisor.conf').read_text()
+sections = re.split(r'(?=^\[program:)', text, flags=re.MULTILINE)
+selected = [section for section in sections if section.startswith(f'[program:owac-n04-v5-{platform}]')]
+assert len(selected) == 1
+Path(f'/etc/supervisor/conf.d/owac-n04-v5-{platform}.conf').write_text(selected[0])
+for cmd in (['supervisorctl', 'reread'], ['supervisorctl', 'update', f'owac-n04-v5-{platform}'], ['supervisorctl', 'start', f'owac-n04-v5-{platform}']):
+    subprocess.run(cmd, check=True)
+receipt['start_status'] = subprocess.run(['supervisorctl', 'status', f'owac-n04-v5-{platform}'], capture_output=True, text=True).stdout
+assert 'RUNNING' in receipt['start_status']
+repair_path = root / 'monitor/codex/repair-runs.json'
+repair = json.loads(repair_path.read_text())
+repair['runs'] = [run for run in repair.get('runs', []) if run.get('platform') != platform]
+repair['active'] = bool(repair['runs'])
+repair_path.write_text(json.dumps(repair) + '\n')
+(formal_run / 'promotion.json').write_text(json.dumps(receipt, indent=2) + '\n')
+(root / f'control-history/20261019-v5-formal-start-{platform}.json').write_text(json.dumps(receipt, indent=2) + '\n')
+print(json.dumps({'platform': platform, 'from_step': 9, 'status': receipt['start_status']}))

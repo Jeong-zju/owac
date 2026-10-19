@@ -1,0 +1,116 @@
+{
+  "schema": "n04-protocol-v1",
+  "stage": "S0",
+  "owner_branch": "lzh/n04-egomotion-separation",
+  "frozen": true,
+  "frozen_at": "2026-10-14",
+  "frozen_by": "ws-contracts",
+  "revision_policy": "本文件在 S0 先算先冻结；阈值只允许在未看到模型/最终测试结果时通过记录理由并重新冻结协议来修改，禁止按结果回调门槛（N04 v1.0 §11.2）。任何修改必须同时更新 source_config.sha256。",
+  "source_config": {
+    "path": "configs/n04/full/s0_data.json",
+    "sha256": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33",
+    "nominal_camera_key": "protocol.nominal_camera",
+    "reference_2d_key": "protocol.reference_2d",
+    "error_separation_key": "protocol.error_separation",
+    "dynamic_revision_key": "protocol.dynamic_revision"
+  },
+  "source_theory": {
+    "path": "research/theory/n04_v1.md",
+    "section": "§7 像素 ↔ 米换算（protocol.nominal_camera，诊断参照）",
+    "note": "三维 px↔m 换算与数值以该节为准，逐行一致；该节明确这些数字只作诊断参照。"
+  },
+  "inherited_2d": {
+    "relative_improvement_min": 0.1,
+    "absolute_improvement_px_min": 0.05,
+    "units": "original_image_pixel",
+    "source": "N04 v1.0 §11.2 动态状态门，继承旧二维门槛（configs/n04/full/s0_data.json protocol.reference_2d）",
+    "applies_to": "旧二维数据（D0 之前的二维探针与旧基准）上的缺失误差等动态状态指标"
+  },
+  "three_dimensional": {
+    "status": "diagnostic_reference_only",
+    "calibration_available": false,
+    "not_an_acceptance_baseline": true,
+    "note": "仓库当前没有真实相机标定（docs/status.md：机器人本体、相机和数据留空）。按 research/theory/n04_v1.md §7，以下全部数字只作诊断参照，不得当真实传感器标定或最终验收口径。冻结口径（Lead 2026-10-14 确认）：诊断参照下的 provisional 冻结；真实标定到位后必须用同一公式重算并重新冻结。",
+    "nominal_camera": {
+      "focal_px": 320.0,
+      "depth_m": 0.6,
+      "image_size": [256, 256],
+      "feature_stride": 32
+    },
+    "derivation": {
+      "formula": "u - cx = fx * X / Z  =>  X = (u - cx) * Z / fx；原图像素尺度 s_px(Z) = Z / fx [m / original px]；特征像素尺度 s_feat(Z) = stride * Z / fx [m / feature px]（中心间距）",
+      "anchor": "fx = 320 px, Z = 0.6 m, image_size = 256x256, stride = 32, cx = cy = 128（图像中心）",
+      "substituted": {
+        "one_original_px_m": "0.6 / 320 = 1.875e-3 m = 1.875 mm",
+        "inherited_floor_m": "0.05 * 1.875 mm = 9.375e-5 m = 0.09375 mm",
+        "inherited_floor_feature_px": "0.05 / 32 = 1.5625e-3 feature px",
+        "one_feature_px_m": "32 * 1.875 mm = 0.06 m = 60 mm",
+        "image_half_width_m": "128 * 1.875 mm = 0.24 m",
+        "image_width_m": "256 * 1.875 mm = 0.48 m",
+        "stride_center_offset": "15.5 original px = 29.0625 mm = 0.484375 feature px",
+        "hfov_exact_deg": "2 * atan(128 / 320) = 43.6028",
+        "feature_grid": "256 / 32 = 8 x 8"
+      },
+      "source": "research/theory/n04_v1.md §7；本文件数值与之一致，未另立换算。"
+    },
+    "absolute_gate": {
+      "rule": "三维绝对收益必须同时满足相对 ≥10%，且在该评分空间的测量分辨率之上有绝对收益（N04 v1.0 §11.2）。provisional 冻结：以诊断换算的 1 原图像素 = 1.875 mm 作为测量分辨率下限（严格超过）；继承的 0.05 px = 0.09375 mm 只作下限参照，不能单独作为通过条件。",
+      "original_pixel_space": {
+        "min_improvement_m": 0.001875,
+        "min_improvement_px_equivalent": 1.0,
+        "inherited_floor_m": 9.375e-5,
+        "inherited_floor_px_equivalent": 0.05,
+        "strictly_exceed_resolution": true,
+        "formula": "max(0.05 * 0.6 / 320, 1 * 0.6 / 320) = 1.875e-3 m"
+      },
+      "feature_space_equivalents": {
+        "feature_scale_m_per_feature_px": 0.06,
+        "inherited_floor_feature_px": 0.0015625,
+        "measurement_resolution_feature_px_equivalent": 0.03125,
+        "gate_m": 0.001875,
+        "note": "Lead 2026-10-14 裁决：门槛以原图像素空间为准，任何在特征像素空间计分的指标必须先换算回米/原图像素再判门槛，并同时报告特征空间等效值；不设 1 特征 px = 60 mm 的独立门槛（那是表示分辨率，不是验收门槛）。"
+      },
+      "relative_improvement_min": 0.1,
+      "status": "diagnostic_reference_only"
+    }
+  },
+  "h1_error_separation": {
+    "hypothesis": "在同一开发误报预算下，新增误差分离规则的干扰负例误报低于最强既有对照，同时不明显牺牲外部事件召回；配对区间支持方向。",
+    "dev_false_positive_budget": 0.01,
+    "dev_false_positive_budget_fixed_across_arms": true,
+    "negative_false_positive_relative_reduction_min": 0.2,
+    "event_recall_drop_max_percentage_points": 2.0,
+    "paired_interval_must_support_direction": true,
+    "paired_interval_resampling_unit": "task_or_source_trajectory",
+    "per_critical_group_reported_separately": true,
+    "source": "N04 v1.0 §11.2 误差分离门（configs/n04/full/s0_data.json protocol.error_separation）"
+  },
+  "h2_dynamic_revision": {
+    "hypothesis": "停止/反向后的积分误差较 Ac-RKN 降低，且缺失期与修订延迟不退化。",
+    "stop_reverse_integration_error_reduction_min": 0.15,
+    "missing_phase_error_degradation_max": 0.05,
+    "revision_latency_must_improve_or_not_degrade": true,
+    "missing_error_bucketed_by_physical_gap": true,
+    "censored_unrecovered_reported": true,
+    "source": "N04 v1.0 §11.2 动态修订门（configs/n04/full/s0_data.json protocol.dynamic_revision）"
+  },
+  "deferred_gates": [
+    {
+      "name": "运动网络训练触发",
+      "source": "N04 v1.0 §11.2",
+      "note": "依赖 S3 以后的真值运动诊断，本轮不冻结数值；沿用方案原文。"
+    },
+    {
+      "name": "最终闭环门",
+      "source": "N04 v1.0 §11.2",
+      "note": "依赖 S7 官方基准配对评测，本轮不冻结数值；沿用方案原文（总体 +3pp 且配对 95% 区间下界大于 0）。"
+    }
+  ],
+  "metric_semantics": {
+    "prior_vs_posterior": "校正前为 prior，校正后为 posterior，分开报告",
+    "unit_separation": ["meter", "original_pixel", "feature_pixel"],
+    "event_definitions": ["motion_presence", "prediction_mismatch", "RAW_observable_change"],
+    "missing_error_buckets": "按物理缺失时长分桶；未恢复记 censored",
+    "revision_latency_start": "第一条可用有效新测量"
+  }
+}

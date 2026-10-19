@@ -1,0 +1,569 @@
+{
+  "stage": "N04 v1.1 S2",
+  "date": "2026-10-15",
+  "status": "S2_training_stopped_by_user_code_repair_v3",
+  "headline": "用户已终止所有 N04 训练；优先修复代码。历史开发闭环100/100、0成功、100失败、最终基础设施错误0保留。修补版v3只做前后向／合同验证，未训练、未闭环、未进入S3。",
+  "interfaces_contract": "docs/n04_v11_s2_interfaces.md",
+  "implementation": {
+    "measurement_reused": "src/owac/frameworks/n04/measurement.py, src/owac/frameworks/n04/_vendor/convnext/",
+    "correspondence_new": "src/owac/frameworks/n04/correspondence.py, src/owac/frameworks/n04/_vendor/raft/",
+    "quality_new": "src/owac/frameworks/n04/quality.py",
+    "state_new": "src/owac/frameworks/n04/state_estimator.py, src/owac/frameworks/n04/evidence_update.py",
+    "readout_new": "src/owac/frameworks/n04/readout.py",
+    "encoder_new": "src/owac/frameworks/n04/encoder_v11.py",
+    "training_new": "src/owac/training/n04_v11.py",
+    "evaluation_new": "src/owac/evaluation/n04_v11.py, src/owac/evaluation/n04_v11_closed_loop.py, src/owac/evaluation/n04_v11_visuals.py",
+    "data_new": "src/owac/raw/n04_v11_data.py, src/owac/raw/rawvla_sequence.py(additions only)",
+    "configs": "configs/n04/v1_1/ (base + platform_* + arm_{A,B,C,D} + runs/* + smoke_profile*.json + s2_launch_*.json + eval100.json)",
+    "monitor_new": "src/owac/runtime/n04_v11_progress.py, src/owac/runtime/n04_v11_progress.html",
+    "policy_server_new_unverified": "src/owac/backends/n04_v11_server.py; post-fix real closed-loop path verified for 100 completed episodes",
+    "scripts": "scripts/n04_full/n04_v11_sync.sh, n04_v11_launch.sh, n04_v11_loop.sh, n04_v11_visuals.sh"
+  },
+  "parameters": {
+    "pi05_backend": 3616757520,
+    "convnext_measurement": 88942210,
+    "raft": 5257536,
+    "readout_default": 66635776,
+    "quality_head": 58240,
+    "state_estimator": 375554
+  },
+  "remote": {
+    "host": "root@154.59.156.22",
+    "ssh_port": 16724,
+    "gpus": "2x RTX PRO 6000 Blackwell 96GB",
+    "n04_root": "/workspace/owac/research/n04-v1",
+    "data_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+    "frozen_source_snapshot": "/workspace/owac/research/n04-v1/source/n04-v11-20261015T165752Z-a81cf25",
+    "python": "/workspace/owac/research/n04-v1/envs/n04v11/bin/python",
+    "initial_source_snapshot": "/workspace/owac/research/n04-v1/source/n04-v11-20261015T114012Z-a81cf25"
+  },
+  "training": {
+    "seed": 101,
+    "nominal_budget_steps": 100000,
+    "checkpoint_every_steps": 100,
+    "sessions": {
+      "libero": "n04v11-libero-D101",
+      "robotwin": "n04v11-robotwin-D101"
+    },
+    "run_dirs": {
+      "libero": "/workspace/owac/research/n04-v1/runs/v1.1/s2/libero-D-seed101",
+      "robotwin": "/workspace/owac/research/n04-v1/runs/v1.1/s2/robotwin-D-seed101"
+    },
+    "logs": {
+      "libero": "/workspace/owac/research/n04-v1/runs/v1.1/s2/libero-D-seed101/logs/train.log",
+      "robotwin": "/workspace/owac/research/n04-v1/runs/v1.1/s2/robotwin-D-seed101/logs/train.log"
+    },
+    "stop": "tmux kill-session -t n04v11-<platform>-D101  (或 run 目录下 stop.sh)",
+    "resume": "DISABLED_BY_USER_STOP",
+    "actual_state_2026-10-15T11_46Z": {
+      "libero": {
+        "step": 2,
+        "step_seconds": 76.2,
+        "peak_memory_gb": 64.7,
+        "loss": {
+          "total": 31.43,
+          "action": 1.37,
+          "correspondence": 0.567,
+          "forecast": 299.97,
+          "representation": 0.972
+        }
+      },
+      "robotwin": {
+        "step": 1,
+        "step_seconds": 122.0,
+        "peak_memory_gb": 92.9,
+        "loss": {
+          "total": 33.77,
+          "action": 3.365,
+          "correspondence": 0.76,
+          "forecast": 303.18,
+          "representation": 0.978
+        }
+      },
+      "checkpoints_saved": "none yet；因饱和掩码修复于 2026-10-15T12:13Z 重启（修复前日志/曲线归档为 *.prefix-saturation.*），首个 checkpoint 预计 23:00（LIBERO）/ 23:25（RoboTwin）本地"
+    },
+    "curve_source": "<run>/metrics.jsonl (step, train_loss, terms.*, lr, step_seconds, gpu_memory_gb/gpu_live_gb/gpu_reserved_gb) 与 <run>/progress.json",
+    "cost_finding": {
+      "measured_100k_days": {
+        "libero": 85.1,
+        "robotwin": 124.7
+      },
+      "note": "100k 名义预算按实测步时不可行；需先降本再谈跑满",
+      "ranked_reductions_without_spec_change": [
+        "8 段窗口合批前向（当前 GPU 利用率 29–55%）2–3×",
+        "读出媒体 token 2× 池化 15–20%",
+        "forecast 目标复用主路径 stop-grad latent 10–15%",
+        "对应损失降到 RAFT 工作分辨率 5–15%",
+        "RAFT iters 12→6–8 10–20%"
+      ],
+      "independent_median_step_seconds": {
+        "libero": 129.08253638632596,
+        "robotwin": 151.95706596784294
+      },
+      "independent_estimated_remaining_days": {
+        "libero": 149.00666491928942,
+        "robotwin": 175.63704208116513
+      }
+    },
+    "restarts": [
+      {
+        "utc": "2026-10-15T11:20Z",
+        "reason": "gradient_checkpointing 与有状态编码器冲突（CheckpointError），修复后重启"
+      },
+      {
+        "utc": "2026-10-15T12:13Z",
+        "reason": "saturation_mask 维度错误修复，重启使整轮训练使用正确输入；进度损失约 25 分钟"
+      },
+      {
+        "utc": "2026-10-15T17:01Z",
+        "reason": "LIBERO RAW 双缩放（scaled_raw /255 + InputScale 1/255）与 forecast 归约口径一并修复后从零重跑；pre-fix 产物归档为 pre-fix-input-scale.*"
+      }
+    ],
+    "actual_state_2026-10-15T17_02Z": {
+      "libero": {
+        "step": 0,
+        "step_seconds": 125.9,
+        "loss": {
+          "total": 1.1724,
+          "action": 0.7844,
+          "correspondence": 2.5156,
+          "forecast": 1.2676,
+          "representation": 0.9696
+        }
+      },
+      "robotwin": {
+        "step": 0,
+        "note": "restarted, GPU1 92.9GB"
+      },
+      "first_checkpoint_eta_local": {
+        "libero": "2026-10-16 ~04:30",
+        "robotwin": "2026-10-16 ~04:55"
+      },
+      "loss_definition": "v1_1_forecast_perdim_v2"
+    },
+    "status": "stopped_by_user",
+    "stopped_at": "2026-10-16T02:36:09Z",
+    "restart_authorized": false,
+    "historical_launch_commands": [
+      "SNAP=/workspace/owac/research/n04-v1/source/n04-v11-20261015T114012Z-a81cf25",
+      "N04V11_SOURCE=$SNAP N04V11_CONFIG=$SNAP/configs/n04/v1_1/s2_launch_libero_D.json bash $SNAP/scripts/n04_full/n04_v11_launch.sh libero D 101 0",
+      "N04V11_SOURCE=$SNAP N04V11_CONFIG=$SNAP/configs/n04/v1_1/s2_launch_robotwin_D.json bash $SNAP/scripts/n04_full/n04_v11_launch.sh robotwin D 101 1"
+    ],
+    "saved_checkpoint_step": {
+      "libero": 200,
+      "robotwin": 100
+    },
+    "last_progress_step": {
+      "libero": 278,
+      "robotwin": 148
+    },
+    "historical_independent_snapshot": {
+      "captured_at": "2026-10-16T02:32:41Z",
+      "platforms": {
+        "libero": {
+          "step": 276,
+          "train_loss": 0.6709663197398186,
+          "dev_loss": null,
+          "phase": "train",
+          "updated_at": "2026-10-16T02:30:52Z",
+          "step_seconds": 131.32123551890254,
+          "checkpoints": [
+            "checkpoint-step0000100.pt",
+            "checkpoint-step0000200.pt"
+          ]
+        },
+        "robotwin": {
+          "step": 146,
+          "train_loss": 0.6761529967188835,
+          "dev_loss": null,
+          "phase": "train",
+          "updated_at": "2026-10-16T02:30:16Z",
+          "step_seconds": 164.83251038566232,
+          "checkpoints": [
+            "checkpoint-step0000100.pt"
+          ]
+        }
+      },
+      "sessions": [
+        "n04v11-libero-D101: 1 windows (created Thu Oct 15 16:58:22 2026)",
+        "n04v11-robotwin-D101: 1 windows (created Fri Oct 16 00:33:08 2026)",
+        "ssh_tmux: 1 windows (created Thu Oct 15 06:25:54 2026)"
+      ],
+      "audit_cpu_processes": []
+    }
+  },
+  "closed_loop_eval": {
+    "list": "configs/n04/v1_1/eval100.json (LIBERO 50 + RoboTwin 50, 每平台 5 光照域 x 10)",
+    "completed": 100,
+    "planned_total": 100,
+    "planned_libero": 50,
+    "planned_robotwin": 50,
+    "successes": 0,
+    "infrastructure_errors": 0,
+    "smoke_only_not_n04": {
+      "policy": "official pi0.5 LIBERO checkpoint (NOT N04)",
+      "episodes": 2,
+      "successes": 1,
+      "failures": 1,
+      "timeouts": 1,
+      "infrastructure_errors": 0,
+      "videos": "/workspace/owac/research/n04-v1/runs/v1.1/smoke/libero-loop-smoke/artifacts/libero/<identity>.mp4 (256x256@10fps)",
+      "purpose": "闭环链路与计数口径验证"
+    },
+    "blockers": [],
+    "command_shape": "bash scripts/n04_full/n04_v11_loop.sh <platform> <gpu>  (N04V11_CHECKPOINT=... N04V11_POLICY_COMMAND='...{checkpoint}...{port}...')",
+    "interpretation_caveat": "按实测步时，step 100 仅相当于名义预算的 0.1%：用该早期 checkpoint 跑出的 50+50 是开发结果与链路验证（metadata／episode reset／resize 256／RAW 输入／动作回传），不是模型能力结论，也不代表方法失败。本轮不设最低成功率，不因数字低补种子或延长。",
+    "libero_50_status": "DONE: post-fix step100 + exact; 50/50, 0 successes, 50 failures, final errors 0; independently verified 2026-10-16",
+    "n04_policy_server_verified": {
+      "libero": "real live frames -> normalized_actions [1,10,32] finite; reset replays first frame value-identical; metadata n04.step=100",
+      "robotwin": "protocol B, deterministic constructed input -> data.actions [50,14] finite; MEAN_STD, action_chunk_size=50, state_dim=14; metadata n04.step=100"
+    },
+    "robotwin_50_status": "DONE: post-fix step100 + protocol B + exact; 50/50, 0 successes, 50 failures, final errors 0; independently verified 2026-10-16",
+    "failures": 100,
+    "timeouts": 50,
+    "libero_50_failure_samples": [
+      "runs/v1.1/s2/libero-D-seed101/artifacts/libero/libero:libero_spatial:1:5:ExtremeLow.mp4",
+      "runs/v1.1/s2/libero-D-seed101/artifacts/libero/libero:libero_10:0:0:Normal.mp4"
+    ],
+    "success_samples": [],
+    "history_convention_ruling": "exact path (client sends last proprio_history+1 real frames; metadata proprio_history_source=observation_frames|policy_calls_approx) + paired approx/exact comparison on 4-6 episodes; re-run LIBERO 50 with exact if first-action-block max elementwise diff > 0.05 or success changes directionally",
+    "by_domain": {
+      "ExtremeLow": {
+        "completed": 10,
+        "successes": 0
+      },
+      "Low": {
+        "completed": 10,
+        "successes": 0
+      },
+      "Normal": {
+        "completed": 10,
+        "successes": 0
+      },
+      "Over": {
+        "completed": 10,
+        "successes": 0
+      },
+      "ExtremeOver": {
+        "completed": 10,
+        "successes": 0
+      }
+    },
+    "by_suite": {
+      "libero_10": {
+        "completed": 15,
+        "successes": 0
+      },
+      "libero_goal": {
+        "completed": 10,
+        "successes": 0
+      },
+      "libero_object": {
+        "completed": 10,
+        "successes": 0
+      },
+      "libero_spatial": {
+        "completed": 15,
+        "successes": 0
+      }
+    },
+    "steps_range": [
+      220,
+      520
+    ],
+    "records_span_utc": [
+      "2026-10-15T15:09:51Z",
+      "2026-10-15T15:59:06Z"
+    ],
+    "dedup": "50 rows = 50 unique identities (attempt1 x47 + attempt2 x3)",
+    "pre_fix_notice": "LIBERO 50 (0/50) 与 exact 轮均在 pre-fix 输入尺度上的 checkpoint 上完成，统一标为 pre-fix-input-scale 开发证据；正式 100 次口径需等修复后的 step-100 checkpoint。",
+    "pre_fix_rounds": {
+      "eval_results_jsonl_rows": 100,
+      "rounds": [
+        "approx (policy_calls_approx)",
+        "exact (observation_frames)"
+      ],
+      "exact_round": {
+        "completed": 50,
+        "successes": 0,
+        "failures": 50,
+        "timeouts": 50,
+        "infrastructure_errors": 0,
+        "episode_seconds_total": 1912.0,
+        "span_utc": [
+          "2026-10-15T16:41:03Z",
+          "2026-10-15T17:10:49Z"
+        ]
+      },
+      "videos": {
+        "exact": "artifacts/pre-fix-input-scale/",
+        "approx": "artifacts/pre-fix-input-scale-approx/"
+      },
+      "provenance_file": "<run>/eval-provenance.json (authoritative; progress.json is periodically rewritten by training)",
+      "determinism_evidence": "runs/v1.1/smoke/paired-proprio/{exact,approx}: first 3 chunks max|diff| = 0.0"
+    },
+    "formal_round": {
+      "platform": "libero",
+      "convention": "post-fix + exact proprio history",
+      "checkpoint": "runs/v1.1/s2/libero-D-seed101/checkpoint-step0000100.pt",
+      "rows": 50,
+      "completed": 50,
+      "planned": 50,
+      "successes": 0,
+      "failures": 50,
+      "timeouts": 50,
+      "infrastructure_errors": 0,
+      "by_suite": {
+        "libero_10": 15,
+        "libero_goal": 10,
+        "libero_object": 10,
+        "libero_spatial": 15
+      },
+      "by_domain": {
+        "ExtremeLow": {
+          "completed": 10,
+          "successes": 0
+        },
+        "Low": {
+          "completed": 10,
+          "successes": 0
+        },
+        "Normal": {
+          "completed": 10,
+          "successes": 0
+        },
+        "Over": {
+          "completed": 10,
+          "successes": 0
+        },
+        "ExtremeOver": {
+          "completed": 10,
+          "successes": 0
+        }
+      },
+      "videos": "50/50 in artifacts/libero/ ; success videos: none",
+      "episode_seconds_total": 2025.9,
+      "span_utc": [
+        "2026-10-15T21:12:23Z",
+        "2026-10-15T21:43:50Z"
+      ],
+      "interpretation": "0/50 为开发结果（step100 ≈ 名义预算 0.1%），非独立最终测试；同一轮训练指标已健康（loss 0.70/action 0.34/fc 稳定）",
+      "jsonl_total_rows": 152
+    },
+    "total_completed_of_100": 100,
+    "formal_round_robotwin": {
+      "convention": "post-fix + protocol B + exact proprio history",
+      "checkpoint": "runs/v1.1/s2/robotwin-D-seed101/checkpoint-step0000100.pt",
+      "rows": 50,
+      "completed": 50,
+      "planned": 50,
+      "successes": 0,
+      "failures": 50,
+      "infrastructure_errors": 0,
+      "jsonl_total_rows": 63,
+      "by_domain": {
+        "ExtremeLow": 10,
+        "Low": 10,
+        "Normal": 10,
+        "Over": 10,
+        "ExtremeOver": 10
+      },
+      "by_task": {
+        "grab_roller": 5,
+        "handover_mic": 5,
+        "lift_pot": 5,
+        "open_laptop": 5,
+        "pick_dual_bottles": 5,
+        "place_object_basket": 5,
+        "place_phone_stand": 5,
+        "put_object_cabinet": 5,
+        "stack_blocks_two": 5,
+        "stack_bowls_two": 5
+      },
+      "steps_total": 30000,
+      "steps_note": "equals sum of official step_lim; all failures are budget-exhausted",
+      "timeout_field_note": "author episode_results.jsonl has no timeout field -> recorded false, not fabricated; step evidence shows every episode ran to its task limit",
+      "videos": "50/50 in artifacts/robotwin/<identity>.mp4 ; success videos: none",
+      "campaign_minutes": 85,
+      "median_episode_seconds": 121.7,
+      "seconds_per_step": 0.19,
+      "input_domain_check": "passed, worst deviation x1.12 vs training data across 5 lighting domains (report 21.3)"
+    },
+    "total_successes_of_100": 0,
+    "total_infrastructure_errors_of_100": 0
+  },
+  "monitor": {
+    "url_via_tunnel": "ssh -p 16724 root@154.59.156.22 -L 8090:localhost:8090  ->  http://127.0.0.1:8090/",
+    "service": "python3 src/owac/runtime/n04_v11_progress.py --run-root /workspace/owac/research/n04-v1/runs/v1.1 --out /workspace/owac/research/n04-v1/monitor/state --host 127.0.0.1 --port 8090 --interval 12",
+    "start_stop": "bash /workspace/owac/research/n04-v1/monitor/start.sh | stop.sh",
+    "log": "/workspace/owac/research/n04-v1/monitor/monitor.log",
+    "verified_with_real_data": true
+  },
+  "visuals": {
+    "tool": "src/owac/evaluation/n04_v11_visuals.py + scripts/n04_full/n04_v11_visuals.sh",
+    "raw_fixed_mapping": "display(v)=log1p(G*clip(v/white_level,0,1))/log1p(G); libero white=255 G=15, robotwin white=1.0 G=1000",
+    "same_source_rgb": "LIBERO libero/rgb (agentview_rgb_uint8,wrist_rgb_uint8); RoboTwin robotwin2/rgb (head/left/right_camera_rgb_uint8)",
+    "panels": "RAW 固定显示 / 同源 RGB / flow 对应 / 质量 R / 两模式权重 / 支持轨迹 / readout attention",
+    "artifacts_so_far": {
+      "location": "runs/v1.1/s2/libero-D-seed101/artifacts/libero-D-seed101/ (clip_01..03, 8 frames each, PNG + per-frame meta.json + index.json)",
+      "checkpoint": "checkpoint-step0000100.pt (manifest: step=100, trained=true, config_fingerprint=42c3390d…)",
+      "verified_by_lead": "clip_01/frame_0000080.png: 7 panels same-frame same-coords; flow median 26.82 px / p95 31.73 px; supports 127 valid, 1 occluded, 0 outside; attention dense mass 0.960; mode P(revision)≈0; RAW panel clipped at white=255 in the Over domain (fixed mapping, not per-frame stretch)",
+      "robottwin": "not yet (CPU rendering would slow RoboTwin training; pending)"
+    },
+    "output_location": "<run>/artifacts/<platform>-D-seed101/clip_XX/frame_*.png + index.json",
+    "post_fix_step100": {
+      "location": "runs/v1.1/s2/libero-D-seed101/artifacts/libero-D-seed101-postfix-step0100/ (24 frames + per-frame meta + index.json)",
+      "verified_png": ".../clip_01/frame_0000085.png",
+      "flow_median_px": [
+        3.186,
+        3.958
+      ],
+      "flow_p95_px": [
+        5.689,
+        9.5
+      ],
+      "log10_R_range": [
+        0.00034,
+        0.00097
+      ],
+      "attention_dense_mass": [
+        0.9702,
+        0.9728
+      ],
+      "mean_P_revision": "2e-05..0.1428 (no frame > 0.5)",
+      "valid_supports": [
+        122,
+        128
+      ],
+      "occluded": [
+        0,
+        4
+      ],
+      "outside": [
+        0,
+        2
+      ],
+      "id_max": [
+        127,
+        137
+      ],
+      "births_per_frame": "median 0, max 4 (first frame 128 inflates the mean to 16.7)",
+      "one_line": "对应与支持侧明显改善；R/attention/模式权重仍无区分度（早期）",
+      "display_mapping_regression_fixed": "输入尺度修复后 RAW 面板一度整片全白（显示映射仍按旧口径再乘 255）；已改为从 PLATFORM_SPECS.value_scale 推导 + 未知量纲报错，并加测试。数值结论不受影响"
+    }
+  },
+  "evidence": {
+    "tests": {
+      "tests/encoders/n04_v11": "138 passed, 1 skipped",
+      "tests/test_n04_v11_progress.py": "9 passed",
+      "ruff": "clean"
+    },
+    "weights_audit": {
+      "libero": "GCS 12,439,085,481 B, 812/813 keys, active_missing=[], 8.52 GB bf16",
+      "robotwin": "HF SidneyXie/pi05_robotwin @ e49e2ab6, 9,354,050,752 B, 813/813 keys, sha256 matches author-published values"
+    },
+    "raw_data_checks": "LIBERO loader keeps FP32 counts 0..255; encoder alone applies InputScale 1/255. RoboTwin preserves float32 linear values. Historical double-scaled input is pre-fix only.",
+    "simulators": "LIBERO envs/libero-sim (20 frames @0.28 s/frame, 128x128 non-black); RoboTwin envs/robotwin-sim (grab_roller, 20 frames, 3x 240x320 real render)",
+    "real_defects_fixed": [
+      "build_encoder missing platform/arm",
+      "BF16 autocast broke PixelAffine dtype",
+      "norm-stats schema (libero named entry + action singular; robotwin norm_stats + actions plural)",
+      "tokenizer returns 1-D numpy, bridge needs [B,L]",
+      "forecast target features ran with grad (multi-res ConvNeXt graphs)",
+      "forecast anchors rolled 1/2/4 steps through RKN building dense temporaries (+13 GB/frame -> 101 GB OOM)",
+      "gradient_checkpointing re-calls stateful encoder.step on recompute (CheckpointError + duplicate fusion)",
+      "metrics gpu_memory_gb reported monotonic peak (misread as cross-step leak)",
+      "saturation_mask 归约维错误（按 [B,C,H,W] 写 dim=1，但四调用点都传单帧 [C,H,W] → 返回 [3,1,W] 再被折成 [1,W] 横条 OR，饱和通道长期错误）；已改为 channel any → [1,H,W] 并实测 (1,2,4)/正确像素，训练重启一次",
+      "策略服务 `_environment_actions` 把 MEAN_STD 统计张量建在 CPU 而动作在 cuda:0 → device 不一致（首次 RoboTwin 冒烟失败）；已改为随动作设备，并有旧写法必挂的回归测试"
+    ],
+    "raft_collapse_validation": {
+      "fixed_set": "10 dev pairs (5 lighting domains x 2, frames [8,9], agentview), intended-uint8 scale",
+      "corr_overall": {
+        "fresh": 2.685,
+        "pre_fix_step100": 3.161,
+        "post_fix_step100": 2.691,
+        "post_fix_paired_delta": 0.006,
+        "ci95": [
+          -0.03,
+          0.047
+        ]
+      },
+      "flow_median_px": {
+        "fresh": 4.3,
+        "pre_fix_step100": 29.18,
+        "post_fix_step100": 3.4
+      },
+      "transport_over_static": {
+        "fresh": 2.93,
+        "pre_fix_step100": 8.22,
+        "post_fix_step100": 2.95
+      },
+      "degenerate_trajectory_monotone": "2.000 -> 3.463 (constant displacement still penalised)",
+      "conclusion": "塌缩已解除（不再是常数大位移、tr/st 回到 fresh 水平、亮域回归消失）；但 dev corr 在 step-100 与 fresh 无可测差异（仍在 ~2k warmup 内，属预期）",
+      "residual_risk": "post-fix 仍有 ~3.4px 几乎与场景无关的 fy 常数组件，需盯是否随步数增长",
+      "next_levers_judgement_only": [
+        "核对 RAFT 参数组 LR/warmup 是否真按 3e-4/2k 生效并接线 set_step",
+        "盯 fy 常数组件",
+        "最后才考虑 |flow| 上限"
+      ]
+    },
+    "input_scale_control": "training_feed（旧双缩放口径）下所有域 corr ≈ 2.000（比值地板、无信号）→ 只有修好输入尺度后 corr 才可判读"
+  },
+  "not_done": [
+    "repair-v3 representation/action learning and causal mechanism evaluation",
+    "matched A/B/C/D comparisons and repaired-model closed-loop validation; all training requires new authorization"
+  ],
+  "next_steps": [
+    "Review code repair report and reproducible receipts",
+    "Keep all training stopped until explicit subsequent authorization"
+  ],
+  "stopped_at": "S2 code repair; training stopped by user; no S3",
+  "known_limitations": [
+    "Historical 0/100 is unchanged and belongs to original step100 code/weights",
+    "repair v3 changes readout and objective semantics; old checkpoints must use historical frozen code",
+    "cropped Gaussian self-supervision is a documented adaptation, not the complete SMURF training recipe",
+    "repair version is untrained and has no new closed-loop capability evidence"
+  ],
+  "independent_audit": {
+    "date": "2026-10-16",
+    "report": "research/experiments/2026-10-16_n04_v11_s2_independent_audit.md",
+    "summary": "research/experiments/results/2026-10-16_n04_v11_s2_independent_audit/summary.json",
+    "patched_source": "/workspace/owac/research/n04-v1/source/n04-v11-s2-audit-20261016",
+    "running_training_uses_patched_source": false,
+    "tests": "191 passed, 1 skipped; make check passed",
+    "verdict": "closed-loop receipt verified; full S2 implementation remains partial; capability unestablished",
+    "prefix_regularizer_counterexample": "research/experiments/results/2026-10-16_n04_v11_s2_independent_audit/prefix-regularizer-counterexample.json",
+    "fixed_dev_action_loss": {
+      "libero": {
+        "dev_loss": 0.36539871245622635,
+        "windows": 4,
+        "points": 16,
+        "step": 100,
+        "seconds": 186.83729281276464
+      },
+      "robotwin": {
+        "dev_loss": 0.3629450164735317,
+        "windows": 4,
+        "points": 16,
+        "step": 100,
+        "seconds": 208.41753565892577
+      }
+    },
+    "cpu_validation_finished": true,
+    "final_state": "research/experiments/results/2026-10-16_n04_v11_s2_independent_audit/final-running-state.json"
+  },
+  "code_repair": {
+    "report": "research/experiments/2026-10-16_n04_v11_s2_code_repair.md",
+    "summary": "research/experiments/results/2026-10-16_n04_v11_s2_repair/summary.json",
+    "source": "/workspace/owac/research/n04-v1/source/n04-v11-s2-repair-20261016",
+    "implementation_version": "n04-v1.1-s2-repair-v3",
+    "optimizer_updates": 0,
+    "training_restarted": false,
+    "verification": "220 passed, 1 skipped; make check passed; both full real windows and isolated selfsup gradients verified",
+    "status": "code_and_gradient_contracts_verified_training_stopped",
+    "latest_saved_checkpoint_steps": {
+      "libero": 200,
+      "robotwin": 100
+    }
+  }
+}

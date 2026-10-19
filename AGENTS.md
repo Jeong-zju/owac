@@ -40,6 +40,25 @@
 
 2026-10-16 用户最新边界：只修代码并从随机初始化完成 P2 画像，**训练由用户自行开启**。当前执行版本 `n02-v12-p2-causal-r4`：修复因果损失的状态梯度、测量掩码/权重/NaN、非正方形 RAW 查询的行列与像素中心坐标、饱和排除、零支持读出及恢复/覆盖保护。仅运行 `--profile-only` 的真实前后向，优化更新 0；禁止据旧阶段包自行启动训练、P3/P4。正式启动与验收边界见 `research/experiments/n02_v1_2/P2_fresh_profile_20261016.md` 和 `research/experiments/n02_v1_2/P2_r4_user_training.md`。旧 r2/旧 1000 步只保留历史身份，不能 resume 为 r4。
 
+2026-10-19 最新入口：`research/experiments/2026-10-19_n04_stability_repair_v5.md`。v4.2 LIBERO停于1288/持久1280、RoboTwin363/持久360，故障权重与负结果保留，不续入v5。当前v5 `n04-v1.1-s2-stability-repair-v5` / `v1_1_s2_normalized_latent_bounded_transition_v5` 已完成数值/缺项修复；467测试通过、1跳过、make check通过。双平台完整真实零更新、8次完整优化、独立确定性GPU重载及第9次更新通过，正式Supervisor `owac-n04-v5-{libero,robotwin}`已从9继续，均真实保存step10；原batch8/warmup200/预算2000，禁止自动扩展预算或进入S3。冻结源码`source/n04-v11-codex-stability-v5-deterministic-dev-20261019`，765文件清单；训练step/前反向AST与零更新源一致，仅固定dev参考另加原生确定性路径，CUBLAS_WORKSPACE_CONFIG=:4096:8必须在启动前设置。禁止热改源码。原严格编译dev比较失败回执保留，独立确定性对照每平台2模型×3次完全一致后才通过原1e-5门禁。正式初始段与验证映射、保留step8/9权重见promotion.json；原诊断路径为兼容symlink。恢复使用--resume latest，不得从v4、原型或空目录静默fresh启动。GPU利用率和长期/闭环效果未验收；监控8090与systemd隧道保留。下方旧轮“运行中”均为历史。
+
+
+2026-10-17 监控连接：本地8090转发改由用户级systemd `owac-n04-monitor-tunnel.service` 托管，已enabled；模板 `configs/n04/v1_1/codex_monitor_tunnel.service`，安装 `/home/jeong/.config/systemd/user/owac-n04-monitor-tunnel.service`。只绑定127.0.0.1:8090，使用既有SSH身份与严格host key检查；保活15秒×3，退出后5秒自动重连。已实际终止本地隧道并确认PID改变、NRestarts增加和HTTP200恢复。不要再并行启动占用8090的裸SSH。远端训练／监控未重启；本地运行工具缺用户DBus环境时，使用`XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus systemctl --user ...`。证据见修复报告末尾及`research/experiments/results/2026-10-17_n04_monitor_connection/systemd-recovery.json`。
+
+2026-10-16 最新修复与运行入口：`research/experiments/2026-10-16_n04_aux_repair_v4.md`。用户要求执行修复后，Codex 完成辅助目标、RoboTwin 补边梯度和编译反传回退修复；实现 `n04-v1.1-s2-aux-repair-v4.2`，损失 `v1_1_s2_independent_window_vicreg_v4_1`。两平台完整真实模型四目标及强制原生精确反向均通过零更新检查；本地443 passed、1 skipped，make check通过。正式训练已由独立 Supervisor `owac-n04-aux-v42-{libero,robotwin}` 在两卡启动，从fresh seed101开始，原batch8/warmup200/2000更新，表征外权重0.1。冻结源码 `source/n04-v11-codex-aux-v42-20261016`，新run为 `runs/v1.1/codex-s2/{libero,robotwin}-D-aux-v4-seed101`；不能热改该源码或恢复旧v3/短程原型权重。长程辅助项稳定性与能力仍待验证；GPU低并行度尚未解决。监控继续使用8090，实际更新及保存以新run与小型回执为准。下方暂停和v3运行状态均为历史。
+
+2026-10-16 当前运行状态补注：辅助项排查期间，两平台Codex训练均已暂停（LIBERO持久step70、RoboTwin持久step45），监控继续运行。固定真实窗口确认前缀变化缩小、表征接近常数惩罚，预测落后保持状态基线；有效修复尚未完成。接续先读`research/experiments/2026-10-16_n04_aux_acceleration.md`及其中原始收据，保留旧权重与负结果，不将r3直接盲目恢复。下方直接训练授权仍有效，恢复前须完成修复验证并区分新旧实验身份。
+
+2026-10-16 最新用户授权：**由 Codex 直接接入并运行修补版训练，提供简洁监控（状态／速度／效果），充分利用两张 RTX PRO 6000；不交给 DeepSeek。** 此指令取代下方停止后的禁训约束。新训练用独立源码与运行目录、seed101、D、官方数据；不把历史 v2 checkpoint 静默作为 v3 resume。先做保持目标与规模的性能验证，再启动两平台训练；保留停止回执与原权重。
+
+2026-10-16 当前代码修复入口：`research/experiments/2026-10-16_n04_v11_s2_code_repair.md`。修补版实现标记 `n04-v1.1-s2-repair-v3`，历史 checkpoint 只用原冻结源码解释。
+
+2026-10-16 最新用户指令：**终止所有 N04 训练，优先修复代码与目标实现缺项、代码漏洞**。两平台训练已终止，远端 `/workspace/owac/research/n04-v1/TRAINING_STOPPED_BY_USER.json` 为停止标记。当前只做代码、前后向／重载／合同验证，不启动训练、profile optimizer update、恢复作业或新闭环。此前“训练继续”是停止前历史；重新训练必须有后续用户明确指令。
+
+2026-10-16 较早审计（已由当前停止指令与修复报告取代，以下“训练继续”为历史）当前解释入口为 `research/experiments/2026-10-16_n04_v11_s2_independent_audit.md`：100 次开发闭环的 0/100 已独立核实，原完整实现／训练健康声明收窄；完整 S2 仍 partial（对应遮挡／stop-gradient 自监督等缺项），未进入 S3。两平台原冻结快照训练继续，审计修补源目录独立保存，尚未重启应用。继续前先看现有进程、已保存 checkpoint 与本报告，不能重复跑早期权重百次评估或把已有 100 次成果当待完成。S2 原提示词仍是要求来源，不因修补完成工程检查就认定机制或能力成立。
+
+2026-10-15 N04 当前正式路线为 `docs/plans/N04_full_development_v1.1.md`，采用依据见 `docs/decisions/0015-n04-v1.1-route.md`。后续开发接续 `docs/prompts/n04_v1_1/README.md` 的 S2 完整模型，随后 S3 单种子对照／针对性改进、S4 百次闭环与阶段结论。新增网络只用官方 RawVLA-Bench；S0 扩展和其衍生 S1 权重不进入官方数据主实验。旧 v1.0 S2—S7 为历史，不再作为当前阶段门槛。当前单训练种子 seed101、每个待评模型 100 次闭环（默认 LIBERO50＋RoboTwin50）；不要求三种子、全部方法／消融、逐文件 hash、收敛性判断或官方全清单。必要数值／因果／输入检查保留。阶段提示词内置前端专家实时监控任务，使用用户指定的N04专用双GPU服务器，支持双模型／双worker并行；凭据从服务器HF_TOKEN读取。本轮文档更新未启动训练。
+
 本文件适用于本仓库及其子目录。后续 OWAC 开发以本仓库为基础；并行工作使用本仓库的分支或 worktree，避免另建脱离版本历史的实现。用户当前明确要求优先于本文件。
 
 本地工作空间为 `/home/jeong/zeno/owac/`，主 checkout 为 `repo/`。新 worktree 必须位于 `/home/jeong/zeno/owac/worktrees/<task>/`，不得散落到 `zeno/` 或嵌套进主 checkout。已有 worktree 内的任务继续使用当前 checkout；Git、安装与检查都在该 checkout 内执行。工作空间容器自身不初始化 Git。

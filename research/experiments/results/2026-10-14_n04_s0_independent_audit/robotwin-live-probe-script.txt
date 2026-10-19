@@ -1,0 +1,31 @@
+import os,sys,json,traceback
+from pathlib import Path
+import numpy as np
+root=Path('/workspace/owac/rawvla/source/third_party/RoboTwin')
+frozen=root.parents[1]
+out=Path('/workspace/owac/research/n04-v1/runs/s0/robotwin-live-probe-20261014')
+out.mkdir(parents=True,exist_ok=True)
+os.chdir(root)
+sys.path[:0]=[str(root),str(root/'script'),str(frozen/'scripts/replay')]
+record={'scope':'fresh scene geometry feasibility only; no old NPZ correspondence or execution trace', 'task':'grab_roller','seed':20261014}
+env=None
+try:
+ from replay_robotwin2_clean_training import build_robotwin_args
+ from script.collect_data import class_decorator
+ args=build_robotwin_args(root,out,'grab_roller')
+ args.update(now_ep_num=0,seed=20261014,save_data=False,hdr_raw_white_level=1.,raw_sensor_noise_enabled=False)
+ args['data_type'].update(depth=True,mesh_segmentation=True,actor_segmentation=True)
+ env=class_decorator('grab_roller');env.setup_demo(**args)
+ obs=env.get_obs();record['cameras']={}
+ for name,c in obs['observation'].items():
+  record['cameras'][name]={k:dict(shape=list(np.asarray(v).shape),finite=bool(np.isfinite(v).all())) for k,v in c.items() if isinstance(v,np.ndarray)}
+ record['contact_count']=len(env.scene.get_contacts())
+ record['status']='live_geometry_available'
+except Exception:
+ record['status']='failed';record['error']=traceback.format_exc()
+finally:
+ if env is not None:
+  try:env.close_env()
+  except Exception:record['cleanup_error']=traceback.format_exc()
+ (out/'report.json').write_text(json.dumps(record,indent=2)+'\n')
+ print(json.dumps(record,indent=2))

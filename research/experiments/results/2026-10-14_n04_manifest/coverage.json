@@ -1,0 +1,370 @@
+{
+  "fields": [
+    {
+      "n_files": 1771,
+      "platform": "libero",
+      "rows": [
+        {
+          "evidence": "成员 ['agentview_raw_uint8', 'wrist_raw_uint8'] 在 1771 个文件中全部存在；相机 dtype=[('uint8',)]；形状与帧数见 aggregates.frame_span",
+          "evidence_level": "measured",
+          "field": "camera_measurement",
+          "label": "相机测量数组",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [],
+          "verified": true
+        },
+        {
+          "evidence": "全对齐文件 1771/1771；declared 与实测不一致 0 个；最大 missing_rate=0.0；有效帧合计 261131",
+          "evidence_level": "measured",
+          "field": "alignment",
+          "label": "帧对齐/有效帧",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [],
+          "verified": true
+        },
+        {
+          "evidence": "匹配 executed/command/control 的数组键=无；metadata 键=无；动作数组成员=1771/1771；渲染协议取值={\"render_order\": {\"\\\"env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize\\\"\": 1771}, \"replay_mode\": {\"\\\"actions\\\"\": 1771}}；Lead 裁决（provisional）：生产脚本执行顺序为 get_state() → 渲染 frame t → 记录 actions[t] → 才 step(action)，因此 actions[t] 是可用的已执行动作候选，但未做同版本重放逐帧核对",
+          "evidence_level": "producer_code_order",
+          "field": "executed_action",
+          "label": "实际执行动作",
+          "provisional": true,
+          "status": "partial",
+          "unavailable_conditions": [
+            "未做同版本重放的逐帧核对（verified=false）",
+            "没有下发/限幅/执行区间与命令 ID，无法确认实际下发值",
+            "只有帧索引（frame 单位），无法给出 action→曝光时刻的映射"
+          ],
+          "verified": false
+        },
+        {
+          "evidence": "Lead 裁决：2403 个 NPZ 的键并集中无时间/帧率键，metadata 无 fps → 只能 time_unit=frame。本项目实测：metadata 时间类键=无；深读样本检查了 72 个小数组前导列，['states'] 等间隔严格单调；列语义未在 metadata 声明，只登记为未决观测",
+          "evidence_level": "negative_scan",
+          "field": "timestamp",
+          "label": "时间戳",
+          "provisional": false,
+          "status": "unavailable",
+          "unavailable_conditions": [
+            "无绝对时钟、无 fps、无曝光开始/中点/结束、无帧到达时间、无 clock_id",
+            "帧号不等于秒：禁止由帧序换算秒或构造事件时刻",
+            "存在等间隔单调首列，但列语义未声明；只能登记为未决观测，不得当作可用时间戳"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "metadata 键=['lighting_domain', 'lighting_ev', 'lighting_rig', 'lighting_sample_unit', 'lighting_scale', 'sensor_saturation_ev']；lighting_domain 取值={'\"Over\"': 384, '\"ExtremeLow\"': 353, '\"Low\"': 352, '\"ExtremeOver\"': 344, '\"Normal\"': 338}",
+          "evidence_level": "metadata_only",
+          "field": "exposure",
+          "label": "曝光/照明",
+          "provisional": false,
+          "status": "partial",
+          "unavailable_conditions": [
+            "有照明域与 EV/scale 标量，无曝光时间、积分区间、快门或增益标定",
+            "EV/scale 是渲染生成参数，不是实测曝光量"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "本体键=robot_states（dtype={'float32': 1771}）；动作键=actions（dtype={'float32': 1771}）；LIBERO states 含未标注语义的机器人状态块，robot_states 为 8 维末端+夹爪",
+          "evidence_level": "metadata_only",
+          "field": "joint_state",
+          "label": "关节状态",
+          "provisional": true,
+          "status": "partial",
+          "unavailable_conditions": [
+            "NPZ 内没有关节名、单位、来源声明，也没有独立的当前关节测量键",
+            "RoboTwin 需要作者缓存协议才能把 actions[t] 解释为关节量"
+          ],
+          "verified": false
+        },
+        {
+          "evidence": "metadata 标定类键=无；成员键=无；Lead 裁决：RoboTwin 的 camera.get_intrinsic_matrix() 只在运行时算出、不写入缓存；LIBERO 由 MuJoCo 运行时定义 → 缓存不含 K/畸变/外参/时间偏移",
+          "evidence_level": "producer_code_order",
+          "field": "camera_calibration",
+          "label": "相机标定",
+          "provisional": false,
+          "status": "unavailable",
+          "unavailable_conditions": [
+            "没有内参 K、畸变模型、外参/基线、坐标约定、标定版本或相机-本体时间偏移",
+            "只能外挂名义标定做诊断，并显式标注为假设"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "本体末端键=robot_states 在 1771/1771 文件中存在；metadata 位姿类键=无；LIBERO 的 8 维布局（3 位置 + 3 旋转 + 2 夹爪）依数值范围推断，无生产者核对",
+          "evidence_level": "measured",
+          "field": "pose",
+          "label": "位姿",
+          "provisional": true,
+          "status": "partial",
+          "unavailable_conditions": [
+            "无相机外参、无基座/世界系声明、无物体位姿",
+            "四元数约定（wxyz）来自数值核对，不是 metadata 声明"
+          ],
+          "verified": false
+        },
+        {
+          "evidence": "metadata 噪声键=['noise_seed']；noise_seed 在 1771/1771 文件中存在",
+          "evidence_level": "metadata_only",
+          "field": "noise_model",
+          "label": "噪声模型",
+          "provisional": false,
+          "status": "partial",
+          "unavailable_conditions": [
+            "只有 render_order 字符串提到固定噪声与每文件的 noise_seed",
+            "没有 shot/read 噪声参数、白电平或每帧噪声场"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "配对文件存在 {'present': 1771, 'absent': 0, 'unknown': 0}",
+          "evidence_level": "measured",
+          "field": "rgb_pair",
+          "label": "RGB 配对",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [
+            "配对 RGB 不是原生 Bayer；只作独立基线与预览"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "源轨迹 1771 个（路径回退 0 个），每个源的变体数上限 1",
+          "evidence_level": "measured",
+          "field": "source_identity",
+          "label": "源身份/变体",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [
+            "本份数据每个源只有 1 个变体文件，无法用真实多照明变体验证分组不泄漏"
+          ],
+          "verified": true
+        }
+      ]
+    },
+    {
+      "n_files": 632,
+      "platform": "robotwin",
+      "rows": [
+        {
+          "evidence": "成员 ['head_camera_raw_float32', 'left_camera_raw_float32', 'right_camera_raw_float32'] 在 632 个文件中全部存在；相机 dtype=[('float32',)]；形状与帧数见 aggregates.frame_span",
+          "evidence_level": "measured",
+          "field": "camera_measurement",
+          "label": "相机测量数组",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [],
+          "verified": true
+        },
+        {
+          "evidence": "全对齐文件 632/632；declared 与实测不一致 0 个；最大 missing_rate=0.0；有效帧合计 146944",
+          "evidence_level": "measured",
+          "field": "alignment",
+          "label": "帧对齐/有效帧",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [],
+          "verified": true
+        },
+        {
+          "evidence": "匹配 executed/command/control 的数组键=无；metadata 键=无；metadata 渲染协议取值={\"raw_protocol\": {\"\\\"copy_clean_physics_state_each_frame_then_render_without_action\\\"\": 632}, \"clean_protocol\": {\"\\\"original_lighting_joint_action_replay\\\"\": 632}}；Lead 裁决：metadata 引用的 clean_replay_record / source_trajectory 不在交付数据里，无法核对对应",
+          "evidence_level": "producer_code_order",
+          "field": "executed_action",
+          "label": "实际执行动作",
+          "provisional": false,
+          "status": "unavailable",
+          "unavailable_conditions": [
+            "RAW 渲染明确不执行动作（copy state then render without action）",
+            "引用的干净重放记录与源轨迹文件未随数据交付",
+            "没有逐帧下发的控制值、命令 ID、执行时间区间、限幅记录或执行状态",
+            "只有帧索引（frame 单位），无法给出 action→曝光时刻的映射"
+          ],
+          "verified": false
+        },
+        {
+          "evidence": "Lead 裁决：2403 个 NPZ 的键并集中无时间/帧率键，metadata 无 fps → 只能 time_unit=frame。本项目实测：metadata 时间类键=无；深读样本检查了 96 个小数组前导列，没有任何等间隔严格单调列",
+          "evidence_level": "negative_scan",
+          "field": "timestamp",
+          "label": "时间戳",
+          "provisional": false,
+          "status": "unavailable",
+          "unavailable_conditions": [
+            "无绝对时钟、无 fps、无曝光开始/中点/结束、无帧到达时间、无 clock_id",
+            "帧号不等于秒：禁止由帧序换算秒或构造事件时刻",
+            "没有任何可用的时间列"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "metadata 键=['lighting_applied', 'lighting_domain', 'lighting_ev', 'lighting_sample_unit', 'lighting_scale', 'lighting_strategy']；lighting_domain 取值={'\"ExtremeLow\"': 127, '\"Low\"': 127, '\"Normal\"': 127, '\"Over\"': 126, '\"ExtremeOver\"': 125}",
+          "evidence_level": "metadata_only",
+          "field": "exposure",
+          "label": "曝光/照明",
+          "provisional": false,
+          "status": "partial",
+          "unavailable_conditions": [
+            "有照明域与 EV/scale 标量，无曝光时间、积分区间、快门或增益标定",
+            "EV/scale 是渲染生成参数，不是实测曝光量"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "本体键=robot_states（dtype={'float32': 632}）；动作键=actions（dtype={'float32': 632}）；robot_states 为双臂末端+夹爪（深读 24 个样本 layout 检查通过）；actions 为 14 维向量，其关节量解释来自作者缓存协议，metadata 未声明",
+          "evidence_level": "measured",
+          "field": "joint_state",
+          "label": "关节状态",
+          "provisional": false,
+          "status": "partial",
+          "unavailable_conditions": [
+            "NPZ 内没有关节名、单位、来源声明，也没有独立的当前关节测量键",
+            "RoboTwin 需要作者缓存协议才能把 actions[t] 解释为关节量"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "metadata 标定类键=无；成员键=无；Lead 裁决：RoboTwin 的 camera.get_intrinsic_matrix() 只在运行时算出、不写入缓存；LIBERO 由 MuJoCo 运行时定义 → 缓存不含 K/畸变/外参/时间偏移",
+          "evidence_level": "producer_code_order",
+          "field": "camera_calibration",
+          "label": "相机标定",
+          "provisional": false,
+          "status": "unavailable",
+          "unavailable_conditions": [
+            "没有内参 K、畸变模型、外参/基线、坐标约定、标定版本或相机-本体时间偏移",
+            "只能外挂名义标定做诊断，并显式标注为假设"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "本体末端键=robot_states 在 632/632 文件中存在；metadata 位姿类键=无；RoboTwin 布局经深读 24 个样本核对：robot_states=[left_endpose(7), left_gripper, right_endpose(7), right_gripper]",
+          "evidence_level": "measured",
+          "field": "pose",
+          "label": "位姿",
+          "provisional": false,
+          "status": "partial",
+          "unavailable_conditions": [
+            "无相机外参、无基座/世界系声明、无物体位姿",
+            "四元数约定（wxyz）来自数值核对，不是 metadata 声明"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "metadata 噪声键=['noise_seed', 'raw_sensor_noise_enabled', 'raw_sensor_read_noise', 'raw_sensor_shot_noise', 'raw_white_level']；noise_seed 在 632/632 文件中存在",
+          "evidence_level": "metadata_only",
+          "field": "noise_model",
+          "label": "噪声模型",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [],
+          "verified": true
+        },
+        {
+          "evidence": "配对文件存在 {'present': 632, 'absent': 0, 'unknown': 0}",
+          "evidence_level": "measured",
+          "field": "rgb_pair",
+          "label": "RGB 配对",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [
+            "配对 RGB 不是原生 Bayer；只作独立基线与预览"
+          ],
+          "verified": true
+        },
+        {
+          "evidence": "源轨迹 632 个（路径回退 0 个），每个源的变体数上限 1",
+          "evidence_level": "measured",
+          "field": "source_identity",
+          "label": "源身份/变体",
+          "provisional": false,
+          "status": "available",
+          "unavailable_conditions": [
+            "本份数据每个源只有 1 个变体文件，无法用真实多照明变体验证分组不泄漏"
+          ],
+          "verified": true
+        }
+      ]
+    }
+  ],
+  "lead_rulings": {
+    "rulings": [
+      {
+        "field": "timestamp",
+        "reason": "2403 个 NPZ 的键并集中无时间/帧率键、metadata 无 fps → 只能 time_unit=frame",
+        "verdict": "两平台均不可用"
+      },
+      {
+        "field": "camera_calibration",
+        "reason": "RoboTwin 的 camera.get_intrinsic_matrix() 只在运行时算出、不写入缓存；LIBERO 由 MuJoCo 运行时定义",
+        "verdict": "两平台均不可用"
+      },
+      {
+        "field": "executed_action",
+        "reason": "LIBERO 证据是生产脚本执行顺序 get_state()→渲染 frame t→记录 actions[t]→才 step(action)，evidence_level=producer_code_order、verified=false；RoboTwin 的 clean_replay_record/source_trajectory 不在交付数据里",
+        "verdict": "LIBERO=partial/provisional（未验证）；RoboTwin=不可用"
+      },
+      {
+        "field": "partial",
+        "reason": "不可用条件清单必须显式给出",
+        "verdict": "不得把 partial 写成 available"
+      }
+    ],
+    "source": "Lead 裁决 2026-10-14（本会话消息）",
+    "telemetry_source_audit": "research/experiments/results/2026-10-14_n04_v1_s0/telemetry-source-audit.json"
+  },
+  "references": {
+    "telemetry_source_audit": {
+      "path": "research/experiments/results/2026-10-14_n04_v1_s0/telemetry-source-audit.json",
+      "present_at_run": true,
+      "resolved_path": "/workspace/owac/research/n04-v1/data/s0-manifest/code/n04-s0-ws-manifest-20261014T040622Z-5e275d95c691/references/research/experiments/results/2026-10-14_n04_v1_s0/telemetry-source-audit.json",
+      "sha256": "a01e928232cf88e7e09dcc3ba5af01e6734adc71d72b44852c65df51fe7cc156"
+    }
+  },
+  "schema": "n04-s0-coverage-v1",
+  "status_levels": [
+    "available",
+    "partial",
+    "unavailable"
+  ],
+  "unavailable_conditions": [
+    {
+      "condition": "libero: 使用 executed_action 作为因果输入",
+      "reason": "缓存没有逐帧执行记录；RoboTwin 的 raw_protocol 明确是「复制干净物理状态后逐帧渲染、不执行动作」，LIBERO 只有 replay_mode=actions",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "libero: 把帧号当秒或把 EV 当曝光时间",
+      "reason": "无绝对时间字段；EV/scale 是渲染生成参数",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "libero: 使用相机标定做几何传播",
+      "reason": "无 K/畸变/外参，必须借用名义标定并显式标注为假设",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "robotwin: 使用 executed_action 作为因果输入",
+      "reason": "缓存没有逐帧执行记录；RoboTwin 的 raw_protocol 明确是「复制干净物理状态后逐帧渲染、不执行动作」，LIBERO 只有 replay_mode=actions",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "robotwin: 把帧号当秒或把 EV 当曝光时间",
+      "reason": "无绝对时间字段；EV/scale 是渲染生成参数",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "robotwin: 使用相机标定做几何传播",
+      "reason": "无 K/畸变/外参，必须借用名义标定并显式标注为假设",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "把三通道 RAW 当原生 Bayer CFA",
+      "reason": "representation 分别为 raw（uint8）与 three_channel_linear_float32，均为三通道渲染",
+      "verdict": "禁止"
+    },
+    {
+      "condition": "训练/开发集与 final 共享源轨迹",
+      "reason": "split 按 source_trajectory_id 分组，splits.json 的 source_overlap 三项必须为空",
+      "verdict": "禁止"
+    }
+  ]
+}

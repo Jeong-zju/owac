@@ -1,0 +1,21 @@
+{
+  "include": [
+    "base.json",
+    "platform_robotwin.json",
+    "arm_D.json"
+  ],
+  "notes": "RoboTwin 20—50 步资源 profile：显存／步速／四损失项，不冒充正式训练",
+  "optim": {
+    "steps": 30,
+    "batch": 8
+  },
+  "monitor": {
+    "log_every": 1,
+    "checkpoint_every": 15,
+    "eval_every": 15,
+    "profile": true
+  },
+  "data": {
+    "dev_windows": 1
+  }
+}

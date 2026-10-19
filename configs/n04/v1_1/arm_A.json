@@ -1,0 +1,22 @@
+{
+  "arm": "A",
+  "notes": "同源固定 ISP RGB 单帧；S3 补对照",
+  "model": {
+    "input_mode": "rawvla_rgb3",
+    "isp": "fixed_clip_srgb_v1",
+    "modules": {
+      "correspondence": false,
+      "state_estimator": false,
+      "dual_mode": false,
+      "readout": true
+    }
+  },
+  "loss": {
+    "weights": {
+      "action": 1.0,
+      "correspondence": 0.0,
+      "forecast": 0.0,
+      "representation": 0.01
+    }
+  }
+}

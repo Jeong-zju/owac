@@ -1,0 +1,400 @@
+{
+  "stage": "S0",
+  "implementation_status": "complete",
+  "experiment_status": "completed",
+  "claim_status": "not_applicable",
+  "claim_status_note": "S0 无机制主张；本轮冻结的是数据、坐标、因果合同与预注册门槛，未训练任何网络。",
+  "date": "2026-10-14",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "branch": "lzh/n04-egomotion-separation",
+  "head": "fd6255b769d661af568738bec194bb599601a644",
+  "plan_sha256": "e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2",
+  "s0_prompt_sha256": "ecfa4da66062b33a30c473a5491739ed7039279a4974b16fb5c874f26e45016a",
+  "stage_record": "research/experiments/2026-10-14_n04_v1_s0_completion.md",
+  "source_manifest": {
+    "snapshot_id": "n04-s0-20261014T062313Z-cc61897ab1cb",
+    "package_sha256": "cc61897ab1cbcd02282c9ecdf8af742bb6d44187bbd7b5b000eab708fc28a95d",
+    "local_package": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/outputs/n04-v1/s0/completion-packages/n04-s0-20261014T062313Z-cc61897ab1cb.tar.gz",
+    "package_manifest": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/outputs/n04-v1/s0/completion-packages/n04-s0-20261014T062313Z-cc61897ab1cb.manifest.json",
+    "packed_files": 936,
+    "remote_path": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T062313Z-cc61897ab1cb",
+    "remote_verify": "936 checked, differences=0; archive SHA verified before extraction",
+    "explicitly_contains_uncommitted": true,
+    "note": "Final runtime J independently validated. Documentation/handoff receipts updated after packaging; src/configs/scripts/tests unchanged."
+  },
+  "data_manifest": {
+    "remote_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+    "npz_count": {
+      "libero": 1771,
+      "robotwin2": 632,
+      "total": 2403
+    },
+    "bytes_total": 509194817528,
+    "valid_frames": 408075,
+    "independent_source_trajectories": 2403,
+    "variants_per_source_max": 1,
+    "inventory": "research/experiments/results/2026-10-14_n04_manifest/inventory-summary.json",
+    "inventory_full_remote": "/workspace/owac/research/n04-v1/manifests/s0-manifest/POINTER.json",
+    "coverage": "research/experiments/results/2026-10-14_n04_manifest/coverage.json",
+    "coverage_sha256": "3dbf18ca7e89538ec80bbebfa018abcc814f76667eb6619ab0a401d260cf4116",
+    "telemetry_provenance": "research/experiments/results/2026-10-14_n04_manifest/telemetry-provenance.json",
+    "source_audit": "research/experiments/results/2026-10-14_n04_v1_s0/telemetry-source-audit.json",
+    "two_run_identity": "content_sha256=fce3bd48fdc288ffd7b96eee64c06cd8724eb29cef6dda22eba618bb14e31921",
+    "unavailable_conditions": 8,
+    "field_coverage_availability": {
+      "camera_measurement": "available 两平台",
+      "alignment": "available 两平台",
+      "rgb_pair": "available 两平台",
+      "source_identity": "available 两平台",
+      "executed_action": {
+        "libero": "partial/provisional (producer_code_order, verified=false)",
+        "robotwin2": "unavailable"
+      },
+      "timestamp": "unavailable 两平台",
+      "camera_calibration": "unavailable 两平台",
+      "exposure": "partial (EV/scale 是渲染参数，非真实曝光)",
+      "joint_state": "partial",
+      "pose": "partial",
+      "noise_model": {
+        "robotwin2": "available",
+        "libero": "partial"
+      }
+    },
+    "completion": "research/experiments/results/2026-10-14_n04_s0_completion/dataset-manifest.json"
+  },
+  "split_manifest": {
+    "path": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+    "sha256": "7465309422e973edcf423db597305469eec18babed1fa51698bcfa047a97f9fe",
+    "main_counts": {
+      "train": 1917,
+      "dev": 251,
+      "final": 235
+    },
+    "member_table_sha256": "0d3d41911816361b5b5e1093e07515f87ded913739d685e056cdeb9fe5f12247",
+    "main_split_sha256": "8d2879385c7feb18e9b76420d4692fbe30d793442186ca1d5af8bfdb71ac5111",
+    "source_overlap": {
+      "train_dev": 0,
+      "train_final": 0,
+      "dev_final": 0
+    },
+    "group_key": "source_trajectory_id",
+    "seed": 20261014,
+    "holdouts": {
+      "object": {
+        "n_sources": 90,
+        "level": "source_group"
+      },
+      "scene": {
+        "n_sources": 27,
+        "level": "source_group",
+        "coverage_warning": "覆盖窄：仅 libero_10 的 10/40 任务可解析场景 token"
+      },
+      "camera": {
+        "level": "view",
+        "warning": "视角级 holdout，不是源组级"
+      },
+      "unseen_factor_combination": {
+        "libero": 338,
+        "robotwin2": 125
+      }
+    },
+    "official_test_manifest_disjointness": {
+      "path": "research/experiments/results/2026-10-14_n04_manifest/official-test-disjointness.json",
+      "sha256": "7bc23e9b82be84cf8ace8c0733d04f97cf45deb17a3ad7f0b4fb89a0d2b617d0",
+      "participates_in_training_split": false,
+      "code_level_isolation": true,
+      "task_level_overlap": {
+        "libero": 40,
+        "robotwin2": 13
+      },
+      "source_episode_level_overlap": {
+        "libero": 1771,
+        "robotwin2": 632
+      },
+      "verdict": "官方清单不参与训练拆分；但训练 NPZ 与官方测试清单派生自同一源 episode/初始状态池（RoboTwin 字段级确认，LIBERO 高可能性推断）。S1/S6 不得据此宣称『未见过 episode』的泛化。"
+    }
+  },
+  "configs": [
+    {
+      "path": "configs/n04/full/s0_data.json",
+      "sha256": "012d35c2498b3d4a1b100dc4e9e2d7cf41bcfbc7d49d84ca23dc49a8017911d3"
+    },
+    {
+      "path": "configs/n04/full/protocol.json",
+      "sha256": "8263fef9487bf34c04b2c4617eb49f44d8770298698ebadb3ba7629bfc36fdb8"
+    },
+    {
+      "path": "configs/n04/full/protocol_calibrated_sim.json",
+      "sha256": "14e88f26dbbb0a5539a5639f424d1daee0486f35476be2e12793ff649df5f98f"
+    },
+    {
+      "path": "configs/n04/full/s0_completion.json",
+      "sha256": "ba0b284ffe09a2c84c032caaa2275a70a479895d1310188d014d2532e4183b4f"
+    }
+  ],
+  "checkpoints": [],
+  "deliverables": [
+    {
+      "path": "src/owac/raw/telemetry.py",
+      "sha256": "6877c0f5443acb24b28bda803a474b2cf9d8b5ecedb7f529441b55edf0ce7a86",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/raw/rawvla_sequence.py",
+      "sha256": "a56b052ab4c4d424491ea73fa91c5a770efd375d40ce2c18949d644288b3e085",
+      "status": "modified (additive; default path bit-identical)"
+    },
+    {
+      "path": "src/owac/raw/n04_manifest.py",
+      "sha256": "873a2aab5f5dda7c399151534aa63f157130c8d24180314231998d44bb2bc61c",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/raw/n04_mechanism_data.py",
+      "sha256": "c63b54be5dc48e1a0e641daf83b9379c081c8cc020876c6ac6bb766714bdc6ad",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/frameworks/n04/measurement_geometry.py",
+      "sha256": "5012a499d5ec04dff2dce2ec00128f9ad34a89b00c254cb06c94422a5534f75f",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/frameworks/n04/proprio.py",
+      "sha256": "a30409c33a4b1a171b1faa6b63e81d9c36c29f11e36cf711f7917273708263f3",
+      "status": "modified (comment fix + explicit frame API; old numerics kept)"
+    },
+    {
+      "path": "src/owac/frameworks/n04/model.py",
+      "sha256": "93af3a3994221050c6ad9e84395c1cfca636c2b6d203fbb4369b7020f3f6f599",
+      "status": "modified (NaN/huge sanitization, 9 lines; normal path bit-identical)"
+    },
+    {
+      "path": "src/owac/evaluation/n04_contracts.py",
+      "sha256": "f3c9a460eb1ca57aad2d2c4a777e238304bc8ef072c6cce7ebf3cd1f002f1f55",
+      "status": "new"
+    },
+    {
+      "path": "scripts/n04_full/package_source.py",
+      "sha256": "7d7e852950703685f9a309614f39f2a86744fea0a905675f791a1d450ea9d441",
+      "status": "new"
+    },
+    {
+      "path": "scripts/n04_full/n04_supervisor.conf.template",
+      "sha256": "25b03f44f5e17b8909406f667321ac0bdfee10e82faa0c08ff936f0f8274f61e",
+      "status": "new"
+    },
+    {
+      "path": "research/theory/n04_v1.md",
+      "sha256": "0ef7a70fb3f02526f402b8ffefd78ec576d9d1431c50dd93132b470410feb600",
+      "status": "new"
+    },
+    {
+      "path": "tests/encoders/n04_full/",
+      "status": "included in 361 passing N04 + N04 full tests"
+    },
+    {
+      "path": "research/experiments/2026-10-14_n04_v1_s0.md",
+      "status": "new (stage record)",
+      "sha256": "b991a06e93c8464eab0878907d9eeeaec24d419d813d1446976329105bcaac7e"
+    },
+    {
+      "path": "src/owac/raw/n04_live_collection.py",
+      "status": "S0 remote completion",
+      "sha256": "9498e8926e030e014c9f25bbbcb84fe623968800a48ea74a7a076c0bd2d21577"
+    },
+    {
+      "path": "src/owac/raw/n04_d1_capture.py",
+      "status": "S0 remote completion",
+      "sha256": "d92531417b29ee34d291a6028196e60b1d4ed95723da5e4f05b518e964a20706"
+    },
+    {
+      "path": "src/owac/raw/n04_rendered_factors.py",
+      "status": "S0 remote completion",
+      "sha256": "e15e776b74852b4aeab9089f54465cd87ab11f86f6c0e083a426117b51a12514"
+    },
+    {
+      "path": "src/owac/raw/n04_extension_loader.py",
+      "status": "S0 remote completion",
+      "sha256": "6194db69b1a318543a3f9cfad6004476fd8e81b71487d5143590208314b4a2c3"
+    },
+    {
+      "path": "src/owac/raw/n04_extension_upgrade.py",
+      "status": "S0 remote completion",
+      "sha256": "c1dc598ebcccc09f6f5ee7932686d7d43cb7d371b1b0300e097fee492efe131d"
+    },
+    {
+      "path": "src/owac/evaluation/n04_live_contracts.py",
+      "status": "S0 remote completion",
+      "sha256": "60797f4d0108aaa8e83b6e72d228818a934c692e6593852ac87cebeb660eb90c"
+    },
+    {
+      "path": "src/owac/evaluation/n04_factor_contracts.py",
+      "status": "S0 remote completion",
+      "sha256": "269be06b41f6595d6ff19128490c0cf290ccbd59c06be88e5babfdaf9401c1be"
+    },
+    {
+      "path": "scripts/n04_full/complete_s0_remote.py",
+      "status": "S0 remote completion",
+      "sha256": "c1943d3198aa02d73b2780acc9dc228cb4ac45165a96439844cdacd458b89331"
+    },
+    {
+      "path": "scripts/n04_full/freeze_s0_calibration.py",
+      "status": "S0 remote completion",
+      "sha256": "b06cca95442e1d6d907fc725a361064db011dbbcc77cd79c769e258f6a240924"
+    },
+    {
+      "path": "tests/encoders/n04_full/test_live_collection.py",
+      "status": "S0 remote completion",
+      "sha256": "95f2f770602e96d65f5af71c2a692a54d7dfe6bd673a5ab8f128d5c1f6cc8f58"
+    }
+  ],
+  "commands": [
+    "uv run --locked pytest -q tests/encoders/n04 tests/encoders/n04_full",
+    "make check",
+    "python -m owac.evaluation.n04_contracts --config configs/n04/full/s0_data.json --manifest research/experiments/results/2026-10-14_n04_manifest/splits.json --live-data-root /workspace/owac/research/n04-v1/data/s0-paired-v1-20261014 --output <new-report>",
+    "python -m owac.evaluation.n04_live_contracts /workspace/owac/research/n04-v1/data/s0-paired-v1-20261014 --output <new-report>",
+    "python -m owac.evaluation.n04_factor_contracts /workspace/owac/research/n04-v1/runs/s0/completion-factors-20261014 --output <new-report>"
+  ],
+  "metrics": {
+    "stage": "N04 v1.0 S0",
+    "status": "passed",
+    "scope": "original S0 data and causal contract; new named simulator extensions",
+    "paired": {
+      "sequences": 40,
+      "sources": 40,
+      "frames": 960,
+      "camera_frames": 2880,
+      "split": {
+        "train": 32,
+        "dev": 4,
+        "final": 4
+      }
+    },
+    "rendered_factors": {
+      "sequences": 152,
+      "sources": 10,
+      "factors": 16,
+      "frames": 1824,
+      "camera_frames": 3648,
+      "source_split": {
+        "train": 8,
+        "dev": 1,
+        "final": 1
+      }
+    },
+    "contracts": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "partial": 0,
+      "required_total": 7
+    },
+    "local_tests": 361,
+    "remote_tests": 361,
+    "make_check": "passed; 246 files formatted",
+    "timing": {
+      "decisions": 1920,
+      "actual_out_of_order_pairs": 320,
+      "control_replay_entries": 2120,
+      "future_poison_checks": 1920
+    },
+    "geometry": {
+      "libero_max_numerical_bound_ratio": 0.6453125697065863,
+      "robotwin_max_projection_error_px": 0.0004547045176366282,
+      "factor_independent_numpy_max_bound_ratio": 0.07772581658194065
+    },
+    "final_runtime_snapshot": "n04-s0-20261014T062313Z-cc61897ab1cb",
+    "package_sha256": "cc61897ab1cbcd02282c9ecdf8af742bb6d44187bbd7b5b000eab708fc28a95d",
+    "verified_files": 936,
+    "frozen_assets_unchanged": 8,
+    "limitations": [
+      "Original 2403 NPZ missing historical telemetry remain unchanged; no correspondence sidecars assigned.",
+      "Simulated instantaneous sampling, host arrival queue and physics seconds are distinct; no hardware exposure claim.",
+      "Transparent LIBERO pixels retain RAW/visibility but have no unique depth supervision support.",
+      "Controlled rig is scripted kinematic intervention; live control diagnostics are not expert-success demonstrations.",
+      "Original official source-pool overlap and narrow scene/camera holdouts remain generalization limits.",
+      "S1 training sufficiency/convergence and H1/H2/H3/benchmark performance are untested."
+    ],
+    "network_training_started": false,
+    "committed": false,
+    "pushed": false
+  },
+  "failed_groups": [],
+  "resources": {
+    "training_compute_used": "none (S0 has no network training)",
+    "encoder_python": "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+    "libero_python": "/workspace/owac/rawvla/envs/starvla/bin/python",
+    "robotwin_python": "/workspace/owac/rawvla/envs/robotwin/bin/python",
+    "collection": "bounded sequential jobs under three task-specific supervisor programs; all completed; existing services untouched",
+    "gpu_capacity_at_collection_start": "approximately 64 GiB free; shared allocation changed during run; not a peak-usage measurement",
+    "peak_gpu_usage": "not measured",
+    "source_snapshots": "C/F/H collection; J final validation; see package descriptors and run receipts"
+  },
+  "next_stage_inputs": {
+    "s1_stage_entry_ready": true,
+    "s1_training_sufficiency": "to_be_established_in_S1",
+    "paired_root": "/workspace/owac/research/n04-v1/data/s0-paired-v1-20261014",
+    "factor_root": "/workspace/owac/research/n04-v1/runs/s0/completion-factors-20261014",
+    "loaders": [
+      "owac.raw.n04_extension_loader.LiveExtensionSequence",
+      "owac.raw.n04_extension_loader.rendered_training_frame"
+    ],
+    "calibrated_protocol": "configs/n04/full/protocol_calibrated_sim.json",
+    "encoder_python": "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+    "s3_action_inputs": "new LIBERO env.step and RoboTwin joint drive logs only; original NPZ executed controls unavailable",
+    "unlabeled_source_split": {
+      "train": 1917,
+      "dev": 251,
+      "final": 235,
+      "geometry_labels_available": false
+    },
+    "training_boundary": "gt_geometry_support masks transparent depth; gt_* supervision only; no expert success label inherited",
+    "next_work": [
+      "Enter S1 full backbone measurement training and establish sufficient scale/convergence.",
+      "Verify a fresh immutable source snapshot before launching S1."
+    ]
+  },
+  "remaining_work": [],
+  "notes": [
+    "S0 accepted on new independently named simulator extensions; earlier partial verdict is retained in historical report.",
+    "No network training, commits or pushes. Only this task added supervisor programs; no existing service stopped or restarted.",
+    "Historical failures and original arrays retained; final LIBERO geometry comes from H, RoboTwin canonical conversion records each change; final contracts and tests ran on J.",
+    "RoboTwin command vector contains 76 active-joint drive readbacks with position and velocity (152 scalars), including persistent slots; revolute rad/rad_s and prismatic m/m_s are explicit; this is not the 14-dimensional VLA action."
+  ],
+  "status_scope": "S0 accepted on new independent simulator data; S1 not started; no model/scientific claim",
+  "independent_acceptance": {
+    "status": "passed",
+    "report": "research/experiments/2026-10-14_n04_v1_s0_completion.md",
+    "acceptance": "research/experiments/results/2026-10-14_n04_s0_completion/acceptance.json",
+    "previous_report": "research/experiments/2026-10-14_n04_v1_s0_independent_acceptance.md"
+  },
+  "original_stage_record": "research/experiments/2026-10-14_n04_v1_s0.md",
+  "historical_metrics_reference": "research/experiments/results/2026-10-14_n04_s0_completion/handoff-before-completion.json",
+  "limitations": [
+    "Original 2403 NPZ missing historical telemetry remain unchanged; no correspondence sidecars assigned.",
+    "Simulated instantaneous sampling, host arrival queue and physics seconds are distinct; no hardware exposure claim.",
+    "Transparent LIBERO pixels retain RAW/visibility but have no unique depth supervision support.",
+    "Controlled rig is scripted kinematic intervention; live control diagnostics are not expert-success demonstrations.",
+    "Original official source-pool overlap and narrow scene/camera holdouts remain generalization limits.",
+    "S1 training sufficiency/convergence and H1/H2/H3/benchmark performance are untested."
+  ],
+  "historical_commands": [
+    "uv run --locked --extra encoder pytest -q tests/encoders/n04 tests/encoders/n04_full",
+    "make check",
+    "uv run --locked --extra encoder python -m owac.raw.n04_manifest --config configs/n04/full/s0_data.json --output <run>/inventory.json",
+    "uv run --locked --extra encoder python -m owac.raw.n04_mechanism_data --config configs/n04/full/s0_data.json --output <run>/mechanism-data",
+    "uv run --locked --extra encoder python -m owac.evaluation.n04_contracts --config configs/n04/full/s0_data.json --manifest research/experiments/results/2026-10-14_n04_manifest/splits.json --output research/experiments/results/2026-10-14_n04_s0_contracts/contracts-with-manifest.json",
+    "python3 scripts/n04_full/package_source.py build --output-dir outputs/n04-v1/s0/source-packages"
+  ],
+  "historical_resources": {
+    "gpu_remote": "RTX PRO 6000 Blackwell 97887 MiB total / 86882 MiB used / 10368 MiB free / util 100%（4 个既有服务，本阶段未触碰）",
+    "training_compute_used": "none (S0 has no network training)",
+    "d0_generation": "local CPU, ~71 MB output",
+    "inventory_cost": "9.44 s scan + 0.39 s deep read, 10.0 GB read, peak RSS 163 MiB, single process",
+    "encoder_env": "/workspace/owac/research/n04-v1/envs/encoder/bin/python (Python 3.12.3, numpy 2.5.1, torch 2.14.1+cu130, cuda available)",
+    "encoder_env_size": "5.3 GB, 35 packages"
+  },
+  "final_receipts_remote": "/workspace/owac/research/n04-v1/manifests/s0-completion-final-j"
+}

@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-16",
+  "owner": "Codex",
+  "source_checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "base_commit": "a81cf25148870fd83fbc06a4fabf374510493978",
+  "implementation_version": "n04-v1.1-s2-repair-v3",
+  "training_authorized": true,
+  "fresh_encoder": true,
+  "historical_v2_checkpoint_resumed": false,
+  "platforms": [
+    "libero",
+    "robotwin"
+  ],
+  "seed": 101,
+  "arm": "D",
+  "steps_per_platform": 2000,
+  "warmup_steps": 200,
+  "effective_batch": 8,
+  "dashboard": "http://127.0.0.1:8090/",
+  "checks": {
+    "make_check": "passed",
+    "tests_passed": 229,
+    "tests_skipped": 1,
+    "skip_reason": "local websockets missing",
+    "monitor_tests": 11
+  },
+  "historical_closed_loop": {
+    "completed": 100,
+    "successes": 0,
+    "unchanged": true
+  },
+  "new_closed_loop": "not_started",
+  "claim_boundary": "engineering launch and speed; fixed dev trend still too early; no capability conclusion",
+  "monitor_semantics": [
+    "actual validation measurements only",
+    "reported optimizer cycle timing only, no speed from restored step counters",
+    "cold compile warmup visible",
+    "stale heartbeat warning"
+  ],
+  "remaining_performance_gap": {
+    "gpu_utilization_mean_percent": [
+      30.1,
+      33.1
+    ],
+    "power_mean_w": [
+      123.1,
+      127.5
+    ],
+    "full_utilization_achieved": false,
+    "likely_bottleneck": "sequential frame execution / CPU kernel dispatch; no complete CUDA trace yet",
+    "unimplemented": "batch independent windows without changing causal/model/loss contracts"
+  },
+  "runtime_checked_at": "2026-10-16T04:18:53.258112+00:00",
+  "runtime": {
+    "libero": {
+      "phase": "train",
+      "step": 12,
+      "dev_loss": 1.0104377269744873,
+      "initial_dev_loss": 1.081860065460205,
+      "checkpoint_step": 10,
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016",
+      "process_alive": true
+    },
+    "robotwin": {
+      "phase": "train",
+      "step": 5,
+      "dev_loss": 0.6794120073318481,
+      "initial_dev_loss": 2.453131318092346,
+      "checkpoint_step": 5,
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016",
+      "process_alive": true
+    }
+  },
+  "dashboard_health": "{\n  \"ok\": true,\n  \"sampled_at\": \"2026-10-16T04:18:52Z\",\n  \"runs\": 2,\n  \"error\": null\n}",
+  "takeover_and_monitor_verified": true,
+  "all_requested_performance_goals_completed": false
+}

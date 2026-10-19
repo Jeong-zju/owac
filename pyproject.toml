@@ -27,6 +27,8 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "owac.runtime" = ["*.html"]
+"owac.baselines._vendor.rkn" = ["LICENSE", "provenance.json"]
+"owac.frameworks.n04._vendor.convnext" = ["LICENSE", "provenance.json"]
 "owac.baselines" = ["sbi_embedding.LICENSE.txt"]
 "owac.baselines._vendor.dbsr" = ["LICENSE", "provenance.json"]
 "owac.baselines._vendor.sea_raft" = ["LICENSE", "provenance.json", "*.py"]
@@ -35,12 +37,17 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-extend-exclude = ["src/owac/frameworks/n02_full/components/upstream", "outputs"]
+extend-exclude = [
+    "src/owac/frameworks/n02_full/components/upstream",
+    "src/owac/frameworks/n04/_vendor/convnext/convnext.py",
+    "outputs",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
+"src/owac/baselines/_vendor/rkn/*.py" = ["E501", "UP", "B028"]
 "src/owac/baselines/_vendor/dbsr/*.py" = ["E501", "UP008", "UP032"] # Preserve upstream definitions.
 # Preserve upstream SEA-RAFT definitions: only the declared vendor changes apply.
 "src/owac/baselines/_vendor/sea_raft/*.py" = ["B007", "E501", "E712", "E722", "F401", "F811", "F841", "I001", "UP008", "UP034"]

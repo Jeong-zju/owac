@@ -1,0 +1,101 @@
+{
+  "previous_commit": "771b33ac222584fc172e2e374c6c463460a9b1e9",
+  "source_sha256": {
+    "src/owac/frameworks/n04/proprio.py": "e96494ede9668f1f60af5c47841601f55a78502bbdee8e9ecad650cb6897b630",
+    "src/owac/frameworks/n04/ego.py": "3efd53e58478c3000cf75e55e0bfcd8709a98671c7e54ba6ba3d9948f64ca105",
+    "src/owac/frameworks/n04/synthetic.py": "fad4333f47a67926c9ca5ceca4ed69a7ad5347c598c67f06e22f00a4162ddc9f",
+    "src/owac/frameworks/n04/geometry.py": "35c2596ec815df23095ec9e63f889702dff902185c16b4298edb799b8f0788c3",
+    "src/owac/frameworks/n04/config.py": "95a902119b079766187928af6e85dd08528210fef58c48508394852b954ebcda",
+    "src/owac/frameworks/n04/state.py": "bf00eaeadc8492b837bf7cb8374f10c5fe9369071dabd25c2cfbff86b10c128b",
+    "src/owac/frameworks/n04/__init__.py": "199dd999af3b0d1f3d07fcef42549605d3ad383415d95c7f27d3a6a560cb919a",
+    "src/owac/frameworks/n04/innovation.py": "7eb5100bc51bfc09cef598b628b5359b6f7a5b58ee491178b1de59e2df63310b",
+    "src/owac/frameworks/n04/model.py": "07b486678e0830a2d980783173510aa8606f4113bc2800043ff50ad892ad57b6",
+    "src/owac/training/n04.py": "cd7723a2476fd5e564afb7c92fbc9519558d18e45c0fd7bce676b90f0c940dc5",
+    "src/owac/baselines/n04.py": "c4c64280e524a0e1b1fd5d5c5144ece9e54bf9b124a034e41a8ad203519d09b6",
+    "src/owac/evaluation/n04.py": "daa401c5f50fce81a29c26a0d0094824cfbac1ca148e9fc80de4f6ab0a3c4a56"
+  },
+  "config_sha256": "26ed1fad05b34a89fe95dea6fca1b5a173cdc4a253a682c3445293b97a28fd68",
+  "training_data_seed": 0,
+  "training_data_sha256": "a3ae0870bf20e356e20a66f8a99c50723a02e2fd22b5feb7df8d4fc33fcf0c0b",
+  "initialization_seeds": [
+    0,
+    1,
+    2
+  ],
+  "continuity_eval_seeds": [
+    10000,
+    10001,
+    10002
+  ],
+  "fresh_eval_seeds": [
+    20000,
+    20001,
+    20002
+  ],
+  "updates": 200,
+  "train_recipe": {
+    "sequence_length": 12,
+    "tbptt": 8,
+    "batch_size": 4,
+    "steps": 200,
+    "lr": 0.0003,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "freeze_propagation": false,
+    "future_measurement_loss": true,
+    "cfa": false,
+    "device": "cuda",
+    "dtype": "float32",
+    "log_every": 25,
+    "checkpoint_every": 100,
+    "seed": 0,
+    "threads": 4,
+    "synthetic": {
+      "camera_translation": [
+        1.2,
+        1.2
+      ],
+      "camera_rotation": [
+        0.0,
+        0.4
+      ],
+      "object_velocity": [
+        0.8,
+        1.2
+      ],
+      "illumination": [
+        0.7,
+        1.3
+      ],
+      "noise_sigma": 0.01,
+      "action_delay": 2,
+      "calibration_scale": 1.08
+    },
+    "output": "outputs/n04"
+  },
+  "external_gate_threshold": 0.5,
+  "models": [
+    "candidate",
+    "single_frame",
+    "fixed_raw_patch",
+    "convgru",
+    "motion_compensation",
+    "predict_update_filter",
+    "action_conditioned_recurrent",
+    "n04_no_ego",
+    "n04_no_change_branch",
+    "n04_no_illumination",
+    "n04_all_residual_noise",
+    "n04_time_shifted_context",
+    "frozen"
+  ],
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 5090",
+  "python": "3.12.12 (main, Jan 14 2026, 19:35:58) [Clang 21.1.4 ]",
+  "generator_unchanged": true,
+  "evaluation_unchanged": true,
+  "complete": true,
+  "checkpoints": 42,
+  "evaluations": 252
+}

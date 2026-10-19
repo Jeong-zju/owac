@@ -1,0 +1,7 @@
+{
+  "include": ["base.json", "platform_libero.json", "arm_D.json"],
+  "notes": "诊断用：optim.batch=1 判断显存泄漏在单窗口内还是跨窗口累积（不用于正式训练）",
+  "optim": {"steps": 6, "batch": 1, "micro_batch": 1},
+  "monitor": {"log_every": 1, "checkpoint_every": 99, "eval_every": 99},
+  "data": {"dev_windows": 1}
+}

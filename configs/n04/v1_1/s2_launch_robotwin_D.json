@@ -1,0 +1,12 @@
+{
+  "include": [
+    "runs/robotwin_D.json"
+  ],
+  "device": "cuda:1",
+  "notes": "S2 正式训练启动（RoboTwin D seed101）。只覆盖设备；其余为规格默认，gradient_checkpointing 关闭。 checkpoint_every=100：实测步时 79—122 s，5k 才存盘会让可视化/闭环等到数天后；改 100 步一存是调度选择，不表示效果门槛。",
+  "monitor": {
+    "log_every": 1,
+    "checkpoint_every": 100,
+    "eval_every": 500
+  }
+}

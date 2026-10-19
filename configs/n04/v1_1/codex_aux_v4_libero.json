@@ -1,0 +1,25 @@
+{
+  "include": [
+    "codex_compiled_raft_libero.json"
+  ],
+  "model": {
+    "transition_init": "constant_velocity",
+    "readout": {
+      "prefix_fp32": true
+    },
+    "measurement_padding_mode": "replicate"
+  },
+  "loss_definition": "v1_1_s2_independent_window_vicreg_v4_1",
+  "loss": {
+    "representation_mode": "independent_windows",
+    "representation": {
+      "variance_weight": 25.0,
+      "covariance_weight": 1.0
+    },
+    "forecast_max_variance": 1000.0
+  },
+  "notes": "Fresh v4 experiment: independent-window gradient-cached VICReg; constant-velocity RKN initialization; FP32 prefix projection. Historical v3 checkpoints are not resumable. Other capacity/data/action/forecast contracts retained.",
+  "monitor": {
+    "auxiliary_dev": true
+  }
+}

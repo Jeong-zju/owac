@@ -1,0 +1,87 @@
+{
+  "checkpoint": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/checkpoint-step0050000.pt",
+  "checkpoint_sha256": "2ddb0bb1c6050f3c810b048ddb4c4c873b965018c21f1706f4a02cae63f958c7",
+  "checkpoint_step": 50000,
+  "config_sha256": "e104ea4a7b6af536e779fdbef48271bcd9a4fe4d239f75ea72cd1772392cbcb6",
+  "memoryless_carry": {
+    "depth_drift_m": {
+      "1": 0.003957395368016096,
+      "2": 0.005571952541658627,
+      "3": 0.006714155155119471
+    },
+    "latent_relative_drift": {
+      "1": 0.6548978830611081,
+      "2": 0.7560928312441066,
+      "3": 0.8084645709431758
+    },
+    "note": "无记忆基线诊断：数值随 age 增长说明沿用旧测量会偏离当前帧测量，供 S2 状态模块对照",
+    "sequences": 144
+  },
+  "metrics": {
+    "correspondence_negative_cosine": 0.09399933979979583,
+    "correspondence_positive_cosine": 0.10107746995275929,
+    "coverage_1sigma": 0.23250188016312137,
+    "coverage_2sigma": 0.36038403980377137,
+    "depth_mae_m": 0.019699190196569613,
+    "depth_median_m": 0.00917363166809082,
+    "depth_nll": 139.77810633167948,
+    "depth_norm_mae": 0.023558829130243958,
+    "depth_rmse_m": 0.07944931716731492,
+    "groups": {
+      "libero/agentview": {
+        "coverage_1sigma": 0.10793730330586752,
+        "depth_mae_m": 0.018309148841531418,
+        "depth_norm_mae": 0.021896438626547707,
+        "pixels": 391153
+      },
+      "rendered_factor/camera_0": {
+        "coverage_1sigma": 0.7366765340169271,
+        "depth_mae_m": 0.015628628989816207,
+        "depth_norm_mae": 0.0186907277052738,
+        "pixels": 393216
+      },
+      "robotwin2/front_camera": {
+        "coverage_1sigma": 0.05609592013888889,
+        "depth_mae_m": 0.023411558270325056,
+        "depth_norm_mae": 0.02799855706814706,
+        "pixels": 460800
+      },
+      "robotwin2/left_camera": {
+        "coverage_1sigma": 0.0844162326388889,
+        "depth_mae_m": 0.02064031309855636,
+        "depth_norm_mae": 0.024684345121623326,
+        "pixels": 460800
+      }
+    },
+    "pixels": 1705969,
+    "position_error_m": 0.02121748554742159,
+    "split": "dev",
+    "variance_std_m": 0.007207424966090053
+  },
+  "protocol": {
+    "available": true,
+    "groups": {
+      "libero/agentview": {
+        "depth_mae_m": 0.018309148841531418,
+        "one_original_pixel_m": 0.0031937240094492216,
+        "protocol_ratio": 5.7328525531199395,
+        "reference_depth_m": 0.9869224727153778
+      },
+      "robotwin2/front_camera": {
+        "depth_mae_m": 0.023411558270325056,
+        "one_original_pixel_m": 0.0023128668369017088,
+        "protocol_ratio": 10.122311365615378,
+        "reference_depth_m": 0.8294916076660156
+      },
+      "robotwin2/left_camera": {
+        "depth_mae_m": 0.02064031309855636,
+        "one_original_pixel_m": 0.0017409744411732246,
+        "protocol_ratio": 11.8556094853679,
+        "reference_depth_m": 0.6243868713378906
+      }
+    },
+    "protocol_sha256": "14e88f26dbbb0a5539a5639f424d1daee0486f35476be2e12793ff649df5f98f"
+  },
+  "split": "dev",
+  "stage": "S1"
+}

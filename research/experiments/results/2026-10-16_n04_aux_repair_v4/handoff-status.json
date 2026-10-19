@@ -1,0 +1,311 @@
+{
+  "captured_at": "2026-10-16T08:48:38.961832+00:00",
+  "platforms": {
+    "libero-D-aux-v4-seed101": {
+      "progress": {
+        "stage": "S2",
+        "platform": "libero",
+        "arm": "D",
+        "seed": 101,
+        "phase": "train",
+        "updated_at": "2026-10-16T08:48:27Z",
+        "step": 3,
+        "budget_steps": 2000,
+        "train_loss": 3.4174108270168304,
+        "dev_loss": 1.1017503142356873,
+        "step_seconds": 171.1930125951767,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-16T08:42:01] step       1 loss=3.4106 action=0.6993 lr=1.00e-06 164.05s",
+          "[2026-10-16T08:44:58] step       2 loss=3.7178 action=0.9106 lr=1.50e-06 165.05s",
+          "[2026-10-16T08:47:50] step       3 loss=3.4487 action=0.7558 lr=2.00e-06 172.49s"
+        ],
+        "loss_definition": "v1_1_s2_independent_window_vicreg_v4_1",
+        "owner": "Codex",
+        "gpu_index": 0,
+        "activity": {
+          "initial_dev_loss": 1.1017503142356873,
+          "best_dev_loss": 1.1017503142356873,
+          "last_checkpoint_step": 1,
+          "auxiliary_validation": {
+            "step": 0,
+            "windows": 2,
+            "forecast": {
+              "1": {
+                "forecast_quad": 1.5308491621286637,
+                "forecast_logdet": 133.77719374625914,
+                "forecast_mode_w0": 0.9432658509862039,
+                "forecast_mode_w1": 0.05673419690180209,
+                "forecast_S_mean": 1.7358382267336692,
+                "forecast_S_min": 1.4857376958093336,
+                "forecast_S_max": 2.3287683667675143,
+                "forecast_R_mean": 1.0016053905410152,
+                "forecast_R_min": 0.8883659988641739,
+                "forecast_R_max": 1.1193707498811907,
+                "prediction_mse": 0.01000500653660105,
+                "persistence_mse": 0.009826213714756792,
+                "target_rms": 0.5326423803644795
+              },
+              "2": {
+                "forecast_quad": 1.6716955090562502,
+                "forecast_logdet": 178.70121383666992,
+                "forecast_mode_w0": 0.913500326871872,
+                "forecast_mode_w1": 0.08649968095123768,
+                "forecast_S_mean": 2.07221112648646,
+                "forecast_S_min": 1.7881689578294755,
+                "forecast_S_max": 2.619793387254079,
+                "forecast_R_mean": 1.0016013880570729,
+                "forecast_R_min": 0.8881380553046863,
+                "forecast_R_max": 1.1196666051944097,
+                "prediction_mse": 0.01303602366630609,
+                "persistence_mse": 0.0122181758362179,
+                "target_rms": 0.5322259311874707
+              },
+              "4": {
+                "forecast_quad": 1.4732795916497707,
+                "forecast_logdet": 276.4988899230957,
+                "forecast_mode_w0": 0.8808758966624737,
+                "forecast_mode_w1": 0.11912409575389964,
+                "forecast_S_mean": 3.0260399175541743,
+                "forecast_S_min": 2.6162662910563603,
+                "forecast_S_max": 3.5626967953784123,
+                "forecast_R_mean": 1.001597248017788,
+                "forecast_R_min": 0.8897964134812355,
+                "forecast_R_max": 1.1184406727552414,
+                "prediction_mse": 0.016847013691273918,
+                "persistence_mse": 0.014605907191123282,
+                "target_rms": 0.5313624164887837
+              }
+            },
+            "representation": {
+              "variance": 0.9466603398323059,
+              "covariance": 0.03718533366918564,
+              "std": 0.05137692764401436,
+              "windows": 2
+            }
+          },
+          "completed_windows": 1,
+          "total_windows": 8,
+          "representation_diag": {
+            "variance": 0.920162558555603,
+            "covariance": 0.07728961110115051,
+            "std": 0.07900453358888626,
+            "windows": 8
+          },
+          "update_started_at": 1792140488.378183
+        }
+      },
+      "updates": [
+        {
+          "step": 1,
+          "terms": {
+            "action": 0.6993243992328644,
+            "correspondence": 2.4634023755788803,
+            "forecast": 1.279443845152855,
+            "representation": 23.37018394470215
+          },
+          "step_seconds": 176.02922594547272,
+          "gradient_norm_before_clip": 159.841796875,
+          "gradient_fallback_windows": 0,
+          "representation_diag": {
+            "variance": 0.9334345459938049,
+            "covariance": 0.03432164713740349,
+            "std": 0.06559208780527115,
+            "windows": 8
+          }
+        },
+        {
+          "step": 2,
+          "terms": {
+            "action": 0.9105709046125412,
+            "correspondence": 2.723579078912735,
+            "forecast": 1.2778019160032272,
+            "representation": 24.07105255126953
+          },
+          "step_seconds": 170.54372640885413,
+          "gradient_norm_before_clip": 124.0693588256836,
+          "gradient_fallback_windows": 0,
+          "representation_diag": {
+            "variance": 0.962701141834259,
+            "covariance": 0.0035239250864833593,
+            "std": 0.035517215728759766,
+            "windows": 8
+          }
+        },
+        {
+          "step": 3,
+          "terms": {
+            "action": 0.7558004520833492,
+            "correspondence": 2.341427728533745,
+            "forecast": 1.2804154753684998,
+            "representation": 23.307626724243164
+          },
+          "step_seconds": 171.1930125951767,
+          "gradient_norm_before_clip": 594.2757568359375,
+          "gradient_fallback_windows": 0,
+          "representation_diag": {
+            "variance": 0.9303106069564819,
+            "covariance": 0.049862395972013474,
+            "std": 0.06873568892478943,
+            "windows": 8
+          }
+        }
+      ],
+      "compiled_retry_count": 0,
+      "last_log": "[2026-10-16T08:47:50] step       3 loss=3.4487 action=0.7558 lr=2.00e-06 172.49s"
+    },
+    "robotwin-D-aux-v4-seed101": {
+      "progress": {
+        "stage": "S2",
+        "platform": "robotwin",
+        "arm": "D",
+        "seed": 101,
+        "phase": "representation_cache",
+        "updated_at": "2026-10-16T08:48:38Z",
+        "step": 2,
+        "budget_steps": 2000,
+        "train_loss": 5.929943327307702,
+        "dev_loss": 2.4387569427490234,
+        "step_seconds": 240.1623175200075,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-16T08:44:30] step       1 loss=5.9514 action=3.3200 lr=1.00e-06 235.53s",
+          "[2026-10-16T08:48:34] step       2 loss=4.8786 action=2.2487 lr=1.50e-06 232.06s"
+        ],
+        "loss_definition": "v1_1_s2_independent_window_vicreg_v4_1",
+        "owner": "Codex",
+        "gpu_index": 1,
+        "activity": {
+          "initial_dev_loss": 2.4387569427490234,
+          "best_dev_loss": 2.4387569427490234,
+          "last_checkpoint_step": 1,
+          "auxiliary_validation": {
+            "step": 0,
+            "windows": 2,
+            "forecast": {
+              "1": {
+                "forecast_quad": 4.2009514813782065,
+                "forecast_logdet": 135.78553862212806,
+                "forecast_mode_w0": 0.9462921430346787,
+                "forecast_mode_w1": 0.05370783062791953,
+                "forecast_S_mean": 1.7523150565803691,
+                "forecast_S_min": 1.2244307571841824,
+                "forecast_S_max": 2.549953845239455,
+                "forecast_R_mean": 1.0017550626108724,
+                "forecast_R_min": 0.6797375855266407,
+                "forecast_R_max": 1.3944528481011749,
+                "prediction_mse": 0.027826388596847492,
+                "persistence_mse": 0.02723788730399583,
+                "target_rms": 0.39755160930336164
+              },
+              "2": {
+                "forecast_quad": 3.920986603366004,
+                "forecast_logdet": 182.39832644992404,
+                "forecast_mode_w0": 0.9155874755647447,
+                "forecast_mode_w1": 0.08441260361837016,
+                "forecast_S_mean": 2.104360698329078,
+                "forecast_S_min": 1.5474829806221857,
+                "forecast_S_max": 2.8288305269347296,
+                "forecast_R_mean": 1.0017563554975724,
+                "forecast_R_min": 0.6860151718060176,
+                "forecast_R_max": 1.3840870877106985,
+                "prediction_mse": 0.031134859213812482,
+                "persistence_mse": 0.029720017448481587,
+                "target_rms": 0.3974009725782606
+              },
+              "4": {
+                "forecast_quad": 3.1701492298217047,
+                "forecast_logdet": 282.5728009541829,
+                "forecast_mode_w0": 0.8823732059626352,
+                "forecast_mode_w1": 0.11762677572135415,
+                "forecast_S_mean": 3.098819220349902,
+                "forecast_S_min": 2.382168715908414,
+                "forecast_S_max": 3.9184551409312656,
+                "forecast_R_mean": 1.0017649765525545,
+                "forecast_R_min": 0.7002010150324731,
+                "forecast_R_max": 1.359409022189322,
+                "prediction_mse": 0.03726059725020258,
+                "persistence_mse": 0.03417578161073228,
+                "target_rms": 0.39431752796683994
+              }
+            },
+            "representation": {
+              "variance": 0.9397291541099548,
+              "covariance": 0.06124533712863922,
+              "std": 0.05849974602460861,
+              "windows": 2
+            }
+          },
+          "completed_windows": 1,
+          "total_windows": 8,
+          "representation_diag": {
+            "variance": 0.8638693690299988,
+            "covariance": 1.2043397426605225,
+            "std": 0.13554976880550385,
+            "windows": 8
+          },
+          "update_started_at": 1792140308.2448568
+        }
+      },
+      "updates": [
+        {
+          "step": 1,
+          "terms": {
+            "action": 3.3200411647558212,
+            "correspondence": 2.537873297929764,
+            "forecast": 1.2785049080848694,
+            "representation": 22.497201919555664
+          },
+          "step_seconds": 248.2609053477645,
+          "gradient_norm_before_clip": 3862.306884765625,
+          "gradient_fallback_windows": 0,
+          "representation_diag": {
+            "variance": 0.8760408759117126,
+            "covariance": 0.5961804389953613,
+            "std": 0.12334872782230377,
+            "windows": 8
+          }
+        },
+        {
+          "step": 2,
+          "terms": {
+            "action": 2.2487081438302994,
+            "correspondence": 2.220016226172447,
+            "forecast": 1.2778212577104568,
+            "representation": 22.801074981689453
+          },
+          "step_seconds": 240.1623175200075,
+          "gradient_norm_before_clip": 22205.455078125,
+          "gradient_fallback_windows": 0,
+          "representation_diag": {
+            "variance": 0.8638693690299988,
+            "covariance": 1.2043397426605225,
+            "std": 0.13554976880550385,
+            "windows": 8
+          }
+        }
+      ],
+      "compiled_retry_count": 0,
+      "last_log": "[2026-10-16T08:48:34] step       2 loss=4.8786 action=2.2487 lr=1.50e-06 232.06s"
+    }
+  },
+  "supervisor": "owac-n04-aux-v42-libero          RUNNING   pid 581821, uptime 0:10:36\nowac-n04-aux-v42-robotwin        RUNNING   pid 581955, uptime 0:09:16\nowac-n04-codex-monitor           RUNNING   pid 580569, uptime 0:31:14\n"
+}

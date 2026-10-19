@@ -1,0 +1,119 @@
+{
+  "head": "b4c26cc4b0de3a3df5e73bca4eb4eab43b849bd4",
+  "checkpoint_sha256": "89d68236362eb2f74e827be3ebc401c288f50027e025c40da2d3bb1e1e723b8a",
+  "checkpoint_updates": 200,
+  "scope": "source review and controlled probes; no retraining or benchmark mutation",
+  "disconnected_heads": {
+    "flow_gradient_l1": 32.48609924316406,
+    "uncertainty_gradient_l1": 0.0,
+    "uncertainty_checkpoint_weight_l1": 0.0,
+    "uncertainty_checkpoint_bias": 0.0,
+    "stability_gradient_l1": 0.0,
+    "stability_checkpoint_weight_l1": 0.0,
+    "ego_unknown_weights_exactly_equal": true,
+    "ego_unknown_bias_exactly_equal": true,
+    "ego_unknown_mix_max_diff": 0.0,
+    "valid_uncertainty_unique_values": [
+      0.6941471695899963
+    ]
+  },
+  "illumination_domain": {
+    "true_raw_gain": 1.5,
+    "saturated_pixels": 0,
+    "linear_domain_gain_median": 1.4999985694885254,
+    "trained_feature_domain_gain_median": 1.019349455833435,
+    "note": "feature-domain fixture uses the actual trained stem, not a scaled-feature stub"
+  },
+  "illumination_mask_leak": {
+    "scalar_gain": 1.0,
+    "max_gain_change_on_reliable_pixels": 1.7999982833862305,
+    "unreliable_region_input_change": "1 -> 10, weight remains zero"
+  },
+  "change_coordinates": {
+    "previous_stable_peak_flat_index": 650,
+    "predicted_stable_peak_flat_index": 651,
+    "updated_change_peak_flat_index": 650,
+    "residual_l1": 0.0,
+    "expected_change_peak_flat_index": 651,
+    "note": "1px exact self-motion; old change should move with the same feature coordinate transform"
+  },
+  "change_supervision_conflict": {
+    "moving_object_pixels": 100,
+    "zero_residual_interior_pixels": 90,
+    "gate_interior_min": 1.0,
+    "change_interior_abs_max": 0.0,
+    "change_magnitude_training_loss": 0.1654190570116043,
+    "interior_loss": 0.9999000430107117,
+    "interior_loss_write_gradient": 0.0,
+    "interior_loss_gate_head_gradient_l1": 0.0,
+    "note": "diagnostic encoded-feature fixture; not a re-estimation of the reported FNR"
+  },
+  "focused_tests": {
+    "command": "uv run --locked --extra encoder pytest -q tests/encoders/n04/test_innovation.py tests/encoders/n04/test_acceptance.py",
+    "result": "40 passed, 2 existing warnings"
+  },
+  "reproduce": "uv run --locked --extra encoder python research/reviews/2026-10-12_n04_source_review/probe.py",
+  "findings": [
+    {
+      "id": "R1",
+      "priority": "P1",
+      "file": "src/owac/frameworks/n04/model.py",
+      "start": 410,
+      "end": 410,
+      "problem": "学习的传播不确定度被 detach，且没有独立监督；全部四路训练目标对 log_sigma 输出的梯度为零。",
+      "verification": "200 步 checkpoint 的第三输出通道仍为零；完整训练目标重放梯度为零，有效区域不确定度恒为 0.694147。",
+      "repair": "为传播可信度设置可检查的校准目标，并建立实际学习路径；缺历史掩码与不确定度梯度分开处理。"
+    },
+    {
+      "id": "R2",
+      "priority": "P1",
+      "file": "src/owac/frameworks/n04/innovation.py",
+      "start": 228,
+      "end": 235,
+      "problem": "自运动误差和 unknown 没有不同的更新或监督用途；两路从相同初始化得到相同梯度；stability 完全未被训练目标使用。",
+      "verification": "实际 checkpoint 的 ego/unknown 权重与偏置逐位相同，mix 输出差为零；stability 输出层权重和梯度均为零。",
+      "repair": "定义并接入不同原因对更新的作用或可识别监督，避免把对称且不可区分的通道当作已实现的原因分解。"
+    },
+    {
+      "id": "R3",
+      "priority": "P1",
+      "file": "src/owac/training/n04.py",
+      "start": 784,
+      "end": 788,
+      "problem": "变化幅度要求整个移动物体为 1，但变化场只能通过门控乘以有符号特征残差写入；均匀物体内部可没有残差。",
+      "verification": "10x10 均匀目标移动 1px，90 个重叠像素残差为零；即便 gate=1，变化幅度仍为零，内部幅度损失无法给 gate 或写入强度有效梯度。",
+      "repair": "统一 residual/change-cell/事件掩码的语义，使用能表达运动区域的变化表示，或改为与实际可观测差异一致的监督。"
+    },
+    {
+      "id": "R4",
+      "priority": "P1",
+      "file": "src/owac/frameworks/n04/model.py",
+      "start": 477,
+      "end": 480,
+      "problem": "历史 change 场未经运动传播直接与当前坐标的残差相加。",
+      "verification": "无新增残差、精确 1px 自运动下，stable 峰值从 (10,10) 移到 (11,10)，change 峰值仍在 (10,10)。",
+      "repair": "历史变化场与稳定场采用相同的坐标变换和有效性处理，再执行衰减与当前写入。"
+    },
+    {
+      "id": "R5",
+      "priority": "P2",
+      "file": "src/owac/frameworks/n04/innovation.py",
+      "start": 195,
+      "end": 197,
+      "problem": "将经过 GELU/GroupNorm 的任意特征当成满足乘性曝光关系的线性强度来估计照明增益。",
+      "verification": "实际已训练 stem 输入无饱和 RAW 的 1.5 倍缩放；线性测量域估计 1.499999，特征域只估计 1.019349。",
+      "repair": "在有明确物理单位的线性测量路径估计增益，或单独训练并验证特征域照明映射；保留动作相关的原测量证据。"
+    },
+    {
+      "id": "R6",
+      "priority": "P2",
+      "file": "src/owac/frameworks/n04/innovation.py",
+      "start": 102,
+      "end": 107,
+      "problem": "局部低频增益用未加权池化，不遵守传入的可靠性 mask。",
+      "verification": "只将 weight=0 区域的 current 从 1 改为 10，可靠区域的 gain 仍改变 1.8；标量增益保持 1。",
+      "repair": "局部统计使用可靠性加权与有效支持归一化，并排除缺失和饱和测量。"
+    }
+  ],
+  "interpretation": "这些探针证明源码缺陷；未进行逐项修补、重训和独立矩阵，不能量化其对 49.476% 漏报、1.396/1.744 响应比或定位增量的各自贡献，也不能据此宣称机制已成立。"
+}

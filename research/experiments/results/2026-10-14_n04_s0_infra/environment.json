@@ -1,0 +1,138 @@
+{
+  "schema": "n04-environment-v1",
+  "created_utc": "2026-10-14T04:06:26.102694Z",
+  "owner": "ws-infra (N04 v1.0 S0, workflow E)",
+  "encoder_python": "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+  "encoder_env_root": "/workspace/owac/research/n04-v1/envs/encoder",
+  "encoder_freeze_file": "/workspace/owac/research/n04-v1/envs/encoder.freeze.txt",
+  "python": {
+    "version": "Python 3.12.3",
+    "base_prefix": "/usr",
+    "realpath": "/usr/bin/python3.12",
+    "venv_created_with": "uv venv --python /usr/bin/python3.12 /workspace/owac/research/n04-v1/envs/encoder",
+    "interpreter_discovery": "server had only /usr/bin/python3.12 (3.12.3) as a system interpreter; no uv cache (~/.cache/uv absent), pip cache ~44MB; system python already had numpy 2.5.3 but the N04 encoder env is independent and pins its own versions"
+  },
+  "packages": {
+    "pinned_for_install": {
+      "numpy": "2.5.1",
+      "torch": "2.14.1",
+      "pytest": "9.1.1"
+    },
+    "pin_source": "local uv.lock resolution for the `encoder` extra + `dev` group (python>=3.12 markers)",
+    "index_url_used": "https://pypi.tuna.tsinghua.edu.cn/simple",
+    "installed_count": 35,
+    "installed": {
+      "cuda-bindings": "13.4.3",
+      "cuda-pathfinder": "1.8.3",
+      "cuda-toolkit": "13.0.3.0",
+      "filelock": "4.1.1",
+      "fsspec": "2026.9.0",
+      "iniconfig": "2.3.1",
+      "jinja2": "3.1.6",
+      "markupsafe": "3.0.4",
+      "mpmath": "1.3.0",
+      "networkx": "3.7",
+      "numpy": "2.5.1",
+      "nvidia-cublas": "13.1.1.3",
+      "nvidia-cuda-cupti": "13.0.85",
+      "nvidia-cuda-nvrtc": "13.0.88",
+      "nvidia-cuda-runtime": "13.0.96",
+      "nvidia-cudnn-cu13": "9.24.0.43",
+      "nvidia-cufft": "12.0.0.61",
+      "nvidia-cufile": "1.15.1.6",
+      "nvidia-curand": "10.4.0.35",
+      "nvidia-cusolver": "12.0.4.66",
+      "nvidia-cusparse": "12.6.3.3",
+      "nvidia-cusparselt-cu13": "0.8.1",
+      "nvidia-nccl-cu13": "2.30.7",
+      "nvidia-nvjitlink": "13.4.92",
+      "nvidia-nvshmem-cu13": "3.4.5",
+      "nvidia-nvtx": "13.0.85",
+      "packaging": "26.3",
+      "pluggy": "1.6.0",
+      "pygments": "2.21.0",
+      "pytest": "9.1.1",
+      "setuptools": "84.0.0",
+      "sympy": "1.14.0",
+      "torch": "2.14.1",
+      "triton": "3.8.0",
+      "typing-extensions": "4.16.0"
+    }
+  },
+  "torch": {
+    "version": "2.14.1+cu130",
+    "cuda_build": "13.0",
+    "cuda_available": true,
+    "device_name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "sm_arch_list": "sm_75,sm_80,sm_86,sm_90,sm_100,sm_120"
+  },
+  "numpy": {
+    "version": "2.5.1"
+  },
+  "pytest": {
+    "version": "File \"<string>\", line 1"
+  },
+  "verification": {
+    "commands": [
+      "/workspace/owac/research/n04-v1/envs/encoder/bin/python -V",
+      "/workspace/owac/research/n04-v1/envs/encoder/bin/python -c 'import numpy; print(numpy.__version__)'",
+      "/workspace/owac/research/n04-v1/envs/encoder/bin/python -c 'import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())'",
+      "/workspace/owac/research/n04-v1/envs/encoder/bin/python -m pytest --version",
+      "/workspace/owac/research/n04-v1/envs/encoder/bin/python /tmp/n04_env_smoke.py"
+    ],
+    "smoke_script_path": "/tmp/n04_env_smoke.py",
+    "smoke_script_stdout": {
+      "python": "3.12.3",
+      "numpy": "2.5.1",
+      "array_sha256": "ee6adb5c714cff4f22526ac6f637221a07343b8077e13d533427f46ac9ebd388",
+      "eig_min_max": [
+        0.25859175550658114,
+        2.7973249503841604
+      ],
+      "dtype": "float32"
+    },
+    "env_size": "5.3G",
+    "gpu_smoke": {
+      "script_path": "/tmp/n04_gpu_smoke.py",
+      "recorded_utc": "2026-10-14T04:10:54.797140Z",
+      "result": {
+        "conv_out_shape": [
+          8,
+          32,
+          32,
+          32
+        ],
+        "conv_out_dtype": "torch.float32",
+        "weight_grad_norm": 0.20188182592391968,
+        "matmul_shape": [
+          512,
+          512
+        ],
+        "matmul_finite": true,
+        "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+        "capability": "12.0",
+        "allocated_mb": 37.13
+      }
+    }
+  },
+  "frozen_backends_untouched": {
+    "policy": "read-only check; no install, upgrade or modification was performed in these envs",
+    "starvla": {
+      "python": "/workspace/owac/rawvla/envs/starvla/bin/python",
+      "exists": true,
+      "version": "Python 3.10.21",
+      "numpy": "1.26.4",
+      "torch": "2.7.1+cu128"
+    },
+    "robotwin": {
+      "root": "/workspace/owac/rawvla/envs/robotwin",
+      "exists": true,
+      "python": "/workspace/owac/rawvla/envs/robotwin/bin/python",
+      "version": "Python 3.10.21"
+    }
+  },
+  "notes": [
+    "encoder_python is the absolute interpreter later stages must read from this file; it is never the shell `python`.",
+    "Backend integration still uses the frozen starvla python 3.10 runtime via PYTHONPATH=<snapshot>/src:/workspace/owac/rawvla/source/starVLA (see remote_execution.md)."
+  ]
+}

@@ -1,0 +1,105 @@
+{
+ "arrays": {
+  "issued_command": {
+   "dtype": "float32",
+   "shape": [
+    8,
+    7
+   ]
+  },
+  "post_state": {
+   "dtype": "float64",
+   "shape": [
+    8,
+    51
+   ]
+  },
+  "pre_state": {
+   "dtype": "float64",
+   "shape": [
+    8,
+    51
+   ]
+  },
+  "step_index": {
+   "dtype": "int32",
+   "shape": [
+    8
+   ]
+  }
+ },
+ "controller_buffer_notes": [
+  "the trace is collected from a fresh, reset environment whose construction, seed and ordered operations are recorded in `recipe`",
+  "the controller/observable buffers therefore start from the post-reset state and are reproduced by re-running the same recipe",
+  "this does not transfer to the original external recording: its own buffers are not stored in the npz (see source_fidelity)"
+ ],
+ "controller_buffer_policy": "recorded_initial_conditions",
+ "issued_command_source": "collector_step_call_argument",
+ "name": "n04ext_libero_variant_00",
+ "npz": "n04ext_libero_variant_00.npz",
+ "npz_bytes": 6428,
+ "npz_sha256": "225d25ab892a4a30b528eedeba95574a77745335bcc512f243ecdd116d1f6622",
+ "platform": "libero",
+ "recipe": {
+  "env": {
+   "bddl_file": "/workspace/owac/rawvla/source/third_party/LIBERO/libero/libero/bddl_files/libero_10/KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it.bddl",
+   "camera_heights": 256,
+   "camera_widths": 256,
+   "env_seed": 0,
+   "suite": "libero_10",
+   "task_id": 3,
+   "task_name": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it"
+  },
+  "issued_command_source": "collector_step_call_argument",
+  "ordered_operations": [
+   "build env and call env.seed(env_seed)",
+   "apply warmstart policy at build time when warmstart_mode=disabled_by_flag",
+   "env.reset()",
+   "env.set_init_state(pre_state[0]) once; thereafter continuous execution",
+   "per step t: apply warmstart policy; env.step(issued_command[t]); read post_state[t]"
+  ],
+  "source_frames_used": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000150/variant_00.npz",
+  "warmstart_mode": "disabled_by_flag"
+ },
+ "recomputability": {
+  "bit_exact_recomputable": true,
+  "controller_buffer_policy": "recorded_initial_conditions",
+  "evidence_level": "bit_exact_recomputable",
+  "missing": [],
+  "notes": [],
+  "rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+  "verification": {
+   "bit_exact": true,
+   "max_abs_diff": 1.7301603400833587e-14,
+   "method": "re-run the recorded recipe in a fresh environment and re-apply the recorded warm-start policy, then compare with the collected post_state",
+   "steps": 8,
+   "tolerance": 1e-12
+  },
+  "warmstart_mode": "disabled_by_flag"
+ },
+ "schema": "n04-d1-executed-trace-v1",
+ "source_fidelity": {
+  "basis": "S0 action-phase verification: k=+1 median 1.6e-4..7.1e-4 and 70-300x better than the wrong lags, but bit-exact replay of the external recording is not achievable because it does not store qacc_warmstart or the controller buffers",
+  "level": "not_applicable_new_capture"
+ },
+ "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000150/variant_00.npz",
+ "step_field_semantics": {
+  "issued_command": "command actually passed to the simulator at this step (float32)",
+  "post_state": "flattened simulator state after the step (float64)",
+  "pre_state": "flattened simulator state before the step, [time, qpos, qvel] (float64)",
+  "step_index": "0-based index of the collected step inside this trace"
+ },
+ "steps": 8,
+ "warmstart_mode": "disabled_by_flag",
+ "warmstart_semantics": "set mjDSBL_WARMSTART (bit 256) on the model before stepping; the solver ignores the warm-start, so no warm-start array is needed"
+}

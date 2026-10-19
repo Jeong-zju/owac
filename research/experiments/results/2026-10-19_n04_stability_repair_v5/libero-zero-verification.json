@@ -1,0 +1,248 @@
+{
+  "platform": "libero",
+  "optimizer_updates": 0,
+  "initialization_counterfactual": {
+    "configured_identity": {
+      "terms": {
+        "action": 0.5716118216514587,
+        "correspondence": null,
+        "forecast": 1.1635662317276,
+        "representation": null
+      },
+      "forecast": {
+        "created": 178,
+        "settled": 178,
+        "skipped": 14,
+        "skip_reasons": {
+          "window_too_short": 14
+        },
+        "diagnostics": {
+          "1": {
+            "forecast_quad": 7.930123144580472,
+            "forecast_logdet": 95.78399129067698,
+            "forecast_mode_w0": 0.9429869074975291,
+            "forecast_mode_w1": 0.0570131178584791,
+            "forecast_S_mean": 1.5094358248095359,
+            "forecast_S_min": 1.241854638822617,
+            "forecast_S_max": 2.300336483986147,
+            "forecast_R_mean": 1.0012219163679308,
+            "forecast_R_min": 0.8695979195256387,
+            "forecast_R_max": 1.1308717766115743,
+            "prediction_mse": 0.044964158547020724,
+            "persistence_mse": 0.044964159808812604,
+            "target_rms": 0.9923468376359632,
+            "count": 62.0
+          },
+          "2": {
+            "forecast_quad": 9.076678657531739,
+            "forecast_logdet": 113.32394917805989,
+            "forecast_mode_w0": 0.9135943581660588,
+            "forecast_mode_w1": 0.08640564692517122,
+            "forecast_S_mean": 1.625583710273107,
+            "forecast_S_min": 1.3426239550113679,
+            "forecast_S_max": 2.46139680147171,
+            "forecast_R_mean": 1.0012279172738394,
+            "forecast_R_min": 0.86858222981294,
+            "forecast_R_max": 1.1318822264671327,
+            "prediction_mse": 0.055188602209091185,
+            "persistence_mse": 0.055188605872293316,
+            "target_rms": 0.9921085109313329,
+            "count": 60.0
+          },
+          "4": {
+            "forecast_quad": 9.456935967717852,
+            "forecast_logdet": 148.34042031424386,
+            "forecast_mode_w0": 0.8809923614774432,
+            "forecast_mode_w1": 0.11900762229093484,
+            "forecast_S_mean": 1.872406616806984,
+            "forecast_S_min": 1.5509639020477022,
+            "forecast_S_max": 2.749394408294133,
+            "forecast_R_mean": 1.0012395594801222,
+            "forecast_R_min": 0.8662889589156423,
+            "forecast_R_max": 1.1325725529875075,
+            "prediction_mse": 0.06561748823150992,
+            "persistence_mse": 0.06561749880867344,
+            "target_rms": 0.991526899593217,
+            "count": 56.0
+          }
+        }
+      }
+    }
+  },
+  "representation_batch": {
+    "variance": 0.9336298704147339,
+    "covariance": 0.032787542790174484,
+    "std": 0.06540393084287643,
+    "windows": 8
+  },
+  "objective_gradients": [
+    {
+      "objective": "action",
+      "terms": {
+        "action": 0.6978240013122559,
+        "correspondence": 2.715242862701416,
+        "forecast": 1.1302677392959595,
+        "representation": 23.373533248901367
+      },
+      "valid_counts": {
+        "correspondence": 32,
+        "representation": 1,
+        "forecast": 178,
+        "action": 4
+      },
+      "gradient_norms": {
+        "encoder.measurement.backbone": 21.56666541053833,
+        "encoder.measurement.laterals": 8.42123690401293,
+        "encoder.measurement.fusion": 19.150487809467137,
+        "encoder.quality_head.stat_encoder": 1.408610531350711e-05,
+        "encoder.quality_head.latent_encoder": 4.302482190744702e-05,
+        "encoder.quality_head.output": 3.842243248174052e-05,
+        "encoder.correspondence.raft": 0.0029173444693524945,
+        "encoder.state_stack.revision_q_raw": 5.5823987860253235e-06,
+        "encoder.state_stack.mode_transition_logits": 3.6104486813271634e-07,
+        "encoder.state_stack.cells": 0.01085080496882011,
+        "encoder.state_stack.control": 0.02173830331602459,
+        "encoder.readout.camera_embedding": 0.40442681182570556,
+        "encoder.readout.dense_proj": 6.871260488632938,
+        "encoder.readout.support_proj": 0.5364217781771375,
+        "encoder.readout.resampler": 23.89242212116115,
+        "encoder.readout.to_prefix": 12.858575893431187,
+        "backend.vlm.model": 0.41048572654842697,
+        "backend.action_head.gemma_expert": 2.920064062412256,
+        "backend.action_head.action_in_proj": 0.1422772654398667,
+        "backend.action_head.action_out_proj": 1.5766281970563385,
+        "backend.action_head.time_mlp_in": 0.65197569001019,
+        "backend.action_head.time_mlp_out": 0.7171999287982741
+      },
+      "parameters_unchanged": true,
+      "gradient_eager_fallback": false
+    },
+    {
+      "objective": "correspondence",
+      "terms": {
+        "action": 0.6978240013122559,
+        "correspondence": 2.715242862701416,
+        "forecast": 1.1302677392959595,
+        "representation": 23.373533248901367
+      },
+      "valid_counts": {
+        "correspondence": 32,
+        "representation": 1,
+        "forecast": 178,
+        "action": 4
+      },
+      "gradient_norms": {
+        "encoder.correspondence.raft": 0.24209158730074415
+      },
+      "parameters_unchanged": true,
+      "gradient_eager_fallback": false
+    },
+    {
+      "objective": "forecast",
+      "terms": {
+        "action": 0.6978240013122559,
+        "correspondence": 2.715242862701416,
+        "forecast": 1.1302677392959595,
+        "representation": 23.373533248901367
+      },
+      "valid_counts": {
+        "correspondence": 32,
+        "representation": 1,
+        "forecast": 178,
+        "action": 4
+      },
+      "gradient_norms": {
+        "encoder.measurement.backbone": 0.007497835794540005,
+        "encoder.measurement.laterals": 0.0029952941022291985,
+        "encoder.measurement.fusion": 0.00630280114155236,
+        "encoder.quality_head.stat_encoder": 0.0008261084260057249,
+        "encoder.quality_head.latent_encoder": 0.0022033624237892966,
+        "encoder.quality_head.output": 0.0021727428754836856,
+        "encoder.correspondence.raft": 0.005185211666366435,
+        "encoder.state_stack.revision_q_raw": 7.529277570476091e-06,
+        "encoder.state_stack.mode_transition_logits": 0.00023749003046416584,
+        "encoder.state_stack.cells": 0.001343670174524781,
+        "encoder.state_stack.control": 0.0004712319241334168
+      },
+      "parameters_unchanged": true,
+      "gradient_eager_fallback": false
+    },
+    {
+      "objective": "representation",
+      "terms": {
+        "action": 0.6978240013122559,
+        "correspondence": 2.715242862701416,
+        "forecast": 1.1302677392959595,
+        "representation": 23.373533248901367
+      },
+      "valid_counts": {
+        "correspondence": 32,
+        "representation": 1,
+        "forecast": 178,
+        "action": 4
+      },
+      "gradient_norms": {
+        "encoder.measurement.backbone": 21.296451438803167,
+        "encoder.measurement.laterals": 6.413030996504079,
+        "encoder.measurement.fusion": 11.410876116560752,
+        "encoder.quality_head.stat_encoder": 2.565593723206789e-06,
+        "encoder.quality_head.latent_encoder": 7.357632236532251e-06,
+        "encoder.quality_head.output": 8.14579616827235e-06,
+        "encoder.correspondence.raft": 0.0004302619149578369,
+        "encoder.state_stack.revision_q_raw": 1.1623664085120219e-06,
+        "encoder.state_stack.mode_transition_logits": 4.5321261904420223e-08,
+        "encoder.state_stack.cells": 0.0031476153570446927,
+        "encoder.state_stack.control": 0.008353023578681193,
+        "encoder.readout.camera_embedding": 0.13825218735804584,
+        "encoder.readout.dense_proj": 2.867813492217053,
+        "encoder.readout.support_proj": 0.20885720863721907,
+        "encoder.readout.resampler": 7.744078525169071,
+        "encoder.readout.to_prefix": 2.1852128776765865
+      },
+      "parameters_unchanged": true,
+      "gradient_eager_fallback": false
+    },
+    {
+      "objective": "joint_exact",
+      "terms": {
+        "action": 0.6961163282394409,
+        "correspondence": 2.715240955352783,
+        "forecast": 1.1302536725997925,
+        "representation": 23.373533248901367
+      },
+      "valid_counts": {
+        "correspondence": 32,
+        "representation": 1,
+        "forecast": 178,
+        "action": 4
+      },
+      "gradient_norms": {
+        "encoder.measurement.backbone": 32.42072909664572,
+        "encoder.measurement.laterals": 11.009794296435746,
+        "encoder.measurement.fusion": 22.17124520039758,
+        "encoder.quality_head.stat_encoder": 0.0008280109309408963,
+        "encoder.quality_head.latent_encoder": 0.0022151660561840515,
+        "encoder.quality_head.output": 0.0021768776214044845,
+        "encoder.correspondence.raft": 0.2399683931783184,
+        "encoder.state_stack.revision_q_raw": 8.926130995966015e-06,
+        "encoder.state_stack.mode_transition_logits": 0.00023785311728120474,
+        "encoder.state_stack.cells": 0.01138000910797268,
+        "encoder.state_stack.control": 0.023916936536269143,
+        "encoder.readout.camera_embedding": 0.41672863102152063,
+        "encoder.readout.dense_proj": 7.228077528633154,
+        "encoder.readout.support_proj": 0.5653203500686463,
+        "encoder.readout.resampler": 24.43303631375156,
+        "encoder.readout.to_prefix": 12.581553729309533,
+        "backend.vlm.model": 0.40078404377329657,
+        "backend.action_head.gemma_expert": 2.8743251030636223,
+        "backend.action_head.action_in_proj": 0.1412246554980784,
+        "backend.action_head.action_out_proj": 1.568532632495293,
+        "backend.action_head.time_mlp_in": 0.6492380952491975,
+        "backend.action_head.time_mlp_out": 0.711481242744217
+      },
+      "parameters_unchanged": true,
+      "gradient_eager_fallback": true
+    }
+  ],
+  "complete": true
+}

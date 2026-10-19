@@ -1,0 +1,105 @@
+{
+  "schema": "n04-source-snapshots-index-v1",
+  "updated_utc": "2026-10-14T04:12:44Z",
+  "authoritative_snapshot_id": "n04-s0-20261014T040846Z-30640b9274ed",
+  "note": "Only the authoritative snapshot passed package-sha, per-file sha256 and tool verify with 0 differences. Superseded entries are kept for history: n04-s0-20261014T040701Z-bd7782632fc6 intentionally fails verification on one file (manifest/tar race fixed afterwards) and must not be used to start a stage.",
+  "snapshots": [
+    {
+      "snapshot_id": "n04-s0-20261014T035852Z-906f1376bda2",
+      "source_tree": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T035852Z-906f1376bda2",
+      "package": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T035852Z-906f1376bda2.tar.gz",
+      "package_sha256": "906f1376bda27d65039f84e718e863f4bfc915cc972907e50e138e21fa6853ce",
+      "package_bytes": 7925889,
+      "packed_files": 766,
+      "per_file_check": {
+        "ok_lines": 766,
+        "failed_lines": 0
+      },
+      "tool_verify_differences": 0,
+      "stability": null,
+      "git_head": "fd6255b769d661af568738bec194bb599601a644",
+      "tracked_diff_sha256": "e48f8d11288ad6f79c187dc68cab69688907a810a564bf147035bd89ebaa2dae",
+      "authoritative_for_stages": null,
+      "superseded_by": "n04-s0-20261014T040846Z-30640b9274ed",
+      "note": null,
+      "markers": [
+        "SUPERSEDED"
+      ],
+      "verify_note": "tree now carries marker file(s) not present in its own manifest: a future `package_source.py verify` reports them under extra_count, which is expected"
+    },
+    {
+      "snapshot_id": "n04-s0-20261014T040701Z-bd7782632fc6",
+      "source_tree": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040701Z-bd7782632fc6",
+      "package": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040701Z-bd7782632fc6.tar.gz",
+      "package_sha256": "bd7782632fc63f813ddb2e0438f52efadab9f2d3aaad7ba19dc11835b99d9983",
+      "package_bytes": 8093633,
+      "packed_files": 777,
+      "per_file_check": {
+        "ok_lines": 776,
+        "failed_lines": 1
+      },
+      "tool_verify_differences": 1,
+      "stability": null,
+      "git_head": "fd6255b769d661af568738bec194bb599601a644",
+      "tracked_diff_sha256": "5f3c6d017c2d951206e8364206d3791c7b77bbd989fe7270dc97f0c8c8401a43",
+      "authoritative_for_stages": null,
+      "superseded_by": "n04-s0-20261014T040846Z-30640b9274ed",
+      "note": {
+        "snapshot_id": "n04-s0-20261014T035852Z-906f1376bda2",
+        "reason": "first snapshot lacked the supervisor-template contract test",
+        "note": "both trees remain on the remote; this record's snapshot is the authoritative one for S1+"
+      },
+      "markers": [
+        "SUPERSEDED",
+        "DO_NOT_USE"
+      ],
+      "verify_note": "tree now carries marker file(s) not present in its own manifest: a future `package_source.py verify` reports them under extra_count, which is expected"
+    },
+    {
+      "snapshot_id": "n04-s0-20261014T040846Z-30640b9274ed",
+      "source_tree": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040846Z-30640b9274ed",
+      "package": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040846Z-30640b9274ed.tar.gz",
+      "package_sha256": "30640b9274ed209ab25728dfb7119cba57cae41eb6692505a067ca7c21bf0f53",
+      "package_bytes": 8117011,
+      "packed_files": 781,
+      "per_file_check": {
+        "ok_lines": 781,
+        "failed_lines": 0
+      },
+      "tool_verify_differences": 0,
+      "stability": true,
+      "git_head": "fd6255b769d661af568738bec194bb599601a644",
+      "tracked_diff_sha256": "5f3c6d017c2d951206e8364206d3791c7b77bbd989fe7270dc97f0c8c8401a43",
+      "authoritative_for_stages": "s1+",
+      "superseded_by": null,
+      "note": {
+        "n04-s0-20261014T040701Z-bd7782632fc6": "manifest/tar race: another agent rewrote tests/encoders/n04_full/test_mechanism_data.py between the hash pass and the write pass; the tool now hashes in the write pass and re-checks stability, so this snapshot was rebuilt and re-verified",
+        "n04-s0-20261014T035852Z-906f1376bda2": "missing the supervisor-template contract test"
+      },
+      "markers": []
+    }
+  ],
+  "markers": {
+    "policy": "superseded snapshots are kept as history and marked in-place; the authoritative snapshot tree is left untouched (781 files, no marker) so its verify stays at 0 differences",
+    "files": {
+      "n04-s0-20261014T035852Z-906f1376bda2/SUPERSEDED": {
+        "path": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T035852Z-906f1376bda2/SUPERSEDED",
+        "bytes": 767,
+        "sha256": "d52da266e0afc00e4499f91fb98610527f1c7e6d0d3cda0b40f407f921b4061c",
+        "lines": 11
+      },
+      "n04-s0-20261014T040701Z-bd7782632fc6/SUPERSEDED": {
+        "path": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040701Z-bd7782632fc6/SUPERSEDED",
+        "bytes": 428,
+        "sha256": "69691a75e5881537f4dc90176cc2daaa278ab69c0f8e3c7854a84acad4476e72",
+        "lines": 8
+      },
+      "n04-s0-20261014T040701Z-bd7782632fc6/DO_NOT_USE": {
+        "path": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T040701Z-bd7782632fc6/DO_NOT_USE",
+        "bytes": 928,
+        "sha256": "a308fd685fe1f8d4440befdb6bec1a1cb00d99131f6a0d302a9306c52e18f585",
+        "lines": 14
+      }
+    }
+  }
+}

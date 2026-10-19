@@ -1,0 +1,464 @@
+{
+  "stage": "S0",
+  "implementation_status": "partial",
+  "experiment_status": "blocked_by_data",
+  "claim_status": "not_applicable",
+  "claim_status_note": "S0 无机制主张；本轮冻结的是数据、坐标、因果合同与预注册门槛，未训练任何网络。",
+  "date": "2026-10-14",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "branch": "lzh/n04-egomotion-separation",
+  "head": "fd6255b769d661af568738bec194bb599601a644",
+  "plan_sha256": "e91c8c041af9dcb7f889ed4c3e72f4b8036f6e06cc14c8e0f0c68410de7508e2",
+  "s0_prompt_sha256": "ecfa4da66062b33a30c473a5491739ed7039279a4974b16fb5c874f26e45016a",
+  "stage_record": "research/experiments/2026-10-14_n04_v1_s0_independent_acceptance.md",
+  "source_manifest": {
+    "snapshot_id": "n04-s0-20261014T051153Z-8bd493ab4460",
+    "package_sha256": "8bd493ab44603229712df15d5d58d6eac4b3f9816fffdaba7b880dfbf0b1d326",
+    "local_package": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/outputs/n04-v1/s0/independent-source-packages/n04-s0-20261014T051153Z-8bd493ab4460.tar.gz",
+    "package_manifest": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation/outputs/n04-v1/s0/independent-source-packages/n04-s0-20261014T051153Z-8bd493ab4460.manifest.json",
+    "packed_files": 879,
+    "tracked_diff_sha256": "f64ae62a4175d112a6647843fb465146fe2e36704e50a495374d5fa5b266b430",
+    "remote_path": "/workspace/owac/research/n04-v1/source/n04-s0-20261014T051153Z-8bd493ab4460",
+    "remote_verify": "879 files checked, differences=0, package hash matched",
+    "explicitly_contains_uncommitted": true,
+    "measured_d1_snapshot": "n04-s0-20261014T050411Z-357e5289dbbb",
+    "runtime_identity": "All src/ and configs/ files byte-identical between final snapshot and measured B; final remote pytest 349 passed.",
+    "note": "This handoff/report final receipts were updated after packaging; runtime source is unchanged. Original handoff is archived."
+  },
+  "data_manifest": {
+    "remote_root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+    "npz_count": {
+      "libero": 1771,
+      "robotwin2": 632,
+      "total": 2403
+    },
+    "bytes_total": 509194817528,
+    "valid_frames": 408075,
+    "independent_source_trajectories": 2403,
+    "variants_per_source_max": 1,
+    "inventory": "research/experiments/results/2026-10-14_n04_manifest/inventory-summary.json",
+    "inventory_full_remote": "/workspace/owac/research/n04-v1/manifests/s0-manifest/POINTER.json",
+    "coverage": "research/experiments/results/2026-10-14_n04_manifest/coverage.json",
+    "coverage_sha256": "3dbf18ca7e89538ec80bbebfa018abcc814f76667eb6619ab0a401d260cf4116",
+    "telemetry_provenance": "research/experiments/results/2026-10-14_n04_manifest/telemetry-provenance.json",
+    "source_audit": "research/experiments/results/2026-10-14_n04_v1_s0/telemetry-source-audit.json",
+    "two_run_identity": "content_sha256=fce3bd48fdc288ffd7b96eee64c06cd8724eb29cef6dda22eba618bb14e31921",
+    "unavailable_conditions": 8,
+    "field_coverage_availability": {
+      "camera_measurement": "available 两平台",
+      "alignment": "available 两平台",
+      "rgb_pair": "available 两平台",
+      "source_identity": "available 两平台",
+      "executed_action": {
+        "libero": "partial/provisional (producer_code_order, verified=false)",
+        "robotwin2": "unavailable"
+      },
+      "timestamp": "unavailable 两平台",
+      "camera_calibration": "unavailable 两平台",
+      "exposure": "partial (EV/scale 是渲染参数，非真实曝光)",
+      "joint_state": "partial",
+      "pose": "partial",
+      "noise_model": {
+        "robotwin2": "available",
+        "libero": "partial"
+      }
+    }
+  },
+  "split_manifest": {
+    "path": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+    "sha256": "7465309422e973edcf423db597305469eec18babed1fa51698bcfa047a97f9fe",
+    "main_counts": {
+      "train": 1917,
+      "dev": 251,
+      "final": 235
+    },
+    "member_table_sha256": "0d3d41911816361b5b5e1093e07515f87ded913739d685e056cdeb9fe5f12247",
+    "main_split_sha256": "8d2879385c7feb18e9b76420d4692fbe30d793442186ca1d5af8bfdb71ac5111",
+    "source_overlap": {
+      "train_dev": 0,
+      "train_final": 0,
+      "dev_final": 0
+    },
+    "group_key": "source_trajectory_id",
+    "seed": 20261014,
+    "holdouts": {
+      "object": {
+        "n_sources": 90,
+        "level": "source_group"
+      },
+      "scene": {
+        "n_sources": 27,
+        "level": "source_group",
+        "coverage_warning": "覆盖窄：仅 libero_10 的 10/40 任务可解析场景 token"
+      },
+      "camera": {
+        "level": "view",
+        "warning": "视角级 holdout，不是源组级"
+      },
+      "unseen_factor_combination": {
+        "libero": 338,
+        "robotwin2": 125
+      }
+    },
+    "official_test_manifest_disjointness": {
+      "path": "research/experiments/results/2026-10-14_n04_manifest/official-test-disjointness.json",
+      "sha256": "7bc23e9b82be84cf8ace8c0733d04f97cf45deb17a3ad7f0b4fb89a0d2b617d0",
+      "participates_in_training_split": false,
+      "code_level_isolation": true,
+      "task_level_overlap": {
+        "libero": 40,
+        "robotwin2": 13
+      },
+      "source_episode_level_overlap": {
+        "libero": 1771,
+        "robotwin2": 632
+      },
+      "verdict": "官方清单不参与训练拆分；但训练 NPZ 与官方测试清单派生自同一源 episode/初始状态池（RoboTwin 字段级确认，LIBERO 高可能性推断）。S1/S6 不得据此宣称『未见过 episode』的泛化。"
+    }
+  },
+  "configs": [
+    {
+      "path": "configs/n04/full/s0_data.json",
+      "sha256": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33"
+    },
+    {
+      "path": "configs/n04/full/protocol.json",
+      "sha256": "055acc442c7fa7bbb1b1f06257a32ca5a8431c4abc6f0ea23c28d3e9bf2053bc"
+    }
+  ],
+  "checkpoints": [],
+  "deliverables": [
+    {
+      "path": "src/owac/raw/telemetry.py",
+      "sha256": "786cea46f032109f5d1cd747fdf42566e02c04b0634da73be2b589660e1f0267",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/raw/rawvla_sequence.py",
+      "sha256": "a56b052ab4c4d424491ea73fa91c5a770efd375d40ce2c18949d644288b3e085",
+      "status": "modified (additive; default path bit-identical)"
+    },
+    {
+      "path": "src/owac/raw/n04_manifest.py",
+      "sha256": "cffd1f36d99fcfa03c8c4e38d8b2a2db31b2f7bebc7e0d485e4bf47d6f28b197",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/raw/n04_mechanism_data.py",
+      "sha256": "a63d3c31f4eb749972df7db75b0ec6c7e68a16b2cc7dbf0899d586f1170faa85",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/frameworks/n04/measurement_geometry.py",
+      "sha256": "5012a499d5ec04dff2dce2ec00128f9ad34a89b00c254cb06c94422a5534f75f",
+      "status": "new"
+    },
+    {
+      "path": "src/owac/frameworks/n04/proprio.py",
+      "sha256": "a30409c33a4b1a171b1faa6b63e81d9c36c29f11e36cf711f7917273708263f3",
+      "status": "modified (comment fix + explicit frame API; old numerics kept)"
+    },
+    {
+      "path": "src/owac/frameworks/n04/model.py",
+      "sha256": "93af3a3994221050c6ad9e84395c1cfca636c2b6d203fbb4369b7020f3f6f599",
+      "status": "modified (NaN/huge sanitization, 9 lines; normal path bit-identical)"
+    },
+    {
+      "path": "src/owac/evaluation/n04_contracts.py",
+      "sha256": "f6d371aef4a9b0fbfce923c8327c1a28cd53cf53af9a5a18fe400c61d4da215a",
+      "status": "new"
+    },
+    {
+      "path": "scripts/n04_full/package_source.py",
+      "sha256": "7d7e852950703685f9a309614f39f2a86744fea0a905675f791a1d450ea9d441",
+      "status": "new"
+    },
+    {
+      "path": "scripts/n04_full/n04_supervisor.conf.template",
+      "sha256": "25b03f44f5e17b8909406f667321ac0bdfee10e82faa0c08ff936f0f8274f61e",
+      "status": "new"
+    },
+    {
+      "path": "research/theory/n04_v1.md",
+      "sha256": "d293c741aaf46ae928708059e72da80d884e7199eb17acdb24272257d48c3983",
+      "status": "new"
+    },
+    {
+      "path": "tests/encoders/n04_full/",
+      "status": "new (7 files, 136 tests)"
+    },
+    {
+      "path": "research/experiments/2026-10-14_n04_v1_s0.md",
+      "status": "new (stage record)"
+    }
+  ],
+  "commands": [
+    "uv run --locked --extra encoder pytest -q tests/encoders/n04 tests/encoders/n04_full",
+    "make check",
+    "uv run --locked --extra encoder python -m owac.raw.n04_manifest --config configs/n04/full/s0_data.json --output <run>/inventory.json",
+    "uv run --locked --extra encoder python -m owac.raw.n04_mechanism_data --config configs/n04/full/s0_data.json --output <run>/mechanism-data",
+    "uv run --locked --extra encoder python -m owac.evaluation.n04_contracts --config configs/n04/full/s0_data.json --manifest research/experiments/results/2026-10-14_n04_manifest/splits.json --output research/experiments/results/2026-10-14_n04_s0_contracts/contracts-with-manifest.json",
+    "python3 scripts/n04_full/package_source.py build --output-dir outputs/n04-v1/s0/source-packages"
+  ],
+  "metrics": {
+    "local_tests": {
+      "n04": 198,
+      "n04_full": 151,
+      "combined": 349,
+      "status": "passed"
+    },
+    "remote_final_tests": {
+      "combined": 349,
+      "status": "passed"
+    },
+    "make_check": "passed: ruff check, format --check, compileall; 236 files formatted",
+    "contracts": {
+      "total": 8,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "partial": 1,
+      "required_total": 7
+    },
+    "inventory": {
+      "aggregates_sha256": "53d956bb518c80e148283edd80d0f4f348cda779665f5b2e17e5f3e988d1ca62",
+      "code_sha256": "873a2aab5f5dda7c399151534aa63f157130c8d24180314231998d44bb2bc61c",
+      "config_sha256": "ff1a7e6004169448cd6e3acddac5bded9714f7d146f95b40c1645656ef5a1e33",
+      "content_sha256": "e8a3df227eed7328c0f0b9a56426380b0230fba08faa1a7d0ae63ef36fc1107f",
+      "counts": {
+        "bytes_by_platform": {
+          "libero": 102893014468,
+          "robotwin": 406301803060
+        },
+        "files": 2403,
+        "files_by_platform": {
+          "libero": 1771,
+          "robotwin": 632
+        },
+        "sources_by_platform": {
+          "libero": 1771,
+          "robotwin": 632
+        }
+      },
+      "coverage_sha256": "2c6a07b1c0b953fa1ba09a0b72066d51248afdd1f1496c7544d44c8b62c4402c",
+      "deep_sample_sha256": "7ec06757a955d7aee3f1c74c1b79c705a714a8a49ad2ddf3734811dd20390199",
+      "main_member_table_sha256": "0d3d41911816361b5b5e1093e07515f87ded913739d685e056cdeb9fe5f12247",
+      "main_split_sha256": "8d2879385c7feb18e9b76420d4692fbe30d793442186ca1d5af8bfdb71ac5111",
+      "records_sha256": "2b709b154ec089cb47ff65bc1056f087ea0733205f4792304128e76e63270a5b",
+      "schema": "n04-s0-inventory-hashes-v1",
+      "telemetry_provenance_sha256": "95489afeaf705d46faa5ca23c4ef33408cd77cf4383aa54d131236b13f9e4729"
+    },
+    "d0_audit_artifact": "research/experiments/results/2026-10-14_n04_s0_independent_audit/remote-a/mechanism/d0/audit.json",
+    "d1_independent_validation": {
+      "records": [
+        {
+          "record": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-0/n04ext_libero_variant_00.measurements.json",
+          "checks": {
+            "measurement_hash": true,
+            "trace_record_hash": true,
+            "trace_array_hash": true,
+            "extension_only": true,
+            "finite_arrays": true,
+            "finite_trace": true,
+            "continuous_execution": true,
+            "frame_trace_alignment": true,
+            "physical_time": true,
+            "aligned_pixel_grids": true,
+            "positive_depth": true,
+            "rigid_camera_pose": true,
+            "independent_depth_rays": true
+          },
+          "metrics": {
+            "frames": 8,
+            "camera_frames": 16,
+            "continuity_max_abs": 0.0,
+            "rotation_orthogonality_error": 3.774758283725532e-15,
+            "ray_samples": 400,
+            "matched_rays": 378,
+            "max_depth_error_m": 2.15314157552271e-05,
+            "max_error_over_bound": 0.682422191692569
+          },
+          "passed": true
+        },
+        {
+          "record": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-1/n04ext_libero_variant_00.measurements.json",
+          "checks": {
+            "measurement_hash": true,
+            "trace_record_hash": true,
+            "trace_array_hash": true,
+            "extension_only": true,
+            "finite_arrays": true,
+            "finite_trace": true,
+            "continuous_execution": true,
+            "frame_trace_alignment": true,
+            "physical_time": true,
+            "aligned_pixel_grids": true,
+            "positive_depth": true,
+            "rigid_camera_pose": true,
+            "independent_depth_rays": true
+          },
+          "metrics": {
+            "frames": 8,
+            "camera_frames": 16,
+            "continuity_max_abs": 0.0,
+            "rotation_orthogonality_error": 3.885780586188048e-15,
+            "ray_samples": 400,
+            "matched_rays": 375,
+            "max_depth_error_m": 2.15314157552271e-05,
+            "max_error_over_bound": 0.722850500791982
+          },
+          "passed": true
+        },
+        {
+          "record": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-2/n04ext_libero_variant_00.measurements.json",
+          "checks": {
+            "measurement_hash": true,
+            "trace_record_hash": true,
+            "trace_array_hash": true,
+            "extension_only": true,
+            "finite_arrays": true,
+            "finite_trace": true,
+            "continuous_execution": true,
+            "frame_trace_alignment": true,
+            "physical_time": true,
+            "aligned_pixel_grids": true,
+            "positive_depth": true,
+            "rigid_camera_pose": true,
+            "independent_depth_rays": true
+          },
+          "metrics": {
+            "frames": 8,
+            "camera_frames": 16,
+            "continuity_max_abs": 0.0,
+            "rotation_orthogonality_error": 4.440892098500626e-15,
+            "ray_samples": 400,
+            "matched_rays": 384,
+            "max_depth_error_m": 2.1527581805624862e-05,
+            "max_error_over_bound": 0.4948876825652097
+          },
+          "passed": true
+        },
+        {
+          "record": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-3/n04ext_libero_variant_00.measurements.json",
+          "checks": {
+            "measurement_hash": true,
+            "trace_record_hash": true,
+            "trace_array_hash": true,
+            "extension_only": true,
+            "finite_arrays": true,
+            "finite_trace": true,
+            "continuous_execution": true,
+            "frame_trace_alignment": true,
+            "physical_time": true,
+            "aligned_pixel_grids": true,
+            "positive_depth": true,
+            "rigid_camera_pose": true,
+            "independent_depth_rays": true
+          },
+          "metrics": {
+            "frames": 8,
+            "camera_frames": 16,
+            "continuity_max_abs": 0.0,
+            "rotation_orthogonality_error": 4.218847493575595e-15,
+            "ray_samples": 400,
+            "matched_rays": 382,
+            "max_depth_error_m": 2.1527581805624862e-05,
+            "max_error_over_bound": 0.5068703539918022
+          },
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "frozen_assets": {
+      "checked": 8,
+      "hash_matches": 8
+    }
+  },
+  "failed_groups": [
+    "C5.real_data skipped: original NPZ timestamps/calibration and reliable executed-action logs unavailable.",
+    "Original LIBERO bit-exact action replay remains failed; new independent extension does not upgrade old NPZs.",
+    "D1 formal scale/factor coverage and paired RoboTwin execution collection remain partial.",
+    "Scene holdout only 27 sources; camera holdout is view-level; official benchmark source pool overlaps training.",
+    "Original D1 state-roundtrip sidecar assertion and old zeroed_each_step dry-run claims superseded by independent repairs.",
+    "First new capture A had pixel-centre/MSAA geometry mismatch; retained as history, use corrected capture B."
+  ],
+  "resources": {
+    "gpu_remote": "RTX PRO 6000 Blackwell 97887 MiB total / 86882 MiB used / 10368 MiB free / util 100%（4 个既有服务，本阶段未触碰）",
+    "training_compute_used": "none (S0 has no network training)",
+    "d0_generation": "local CPU, ~71 MB output",
+    "inventory_cost": "9.44 s scan + 0.39 s deep read, 10.0 GB read, peak RSS 163 MiB, single process",
+    "encoder_env": "/workspace/owac/research/n04-v1/envs/encoder/bin/python (Python 3.12.3, numpy 2.5.1, torch 2.14.1+cu130, cuda available)",
+    "encoder_env_size": "5.3 GB, 35 packages"
+  },
+  "next_stage_inputs": {
+    "unlabeled_source_split": {
+      "train": 1917,
+      "dev": 251,
+      "final": 235,
+      "geometry_labels_available": false
+    },
+    "verified_labeled_inputs": [
+      "D0 analytic 16-factor data",
+      "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b: 4 LIBERO extensions / 32 timestamps / 64 camera frames"
+    ],
+    "s1_formal_training_ready": false,
+    "blocking_gaps_before_s1": [
+      "Freeze a sufficiently covered and scaled labeled D1 dataset and its source-group splits.",
+      "Refreeze physical thresholds using real calibration before model comparison.",
+      "Verify source snapshot identity at launch; no training was launched in this audit."
+    ],
+    "s3_action_inputs": "Only newly captured LIBERO issued-command traces are verified; old NPZ executed actions remain unusable.",
+    "encoder_python": "/workspace/owac/research/n04-v1/envs/encoder/bin/python",
+    "do_not_use": [
+      "future supervised actions as executed history",
+      "old NPZ state-roundtrip as frame correspondence",
+      "frame indices as seconds",
+      "pseudo-RAW as native CFA",
+      "small labeled extensions as formal training completion"
+    ]
+  },
+  "remaining_work": [
+    "Complete D1 factor/scale coverage; four bounded LIBERO extensions are not a formal training corpus.",
+    "Implement and validate paired RoboTwin execution-log/measurement extension collection; live geometry feasibility is verified.",
+    "Validate physical arrival/time-shift contracts on new data; original NPZ timestamps/calibration remain unavailable.",
+    "Refreeze metric thresholds from actual calibration before model experiments; retain official source-pool overlap and holdout limits.",
+    "Package and verify final working-tree source before any S1 run; S1 has not started."
+  ],
+  "notes": [
+    "S0 full-stage status is partial; core engineering fixes and bounded audits passed.",
+    "No model training, commits, pushes, baseline reruns or supervisor service changes.",
+    "Historical delivery, initial adverse tests, and first capture A are preserved; final geometry evidence comes from B."
+  ],
+  "status_scope": "Core causal contracts repaired and accepted; complete two-platform D1 collection/coverage and real-data temporal contract remain partial. This does not mean audit execution is incomplete.",
+  "independent_acceptance": {
+    "record": "research/experiments/2026-10-14_n04_v1_s0_independent_acceptance.md",
+    "original_delivery": "not_accepted_without_repairs",
+    "core_engineering_contracts": "passed_after_repairs",
+    "full_stage_status": "partial",
+    "tests_local": 349,
+    "tests_remote_snapshot_b": 348,
+    "contract_summary": {
+      "passed": 7,
+      "failed": 0,
+      "partial": 1
+    },
+    "d1_libero": {
+      "trajectories": 4,
+      "frames": 32,
+      "camera_frames": 64,
+      "continuous_state_error": 0.0,
+      "independent_ray_samples": 1600,
+      "matched_rays": 1519,
+      "max_depth_error_m": 2.15314157552271e-05,
+      "root": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b"
+    },
+    "robotwin": "live scene K/depth/segmentation/contact extracted; historical actions and paired training data remain unavailable",
+    "source_snapshot_b": "n04-s0-20261014T050411Z-357e5289dbbb",
+    "previous_handoff": "research/experiments/results/2026-10-14_n04_s0_independent_audit/handoff-before-independent-audit.json",
+    "s1_formal_training_ready": false,
+    "tests_remote_final": 349
+  },
+  "original_stage_record": "research/experiments/2026-10-14_n04_v1_s0.md",
+  "historical_metrics_reference": "research/experiments/results/2026-10-14_n04_s0_independent_audit/handoff-before-independent-audit.json"
+}

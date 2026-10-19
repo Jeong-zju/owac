@@ -1,0 +1,61 @@
+{
+  "name": "n04-small",
+  "comment": "N04 小尺寸配置：宽度 64、3 层、多尺度 3。缩放轴与 tiny 相同，只改规模。",
+  "input_mode": "rawvla_rgb3",
+  "measurement_size": [
+    64,
+    64
+  ],
+  "channels": 3,
+  "camera_ids": [
+    "head"
+  ],
+  "seed": 0,
+  "geometry": {
+    "feature_size": [
+      64,
+      64
+    ],
+    "pixel_stride": 1.0,
+    "max_flow": 8.0
+  },
+  "model": {
+    "name": "n04-small",
+    "width": 64,
+    "blocks": 3,
+    "scales": 3,
+    "scale_strides": [
+      1,
+      2,
+      4
+    ],
+    "coarse_stride": 4,
+    "hidden": 128,
+    "camera_embedding": 8,
+    "readout_tokens": 128,
+    "readout_dim": 256,
+    "predictor": "learned_proprio",
+    "use_previous_features": true,
+    "illumination_branch": true,
+    "change_branch": true,
+    "loss_weights": {
+      "location": 1.0,
+      "future_measurement": 0.5,
+      "change": 0.1,
+      "ego_warp": 0.1
+    }
+  },
+  "train": {
+    "sequence_length": 16,
+    "tbptt": 16,
+    "batch_size": 4,
+    "steps": 200,
+    "lr": 0.0003,
+    "grad_clip": 1.0,
+    "burn_in": 2,
+    "log_every": 20,
+    "seed": 0,
+    "device": "cpu",
+    "threads": 4
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "include": [
+    "runs/libero_D.json"
+  ],
+  "optim": {
+    "fused": true,
+    "steps": 2000,
+    "warmup_steps": 200
+  },
+  "monitor": {
+    "log_every": 1,
+    "checkpoint_every": 10,
+    "eval_every": 25,
+    "profile": false,
+    "initial_dev": true,
+    "checkpoint_first": true,
+    "save_best": true,
+    "keep_checkpoints": 2,
+    "eval_every_early": 5,
+    "early_until": 100
+  },
+  "performance": {
+    "rkn_checkpoint": false,
+    "cudnn_benchmark": true,
+    "preload_window": true,
+    "compile_banded": false,
+    "compile_readout": false,
+    "prefetch_windows": true,
+    "verified_joint_backward": true
+  },
+  "notes": "Codex-owned repair-v3 training. Fresh initialization; old v2 checkpoints are historical. First budget: 2000 optimizer updates, 200 warmup; preserve effective batch8 and all model/loss contracts. Reassess using fixed-dev trends.",
+  "owner": "Codex",
+  "data": {
+    "dev_windows": 2
+  }
+}

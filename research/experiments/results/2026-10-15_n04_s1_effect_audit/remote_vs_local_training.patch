@@ -1,0 +1,42 @@
+--- outputs/n04-v1/s1/remote-training-audit-20261015.py	2026-10-15 15:50:45.047936949 +0800
++++ src/owac/training/n04_full.py	2026-10-15 11:15:28.668751442 +0800
+@@ -1194,24 +1194,30 @@
+ 
+ 
+ def detect_stability(history: Sequence[dict[str, Any]], config: N04FullConfig) -> dict[str, Any]:
+-    """连续 ``stability_window`` 次 eval 的主指标相对改善 < 阈值即记趋稳。"""
++    """**最近** ``stability_window`` 次逐步相对改善全部 < 阈值即记趋稳。
++
++    只检查最近一段：扫全历史会把"早期大幅改善"永久当成未趋稳（初版实现即犯此错，S1
++    的 seed 17 因此拿到过 always-still_improving 的报告字段）。指标变差记为负改善，
++    同样满足 < 阈值——判据问的是"是否还在改善"，不是"是否在变好"。
++    """
+     window = int(config.training.stability_window)
+     threshold = float(config.training.stability_relative_threshold)
+     values = [entry.get("depth_norm_mae") for entry in history]
+     values = [value for value in values if value is not None]
+     if len(values) < window + 1:
+         return {"converged": False, "reason": "insufficient_evals", "evals": len(values)}
+-    for index in range(window, len(values)):
+-        previous, current = values[index - window], values[index]
+-        if previous == 0:
+-            continue
+-        if (previous - current) / abs(previous) >= threshold:
+-            return {"converged": False, "reason": "still_improving", "evals": len(values)}
++    recent = values[-(window + 1) :]
++    improvements = [
++        (recent[index] - recent[index + 1]) / abs(recent[index]) if recent[index] else 0.0
++        for index in range(window)
++    ]
++    converged = all(improvement < threshold for improvement in improvements)
+     return {
+-        "converged": True,
+-        "reason": "five_evaluations_below_threshold",
++        "converged": converged,
++        "reason": "recent_window_below_threshold" if converged else "still_improving",
+         "evals": len(values),
+         "threshold": threshold,
++        "last_improvements": [round(value, 5) for value in improvements],
+     }
+ 
+ 

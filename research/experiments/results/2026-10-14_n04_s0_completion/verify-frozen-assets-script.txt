@@ -1,0 +1,15 @@
+import hashlib,json,subprocess,time
+from pathlib import Path
+base=Path('/workspace/owac/research/n04-v1')
+old=json.loads((base/'source/n04-s0-20261014T055928Z-0ee7433d3e2a/research/experiments/results/2026-10-14_n04_s0_infra/frozen-assets.json').read_text())['files']
+files=old['report_dir']+old['frozen_protocol_dir']+list(old['weights'].values())
+result={'started':time.time(),'assets':[]}
+for entry in files:
+ h=hashlib.sha256()
+ with Path(entry['path']).open('rb') as f:
+  for chunk in iter(lambda:f.read(8*1024*1024),b''):h.update(chunk)
+ result['assets'].append({'path':entry['path'],'sha256':h.hexdigest(),'matches':h.hexdigest()==entry['sha256']})
+result['supervisor']=subprocess.run(['supervisorctl','status'],capture_output=True,text=True).stdout
+result['passed']=all(e['matches'] for e in result['assets']);result['finished']=time.time()
+(base/'manifests/completion-frozen-assets.json').write_text(json.dumps(result,indent=2)+'\n')
+print('frozen assets',len(files),result['passed'])

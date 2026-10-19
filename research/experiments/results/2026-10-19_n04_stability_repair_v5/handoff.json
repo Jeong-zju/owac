@@ -1,0 +1,181 @@
+{
+  "experiment": "2026-10-19_n04_stability_repair_v5",
+  "captured_utc": "2026-10-19T03:16:14.900565+00:00",
+  "implementation_version": "n04-v1.1-s2-stability-repair-v5",
+  "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+  "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019",
+  "engineering_repair_verified": true,
+  "formal_training_running": true,
+  "seed": 101,
+  "batch": 8,
+  "warmup": 200,
+  "budget_per_platform": 2000,
+  "runs": {
+    "libero": {
+      "run_dir": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101",
+      "pid": 782451,
+      "completed_at_snapshot": 11,
+      "durable_checkpoint": {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101/checkpoint-step0000010.pt",
+        "step": 10,
+        "bytes": 10831849401,
+        "encoder_keys": 653,
+        "backend_keys": 662,
+        "optimizer_groups": 7,
+        "scheduler": {
+          "base_lrs": [
+            0.0001,
+            0.0001,
+            0.0003,
+            0.0003,
+            1e-05,
+            1e-05,
+            1e-05
+          ],
+          "last_epoch": 10,
+          "_step_count": 11,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            5.500000000000001e-06,
+            5.500000000000001e-06,
+            1.6499999999999998e-05,
+            1.6499999999999998e-05,
+            5.5e-07,
+            5.5e-07,
+            5.5e-07
+          ],
+          "lr_lambdas": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "config_fingerprint": "58366cec1ac2c72a3d5e6c374e62039b33ad39bb7450b40fe7b0adbedf1a31ee",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5"
+      },
+      "objective_coverage": {
+        "action": {
+          "windows": 8,
+          "valid_items": 32
+        },
+        "correspondence": {
+          "windows": 8,
+          "valid_items": 256
+        },
+        "forecast": {
+          "windows": 8,
+          "valid_items": 1424
+        },
+        "representation": {
+          "windows": 8,
+          "valid_items": 8
+        }
+      },
+      "continuous_verification": "libero-continuous-recovery-verification.json",
+      "original_failed_verification": "libero-initial-strict-failure.json"
+    },
+    "robotwin": {
+      "run_dir": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101",
+      "pid": 782631,
+      "completed_at_snapshot": 10,
+      "durable_checkpoint": {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101/checkpoint-step0000010.pt",
+        "step": 10,
+        "bytes": 10831889401,
+        "encoder_keys": 653,
+        "backend_keys": 662,
+        "optimizer_groups": 7,
+        "scheduler": {
+          "base_lrs": [
+            0.0001,
+            0.0001,
+            0.0003,
+            0.0003,
+            1e-05,
+            1e-05,
+            1e-05
+          ],
+          "last_epoch": 10,
+          "_step_count": 11,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            5.500000000000001e-06,
+            5.500000000000001e-06,
+            1.6499999999999998e-05,
+            1.6499999999999998e-05,
+            5.5e-07,
+            5.5e-07,
+            5.5e-07
+          ],
+          "lr_lambdas": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "config_fingerprint": "406fcdd2beb62ff750d248de5bb151ea92620af0ce0f59ab3121d5c6e63d1eec",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5"
+      },
+      "objective_coverage": {
+        "action": {
+          "windows": 8,
+          "valid_items": 32
+        },
+        "correspondence": {
+          "windows": 8,
+          "valid_items": 256
+        },
+        "forecast": {
+          "windows": 8,
+          "valid_items": 2136
+        },
+        "representation": {
+          "windows": 8,
+          "valid_items": 8
+        }
+      },
+      "continuous_verification": "robotwin-continuous-recovery-verification.json",
+      "original_failed_verification": "robotwin-initial-strict-failure.json"
+    }
+  },
+  "verification": {
+    "local_passed": 467,
+    "local_skipped": 1,
+    "skip_reason": "local websockets unavailable",
+    "make_check": "passed",
+    "full_real_zero_update": "both passed, four objectives and joint_exact, optimizer updates zero",
+    "continuous": "eight canonical updates, strict independent deterministic GPU reload and next full update nine passed; formal resumes loaded nine and saved ten",
+    "dev_threshold_relaxed": false,
+    "dev_strict_threshold": 1e-05,
+    "source_model_files_unchanged_since_real_zero_check": true,
+    "changed_trainer_methods_only": [
+      "_fixed_dev_math",
+      "evaluate_dev_action_loss"
+    ]
+  },
+  "convergence_verified": false,
+  "method_validated": false,
+  "new_closed_loop_episodes": 0,
+  "entered_S3": false,
+  "gpu_utilization_issue_resolved": false,
+  "limits": [
+    "Early warmup, two fixed dev windows per platform, one seed.",
+    "Forecast versus persistence near 1; useful prediction/representation gain and robot effects not established.",
+    "Initial compiled dev strict failures preserved; deterministic native reference now explicit; out-of-cadence step8 used only for reload consistency.",
+    "Current update times include cold compilation/validation/saving; not steady-state speedup evidence."
+  ],
+  "monitor_url": "http://127.0.0.1:8090/",
+  "resume": "Supervised run_n04_codex.py --resume latest, same full config; never resume failed v4/prototype or silently fresh from empty run.",
+  "training_receipt_captured_utc": "2026-10-19T03:12:31.785320+00:00",
+  "dashboard_sampled_at_local": "2026-10-19 11:16:13 CST"
+}

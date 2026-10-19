@@ -1,0 +1,484 @@
+{
+  "correspondence_notes": [
+    "recorded `states` and per-frame `actions` present in the npz",
+    "simulator check not requested (--sim-probe); sidecar refused"
+  ],
+  "correspondence_verified": false,
+  "fields_to_collect": [
+    "executed_action",
+    "camera_intrinsics_k",
+    "camera_pose",
+    "robot_pose",
+    "depth_m",
+    "visibility_mask",
+    "contact_state"
+  ],
+  "limit_frames": 4,
+  "measurement_capture": {
+    "action_semantics": "trace issued_command is clipped normalized env.step command, not motor torque",
+    "arrays": {
+      "audit_ray_bound_m": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          50
+        ]
+      },
+      "audit_ray_error_m": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          50
+        ]
+      },
+      "audit_ray_matching_geom": {
+        "dtype": "bool",
+        "shape": [
+          8,
+          50
+        ]
+      },
+      "gt_T_W_from_C": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          2,
+          4,
+          4
+        ]
+      },
+      "gt_body_position_W": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          30,
+          3
+        ]
+      },
+      "gt_body_rotation_W": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          30,
+          9
+        ]
+      },
+      "gt_contact_distance_m_0000": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0001": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0002": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0003": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0004": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0005": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0006": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_distance_m_0007": {
+        "dtype": "float64",
+        "shape": [
+          32
+        ]
+      },
+      "gt_contact_geom_pairs_0000": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0001": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0002": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0003": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0004": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0005": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0006": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0007": {
+        "dtype": "int32",
+        "shape": [
+          32,
+          2
+        ]
+      },
+      "gt_depth_m": {
+        "dtype": "float32",
+        "shape": [
+          8,
+          2,
+          256,
+          256
+        ]
+      },
+      "gt_segmentation": {
+        "dtype": "int32",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          2
+        ]
+      },
+      "gt_visible_support": {
+        "dtype": "bool",
+        "shape": [
+          8,
+          2,
+          256,
+          256
+        ]
+      },
+      "online_K": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          2,
+          3,
+          3
+        ]
+      },
+      "online_qpos": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          24
+        ]
+      },
+      "online_qvel": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          22
+        ]
+      },
+      "online_rawvla_rgb3": {
+        "dtype": "uint8",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          3
+        ]
+      },
+      "online_sim_time_s": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ]
+      },
+      "reference_rgb": {
+        "dtype": "uint8",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          3
+        ]
+      }
+    },
+    "camera_coordinates": "T_W_from_C; C has x right, y down, z forward; K in original pixels",
+    "cameras": [
+      "agentview",
+      "robot0_eye_in_hand"
+    ],
+    "factor_coverage": "bounded replay of source commands; D1 factor coverage remains partial",
+    "frames": 8,
+    "geometry_audit": {
+      "bound": "8*float32_eps*z^2/near + 1e-6 m; at least 80% matching geometry IDs",
+      "matching_geom_samples": 375,
+      "max_depth_error_m": 2.15314157552271e-05,
+      "max_error_over_bound": 0.722850500791982,
+      "passed": true,
+      "samples": 400
+    },
+    "image_coordinates": "top-left; x right, y down; raw/depth/segmentation same grid; no resize",
+    "label_coverage": [
+      "depth_m",
+      "camera_pose",
+      "body_pose",
+      "segmentation",
+      "contact"
+    ],
+    "mode": "extension_set",
+    "native_cfa": false,
+    "noise_seed": 0,
+    "npz": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-1/n04ext_libero_variant_00.measurements.npz",
+    "processing": "MuJoCo RGB -> frozen RawVLA make_rawvla_observation; benchmark pseudo-RAW",
+    "renderer": {
+      "offsamples": 0,
+      "principal_point_pixel_index": [
+        127.5,
+        127.5
+      ]
+    },
+    "replay_max_errors": {
+      "audit_ray_bound_m": 0.0,
+      "audit_ray_error_m": 0.0,
+      "audit_ray_matching_geom": 0.0,
+      "gt_T_W_from_C": 0.0,
+      "gt_body_position_W": 0.0,
+      "gt_body_rotation_W": 0.0,
+      "gt_contact_distance_m": 0.0,
+      "gt_contact_geom_pairs": 0.0,
+      "gt_depth_m": 0.0,
+      "gt_segmentation": 0.0,
+      "gt_visible_support": 0.0,
+      "online_K": 0.0,
+      "online_qpos": 0.0,
+      "online_qvel": 0.0,
+      "online_rawvla_rgb3": 0.0,
+      "online_sim_time_s": 0.0,
+      "reference_rgb": 0.0
+    },
+    "replay_verified": true,
+    "representation": "rawvla_rgb3",
+    "schema": "n04-d1-libero-extension-v1",
+    "sha256": "31605a405bb093272abacd7a050aa39ee77fd1459736de12cc07bcd6ec8e14cd",
+    "source_correspondence_verified": false,
+    "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+    "source_trace": "n04ext_libero_variant_00.trace.json",
+    "supervision_policy": "gt_* only supervision; no external NPZ labels or source expert success inherited",
+    "time_semantics": "ideal instantaneous simulator sampling in sim seconds; no real exposure or arrival latency",
+    "trace_sha256": "2f4d4826d277e2cd835dd03b64276a1382c4ddf8eb355087e83db202e774595e"
+  },
+  "npz_probe": {
+    "actions_finite": true,
+    "actions_per_frame": 7,
+    "bytes": 99996890,
+    "cfa_like_keys": [],
+    "dtypes": {
+      "actions": "float32",
+      "agentview_raw_uint8": "uint8",
+      "dones": "uint8",
+      "metadata_json": "<U1687",
+      "rewards": "uint8",
+      "robot_states": "float32",
+      "states": "float64",
+      "wrist_raw_uint8": "uint8"
+    },
+    "exists": true,
+    "has_contact": false,
+    "has_depth": false,
+    "has_intrinsics": false,
+    "has_pose": false,
+    "has_visibility": false,
+    "image_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ],
+    "keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8",
+      "actions",
+      "states",
+      "robot_states",
+      "rewards",
+      "dones",
+      "metadata_json"
+    ],
+    "metadata": {
+      "agentview_stats": {
+        "clip_ratio": 0.09589307890163631,
+        "dark_ratio": 0.04101640596164493,
+        "mean_luma": 0.42884454131126404,
+        "median_luma": 0.47712865471839905,
+        "p01_luma": 0.0028047061059623957,
+        "p95_luma": 0.949489414691925
+      },
+      "agentview_table_flood": 0.1314729871201067,
+      "benchmark": "rawvla-bench-light-libero-v1-train-rerender-npz",
+      "dataset_name": "libero_10_no_noops_1.0.0_lerobot",
+      "demo_index": 11,
+      "demo_key": "demo_11",
+      "hdf5_path": "KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it_demo.hdf5",
+      "lighting_domain": "Over",
+      "lighting_ev": 1.69720948068016,
+      "lighting_rig": "common_agentview_key",
+      "lighting_sample_unit": 0.1314729871201067,
+      "lighting_scale": 3.2427312930002334,
+      "noise_seed": 2996972407,
+      "noops_filtered": 0,
+      "npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+      "num_frames": 254,
+      "paired_rgb_render_order": "default_lighting_rgb256_then_rotate_180",
+      "raw_shape": [
+        256,
+        256,
+        3
+      ],
+      "render_order": "env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize",
+      "replay_mode": "actions",
+      "representation": "raw",
+      "rgb_npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+      "sensor_saturation_ev": 0.5657364935600533,
+      "source_shape": [
+        256,
+        256,
+        3
+      ],
+      "suite": "libero_10",
+      "task_description": "turn on the stove and put the moka pot on it",
+      "task_id": 2,
+      "task_name": "KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it",
+      "trajectory_id": 111,
+      "variant_index": 0,
+      "wrist_stats": {
+        "clip_ratio": 0.16982077050396777,
+        "dark_ratio": 0.00016274039200910433,
+        "mean_luma": 0.5234823822975159,
+        "median_luma": 0.4886196553707123,
+        "p01_luma": 0.05185961350798607,
+        "p95_luma": 0.953123152256012
+      }
+    },
+    "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+    "robot_state_dim": 8,
+    "sha256": "c1246ff4ded823c8952316cff474e51af269663681d5895d881f26ae9d9b96d5",
+    "shapes": {
+      "actions": [
+        254,
+        7
+      ],
+      "agentview_raw_uint8": [
+        254,
+        256,
+        256,
+        3
+      ],
+      "dones": [
+        254
+      ],
+      "metadata_json": [],
+      "rewards": [
+        254
+      ],
+      "robot_states": [
+        254,
+        8
+      ],
+      "states": [
+        254,
+        47
+      ],
+      "wrist_raw_uint8": [
+        254,
+        256,
+        256,
+        3
+      ]
+    },
+    "state_dim": 47,
+    "three_channel_image_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ]
+  },
+  "output_dir": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-b/capture-1",
+  "platform": "libero",
+  "recomputability_rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+  "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000111/variant_00.npz",
+  "target": {
+    "mode": "extension_set",
+    "name": "n04ext_libero_variant_00.npz",
+    "reason": "correspondence not confirmed; original NPZ name is not reused"
+  },
+  "trace": {
+    "npz": "n04ext_libero_variant_00.npz",
+    "npz_sha256": "928ae85d1ba75bda24b55ea24e2ff17c8d07d363a4d61616f77c7b24f393d7b5",
+    "recomputability": {
+      "bit_exact_recomputable": true,
+      "controller_buffer_policy": "recorded_initial_conditions",
+      "evidence_level": "bit_exact_recomputable",
+      "missing": [],
+      "notes": [],
+      "rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+      "verification": {
+        "bit_exact": true,
+        "max_abs_diff": 0.0,
+        "method": "re-run the recorded recipe in a fresh environment and re-apply the recorded warm-start policy, then compare with the collected post_state",
+        "steps": 8,
+        "tolerance": 1e-12
+      },
+      "warmstart_mode": "zeroed_each_step"
+    },
+    "record": "n04ext_libero_variant_00.trace.json",
+    "steps": 8,
+    "warmstart_mode": "zeroed_each_step"
+  },
+  "trace_schema": "n04-d1-executed-trace-v1",
+  "trace_step_fields": [
+    "step_index",
+    "pre_state",
+    "issued_command",
+    "post_state"
+  ]
+}

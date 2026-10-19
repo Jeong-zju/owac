@@ -8,6 +8,8 @@
 
 2026-10-15：N02 已采用 **[v1.2 正式方案](../plans/N02_full_development_v1.2.md)**，当前 P2 完整实现待实施；[采用决议](../decisions/0015-n02-v1-2-route.md)规定 P3 充分训练与 P4 独立确认。[新版P2—P4自包含包](n02_v1_2/README.md)已备，seed1103、每个实际选中模型共100次闭环，双GPU新服务器和前端专家实时网页任务已内置；[v1.1 阶段包](n02_v1_1/README.md)与旧原型仅供历史回查，不再复制其中启动语。P1 独立验收未通过的事实及缺陷修复要求保留。
 
+2026-10-15 N04 正式开发采用 [v1.1 阶段交接](n04_v1_1/README.md)，当前为 [S2 完整模型](n04_v1_1/S2_full_encoder.md)待实施，随后 S3 单种子对照／针对性改进和 S4 每待评模型100次闭环；完整任务含前端专家实时监控，远端登录指令留空。S0／S1 已有记录和 v1.0 提示词均保留为历史；不重启旧 S0，不再逐项执行旧 S2—S7。
+
 三个 worktree 分别研究 N01、N02、N04，具有相同的部署基线、研究文档快照和提示词。每份提示词都可独立使用，包含核心更新规则、参考代码、文件职责、数据接口、训练顺序、π0.5 接入和验收实验。
 
 | 研究方向 | worktree | 分支 | 完整提示词 |
@@ -18,6 +20,8 @@
 | N01 自适应时空证据积分 | `/home/jeong/zeno/owac/worktrees/n01-evidence-integration` | `lzh/n01-evidence-integration` | [N01 提示词](DeepSeek_N01_implementation.md) |
 | N02 RAW 测量约束的动作表征 | `/home/jeong/zeno/owac/worktrees/n02-measurement-completion` | `lzh/n02-measurement-completion` | [v1.2 正式方案](../plans/N02_full_development_v1.2.md)；[P2完整包](n02_v1_2/P2_FULL_ENCODER.md)；[历史包](n02_v1_1/README.md) |
 | N04 自运动预测与变化分离 | `/home/jeong/zeno/owac/worktrees/n04-egomotion-separation` | `lzh/n04-egomotion-separation` | [N04 提示词](DeepSeek_N04_implementation.md) |
+
+| N04 RAW 证据预测与状态修订 | `/home/jeong/zeno/owac/worktrees/n04-egomotion-separation` | `lzh/n04-egomotion-separation` | [N04 v1.1 入口](n04_v1_1/README.md) |
 
 N02/N04 在对应 worktree 使用其当前有效提示词；N01 使用新v1.2完整包，P4/P5执行前读取届时实际前阶段报告。三个方向独立，不能用本页历史快照覆盖各 worktree 更新后的路线。
 
@@ -35,7 +39,7 @@ N02/N04 在对应 worktree 使用其当前有效提示词；N01 使用新v1.2完
 ```
 
 ```text
-请进入 /home/jeong/zeno/owac/worktrees/n04-egomotion-separation，完整读取 docs/prompts/DeepSeek_N04_implementation.md 和它要求阅读的仓库文档，然后按顺序实际实现 N04。先做可检查的运动传播，再做变化分解、训练和后端接入。
+请进入 /home/jeong/zeno/owac/worktrees/n04-egomotion-separation，完整读取 docs/plans/N04_full_development_v1.1.md、docs/prompts/n04_v1_1/S2_full_encoder.md 和其中要求的当前证据，实际完成 v1.1 S2 完整模型、官方数据整体训练和开发闭环；完成后交接，不自动进入 S3。
 ```
 
 提示词中的具体结构与超参数是首轮可检验方案；不是 roadmap 已确定的最终架构。N01、N02、N04 独立检验自己的假设，保留 F01—F12 的候选空间。

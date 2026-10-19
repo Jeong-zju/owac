@@ -1,0 +1,445 @@
+{
+  "correspondence_notes": [
+    "recorded `states` and per-frame `actions` present in the npz",
+    "simulator check not requested (--sim-probe); sidecar refused"
+  ],
+  "correspondence_verified": false,
+  "fields_to_collect": [
+    "executed_action",
+    "camera_intrinsics_k",
+    "camera_pose",
+    "robot_pose",
+    "depth_m",
+    "visibility_mask",
+    "contact_state"
+  ],
+  "limit_frames": 4,
+  "measurement_capture": {
+    "action_semantics": "trace issued_command is clipped normalized env.step command, not motor torque",
+    "arrays": {
+      "gt_T_W_from_C": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          2,
+          4,
+          4
+        ]
+      },
+      "gt_body_position_W": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          31,
+          3
+        ]
+      },
+      "gt_body_rotation_W": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          31,
+          9
+        ]
+      },
+      "gt_contact_distance_m_0000": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0001": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0002": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0003": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0004": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0005": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0006": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_distance_m_0007": {
+        "dtype": "float64",
+        "shape": [
+          24
+        ]
+      },
+      "gt_contact_geom_pairs_0000": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0001": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0002": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0003": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0004": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0005": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0006": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_contact_geom_pairs_0007": {
+        "dtype": "int32",
+        "shape": [
+          24,
+          2
+        ]
+      },
+      "gt_depth_m": {
+        "dtype": "float32",
+        "shape": [
+          8,
+          2,
+          256,
+          256
+        ]
+      },
+      "gt_segmentation": {
+        "dtype": "int32",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          2
+        ]
+      },
+      "gt_visible_support": {
+        "dtype": "bool",
+        "shape": [
+          8,
+          2,
+          256,
+          256
+        ]
+      },
+      "online_K": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          2,
+          3,
+          3
+        ]
+      },
+      "online_qpos": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          26
+        ]
+      },
+      "online_qvel": {
+        "dtype": "float64",
+        "shape": [
+          8,
+          24
+        ]
+      },
+      "online_rawvla_rgb3": {
+        "dtype": "uint8",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          3
+        ]
+      },
+      "online_sim_time_s": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ]
+      },
+      "reference_rgb": {
+        "dtype": "uint8",
+        "shape": [
+          8,
+          2,
+          256,
+          256,
+          3
+        ]
+      }
+    },
+    "camera_coordinates": "T_W_from_C; C has x right, y down, z forward; K in original pixels",
+    "cameras": [
+      "agentview",
+      "robot0_eye_in_hand"
+    ],
+    "factor_coverage": "bounded replay of source commands; D1 factor coverage remains partial",
+    "frames": 8,
+    "image_coordinates": "top-left; x right, y down; raw/depth/segmentation same grid; no resize",
+    "label_coverage": [
+      "depth_m",
+      "camera_pose",
+      "body_pose",
+      "segmentation",
+      "contact"
+    ],
+    "mode": "extension_set",
+    "native_cfa": false,
+    "noise_seed": 0,
+    "npz": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-3/n04ext_libero_variant_00.measurements.npz",
+    "processing": "MuJoCo RGB -> frozen RawVLA make_rawvla_observation; benchmark pseudo-RAW",
+    "replay_max_errors": {
+      "gt_T_W_from_C": 0.0,
+      "gt_body_position_W": 0.0,
+      "gt_body_rotation_W": 0.0,
+      "gt_contact_distance_m": 0.0,
+      "gt_contact_geom_pairs": 0.0,
+      "gt_depth_m": 0.0,
+      "gt_segmentation": 0.0,
+      "gt_visible_support": 0.0,
+      "online_K": 0.0,
+      "online_qpos": 0.0,
+      "online_qvel": 0.0,
+      "online_rawvla_rgb3": 0.0,
+      "online_sim_time_s": 0.0,
+      "reference_rgb": 0.0
+    },
+    "replay_verified": true,
+    "representation": "rawvla_rgb3",
+    "schema": "n04-d1-libero-extension-v1",
+    "sha256": "49ca79020c440a6b679e4d1bdd35b8551dcba6f59db62ad9d91d2eed3d8682ba",
+    "source_correspondence_verified": false,
+    "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+    "source_trace": "n04ext_libero_variant_00.trace.json",
+    "supervision_policy": "gt_* only supervision; no external NPZ labels or source expert success inherited",
+    "time_semantics": "ideal instantaneous simulator sampling in sim seconds; no real exposure or arrival latency",
+    "trace_sha256": "399ffc361fd7210b7c5ec492672f020e817546fac872ce12c6928e8cd4614eae"
+  },
+  "npz_probe": {
+    "actions_finite": true,
+    "actions_per_frame": 7,
+    "bytes": 87800668,
+    "cfa_like_keys": [],
+    "dtypes": {
+      "actions": "float32",
+      "agentview_raw_uint8": "uint8",
+      "dones": "uint8",
+      "metadata_json": "<U1666",
+      "rewards": "uint8",
+      "robot_states": "float32",
+      "states": "float64",
+      "wrist_raw_uint8": "uint8"
+    },
+    "exists": true,
+    "has_contact": false,
+    "has_depth": false,
+    "has_intrinsics": false,
+    "has_pose": false,
+    "has_visibility": false,
+    "image_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ],
+    "keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8",
+      "actions",
+      "states",
+      "robot_states",
+      "rewards",
+      "dones",
+      "metadata_json"
+    ],
+    "metadata": {
+      "agentview_stats": {
+        "clip_ratio": 0.0,
+        "dark_ratio": 0.61812225478647,
+        "mean_luma": 0.021257376298308372,
+        "median_luma": 0.024100393056869507,
+        "p01_luma": 0.0,
+        "p95_luma": 0.03924078121781349
+      },
+      "agentview_table_flood": 0.0,
+      "benchmark": "rawvla-bench-light-libero-v1-train-rerender-npz",
+      "dataset_name": "libero_10_no_noops_1.0.0_lerobot",
+      "demo_index": 10,
+      "demo_key": "demo_10",
+      "hdf5_path": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it_demo.hdf5",
+      "lighting_domain": "Low",
+      "lighting_ev": -3.4542167419263636,
+      "lighting_rig": "common_agentview_key",
+      "lighting_sample_unit": 0.36385550538242417,
+      "lighting_scale": 0.091238292537545,
+      "noise_seed": 2392049797,
+      "noops_filtered": 0,
+      "npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+      "num_frames": 223,
+      "paired_rgb_render_order": "default_lighting_rgb256_then_rotate_180",
+      "raw_shape": [
+        256,
+        256,
+        3
+      ],
+      "render_order": "env_lighting_then_rgb256_then_fixed_unprocess_noise_then_policy_resize",
+      "replay_mode": "actions",
+      "representation": "raw",
+      "rgb_npz_relpath": "libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+      "sensor_saturation_ev": 0.0,
+      "source_shape": [
+        256,
+        256,
+        3
+      ],
+      "suite": "libero_10",
+      "task_description": "put the black bowl in the bottom drawer of the cabinet and close it",
+      "task_id": 3,
+      "task_name": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+      "trajectory_id": 160,
+      "variant_index": 0,
+      "wrist_stats": {
+        "clip_ratio": 0.0,
+        "dark_ratio": 0.37382616804319646,
+        "mean_luma": 0.027303915470838547,
+        "median_luma": 0.033631373196840286,
+        "p01_luma": 0.0,
+        "p95_luma": 0.04285882040858269
+      }
+    },
+    "path": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+    "robot_state_dim": 8,
+    "sha256": "33d9fe3bb497f9b45bfbd66f7494bbbf7bbbbc7c9b2f7a0b9fc0a5d68d790fb1",
+    "shapes": {
+      "actions": [
+        223,
+        7
+      ],
+      "agentview_raw_uint8": [
+        223,
+        256,
+        256,
+        3
+      ],
+      "dones": [
+        223
+      ],
+      "metadata_json": [],
+      "rewards": [
+        223
+      ],
+      "robot_states": [
+        223,
+        8
+      ],
+      "states": [
+        223,
+        51
+      ],
+      "wrist_raw_uint8": [
+        223,
+        256,
+        256,
+        3
+      ]
+    },
+    "state_dim": 51,
+    "three_channel_image_keys": [
+      "agentview_raw_uint8",
+      "wrist_raw_uint8"
+    ]
+  },
+  "output_dir": "/workspace/owac/research/n04-v1/runs/s0/independent-20261014-a/capture-3",
+  "platform": "libero",
+  "recomputability_rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+  "source_npz": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw/libero_10_no_noops_1.0.0_lerobot/episode_000160/variant_00.npz",
+  "target": {
+    "mode": "extension_set",
+    "name": "n04ext_libero_variant_00.npz",
+    "reason": "correspondence not confirmed; original NPZ name is not reused"
+  },
+  "trace": {
+    "npz": "n04ext_libero_variant_00.npz",
+    "npz_sha256": "2f882b898668c9719a185f15db7b9383c5450442d4f8fe1d23eba3bbae415b11",
+    "recomputability": {
+      "bit_exact_recomputable": true,
+      "controller_buffer_policy": "recorded_initial_conditions",
+      "evidence_level": "bit_exact_recomputable",
+      "missing": [],
+      "notes": [],
+      "rule": "bit-exact recomputation of 'executed action -> state transition' requires all of: (1) pre_state, post_state and issued_command on every step; (2) a controlled solver warm-start: warmstart_mode in {disabled_by_flag, zeroed_each_step} or warmstart_mode=saved_before_step together with the recorded qacc_warmstart_before array; (3) an explicit controller/observable buffer policy: recorded_initial_conditions (the recipe fixes them from a fresh, reset environment) or declared_not_recomputable; (4) the ordered replay recipe; and (5) a passing verification replay (verification.bit_exact == true). Missing any of (1)-(4) leaves only phase-level evidence.",
+      "verification": {
+        "bit_exact": true,
+        "max_abs_diff": 0.0,
+        "method": "re-run the recorded recipe in a fresh environment and re-apply the recorded warm-start policy, then compare with the collected post_state",
+        "steps": 8,
+        "tolerance": 1e-12
+      },
+      "warmstart_mode": "saved_before_step"
+    },
+    "record": "n04ext_libero_variant_00.trace.json",
+    "steps": 8,
+    "warmstart_mode": "saved_before_step"
+  },
+  "trace_schema": "n04-d1-executed-trace-v1",
+  "trace_step_fields": [
+    "step_index",
+    "pre_state",
+    "issued_command",
+    "post_state"
+  ]
+}

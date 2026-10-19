@@ -1,0 +1,12 @@
+{
+  "include": [
+    "runs/libero_D.json"
+  ],
+  "device": "cuda:0",
+  "notes": "S2 正式训练启动（LIBERO D seed101）。只覆盖设备；窗口/监督点/有效 batch/损失权重/anchors 全为规格默认，不启用 gradient_checkpointing（重算会再次调用有状态编码器）。 checkpoint_every=100：实测步时 79—122 s，5k 才存盘会让可视化/闭环等到数天后；改 100 步一存是调度选择，不表示效果门槛。",
+  "monitor": {
+    "log_every": 1,
+    "checkpoint_every": 100,
+    "eval_every": 500
+  }
+}
