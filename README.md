@@ -1,5 +1,24 @@
 # OWAC
 
+2026-10-19 **闭环失败有限诊断完成，训练保持停止。** 同四个Normal场景作者预训练策略4/4成功、RAW/RGB均0/4；相同3个Normal专家观测上的完整采样MAE7分别为作者0.0618、RAW0.6149、RGB0.3837。模型在专家观测上已明显偏离，优先查视觉—动作适配；不能仅归因于闭环误差累积。见[诊断与证据](research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md)。
+
+2026-10-19 **按用户最新要求停止RAW/RGB训练与后续队列。** 已禁用自动启动并保留检查点、原始日志及0/12配对小测结果；只有用户重新授权后才可恢复。见[停止记录](research/experiments/n01_v1_2/P3_training_stopped_20261019.md)。下方“已恢复训练”为本次停止前的历史。
+
+2026-10-19 **20k附近RAW/RGB检查点的配对闭环小测完成：两臂各0/12。** 实际权重20,800/21,100步，同一组12场、共24次执行；四个LIBERO suite，ExtremeLow/Low/Normal各4场，没有未完成。两路训练均已恢复并实际推进，监控页显示成功率及正常光同场景回放。见[小测记录](research/experiments/n01_v1_2/P3_20k_closed_loop_probe.md)与[实时监控](http://127.0.0.1:18080/)。这是开发小测，训练重合未知，不作留出泛化或机制优劣结论。
+
+2026-10-17 **按用户最新授权启动完整 N01 训练。** 两张 PRO 6000 分别负责 RAW/RGB，当前 LIBERO、随后 RoboTwin；每 run 50k 步预算，Base 仍留至 P4。新训练使用独立冻结源码与数据清单，不续旧有缺陷的权重。[简洁实时监控](http://127.0.0.1:18080/)只看状态、速度、验证误差和 GPU；[启动、加速与实测记录](research/experiments/n01_v1_2/P3_training_launch.md)。下文“代码补全后暂停”是本次授权前的状态，旧闭环留出撤回仍有效。
+
+2026-10-17 **N01 v1.2 P3代码已补全，训练按用户要求保持暂停。** 完整SEA-RAFT、局部GLS/有界BOCPD、来源重算、统一原生输入与匹配后端适配已接入；八份配置及两平台运行接点齐全。新模型未训练，旧闭环“留出成立”仍撤回，不能标记P3研究完成。当前入口：[代码补全与无更新验收](research/experiments/n01_v1_2/P3_code_completion.md)。下方旧实现缺口及数值保留为历史。
+
+
+2026-10-16 **N01 v1.2 P3 独立验收未通过，主体队列已保全并暂停，禁止按原队列自动续训。** 已修补断点/RNG、重复测量证据、reset 后验、参考有效性与留出筛选身份错误；旧“0/96 留出成立”撤回。运动对应/真实支持拟合、训练与服务视野及后端适配仍缺；Base 按既有决定留至 P4。详见[独立验收与修补记录](research/experiments/n01_v1_2/P3_independent_acceptance.md)。下方 10-15 的“P3待实施”及 DeepSeek 交付记录为历史。
+
+2026-10-15 N01更换至新服务器`154.59.156.21:34302`，两张RTX PRO 6000 Blackwell Server Edition可并行RAW/RGB训练及验证，每轮开发闭环仍总100次。v1.2三份完整提示词与控制台已同步；实际环境/源码/数据恢复及验证见[新机部署记录](docs/N01_new_server_deployment_2026-10-15.md)。本次迁移未启动P3主体训练。
+
+2026-10-15 **N01更新为v1.2：面向VLA的RAW时空证据编码。** [完整Markdown](docs/N01_full_development_plan_2026-10-15_v1.2.md)、[HTML阅读版](docs/N01_full_development_plan_2026-10-15_v1.2.html)、[DeepSeek完整执行包](docs/prompts/n01_v1_2/README.md)。当前P3待实施；核心为同源RAW/RGB×Base/N01四臂，每平台/方法单种子101，共8个主体训练run；P4核心53,000条。旧v1.1三臂全RAW矩阵为历史，来源撤回服务于信息利用和行动结果。本次同步方案、控制台和提示词，未训练新模型。
+
+2026-10-15 **N01 正式方案更新至 v1.1。** [完整方案](docs/N01_full_development_plan_2026-10-15_v1.1.md)（[HTML 阅读版](docs/N01_full_development_plan_2026-10-15_v1.1.html)）采用“P3 完整模型、真实 RawVLA-Bench 充分训练与开发闭环 → P4 冻结全量验证 → P5 迁移扩展”。来源撤回、时空支持、成熟融合、32 帧有界回放、期限读出及 π0.5 训练整体纳入 P3；真实案例可视化与主链理论为共同交付。v1.0/P2 历史和负结果保留，旧 P3—P8 提示词不再执行。本次只更新方案与入口，未进入 P3、未启动训练或评测。见[正式决定](docs/decisions/0014-n01-v1-1-full-model-route.md)。
+
 2026-10-15 **N01 v1.0 P2 独立验收：未完全通过，代码已修补，未续训。** 新增 10 项反例在原版本全部失败、修补后全部通过；本地 721 passed / 2 CUDA skipped、服务器 375 passed / 0 skipped。修正实际停止点/最终低 LR 窗口、风险分档、遮挡与静态误拒分母、来源/噪声块身份及恢复校准 hash。现有六组仅 CFA seed 307 满足全部平台条件；12 px 新合成诊断误差约 3.3–11.6 px，风险覆盖明显失准。原训练及后端接入证据保留，暂不建议直接按原配方续到 300k；遵照用户要求，本轮正式训练更新为 0。见[独立验收报告](research/experiments/n01_full/P2_acceptance_report.md)。下方 2026-10-14 P2 完成断言为修补前历史，以本次复核为准。
 
 2026-10-14 **N01 v1.0 P2（RAW 运动对应与噪声模型）交付并停在交接点**：新增固定 SEA-RAFT（vendor commit `9137517`，BSD-3-Clause；CFA 4/8 与 pseudo-RAW 3/6 入口，关闭 torchvision ImageNet 自动加载与 `/255`）、解析真值合成运动生成器（平移/旋转/分层遮挡/局部非刚性/重复纹理/曝光/运动模糊 + 亚像素真值）、`Var(y|mu)=a·max(mu,0)+b` + 共享黑电平块噪声与可追溯校准 JSON、`DbsrFeatureAdapter`（显式三通道 stem、16×16 带 mask 池化、共享 `512→2048` 读出、P3 支持硬关闭）与 `n01_full_policy_preflight --mode raw_adapter`、`training/evaluation.n01_motion`（作者迭代损失、fit-check/两档 LR 选择/平台判据/完整恢复、四臂评测与风险分档）。本地全仓 **711 passed / 2 skipped**、`make check` 通过、独立验收对手 **53 项反例 + 16 变异矩阵**；修复 D1（平台判据把恒定/恶化曲线判成平台）、D2（噪声对角分支漏共享块方差）、A（strict `weights_only` 拒绝含 NumPy RNG 的本项目 checkpoint）、B（预检窗口计数调用了不存在的方法）、C/D（estimator 与评测各有多处 CPU/CUDA 设备混用）与 E（预检 stem 配对规则），另有 3.10/3.11/3.12 跨版本 AST 摘要修复。远程 CFA 第一段三种子全部结束：101 `validation_plateau`@82k（val EPE 0.069852）、211 `budget_exhausted`@100k、307 `validation_plateau`@99k（经历 62 分钟实例失联，从 13k 精确续训）；**pseudo-RAW（rgb3）正式臂三种子**（各臂自己的两档 LR 搜索 winner `lr=5e-5/iters=4`）也全部 `validation_plateau`：85k/81k/85k，val EPE best 0.0394/0.0401/0.0405。GPU 评测：CFA test EPE 0.0869/0.0893/0.0950、rgb3 0.0455/0.0426/0.0419（`no_alignment` 1.9213 / 0.9845、`old_simplified` 2.9852 / 8.7080、`oracle` 0.0 单列；两臂输入体制不同，不直接比较），CFA p50 6.79–6.84 ms、rgb3 p50 6.76–7.80 ms，峰值 103.7–108.4 MB。两平台 `raw_adapter` 真实预检（**正式 rgb3 模型** + identity 对照 + 故意错配诊断）通过。P2 GPU 小时合计约 **9.9**。**未进入 P3/P4，无 N01 机制增量或闭环结论**。见 [P2 阶段报告](research/experiments/n01_full/P2_report.md)与[收据](research/experiments/results/n01_full/P2/receipt.json)。
@@ -38,6 +57,8 @@ GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)
 
 ## 先读这些文件
 
+- [N01 v1.2 DeepSeek执行提示词](docs/prompts/n01_v1_2/README.md)：P3/P4/P5每阶段一份完整包，当前使用P3；包含远程训练与实时监控页的前端专家任务，尚未启动新训练。
+- [N01 当前正式方案 v1.2](docs/N01_full_development_plan_2026-10-15_v1.2.md)：完整模型、真实数据、理论、可视化、充分训练和新阶段；[历史方案 v1.0](docs/N01_full_development_plan_2026-10-14_v1.0.md)保留供追溯。
 - [学术研究方案](docs/OWAC_academic_research_proposal_2026-10-09.md)：三个核心机制、后端接入与实验设计。
 - [当前 research roadmap v6](docs/OWAC_research_roadmap_2026-10-08.md)：研究目标、12 个候选家族及证据要求。
 - [RawVLA-Bench 冻结记录](docs/decisions/0012-rawvla-pi05-protocol-freeze.md)、[当前路线](docs/decisions/0011-rawvla-bench-main-route.md)：已跑通的部署、现成 π0.5 与固定评测协议。

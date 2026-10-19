@@ -1,0 +1,667 @@
+{
+  "schema": "n01-v12-p3-code-completion-v1",
+  "verified_at_utc": "2026-10-16T17:33:50.276935+00:00",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n01-evidence-integration",
+  "branch": "lzh/n01-evidence-integration",
+  "head": "d3dec908d78d0a86a761abc985b83113d836c8cf",
+  "code_scope_complete": true,
+  "research_stage_complete": false,
+  "formal_training_started": false,
+  "diagnostic_training_started": false,
+  "optimizer_updates_this_request": 0,
+  "source": "working tree including preserved DeepSeek changes; see P3_worktree_diff.txt",
+  "local_checks": {
+    "make_check": "passed",
+    "pytest_passed": 853,
+    "pytest_skipped": 25,
+    "skips": {
+      "optimizer_updates_prohibited": 19,
+      "local_cuda_unavailable": 3,
+      "local_author_isp_checkout_unavailable": 3
+    }
+  },
+  "remote_controls": {
+    "passed": 31,
+    "skipped": 0,
+    "includes_live_author_isp_cross_checks": 4
+  },
+  "real_network_probes": [
+    {
+      "arm": "raw_n01",
+      "platform": "libero",
+      "raw_field_shape": {
+        "agentview": [
+          1,
+          32,
+          3,
+          256,
+          256
+        ],
+        "wrist": [
+          1,
+          32,
+          3,
+          256,
+          256
+        ]
+      },
+      "unique_frames": {
+        "agentview": 32,
+        "wrist": 32
+      },
+      "optimizer_updates": 0,
+      "forward_only": true,
+      "action_target_mask_count": 10,
+      "loss": {
+        "train_action_loss": 0.40144413709640503,
+        "encoder_grad_abs_sum": 0,
+        "bridge_grad_abs_sum": 0,
+        "backend_grad_abs_sum": 0,
+        "backend_is_frozen": true,
+        "visual_tokens_shape": [
+          1,
+          512,
+          512
+        ],
+        "visual_token_mask_valid": 512
+      },
+      "support": {
+        "agentview": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 93966340,
+            "arrivals": 32,
+            "motion_seconds": 0.988187394104898,
+            "support_seconds": 0.2189222862944007,
+            "content_seconds": 0.24240018799901009,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "wrist": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 93966340,
+            "arrivals": 32,
+            "motion_seconds": 0.6895716032013297,
+            "support_seconds": 0.10748800775036216,
+            "content_seconds": 0.2402099398896098,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0,
+      "motion_auxiliary": null,
+      "compute_forward_backward_seconds": 2.849601046182215,
+      "peak_gpu_allocated_bytes": 43689604608,
+      "receipt_file": "libero-raw_n01-forward32.json"
+    },
+    {
+      "arm": "rgb_n01",
+      "platform": "robotwin2",
+      "raw_field_shape": {
+        "head_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ],
+        "left_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ],
+        "right_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ]
+      },
+      "unique_frames": {
+        "head_camera": 32,
+        "left_camera": 32,
+        "right_camera": 32
+      },
+      "optimizer_updates": 0,
+      "forward_only": true,
+      "action_target_mask_count": 50,
+      "loss": {
+        "train_action_loss": 3.6810693740844727,
+        "encoder_grad_abs_sum": 0,
+        "bridge_grad_abs_sum": 0,
+        "backend_grad_abs_sum": 0,
+        "backend_is_frozen": true,
+        "visual_tokens_shape": [
+          1,
+          768,
+          512
+        ],
+        "visual_token_mask_valid": 768
+      },
+      "support": {
+        "head_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 1.0494207730516791,
+            "support_seconds": 0.20306782983243465,
+            "content_seconds": 0.2822306212037802,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "left_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 0.8309182273223996,
+            "support_seconds": 0.12087428104132414,
+            "content_seconds": 0.2803661357611418,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "right_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 0.8940864447504282,
+            "support_seconds": 0.1436700988560915,
+            "content_seconds": 0.2806928916834295,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0,
+      "motion_auxiliary": null,
+      "compute_forward_backward_seconds": 4.573869042098522,
+      "peak_gpu_allocated_bytes": 55073363968,
+      "receipt_file": "robotwin2-rgb_n01-forward32.json"
+    },
+    {
+      "arm": "raw_n01",
+      "platform": "libero",
+      "raw_field_shape": {
+        "agentview": [
+          1,
+          2,
+          3,
+          256,
+          256
+        ],
+        "wrist": [
+          1,
+          2,
+          3,
+          256,
+          256
+        ]
+      },
+      "unique_frames": {
+        "agentview": 2,
+        "wrist": 2
+      },
+      "optimizer_updates": 0,
+      "forward_only": false,
+      "action_target_mask_count": 10,
+      "loss": {
+        "train_action_loss": 0.40144413709640503,
+        "encoder_grad_abs_sum": 4756.276471614838,
+        "bridge_grad_abs_sum": 3774.108050983399,
+        "backend_grad_abs_sum": 0,
+        "backend_is_frozen": true,
+        "visual_tokens_shape": [
+          1,
+          512,
+          512
+        ],
+        "visual_token_mask_valid": 512
+      },
+      "support": {
+        "agentview": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 2,
+          "stage_cost": {
+            "state_bytes": 60880870,
+            "arrivals": 2,
+            "motion_seconds": 0.23429270274937153,
+            "support_seconds": 0.07892284309491515,
+            "content_seconds": 0.023027009330689907,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 256,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "wrist": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 2,
+          "stage_cost": {
+            "state_bytes": 60880870,
+            "arrivals": 2,
+            "motion_seconds": 0.03502391604706645,
+            "support_seconds": 0.009801547043025494,
+            "content_seconds": 0.01584790414199233,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 256,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0.0,
+      "motion_auxiliary": {
+        "kind": "known_spatial_transform_on_real_own_domain_frame",
+        "loss": 167.99490356445312,
+        "grad_abs_sum": 961815.0013771264,
+        "optimizer_updates": 0
+      },
+      "compute_forward_backward_seconds": 0.9423866840079427,
+      "peak_gpu_allocated_bytes": 11916064256,
+      "receipt_file": "libero-raw_n01-backward2-warmup.json"
+    },
+    {
+      "arm": "rgb_n01",
+      "platform": "robotwin2",
+      "raw_field_shape": {
+        "head_camera": [
+          1,
+          2,
+          3,
+          240,
+          320
+        ],
+        "left_camera": [
+          1,
+          2,
+          3,
+          240,
+          320
+        ],
+        "right_camera": [
+          1,
+          2,
+          3,
+          240,
+          320
+        ]
+      },
+      "unique_frames": {
+        "head_camera": 2,
+        "left_camera": 2,
+        "right_camera": 2
+      },
+      "optimizer_updates": 0,
+      "forward_only": false,
+      "action_target_mask_count": 50,
+      "loss": {
+        "train_action_loss": 3.6810693740844727,
+        "encoder_grad_abs_sum": 16792.23827457428,
+        "bridge_grad_abs_sum": 13526.641870111227,
+        "backend_grad_abs_sum": 71487.80112600327,
+        "backend_is_frozen": false,
+        "visual_tokens_shape": [
+          1,
+          768,
+          512
+        ],
+        "visual_token_mask_valid": 768
+      },
+      "support": {
+        "head_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 2,
+          "stage_cost": {
+            "state_bytes": 71243750,
+            "arrivals": 2,
+            "motion_seconds": 0.22787547996267676,
+            "support_seconds": 0.062227184884250164,
+            "content_seconds": 0.023509320802986622,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 256,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "left_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 2,
+          "stage_cost": {
+            "state_bytes": 71243750,
+            "arrivals": 2,
+            "motion_seconds": 0.0353429289534688,
+            "support_seconds": 0.010193580761551857,
+            "content_seconds": 0.018451685085892677,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 256,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "right_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 2,
+          "stage_cost": {
+            "state_bytes": 71243750,
+            "arrivals": 2,
+            "motion_seconds": 0.037336439825594425,
+            "support_seconds": 0.01021442236378789,
+            "content_seconds": 0.018401533365249634,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 256,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0.0,
+      "motion_auxiliary": {
+        "kind": "known_spatial_transform_on_real_own_domain_frame",
+        "loss": 3938.17578125,
+        "grad_abs_sum": 1931188.111570023,
+        "optimizer_updates": 0
+      },
+      "compute_forward_backward_seconds": 1.1175247533246875,
+      "peak_gpu_allocated_bytes": 15396350976,
+      "receipt_file": "robotwin2-rgb_n01-backward2-adaptation.json"
+    },
+    {
+      "arm": "raw_n01",
+      "platform": "libero",
+      "raw_field_shape": {
+        "agentview": [
+          1,
+          32,
+          3,
+          256,
+          256
+        ],
+        "wrist": [
+          1,
+          32,
+          3,
+          256,
+          256
+        ]
+      },
+      "unique_frames": {
+        "agentview": 32,
+        "wrist": 32
+      },
+      "optimizer_updates": 0,
+      "forward_only": false,
+      "action_target_mask_count": 10,
+      "loss": {
+        "train_action_loss": 0.40144413709640503,
+        "encoder_grad_abs_sum": 4756.276471614838,
+        "bridge_grad_abs_sum": 3774.108050983399,
+        "backend_grad_abs_sum": 0,
+        "backend_is_frozen": true,
+        "visual_tokens_shape": [
+          1,
+          512,
+          512
+        ],
+        "visual_token_mask_valid": 512
+      },
+      "support": {
+        "agentview": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 93966340,
+            "arrivals": 32,
+            "motion_seconds": 1.4647021610289812,
+            "support_seconds": 0.21324167819693685,
+            "content_seconds": 0.2475009448826313,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "wrist": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 93966340,
+            "arrivals": 32,
+            "motion_seconds": 1.2627593539655209,
+            "support_seconds": 0.13085811771452427,
+            "content_seconds": 0.24396991496905684,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0.0,
+      "motion_auxiliary": null,
+      "compute_forward_backward_seconds": 8.214804260060191,
+      "peak_gpu_allocated_bytes": 51226080256,
+      "receipt_file": "libero-raw_n01-backward32-warmup.json"
+    },
+    {
+      "arm": "rgb_n01",
+      "platform": "robotwin2",
+      "raw_field_shape": {
+        "head_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ],
+        "left_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ],
+        "right_camera": [
+          1,
+          32,
+          3,
+          240,
+          320
+        ]
+      },
+      "unique_frames": {
+        "head_camera": 32,
+        "left_camera": 32,
+        "right_camera": 32
+      },
+      "optimizer_updates": 0,
+      "forward_only": false,
+      "action_target_mask_count": 50,
+      "loss": {
+        "train_action_loss": 3.6810693740844727,
+        "encoder_grad_abs_sum": 16792.238289117813,
+        "bridge_grad_abs_sum": 13526.641870111227,
+        "backend_grad_abs_sum": 71487.80112600327,
+        "backend_is_frozen": false,
+        "visual_tokens_shape": [
+          1,
+          768,
+          512
+        ],
+        "visual_token_mask_valid": 768
+      },
+      "support": {
+        "head_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 1.6592299942858517,
+            "support_seconds": 0.20875612692907453,
+            "content_seconds": 0.28635020507499576,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "left_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 1.4589871200732887,
+            "support_seconds": 0.1427870448678732,
+            "content_seconds": 0.28430639021098614,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        },
+        "right_camera": {
+          "applied": true,
+          "status": "applied_v1_2",
+          "window_frames": 32,
+          "stage_cost": {
+            "state_bytes": 109735940,
+            "arrivals": 32,
+            "motion_seconds": 1.3693359456956387,
+            "support_seconds": 0.14191068336367607,
+            "content_seconds": 0.28457039315253496,
+            "stage_timing_kind": "synchronized_wall"
+          },
+          "state_counts": {
+            "invalid": 7936,
+            "accepted": 0,
+            "deferred": 0,
+            "retracted": 0
+          }
+        }
+      },
+      "motion_gradient_from_native_action_loss": 0.0,
+      "motion_auxiliary": null,
+      "compute_forward_backward_seconds": 13.72215582197532,
+      "peak_gpu_allocated_bytes": 60247862784,
+      "receipt_file": "robotwin2-rgb_n01-backward32-adaptation.json"
+    }
+  ],
+  "memory_fix": {
+    "failure_before": "native RoboTwin 32-frame backward CUDA OOM at about 90.6 GiB process usage",
+    "implementation": "complete camera activation checkpoint plus detached fixed channel-mean diagnostics; same backbone/fusion/window/resolution",
+    "parity": "full fusion output, mean weights and parameter gradients matched in independent no-update control",
+    "before_libero_peak_gib": 68.02914333343506,
+    "after_libero_peak_gib": 47.70800495147705,
+    "after_robotwin_peak_gib": 56.11019468307495
+  },
+  "training_state": {
+    "programs": "owac-n01-v12-p3-raw              STOPPED   Not started\nowac-n01-v12-p3-rgb              STOPPED   Not started\n",
+    "configuration": {
+      "owac-n01-v12-p3-raw": {
+        "path": "/etc/supervisor/conf.d/owac-n01-v12-p3-raw.conf",
+        "autostart": "false",
+        "autorestart": "false"
+      },
+      "owac-n01-v12-p3-rgb": {
+        "path": "/etc/supervisor/conf.d/owac-n01-v12-p3-rgb.conf",
+        "autostart": "false",
+        "autorestart": "false"
+      }
+    },
+    "global_hold_present": true,
+    "prior_run_hold_present": true,
+    "gpu_at_end": "0, 0 MiB\n1, 0 MiB\n",
+    "new_supervisor_template_registered": false
+  },
+  "boundaries": [
+    "no new model trained or checkpoint saved by verification",
+    "random untrained motion was rejected by risk/support; native action-to-motion gradient is zero on these probes",
+    "known spatial transform on real own-domain images gives nonzero motion gradients; this is not natural-flow ground truth",
+    "noise/risk/threshold operating points remain declared or unfitted; labelled calibration CLI exists but no calibration result is claimed",
+    "original LIBERO demonstrations missing; content identity CLI exists but old 0/96 is not a verified heldout result",
+    "single-probe timing is not p50/p95/p99 training throughput or optimizer-memory acceptance",
+    "Base training remains deferred; no closed-loop run or P4 has started"
+  ]
+}

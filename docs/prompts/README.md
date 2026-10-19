@@ -1,21 +1,21 @@
 # 三项编码器研究的 DeepSeek 使用入口
 
-2026-10-14：N01 正式开发请使用 [v1.0 分阶段提示词](n01_v1_0/README.md)，从 P0 开始。下文 `DeepSeek_N01_implementation.md` 为早期原型交接，保留供历史追溯，不再作为 v1.0 的启动提示词。
+2026-10-15：N01当前正式路线为[v1.2](../N01_full_development_plan_2026-10-15_v1.2.md)，[P3/P4/P5完整执行包](n01_v1_2/README.md)已准备。当前只复制P3一份：同源RAW/RGB×Base/N01四臂、每平台/方法1个训练种子、远程训练及简单实时监控前端专家任务均已展开。旧v1.1三臂全RAW主矩阵和v1.0后续局部包为历史，不从P0重启。本次更新文档/控制台/交接材料，未训练新模型。
 
 三个 worktree 分别研究 N01、N02、N04，具有相同的部署基线、研究文档快照和提示词。每份提示词都可独立使用，包含核心更新规则、参考代码、文件职责、数据接口、训练顺序、π0.5 接入和验收实验。
 
 | 研究方向 | worktree | 分支 | 完整提示词 |
 | --- | --- | --- | --- |
-| N01 自适应时空证据积分 | `/home/jeong/zeno/owac/worktrees/n01-evidence-integration` | `lzh/n01-evidence-integration` | [N01 提示词](DeepSeek_N01_implementation.md) |
+| N01 自适应时空证据积分 | `/home/jeong/zeno/owac/worktrees/n01-evidence-integration` | `lzh/n01-evidence-integration` | [v1.2执行入口](n01_v1_2/README.md)；[当前P3完整包](n01_v1_2/P3_FULL_ENCODER.md) |
 | N02 测量约束的循环补全 | `/home/jeong/zeno/owac/worktrees/n02-measurement-completion` | `lzh/n02-measurement-completion` | [N02 提示词](DeepSeek_N02_implementation.md) |
 | N04 自运动预测与变化分离 | `/home/jeong/zeno/owac/worktrees/n04-egomotion-separation` | `lzh/n04-egomotion-separation` | [N04 提示词](DeepSeek_N04_implementation.md) |
 
-在对应 worktree 中启动一个 DeepSeek 编程会话，让它读取对应提示词并开始实现；如果该会话不能读取文件，就把提示词全文粘贴进去。三个会话可分别推进，不必把三份提示词同时交给一个会话。
+N02/N04 在对应 worktree 使用其当前有效提示词；N01 使用新v1.2完整包，P4/P5执行前读取届时实际前阶段报告。三个方向独立，不能用本页历史快照覆盖各 worktree 更新后的路线。
 
 可直接发送以下启动语，按方向选择一条：
 
 ```text
-请进入 /home/jeong/zeno/owac/worktrees/n01-evidence-integration，完整读取 docs/prompts/DeepSeek_N01_implementation.md 和它要求阅读的仓库文档，然后按顺序实际实现 N01。先做可手算的支持域积分，再做支持域重组、训练和后端接入。
+请进入 /home/jeong/zeno/owac/worktrees/n01-evidence-integration，完整读取 docs/prompts/n01_v1_2/P3_FULL_ENCODER.md 及其要求的当前仓库材料，实际执行N01 v1.2 P3。先接通简单实时监控页，调用前端专家，完成完整模型、真实训练、匹配对照、开发闭环与可视化；保留现有修改，不执行旧v1.0局部阶段，完成后停在P3交接点。
 ```
 
 ```text

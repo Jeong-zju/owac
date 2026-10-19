@@ -1,0 +1,344 @@
+{
+  "schema": "owac.n01.v1_2_plan_sources.v1",
+  "date": "2026-10-15",
+  "plan": "docs/N01_full_development_plan_2026-10-15_v1.2.md",
+  "source_baseline": "d3dec908d78d0a86a761abc985b83113d836c8cf",
+  "scope": "Research-route, docs, console and complete DeepSeek prompt update. No new encoder, data collection, training or remote monitor deployment. Primary paper pages reread; existing code/data contracts reviewed locally.",
+  "parent_source_record": "research/reviews/2026-10-15_n01_v1_1_plan_sources.json",
+  "execution_locks": "Existing upstream locks unchanged; new references are not installed runtime dependencies.",
+  "references": [
+    {
+      "id": "R01",
+      "entry": "Bhat et al. *Deep Burst Super-Resolution*. CVPR 2021。[论文](https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html)；[固定作者代码](https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278)。现有内容与融合基线。",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2021/html/Bhat_Deep_Burst_Super-Resolution_CVPR_2021_paper.html",
+        "https://github.com/goutamgmb/deep-burst-sr/tree/16f158e0553b6702cc1693c43f733c2830973278"
+      ],
+      "verification_scope": "existing_locked_local_vendor_and_adapter_inspected; primary_paper_reviewed"
+    },
+    {
+      "id": "R02",
+      "entry": "Luo et al. *BSRT: Improving Burst Super-Resolution with Swin Transformer and Flow-Guided Deformable Alignment*. CVPRW 2022。[论文](https://arxiv.org/abs/2204.08332)；[作者代码](https://github.com/Algolzw/BSRT)。强骨干替换候选；完整 RAW 合规适配待做。",
+      "urls": [
+        "https://arxiv.org/abs/2204.08332",
+        "https://github.com/Algolzw/BSRT"
+      ],
+      "verification_scope": "existing_locked_author_source_inspected; author_configuration_reviewed; no_runtime_port"
+    },
+    {
+      "id": "R03",
+      "entry": "Dudhane et al. *Burst Image Restoration and Enhancement*. CVPR 2022。[论文](https://arxiv.org/abs/2110.03680)；[BIPNet](https://github.com/akshaydudhane16/BIPNet)。隐式对齐与跨帧通信近邻。",
+      "urls": [
+        "https://arxiv.org/abs/2110.03680",
+        "https://github.com/akshaydudhane16/BIPNet"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R04",
+      "entry": "Dudhane et al. *Burstormer: Burst Image Restoration and Enhancement Transformer*. CVPR 2023。[论文](https://openaccess.thecvf.com/content/CVPR2023/html/Dudhane_Burstormer_Burst_Image_Restoration_and_Enhancement_Transformer_CVPR_2023_paper.html)；[作者代码](https://github.com/akshaydudhane16/Burstormer)。已查部分特征/对齐/融合源码，未运行新模型。",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2023/html/Dudhane_Burstormer_Burst_Image_Restoration_and_Enhancement_Transformer_CVPR_2023_paper.html",
+        "https://github.com/akshaydudhane16/Burstormer"
+      ],
+      "verification_scope": "paper_method_and_training_reviewed; selected_author_Network_py_inspected; no_runtime_port"
+    },
+    {
+      "id": "R05",
+      "entry": "Mildenhall et al. *Burst Denoising with Kernel Prediction Networks*. CVPR 2018。[作者论文与代码页](https://bmild.github.io/kpn/)。来源利用和优化参考。",
+      "urls": [
+        "https://bmild.github.io/kpn/"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R06",
+      "entry": "Wronski et al. *Handheld Multi-Frame Super-Resolution*. ACM TOG 2019。[作者机构页](https://research.google/pubs/handheld-multi-frame-super-resolution/)。RAW 采样与鲁棒融合依据。",
+      "urls": [
+        "https://research.google/pubs/handheld-multi-frame-super-resolution/"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R07",
+      "entry": "Wang, Lipson and Deng. *SEA-RAFT: Simple, Efficient, Accurate RAFT for Optical Flow*. ECCV 2024。[论文](https://arxiv.org/html/2405.14793v1)；[作者代码](https://github.com/princeton-vl/SEA-RAFT)。已复用完整模块，P2 风险/泛化边界按验收保留。",
+      "urls": [
+        "https://arxiv.org/html/2405.14793v1",
+        "https://github.com/princeton-vl/SEA-RAFT"
+      ],
+      "verification_scope": "existing_locked_local_vendor_and_P2_training_receipts_inspected; primary_paper_reviewed"
+    },
+    {
+      "id": "R08",
+      "entry": "*WAFT: Warping-Alone Field Transforms for Optical Flow*. 2025 预印本。[论文](https://arxiv.org/abs/2506.21526)；[作者代码](https://github.com/princeton-vl/WAFT)。运动替换近邻，未做 RAW 运行验收。",
+      "urls": [
+        "https://arxiv.org/abs/2506.21526",
+        "https://github.com/princeton-vl/WAFT"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R09",
+      "entry": "*RViDeformer: Efficient Raw Video Denoising Transformer with a Larger Benchmark Dataset*. TCSVT 2025（早期预印本 2023）。[论文](https://arxiv.org/abs/2305.00767)；[作者代码/数据](https://github.com/cao-cong/RViDeformer)。ReCRVD 显示屏重拍范围须披露。",
+      "urls": [
+        "https://arxiv.org/abs/2305.00767",
+        "https://github.com/cao-cong/RViDeformer"
+      ],
+      "verification_scope": "author_README_and_selected_architecture_source_inspected; no_new_dataset_run"
+    },
+    {
+      "id": "R10",
+      "entry": "*AIM 2025 Low-light RAW Video Denoising Challenge: Dataset, Methods and Results*. 2025。[论文](https://arxiv.org/abs/2508.16830)。多传感器 RAW 数据与评测参考，未取得/运行新数据。",
+      "urls": [
+        "https://arxiv.org/abs/2508.16830"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R11",
+      "entry": "Di et al. *QMambaBSR: Burst Image Super-Resolution with Query State Space Model*. CVPR 2025。[论文](https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html)。查询状态空间融合近邻。",
+      "urls": [
+        "https://openaccess.thecvf.com/content/CVPR2025/html/Di_QMambaBSR_Burst_Image_Super-Resolution_with_Query_State_Space_Model_CVPR_2025_paper.html"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R12",
+      "entry": "Zhu et al. *Trajectory-aware Shifted State Space Models for Online Video Super-Resolution*. ICLR 2026。[论文](https://arxiv.org/html/2508.10453v2)；[TS-Mamba 作者代码](https://github.com/QZ1-boy/TS-Mamba)。已查方法与仓库，README 的训练配置路径访问失败，不能声称开箱可训练或 RAW 适配完成。",
+      "urls": [
+        "https://arxiv.org/html/2508.10453v2",
+        "https://github.com/QZ1-boy/TS-Mamba"
+      ],
+      "verification_scope": "paper_method_and_author_repository_reviewed; advertised_training_yaml_fetch_returned_404; no_runtime_port"
+    },
+    {
+      "id": "R13",
+      "entry": "Shi et al. *MemoryVLA: Perceptual-Cognitive Memory in Vision-Language-Action Models for Robotic Manipulation*. ICLR 2026。[论文](https://arxiv.org/html/2508.19236v2)；[作者代码](https://github.com/shihao1895/MemoryVLA)。检索、融合与记忆合并近邻。",
+      "urls": [
+        "https://arxiv.org/html/2508.19236v2",
+        "https://github.com/shihao1895/MemoryVLA"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R14",
+      "entry": "Shi et al. *MemoryVLA++: Temporal Modeling via Memory and Imagination in Vision-Language-Action Models*. 2026 预印本。[论文](https://arxiv.org/abs/2606.09827)。记忆/想象边界，不因相关而把世界模型加入 N01。",
+      "urls": [
+        "https://arxiv.org/abs/2606.09827"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R15",
+      "entry": "Jiang et al. *RoboTTT: Context Scaling for Robot Policies*. 2026 预印本。[论文](https://arxiv.org/abs/2607.15275)；[作者机构页](https://research.nvidia.com/labs/gear/robottt/)。长上下文和序列训练参考，不声称 fast weights 可直接删源。",
+      "urls": [
+        "https://arxiv.org/abs/2607.15275",
+        "https://research.nvidia.com/labs/gear/robottt/"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R16",
+      "entry": "Adams and MacKay. *Bayesian Online Changepoint Detection*. 2007。[论文](https://arxiv.org/abs/0710.3742)。标准变化检测对照。",
+      "urls": [
+        "https://arxiv.org/abs/0710.3742"
+      ],
+      "verification_scope": "inherited_primary_reference_from_v1_0; not_reopened_for_this_document_update"
+    },
+    {
+      "id": "R17",
+      "entry": "Altamirano, Briol and Knoblauch. *Robust and Scalable Bayesian Online Changepoint Detection*. ICML 2023。[论文](https://proceedings.mlr.press/v202/altamirano23a.html)；[DSM-bocd 作者代码](https://github.com/maltamiranomontero/DSM-bocd)。鲁棒参考，条件保证不混为频率学误报界。",
+      "urls": [
+        "https://proceedings.mlr.press/v202/altamirano23a.html",
+        "https://github.com/maltamiranomontero/DSM-bocd"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R18",
+      "entry": "Howard et al. *Time-uniform, Nonparametric, Nonasymptotic Confidence Sequences*. Annals of Statistics 2021。[论文](https://arxiv.org/abs/1810.08240)；[confseq](https://github.com/gostevehoward/confseq)。条件适用的顺序推断。",
+      "urls": [
+        "https://arxiv.org/abs/1810.08240",
+        "https://github.com/gostevehoward/confseq"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R19",
+      "entry": "Shin, Ramdas and Rinaldo. *E-detectors: A Nonparametric Framework for Sequential Change Detection*。[论文](https://arxiv.org/abs/2203.03532)；[期刊原文](https://nejsds.nestat.org/journal/NEJSDS/article/59/text)。平均误报间隔与检测延迟参考，不能换成全程误报概率结论。",
+      "urls": [
+        "https://arxiv.org/abs/2203.03532",
+        "https://nejsds.nestat.org/journal/NEJSDS/article/59/text"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R20",
+      "entry": "Sünderhauf and Protzel. *Switchable Constraints for Robust Pose Graph SLAM*. IROS 2012。[作者论文](https://nikosuenderhauf.github.io/assets/papers/IROS12-switchableConstraints.pdf)。错误约束退出的已有机制。",
+      "urls": [
+        "https://nikosuenderhauf.github.io/assets/papers/IROS12-switchableConstraints.pdf"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R21",
+      "entry": "Kaess et al. *iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree*. IJRR 2012。[作者页](https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html)；[GTSAM](https://github.com/borglab/gtsam)。依赖重求解参考，不强制搬成 GPU 主线。",
+      "urls": [
+        "https://people.csail.mit.edu/kaess/pub/Kaess12ijrr.html",
+        "https://github.com/borglab/gtsam"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R22",
+      "entry": "Cui and Harada. *RAW-Adapter: Adapting Pre-trained Visual Model to Camera RAW Images*. ECCV 2024。[论文](https://arxiv.org/abs/2408.14802)。适配近邻，ISP 路线不是本主链。",
+      "urls": [
+        "https://arxiv.org/abs/2408.14802"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R23",
+      "entry": "Huang et al. *Dr. RAW: Towards General High-Level Vision from RAW with Efficient Task Conditioning*. NeurIPS 2025。[论文](https://proceedings.neurips.cc/paper_files/paper/2025/hash/20eadb6338a53114a6371f102c5ded95-Abstract-Conference.html)。传感器/任务适配近邻，预处理与重马赛克另审。",
+      "urls": [
+        "https://proceedings.neurips.cc/paper_files/paper/2025/hash/20eadb6338a53114a6371f102c5ded95-Abstract-Conference.html"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R24",
+      "entry": "Li et al. *Towards RAW Object Detection in Diverse Conditions*. CVPR 2025。[论文](https://arxiv.org/abs/2411.15678)；[AODRaw 作者代码/数据](https://github.com/lzyhha/AODRaw)。RAW 预训练与数据不足的依据；RGB 教师蒸馏不进入本主训练链。",
+      "urls": [
+        "https://arxiv.org/abs/2411.15678",
+        "https://github.com/lzyhha/AODRaw"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R25",
+      "entry": "Liu et al. *RawVLA: Embodied Neural Image Signal Processor for Robotic Manipulation*. 2026 预印本。[原文及训练协议](https://arxiv.org/html/2609.37530v1)；[作者项目](https://shuhongll.github.io/rawvla/)。直接竞争边界，实际输入以固定数据审计为准。",
+      "urls": [
+        "https://arxiv.org/html/2609.37530v1",
+        "https://shuhongll.github.io/rawvla/"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R26",
+      "entry": "Physical Intelligence et al. *π0.5: a Vision-Language-Action Model with Open-World Generalization*. 2025。[论文](https://arxiv.org/abs/2504.16054)；[openpi](https://github.com/Physical-Intelligence/openpi)。执行仍用冻结 StarVLA/RawVLA 接口与权重。",
+      "urls": [
+        "https://arxiv.org/abs/2504.16054",
+        "https://github.com/Physical-Intelligence/openpi"
+      ],
+      "verification_scope": "inherited_primary_reference_from_v1_0; not_reopened_for_this_document_update"
+    },
+    {
+      "id": "R27",
+      "entry": "Lehtinen et al. *Noise2Noise: Learning Image Restoration without Clean Data*. ICML 2018。[论文](https://proceedings.mlr.press/v80/lehtinen18a.html)。辅助监督的条件依据。",
+      "urls": [
+        "https://proceedings.mlr.press/v80/lehtinen18a.html"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R28",
+      "entry": "Batson and Royer. *Noise2Self: Blind Denoising by Self-Supervision*. ICML 2019。[论文](https://proceedings.mlr.press/v97/batson19a.html)。噪声独立与 J-invariance 的适用边界。",
+      "urls": [
+        "https://proceedings.mlr.press/v97/batson19a.html"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R29",
+      "entry": "Jain and Wallace. *Attention is not Explanation*. NAACL 2019。[论文](https://aclanthology.org/N19-1357/)。原实验在 NLP，不直接当作视觉注意力无效定理。",
+      "urls": [
+        "https://aclanthology.org/N19-1357/"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R30",
+      "entry": "Wiegreffe and Pinter. *Attention is not not Explanation*. EMNLP 2019。[论文](https://aclanthology.org/D19-1002.pdf)。解释性需要具体干预/对照实验。",
+      "urls": [
+        "https://aclanthology.org/D19-1002.pdf"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R31",
+      "entry": "Jaegle et al. *Perceiver IO: A General Architecture for Structured Inputs & Outputs*. ICLR 2022。[论文](https://arxiv.org/abs/2107.14795)；[官方实现](https://github.com/google-deepmind/deepmind-research/tree/master/perceiver)。按需读出候选。",
+      "urls": [
+        "https://arxiv.org/abs/2107.14795",
+        "https://github.com/google-deepmind/deepmind-research/tree/master/perceiver"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R32",
+      "entry": "Gu and Dao. *Mamba: Linear-Time Sequence Modeling with Selective State Spaces*. COLM 2024。[论文](https://arxiv.org/abs/2312.00752)；[官方实现](https://github.com/state-spaces/mamba)。状态候选，整体稳定/删除保证需另证。",
+      "urls": [
+        "https://arxiv.org/abs/2312.00752",
+        "https://github.com/state-spaces/mamba"
+      ],
+      "verification_scope": "inherited_primary_reference_from_v1_0; not_reopened_for_this_document_update"
+    },
+    {
+      "id": "R33",
+      "entry": "Revay, Wang and Manchester. *Recurrent Equilibrium Networks: Flexible Dynamic Models with Guaranteed Stability and Robustness*. IEEE TAC 2023。[论文](https://arxiv.org/abs/2104.05942)；[作者代码](https://github.com/imanchester/REN)。稳定结构参考，不将其保证转移给任意 Mamba 组合。",
+      "urls": [
+        "https://arxiv.org/abs/2104.05942",
+        "https://github.com/imanchester/REN"
+      ],
+      "verification_scope": "primary_paper_or_author_page_reviewed_in_v1_1_discussion; no_new_runtime_verification"
+    },
+    {
+      "id": "R34",
+      "entry": "Brooks et al. *Unprocessing Images for Learned Raw Denoising*. CVPR2019。[论文](https://arxiv.org/abs/1811.11127)；[作者代码](https://github.com/timothybrooks/unprocessing)。成像与噪声域参考，逆处理不恢复源RGB已丢失信息。",
+      "urls": [
+        "https://arxiv.org/abs/1811.11127",
+        "https://github.com/timothybrooks/unprocessing"
+      ],
+      "verification_scope": "primary_paper_page_reviewed; code_repository_link_is_navigation_not_runtime_validation"
+    },
+    {
+      "id": "R35",
+      "entry": "Chen et al. *Learning to See in the Dark*. CVPR2018。[论文](https://arxiv.org/abs/1805.01934)；[作者代码](https://github.com/cchen156/Learning-to-See-in-the-Dark)。短曝光RAW研究背景，RGB恢复目标不进入主链。",
+      "urls": [
+        "https://arxiv.org/abs/1805.01934",
+        "https://github.com/cchen156/Learning-to-See-in-the-Dark"
+      ],
+      "verification_scope": "primary_paper_page_reviewed; code_repository_link_is_navigation_not_runtime_validation"
+    },
+    {
+      "id": "R36",
+      "entry": "Cui and Harada. *RAW-Adapter*. ECCV2024。[论文](https://arxiv.org/abs/2408.14802)；[作者代码](https://github.com/cuiziteng/ECCV_RAW_Adapter)。已有RAW高层视觉适配。",
+      "urls": [
+        "https://arxiv.org/abs/2408.14802",
+        "https://github.com/cuiziteng/ECCV_RAW_Adapter"
+      ],
+      "verification_scope": "primary_paper_page_reviewed; code_repository_link_is_navigation_not_runtime_validation"
+    },
+    {
+      "id": "R37",
+      "entry": "Huang et al. *Dr. RAW*. NeurIPS2025。[论文](https://papers.neurips.cc/paper_files/paper/2025/hash/20eadb6338a53114a6371f102c5ded95-Abstract-Conference.html)。已有传感器条件与任务适配，不借其结果保证N01。",
+      "urls": [
+        "https://papers.neurips.cc/paper_files/paper/2025/hash/20eadb6338a53114a6371f102c5ded95-Abstract-Conference.html"
+      ],
+      "verification_scope": "primary_paper_page_reviewed; code_repository_link_is_navigation_not_runtime_validation"
+    }
+  ],
+  "local_evidence": [
+    "src/owac/raw/rawvla_sequence.py",
+    "src/owac/raw/n01_noise.py",
+    "src/owac/frameworks/n01_full/adapters.py",
+    "research/experiments/n01_full/P2_acceptance_report.md"
+  ],
+  "remote_resource_check": "New server 154.59.156.21:34302 inspected and actually provisioned; see docs/N01_new_server_deployment_2026-10-15.md and current remote_snapshot.json. Old snapshot retained separately.",
+  "historical_plan_hashes": {
+    "docs/N01_full_development_plan_2026-10-15_v1.1.md": "4fbdd80825f7fdd9c5e6cb3856cce51fe564254fc73709c49bd1e639f274622f",
+    "docs/N01_full_development_plan_2026-10-15_v1.1.html": "ad7211603ab3de32b7ab7d957bb88a2f4022ff15f20362bfaf88fb83d1ec67af"
+  },
+  "plan_sha256": "cb0e2369633d9d056bceb5887261ed2e3c8bea60b5db0c4a7e8423789c15ea7c",
+  "development_budget": "User supplement: 100 closed-loop trials total per development round, prioritize current model; do not multiply by arms/platforms or require all-arm coverage.",
+  "remote_deployment_record": "docs/N01_new_server_deployment_2026-10-15.md"
+}

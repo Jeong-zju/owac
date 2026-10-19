@@ -1,0 +1,1352 @@
+{
+  "schema": "n01-v12-paired-20k-probe-v1",
+  "collected_at_utc_epoch": 1792395743.693692,
+  "run_root": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019",
+  "training_root": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-complete",
+  "research_stage_complete": false,
+  "paired_unique_scenes": 12,
+  "completed_executions": 24,
+  "scope": "paired development probe; training overlap unknown; no held-out claim",
+  "plan": {
+    "created_at": 1792393331.410854,
+    "identities": [
+      {
+        "suite": "libero_10",
+        "task_id": 0,
+        "episode_idx": 0,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "ExtremeLow",
+        "lighting_ev": -5.230958001145602
+      },
+      {
+        "suite": "libero_10",
+        "task_id": 3,
+        "episode_idx": 1,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Low",
+        "lighting_ev": -3.9003324483308126
+      },
+      {
+        "suite": "libero_10",
+        "task_id": 6,
+        "episode_idx": 2,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Normal",
+        "lighting_ev": -0.028788899629141218
+      },
+      {
+        "suite": "libero_goal",
+        "task_id": 0,
+        "episode_idx": 0,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "ExtremeLow",
+        "lighting_ev": -4.906853917619022
+      },
+      {
+        "suite": "libero_goal",
+        "task_id": 3,
+        "episode_idx": 1,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Low",
+        "lighting_ev": -3.2221408652183663
+      },
+      {
+        "suite": "libero_goal",
+        "task_id": 6,
+        "episode_idx": 2,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Normal",
+        "lighting_ev": 0.2828362605114957
+      },
+      {
+        "suite": "libero_object",
+        "task_id": 0,
+        "episode_idx": 0,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "ExtremeLow",
+        "lighting_ev": -4.115843493096457
+      },
+      {
+        "suite": "libero_object",
+        "task_id": 3,
+        "episode_idx": 1,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Low",
+        "lighting_ev": -3.5200152459758165
+      },
+      {
+        "suite": "libero_object",
+        "task_id": 6,
+        "episode_idx": 2,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Normal",
+        "lighting_ev": -0.3829479659601964
+      },
+      {
+        "suite": "libero_spatial",
+        "task_id": 0,
+        "episode_idx": 0,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "ExtremeLow",
+        "lighting_ev": -5.488576894952915
+      },
+      {
+        "suite": "libero_spatial",
+        "task_id": 3,
+        "episode_idx": 1,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Low",
+        "lighting_ev": -3.08259225329291
+      },
+      {
+        "suite": "libero_spatial",
+        "task_id": 6,
+        "episode_idx": 2,
+        "base_seed": 0,
+        "init_state_index": 0,
+        "lighting_domain": "Normal",
+        "lighting_ev": -0.1253707563927311
+      }
+    ],
+    "per_arm": 12,
+    "total": 24,
+    "lighting_domains": [
+      "ExtremeLow",
+      "Low",
+      "Normal"
+    ],
+    "same_identities_sha256": "8c36b7672ae3a7ba29940c82ff6f29fc381aab2fc1fc00eac12b0336ac70d99a",
+    "scope": "paired development probe; content-verified held-out status unavailable",
+    "source_git_head": "d3dec908d78d0a86a761abc985b83113d836c8cf",
+    "dirty_source": true
+  },
+  "source_manifest_sha256": "246f7a31f97b359fe911c788cdc0b23748fe54b6decb9c8c1c02cc9382320050",
+  "frozen_source_files_verified": 310,
+  "arms": {
+    "raw": {
+      "checkpoint": {
+        "arm": "raw_n01",
+        "step": 20800,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/checkpoints/libero-raw_n01-captured.pt",
+        "config": {
+          "arm": "raw_n01",
+          "method": "raw_n01",
+          "model_factory": "owac.frameworks.n01_full.model:build_model",
+          "platform": "libero",
+          "seed": 101,
+          "input_domain": "RAW",
+          "data_kind": "libero_dequantized",
+          "support_enabled": true,
+          "window_frames": 32,
+          "feature_width": 512,
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "fusion": "dbsr_reference",
+          "pool_grid": 16,
+          "tokens_per_camera": 256,
+          "readout_width": 2048,
+          "input_mode": "rawvla_rgb3",
+          "camera_order": [
+            "agentview",
+            "wrist"
+          ],
+          "support": {
+            "implementation": "gls_window",
+            "region_grid": 16,
+            "multiscale_radii": [
+              0,
+              1,
+              2
+            ],
+            "receptive_field_radius": 1,
+            "hazard": 0.03125,
+            "keep_run_lengths": 16,
+            "prior_mean": 1.0,
+            "prior_var": 1.0,
+            "obs_var": 0.25,
+            "robust_omega": 4.0,
+            "robust_scale": 1.5,
+            "accept_logodds": 0.5,
+            "retract_logodds": 1.0,
+            "large_residual_threshold": 3.0,
+            "recent_run_fraction": 2.0,
+            "defer_observations": 2,
+            "noise_floor": 0.001,
+            "min_region_cells": 4,
+            "affine": true,
+            "source": "Truncated BOCPD and GaussianUnknownMean transcribed from DSM-bocd 9d05117bc8c6e971c836ee1df0c49e2d2950862b (MIT); bounded-influence generalized-Bayes update and the thresholds/scales are this project's"
+          },
+          "motion": {
+            "depth": "resnet34",
+            "iters": 4,
+            "checkpoint": null,
+            "checkpoint_domain": null,
+            "trainable": true,
+            "pair_chunk": 1,
+            "max_cycle_error": 3.0,
+            "cycle_check": true,
+            "activation_checkpointing": true,
+            "version": "same-domain-sea-raft-action-v1"
+          },
+          "observation": {
+            "native_shape": [
+              256,
+              256
+            ],
+            "output_shape": [
+              0,
+              0
+            ],
+            "history_stride": 1,
+            "shot": 0.0004,
+            "read_variance": 1.1281558374983982e-05,
+            "noise_provenance": "author_libero_shot_read_plus_quantisation",
+            "version": "native-isp-full-field-v1"
+          },
+          "training": {
+            "warmup_steps": 2000,
+            "total_steps": 50000,
+            "encoder_lr": 1e-05,
+            "backend_lr": 1e-06,
+            "lr_warmup_steps": 200,
+            "min_lr_ratio": 0.1,
+            "backend_prefixes": [
+              "action_head."
+            ],
+            "gradient_clip": 1.0,
+            "motion_aux_weight": 0.05,
+            "version": "matched-encoder-warmup-action-expert-v1"
+          },
+          "supported_logic_version": "n01-v1.2-p3-complete-20261017"
+        },
+        "samples_consumed": 83200,
+        "sha256": "0a7c025b1c097e99cb4985ee15501fd7915ba2ea82d71763a206ebb7b44875b2",
+        "bytes": 6484845221
+      },
+      "report": {
+        "stage": "P3",
+        "selected_identities": 12,
+        "completed_rollouts": 12,
+        "successes": 0,
+        "failures": 12,
+        "success_rate": 0.0,
+        "denominator": 12,
+        "denominator_note": "the denominator is the number of identities actually completed, merged by identity across workers; worker counts must never be added together",
+        "not_completed": [],
+        "by_suite": {
+          "libero_10": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_goal": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_object": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_spatial": {
+            "completed": 3,
+            "successes": 0
+          }
+        },
+        "wall_seconds": {
+          "mean": 105.36660140675183,
+          "max": 173.6548435841687
+        },
+        "budget_note": "P3 development loop by design: this is not the P4 formal list and its denominator is not 10,000 or 13,250",
+        "plan": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/raw_n01/devloop-paired/plan.json",
+        "checkpoint_step": 20800
+      },
+      "controller": {
+        "role": "raw",
+        "arm": "raw_n01",
+        "checkpoint_step": 20800,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/checkpoints/libero-raw_n01-captured.pt",
+        "selected": 12,
+        "completed": 12,
+        "successes": 0,
+        "paused_training": false,
+        "state": "completed",
+        "holdout_status": "development; content-level split identity not proven",
+        "updated_at": 1792395087.2416644,
+        "resume_checkpoint_step": 20900,
+        "service_pid": 218992,
+        "launcher_pid": 219044,
+        "error": null,
+        "training_resumed": true
+      },
+      "ledger_sha256": "706787670a2a6962ceb526b1aa21bc219e652ba5a213e7f69e862b4dc839f624",
+      "ledger_lines": 12,
+      "unique_completed_identities": 12,
+      "simulator_suite_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "restored_checkpoint": {
+        "step": 20800,
+        "arm": "raw_n01",
+        "platform": "libero",
+        "seed": 101
+      },
+      "execution": {
+        "precision": "bf16",
+        "physical_statistics": "fp32",
+        "skip_empty_sources": true,
+        "flow_pair_batch_size": 8,
+        "content_batch_size": 4
+      },
+      "query_count": 792,
+      "median_query_rpc_ms": 1185.8335,
+      "all_episode_initial_unique_frames_equal_one": true,
+      "max_unique_frames": {
+        "agentview": 32,
+        "wrist": 32
+      },
+      "recording_errors": 0,
+      "training_resume_verified": {
+        "pid": 221805,
+        "step": 20954,
+        "resumed_checkpoint_step": 20900,
+        "phase": "backend_adaptation"
+      },
+      "episodes": [
+        {
+          "task_suite": "libero_10",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "put both the alphabet soup and the tomato sauce in the basket",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 171.49548962619156,
+          "policy_flow_seed": 971979802,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -5.230958001145602,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.17936133256959852,
+            "lighting_scale": 0.02662715311317941,
+            "noise_seed": 2836177961,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_10",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "put the black bowl in the bottom drawer of the cabinet and close it",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 173.6548435841687,
+          "policy_flow_seed": 3586036783,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.9003324483308126,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.06644503444612482,
+            "lighting_scale": 0.0669704072627656,
+            "noise_seed": 4171106778,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_10",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 166.31850453000516,
+          "policy_flow_seed": 4194814653,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.028788899629141218,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.4712111003708588,
+            "lighting_scale": 0.9802428375357943,
+            "noise_seed": 577882614,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "open the middle drawer of the cabinet",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 93.24049750296399,
+          "policy_flow_seed": 2366666876,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -4.906853917619022,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.39543072158731885,
+            "lighting_scale": 0.033334180785606064,
+            "noise_seed": 3541477062,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "open the top drawer and put the bowl inside",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 92.18139153718948,
+          "policy_flow_seed": 1377905944,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.2221408652183663,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.5185727565210891,
+            "lighting_scale": 0.10716154078034285,
+            "noise_seed": 2763525900,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "put the cream cheese in the bowl",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 92.66146590188146,
+          "policy_flow_seed": 2291761967,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": 0.2828362605114957,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.7828362605114957,
+            "lighting_scale": 1.2165842738789179,
+            "noise_seed": 2705420433,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "pick up the alphabet soup and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 86.7644585086964,
+          "policy_flow_seed": 3349142704,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -4.115843493096457,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.922771004602362,
+            "lighting_scale": 0.05767766245806123,
+            "noise_seed": 2202201086,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "pick up the bbq sauce and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 87.30548507114872,
+          "policy_flow_seed": 1727601727,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.5200152459758165,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.3199898360161223,
+            "lighting_scale": 0.08717055794927853,
+            "noise_seed": 1947775787,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "pick up the butter and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 83.88516798894852,
+          "policy_flow_seed": 361862898,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.3829479659601964,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.11705203403980358,
+            "lighting_scale": 0.7668689881917302,
+            "noise_seed": 3328776738,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 74.22324228705838,
+          "policy_flow_seed": 2667526981,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -5.488576894952915,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.007615403364723883,
+            "lighting_scale": 0.022272743781561903,
+            "noise_seed": 3633663850,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 70.64056012267247,
+          "policy_flow_seed": 1111702545,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.08259225329291,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.6116051644713931,
+            "lighting_scale": 0.11804491053326224,
+            "noise_seed": 2148022229,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 72.028110220097,
+          "policy_flow_seed": 2404493953,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.1253707563927311,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.3746292436072689,
+            "lighting_scale": 0.9167684137617802,
+            "noise_seed": 2066310762,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 6
+          }
+        }
+      ]
+    },
+    "rgb": {
+      "checkpoint": {
+        "arm": "rgb_n01",
+        "step": 21100,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/checkpoints/libero-rgb_n01-captured.pt",
+        "config": {
+          "arm": "rgb_n01",
+          "method": "rgb_n01",
+          "model_factory": "owac.frameworks.n01_full.model:build_model",
+          "platform": "libero",
+          "seed": 101,
+          "input_domain": "RGB",
+          "data_kind": "libero_dequantized",
+          "support_enabled": true,
+          "window_frames": 32,
+          "feature_width": 512,
+          "stem_width": 64,
+          "residual_blocks": 9,
+          "fusion": "dbsr_reference",
+          "pool_grid": 16,
+          "tokens_per_camera": 256,
+          "readout_width": 2048,
+          "input_mode": "rendered_rgb3",
+          "camera_order": [
+            "agentview",
+            "wrist"
+          ],
+          "support": {
+            "implementation": "gls_window",
+            "region_grid": 16,
+            "multiscale_radii": [
+              0,
+              1,
+              2
+            ],
+            "receptive_field_radius": 1,
+            "hazard": 0.03125,
+            "keep_run_lengths": 16,
+            "prior_mean": 1.0,
+            "prior_var": 1.0,
+            "obs_var": 0.25,
+            "robust_omega": 4.0,
+            "robust_scale": 1.5,
+            "accept_logodds": 0.5,
+            "retract_logodds": 1.0,
+            "large_residual_threshold": 3.0,
+            "recent_run_fraction": 2.0,
+            "defer_observations": 2,
+            "noise_floor": 0.001,
+            "min_region_cells": 4,
+            "affine": true,
+            "source": "Truncated BOCPD and GaussianUnknownMean transcribed from DSM-bocd 9d05117bc8c6e971c836ee1df0c49e2d2950862b (MIT); bounded-influence generalized-Bayes update and the thresholds/scales are this project's"
+          },
+          "motion": {
+            "depth": "resnet34",
+            "iters": 4,
+            "checkpoint": null,
+            "checkpoint_domain": null,
+            "trainable": true,
+            "pair_chunk": 1,
+            "max_cycle_error": 3.0,
+            "cycle_check": true,
+            "activation_checkpointing": true,
+            "version": "same-domain-sea-raft-action-v1"
+          },
+          "observation": {
+            "native_shape": [
+              256,
+              256
+            ],
+            "output_shape": [
+              0,
+              0
+            ],
+            "history_stride": 1,
+            "shot": 0.0,
+            "read_variance": 0.0001,
+            "noise_provenance": "declared_same_domain_proxy_unfitted",
+            "version": "native-isp-full-field-v1"
+          },
+          "training": {
+            "warmup_steps": 2000,
+            "total_steps": 50000,
+            "encoder_lr": 1e-05,
+            "backend_lr": 1e-06,
+            "lr_warmup_steps": 200,
+            "min_lr_ratio": 0.1,
+            "backend_prefixes": [
+              "action_head."
+            ],
+            "gradient_clip": 1.0,
+            "motion_aux_weight": 0.05,
+            "version": "matched-encoder-warmup-action-expert-v1"
+          },
+          "supported_logic_version": "n01-v1.2-p3-complete-20261017"
+        },
+        "samples_consumed": 84400,
+        "sha256": "bcaaf5d56a14f51d0a38555a1148c1ff3becbe2ba36c7c277d664fb054f6e1ef",
+        "bytes": 6484845221
+      },
+      "report": {
+        "stage": "P3",
+        "selected_identities": 12,
+        "completed_rollouts": 12,
+        "successes": 0,
+        "failures": 12,
+        "success_rate": 0.0,
+        "denominator": 12,
+        "denominator_note": "the denominator is the number of identities actually completed, merged by identity across workers; worker counts must never be added together",
+        "not_completed": [],
+        "by_suite": {
+          "libero_10": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_goal": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_object": {
+            "completed": 3,
+            "successes": 0
+          },
+          "libero_spatial": {
+            "completed": 3,
+            "successes": 0
+          }
+        },
+        "wall_seconds": {
+          "mean": 100.32914594203855,
+          "max": 164.87835898529738
+        },
+        "budget_note": "P3 development loop by design: this is not the P4 formal list and its denominator is not 10,000 or 13,250",
+        "plan": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/rgb_n01/devloop-paired/plan.json",
+        "checkpoint_step": 21100
+      },
+      "controller": {
+        "role": "rgb",
+        "arm": "rgb_n01",
+        "checkpoint_step": 21100,
+        "checkpoint": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/checkpoints/libero-rgb_n01-captured.pt",
+        "selected": 12,
+        "completed": 12,
+        "successes": 0,
+        "paused_training": false,
+        "state": "completed",
+        "holdout_status": "development; content-level split identity not proven",
+        "updated_at": 1792395462.3907046,
+        "resume_checkpoint_step": 21300,
+        "service_pid": 219432,
+        "launcher_pid": 219473,
+        "error": null,
+        "training_resumed": true
+      },
+      "ledger_sha256": "7b1c69a69dc814e7790a139643bb3652eb88d9bb4d1d016768b3ac0a0296a762",
+      "ledger_lines": 12,
+      "unique_completed_identities": 12,
+      "simulator_suite_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "restored_checkpoint": {
+        "step": 21100,
+        "arm": "rgb_n01",
+        "platform": "libero",
+        "seed": 101
+      },
+      "execution": {
+        "precision": "bf16",
+        "physical_statistics": "fp32",
+        "skip_empty_sources": true,
+        "flow_pair_batch_size": 8,
+        "content_batch_size": 4
+      },
+      "query_count": 792,
+      "median_query_rpc_ms": 1097.759,
+      "all_episode_initial_unique_frames_equal_one": true,
+      "max_unique_frames": {
+        "agentview": 32,
+        "wrist": 32
+      },
+      "recording_errors": 0,
+      "training_resume_verified": {
+        "pid": 222463,
+        "step": 21321,
+        "resumed_checkpoint_step": 21300,
+        "phase": "backend_adaptation"
+      },
+      "episodes": [
+        {
+          "task_suite": "libero_10",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "put both the alphabet soup and the tomato sauce in the basket",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 164.87835898529738,
+          "policy_flow_seed": 971979802,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -5.230958001145602,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.17936133256959852,
+            "lighting_scale": 0.02662715311317941,
+            "noise_seed": 2836177961,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_10",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "put the black bowl in the bottom drawer of the cabinet and close it",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 156.0370230972767,
+          "policy_flow_seed": 3586036783,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.9003324483308126,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.06644503444612482,
+            "lighting_scale": 0.0669704072627656,
+            "noise_seed": 4171106778,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_10",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+          "success": false,
+          "num_steps": 520,
+          "wall_seconds": 153.2056605340913,
+          "policy_flow_seed": 4194814653,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.028788899629141218,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.4712111003708588,
+            "lighting_scale": 0.9802428375357943,
+            "noise_seed": 577882614,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_10",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "open the middle drawer of the cabinet",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 92.95416763983667,
+          "policy_flow_seed": 2366666876,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -4.906853917619022,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.39543072158731885,
+            "lighting_scale": 0.033334180785606064,
+            "noise_seed": 3541477062,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "open the top drawer and put the bowl inside",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 87.53125051036477,
+          "policy_flow_seed": 1377905944,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.2221408652183663,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.5185727565210891,
+            "lighting_scale": 0.10716154078034285,
+            "noise_seed": 2763525900,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_goal",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "put the cream cheese in the bowl",
+          "success": false,
+          "num_steps": 300,
+          "wall_seconds": 88.20402843505144,
+          "policy_flow_seed": 2291761967,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": 0.2828362605114957,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.7828362605114957,
+            "lighting_scale": 1.2165842738789179,
+            "noise_seed": 2705420433,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_goal",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "pick up the alphabet soup and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 85.96510019386187,
+          "policy_flow_seed": 3349142704,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -4.115843493096457,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.922771004602362,
+            "lighting_scale": 0.05767766245806123,
+            "noise_seed": 2202201086,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "pick up the bbq sauce and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 88.31884262664244,
+          "policy_flow_seed": 1727601727,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.5200152459758165,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.3199898360161223,
+            "lighting_scale": 0.08717055794927853,
+            "noise_seed": 1947775787,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_object",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "pick up the butter and place it in the basket",
+          "success": false,
+          "num_steps": 280,
+          "wall_seconds": 87.35264060040936,
+          "policy_flow_seed": 361862898,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.3829479659601964,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.11705203403980358,
+            "lighting_scale": 0.7668689881917302,
+            "noise_seed": 3328776738,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_object",
+            "task_id": 6
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 0,
+          "episode_idx": 0,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 66.94365210738033,
+          "policy_flow_seed": 2667526981,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 0,
+            "init_state_index": 0,
+            "lighting_domain": "ExtremeLow",
+            "lighting_ev": -5.488576894952915,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.007615403364723883,
+            "lighting_scale": 0.022272743781561903,
+            "noise_seed": 3633663850,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 0
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 3,
+          "episode_idx": 1,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 66.17941145412624,
+          "policy_flow_seed": 1111702545,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 1,
+            "init_state_index": 0,
+            "lighting_domain": "Low",
+            "lighting_ev": -3.08259225329291,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.6116051644713931,
+            "lighting_scale": 0.11804491053326224,
+            "noise_seed": 2148022229,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 3
+          }
+        },
+        {
+          "task_suite": "libero_spatial",
+          "task_id": 6,
+          "episode_idx": 2,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "success": false,
+          "num_steps": 220,
+          "wall_seconds": 66.37961512012407,
+          "policy_flow_seed": 2404493953,
+          "rawvla_bench_entry": {
+            "agentview_table_flood": 0.0,
+            "base_seed": 0,
+            "base_seed_id": 0,
+            "benchmark": "rawvla-bench-light-libero-v1",
+            "episode_idx": 2,
+            "init_state_index": 0,
+            "lighting_domain": "Normal",
+            "lighting_ev": -0.1253707563927311,
+            "lighting_rig": "common_agentview_key",
+            "lighting_sample_unit": 0.3746292436072689,
+            "lighting_scale": 0.9167684137617802,
+            "noise_seed": 2066310762,
+            "sensor_saturation_ev": 0.0,
+            "suite": "libero_spatial",
+            "task_id": 6
+          }
+        }
+      ]
+    }
+  },
+  "paired_outcomes": [
+    {
+      "identity": [
+        "libero_10",
+        0,
+        0
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_10",
+        3,
+        1
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_10",
+        6,
+        2
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_goal",
+        0,
+        0
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_goal",
+        3,
+        1
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_goal",
+        6,
+        2
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_object",
+        0,
+        0
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_object",
+        3,
+        1
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_object",
+        6,
+        2
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_spatial",
+        0,
+        0
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_spatial",
+        3,
+        1
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    },
+    {
+      "identity": [
+        "libero_spatial",
+        6,
+        2
+      ],
+      "raw_success": false,
+      "rgb_success": false,
+      "conditions_and_policy_seed_match": true,
+      "initial_camera_preview_byte_identical": true
+    }
+  ],
+  "previews": {
+    "cases": [
+      {
+        "role": "raw",
+        "checkpoint_step": 20800,
+        "identity": [
+          "libero_10",
+          6,
+          2
+        ],
+        "success": false,
+        "num_steps": 520,
+        "policy_flow_seed": 4194814653,
+        "task_description": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+        "frames": 104,
+        "fps": 4,
+        "video": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/previews/raw-normal-task6.mp4",
+        "display": "same frozen ISP on quantized PNG query frames; display only",
+        "sampling": "one frame per policy query, not every control step"
+      },
+      {
+        "role": "rgb",
+        "checkpoint_step": 21100,
+        "identity": [
+          "libero_10",
+          6,
+          2
+        ],
+        "success": false,
+        "num_steps": 520,
+        "policy_flow_seed": 4194814653,
+        "task_description": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+        "frames": 104,
+        "fps": 4,
+        "video": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/previews/rgb-normal-task6.mp4",
+        "display": "same frozen ISP on quantized PNG query frames; display only",
+        "sampling": "one frame per policy query, not every control step"
+      }
+    ],
+    "comparison_video": "/workspace/owac/rawvla/research/n01-v1/runs/v1-2-p3-paired-20k-20261019/previews/paired-normal-task6.mp4"
+  },
+  "checks": {
+    "make_check": "passed",
+    "local_pytest_passed": 884,
+    "local_pytest_skipped": 6
+  }
+}

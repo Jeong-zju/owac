@@ -1,0 +1,43 @@
+{
+  "checked_at_utc": "2026-10-15T08:09:46Z",
+  "scope": "Read-only SSH preparation for DeepSeek prompts. No training, package installation, service changes, or remote file writes.",
+  "ssh": "ssh -p 44327 root@107.209.104.125",
+  "guide_read": "/etc/vast-agents-guide.md",
+  "gpu": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "total_mib": 97887,
+    "used_mib_sample": 15455,
+    "note": "Transient observation; recheck before scheduling."
+  },
+  "workspace_disk": {
+    "size": "2.0T",
+    "used": "856G",
+    "available": "1.2T",
+    "persistence": "Not verified as a host volume; do not assume recycle/destroy persistence."
+  },
+  "environments": [
+    {
+      "python": "/workspace/owac/rawvla/envs/encoder/bin/python",
+      "python_version": "3.11.16",
+      "torch": "2.9.1+cu128",
+      "cuda_available": true
+    },
+    {
+      "python": "/workspace/owac/rawvla/envs/starvla/bin/python",
+      "python_version": "3.10.21",
+      "torch": "2.7.1+cu128",
+      "cuda_available": true
+    }
+  ],
+  "ports": {
+    "8080": "Jupyter listening on 0.0.0.0; preserve existing service.",
+    "18080": "No listener observed; proposed monitor loopback port, not reserved or deployed."
+  },
+  "existing_policy_services_running": [
+    "owac-rawvla-full-robotwin-policy",
+    "owac-rawvla-robotwin-policy"
+  ],
+  "new_monitor_deployed": false,
+  "training_started": false,
+  "asset_path_basis": "P0-P2 accepted records plus current environment/research-directory inspection; no full dataset recount or checkpoint revalidation in this preparation."
+}

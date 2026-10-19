@@ -1,5 +1,11 @@
 # 研究记录
 
+2026-10-17 N01完整模型已按最新授权开始RAW/RGB双GPU训练，LIBERO后接RoboTwin、Base留P4。[实时训练监控](http://127.0.0.1:18080/)、[启动实测与证据边界](experiments/n01_v1_2/P3_training_launch.md)。下方“P3待实施”等为此前历史。
+
+N01当前正式路线：[v1.2 RAW时空证据编码](../docs/N01_full_development_plan_2026-10-15_v1.2.md)，[DeepSeek完整阶段包](../docs/prompts/n01_v1_2/README.md)，P3待实施。同源RAW/RGB四臂、单种子、两平台8个主体run；控制台/HTML/提示词同步，旧v1.1为历史。
+
+2026-10-15 N01历史方案 [v1.1 完整开发方案](../docs/N01_full_development_plan_2026-10-15_v1.1.md)（[HTML](../docs/N01_full_development_plan_2026-10-15_v1.1.html)）：P3 完整模型、真实任务训练与开发闭环，P4 冻结全量验证，P5 迁移扩展。方案已采用、P3 未实施；P2 结论见 [N01 研究卡](candidates/N01.md)。
+
 当前实验参照为 RawVLA-Bench / π0.5，部署与协议标签 `owac-rawvla-pi05-v0.1.0`；见 [0012](../docs/decisions/0012-rawvla-pi05-protocol-freeze.md)及[全量基线](experiments/2026-10-10_rawvla_pi05_full_baseline.md)。完整 LIBERO 已取得，RoboTwin 尚未完成。
 
 研究依据：[OWAC roadmap v6](../docs/OWAC_research_roadmap_2026-10-08.md)。当前 12 张卡仅从路线图建立种子索引，尚未完成设计、实现或实验，所有负责人和评审安排待定；家族名称不代表已证明的创新。无默认主线，允许新增、拆分、合并和复活候选。

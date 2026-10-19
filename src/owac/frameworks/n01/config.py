@@ -17,6 +17,13 @@ from typing import Any
 
 __all__ = ["N01Config", "load_config", "config_fingerprint", "SCALE_PRESETS"]
 
+# The bounded exact window of v1.2 P3: every episode/camera keeps at most this
+# many unique arrived frames, and everything (BOCPD posterior, analytic state,
+# neural cache) is rebuilt from that window and one fixed initial value.  It
+# matches ``EXACT_WINDOW_CHOICES`` in ``frameworks/n01_full/config.py``; the
+# adapter must not keep fewer frames than its configuration claims.
+MAX_EXACT_UNIQUE_FRAMES = 32
+
 _DEFAULT_LOSS_WEIGHTS = {
     "location": 1.0,
     "measurement_prediction": 0.1,
@@ -110,8 +117,12 @@ class N01Config:
             raise ValueError("time_depths must be >= 1")
         if max(self.time_depths) > self.max_history:
             raise ValueError("time_depths must not exceed max_history")
-        if self.require_unique_frames and self.max_history > 8:
-            raise ValueError("the first reference implementation keeps at most 8 unique frames")
+        if self.require_unique_frames and self.max_history > MAX_EXACT_UNIQUE_FRAMES:
+            raise ValueError(
+                "the bounded exact window keeps at most "
+                f"{MAX_EXACT_UNIQUE_FRAMES} unique frames; a longer history would make the "
+                "declared window unrebuildable"
+            )
         if not self.split_threshold < self.merge_threshold:
             raise ValueError("merge_threshold must exceed split_threshold (hysteresis band)")
         if self.edge_temperature <= 0:

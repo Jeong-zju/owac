@@ -99,8 +99,13 @@ def test_p0_factory_matches_existing_encoder_without_changing_old_history_guard(
     out.square().mean().backward()
     assert all(p.grad is not None and torch.isfinite(p.grad).all() for p in direct.parameters())
     assert sum(p.numel() for p in direct.parameters()) == 1497056
-    with pytest.raises(ValueError, match="at most 8"):
-        BurstFeatureEncoder(BurstFeatureConfig(max_history=16))
+    # v1.2 P3 raised the bounded exact window from 8 to 32 unique frames: every
+    # episode/camera must be rebuildable from up to 32 arrived frames
+    # (see MAX_EXACT_UNIQUE_FRAMES).  The guard itself is kept, so a history
+    # longer than the declared exact window is still refused, not silently kept.
+    assert BurstFeatureEncoder(BurstFeatureConfig(max_history=16)) is not None
+    with pytest.raises(ValueError, match="at most 32"):
+        BurstFeatureEncoder(BurstFeatureConfig(max_history=64))
     with pytest.raises(ValueError, match="four-channel"):
         dbsr_factory(protocol={}, point={"history": 8, "channels": 3}, device="cpu")
 

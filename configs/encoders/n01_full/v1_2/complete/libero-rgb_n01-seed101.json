@@ -1,0 +1,91 @@
+{
+  "arm": "rgb_n01",
+  "method": "rgb_n01",
+  "model_factory": "owac.frameworks.n01_full.model:build_model",
+  "platform": "libero",
+  "seed": 101,
+  "input_domain": "RGB",
+  "data_kind": "libero_dequantized",
+  "support_enabled": true,
+  "window_frames": 32,
+  "feature_width": 512,
+  "stem_width": 64,
+  "residual_blocks": 9,
+  "fusion": "dbsr_reference",
+  "pool_grid": 16,
+  "tokens_per_camera": 256,
+  "readout_width": 2048,
+  "input_mode": "rendered_rgb3",
+  "camera_order": [
+    "agentview",
+    "wrist"
+  ],
+  "support": {
+    "implementation": "gls_window",
+    "region_grid": 16,
+    "multiscale_radii": [
+      0,
+      1,
+      2
+    ],
+    "receptive_field_radius": 1,
+    "hazard": 0.03125,
+    "keep_run_lengths": 16,
+    "prior_mean": 1.0,
+    "prior_var": 1.0,
+    "obs_var": 0.25,
+    "robust_omega": 4.0,
+    "robust_scale": 1.5,
+    "accept_logodds": 0.5,
+    "retract_logodds": 1.0,
+    "large_residual_threshold": 3.0,
+    "recent_run_fraction": 2.0,
+    "defer_observations": 2,
+    "noise_floor": 0.001,
+    "min_region_cells": 4,
+    "affine": true,
+    "source": "Truncated BOCPD and GaussianUnknownMean transcribed from DSM-bocd 9d05117bc8c6e971c836ee1df0c49e2d2950862b (MIT); bounded-influence generalized-Bayes update and the thresholds/scales are this project's"
+  },
+  "motion": {
+    "depth": "resnet34",
+    "iters": 4,
+    "checkpoint": null,
+    "checkpoint_domain": null,
+    "trainable": true,
+    "pair_chunk": 1,
+    "max_cycle_error": 3.0,
+    "cycle_check": true,
+    "activation_checkpointing": true,
+    "version": "same-domain-sea-raft-action-v1"
+  },
+  "observation": {
+    "native_shape": [
+      256,
+      256
+    ],
+    "output_shape": [
+      0,
+      0
+    ],
+    "history_stride": 1,
+    "shot": 0.0,
+    "read_variance": 0.0001,
+    "noise_provenance": "declared_same_domain_proxy_unfitted",
+    "version": "native-isp-full-field-v1"
+  },
+  "training": {
+    "warmup_steps": 2000,
+    "total_steps": 50000,
+    "encoder_lr": 1e-05,
+    "backend_lr": 1e-06,
+    "lr_warmup_steps": 200,
+    "min_lr_ratio": 0.1,
+    "backend_prefixes": [
+      "action_head."
+    ],
+    "gradient_clip": 1.0,
+    "motion_aux_weight": 0.05,
+    "version": "matched-encoder-warmup-action-expert-v1"
+  },
+  "supported_logic_version": "n01-v1.2-p3-complete-20261017"
+}

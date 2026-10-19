@@ -20,10 +20,10 @@ this module's job:
 
 Honest boundaries:
 
-* P3 support/retraction logic is hard-off (:data:`P3_SUPPORT_ENABLED`).  The
-  support graph is never applied and ``diagnostics["p3_support_applied"]`` is
-  always ``False``; P4 reuses this adapter instead of building a second numeric
-  conversion.
+* Support/retraction is opt-in per arm (:data:`P3_SUPPORT_ENABLED`).  ``set_support``
+  attaches the mechanism and ``diagnostics["p3_support_applied"]`` then reports
+  ``applied_v1_2``; without it the field reports ``disabled_by_arm``.  This text used to
+  claim the field was *always* ``False``, which the same class contradicts.
 * P2 motion is wired through :meth:`DbsrFeatureAdapter.set_motion_provider` or an
   explicit ``offsets_xy`` (``[B,T,2,H,W]`` packed-cell pull offsets for the
   fusion).  The provider receives the exact ``window`` the step is fusing and
@@ -43,6 +43,7 @@ owac.frameworks.n01_full`` stays torch-free.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field, replace
 from typing import Any
@@ -66,7 +67,7 @@ from owac.baselines.burst_features import (
 )
 from owac.core.encoder_contract import ComputeBudget, EncoderOutput, MeasurementFrame, VisualTokens
 from owac.frameworks.n01 import state as measurement_state
-from owac.frameworks.n01.config import N01Config
+from owac.frameworks.n01.config import MAX_EXACT_UNIQUE_FRAMES, N01Config
 
 __all__ = [
     "CFA_INPUT_MODES",
@@ -82,11 +83,24 @@ __all__ = [
 ]
 
 CFA_INPUT_MODES = ("bayer_cfa", "synthetic_cfa")
-THREE_CHANNEL_INPUT_MODES = ("rawvla_rgb3",)
+THREE_CHANNEL_INPUT_MODES = (
+    # The author's three-channel HDR-derived / pseudo-RAW view: the real measurement.
+    "rawvla_rgb3",
+    # The same measurement after this project's frozen ISP.  It has to be an accepted
+    # input mode here, because the RGB arms are defined by reading it -- for a long time
+    # the mode did not exist, so every arm was fed the RAW tensor and the "same mechanism,
+    # different input" comparison was never actually run.
+    "rendered_rgb3",
+)
 
 POOL_GRID = 16
 """Deployed per-camera token grid: 16 x 16 == contract ``readout_tokens`` 256."""
 
+# Kept for the P0/P1 contract checks, which assert the *default* adapter has no
+# support attached.  Whether a given arm runs support is decided by
+# ``N01V12Config.spec.support_enabled`` and reported per step in
+# ``diagnostics["p3_support_status"]`` ("applied_v1_2" vs "disabled_by_arm"),
+# so this constant no longer means "support can never be applied".
 P3_SUPPORT_ENABLED = False
 """Hard-off in P2: no support graph, hypothesis merge/split or retraction is applied here.
 
@@ -114,6 +128,9 @@ class DbsrAdapterConfig:
     readout_width: int = 2048
     tokens_per_camera: int = 256
     cfa_pattern: str = "RGGB"
+    # Needed by the ISP, whose realisation is platform-specific; carried here so the
+    # transform happens where the input is consumed rather than being assumed downstream.
+    platform: str = "libero"
 
     def __post_init__(self) -> None:
         if self.input_mode not in CFA_INPUT_MODES + THREE_CHANNEL_INPUT_MODES:
@@ -128,8 +145,10 @@ class DbsrAdapterConfig:
                 f"tokens_per_camera {self.tokens_per_camera} != pool_grid^2 "
                 f"{self.pool_grid * self.pool_grid}"
             )
-        if self.max_history < 1 or self.max_history > 8:
-            raise ValueError("the exact unique-frame buffer keeps at most 8 frames")
+        if self.max_history < 1 or self.max_history > MAX_EXACT_UNIQUE_FRAMES:
+            raise ValueError(
+                f"the exact unique-frame buffer keeps at most {MAX_EXACT_UNIQUE_FRAMES} frames"
+            )
         for name, value in (
             ("feature_width", self.feature_width),
             ("stem_width", self.stem_width),
@@ -233,6 +252,7 @@ class FullState:
     correspondence: dict[str, CameraCorrespondence] = field(default_factory=dict)
     arrivals: dict[str, torch.Tensor] = field(default_factory=dict)
     unique_arrivals: dict[str, torch.Tensor] = field(default_factory=dict)
+    support: dict[str, Any] = field(default_factory=dict)
     step_index: int = 0
 
     @property
@@ -367,7 +387,19 @@ class DbsrFeatureAdapter(nn.Module):
                 activation="relu",
             )
             self.stem_replaced = True
+        self.profile_stages = False
         self.motion_provider: Callable[..., Any] | None = None
+        self.support: Any | None = None
+        # Latest support decision of the most recent step, kept as an attribute
+        # rather than inside ``diagnostics``: evaluation and the visualisation
+        # read it, while the training hot path must not pay a device copy per
+        # step just to fill a diagnostic field.
+        self.last_support: Any | None = None
+
+    def _stage_clock(self, device):
+        if self.profile_stages and torch.device(device).type == "cuda":
+            torch.cuda.synchronize(device)
+        return time.perf_counter()
 
     def set_motion_provider(self, provider: Callable[..., Any] | None) -> None:
         """Attach the P2 window-motion provider (``frame, state, camera_id, window``).
@@ -380,6 +412,24 @@ class DbsrFeatureAdapter(nn.Module):
         coordinate and packed/sensor unit conversion belongs to the provider.
         """
         self.motion_provider = provider
+
+    def set_support(self, support: Any | None) -> None:
+        """Attach the v1.2 measurement support (``SpatialSupport``) to the content path.
+
+        With support attached, :meth:`step` computes the region-level innovation and
+        temporal revision of the fused window and ANDs the resulting usability into
+        the mask that :meth:`encode_window` hands to alignment and fusion.  That is
+        what makes the support *change the content*: the withdrawn source's features
+        are zeroed, the reference frame falls back to the valid-frame consensus, and
+        the fusion softmax renormalises over the remaining sources.  Support carries
+        no learnable parameters, so a N01 arm and its Base arm keep identical
+        parameter counts.
+        """
+        self.support = support
+
+    @property
+    def support_enabled(self) -> bool:
+        return self.support is not None
 
     # -- derived contracts ---------------------------------------------------------
 
@@ -527,15 +577,61 @@ class DbsrFeatureAdapter(nn.Module):
                 state.device,
             )
         updated = measurement_state.push(current, frame)
+        if budget.max_updates == 0:
+            # Arrival bookkeeping is separate from expensive readout computation.
+            # The full path later rebuilds motion/support/content from the retained window.
+            buffered = replace(
+                state,
+                cameras={**state.cameras, camera: updated},
+                arrivals={
+                    **state.arrivals,
+                    camera: state.arrivals.get(camera, torch.zeros_like(unique, dtype=torch.int64))
+                    + 1,
+                },
+                unique_arrivals={
+                    **state.unique_arrivals,
+                    camera: state.unique_arrivals.get(
+                        camera, torch.zeros_like(unique, dtype=torch.int64)
+                    )
+                    + unique.to(torch.int64),
+                },
+                episodes=state.episodes
+                if episode_ids is None
+                else {**state.episodes, camera: list(_episode_values(episode_ids, batch))},
+                step_index=state.step_index + 1,
+            )
+            return EncoderOutput(
+                representation={cid: x.values for cid, x in buffered.tokens.items()},
+                state=buffered,
+                validity={cid: x.mask for cid, x in buffered.tokens.items()},
+                diagnostics={"ingest_only": True, "unique_frames_this_step": unique.tolist()},
+                cost={"state_bytes": self.state_bytes(buffered)},
+            )
         window = min(int(updated.filled.max()), int(budget.max_history))
         tokens = dict(state.tokens)
         correspondence = dict(state.correspondence)
         pooled_mask = None
         weights = None
         source_frame_ids = None
+        motion_seconds = support_seconds = content_seconds = 0.0
+        support_state = state.support.get(camera)
+        support_decision = None
         motion_report: dict[str, Any] = {"status": "identity_pending_p2"}
         if window > 0:
             window_values, cell_mask = self._window(updated, window)
+            # The arm's input domain is realised here, at the point the measurement is
+            # consumed, so that both platforms, the training loop and the serving path get
+            # it from one place.  ``rendered_rgb3`` is the same measurement through the
+            # frozen same-source ISP; without this branch the RGB arms read the RAW tensor
+            # and the "same mechanism, different input" comparison does not exist.
+            if (
+                self.config.input_mode == "rendered_rgb3"
+                and frame.metadata.get("observation_contract") is None
+            ):
+                from owac.raw.n01_paired_views import paired_views
+
+                window_values = paired_views(window_values, platform=self.config.platform).rgb
+            motion_started = self._stage_clock(window_values.device)
             motion = offsets_xy
             motion_source = "explicit_offsets" if offsets_xy is not None else "identity_pending_p2"
             if motion is None and self.motion_provider is not None:
@@ -545,10 +641,83 @@ class DbsrFeatureAdapter(nn.Module):
                 motion_source = "motion_provider"
             resolved_offsets, motion_report = self._resolve_motion(motion, updated, window, batch)
             motion_report["status"] = motion_source
-            fused, available, weights = self.encode_window(
-                window_values, cell_mask, resolved_offsets
-            )
+            motion_seconds = self._stage_clock(window_values.device) - motion_started
+            support_started = self._stage_clock(window_values.device)
+            support_state = state.support.get(camera)
+            support_decision = None
+            shifted = False
+            effective_mask = cell_mask
+            reference_support_mask = None
+            if self.support is not None and window > 1 and hasattr(self.support, "replay_window"):
+                from owac.frameworks.n01_full.tensor_gls import conservative_source_mask
+
+                support_state, support_decision, aligned_mask = self.support.replay_window(
+                    window_values,
+                    cell_mask,
+                    motion_report["valid"],
+                    resolved_offsets,
+                    updated.variance[:window].transpose(0, 1),
+                    motion_report.get("visibility"),
+                )
+                reference_support_mask = aligned_mask.clone()
+                reference_support_mask[:, 1:] &= support_decision.source_usable.unsqueeze(2)
+                effective_mask = conservative_source_mask(
+                    reference_support_mask, cell_mask, resolved_offsets
+                )
+            elif self.support is not None and window > 1:
+                if support_state is None:
+                    # Fixed capacity for the whole configured window: a frame that
+                    # has just arrived must not be mistaken for a slot that was
+                    # freed when it aged back.
+                    support_state = self.support.initial_state(
+                        batch,
+                        max(self.config.max_history - 1, 1),
+                        window_values.shape[-2],
+                        window_values.shape[-1],
+                        window_values.device,
+                    )
+                elif bool(unique.any()):
+                    # The per-source records describe buffer slots, and the buffer only
+                    # advances on a genuinely new measurement, so the shift has to follow
+                    # the buffer rather than the call.  Shifting unconditionally moved the
+                    # carried age/defer records one slot away from the frames they
+                    # describe whenever a duplicate arrival left the window unchanged.
+                    support_state = self.support.shift(support_state, 1, selected=unique)
+                    shifted = True
+                support_state, support_decision = self.support.observe(
+                    support_state,
+                    window_values,
+                    cell_mask,
+                    motion_report["valid"],
+                    new_measurement=unique,
+                )
+                # Slot 0 is the newest frame and stays the reference; the decision
+                # covers history slots 1..T-1.
+                effective_mask = cell_mask.clone()
+                effective_mask[:, 1:] = effective_mask[
+                    :, 1:
+                ] & support_decision.source_usable.unsqueeze(2)
+            support_seconds = self._stage_clock(window_values.device) - support_started
+            content_started = self._stage_clock(window_values.device)
+            self.last_support = support_decision
+            # The decision carries no camera tag, so a consumer that wants to be sure it
+            # is looking at the right camera has nothing to check against.  Recorded here
+            # rather than inferred, because ``last_support`` is overwritten per camera and
+            # the figures read it after the fact.
+            self.last_support_camera = camera if support_decision is not None else None
+            if reference_support_mask is None:
+                fused, available, weights = self._encode_readout(
+                    window_values, effective_mask, resolved_offsets
+                )
+            else:
+                fused, available, weights = self._encode_readout(
+                    window_values,
+                    effective_mask,
+                    resolved_offsets,
+                    reference_mask=reference_support_mask,
+                )
             pooled, pooled_mask, positions = self._masked_pool(fused, available)
+            content_seconds = self._stage_clock(window_values.device) - content_started
             tokens[camera] = CameraTokens(
                 values=pooled,
                 mask=pooled_mask,
@@ -556,6 +725,17 @@ class DbsrFeatureAdapter(nn.Module):
                 window_frames=window,
                 newest_frame_ids=updated.frame_ids[0].detach(),
             )
+            self.last_fusion = {
+                "camera_id": camera,
+                "input_mode": self.config.input_mode,
+                "support_records_shifted": shifted,
+                "batch_mixed_duplicate_and_new": bool(unique.any() and not unique.all()),
+                "window_values": window_values.detach(),
+                "cell_mask": effective_mask.detach(),
+                "offsets_xy": None if resolved_offsets is None else resolved_offsets.detach(),
+                "weights": None if weights is None else weights.detach(),
+                "frame_ids": [int(value) for value in updated.frame_ids[:window, 0].tolist()],
+            }
             default_ids = tuple(int(value) for value in updated.frame_ids[:window, 0].tolist())
             correspondence[camera] = CameraCorrespondence(
                 mapping_version=motion_report["mapping_version"],
@@ -587,6 +767,9 @@ class DbsrFeatureAdapter(nn.Module):
         new_state = replace(
             state,
             cameras={**state.cameras, camera: updated},
+            support=(
+                state.support if support_state is None else {**state.support, camera: support_state}
+            ),
             tokens=tokens,
             correspondence=correspondence,
             arrivals={
@@ -621,8 +804,9 @@ class DbsrFeatureAdapter(nn.Module):
             "source_frame_ids": source_frame_ids,
             "fusion_weights": None if weights is None else weights.detach(),
             "pooled_token_mask": pooled_mask,
-            "p3_support_applied": False,
-            "p3_support_status": "disabled_pending_p4",
+            "p3_support_applied": bool(support_decision is not None),
+            "p3_support_status": ("disabled_by_arm" if self.support is None else "applied_v1_2"),
+            "support": None if support_decision is None else support_decision.describe(),
             "p2_motion_status": motion_report["status"],
             "p2_motion": {
                 key: value
@@ -641,6 +825,12 @@ class DbsrFeatureAdapter(nn.Module):
             cost={
                 "state_bytes": self.state_bytes(new_state),
                 "arrivals": int(new_state.step_index),
+                "motion_seconds": motion_seconds,
+                "support_seconds": support_seconds,
+                "content_seconds": content_seconds,
+                "stage_timing_kind": "synchronized_wall"
+                if self.profile_stages
+                else "host_launch_only",
             },
         )
 
@@ -693,6 +883,12 @@ class DbsrFeatureAdapter(nn.Module):
             camera: [None if bool(selected[i]) else value for i, value in enumerate(values)]
             for camera, values in state.episodes.items()
         }
+        # The support detector carries this episode's posterior, age and defer counts; it
+        # has to be reset with the buffer or the last rollout decides the next one's
+        # support for its first frames.
+        support: dict[str, Any] = {}
+        for camera, entry in state.support.items():
+            support[camera] = entry if self.support is None else self.support.reset(entry, selected)
         correspondence: dict[str, CameraCorrespondence] = {}
         for camera, entry in state.correspondence.items():
             keep = ~selected
@@ -731,6 +927,7 @@ class DbsrFeatureAdapter(nn.Module):
                 camera: torch.where(selected, torch.zeros_like(values), values)
                 for camera, values in state.unique_arrivals.items()
             },
+            support=support,
         )
 
     def detach_state(self, state: FullState) -> FullState:
@@ -787,20 +984,108 @@ class DbsrFeatureAdapter(nn.Module):
         for table in (state.arrivals, state.unique_arrivals):
             for tensor in table.values():
                 total += int(tensor.numel()) * int(tensor.element_size())
+        seen = set()
+
+        def support_bytes(value):
+            if id(value) in seen:
+                return 0
+            seen.add(id(value))
+            if torch.is_tensor(value):
+                return value.numel() * value.element_size()
+            if isinstance(value, dict):
+                return sum(support_bytes(v) for v in value.values())
+            if hasattr(value, "state_dict"):
+                return support_bytes(value.state_dict())
+            return 0
+
+        total += support_bytes(state.support)
         return total
 
     # -- internals -----------------------------------------------------------------
 
+    def _encode_readout(self, values, cell_mask, offsets_xy, reference_mask=None):
+        """Checkpoint the complete camera, not just its individual feature stems.
+
+        Retain compact channel-mean diagnostics. The actual per-channel softmax
+        and fused result are unchanged; cross-camera autograd does not retain all
+        native 32x512 feature/logit volumes until the final action loss.
+        """
+        compact = getattr(self, "checkpoint_content", False)
+
+        def encode(a, mask, offsets, reference):
+            from owac.frameworks.n01_full.acceleration import neural_autocast
+
+            with neural_autocast(self, a):
+                fused, available, weights = self.encode_window(
+                    a, mask, offsets, reference_mask=reference, compact_weights=compact
+                )
+            return fused, available, weights
+
+        if compact and self.training and torch.is_grad_enabled():
+            from torch.utils.checkpoint import checkpoint
+
+            return checkpoint(
+                encode, values, cell_mask, offsets_xy, reference_mask, use_reentrant=False
+            )
+        return encode(values, cell_mask, offsets_xy, reference_mask)
+
     def encode_window(
-        self, values: torch.Tensor, cell_mask: torch.Tensor, offsets_xy: Any = None
+        self,
+        values: torch.Tensor,
+        cell_mask: torch.Tensor,
+        offsets_xy: Any = None,
+        *,
+        reference_mask: torch.Tensor | None = None,
+        compact_weights: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """DBSR-encode a ``[B,T,C,H,W]`` window (newest first) and fuse it."""
         batch, length, channels, height, width = values.shape
-        encoded = self.backbone(values.reshape(batch * length, channels, height, width))
+        original_length = length
+        active = torch.arange(length, device=values.device)
+        if getattr(self, "skip_empty_sources", False):
+            occupied = cell_mask.any(dim=(0, 2, 3, 4))
+            if reference_mask is not None:
+                occupied &= reference_mask.any(dim=(0, 2, 3, 4))
+            occupied[0] = True  # preserve the declared reference/consensus fallback
+            active = occupied.nonzero().flatten()
+            values, cell_mask = values[:, active], cell_mask[:, active]
+            if offsets_xy is not None:
+                offsets_xy = offsets_xy[:, active]
+            if reference_mask is not None:
+                reference_mask = reference_mask[:, active]
+            length = len(active)
+        values = values.masked_fill(~cell_mask, 0)
+        flat = values.reshape(batch * length, channels, height, width)
+        chunk = getattr(self, "content_frame_chunk", len(flat))
+        parts = []
+        for start in range(0, len(flat), chunk):
+            piece = flat[start : start + chunk]
+            if (
+                getattr(self, "checkpoint_content", False)
+                and self.training
+                and torch.is_grad_enabled()
+            ):
+                from torch.utils.checkpoint import checkpoint
+
+                parts.append(checkpoint(self.backbone, piece, use_reentrant=False))
+            else:
+                parts.append(self.backbone(piece))
+        encoded = torch.cat(parts, 0)
         encoded = encoded.reshape(batch, length, self.config.feature_width, height, width)
         encoded = encoded.masked_fill(~cell_mask, 0)
         aligned, valid, offsets = align_features(encoded, cell_mask, offsets_xy)
+        if reference_mask is not None:
+            valid = valid & reference_mask
+            aligned = aligned.masked_fill(~valid, 0)
+        dtype = getattr(self, "neural_dtype", None)
+        if aligned.is_cuda and dtype is not None:
+            aligned = aligned.to(dtype)
         fused, weights = self.fusion(aligned, valid, offsets)
+        if compact_weights:
+            weights = weights.detach().mean(2, keepdim=True)
+        if length != original_length:
+            complete = weights.new_zeros(batch, original_length, *weights.shape[2:])
+            weights = complete.index_copy(1, active, weights)
         available = valid.any(1)
         return fused.masked_fill(~available, 0), available, weights
 
