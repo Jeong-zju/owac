@@ -97,6 +97,24 @@ def test_refresh_picks_up_new_source_and_flags_old_summary(workspace):
     assert any("摘要来源已变化" in warning for warning in route["warnings"])
 
 
+def test_consolidated_routes_read_main_and_reject_other_workspace_paths(workspace):
+    repo, _, registry, _ = workspace
+    settings = json.loads(registry.read_text())
+    route = settings["routes"][0]
+    route.update(checkout="repo", stages=[], documents=[], summary_sources={})
+    (repo / "docs").mkdir()
+    (repo / "docs/status.md").write_text("# Paused research\n")
+    registry.write_text(json.dumps(settings))
+    result = build_snapshot(repo, registry)["routes"][0]
+    assert result["checkout"] == str(repo)
+    assert any(doc["content"] == "# Paused research\n" for doc in result["documents"])
+    for target in ("../outside", "worktrees/../../outside", "other-checkout"):
+        route["checkout"] = target
+        registry.write_text(json.dumps(settings))
+        with pytest.raises(ValueError, match="checkout 不在"):
+            build_snapshot(repo, registry)
+
+
 def test_complete_packet_keeps_its_own_scope_without_legacy_wrapper(workspace):
     repo, _, registry, files = workspace
     settings = json.loads(registry.read_text())

@@ -1,24 +1,26 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-10-15",
+  "reviewed_at": "2026-10-19",
   "routes": [
     {
       "id": "N01",
       "name": "面向VLA的RAW时空证据编码",
       "short": "RAW保留了什么，编码器利用了什么，行动怎样改变",
       "color": "green",
-      "checkout": "worktrees/n01-evidence-integration",
-      "branch": "lzh/n01-evidence-integration",
+      "checkout": "repo",
+      "branch": "main",
       "version": "v1.2 · RAW信息利用与行动归因",
-      "status": "新机部署就绪 · 双GPU · P3待实施",
-      "current_stage": "P3",
+      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "current_stage": "PAUSED",
       "question": "同源RAW相对固定ISP的RGB多保留了哪些行动信息，N01如何利用？",
-      "summary": "RAW信息差异→时空证据编码→VLA行动。四臂单种子101，主体8个run；新机双96GiB GPU，RAW/RGB可并行训练和验证。开发每轮总100次，P3待实施。",
-      "next": "复制已更新的新服务器P3完整包；在154.59.156.21:34302复用部署代码/环境，GPU0 RAW、GPU1 RGB；先接通简单实时监控。",
-      "boundary": "新机代码、三套CUDA环境、完整RawVLA-Bench和π0.5已部署并验证；四臂模型与研究实时监控待P3实现。旧P2正式运动权重未恢复，历史限制保留。",
-      "primary_document": "docs/N01_full_development_plan_2026-10-15_v1.2.md",
-      "evidence_document": "research/experiments/n01_full/P2_acceptance_report.md",
+      "summary": "P3暂停；RAW/RGB各0/12，同四个Normal原策略4/4，两臂各0/4；视觉—动作适配待定位。",
+      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
+      "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+      "evidence_document": "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md",
       "documents": [
+        "research/archives/2026-10-19_worktree_consolidation/README.md",
+        "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md",
         "docs/N01_new_server_deployment_2026-10-15.md",
         "docs/N01_full_development_plan_2026-10-15_v1.2.md",
         "docs/decisions/0015-n01-v1-2-raw-information-route.md",
@@ -52,20 +54,27 @@
         "research/experiments/n01_full/P2_acceptance_report.md"
       ],
       "summary_sources": {
-        "docs/status.md": "7a9a6b2d049b4d80631da833b410ae0653c9af0f6474e980f4017249fe509522",
-        "docs/N01_full_development_plan_2026-10-15_v1.2.md": "cb0e2369633d9d056bceb5887261ed2e3c8bea60b5db0c4a7e8423789c15ea7c",
-        "docs/prompts/n01_v1_2/P3_FULL_ENCODER.md": "87f22df1c09b2723f90f742de27c1f57963502d567a799746a28421e4d079911",
-        "research/experiments/n01_full/P2_acceptance_report.md": "43e75c75a9f0605e5ba92f217880a041681a351a903fc5215d7db352bb580dbd"
+        "docs/status.md": "df98a8e9787ef955729a49b267d6d7ee179419ef3115981ef13d313e986dbd26",
+        "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md": "b4454061d6dd5fbc66beb8b778cd01c7985243590b715b7663aad4a367e1cf69"
       },
       "stages": [
+        {
+          "id": "PAUSED",
+          "title": "暂停与本地证据",
+          "state": "current",
+          "label": "已暂停",
+          "description": "P3暂停；RAW/RGB各0/12，同四个Normal原策略4/4，两臂各0/4；视觉—动作适配待定位。",
+          "document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+          "prompt_kind": "none"
+        },
         {
           "id": "P0",
           "title": "v1.0 问题、数据与依赖",
           "state": "recorded",
-          "label": "独立验收通过",
+          "label": "历史归档 · 当前不执行",
           "description": "修补后 P0 工程验收通过，可以交接 P1；未启动长训练，无机制效果结论。",
           "document": "docs/prompts/n01_v1_0/P0_FOUNDATION.md",
-          "prompt_kind": "original",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
             "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
@@ -73,16 +82,17 @@
             "docs/prompts/n01_v1_0/03_REMOTE_EXECUTION.md",
             "docs/prompts/n01_v1_0/P0_FOUNDATION.md"
           ],
-          "instruction": "P0 已独立验收通过，此包仅供回查历史要求。P1 也已验收并提交；新的开发接续 P3。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。"
+          "instruction": "P0 已独立验收通过，此包仅供回查历史要求。P1 也已验收并提交；新的开发接续 P3。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。",
+          "historical_prompt_kind": "original"
         },
         {
           "id": "P1",
           "title": "v1.0 可组合与可撤回参考",
           "state": "recorded",
-          "label": "已验收并提交",
+          "label": "历史归档 · 当前不执行",
           "description": "独立修补后验收通过：实现 2d82bbb，验收归档 6fb3807；解析参考与真实桥接连通性已核验。",
           "document": "docs/prompts/n01_v1_0/P1_ANALYTIC_REFERENCE.md",
-          "prompt_kind": "original",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
             "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
@@ -92,16 +102,17 @@
             "research/experiments/n01_full/P0_acceptance_report.md",
             "docs/prompts/n01_v1_0/P1_ANALYTIC_REFERENCE.md"
           ],
-          "instruction": "P1 已独立验收并提交（实现 2d82bbb，验收归档 6fb3807）。此包仅用于回查历史要求，不重新启动 P1；新开发接续 P3。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。"
+          "instruction": "P1 已独立验收并提交（实现 2d82bbb，验收归档 6fb3807）。此包仅用于回查历史要求，不重新启动 P1；新开发接续 P3。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。",
+          "historical_prompt_kind": "original"
         },
         {
           "id": "P2",
           "title": "v1.0 运动对应与噪声模型",
           "state": "recorded",
-          "label": "已提交 · 用户确认通过",
+          "label": "历史归档 · 当前不执行",
           "description": "修补 fe8d534，验收记录 d3dec90；2026-10-15 用户决定视为通过，原复核限制保留。",
           "document": "docs/prompts/n01_v1_0/P2_RAW_MOTION.md",
-          "prompt_kind": "original",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_0/00_SHARED_CONTRACT.md",
             "docs/prompts/n01_v1_0/01_CURRENT_IMPLEMENTATION.md",
@@ -112,46 +123,50 @@
             "research/experiments/n01_full/P1_acceptance_report.md",
             "docs/prompts/n01_v1_0/P2_RAW_MOTION.md"
           ],
-          "instruction": "P2 已提交（修补 fe8d534，验收记录 d3dec90），2026-10-15 用户决定视为通过。此包仅供历史回查，不重新启动 P2；新开发接续 P3。P2 独立复核的未完全通过结论和具体限制仍是原始证据，不改写为独立验收通过。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。"
+          "instruction": "P2 已提交（修补 fe8d534，验收记录 d3dec90），2026-10-15 用户决定视为通过。此包仅供历史回查，不重新启动 P2；新开发接续 P3。P2 独立复核的未完全通过结论和具体限制仍是原始证据，不改写为独立验收通过。 当前正式路线为v1.2，新开发仅从v1.2 P3完整包开始。",
+          "historical_prompt_kind": "original"
         },
         {
           "id": "P3",
           "title": "完整编码器与RAW信息归因",
-          "state": "current",
-          "label": "当前待实施 · 完整包已备",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "完整模型与同源四臂主体训练；开发每轮总100次，优先当前模型，跑完报成功率，不要求全任务/全条件/全四臂覆盖。",
           "document": "docs/prompts/n01_v1_2/P3_FULL_ENCODER.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_2/P3_FULL_ENCODER.md"
           ],
-          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。"
+          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。",
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "P4",
           "title": "冻结四臂全量验证",
-          "state": "planned",
-          "label": "后续 · P3交付后",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "冻结ISP/模型/协议；每方法10000＋3250，四臂单种子核心53,000，缺口与原分母保留。",
           "document": "docs/prompts/n01_v1_2/P4_FROZEN_FULL_EVALUATION.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_2/P4_FROZEN_FULL_EVALUATION.md"
           ],
-          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。"
+          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。",
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "P5",
           "title": "真实RAW与有依据的扩展",
-          "state": "planned",
-          "label": "后续 · 按实际限制选择",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "真实CFA/跨域、ISP适用范围、第二骨干/读出或长记忆成本扩展；对应信息归因保持。",
           "document": "docs/prompts/n01_v1_2/P5_TRANSFER_AND_EXTENSIONS.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n01_v1_2/P5_TRANSFER_AND_EXTENSIONS.md"
           ],
-          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。"
+          "instruction": "完整包已包含工作位置、当前路线、远程与阶段范围，不添加旧局部门槛或hash执行前缀。",
+          "historical_prompt_kind": "complete"
         }
       ],
       "legacy_prompt": "docs/prompts/DeepSeek_N01_implementation.md",
@@ -189,25 +204,29 @@
         "budget": "2个平台×4方法×1个种子101，共8个主体run；GPU0 RAW、GPU1 RGB，训练/验证可并行。开发每轮总100次，不能按GPU翻倍；正式P4另行安排。",
         "data_boundary": "RoboTwin：HDR派生浮点；LIBERO：RGB8逆处理/量化缓存；两者都不是原生Bayer。正常光配对RGB不直接用作暗光RAW对照。",
         "status": "新机部署就绪 · 两卡96GiB · P3模型/训练待实施"
-      }
+      },
+      "historical_checkout": "worktrees/n01-evidence-integration",
+      "historical_branch": "lzh/n01-evidence-integration"
     },
     {
       "id": "N02",
       "name": "RAW 测量约束的动作表征",
       "short": "让 RAW 弱测量约束表征并改变动作",
       "color": "blue",
-      "checkout": "worktrees/n02-measurement-completion",
-      "branch": "lzh/n02-measurement-completion",
+      "checkout": "repo",
+      "branch": "main",
       "version": "v1.2 · 完整 RAW 编码器",
-      "status": "代码环境已部署 · 数据同步中 · P2待实施",
-      "current_stage": "P2",
+      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "current_stage": "PAUSED",
       "question": "能否利用 RAW 保留的动作线索，纠正潜在解释，并让 π0.5 改善操作？",
-      "summary": "P2—P4自包含包已备：完整模型/真实训练/实时可视化，seed1103，所选模型共100次闭环。新机双GPU可RAW/RGB并行；P1已证实缺陷并入P2修复。",
-      "next": "复制P2完整包，在93.91.156.102:51584的N02 worktree实现完整模型；代码/环境/权重和双平台迁移已检查，数据全集后台同步，先接通真实训练监控。",
-      "boundary": "当前为提示词与部署；v1.2模型/长训练/闭环收益尚未实施。LIBERO pseudo-RAW与RoboTwin HDR-derived分报，不主张原生CFA。",
-      "primary_document": "docs/plans/N02_full_development_v1.2.md",
-      "evidence_document": "research/experiments/2026-10-15_n02_p1_independent_acceptance.md",
+      "summary": "P2/r17暂停；Normal小样本冻结RAW动作读出有收益，联合更新无额外总体收益；r17学习策略闭环0，历史r11为0/3。",
+      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
+      "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+      "evidence_document": "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md",
       "documents": [
+        "research/archives/2026-10-19_worktree_consolidation/README.md",
+        "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md",
         "docs/prompts/n02_v1_2/README.md",
         "docs/prompts/n02_v1_2/00_EXECUTION_CONTEXT.md",
         "docs/prompts/n02_v1_2/01_REFERENCE_CODE.md",
@@ -223,143 +242,163 @@
         "research/candidates/N02.md"
       ],
       "summary_sources": {
-        "docs/status.md": "1ec8a277be36144988546e91059c3a89e01684fecc471a608192cb2c6c532ce2",
-        "docs/plans/N02_full_development_v1.2.md": "ece2a1fafa8d47a7073ef1d971b6e70d2c401f67c9cb04c1165d929c9b1ac2cc",
-        "docs/prompts/n02_v1_2/P2_FULL_ENCODER.md": "294d13d8dc197b28a9d2c9b0950690cdd641f324908b151263ecd2676235cce8",
-        "research/experiments/2026-10-15_n02_v1_2_remote_deployment.md": "d250a5921bea9a8fc76856e25832e6e0e3e689f6a4e2005b284eb9baef2d3713"
+        "docs/status.md": "df98a8e9787ef955729a49b267d6d7ee179419ef3115981ef13d313e986dbd26",
+        "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md": "d7452eadcb4a6a3309695235044b94124d8f9149a7084fd0c9e9498292a2c0dd"
       },
       "stages": [
+        {
+          "id": "PAUSED",
+          "title": "暂停与本地证据",
+          "state": "current",
+          "label": "已暂停",
+          "description": "P2/r17暂停；Normal小样本冻结RAW动作读出有收益，联合更新无额外总体收益；r17学习策略闭环0，历史r11为0/3。",
+          "document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+          "prompt_kind": "none"
+        },
         {
           "id": "P0",
           "title": "v1.1 基础、数据与上游一致性",
           "state": "recorded",
-          "label": "历史 · 基础已验收",
+          "label": "历史归档 · 当前不执行",
           "description": "P0 工程、数据和数值基础可复用，不代表完整能力。",
           "document": "research/experiments/2026-10-14_n02_p0_independent_acceptance.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "P1",
           "title": "v1.1 RAW 观测与绝对拟合",
           "state": "recorded",
-          "label": "历史失败记录 · 独立验收未通过",
+          "label": "历史归档 · 当前不执行",
           "description": "先验与三态接线、泄漏及评测缺陷并入 v1.2 P2；不沿旧启动语续训。",
           "document": "research/experiments/2026-10-15_n02_p1_independent_acceptance.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "P2",
           "title": "完整RAW编码器与真实VLA",
-          "state": "current",
-          "label": "当前待实施 · 完整包已备",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "修复P1、完整Base/候选/测量反馈/读出，真实短训与实时网页；P3接续预算。",
           "document": "docs/prompts/n02_v1_2/P2_FULL_ENCODER.md",
           "section_source": "docs/plans/N02_full_development_v1.2.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n02_v1_2/P2_FULL_ENCODER.md"
           ],
-          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。"
+          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。",
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "P3",
           "title": "单种子充分训练与整体比较",
-          "state": "planned",
-          "label": "后续阶段 · 完整包已备",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "GPU0 RAW/GPU1 RGB并行；100k/50k为资源计划，不以收敛或全部矩阵为门槛。",
           "document": "docs/prompts/n02_v1_2/P3_TRAINING_COMPARISON.md",
           "section_source": "docs/plans/N02_full_development_v1.2.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n02_v1_2/P3_TRAINING_COMPARISON.md"
           ],
-          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。"
+          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。",
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "P4",
           "title": "独立重载与100次闭环",
-          "state": "planned",
-          "label": "后续阶段 · 完整包已备",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "所选模型各共100次，默认RoboTwin主平台；预定双平台50+50分报，成功率/失败/视频。",
           "document": "docs/prompts/n02_v1_2/P4_CLOSED_LOOP_100.md",
           "section_source": "docs/plans/N02_full_development_v1.2.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n02_v1_2/P4_CLOSED_LOOP_100.md"
           ],
-          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。"
+          "instruction": "直接复制本阶段完整原文；已含新机/双GPU/单种子/100次/前端专家任务，不添加旧v1.1门槛或执行前缀。",
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "v1.1-E1",
           "title": "v1.1 早期策略预检 · direct",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P2",
           "title": "v1.1 对象循环与全局求解",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P2_ENTITIES_SOLVER.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-E2",
           "title": "v1.1 早期策略预检 · objects",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/EARLY_POLICY_PREFLIGHT.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P3",
           "title": "v1.1 发现新的结构解释",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P3_STRUCTURE_DISCOVERY.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P4",
           "title": "v1.1 来源依赖与正确撤回",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P4_PROVENANCE_REPLAY.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P5",
           "title": "v1.1 机制审计与局部执行",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P5_MECHANISM_AUDIT.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P6",
           "title": "v1.1 正式 π0.5 适配",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P6_POLICY_TRAINING.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "v1.1-P7",
           "title": "v1.1 完整机器人闭环",
-          "state": "planned",
-          "label": "历史计划 · 未按此路线实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "旧版阶段仅供回查，不再作为新任务执行入口。",
           "document": "docs/prompts/n02_v1_1/P7_CLOSED_LOOP.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         }
       ],
       "legacy_prompt": "docs/prompts/DeepSeek_N02_implementation.md",
@@ -398,25 +437,29 @@
         "budget": "仅训练seed1103；100k预训练＋50k适配为资源计划；所选模型共100次，默认RoboTwin100，预定双平台50+50。RAW/RGB分卡并行，不要求全矩阵/三种子/全集/hash/收敛门槛。",
         "data_boundary": "LIBERO 为 RGB8-derived pseudo-RAW；RoboTwin 为 HDR-derived。正常光配对 RGB 不冒充同源退化输入；当前不主张原生 CFA 信息增量。",
         "status": "P2—P4完整包已备；代码/环境/原策略迁移检查通过，数据同步中；P2模型待实现"
-      }
+      },
+      "historical_checkout": "worktrees/n02-measurement-completion",
+      "historical_branch": "lzh/n02-measurement-completion"
     },
     {
       "id": "N04",
       "name": "RAW 证据预测与状态修订",
       "short": "运动中利用弱 RAW 证据，及时修订旧预测",
       "color": "orange",
-      "checkout": "worktrees/n04-egomotion-separation",
-      "branch": "lzh/n04-egomotion-separation",
+      "checkout": "repo",
+      "branch": "main",
       "version": "v1.1 · 单种子／每模型100次",
-      "status": "S1 局部有效／方差未通过 · S2 待实施",
-      "current_stage": "S2",
+      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "current_stage": "PAUSED",
       "question": "机器人运动时，如何充分利用 RAW 相比同源 RGB 保留的任务证据，并在新证据反驳预测时及时更新表征？",
-      "summary": "完整 ConvNeXt-B、RAFT、条件 RKN、双模式修订和 π0.5 的路线已采用；S2待实施。DeepSeek阶段包已扩写：每平台／方法seed101，每个待评模型100次（默认两平台各50），含前端专家简洁实时网页任务，已填专用双GPU服务器／8080转发，支持双模型和验证并行，HF凭据读服务器环境。S1局部学习有效但方差不可靠，完整模型和RAW增量尚未验证。",
-      "next": "复制S2自包含完整提示词：建立全部核心路径、真实进度网页、单种子训练和当前模型100次闭环；不附旧验收全文。",
-      "boundary": "新增网络只用官方数据；无三种子／全清单／全部消融要求，不设逐文件hash或收敛门槛。旧S0/S1与v1.0仅供历史；当前未启动训练或部署监控。",
-      "primary_document": "docs/plans/N04_full_development_v1.1.md",
-      "evidence_document": "research/experiments/2026-10-15_n04_v1_s1_independent_effect_acceptance.md",
+      "summary": "S2暂停；v4.2故障与v5工程修复保留，历史开发闭环0/100；长期效果未验收。",
+      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
+      "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+      "evidence_document": "research/experiments/2026-10-19_n04_stability_repair_v5.md",
       "documents": [
+        "research/archives/2026-10-19_worktree_consolidation/README.md",
+        "research/experiments/2026-10-19_n04_stability_repair_v5.md",
         "docs/plans/N04_full_development_v1.1.md",
         "docs/decisions/0015-n04-v1.1-route.md",
         "research/experiments/2026-10-15_n04_v1_s1_independent_effect_acceptance.md",
@@ -431,74 +474,85 @@
         "docs/prompts/n04_v1_0/README.md"
       ],
       "summary_sources": {
-        "docs/status.md": "1eebbf2ee9edfc1983a8eff01ba3ad47be1a52dc0ba58d29c86b49a8a2ab3f48",
-        "docs/plans/N04_full_development_v1.1.md": "4b02bd9bd45ee4b26d1eb06b74a1b821a866f70bbeb0c6a32b6c62a58d0c2568",
-        "docs/decisions/0015-n04-v1.1-route.md": "bd78317b7dfb7855603a12fbaa596c93a52caadd58d9514b14508e02373c22a3",
-        "docs/prompts/n04_v1_1/README.md": "bc636d8ef6c0d1a36bda03ed4b29dcbf29898119a81c28b651c9c4a97cfb3589",
-        "docs/prompts/n04_v1_1/S2_full_encoder.md": "f763ba359b98fcef682f8df5f113ade72d775456e637851721bd5fee1e614c8e",
-        "docs/prompts/n04_v1_1/S3_training_ablation.md": "b1805fe3c8afb554bb499a0ab805bd26a67598882f76c5239c4a3a23e4b2f2f3",
-        "docs/prompts/n04_v1_1/S4_frozen_evaluation.md": "0bc67e92246cd3df7ffd0ec5dc4d6e31599f66524d06df8fb198b0ee900321ac"
+        "docs/status.md": "df98a8e9787ef955729a49b267d6d7ee179419ef3115981ef13d313e986dbd26",
+        "research/experiments/2026-10-19_n04_stability_repair_v5.md": "5b008b70fa4dd32bccae89a14531784591604d75070bbbafe5f090cc219e535a"
       },
       "stages": [
+        {
+          "id": "PAUSED",
+          "title": "暂停与本地证据",
+          "state": "current",
+          "label": "已暂停",
+          "description": "S2暂停；v4.2故障与v5工程修复保留，历史开发闭环0/100；长期效果未验收。",
+          "document": "research/archives/2026-10-19_worktree_consolidation/README.md",
+          "prompt_kind": "none"
+        },
         {
           "id": "S0",
           "title": "v1.0 数据与因果合同",
           "state": "recorded",
-          "label": "历史 · 合同已验收",
+          "label": "历史归档 · 当前不执行",
           "description": "a81cf25 保留为历史；额外采集不进入 v1.1 主实验，不重启本阶段。",
           "document": "research/experiments/2026-10-14_n04_v1_s0_completion.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "S1",
           "title": "v1.0 ConvNeXt-B 测量",
           "state": "recorded",
-          "label": "历史 · 局部有效／方差未通过",
+          "label": "历史归档 · 当前不执行",
           "description": "用户已停止旧训练。保留完整骨干结构与独立验收；扩展数据权重不作为官方数据主实验初始化。",
           "document": "research/experiments/2026-10-15_n04_v1_s1_independent_effect_acceptance.md",
-          "prompt_kind": "none"
+          "prompt_kind": "none",
+          "historical_prompt_kind": "none"
         },
         {
           "id": "S2",
           "title": "完整模型与单种子训练",
-          "state": "current",
-          "label": "当前待实施",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "一次建立完整N04；调用前端专家实现简洁实时网页；seed101训练，当前模型100次闭环。 专用双GPU可并行，独立分配GPU与输出；每模型仍100次。",
           "document": "docs/prompts/n04_v1_1/S2_full_encoder.md",
           "section_source": "docs/plans/N04_full_development_v1.1.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n04_v1_1/S2_full_encoder.md"
-          ]
+          ],
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "S3",
           "title": "单种子对照与针对性改进",
-          "state": "planned",
-          "label": "计划",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "按C→A→B补最有信息量的对照；每平台／方法一个种子，每个待评模型各100次，不自动全消融。 专用双GPU可并行，独立分配GPU与输出；每模型仍100次。",
           "document": "docs/prompts/n04_v1_1/S3_training_ablation.md",
           "section_source": "docs/plans/N04_full_development_v1.1.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n04_v1_1/S3_training_ablation.md"
-          ]
+          ],
+          "historical_prompt_kind": "complete"
         },
         {
           "id": "S4",
           "title": "百次闭环与阶段结论",
-          "state": "planned",
-          "label": "计划",
+          "state": "recorded",
+          "label": "历史归档 · 当前不执行",
           "description": "选定模型各100次，默认LIBERO50＋RoboTwin50；复用有效结果，整理成功率、视频及下一步。 专用双GPU可并行，独立分配GPU与输出；每模型仍100次。",
           "document": "docs/prompts/n04_v1_1/S4_frozen_evaluation.md",
           "section_source": "docs/plans/N04_full_development_v1.1.md",
-          "prompt_kind": "complete",
+          "prompt_kind": "none",
           "prompt_sources": [
             "docs/prompts/n04_v1_1/S4_frozen_evaluation.md"
-          ]
+          ],
+          "historical_prompt_kind": "complete"
         }
       ],
-      "legacy_prompt": "docs/prompts/DeepSeek_N04_implementation.md"
+      "legacy_prompt": "docs/prompts/DeepSeek_N04_implementation.md",
+      "historical_checkout": "worktrees/n04-egomotion-separation",
+      "historical_branch": "lzh/n04-egomotion-separation"
     }
   ],
   "shared_documents": [

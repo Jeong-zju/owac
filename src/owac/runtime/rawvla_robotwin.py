@@ -210,6 +210,12 @@ class ModelClient:
             LOGGER.warning("跳过 proprio_history（未上送）：%s", error)
             return None
 
+    def _native_replan_due(self, step):
+        """Keep the frozen native cadence explicit for source-based protocol audits."""
+        if self.actions is None or step - self.chunk_start >= 50:
+            return True
+        return False
+
     def step(self, example, step):
         history = self._history()
         if self.actions is None:  # episode 首次推理（作者 harness 每 episode 调 reset_model）
@@ -219,8 +225,12 @@ class ModelClient:
             if state.shape == (ROBOTWIN_STATE_DIM,) and np.isfinite(state).all():
                 history.append(state)
         execution = getattr(self, "execution", None)
-        interval = execution.protocol.replan_interval if execution else 50
-        if self.actions is None or step - self.chunk_start >= interval:
+        should_replan = (
+            self.actions is None or step - self.chunk_start >= execution.protocol.replan_interval
+            if execution
+            else self._native_replan_due(step)
+        )
+        if should_replan:
             if os.environ.get("RAWVLA_FLOW_SEED") is not None:
                 example = dict(example)
                 example["flow_seed"] = (int(os.environ["RAWVLA_FLOW_SEED"]) + step) % (2**32)

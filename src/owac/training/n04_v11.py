@@ -2427,7 +2427,7 @@ class V11Trainer:
             "memory_settings": self.memory_settings(),
             "stages": {
                 "window_forward_backward": {
-                    "peak_memory_gb": _gpu_memory().get("peak_gb"),
+                    "peak_memory_gb": (_gpu_memory() or {}).get("peak_gb"),
                     "seconds": elapsed,
                 }
             },

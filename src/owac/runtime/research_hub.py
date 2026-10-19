@@ -195,8 +195,8 @@ def build_snapshot(repo: Path, registry_path: Path | None = None) -> dict:
     for entry in registry["routes"]:
         route = dict(entry)
         root = (workspace / route["checkout"]).resolve()
-        if not root.is_relative_to((workspace / "worktrees").resolve()):
-            raise ValueError(f"checkout 不在 worktrees 中：{root}")
+        if root != repo and not root.is_relative_to((workspace / "worktrees").resolve()):
+            raise ValueError(f"checkout 不在主仓库或 worktrees 中：{root}")
         route["checkout"] = str(root)
         route["git"] = git_state(root)
         route["exists"] = root.is_dir()

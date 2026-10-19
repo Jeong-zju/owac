@@ -1,0 +1,110 @@
+{
+  "checked_at_utc": "2026-10-10T05:56:01.397437+00:00",
+  "simulator_requirement": "Isaac Sim only; native CameraCore pre-ISP CFA; MuJoCo path rejected by user",
+  "status": "已找到官方通用采集/扩增/回放脚本；未找到当前 DROID 九组任务的现成自动专家生成器",
+  "reason": "PolaRiS 公开仿真共同训练 RLDS 缺少逐帧物体状态。Isaac Lab 的状态记录和回放工具可复用，但当前 DROID 没有 Mimic 入口，默认 SE3 遥操作与 8 维绝对关节动作未接通；仍需选定专家来源并适配。",
+  "dataset": {
+    "repo": "owhan/PolaRiS-datasets",
+    "revision": "dca86b8e186df63323eb375344a1977d92f508f7",
+    "feature_source": "https://huggingface.co/datasets/owhan/PolaRiS-datasets/blob/dca86b8e186df63323eb375344a1977d92f508f7/polaris_droid_cotrain_dataset/1.0.0/features.json",
+    "observation_keys": [
+      "gripper_position",
+      "wrist_image_left",
+      "joint_position",
+      "exterior_image_2_left",
+      "exterior_image_1_left"
+    ],
+    "action_keys": [
+      "gripper_position",
+      "joint_position"
+    ],
+    "episode_metadata_keys": [
+      "recording_folderpath",
+      "file_path"
+    ],
+    "full_scene_state": false
+  },
+  "sources": [
+    "https://github.com/arhanjain/polaris",
+    "https://polaris-evals.github.io/PolaRiS.pdf",
+    "https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/running_a_real_policy/openpi.html",
+    "https://isaac-sim.github.io/IsaacLab/main/source/overview/imitation-learning/teleop_imitation.html",
+    "https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/step_3_data_generation.html"
+  ],
+  "new_expert_data_generated": false,
+  "paired_training_dataset_delivered": false,
+  "policy_test_trajectories_are_expert_training_data": false,
+  "arena_commit": "2cc9e9766f1f62a500b85c92207192d8c60fcce5",
+  "isaaclab_commit": "91a0906f93802eb859192dcb0bca879f891e92d6",
+  "verification_scope": "pinned source inspection and cloud file SHA256 verification; these collection/generation/replay scripts were not GPU-tested on the current DROID task",
+  "scripts": {
+    "record_demos": {
+      "path": "submodules/IsaacLab/scripts/tools/record_demos.py",
+      "bytes": 37349,
+      "sha256": "2acae2a2a39057c4ab6e71557d577830da0b25b008a54f86ff5cdc269408b091",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/scripts/tools/record_demos.py",
+      "assessment": "Manual expert teleoperation to HDF5; generic action/state recorder retains initial and post-step articulation/rigid object state. Default keyboard/SpaceMouse SE3 commands need a DROID jointpos adapter."
+    },
+    "replay_demos": {
+      "path": "submodules/IsaacLab/scripts/tools/replay_demos.py",
+      "bytes": 14945,
+      "sha256": "9e13805a8186c4e4beb11437f7b1a594cdac749d90e5002e827adc4efef6d1b1",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/scripts/tools/replay_demos.py",
+      "assessment": "Restores initial state and replays saved actions; --validate_states compares saved post-step states with replay states. It is not per-frame forced state restoration and has no native RAW writer."
+    },
+    "mimic_generate_dataset": {
+      "path": "submodules/IsaacLab/scripts/imitation_learning/isaaclab_mimic/generate_dataset.py",
+      "bytes": 8179,
+      "sha256": "0478bc47e524d6241028d47e6d30f4e16195bedb91eb53af1d26d515f0478f87",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/scripts/imitation_learning/isaaclab_mimic/generate_dataset.py",
+      "assessment": "Augments annotated seed demonstrations; requires a compatible Mimic environment. Current DROID base sets mimic_env=None and derived jointpos embodiments do not provide an implementation."
+    },
+    "lift_cube_state_machine": {
+      "path": "submodules/IsaacLab/scripts/environments/state_machine/lift_cube_sm.py",
+      "bytes": 11905,
+      "sha256": "5f559ce72637cb3a3071f7ba849c5d1d6e866f10a541b8f7dc6157c54b31e5d1",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/scripts/environments/state_machine/lift_cube_sm.py",
+      "assessment": "Franka cube lift example; different embodiment, gripper and task; not a complete DROID nine-variation pick-and-place expert."
+    },
+    "state_recorders": {
+      "path": "submodules/IsaacLab/source/isaaclab/isaaclab/envs/mdp/recorders/recorders.py",
+      "bytes": 2236,
+      "sha256": "18cb5704245052c27c4f9fe37afd6fc226217ee17425113ae73ed4c0328afd64",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/source/isaaclab/isaaclab/envs/mdp/recorders/recorders.py",
+      "assessment": "InitialStateRecorder and PostStepStatesRecorder use scene.get_state(is_relative=True), covering registered articulated and rigid assets. Camera, lighting, asset versions and RAW provenance require additional metadata."
+    },
+    "recorder_config": {
+      "path": "submodules/IsaacLab/source/isaaclab/isaaclab/envs/mdp/recorders/recorders_cfg.py",
+      "bytes": 2360,
+      "sha256": "2970eb6f7e8b62fb1f0fbc542e11525c6e93a649be3241ebc87208c421044af1",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/91a0906f93802eb859192dcb0bca879f891e92d6/source/isaaclab/isaaclab/envs/mdp/recorders/recorders_cfg.py",
+      "assessment": "Records initial state, post-step state, pre-step action/observation and processed action. Pre-action image i aligns with initial state at i=0 and post-step state i-1 for later frames."
+    },
+    "droid": {
+      "path": "isaaclab_arena/embodiments/droid/droid.py",
+      "bytes": 25241,
+      "sha256": "cb4e25c913dd2fbb1280b9be24d93373eb6bdb200069f71cd55df7e1ba977400",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/isaaclab_arena/embodiments/droid/droid.py",
+      "assessment": "Pinned DROID class assigns self.mimic_env=None. The selected droid_abs_joint_pos embodiment has 7 joint position plus 1 gripper commands."
+    },
+    "arena_env_builder": {
+      "path": "isaaclab_arena/environments/arena_env_builder.py",
+      "bytes": 32423,
+      "sha256": "ff3f62232b1094483c528f4c9326cf823a3014b5b9ff63b048e090d29a52ef0e",
+      "url": "https://github.com/isaac-sim/IsaacLab-Arena/blob/2cc9e9766f1f62a500b85c92207192d8c60fcce5/isaaclab_arena/environments/arena_env_builder.py",
+      "assessment": "Mimic entry point is selected from embodiment.get_mimic_env(); generic task support cannot replace the missing embodiment implementation."
+    }
+  },
+  "replay_default_state_tolerance": 0.01,
+  "replay_tolerance_note": "generic replay compares articulation/rigid-object components using absolute difference; must define stricter per-field units and camera/RAW checks for this dataset",
+  "ready_droid_auto_expert_generator_verified": false,
+  "generic_manual_recorder_available": true,
+  "generic_state_replay_available": true,
+  "generic_mimic_generator_available": true,
+  "other_official_datasets": "GR1/G1 Mimic demonstration datasets exist but are different tasks/embodiments; not substituted for DROID",
+  "curobo_note": "Arena cuRobo extension is used for environment reachability checks; no complete expert pick-and-place generator for these nine configurations was verified",
+  "candidate_next_steps": [
+    "adapt DROID teleoperation/IK and record a few verified successful seed demonstrations, then implement DROID Mimic integration",
+    "implement and verify a DROID-specific scripted/planning expert; would create a new dataset, not recover the checkpoint original training trajectories"
+  ]
+}

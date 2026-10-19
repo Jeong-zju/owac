@@ -89,17 +89,18 @@ def test_no_check_fails_with_the_exported_reference_fixtures():
     failures = {name: e["reason"] for name, e in payload["checks"].items() if e["status"] == "fail"}
     assert failures == {}
     # reference-backed checks must really be reference-backed, not silently skipped
-    for name in (
-        "convnext_base_block",
-        "convnext_base_multiscale",
-        "fcmae_patchify_roundtrip",
-        "dnri_one_step_causal",
-        "savi_slot_attention",
-        "short_train_trend",
-    ):
-        if not (FIXTURE_DIR / f"{name}.pt").exists() and not any(
-            (FIXTURE_DIR / f"{name}.npz",).__iter__()
-        ):
+    # Export filenames differ from check IDs. A Path object is truthy even
+    # when its file is absent, so test actual existence before requiring a run.
+    reference_files = {
+        "convnext_base_block": ("convnext_block.pt",),
+        "convnext_base_multiscale": ("convnext_3ch_square.pt", "convnext_4ch_rect.pt"),
+        "fcmae_patchify_roundtrip": ("fcmae_geometry_3ch.pt",),
+        "dnri_one_step_causal": ("dnri_one_step.pt",),
+        "savi_slot_attention": ("savi_slot_attention.npz",),
+        "short_train_trend": ("train_trend.pt",),
+    }
+    for name, filenames in reference_files.items():
+        if not all((FIXTURE_DIR / filename).is_file() for filename in filenames):
             continue
         assert payload["checks"][name]["status"] in {"pass", "fail"}, name
 

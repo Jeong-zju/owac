@@ -1,5 +1,8 @@
 # 研究记录
 
+2026-10-19：三个方向全部暂停并收敛到本地主线，远端不可达。以下计划、授权和运行状态仅作历史回查；当前以[合并与证据说明](archives/2026-10-19_worktree_consolidation/README.md)为准，不能据旧包启动训练。
+
+
 RawVLA 训练/评测的完整设置和数字证据见[本机归档](archives/2026-10-14_rawvla_pi05_baseline.md)，未来实验使用[比较模板](templates/rawvla-comparison.json)。
 
 当前实验参照为 RawVLA-Bench / π0.5，部署与协议标签 `owac-rawvla-pi05-v0.1.0`；见 [0012](../docs/decisions/0012-rawvla-pi05-protocol-freeze.md)及[全量基线](experiments/2026-10-10_rawvla_pi05_full_baseline.md)。2026-10-14 两平台完整基线已取得：LIBERO 58.20%、RoboTwin 15.63%；主清单 13,250/13,250，原条件 632 条独立计分。见[完整报告](experiments/2026-10-14_rawvla_pi05_complete_evaluation.md)，论文数值尚未复现。
