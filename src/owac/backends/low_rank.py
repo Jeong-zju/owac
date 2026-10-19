@@ -36,9 +36,14 @@ def install_low_rank(base, settings):
     if any(parameter.requires_grad for parameter in base.parameters()):
         raise ValueError("install LoRA only after freezing the original backend")
     targets = tuple(settings.get("targets", ("q_proj", "v_proj")))
+    excluded_prefixes = tuple(settings.get("exclude_prefixes", ()))
+    if any(not isinstance(prefix, str) or not prefix for prefix in excluded_prefixes):
+        raise ValueError("LoRA exclusion prefixes must be nonempty strings")
     rank, alpha = int(settings.get("rank", 8)), float(settings.get("alpha", 16))
     adapters = {}
     for name, module in list(base.named_modules()):
+        if any(name == prefix or name.startswith(prefix + ".") for prefix in excluded_prefixes):
+            continue
         if isinstance(module, nn.Linear) and name.rsplit(".", 1)[-1] in targets:
             if parametrize.is_parametrized(module, "weight"):
                 raise ValueError(f"backend weight is already parametrized: {name}")
@@ -56,6 +61,7 @@ def install_low_rank(base, settings):
         "rank": rank,
         "alpha": alpha,
         "targets": targets,
+        "exclude_prefixes": excluded_prefixes,
         "modules": list(adapters),
         "trainable_parameters": sum(p.numel() for a in adapters.values() for p in a.parameters()),
         "original_backend_frozen": True,

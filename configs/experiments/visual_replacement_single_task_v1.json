@@ -1,0 +1,167 @@
+{
+  "schema": "owac.visual-replacement-study.v1",
+  "kind": "study_protocol_not_trainer_config",
+  "execution_ready": false,
+  "platform": "rawvla_bench_libero",
+  "task": {
+    "suite": "libero_goal",
+    "task_id": 6,
+    "instruction": "put the cream cheese in the bowl",
+    "historical_witness_episode": 2,
+    "lighting": "Normal",
+    "selection_reason": "existing paired original-success/replacement-failure witness"
+  },
+  "scope": "single-task recovery before four-task expansion",
+  "arms": [
+    {
+      "id": "original_frozen",
+      "vision": "native",
+      "backend_updates": 0
+    },
+    {
+      "id": "native_bridge_zero",
+      "vision": "native_via_n02_bridge",
+      "backend_updates": 0
+    },
+    {
+      "id": "native_adapted",
+      "vision": "native_frozen",
+      "budget": "matched"
+    },
+    {
+      "id": "rgb_single",
+      "vision": "single_frame_convnext_v2_base",
+      "budget": "matched"
+    },
+    {
+      "id": "raw_single",
+      "vision": "single_frame_convnext_v2_base",
+      "budget": "matched"
+    }
+  ],
+  "data": {
+    "demonstrations_total": 50,
+    "split_counts": {
+      "train": 40,
+      "validation": 5,
+      "test": 5
+    },
+    "split_unit": "source demonstration; related acquisition variants stay together",
+    "history": 1,
+    "cameras": [
+      "libero_agentview",
+      "libero_wrist"
+    ],
+    "representation": "rawvla_rgb3_not_native_bayer",
+    "rgb_source": "same-acquisition frozen original-policy ISP output, not a new custom ISP",
+    "raw_normalization": "fixed per-channel training-partition statistics only",
+    "manifest": null,
+    "manifest_sha256": null
+  },
+  "frontend": {
+    "implementation": "owac.baselines.single_frame_visual.make_convnext_base",
+    "backbone_source_sha": "2553895753323c6fe0b2bf390683f5ea358a42b9",
+    "pretrained_url": "https://dl.fbaipublicfiles.com/convnext/convnextv2/im1k/convnextv2_base_1k_224_ema.pt",
+    "pretrained_path": "outputs/checkpoints/convnextv2/convnextv2_base_1k_224_ema.pt",
+    "pretrained_sha256": "1bfd2dc2b27908062d185ef81e6bb5e36a0a10850b70d1bf010a945158e15971",
+    "initialization": "same public RGB-pretrained backbone for both three-channel arms; no teacher",
+    "input_size": [
+      256,
+      256
+    ],
+    "input_channels": 3,
+    "output": "final stride32 map -> fixed bilinear 16x16 -> LayerNorm -> Linear(1024,2048)",
+    "token_dim": 2048,
+    "tokens_per_camera": 256,
+    "trainable_scope": "all used backbone parameters and spatial channel projection",
+    "new_mechanisms": [],
+    "auxiliary_losses": [],
+    "rgb_teacher": false
+  },
+  "backend": {
+    "bridge": "owac.backends.rawvla_features_n02.RawVLAFeaturePolicy",
+    "weights": null,
+    "weights_sha256": null,
+    "tokenizer": null,
+    "normalization_stats": null,
+    "language_state_contract": "pi05-native-language-state-v1",
+    "lora": {
+      "kind": "lora",
+      "rank": 8,
+      "alpha": 16,
+      "targets": [
+        "q_proj",
+        "v_proj"
+      ],
+      "exclude_prefixes": [
+        "vlm.model.model.vision_tower",
+        "vlm.model.model.multi_modal_projector"
+      ]
+    },
+    "required_budget_receipt": "identical resolved module names, shapes, initialization and trainable counts across adapted arms",
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "replan_steps": 5,
+    "real_control_dims": 7,
+    "model_action_dims": 32,
+    "flow_objective": "pinned native objective, unchanged across arms; report real and padded dimensions separately"
+  },
+  "optimization": {
+    "seed": 101,
+    "effective_batch_size": 16,
+    "max_updates_per_adapted_arm": 5000,
+    "checkpoints": [
+      0,
+      500,
+      2000,
+      5000
+    ],
+    "anchor_presentations_per_adapted_arm": 80000,
+    "shared_data_order_and_flow_draws": true,
+    "optimizer": "AdamW",
+    "backbone_lr": 1e-05,
+    "projection_lr": 0.0001,
+    "backend_lora_lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_updates": 100,
+    "selection": "minimum validation fully sampled real-control first5 MAE; tie uses earlier step",
+    "learning_rates_status": "initial recipe, not claimed tuned",
+    "extension": "no automatic budget extension or full backend unfreezing"
+  },
+  "evaluation": {
+    "paired_noise_seeds_per_offline_observation": [
+      101,
+      102
+    ],
+    "validation_closed_loop_initializations": 10,
+    "test_closed_loop_initializations": 20,
+    "test_policy": "one selected checkpoint per arm; no checkpoint selection on test",
+    "diagnostic_recovery": {
+      "original_minimum_successes_of_20": 16,
+      "replacement_minimum_successes_of_20": 16,
+      "maximum_success_count_gap_from_original": 2,
+      "interpretation": "development screening only, not statistical non-inferiority"
+    },
+    "required_outputs": [
+      "paired_episode_success_and_regression_ledger",
+      "sampled_action_first1_first5_full10_real7_errors",
+      "translation_rotation_gripper_and_padding_errors",
+      "fixed_observation_noise_boundary_traces",
+      "checkpoint_hashes_actual_updates_and_reloads",
+      "latency_memory_and_actual_gpu_hours"
+    ]
+  },
+  "order": [
+    "native_zero_update_parity",
+    "native_adapted_and_rgb_single",
+    "raw_single",
+    "consider_four_tasks",
+    "consider_temporal_study"
+  ],
+  "assets": {
+    "rawvla_runtime": null,
+    "libero_simulator": null,
+    "paired_demonstrations": null,
+    "fixed_initialization_manifest": null
+  }
+}

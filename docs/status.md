@@ -1,5 +1,7 @@
 # OWAC 当前状态
 
+2026-10-19 主线研究转向[单任务视觉替换与控制恢复](../research/experiments/2026-10-19_visual_replacement_recovery.md)。用户已选择先做单任务，再扩到四任务；首轮50条真实示范、相同后端LoRA、每臂最多5,000更新。当前新增独立单帧空间前端、排除原视觉塔的LoRA范围选项和[比较协议](../configs/experiments/visual_replacement_single_task_v1.json)。旧N01/N02/N04继续暂停；新策略训练与闭环均为0。配套RawVLA运行环境、LIBERO策略权重／统计／tokenizer、真实配对示范及初态清单尚待完整核验；DROID本地部署权重不能替代。
+
 2026-10-19 本地 worktree 清理完成：三个候选 checkout 均已移除，当前只保留 `/home/jeong/zeno/owac/repo/` 的 `main`，后续直接在此开发。清理前重新核验提交祖先关系、工作区、91,270 个证据文件与归档哈希；另保全 N02 本地第三方源码。历史分支、代码快照和主仓库证据归档保留，见[清理收据](../research/archives/2026-10-19_worktree_consolidation/worktree-cleanup.json)。
 
 2026-10-19：用户暂停 N01、N02、N04，要求三个 worktree 合并回主线。远程服务器已不可达；本轮只合并、保全本地证据并运行本地代码检查。当前入口为 `repo/` 的本地 `main`，不自动恢复训练、诊断训练或下一阶段。

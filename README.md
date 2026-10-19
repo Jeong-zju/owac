@@ -1,5 +1,7 @@
 # OWAC
 
+当前主线工作是[单任务视觉替换与控制恢复](research/experiments/2026-10-19_visual_replacement_recovery.md)：先以50条真实示范、相同后端LoRA、最多5,000更新建立单帧RGB基础对照，再比较RAW，恢复后再扩四任务。新实验协议与单帧前端已加入；当前缺少完整配套资产，尚未启动新策略训练。原视觉塔仅作诊断与基线，RAW目标保持不变。
+
 2026-10-19：N01、N02、N04 的代码、研究结论和本地已有训练记录统一收敛到本地主线 `main`。三个方向全部暂停；远程服务器不可达。历史文档中的“运行中”“下一阶段”和训练授权均为当时快照，当前不恢复训练。
 
 当前入口为 `/home/jeong/zeno/owac/repo/`。见[合并、证据保全与恢复说明](research/archives/2026-10-19_worktree_consolidation/README.md)、[当前状态](docs/status.md)和[本地研究统筹台](docs/research-hub.md)。

@@ -1,0 +1,28 @@
+{
+  "base_commit": "920a71697c551db0f4f0f5b6fcb770406669251d",
+  "engineering_checks": {
+    "make_check": "passed; ruff lint, format, compileall",
+    "pytest_command": "uv run --locked pytest -q tests/test_single_frame_visual.py tests/test_n02_backend_adapter.py tests/encoders/n02/test_rawvla_features.py tests/test_rawvla_language.py",
+    "passed": 41,
+    "skipped": 2,
+    "skip_reason": "real StarVLA runtime and author checkpoint/tokenizer unavailable; no real-policy parity claimed",
+    "protocol_budget_consistency": "passed",
+    "markdown_local_links": "passed",
+    "git_diff_check": "passed"
+  },
+  "source_sha256": {
+    "src/owac/baselines/single_frame_visual.py": "1b3809be67d0ee35fc3e98755e060dda68ec1a1efdd125cb1d892d31549c1bd5",
+    "src/owac/backends/low_rank.py": "5175aebc31cb7a140c5acfd7e740992eeb65a36f1c8f7e30efac91bd27ada201",
+    "tests/test_single_frame_visual.py": "e0eb12269381f352cc143f8cdec377ebe4471ee93eeafb1fe7c8fe57223f864f",
+    "tests/test_n02_backend_adapter.py": "2a1192a434947531a25d873362c61ffdce866655b3910943b38401488c2da7a0",
+    "research/experiments/visual_replacement_recovery_20261019/probe_public_backbone.py": "33aab895a36504f66e6b6ab411265723712d7d6ab469912371ae1ac0a99816d6"
+  },
+  "new_policy_optimizer_updates": 0,
+  "new_robot_closed_loops": 0,
+  "scientific_results": "not_run",
+  "public_backbone_probe": {
+    "status": "passed",
+    "receipt": "research/experiments/visual_replacement_recovery_20261019/public-backbone-probe.json",
+    "scope": "real public backbone weights; synthetic inputs; no policy or optimizer"
+  }
+}

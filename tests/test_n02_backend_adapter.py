@@ -7,6 +7,26 @@ from torch.nn import functional as F
 from owac.backends.low_rank import adapter_state, install_low_rank, restore_adapters
 
 
+def test_original_tower_is_excluded_from_matched_backend_budget():
+    base = torch.nn.Module()
+    base.vision = torch.nn.Module()
+    base.vision.q_proj = torch.nn.Linear(4, 4)
+    base.language = torch.nn.Module()
+    base.language.q_proj = torch.nn.Linear(4, 4)
+    base.language.v_proj = torch.nn.Linear(4, 4)
+    base.requires_grad_(False)
+    vision_weight = base.vision.q_proj.weight.detach().clone()
+    adapters, report = install_low_rank(
+        base, {"kind": "lora", "rank": 2, "alpha": 4, "exclude_prefixes": ["vision"]}
+    )
+    assert set(adapters) == {"language.q_proj", "language.v_proj"}
+    assert report["trainable_parameters"] == 32
+    base.language.q_proj(torch.ones(1, 4)).sum().backward()
+    assert adapters["language.q_proj"].B.grad.abs().sum() > 0
+    assert base.vision.q_proj.weight.grad is None
+    assert torch.equal(base.vision.q_proj.weight, vision_weight)
+
+
 def test_parameter_digest_includes_scalar_and_bfloat16_values():
     from owac.training.n02_v12_profile import parameter_digest
 

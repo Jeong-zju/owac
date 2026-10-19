@@ -12,6 +12,8 @@
 
 共享接口按候选保留：N01 沿用 `encoder_contract` / `rawvla_sequence` / `rawvla_features`，N02、N04 使用同目录的 `_n02`、`_n04` 模块；接口语义尚未统一。复现实验优先恢复原快照提交及冻结运行源码，不将合并后的接口接线当作历史源码哈希相同。
 
+2026-10-19 后续用户决定先做单任务视觉替换恢复，再扩四任务。新工作见 `research/experiments/2026-10-19_visual_replacement_recovery.md` 与 `configs/experiments/visual_replacement_single_task_v1.json`：50条真实示范、同后端LoRA、每适配臂最多5,000更新，先零更新桥接对齐，再原视觉适配/RGB恢复，后RAW。旧N01/N02/N04训练授权不恢复；完整后端解冻、预算扩展及四任务训练不由此自动授权。当前缺少完整实验资产，配置是研究协议，不是旧trainer执行配置。
+
 完整 Default π0.5 基线见 `research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md`：LIBERO 58.20%、RoboTwin 15.63%，主清单 13,250/13,250；论文数值未复现。现成输入为作者三通道 pseudo-RAW，LIBERO 来自 RGB8 逆处理、RoboTwin 来自 HDR；不冒充原生 Bayer CFA。原部署标签 `owac-rawvla-pi05-v0.1.0` 保持不动。后续 benchmark 仍采用 RAWVLA-Bench；Arena/PolaRiS 仅作历史留档。
 
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
