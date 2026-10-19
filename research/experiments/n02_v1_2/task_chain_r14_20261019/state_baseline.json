@@ -1,0 +1,67 @@
+{
+  "kind": "linear measured-state-only ridge",
+  "optimizer_updates": 0,
+  "selected_alpha": 1.0,
+  "candidate_alphas": [
+    0.001,
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "validation_scores": [
+    2.1021726648869734,
+    0.2774909461387787,
+    0.11507363224575229,
+    0.09767640909080623,
+    0.09839179768685313,
+    0.13137394648078193
+  ],
+  "selection": "val only; train-only state normalization",
+  "metrics": {
+    "train": {
+      "normalized_control_mse": 0.05056388434869137,
+      "joint_rms_deg": 7.907899764346179,
+      "gripper_mae": 0.09054918688224091,
+      "gripper_max_error": 0.4905556985854321,
+      "valid_action_steps": 1296,
+      "windows": 32,
+      "first_joint_rms_deg": 1.5272669171285973,
+      "first_joint_max_deg": 8.18437972763476,
+      "first_gripper_mae": 0.01141730534344089,
+      "first10_joint_rms_deg": 5.315077362349857,
+      "first10_joint_max_deg": 32.609709386924294,
+      "first10_gripper_mae": 0.0434770833831095
+    },
+    "val": {
+      "normalized_control_mse": 0.09767640909080623,
+      "joint_rms_deg": 11.66591097092878,
+      "gripper_mae": 0.11830972996082298,
+      "gripper_max_error": 0.579259588855084,
+      "valid_action_steps": 438,
+      "windows": 11,
+      "first_joint_rms_deg": 6.366630435600875,
+      "first_joint_max_deg": 16.007644286253214,
+      "first_gripper_mae": 0.01271813188835051,
+      "first10_joint_rms_deg": 10.221563288121544,
+      "first10_joint_max_deg": 42.32757803852328,
+      "first10_gripper_mae": 0.06161575347485802
+    },
+    "test": {
+      "normalized_control_mse": 0.17786563349013015,
+      "joint_rms_deg": 15.825014911306248,
+      "gripper_mae": 0.1189230783413676,
+      "gripper_max_error": 0.6516222650561537,
+      "valid_action_steps": 2218,
+      "windows": 55,
+      "first_joint_rms_deg": 7.961835253285536,
+      "first_joint_max_deg": 32.30288949912689,
+      "first_gripper_mae": 0.013380882781532984,
+      "first10_joint_rms_deg": 10.481839567463368,
+      "first10_joint_max_deg": 58.52325429181951,
+      "first10_gripper_mae": 0.06033938849921929
+    }
+  },
+  "limitation": "lower capacity than nonlinear heads; not a matched-capacity ablation"
+}

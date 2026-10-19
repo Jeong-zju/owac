@@ -1,0 +1,48 @@
+{
+  "completed": true,
+  "actual_updates": 14336,
+  "head_updates": 12288,
+  "pi_updates": 2048,
+  "encoder_updates": 0,
+  "new_closed_loops": 0,
+  "findings": [
+    "More updates help pi:3-demo final training RMS11.343deg at256 to4.019deg at1024; validation-selected Normal heldout23.514 to20.849deg. Cannot treat256 as sufficient training.",
+    "More demonstrations help under fixed1024 updates:Normal heldout state12.703 to11.004deg,RAW19.017 to16.605deg,native17.147 to13.581deg,pi20.849 to17.367deg.",
+    "At5 demonstrations and1024 updates,pi Normal heldout17.367deg is close to the RAW small head16.605deg. The large r14 backend gap included optimization budget effects; current data do not establish inherent pi inability to use RAW tokens.",
+    "RAW3-demo last training RMS reaches0.645deg, but validation-selected Normal heldout remains19.017deg. Strong memorization is compatible with inadequate task generalization.",
+    "Native vision beats RAW with identical heads and budgets, especially5-demo Normal13.581 versus16.605deg; acquisition/pretraining differences prevent assigning this gap uniquely to RAW format or encoder architecture.",
+    "Matched nonlinear state-only readout beats both visual readouts on heldout data. Incremental visual task benefit remains unestablished even for native vision under this head/data regime.",
+    "Some5-demo RAW/native final training checkpoints worsen after512 updates; best validation checkpoints preserve better candidates. Late optimization is nonmonotonic.",
+    "All119 current state/action windows and357 RAW frames independently matched t/current and t+1..t+50; no future-state input or hidden position input was used."
+  ],
+  "interpretation": "Evidence supports both bounded optimization insufficiency and limited data/task generalization. It does not establish an architectural hard failure of the RAW encoder. The visual-state readout/data regime also needs attention.",
+  "limits": [
+    "3vs5 small data increase",
+    "two head seeds;one pi seed",
+    "pretraining and acquisition differ;not isolated architecture/RAW-format causality",
+    "no physical success claim",
+    "Only frozen-representation readout/pi adaptation was extended. Encoder representation training itself was not extended; cannot rule out inadequate encoder training.",
+    "Native upstream pretraining/task-data exposure was not matched or fully audited against these heldout source episodes.",
+    "State-only uses identical nominal head tensors with zero image slots, hence differs in effective active input degrees of freedom.",
+    "Constant learning rates were held fixed. Some5-demo visual last checkpoints regress late; these runs do not establish fully tuned convergence.",
+    "Fixed validation-selected checkpoints and final-step checkpoints are both retained; test results never selected continuation or weights."
+  ],
+  "next_priorities": [
+    "Use a strong measured-state action predictor as a fixed baseline, then test whether a controlled visual residual improves heldout predictions without degrading that baseline.",
+    "Separate encoder training adequacy from architecture using a separately budgeted representation-training study if stronger RAW-specific causal attribution is needed.",
+    "Expand independent task-relevant scene/initial-pose variation;3vs5 cannot establish data scaling saturation."
+  ],
+  "corrections": "Prior r14 five-light UI claim corrected; actual historical dev set has3 Normal and2 Over episodes; source receipts preserved in corrections.json",
+  "verification": "59 targeted tests;make check;raw histories and saved predictions independently recomputed;source/runtime receipt follows",
+  "evidence": [
+    "summary.json",
+    "selection.json",
+    "alignment_audit.json",
+    "extraction.json",
+    "corrections.json",
+    "learning_curves.png",
+    "modality_data_comparison.png"
+  ],
+  "committed": false,
+  "pushed": false
+}

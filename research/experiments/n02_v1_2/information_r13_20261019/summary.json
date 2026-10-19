@@ -1,0 +1,653 @@
+{
+  "policy_updates": 0,
+  "closed_loops": 0,
+  "independent_prediction_audit": {
+    "r11-task850": {
+      "verified_rows": 112,
+      "panels": {
+        "controlled": {
+          "train": {
+            "samples": 256,
+            "groups": 32
+          },
+          "val": {
+            "samples": 64,
+            "groups": 8
+          },
+          "test": {
+            "samples": 64,
+            "groups": 8
+          }
+        },
+        "cached": {
+          "train": {
+            "samples": 128,
+            "groups": 32
+          },
+          "val": {
+            "samples": 32,
+            "groups": 8
+          },
+          "test": {
+            "samples": 32,
+            "groups": 8
+          }
+        }
+      }
+    },
+    "r12-one256": {
+      "verified_rows": 112,
+      "panels": {
+        "controlled": {
+          "train": {
+            "samples": 256,
+            "groups": 32
+          },
+          "val": {
+            "samples": 64,
+            "groups": 8
+          },
+          "test": {
+            "samples": 64,
+            "groups": 8
+          }
+        },
+        "cached": {
+          "train": {
+            "samples": 128,
+            "groups": 32
+          },
+          "val": {
+            "samples": 32,
+            "groups": 8
+          },
+          "test": {
+            "samples": 32,
+            "groups": 8
+          }
+        }
+      }
+    }
+  },
+  "metric_recomputation": "exact equality, same NumPy version as head fitting",
+  "numpy_version": "2.2.6",
+  "heldout_controlled_mlp": [
+    {
+      "arm": "r11-task850",
+      "stage": "shallow_stride4",
+      "target": "object",
+      "mean": 7.10241715113322,
+      "seed_std": 0.14134669503039451
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "deep_stride16",
+      "target": "object",
+      "mean": 6.840707778930664,
+      "seed_std": 0.18168478952210967
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "spatial_fusion",
+      "target": "object",
+      "mean": 5.957225799560547,
+      "seed_std": 0.12287574788201516
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_fixed_state",
+      "target": "object",
+      "mean": 5.955825964609782,
+      "seed_std": 0.12256440558349666
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_actual",
+      "target": "object",
+      "mean": 5.955825964609782,
+      "seed_std": 0.12256440558349666
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "shallow_stride4",
+      "target": "object",
+      "mean": 7.025101820627849,
+      "seed_std": 0.1712404632605696
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "deep_stride16",
+      "target": "object",
+      "mean": 6.826369285583496,
+      "seed_std": 0.18608245676085278
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "spatial_fusion",
+      "target": "object",
+      "mean": 6.081918875376384,
+      "seed_std": 0.13736651401633992
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_fixed_state",
+      "target": "object",
+      "mean": 6.081394990285237,
+      "seed_std": 0.13670126119038917
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_actual",
+      "target": "object",
+      "mean": 6.081394990285237,
+      "seed_std": 0.13670126119038917
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "shallow_stride4",
+      "target": "grippers",
+      "mean": 6.8052769502003985,
+      "seed_std": 0.28945722792729756
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "deep_stride16",
+      "target": "grippers",
+      "mean": 6.626716375350952,
+      "seed_std": 0.06127253501129782
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "spatial_fusion",
+      "target": "grippers",
+      "mean": 6.149557113647461,
+      "seed_std": 0.1615648758866391
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_fixed_state",
+      "target": "grippers",
+      "mean": 6.150576750437419,
+      "seed_std": 0.1617103747467363
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_actual",
+      "target": "grippers",
+      "mean": 6.150576750437419,
+      "seed_std": 0.1617103747467363
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "shallow_stride4",
+      "target": "grippers",
+      "mean": 6.833752870559692,
+      "seed_std": 0.2678607721314501
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "deep_stride16",
+      "target": "grippers",
+      "mean": 6.634926716486613,
+      "seed_std": 0.0320174790789314
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "spatial_fusion",
+      "target": "grippers",
+      "mean": 6.205530961354573,
+      "seed_std": 0.13337436409180464
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_fixed_state",
+      "target": "grippers",
+      "mean": 6.204934040705363,
+      "seed_std": 0.13349596311539155
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_actual",
+      "target": "grippers",
+      "mean": 6.204934040705363,
+      "seed_std": 0.13349596311539155
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "shallow_stride4",
+      "target": "relative",
+      "mean": 8.677007993062338,
+      "seed_std": 0.36754472865615795
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "deep_stride16",
+      "target": "relative",
+      "mean": 8.240615367889404,
+      "seed_std": 0.22145965099897563
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "spatial_fusion",
+      "target": "relative",
+      "mean": 8.4226442972819,
+      "seed_std": 0.5324927669670979
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_fixed_state",
+      "target": "relative",
+      "mean": 8.423235416412354,
+      "seed_std": 0.5307926784611202
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_actual",
+      "target": "relative",
+      "mean": 8.423235416412354,
+      "seed_std": 0.5307926784611202
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "shallow_stride4",
+      "target": "relative",
+      "mean": 8.653927167256674,
+      "seed_std": 0.36708110366361607
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "deep_stride16",
+      "target": "relative",
+      "mean": 8.269086043039957,
+      "seed_std": 0.20732830556010515
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "spatial_fusion",
+      "target": "relative",
+      "mean": 8.417832136154175,
+      "seed_std": 0.46917680758010283
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_fixed_state",
+      "target": "relative",
+      "mean": 8.41627836227417,
+      "seed_std": 0.46922587727894355
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_actual",
+      "target": "relative",
+      "mean": 8.41627836227417,
+      "seed_std": 0.46922587727894355
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "shallow_stride4",
+      "target": "openness",
+      "mean": 0.9453144115488133,
+      "seed_std": 0.006395267227214186
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "deep_stride16",
+      "target": "openness",
+      "mean": 0.9763885490579888,
+      "seed_std": 0.011245887148795071
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "spatial_fusion",
+      "target": "openness",
+      "mean": 0.9768779055541962,
+      "seed_std": 0.006692594925637106
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_fixed_state",
+      "target": "openness",
+      "mean": 0.9768779055541962,
+      "seed_std": 0.006692594925637106
+    },
+    {
+      "arm": "r11-task850",
+      "stage": "pre_pi_actual",
+      "target": "openness",
+      "mean": 0.9768779055541962,
+      "seed_std": 0.006692594925637106
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "shallow_stride4",
+      "target": "openness",
+      "mean": 0.9478019737378679,
+      "seed_std": 0.0037031028740710714
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "deep_stride16",
+      "target": "openness",
+      "mean": 0.9711687464317755,
+      "seed_std": 0.013694090689859986
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "spatial_fusion",
+      "target": "openness",
+      "mean": 0.9743903433651414,
+      "seed_std": 0.007560870196445188
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_fixed_state",
+      "target": "openness",
+      "mean": 0.9743903433651414,
+      "seed_std": 0.007560870196445188
+    },
+    {
+      "arm": "r12-one256",
+      "stage": "pre_pi_actual",
+      "target": "openness",
+      "mean": 0.9743903433651414,
+      "seed_std": 0.007560870196445188
+    }
+  ],
+  "paired_stage_comparisons": {
+    "r11-task850": {
+      "controlled": [
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "object",
+          "mean_error_increase_cm": -0.2617095112800598,
+          "scene_bootstrap95_cm": [
+            -0.6542723789811135,
+            0.08201389685273161
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "grippers",
+          "mean_error_increase_cm": -0.17856058478355408,
+          "scene_bootstrap95_cm": [
+            -0.5397939160466194,
+            0.2020237147808075
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "relative",
+          "mean_error_increase_cm": -0.4363929331302643,
+          "scene_bootstrap95_cm": [
+            -1.017370617389679,
+            0.14689221046864978
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "object",
+          "mean_error_increase_cm": -0.883482038974762,
+          "scene_bootstrap95_cm": [
+            -1.4006747424602508,
+            -0.37313796579837843
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "grippers",
+          "mean_error_increase_cm": -0.4771594703197479,
+          "scene_bootstrap95_cm": [
+            -1.0129883885383606,
+            0.012817164137958794
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "relative",
+          "mean_error_increase_cm": 0.18202903866767883,
+          "scene_bootstrap95_cm": [
+            -0.13529432639479638,
+            0.4982515402138232
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "object",
+          "mean_error_increase_cm": -0.0013998672366142273,
+          "scene_bootstrap95_cm": [
+            -0.0030994626693427564,
+            0.00018536401912569973
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "grippers",
+          "mean_error_increase_cm": 0.0010198131203651428,
+          "scene_bootstrap95_cm": [
+            -0.00058066351339221,
+            0.002808989444747562
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "relative",
+          "mean_error_increase_cm": 0.0005911458283662796,
+          "scene_bootstrap95_cm": [
+            -0.0035801084246486425,
+            0.003973629325628281
+          ],
+          "test_groups": 8
+        }
+      ],
+      "cached": [
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "grippers",
+          "mean_error_increase_cm": 0.6021161675453186,
+          "scene_bootstrap95_cm": [
+            0.11149234976619482,
+            1.0574899405241012
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "grippers",
+          "mean_error_increase_cm": -1.0901439189910889,
+          "scene_bootstrap95_cm": [
+            -1.4649521112442017,
+            -0.7320465832948687
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "grippers",
+          "mean_error_increase_cm": 0.003772313706576824,
+          "scene_bootstrap95_cm": [
+            -0.0010858949273824692,
+            0.011350599117577074
+          ],
+          "test_groups": 8
+        }
+      ]
+    },
+    "r12-one256": {
+      "controlled": [
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "object",
+          "mean_error_increase_cm": -0.19873255491256714,
+          "scene_bootstrap95_cm": [
+            -0.5865196228027344,
+            0.14739890024065966
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "grippers",
+          "mean_error_increase_cm": -0.19882610440254211,
+          "scene_bootstrap95_cm": [
+            -0.5739218816161156,
+            0.21900854893028723
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "relative",
+          "mean_error_increase_cm": -0.3848411440849304,
+          "scene_bootstrap95_cm": [
+            -0.9453286230564117,
+            0.1726984355598688
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "object",
+          "mean_error_increase_cm": -0.744450569152832,
+          "scene_bootstrap95_cm": [
+            -1.350958201289177,
+            -0.09660249017179078
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "grippers",
+          "mean_error_increase_cm": -0.4293955862522125,
+          "scene_bootstrap95_cm": [
+            -0.9258790805935859,
+            0.03190245199948517
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "relative",
+          "mean_error_increase_cm": 0.14874622225761414,
+          "scene_bootstrap95_cm": [
+            -0.19127324409782887,
+            0.46677386239171026
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "object",
+          "mean_error_increase_cm": -0.0005237981677055359,
+          "scene_bootstrap95_cm": [
+            -0.004181913286447525,
+            0.003156455419957637
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "grippers",
+          "mean_error_increase_cm": -0.0005969274789094925,
+          "scene_bootstrap95_cm": [
+            -0.002445128746330738,
+            0.0011849836912006138
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "relative",
+          "mean_error_increase_cm": -0.0015538707375526428,
+          "scene_bootstrap95_cm": [
+            -0.005046050250530243,
+            0.001956603396683931
+          ],
+          "test_groups": 8
+        }
+      ],
+      "cached": [
+        {
+          "from_stage": "shallow_stride4",
+          "to_stage": "deep_stride16",
+          "target": "grippers",
+          "mean_error_increase_cm": 0.6463181972503662,
+          "scene_bootstrap95_cm": [
+            0.12584424018859863,
+            1.1356685042381287
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "deep_stride16",
+          "to_stage": "spatial_fusion",
+          "target": "grippers",
+          "mean_error_increase_cm": -1.1154217720031738,
+          "scene_bootstrap95_cm": [
+            -1.506194531917572,
+            -0.7359181553125381
+          ],
+          "test_groups": 8
+        },
+        {
+          "from_stage": "spatial_fusion",
+          "to_stage": "pre_pi_fixed_state",
+          "target": "grippers",
+          "mean_error_increase_cm": 0.0009756404906511307,
+          "scene_bootstrap95_cm": [
+            -0.0007004924118518829,
+            0.0026194343809038396
+          ],
+          "test_groups": 8
+        }
+      ]
+    }
+  },
+  "native_rgb_control": [
+    {
+      "target": "object",
+      "mean": 5.218701998392741
+    },
+    {
+      "target": "grippers",
+      "mean": 3.4494598309199014
+    },
+    {
+      "target": "relative",
+      "mean": 6.1969813505808515
+    },
+    {
+      "target": "openness",
+      "mean": 0.992292635184732
+    }
+  ],
+  "interpretation": "Small-readout recoverability; does not prove information absence or policy success"
+}

@@ -1,0 +1,46 @@
+{
+  "completed": true,
+  "actual_updates": 1024,
+  "pi_updates": 512,
+  "small_head_updates": 512,
+  "new_closed_loops": 0,
+  "findings": [
+    "The identical frozen RAW spatial representation supports much better training fit with the small direct50-step head than with the declared pi adapter scope under256 updates.",
+    "Frozen selected train joint RMS:small3.1499deg versus pi18.8391deg; final256 checkpoints:small2.6343deg versus pi12.0080deg. The pi fit gap is not only a checkpoint-selection artifact.",
+    "Small joint tuning improves historical held-out MSE0.33164 to0.27960 and joint RMS20.4863 to18.8080deg; selected train fit worsens3.1499 to7.5104deg. This is not a clean representation-sufficiency result.",
+    "Pi joint256 updates improve final training fit to7.9960deg but none improves validation over phase start; selection correctly remains step0. Do not call this a trained-weight generalization gain.",
+    "Measured-state-only train-fitted ridge, alpha chosen only on validation, achieves held-out joint RMS15.8250deg and MSE0.17787, outperforming all visual variants here. Visual incremental generalization has not been established.",
+    "All four selected variants fail the previously used strict training-window action fit criteria; no closed-loop success is claimed."
+  ],
+  "interpretation": "Prioritize pi interface/optimization scope diagnostics while addressing visual incremental task generalization. Evidence does not uniquely blame RAW architecture, sensor noise, or insufficient total training.",
+  "limits": [
+    "Historical development episodes, not an untouched benchmark",
+    "Only3 Normal training episodes and1 Normal validation episode",
+    "Different objectives/capacities; cannot infer inherent pi incapacity",
+    "Zero-visual intervention is out of distribution, not a trained state-only control",
+    "Sample seed14019; head initialization RNG restored from exact RAW850 checkpoint",
+    "No physical success or broad lighting robustness conclusion",
+    "Current RAW frame only in this simplified chain; N02 recurrent candidates/measurement corrections and auxiliaries deliberately bypassed.",
+    "5 held-out episodes are1 per light, different trajectories; not paired illumination/noise intervention.",
+    "Ridge is a lower-capacity state-only baseline, not a matched nonlinear-head ablation.",
+    "Main table uses validation-selected weights; joint phase additionally trains the head, so improvements cannot be uniquely attributed to front-end changes.",
+    "Pi joint selection is step0 with unchanged weights; held-out MSE variation0.000061 is recomputation-path variation, not parameter learning. Batch-size/kernel rounding is a hypothesis, not an isolated cause."
+  ],
+  "next_priority": [
+    "On fixed spatial tokens, isolate residual adapter from LoRA and test action-expert input/output/time modules with explicit capacity and bounded budgets.",
+    "Use the small head as a task diagnostic, require held-out gains over state-only baselines, and independently vary image/state before attributing visual contribution.",
+    "Add a continued-frozen-head control if claiming front-end joint-training benefits; later use a new blind episode split for confirmation."
+  ],
+  "engineering": "54 targeted tests and make check passed; original production N02 action model unchanged; standalone diagnostic modules and monitor route added",
+  "evidence": [
+    "summary.json",
+    "extraction.json",
+    "selection.json",
+    "small_report.json",
+    "pi_report.json",
+    "plan.json",
+    "action_comparison.png"
+  ],
+  "committed": false,
+  "pushed": false
+}

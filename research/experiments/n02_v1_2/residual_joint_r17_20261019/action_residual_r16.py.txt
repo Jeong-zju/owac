@@ -1,0 +1,217 @@
+"""Frozen state prediction plus bounded, validation-selected action correction."""
+
+import copy
+import math
+import time
+
+import numpy as np
+import torch
+
+from owac.evaluation.n02_full.action_learning import (
+    cpu_state,
+    full_targets,
+    sample_order,
+    selected_splits,
+)
+from owac.frameworks.n02_full.task_chain import (
+    SmallActionHead,
+    action_metrics,
+    masked_action_loss,
+    state_digest,
+)
+
+
+class BoundedActionResidual(SmallActionHead):
+    """Same spatial head for all arms; exact zero correction at initialization."""
+
+    def __init__(self, *, cap=1.0, **kwargs):
+        super().__init__(**kwargs)
+        if not math.isfinite(cap) or cap <= 0:
+            raise ValueError("positive finite normalized residual cap required")
+        self.cap = cap
+        torch.nn.init.zeros_(self.predict[-1].weight)
+        torch.nn.init.zeros_(self.predict[-1].bias)
+
+    def forward(self, tokens, state):
+        return self.cap * torch.tanh(super().forward(tokens, state))
+
+
+def fit_action_residual(
+    baseline,
+    features,
+    states,
+    actions,
+    masks,
+    records,
+    train_groups,
+    std,
+    *,
+    seed,
+    state_only=False,
+    budgets=(256, 512, 1024),
+    gates=(0.0, 0.1, 0.25, 0.5, 1.0),
+    cap=1.0,
+    validate_every=64,
+    device="cuda",
+    callback=None,
+    checkpoint=None,
+):
+    """Fit only corrections; choose both checkpoint and scalar gate on validation.
+
+    Step0/gate0 is always available. Test targets are measured only after the
+    fixed optimizer budget ends. No validation guarantee is a test guarantee.
+    The state-only correction is a matched control for added nonlinear capacity.
+    """
+    if tuple(sorted(set(budgets))) != tuple(budgets) or not 1 <= budgets[0] <= budgets[-1] <= 1024:
+        raise ValueError("unique increasing budgets within1..1024 required")
+    if tuple(sorted(set(gates))) != tuple(gates) or gates[0] != 0 or gates[-1] != 1:
+        raise ValueError("increasing gates from0 to1 including exact zero required")
+    splits = selected_splits(records, train_groups)
+    baseline = baseline.to(device).eval().requires_grad_(False)
+    baseline_sha = state_digest(baseline)
+    torch.manual_seed(seed)
+    x = torch.as_tensor(features).detach().float().to(device)
+    if state_only:
+        x = torch.zeros_like(x)
+    state = torch.as_tensor(states).detach().float().to(device)
+    y = torch.as_tensor(actions).detach().float().to(device)
+    valid = torch.as_tensor(masks, dtype=torch.bool, device=device)
+    target = full_targets(y)
+    head = BoundedActionResidual(
+        width=x.shape[-1], tokens=x.shape[1], state_dim=state.shape[-1], cap=cap
+    ).to(device)
+    initial_sha = state_digest(head)
+    base = y.new_zeros((len(x), 50, 32))
+    with torch.no_grad():
+        for indices in splits.values():
+            for i in range(0, len(indices), 8):
+                c = indices[i : i + 8]
+                base[c] = baseline(torch.zeros_like(x[c]), state[c])
+    base = base.detach()
+    optimizer = torch.optim.AdamW(
+        head.parameters(), lr=3e-4, weight_decay=1e-3, fused=str(device).startswith("cuda")
+    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=budgets[-1], eta_min=3e-5
+    )
+    order = sample_order(splits["train"], budgets[-1], seed)
+
+    @torch.no_grad()
+    def correction(indices):
+        return torch.cat(
+            [
+                head(x[c], state[c])[..., :14].cpu()
+                for c in [indices[i : i + 8] for i in range(0, len(indices), 8)]
+            ]
+        ).numpy()
+
+    def measure(indices, delta, gate):
+        b = base[indices, :, :14].cpu().numpy()
+        # Explicit zero path retains exact baseline even if a future delta is NaN.
+        p = b if gate == 0 else b + gate * delta
+        return action_metrics(p, np.asarray(actions)[indices], np.asarray(masks)[indices], std), p
+
+    best_state = cpu_state(head)
+    best_step, best_gate = 0, 0.0
+    initial, _ = measure(splits["val"], None, 0)
+    best = initial["normalized_control_mse"]
+    history = [dict(step=0, candidates=[dict(gate=0.0, val=initial)])]
+    snapshots = {}
+    start = time.perf_counter()
+    for step, indices in enumerate(order, 1):
+        optimizer.zero_grad(set_to_none=True)
+        delta = head(x[indices], state[indices])
+        loss = masked_action_loss(base[indices] + delta, target[indices], valid[indices])
+        if not torch.isfinite(loss):
+            raise FloatingPointError("nonfinite residual action loss")
+        loss.backward()
+        grad = float(torch.nn.utils.clip_grad_norm_(head.parameters(), 1.0))
+        if not np.isfinite(grad):
+            raise FloatingPointError("nonfinite residual action gradient")
+        lr = optimizer.param_groups[0]["lr"]
+        optimizer.step()
+        scheduler.step()
+        if str(device).startswith("cuda"):
+            torch.cuda.synchronize()
+        row = dict(
+            step=step,
+            loss=float(loss.detach()),
+            gradient_norm=grad,
+            lr=lr,
+            seconds_per_update=(time.perf_counter() - start) / step,
+        )
+        if step % validate_every == 0 or step in budgets:
+            d = correction(splits["val"])
+            candidates = []
+            for gate in gates:
+                metric, _ = measure(splits["val"], d, gate)
+                candidates.append(dict(gate=gate, val=metric))
+                if metric["normalized_control_mse"] < best:
+                    best, best_step, best_gate = metric["normalized_control_mse"], step, gate
+                    best_state = cpu_state(head)
+            row["candidates"] = candidates
+            history.append(copy.deepcopy(row))
+        if step in budgets:
+            snapshots[step] = dict(
+                selected=copy.deepcopy(best_state),
+                last=cpu_state(head),
+                selected_step=best_step,
+                selected_gate=best_gate,
+                selected_validation_mse=best,
+            )
+        if callback:
+            callback(
+                dict(
+                    **row,
+                    max_updates=budgets[-1],
+                    selected_step=best_step,
+                    selected_gate=best_gate,
+                    selected_val_mse=best,
+                )
+            )
+    if state_digest(baseline) != baseline_sha or any(
+        p.grad is not None for p in baseline.parameters()
+    ):
+        raise RuntimeError("frozen state baseline was modified")
+    report = dict(
+        seed=seed,
+        state_only=state_only,
+        initial_sha=initial_sha,
+        parameters=sum(p.numel() for p in head.parameters()),
+        baseline_sha=baseline_sha,
+        baseline_sha_after=state_digest(baseline),
+        actual_updates=budgets[-1],
+        train_indices=splits["train"],
+        order=order,
+        history=history,
+        cap=cap,
+        gates=list(gates),
+        elapsed_s=time.perf_counter() - start,
+        baseline={},
+        rows=[],
+    )
+    predictions = {}
+    # Only now read test targets; retain both selected and terminal ungated weights.
+    for split, indices in splits.items():
+        metrics, p = measure(indices, None, 0)
+        report["baseline"][split] = metrics
+        predictions["baseline_" + split] = p
+    for budget, snapshot in snapshots.items():
+        row = {
+            k: snapshot[k] for k in ("selected_step", "selected_gate", "selected_validation_mse")
+        }
+        row["budget"] = budget
+        for version, gate in (("selected", snapshot["selected_gate"]), ("last", 1.0)):
+            head.load_state_dict(snapshot[version], strict=True)
+            row[version] = {}
+            row[version + "_sha"] = state_digest(head)
+            for split, indices in splits.items():
+                d = correction(indices)
+                metric, p = measure(indices, d, gate)
+                row[version][split] = metric
+                predictions[f"{budget}_{version}_{split}"] = p
+                predictions[f"{budget}_{version}_delta_{split}"] = d
+        report["rows"].append(row)
+        if checkpoint:
+            checkpoint(budget, snapshot)
+    return report, predictions

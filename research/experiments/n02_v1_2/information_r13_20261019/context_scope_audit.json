@@ -1,0 +1,52 @@
+{
+  "rows": {
+    "r11-task850": {
+      "controlled": {
+        "actual_vs_fixed_max": 0.0,
+        "fusion_rms": 3.507127046585083,
+        "added_term_rms": 0.42855414748191833,
+        "fusion_sample_centered_rms": 2.3441359996795654,
+        "added_term_sample_centered_rms": 0.004270328674465418,
+        "varying_added_to_fusion_ratio": 0.0018217068783761504,
+        "added_camera_channel_centered_rms": 0.004274303559213877
+      },
+      "cached": {
+        "actual_vs_fixed_max": 0.0,
+        "fusion_rms": 3.433234214782715,
+        "added_term_rms": 0.4285547733306885,
+        "fusion_sample_centered_rms": 2.862555503845215,
+        "added_term_sample_centered_rms": 0.05991768091917038,
+        "varying_added_to_fusion_ratio": 0.020931535070214054,
+        "added_camera_channel_centered_rms": 0.059918228536844254
+      }
+    },
+    "r12-one256": {
+      "controlled": {
+        "actual_vs_fixed_max": 0.0,
+        "fusion_rms": 3.524676561355591,
+        "added_term_rms": 0.4315824806690216,
+        "fusion_sample_centered_rms": 2.3505666255950928,
+        "added_term_sample_centered_rms": 0.003684754716232419,
+        "varying_added_to_fusion_ratio": 0.0015676027542080625,
+        "added_camera_channel_centered_rms": 0.003688911907374859
+      },
+      "cached": {
+        "actual_vs_fixed_max": 0.0,
+        "fusion_rms": 3.447009325027466,
+        "added_term_rms": 0.4315842092037201,
+        "fusion_sample_centered_rms": 2.864492177963257,
+        "added_term_sample_centered_rms": 0.028299788013100624,
+        "varying_added_to_fusion_ratio": 0.009879513105608358,
+        "added_camera_channel_centered_rms": 0.02830086089670658
+      }
+    }
+  },
+  "policy_updates": 0,
+  "labels_as_policy_inputs": false,
+  "context_scope": "Actual/fixed describes supplied context. N02 visual path does not read proprio when action_dim=0; pi state prompt is a separate input. Do not infer that entire policy ignores state.",
+  "code_paths": [
+    "src/owac/frameworks/n02_full/inference_v12.py:_evidence",
+    "src/owac/runtime/n02_v12_robotwin.py:Policy.predict_action"
+  ],
+  "limits": "Added term includes bridge BF16 rounding. Near-constant pooled output is evidence about this output branch and these images, not proof that every latent is constant."
+}

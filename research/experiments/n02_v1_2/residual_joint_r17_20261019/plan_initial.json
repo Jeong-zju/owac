@@ -1,0 +1,229 @@
+{
+  "protocol": "n02-controlled-scene-residual-joint-r17-v1",
+  "scenes": [
+    {
+      "scene": 6,
+      "split": "train",
+      "x": -0.045,
+      "y": -0.13,
+      "yaw": -0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817025
+    },
+    {
+      "scene": 15,
+      "split": "train",
+      "x": 0.04500000000000001,
+      "y": -0.09,
+      "yaw": 0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817034
+    },
+    {
+      "scene": 19,
+      "split": "train",
+      "x": 0.09,
+      "y": -0.09,
+      "yaw": -0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817038
+    },
+    {
+      "scene": 10,
+      "split": "train",
+      "x": 0.0,
+      "y": -0.13,
+      "yaw": 0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817029
+    },
+    {
+      "scene": 4,
+      "split": "train",
+      "x": -0.045,
+      "y": -0.21,
+      "yaw": -0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817023
+    },
+    {
+      "scene": 16,
+      "split": "train",
+      "x": 0.09,
+      "y": -0.21,
+      "yaw": 0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817035
+    },
+    {
+      "scene": 1,
+      "split": "train",
+      "x": -0.09,
+      "y": -0.16999999999999998,
+      "yaw": -0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817020
+    },
+    {
+      "scene": 13,
+      "split": "train",
+      "x": 0.04500000000000001,
+      "y": -0.16999999999999998,
+      "yaw": 0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817032
+    },
+    {
+      "scene": 9,
+      "split": "train",
+      "x": 0.0,
+      "y": -0.16999999999999998,
+      "yaw": -0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817028
+    },
+    {
+      "scene": 8,
+      "split": "train",
+      "x": 0.0,
+      "y": -0.21,
+      "yaw": 0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817027
+    },
+    {
+      "scene": 11,
+      "split": "train",
+      "x": 0.0,
+      "y": -0.09,
+      "yaw": -0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817030
+    },
+    {
+      "scene": 3,
+      "split": "train",
+      "x": -0.09,
+      "y": -0.09,
+      "yaw": -0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817022
+    },
+    {
+      "scene": 2,
+      "split": "val",
+      "x": -0.09,
+      "y": -0.13,
+      "yaw": 0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817021
+    },
+    {
+      "scene": 0,
+      "split": "val",
+      "x": -0.09,
+      "y": -0.21,
+      "yaw": 0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817019
+    },
+    {
+      "scene": 18,
+      "split": "val",
+      "x": 0.09,
+      "y": -0.13,
+      "yaw": 0.3490658503988659,
+      "seed": 17019,
+      "noise_seed": 817037
+    },
+    {
+      "scene": 17,
+      "split": "val",
+      "x": 0.09,
+      "y": -0.16999999999999998,
+      "yaw": -0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817036
+    },
+    {
+      "scene": 12,
+      "split": "test",
+      "x": 0.04500000000000001,
+      "y": -0.21,
+      "yaw": -0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817031
+    },
+    {
+      "scene": 14,
+      "split": "test",
+      "x": 0.04500000000000001,
+      "y": -0.13,
+      "yaw": -0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817033
+    },
+    {
+      "scene": 7,
+      "split": "test",
+      "x": -0.045,
+      "y": -0.09,
+      "yaw": 0.2617993877991494,
+      "seed": 17019,
+      "noise_seed": 817026
+    },
+    {
+      "scene": 5,
+      "split": "test",
+      "x": -0.045,
+      "y": -0.16999999999999998,
+      "yaw": 0.17453292519943295,
+      "seed": 17019,
+      "noise_seed": 817024
+    }
+  ],
+  "counts": {
+    "train": 12,
+    "val": 4,
+    "test": 4
+  },
+  "light": "Normal environment_only EV0",
+  "collection": "online upstream grab_roller expert replans each changed object position/orientation; simultaneous RAW/RGB from same physics observation; fixed home state, fixed model/background",
+  "max_collection_attempts": 20,
+  "success": "upstream plan and benchmark flag plus unchanged strict contact/table-free/height0.83/hold1s +2s passive hold; failed configurations retained, no outcome-based replacements",
+  "sampling": "per episode t0,t10 plus up to16 evenly spaced anchors and closure/lift boundary anchors; temporal target offset1 full50 measured action states, valid mask; all scenes isolated",
+  "baseline": "fresh state-only SmallActionHead two seeds17019/17020,1024 updates each, selected on4validation scenes; frozen and shared across all residual arms",
+  "arms": [
+    "state-residual",
+    "raw-frozen",
+    "native-frozen",
+    "raw-joint"
+  ],
+  "seeds": [
+    17019,
+    17020
+  ],
+  "residual_updates": 512,
+  "validation_every": 64,
+  "gates": [
+    0,
+    0.1,
+    0.25,
+    0.5,
+    1
+  ],
+  "cap": 1,
+  "head_optimizer": "AdamW3e-4 cosine to3e-5 wd1e-3 clip1",
+  "joint_scope": "RAW850 last6stage2 blocks+projections+spatial multiscale fusion; same fresh residual init and sampling asraw-frozen; no pi updates",
+  "joint_optimizer": "encoder lr1e-5; head lr3e-4, cosine ratio0.1, clip1; masked native32 MSE; fixed baseline",
+  "budget_points": [
+    128,
+    256,
+    512
+  ],
+  "max_total_updates": 6144,
+  "pi_updates": 0,
+  "closed_loop_policy_runs": 0,
+  "interpretation": "new controlled development scenes generated after historical tests; no population or formal benchmark success; input is HDR-derived3channel RAW, not Bayer; labels/contact/object poses diagnostic only, never runtime network inputs",
+  "stop": "at fixed budget; no extending based on test; source and actual counts audited; do not silently train on failed or missing scenes"
+}

@@ -9,6 +9,62 @@ from owac.runtime import n02_v12_monitor as monitor
 from owac.runtime.n02_v12_status import append_history, update_status
 
 
+def test_task_chain_status_is_separate_and_does_not_expose_extra_fields(tmp_path):
+    path = tmp_path / "task-chain-r14/small/status.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            dict(
+                branch="small",
+                phase="frozen",
+                state="running",
+                step=8,
+                updated_at=0,
+                secret="never expose",
+            )
+        )
+    )
+    result = monitor.task_chain_payload(tmp_path)
+    assert result["runs"][0]["step"] == 8
+    assert result["runs"][0]["stale"] is True
+    assert "secret" not in result["runs"][0]
+    assert result["runs"][1] == dict(branch="pi", state="waiting")
+    (tmp_path / "task-chain-r14/comparison.json").write_text(
+        json.dumps(
+            dict(
+                rows=[dict(branch="small", phase="joint", test_joint_deg=18.0, secret="hidden")],
+                state_only_test_deg=15.0,
+                secret="hidden",
+            )
+        )
+    )
+    result = monitor.task_chain_payload(tmp_path)
+    assert result["comparison"]["rows"][0]["test_joint_deg"] == 18
+    assert "secret" not in json.dumps(result)
+
+
+def test_learning_monitor_isolates_r15_and_blocks_symlink_status(tmp_path):
+    old = tmp_path / "task-chain-r14/small/status.json"
+    old.parent.mkdir(parents=True)
+    old.write_text(json.dumps(dict(state="running", step=999)))
+    result = monitor.learning_payload(tmp_path)
+    assert result["runs"] == [] and result["completed_runs"] == 0
+    run = tmp_path / "learning-r15/raw-3-s15019"
+    run.mkdir(parents=True)
+    (run / "status.json").write_text(
+        json.dumps(dict(run_id=run.name, state="running", step=64, secret="hidden"))
+    )
+    result = monitor.learning_payload(tmp_path)
+    assert result["runs"][0]["step"] == 64 and "secret" not in json.dumps(result)
+    external = tmp_path.parent / (tmp_path.name + "-outside-status.json")
+    external.write_text(json.dumps(dict(run_id="pi-3-s15019", state="running", step=888)))
+    other = tmp_path / "learning-r15/pi-3-s15019"
+    other.mkdir()
+    (other / "status.json").symlink_to(external)
+    result = monitor.learning_payload(tmp_path)
+    assert len(result["runs"]) == 1
+
+
 def test_fewshot_fit_gate_is_separate_from_relative_dev_improvement(tmp_path):
     run = tmp_path / "P2" / "fewshot"
     update_status(
@@ -563,3 +619,68 @@ def test_representation_video_and_physical_receipt_reject_fake_success_and_escap
     video.unlink()
     video.symlink_to(private)
     assert monitor.representation_video(tmp_path, case.name) is None
+
+
+def test_residual_payload_is_separate_sanitized_and_rejects_symlink_escape(tmp_path):
+    root = tmp_path / "outputs"
+    directory = root / "residual-r16"
+    (directory / "raw-s15019").mkdir(parents=True)
+    (directory / "raw-s15019/status.json").write_text(
+        json.dumps(dict(state="running", step=16, updated_at=0, private_token="do-not-export"))
+    )
+    (directory / "progress.json").write_text(
+        json.dumps(
+            dict(
+                audited=True,
+                reports=[
+                    dict(
+                        run_id="raw-s15019",
+                        modality="raw",
+                        seed=15019,
+                        private_token="secret",
+                        baseline={"test": {"joint_rms_deg": 11, "private_token": "secret"}},
+                        rows=[],
+                    ),
+                    dict(run_id="raw-5-s15019", rows=[]),
+                ],
+            )
+        )
+    )
+    value = monitor.residual_payload(root)
+    assert value["planned_runs"] == 6 and value["completed_runs"] == 1 and value["audited"]
+    assert value["reports"][0]["baseline"]["test"] == {"joint_rms_deg": 11}
+    assert "secret" not in json.dumps(value) and "private_token" not in json.dumps(value)
+    assert next(r for r in value["runs"] if r["run_id"] == "raw-s15019")["stale"]
+    outside = tmp_path / "outside.json"
+    outside.write_text('{"reports": [{"run_id": "native-s15019", "rows": []}]}')
+    (directory / "progress.json").unlink()
+    (directory / "progress.json").symlink_to(outside)
+    assert monitor.residual_payload(root)["reports"] == []
+
+
+def test_joint_monitor_keeps_collection_denominator_and_separates_previous_experiment(tmp_path):
+    root = tmp_path / "outputs"
+    directory = root / "residual-joint-r17"
+    directory.mkdir(parents=True)
+    (directory / "capture_progress.json").write_text(
+        json.dumps(dict(planned=20, attempted=5, accepted=4, secret="hidden"))
+    )
+    (directory / "progress.json").write_text(
+        json.dumps(
+            dict(
+                reports=[
+                    dict(run_id="raw-s17019", modality="raw", seed=17019, rows=[]),
+                    dict(run_id="raw-s15019", rows=[]),
+                ]
+            )
+        )
+    )
+    result = monitor.joint_payload(root)
+    assert result["planned_runs"] == 10 and result["completed_runs"] == 1
+    assert result["collection"] == dict(planned=20, attempted=5, accepted=4)
+    assert "hidden" not in json.dumps(result)
+    outside = tmp_path / "secret.json"
+    outside.write_text('{"reports":[{"run_id":"raw-s17020","rows":[]}]}')
+    (directory / "progress.json").unlink()
+    (directory / "progress.json").symlink_to(outside)
+    assert monitor.joint_payload(root)["completed_runs"] == 0

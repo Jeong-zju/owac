@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>状态基线＋视觉残差</title>
+<style>body{font:16px/1.7 system-ui,sans-serif;background:#f4f6f8;color:#182433;max-width:1150px;margin:30px auto;padding:0 20px}h1{font-size:28px}.muted{color:#657180}.big{font-size:25px;font-weight:650}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}article,section{background:white;border-radius:14px;padding:20px;margin:16px 0}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border-bottom:1px solid #e2e8ed;text-align:left;white-space:nowrap}.overflow{overflow-x:auto}.good{color:#207661}.bad{color:#aa4938}progress{width:100%;accent-color:#287866}a{color:#226e61}select{font:inherit;padding:6px}</style>
+<p><a href="/joint">查看新一轮：阶段分析、场景采集与联合适配</a></p>
+<h1>视觉能否修好状态预测？</h1>
+<p>当前关节状态 → <b>固定状态预测</b> ＋ <b>有界动作修正</b> → 完整 50 步动作</p>
+<p class="muted">三组只训练残差头：仅状态、RAW＋状态、原生视觉＋状态。各两个种子、五条训练示范，前端和 π 均不更新。修正为零始终是候选，强度和检查点只用验证集选。</p>
+<p class="muted">原生视觉使用预训练视觉塔与原光照 RGB 重放；Over 列不能解释为同光照条件下的 RAW / RGB 鲁棒性对比。</p>
+<div class="big" id="total">正在连接</div><p id="error" class="bad"></p><main class="grid" id="active"></main>
+<section><h2>相对固定状态基线的收益</h2><p class="muted">关节 RMS，单位度，越低越好。正收益表示误差下降。主列为正常光；Over 单独展示。历史开发留出已多次查看，不能当新盲测。</p>
+<label>预算 <select id="budget"><option>256</option><option>512</option><option selected>1024</option></select></label>
+<div class="overflow"><table><thead><tr><th>修正输入</th><th>种子</th><th>训练 °</th><th>验证 °</th><th>正常光 °</th><th>基线 °</th><th>收益</th><th>Over °</th><th>所选步 / 强度</th><th>末步训练 °</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p class="muted">所选步可以早于预算终点；末步列使用强度 1，显示优化路径是否回退。“仅状态残差”用于识别额外网络容量带来的收益。验证集选择保底，不保证留出不退化。</p></section>
+<p id="stamp" class="muted"></p><p><a href="/learning">上一轮学习曲线</a> · <a href="/closed-loop">历史闭环</a></p>
+<script>
+const labels={state:'仅状态残差',raw:'RAW 残差',native:'原生视觉残差'};let reports=[];
+const f=(x,n=2)=>Number.isFinite(x)?x.toFixed(n):'—';
+function draw(){const body=document.getElementById('rows');body.replaceChildren();const budget=+document.getElementById('budget').value;
+for(const mode of ['state','raw','native']){let rs=reports.filter(r=>r.modality===mode),pairs=rs.map(r=>[r,r.rows.find(p=>p.budget===budget)]).filter(p=>p[1]);if(!pairs.length)continue;
+const avg=get=>{let vs=pairs.map(get);return vs.every(Number.isFinite)?vs.reduce((a,b)=>a+b,0)/vs.length:NaN};let normal=avg(([r,p])=>p.selected.normal_test?.joint_rms_deg),base=avg(([r,p])=>r.baseline.normal_test?.joint_rms_deg),gain=(base-normal)/base*100;
+let values=[labels[mode],pairs.length+'/2',f(avg(([r,p])=>p.selected.train?.joint_rms_deg)),f(avg(([r,p])=>p.selected.val?.joint_rms_deg)),f(normal),f(base),f(gain,1)+(Number.isFinite(gain)?'%':''),f(avg(([r,p])=>p.selected.over_test?.joint_rms_deg)),pairs.map(([r,p])=>p.selected_step+' / '+p.selected_gate).join('；'),f(avg(([r,p])=>p.last.train?.joint_rms_deg))];let tr=document.createElement('tr');values.forEach((v,i)=>{let td=document.createElement('td');td.textContent=v;if(i===6)td.className=gain>0?'good':gain<0?'bad':'';tr.append(td)});body.append(tr);}}
+async function refresh(){try{let response=await fetch('/api/residual',{cache:'no-store'});if(!response.ok)throw Error();let data=await response.json();reports=data.reports;document.getElementById('total').textContent=`完成 ${data.completed_runs} / 6 组`+(data.audited?' · 预测独立复算通过':'');const speeds=data.runs.map(r=>r.seconds_per_update).filter(Number.isFinite);if(speeds.length)document.getElementById('total').textContent+=' · '+f(speeds.reduce((a,b)=>a+b,0)/speeds.length*1000,1)+' 毫秒/更新（缓存残差头）';document.getElementById('error').textContent=data.failures.length?'作业异常已停止，请核查日志。':'';
+let active=document.getElementById('active');active.replaceChildren();for(const r of data.runs.filter(r=>r.state!=='completed')){let a=document.createElement('article'),b=document.createElement('b'),p=document.createElement('p'),bar=document.createElement('progress');b.textContent=r.run_id+' · '+(r.state==='waiting'?'等待':r.stale?'状态中断':'训练中');p.textContent=`${r.step||0} / ${r.max_updates||1024} · ${f(r.seconds_per_update,3)} 秒/更新 · 所选强度 ${f(r.selected_gate)}`;bar.max=1024;bar.value=r.step||0;a.append(b,p,bar);active.append(a);}draw();document.getElementById('stamp').textContent='已连接 · '+new Date().toLocaleTimeString()+' · 本轮新增闭环 0';}catch(e){document.getElementById('stamp').textContent='连接中断，正在重试';}}
+document.getElementById('budget').addEventListener('change',draw);refresh();setInterval(refresh,5000);
+</script></html>

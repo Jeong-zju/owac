@@ -1,0 +1,16 @@
+{
+  "checkout": "/workspace/owac/worktrees/n02-measurement-completion",
+  "model_python": "outputs/n02-full/runtime/py310-cu128/bin/python",
+  "simulator_python": "/workspace/owac/rawvla/envs/robotwin/bin/python",
+  "policy_updates": 0,
+  "sequence": [
+    "capture.py --scenes 48 (simulator env, RoboTwin cwd and recorded PYTHONPATH)",
+    "extract.py --arm r11-task850; extract.py --arm r12-one256 (model env, GPUs1/0)",
+    "fit.py --arm r11-task850; fit.py --arm r12-one256 (model env, GPUs1/0)",
+    "native_control.py (model env, GPU0)",
+    "analyze_context.py (model env, no GPU operations)",
+    "summarize.py (model env NumPy2.2.6; append /workspace/owac/rawvla/envs/robotwin/lib/python3.10/site-packages for Matplotlib3.10.9; do not prepend that environment or replace NumPy)"
+  ],
+  "safety": "Existing output directories prevent extraction/head overwrite. Preserve completed artifacts before a separate new attempt; do not rerun policy training.",
+  "verification": "make check; uv run --locked pytest tests/test_n02_information_probe.py tests/test_n02_training_monitor.py tests/test_n02_closed_loop.py tests/test_n02_r11_repair.py tests/test_robotwin_grasp_acceptance.py -q"
+}

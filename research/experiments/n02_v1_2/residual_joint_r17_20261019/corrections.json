@@ -1,0 +1,37 @@
+{
+  "collection_protocol": {
+    "planned_scenes": 20,
+    "accepted_scenes": 19,
+    "excluded_scene": 19,
+    "unchanged_physics_acceptance": true,
+    "feasibility_rule_amended_before_learned_policy_updates": true,
+    "no_outcome_based_replacement": true
+  },
+  "recovery": {
+    "observed": "SSH refused then recovered; supervisor oldjobsSTOPPED; cause unestablished",
+    "preserved_receipts": 7,
+    "preserved_accepted": 6,
+    "recovered_workers": [
+      "capture-first-a2",
+      "capture-last-a2"
+    ],
+    "rendering": "explicit same CPU physics and render systems, workerlogicalCUDA0"
+  },
+  "startup_fix": {
+    "issue": "new queue.py shadowed Python stdlib queue; two recovery jobs failed at import before data/training",
+    "fix": "renamed await_inputs.py; original startup logs kept; resumed same jobnames",
+    "old_source": "remote queue_shadow_removed.py.txt"
+  },
+  "precision": {
+    "discovered": "PI0 constructor resets global float32 matmul precision to highest; original joint fixed-baseline outputs drifted max0.00222826 normalized",
+    "rejected": "two original joint512-update runs preserved under outputs/rejected; audit-a1 failed",
+    "repair": "contain loader side effect; RAW forward highest matches original cached tokens; head/baseline high matches frozen controls; exact reload and baseline equality required",
+    "accepted_matrix_updates": 6144,
+    "rejected_joint_updates": 1024,
+    "actual_total_updates": 7168
+  },
+  "phase_support": "include near-tail closure/lift anchors even with fewer than10 valid future actions; report actual1/10/50 support, no padded-future claim",
+  "historical_source": "action_residual_r16.py.txt exactly matches prior r16 source hash",
+  "backup": "small receipts and reports mirrored locally; optional bulk RAW transfer cancelled due low bandwidth, no full offhost backup claim",
+  "repair_startup": "first supervisor command used relative interpreter path and failed NO_FILE before execution; replaced with absolute path in new a2-abs jobs; zero updates in failed startup"
+}

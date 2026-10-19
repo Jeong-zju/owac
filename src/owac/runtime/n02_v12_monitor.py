@@ -1124,6 +1124,293 @@ def execution_cases(root: Path) -> list[dict]:
     return result
 
 
+def task_chain_payload(root: Path) -> dict:
+    """Read fixed, local r14 diagnostic status files without exposing arbitrary fields."""
+    fields = (
+        "branch",
+        "phase",
+        "state",
+        "step",
+        "max_updates",
+        "seconds_per_update",
+        "latest_loss",
+        "selected_step",
+        "selected_val_mse",
+        "updated_at",
+        "peak_memory_gib",
+        "actual_updates",
+        "closed_loop_success",
+    )
+    cards = []
+    for branch in ("small", "pi"):
+        path = (root / "task-chain-r14" / branch / "status.json").resolve()
+        if root.resolve() not in path.parents or not path.is_file():
+            cards.append(dict(branch=branch, state="waiting"))
+            continue
+        try:
+            value = json.loads(path.read_text())
+            card = {key: value[key] for key in fields if key in value}
+            # A stopped writer must never keep appearing as live training.
+            card["stale"] = time.time() - float(value.get("updated_at", 0)) > 180
+            cards.append(card)
+        except (OSError, ValueError, TypeError):
+            cards.append(dict(branch=branch, state="unavailable"))
+    comparison = None
+    path = (root / "task-chain-r14/comparison.json").resolve()
+    if root.resolve() in path.parents and path.is_file():
+        try:
+            raw = json.loads(path.read_text())
+            keys = (
+                "branch",
+                "phase",
+                "train_joint_deg",
+                "test_joint_deg",
+                "normal_joint_deg",
+                "gripper_mae",
+                "fit_passed",
+                "selected_step",
+            )
+            comparison = dict(
+                rows=[{k: r[k] for k in keys if k in r} for r in raw["rows"]],
+                state_only_test_deg=raw.get("state_only_test_deg"),
+            )
+        except (OSError, ValueError, TypeError, KeyError):
+            comparison = None
+    return dict(runs=cards, comparison=comparison, scope="完整50步离线动作诊断；不代表闭环成功")
+
+
+def learning_payload(root: Path) -> dict:
+    """Fixed r15 namespace; preserve separation from historical r14 results."""
+    directory = root / "learning-r15"
+
+    def read(relative):
+        path = (directory / relative).resolve()
+        if root.resolve() not in path.parents:
+            return {}
+        try:
+            return json.loads(path.read_text())
+        except (OSError, ValueError):
+            return {}
+
+    fields = (
+        "run_id",
+        "state",
+        "activity",
+        "step",
+        "max_updates",
+        "modality",
+        "demos",
+        "seed",
+        "actual_updates",
+        "seconds_per_update",
+        "selected_val_mse",
+        "updated_at",
+    )
+    names = [
+        f"{m}-{d}-s{s}" for d in (3, 5) for s in (15019, 15020) for m in ("state", "raw", "native")
+    ] + [f"pi-{d}-s15019" for d in (3, 5)]
+    cards = []
+    for name in ["prepare", *names]:
+        value = read(name + "/status.json")
+        if value:
+            card = {k: value[k] for k in fields if k in value}
+            card["stale"] = time.time() - float(value.get("updated_at", 0)) > 180
+            cards.append(card)
+    public = read("progress.json")
+    reports = []
+    metrics = ("normalized_control_mse", "joint_rms_deg", "gripper_mae", "windows")
+    for raw in public.get("reports", []):
+        if raw.get("run_id") not in names:
+            continue
+        r = {k: raw[k] for k in ("run_id", "modality", "demos", "seed") if k in raw}
+        r["rows"] = []
+        for value in raw.get("rows", []):
+            row = {k: value[k] for k in ("budget", "selected_step") if k in value}
+            for version in ("selected", "last"):
+                row[version] = {
+                    s: {k: value[version][s][k] for k in metrics} for s in ("train", "val", "test")
+                }
+                if "normal_test" in value[version]:
+                    row[version]["normal_test"] = {
+                        k: value[version]["normal_test"][k] for k in metrics
+                    }
+            r["rows"].append(row)
+        reports.append(r)
+    errors = [read(name + "-error.json") for name in ("prepare", "heads-pi5", "pi3")]
+    failed = [
+        {k: r[k] for k in ("command", "failure_type", "updated_at") if k in r} for r in errors if r
+    ]
+    return dict(
+        runs=cards,
+        reports=reports,
+        planned_runs=14,
+        completed_runs=len(reports),
+        audited=bool(public.get("audited")),
+        failures=failed,
+        scope="冻结编码器的50步动作诊断；历史留出Normal/Over；RGB为原光照重放参照",
+    )
+
+
+def residual_payload(root: Path) -> dict:
+    """Read only the fixed r16 experiment, with public-field whitelists."""
+    directory = root / "residual-r16"
+
+    def read(relative):
+        path = (directory / relative).resolve()
+        if root.resolve() not in path.parents:
+            return {}
+        try:
+            return json.loads(path.read_text())
+        except (OSError, ValueError):
+            return {}
+
+    names = [f"{m}-s{s}" for s in (15019, 15020) for m in ("state", "raw", "native")]
+    fields = (
+        "run_id",
+        "state",
+        "modality",
+        "seed",
+        "step",
+        "max_updates",
+        "actual_updates",
+        "seconds_per_update",
+        "selected_gate",
+        "selected_step",
+        "selected_val_mse",
+        "updated_at",
+    )
+    cards = []
+    for name in names:
+        value = read(name + "/status.json")
+        card = {k: value[k] for k in fields if k in value}
+        card.setdefault("run_id", name)
+        card.setdefault("state", "waiting")
+        card["stale"] = bool(value) and time.time() - float(value.get("updated_at", 0)) > 180
+        cards.append(card)
+    public = read("progress.json")
+    metrics = ("normalized_control_mse", "joint_rms_deg", "gripper_mae", "windows")
+
+    def metric_set(value):
+        return {
+            s: {k: v[k] for k in metrics if k in v}
+            for s, v in value.items()
+            if s in ("train", "val", "test", "normal_test", "over_test")
+        }
+
+    reports = []
+    for raw in public.get("reports", []):
+        if raw.get("run_id") not in names:
+            continue
+        r = {k: raw[k] for k in ("run_id", "modality", "seed") if k in raw}
+        r["baseline"] = metric_set(raw.get("baseline", {}))
+        r["rows"] = []
+        for value in raw.get("rows", []):
+            row = {k: value[k] for k in ("budget", "selected_step", "selected_gate") if k in value}
+            for version in ("selected", "last"):
+                row[version] = metric_set(value.get(version, {}))
+            r["rows"].append(row)
+        reports.append(r)
+    failures = []
+    for seed in (15019, 15020):
+        value = read(f"seed{seed}-error.json")
+        if value:
+            failures.append({k: value[k] for k in ("seed", "failure_type") if k in value})
+    return dict(
+        runs=cards,
+        reports=reports,
+        planned_runs=6,
+        completed_runs=len(reports),
+        audited=bool(public.get("audited")),
+        failures=failures,
+        scope="固定状态基线＋有界残差；50步离线动作；历史开发留出Normal/Over",
+    )
+
+
+def joint_payload(root: Path) -> dict:
+    """Read only the fixed r17 experiment, with public-field whitelists."""
+    directory = root / "residual-joint-r17"
+
+    def read(relative):
+        path = (directory / relative).resolve()
+        if root.resolve() not in path.parents:
+            return {}
+        try:
+            return json.loads(path.read_text())
+        except (OSError, ValueError):
+            return {}
+
+    names = [
+        f"{m}-s{s}" for s in (17019, 17020) for m in ("baseline", "state", "raw", "native", "joint")
+    ]
+    fields = (
+        "run_id",
+        "state",
+        "modality",
+        "seed",
+        "step",
+        "max_updates",
+        "actual_updates",
+        "seconds_per_update",
+        "selected_gate",
+        "selected_step",
+        "selected_val_mse",
+        "updated_at",
+    )
+    cards = []
+    for name in names:
+        value = read(name + "/status.json")
+        card = {k: value[k] for k in fields if k in value}
+        card.setdefault("run_id", name)
+        card.setdefault("state", "waiting")
+        card["stale"] = bool(value) and time.time() - float(value.get("updated_at", 0)) > 180
+        cards.append(card)
+    public = read("progress.json")
+    metrics = ("normalized_control_mse", "joint_rms_deg", "gripper_mae", "windows")
+
+    def metric_set(value):
+        return {
+            s: {k: v[k] for k in metrics if k in v}
+            for s, v in value.items()
+            if s in ("train", "val", "test", "normal_test", "over_test", "home_test")
+        }
+
+    reports = []
+    for raw in public.get("reports", []):
+        if raw.get("run_id") not in names:
+            continue
+        r = {k: raw[k] for k in ("run_id", "modality", "seed") if k in raw}
+        r["baseline"] = metric_set(raw.get("baseline", {}))
+        r["rows"] = []
+        for value in raw.get("rows", []):
+            row = {k: value[k] for k in ("budget", "selected_step", "selected_gate") if k in value}
+            for version in ("selected", "last"):
+                row[version] = metric_set(value.get(version, {}))
+            r["rows"].append(row)
+        reports.append(r)
+    failures = []
+    for seed in (17019, 17020):
+        value = read(f"train-{seed}-error.json") or read(f"prepare-{seed}-error.json")
+        if value:
+            failures.append({k: value[k] for k in ("seed", "failure_type") if k in value})
+    collection = read("capture_progress.json")
+    collection = {k: collection[k] for k in ("planned", "attempted", "accepted") if k in collection}
+    preparation = read("prepare/status.json")
+    preparation = {
+        k: preparation[k] for k in ("state", "activity", "step", "max_updates") if k in preparation
+    }
+    return dict(
+        collection=collection,
+        preparation=preparation,
+        runs=cards,
+        reports=reports,
+        planned_runs=10,
+        completed_runs=len(reports),
+        audited=bool(public.get("audited")),
+        failures=failures,
+        scope="正常光新场景；冻结RAW与联合RAW、状态/原生视觉残差；专家演示成功不等于策略成功",
+    )
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "n02-v12-monitor"
     run_root_override = None
@@ -1202,6 +1489,34 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
         try:
+            if path == "/joint":
+                html_path = Path(__file__).with_name("n02_joint.html")
+                self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")
+                return
+            if path == "/api/joint":
+                self._json(200, joint_payload(self._root()))
+                return
+            if path == "/residual":
+                html_path = Path(__file__).with_name("n02_residual.html")
+                self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")
+                return
+            if path == "/api/residual":
+                self._json(200, residual_payload(self._root()))
+                return
+            if path == "/learning":
+                html_path = Path(__file__).with_name("n02_learning.html")
+                self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")
+                return
+            if path == "/api/learning":
+                self._json(200, learning_payload(self._root()))
+                return
+            if path == "/task-chain":
+                html_path = Path(__file__).with_name("n02_task_chain.html")
+                self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")
+                return
+            if path == "/api/task-chain":
+                self._json(200, task_chain_payload(self._root()))
+                return
             if path == "/closed-loop":
                 html_path = Path(__file__).with_name("n02_v12_demo.html")
                 self._send(200, html_path.read_bytes(), "text/html; charset=utf-8")

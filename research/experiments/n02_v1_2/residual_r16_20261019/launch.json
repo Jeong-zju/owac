@@ -1,0 +1,17 @@
+{
+  "git_sha": "fe89b7f008ff77c1859df36ea6dc2a6ae12a1b95",
+  "dirty_diff_sha256": "eaa2a706caebe36783a3a8338f8010d4542c019d2bc261a7f314e5443e5924a8",
+  "files": {
+    "src/owac/evaluation/n02_full/action_residual.py": "cfcb880286ebae60cab31cafc34777c3d2c0923950ae5a94782e8aaae19bbcc8",
+    "src/owac/evaluation/n02_full/action_learning.py": "510def8ebbf19ee9ee6a3ae8444d1c41303616217d7443d669cb717d157232e4",
+    "src/owac/frameworks/n02_full/task_chain.py": "d3857c9181c6c9c9fff1fecf4dbc0005ff97958817f6b23cc5fd962e2765a6ce",
+    "research/experiments/n02_v1_2/residual_r16_20261019/plan.json": "40a9436174788adc589fc8c9ccc4ff5c6a4a3e4ef7a1bc8205506c6d2c941795",
+    "research/experiments/n02_v1_2/residual_r16_20261019/run.py": "083b37fd849c9e417e18d228db4f29e251e5718547e8355b8af20b9a8c572268",
+    "research/experiments/n02_v1_2/residual_r16_20261019/manage.py": "120adaaeb1d7b139d21045083a77a76b019e89445e3a15b69ee2fb47edf1e172"
+  },
+  "commands": [
+    "manage.py --gpu0 --name owac-n02-r16-s15019-a1 -- ABS_MODEL_PYTHON run.py --seed15019",
+    "manage.py --gpu1 --name owac-n02-r16-s15020-a1 -- ABS_MODEL_PYTHON run.py --seed15020"
+  ],
+  "resource_plan": "one seed per GPU, cached features; no encoder or pi loading; fixed6144 updates"
+}
