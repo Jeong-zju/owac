@@ -10,7 +10,7 @@
 | N02 | [r17 结论](research/experiments/n02_v1_2/residual_joint_r17_20261019/conclusions.json)：Normal 小样本冻结 RAW 残差有动作读出收益，局部联合更新无额外总体收益 | r17 的 π 更新 0、学习策略闭环 0；历史 r11 闭环 0/3 保留 |
 | N04 | [v5 修复与训练记录](research/experiments/2026-10-19_n04_stability_repair_v5.md)：保留 v4.2 目标消失/数值退出与 v5 工程修复 | 历史开发闭环 0/100；v5 长期效果与闭环未验证 |
 
-各分支原始 README、状态和执行规则已逐字保存到合并归档；实验记录与负结果保留原路径。大型本地输出在 `outputs/worktree-consolidation-20261019/` 归档并校验，原 worktree 暂保留。仅存远端的权重和训练数据尚未恢复，不将路径清单当作文件已本地保全。
+各分支原始 README、状态和执行规则已逐字保存到合并归档；实验记录与负结果保留原路径。大型本地输出在 `outputs/worktree-consolidation-20261019/` 归档并校验。三个原 worktree 已按用户要求移除，后续直接在主 checkout 的 `main` 开发；历史分支与恢复归档保留。仅存远端的权重和训练数据尚未恢复，不将路径清单当作文件已本地保全。
 
 ## 先读这些文件
 
@@ -47,10 +47,10 @@ uv run --locked python -c "import owac; print(owac.__file__)"
 /home/jeong/zeno/owac/
 ├── AGENTS.md             # 容器入口指引，完整规则随仓库版本管理
 ├── repo/                 # 主 Git checkout，以下目录树以此为根
-└── worktrees/            # 后续并行 checkout 的统一位置
+└── worktrees/            # 仅在后续需要独立 checkout 时创建
 ```
 
-从主仓库创建后续 worktree 的方法见[开发说明](docs/development.md)。当前只预留容器目录，尚未创建额外 worktree。
+从主仓库创建后续 worktree 的方法见[开发说明](docs/development.md)。三个历史 worktree 已于 2026-10-19 归档并清理，当前只保留主 checkout；`worktrees/` 在后续确需隔离时再创建。
 
 ```text
 .

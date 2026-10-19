@@ -1,10 +1,12 @@
 # N01、N02、N04 主线合并与证据保全
 
+2026-10-19 后续清理：用户要求后续直接在主分支开发，三个原 worktree 已移除，空的 `worktrees/` 父目录也已清理。清理前重新核对 91,270 个当前证据文件、归档与清单 SHA-256、提交已合入及工作区无新改动；额外保存 N02 的 2,714 份本地第三方源码文件（含元数据），归档也已逐成员校验。独立 `.venv` 的包版本清单已保存；未删除主仓库、历史分支、研究结论或证据归档。详见[清理前核验](worktree-cleanup-preflight.json)及[移除收据](worktree-cleanup.json)，额外备份与环境清单位于 `outputs/worktree-consolidation-20261019/worktree-cleanup/`。
+
 2026-10-19（Asia/Shanghai），用户要求三个独立 worktree 收敛到主线，并保留既有结论和训练记录；远程服务器已不可达。当前三个方向全部暂停。历史文档的训练授权、RUNNING、PID 和后续阶段要求仅为原时点记录，不作为恢复授权或当前远端状态。
 
 ## 代码与历史
 
-主 checkout 为 `/home/jeong/zeno/owac/repo/`，交付分支为本地 `main`。先在四个原分支分别提交未提交代码和证据，再在 `lzh/consolidate-paused-research` 顺序合并三个候选，完成本地检查后将 `main` 快进到整合结果。原分支与 worktree 保留；未推送 GitHub。原部署标签没有移动。
+主 checkout 为 `/home/jeong/zeno/owac/repo/`，交付分支为本地 `main`。先在四个原分支分别提交未提交代码和证据，再在 `lzh/consolidate-paused-research` 顺序合并三个候选，完成本地检查后将 `main` 快进到整合结果。合并时原分支与 worktree 均保留；之后仅按本页顶部的用户清理指令移除了 worktree。历史分支保留，未推送 GitHub。原部署标签没有移动。
 
 | 来源 | 合并前 HEAD | 保全提交 | 原有未提交文件数 |
 | --- | --- | --- | ---: |
@@ -50,7 +52,7 @@
 - `local-evidence.tar.zst`、`local-evidence-manifest.json`、`archive-receipt.json`：原 worktree 的本地实验输出，以及被忽略的 research 数组/日志；逐成员解压读取、核对大小与 SHA-256。符号链接保存原目标，不将它引用的外部文件冒充已归档。
 - `namespace-changes.json`：N02/N04 活动代码的接口路径调整清单。
 
-`premerge.bundle` 保存已有 Git refs 的完整历史，已通过 `git bundle verify`；四处原 checkout 的源码快照另行保存。原 worktree、outputs、权重和数据均未删除。主 checkout 既有基线输出继续留在原目录。
+`premerge.bundle` 保存已有 Git refs 的完整历史，已通过 `git bundle verify`；四处原 checkout 的源码快照另行保存。合并阶段没有删除原 worktree、outputs、权重或数据；随后的 worktree 清理在重新核验归档后进行，当前以本页顶部清理收据为准。主 checkout 的证据归档和既有基线输出继续保留。
 
 归档只覆盖本机实际已有文件。远端独有 checkpoint、数据集、原始长日志或视频若未同步到本地，就仍属于缺口；历史路径、来源清单和最后收据不能证明这些文件现在可访问、已完整保全或已经丢失。用户报告服务器不可达，本轮未尝试连接，也未启动任何训练/恢复队列。
 

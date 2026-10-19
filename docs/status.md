@@ -1,5 +1,7 @@
 # OWAC 当前状态
 
+2026-10-19 本地 worktree 清理完成：三个候选 checkout 均已移除，当前只保留 `/home/jeong/zeno/owac/repo/` 的 `main`，后续直接在此开发。清理前重新核验提交祖先关系、工作区、91,270 个证据文件与归档哈希；另保全 N02 本地第三方源码。历史分支、代码快照和主仓库证据归档保留，见[清理收据](../research/archives/2026-10-19_worktree_consolidation/worktree-cleanup.json)。
+
 2026-10-19：用户暂停 N01、N02、N04，要求三个 worktree 合并回主线。远程服务器已不可达；本轮只合并、保全本地证据并运行本地代码检查。当前入口为 `repo/` 的本地 `main`，不自动恢复训练、诊断训练或下一阶段。
 
 [合并与证据索引](../research/archives/2026-10-19_worktree_consolidation/README.md)记录原分支/提交、接口冲突处理、本地归档与远端缺口。四处原始状态快照分别保存在该目录的 `baseline/`、`n01/`、`n02/`、`n04/`，历史状态不作为当前作业状态。

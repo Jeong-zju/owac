@@ -1,5 +1,8 @@
 # OWAC 本地开发
 
+2026-10-19 当前开发入口：按用户要求直接使用 `/home/jeong/zeno/owac/repo/` 的 `main`。N01、N02、N04 的三个历史 worktree 已合并、校验并清理；历史分支和恢复归档保留。以下创建 worktree 的说明仅在后续明确需要隔离 checkout 时使用。需要运行编码器测试时，在主 checkout 执行 `uv sync --locked --all-extras`。
+
+
 所有开发从本仓库及其版本历史出发。主 checkout 为 `/home/jeong/zeno/owac/repo/`；工作空间父目录只容纳主仓库、入口指引与 `worktrees/`。GitHub 远端为私有仓库 [Jeong-zju/owac](https://github.com/Jeong-zju/owac)，`origin` 地址为 `https://github.com/Jeong-zju/owac.git`，主分支为 `main`。推送和发布遵循当前任务授权。
 
 ## 环境与检查

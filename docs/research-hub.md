@@ -56,7 +56,7 @@ systemctl --user enable --now owac-research-hub.service
 
 路线登记：[configs/research/hub.json](../configs/research/hub.json)。
 
-1. 当前三个方向的登记 checkout 为 `repo`、分支为 `main`；原 worktree 保留作恢复来源。统筹台只读取文档和 Git 状态，不启动训练。
+1. 当前三个方向的登记 checkout 为 `repo`、分支为 `main`；三个原 worktree 已清理，历史分支与主仓库归档保留作恢复来源。统筹台只读取文档和 Git 状态，不启动训练。
 2. 自包含提示词可设`prompt_kind=complete`，直接复制文件全文；其工作位置/阶段范围由完整包本身给出，不再叠加通用旧门槛或来源hash前缀。可选`research_focus`展示研究链路、比较方法、预算和数据边界，缺省时其他路线保持原界面。
 3. 每条路线配置 `version`、`current_stage`、阶段说明与 `prompt_sources`。`current_stage` 是人工登记的当前核对点，不代表自动批准执行。
 3. 文档自动收录各自 `docs/`、`research/candidates/`、`research/experiments/`、`research/reviews/` 内路径含本方向编号的 Markdown，另含 README、AGENTS、status 和 `documents` 明确列出的来源。不把工作树中其他方向的旧提示词副本混入。
