@@ -30,6 +30,9 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+# ConvNeXt 的 vendor 文件保持上游字节：任何重排都会改变 provenance.json 记录的
+# upstream/local 差异，因此只对它免于格式化与风格检查（结构核查由测试完成）。
+extend-exclude = ["src/owac/frameworks/n04/_vendor/convnext/convnext.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

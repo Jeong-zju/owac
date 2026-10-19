@@ -63,8 +63,10 @@ startretries=0
 ; a training step can take a while to checkpoint; give it time to exit cleanly
 stopwaitsecs=600
 stopsignal=INT
+; supervisor 不允许 stopasgroup=true 与 killasgroup=false 同时出现（S1 首次实际注册时
+; 暴露的 S0 模板缺陷）。训练进程只 fork 不出独立子进程组，两个都置 true 即可。
 stopasgroup=true
-killasgroup=false
+killasgroup=true
 
 ; logs: one file per stage/run, bounded rotation, stderr folded into stdout
 redirect_stderr=true

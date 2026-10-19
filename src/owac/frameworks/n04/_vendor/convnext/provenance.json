@@ -1,0 +1,35 @@
+{
+  "repository": "https://github.com/facebookresearch/ConvNeXt",
+  "commit": "048efcea897d999aed302f2639b6270aedf8d4c8",
+  "license": "MIT",
+  "fetched": "2026-10-14 from raw.githubusercontent.com at the pinned commit",
+  "changes": [
+    "models/convnext.py: timm.models.layers 与 timm.models.registry 导入替换为本地 timm_compat；移除 @register_model 装饰器（4 处）。网络层定义、depth/width 配置与数值逻辑未改。",
+    "timm_compat.py 是本仓库对 DropPath / trunc_normal_ 的独立等价实现，不复制 timm 源码。",
+    "本目录不打包预训练权重；S1 主线使用随机初始化。"
+  ],
+  "files": [
+    {
+      "upstream_path": "models/convnext.py",
+      "local_path": "convnext.py",
+      "upstream_sha256": "e081a71bcad826035cdac2c314bc26de93b0dcb95a70ce8b7668f3e61490b7d2",
+      "local_sha256": "b3c6b135508a2719f67483ee1ebdffb2f0d6fea34218f2ffd757f83cc8c968e7"
+    },
+    {
+      "upstream_path": "LICENSE",
+      "local_path": "LICENSE",
+      "upstream_sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93",
+      "local_sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+    },
+    {
+      "upstream_path": null,
+      "local_path": "timm_compat.py",
+      "local_sha256": "f30042d6392b669cfbe23ffdcedce7e3e3db31b937ed93cdab2def77a39328bb"
+    },
+    {
+      "upstream_path": null,
+      "local_path": "__init__.py",
+      "local_sha256": "85cac9293d2b93379638f3b53167aeec5f31ffabe962f7da51f7b1adc8eadf07"
+    }
+  ]
+}

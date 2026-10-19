@@ -36,6 +36,7 @@ S0 之后本模块支持可选 **遥测 sidecar**（:mod:`owac.raw.telemetry`）
 from __future__ import annotations
 
 import json
+import zipfile
 from collections.abc import Iterator
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -44,6 +45,7 @@ from typing import Any, Literal
 import numpy as np
 import torch
 
+from owac.core.encoder_contract import EmbodimentContext
 from owac.raw.telemetry import (
     VERIFIED_EVIDENCE_LEVELS,
     ExecutedControl,
@@ -653,6 +655,75 @@ class RawVLASequenceLoader:
                 "metadata": sequence.metadata,
             }
 
+    # -- v1.1 追加接口（见文件末尾说明） -------------------------------------------
+
+    def load_window(
+        self,
+        path: Path | str,
+        *,
+        length: int,
+        start: int = 0,
+        episode_id: str | None = None,
+    ) -> RawVLASequence:
+        """只读 ``[start, start+length)`` 帧，其余语义与 :meth:`load` 一致。
+
+        ``actions`` 会按目标相位多读 ``V11_ACTION_SLACK[self.suite]`` 帧，所以窗口内每帧的
+        ``target_view`` 与整段加载逐位一致；``frame_ids`` 保留全局帧号。文件在该区间更短时
+        返回较短序列，调用方按 ``len(sequence)`` 判断。带遥测 sidecar 时按整段语义处理，
+        不在这里做窗口化（v1.1 不补 sidecar）。
+        """
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"找不到 NPZ 文件：{path}")
+        if self.sidecar is not None:
+            raise ValueError("load_window 不做 sidecar 窗口化；请用整段 load 或去掉 sidecar")
+        if self.require_executed_action:
+            raise ValueError("该缓存没有可靠的已执行动作记录；不能使用未来监督动作")
+        view = _NpzWindowView(path, start=start, length=length, slack=V11_ACTION_SLACK[self.suite])
+        if self.suite == "libero":
+            sequence = self._load_libero(view, path, episode_id)
+        else:
+            sequence = self._load_robotwin(view, path, episode_id)
+        if not len(sequence):
+            raise ValueError(f"{path} 在 [{start}, {start + length}) 上没有帧")
+        return replace(sequence, frame_ids=torch.arange(start, start + len(sequence)))
+
+    def v11_windows(
+        self,
+        sequence: RawVLASequence,
+        *,
+        burn_in: int = 16,
+        gradient: int = 32,
+        stride: int | None = None,
+        supervision_points: int = 4,
+        history: int = 4,
+    ) -> Iterator[dict[str, Any]]:
+        """窗口计划 + 每帧本体上下文（只用 ``≤ t`` 的记录，未来动作不进入）。"""
+        for plan in v11_window_plan(
+            len(sequence),
+            burn_in=burn_in,
+            gradient=gradient,
+            stride=stride,
+            supervision_points=supervision_points,
+        ):
+            record = dict(plan)
+            record["episode_id"] = sequence.episode_id
+            record["frame_ids"] = tuple(
+                int(value)
+                for value in sequence.frame_ids[plan["start"] : plan["start"] + plan["length"]]
+            )
+            record["proprio_contexts"] = [
+                proprio_context_at(sequence, plan["start"] + offset, history=history)
+                for offset in range(plan["length"])
+            ]
+            yield record
+
+    def proprio_context_at(
+        self, sequence: RawVLASequence, frame: int, *, history: int = 4
+    ) -> EmbodimentContext:
+        """``frame`` 时刻的本体上下文，见模块级 `proprio_context_at`。"""
+        return proprio_context_at(sequence, frame, history=history)
+
 
 def _slice_supervision(
     actions: np.ndarray, *, length: int, start_offset: int, horizon: int
@@ -675,3 +746,174 @@ def _slice_supervision(
         out[t, :count] = array[start:end]
         mask[t, :count] = 1.0
     return torch.from_numpy(out), torch.from_numpy(mask)
+
+
+# --------------------------------------------------------------------------------------
+# v1.1 S2 追加接口（只新增名字；既有方法语义、签名不变）
+# --------------------------------------------------------------------------------------
+
+#: 目标相位在窗口末尾之后额外需要的帧数：
+#: LIBERO ``actions[t:t+10]``、RoboTwin ``actions[t+1:t+51]``。
+V11_ACTION_SLACK = {"libero": LIBERO_ACTION_HORIZON - 1, "robotwin": ROBOTWIN_ACTION_HORIZON}
+
+
+def v11_supervision_offsets(gradient: int, points: int = 4) -> tuple[int, ...]:
+    """把梯度窗口等分成 ``points`` 段并取每段中点，作为动作监督点（不按难易挑选）。"""
+    if points < 1 or gradient < points or gradient % points:
+        raise ValueError(f"gradient={gradient} 必须能被监督点数 {points} 整除")
+    stride = gradient // points
+    return tuple(index * stride + stride // 2 for index in range(points))
+
+
+def v11_window_plan(
+    total: int,
+    *,
+    burn_in: int = 16,
+    gradient: int = 32,
+    stride: int | None = None,
+    supervision_points: int = 4,
+) -> list[dict[str, Any]]:
+    """``burn_in + gradient`` 帧窗口计划（默认 16 + 32）。
+
+    窗口只取同一 episode 内的连续记录，不跨边界、不补造开头帧；``start`` 是全局帧号，
+    ``supervision_index`` 是窗口内的动作监督帧（相对窗口起点）。
+    """
+    if burn_in < 0 or gradient < 1:
+        raise ValueError("burn_in 不能为负且 gradient 至少为 1")
+    length = burn_in + gradient
+    step = length if stride is None else int(stride)
+    if step < 1:
+        raise ValueError("stride 至少为 1")
+    offsets = v11_supervision_offsets(gradient, supervision_points)
+    return [
+        {
+            "start": start,
+            "length": length,
+            "burn_in": burn_in,
+            "gradient": gradient,
+            "supervision_offsets": offsets,
+            "supervision_index": tuple(burn_in + offset for offset in offsets),
+        }
+        for start in range(0, max(0, int(total) - length + 1), step)
+    ]
+
+
+def proprio_context_at(
+    sequence: RawVLASequence, frame: int, *, history: int = 4
+) -> EmbodimentContext:
+    """无 sidecar 的本体上下文：只用 ``≤ frame`` 的真实记录。
+
+    * 缓存里没有可靠的已执行控制时 ``executed_action=None``、``executed_action_available=False``，
+      不拿未来监督动作补上；
+    * 窗口开头不足 ``history`` 帧时重复该 episode 的第一帧真实值，并把重复帧数写进
+      ``metadata["padded_frames"]``（不编造数值、不借用未来帧）；
+    * 返回结构里没有任何未来动作／未来本体：``supervised_action`` 只由 `target_view` 取用。
+    """
+    total = len(sequence)
+    if not 0 <= frame < total:
+        raise IndexError(f"帧号 {frame} 超出序列长度 {total}")
+    if not sequence.availability.proprio:
+        raise ValueError("该序列没有本体记录，不能构造本体上下文")
+    width = max(1, int(history) + 1)
+    first = max(0, frame - int(history))
+    index = list(range(first, frame + 1))
+    padded = width - len(index)
+    index = [index[0]] * padded + index
+    proprio = sequence.proprio[torch.as_tensor(index, dtype=torch.long)]
+    executed = None if sequence.executed_action is None else sequence.executed_action[frame]
+    return EmbodimentContext(
+        proprio=proprio,
+        proprio_available=True,
+        executed_action=executed,
+        executed_action_available=executed is not None,
+        time_unit=sequence.time_unit,
+        metadata={
+            "history_frames": width,
+            "padded_frames": padded,
+            "frame": int(frame),
+            "platform": sequence.suite,
+            "proprio_key": sequence.metadata.get("states_key", "proprio"),
+            "time_unit": sequence.time_unit,
+            "future_action_excluded": True,
+        },
+    )
+
+
+def _npy_member_header(stream) -> tuple[tuple[int, ...], bool, np.dtype]:
+    version = np.lib.format.read_magic(stream)
+    if version == (1, 0):
+        return np.lib.format.read_array_header_1_0(stream)
+    if version == (2, 0):
+        return np.lib.format.read_array_header_2_0(stream)
+    raise ValueError(f"不支持的 npy 版本 {version}")
+
+
+def npz_member_shape(path: Path | str, key: str) -> tuple[int, ...]:
+    """只解析成员头得到数组形状：计划窗口时不必解压整段测量。"""
+    path = Path(path)
+    member = f"{key}.npy"
+    with zipfile.ZipFile(path) as archive:
+        if member not in archive.namelist():
+            raise KeyError(f"{path} 缺少成员 {member}；实际成员：{sorted(archive.namelist())}")
+        with archive.open(member) as stream:
+            shape, _, _ = _npy_member_header(stream)
+    return tuple(int(value) for value in shape)
+
+
+class _NpzWindowView:
+    """把 NPZ 的帧区间伪装成 ``np.load`` 结果，供既有 ``_load_*`` 复用。
+
+    RoboTwin 单文件可达 GB 级；整段 ``np.load`` 再切片会读完整份成员。这里按 npy 头计算
+    帧字节偏移，只读 ``[start, start+length)``（``actions`` 另加目标相位需要的 slack）。
+    """
+
+    #: 小于此字节数的成员（如 ``metadata_json``）整段读出，不做偏移计算。
+    SMALL_MEMBER_BYTES = 1 << 20
+
+    def __init__(self, path: Path | str, *, start: int, length: int, slack: int = 0) -> None:
+        self._path = Path(path)
+        self._start = max(0, int(start))
+        self._length = int(length)
+        self._slack = int(slack)
+        if self._length < 1:
+            raise ValueError("窗口长度至少为 1")
+        with zipfile.ZipFile(self._path) as archive:
+            self._members = {
+                info.filename[: -len(".npy")]: info
+                for info in archive.infolist()
+                if info.filename.endswith(".npy")
+            }
+
+    @property
+    def files(self) -> list[str]:
+        return list(self._members)
+
+    def __getitem__(self, key: str):
+        member = self._members.get(key)
+        if member is None:
+            raise KeyError(f"{self._path} 没有成员 {key!r}；实际成员：{sorted(self._members)}")
+        extra = self._slack if key == "actions" else 0
+        if member.file_size <= self.SMALL_MEMBER_BYTES:
+            with np.load(self._path, allow_pickle=False) as npz:
+                array = npz[key]
+            if array.ndim == 0:
+                return array
+            start = min(self._start, int(array.shape[0]))
+            rows = max(0, min(self._length + extra, int(array.shape[0]) - start))
+            return array[start : start + rows]
+        with zipfile.ZipFile(self._path) as archive, archive.open(member) as stream:
+            shape, fortran, dtype = _npy_member_header(stream)
+            if fortran or not shape:
+                raise ValueError(f"{self._path} 成员 {key!r} 形状 {shape} 不能按帧切分")
+            header_bytes = stream.tell()
+            frame_bytes = int(dtype.itemsize) * int(np.prod(shape[1:], dtype=np.int64))
+            start = min(self._start, int(shape[0]))
+            rows = max(0, min(self._length + extra, int(shape[0]) - start))
+            stream.seek(header_bytes + start * frame_bytes)
+            payload = stream.read(rows * frame_bytes)
+            if len(payload) != rows * frame_bytes:
+                raise ValueError(f"{self._path} 成员 {key!r} 读取不完整")
+            return np.frombuffer(payload, dtype=dtype).reshape((rows, *shape[1:]))
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._members

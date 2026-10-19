@@ -1,0 +1,22 @@
+{
+  "arm": "B",
+  "notes": "同源固定 ISP RGB + 完整 N04；质量头不得读 RAW；S3 补对照",
+  "model": {
+    "input_mode": "rawvla_rgb3",
+    "isp": "fixed_clip_srgb_v1",
+    "modules": {
+      "correspondence": true,
+      "state_estimator": true,
+      "dual_mode": true,
+      "readout": true
+    }
+  },
+  "loss": {
+    "weights": {
+      "action": 1.0,
+      "correspondence": 0.1,
+      "forecast": 0.1,
+      "representation": 0.01
+    }
+  }
+}

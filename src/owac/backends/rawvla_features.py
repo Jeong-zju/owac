@@ -171,7 +171,7 @@ class RawVLAFeaturePolicy:
             "num_language_tokens": language.shape[1],
         }
 
-    def encode_observation(self, frame, context, state):
+    def encode_observation(self, frame, context, state, *, return_output=False):
         import torch
 
         camera = getattr(frame, "camera_id", getattr(context, "camera_id", None))
@@ -196,7 +196,7 @@ class RawVLAFeaturePolicy:
         self.counter.record(_observation_key(frame))
         output = self.encoder.step(values, context, state, **kwargs)
         tokens = self.encoder.readout_tokens(output, self.config.tokens_per_camera)
-        return tokens, output.state
+        return tokens, (output if return_output else output.state)
 
     def _observation(self, context, task_tokens, task_mask, backend_state):
         from types import SimpleNamespace
@@ -225,10 +225,10 @@ class RawVLAFeaturePolicy:
         )
 
     def _view(self, frame, context, state, task_tokens, task_mask, backend_state):
-        visual, new_state = self.encode_observation(frame, context, state)
+        visual, output = self.encode_observation(frame, context, state, return_output=True)
         prefix = self.embed_prefix_from_visual_tokens(visual, task_tokens, task_mask)
         observation = self._observation(context, task_tokens, task_mask, backend_state)
-        return _FeatureBackendView(self.backend, prefix), observation, visual, new_state
+        return _FeatureBackendView(self.backend, prefix), observation, visual, output
 
     def forward_from_observation(
         self,
@@ -246,7 +246,7 @@ class RawVLAFeaturePolicy:
     ):
         import torch
 
-        view, observation, visual, new_state = self._view(
+        view, observation, visual, output = self._view(
             frame, context, state, task_tokens, task_mask, backend_state
         )
         if (
@@ -270,7 +270,8 @@ class RawVLAFeaturePolicy:
             mask.sum() * self.config.control_dim
         ).clamp_min(1)
         result.update(
-            state=new_state,
+            state=output.state,
+            encoder_output=output,
             visual_tokens=visual,
             encoder_calls=1,
             num_visual_tokens=visual.values.shape[1],
@@ -296,7 +297,7 @@ class RawVLAFeaturePolicy:
         if steps < 1:
             raise ValueError("denoise steps must be positive")
         with torch.no_grad():
-            view, observation, visual, new_state = self._view(
+            view, observation, visual, output = self._view(
                 frame, context, state, task_tokens, task_mask, backend_state
             )
             actions = type(self.backend).sample_actions(
@@ -305,7 +306,7 @@ class RawVLAFeaturePolicy:
         return {
             "actions": actions,
             "control_actions": actions[..., : self.config.control_dim],
-            "state": new_state,
+            "state": output.state,
             "encoder_calls": 1,
             "num_denoise_steps": steps,
         }

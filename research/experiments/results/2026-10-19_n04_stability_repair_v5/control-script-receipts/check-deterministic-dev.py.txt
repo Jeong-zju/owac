@@ -1,0 +1,30 @@
+import contextlib,gc,json,sys
+from pathlib import Path
+import torch
+from owac.training.n04_v11 import V11Trainer,load_config,write_json_atomic
+p=sys.argv[1]; root=Path('/workspace/owac/research/n04-v1'); run=root/f'runs/v1.1/codex-diagnosis/v5-exact-{p}-seed101'; out=root/f'runs/v1.1/codex-diagnosis/v5-deterministic-dev-{p}-seed101'; out.mkdir(exist_ok=True)
+cfg=load_config(f'configs/n04/v1_1/codex_v5_{p}.json')
+receipt={'platform':p,'optimizer_updates':0,'evaluations':[]}
+@contextlib.contextmanager
+def reference(trainer):
+ saved=[]; det=torch.are_deterministic_algorithms_enabled(); warn=torch.is_deterministic_algorithms_warn_only_enabled(); tf=torch.backends.cuda.matmul.allow_tf32
+ try:
+  torch.use_deterministic_algorithms(True);torch.backends.cuda.matmul.allow_tf32=False
+  for module,name,eager in trainer._eager_methods:
+   saved.append((module,name,getattr(module,name)));setattr(module,name,eager)
+  with torch.backends.cudnn.flags(benchmark=False,deterministic=True,allow_tf32=False):yield
+ finally:
+  for module,name,method in saved:setattr(module,name,method)
+  torch.use_deterministic_algorithms(det,warn_only=warn);torch.backends.cuda.matmul.allow_tf32=tf
+try:
+ for stage in ('first_instance','independent_reload'):
+  trainer=V11Trainer(cfg,seed=101,run_dir=out)
+  trainer.load_checkpoint(run/'checkpoint-step0000008.pt')
+  for repeat in range(3):
+   with reference(trainer): result=trainer.evaluate_dev_action_loss()
+   row={'stage':stage,'repeat':repeat,**result};receipt['evaluations'].append(row);write_json_atomic(out/'verification.json',receipt);print(json.dumps(row),flush=True)
+  del trainer;gc.collect();torch.cuda.empty_cache()
+ values=[x['dev_loss'] for x in receipt['evaluations']];receipt['spread']=max(values)-min(values);assert receipt['spread']<=1e-5*max(1,abs(values[0]))
+ receipt['complete']=True;write_json_atomic(out/'verification.json',receipt)
+except Exception as e:
+ receipt['error']=str(e);write_json_atomic(out/'verification.json',receipt);raise

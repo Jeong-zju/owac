@@ -1,0 +1,41 @@
+import contextlib,json,sys
+from pathlib import Path
+import torch
+from owac.training.n04_v11 import V11Trainer,load_config,write_json_atomic
+
+platform=sys.argv[1]
+root=Path('/workspace/owac/research/n04-v1')
+run=root/f'runs/v1.1/codex-diagnosis/v5-exact-{platform}-seed101'
+out=root/f'runs/v1.1/codex-diagnosis/v5-reload-repeat-{platform}-seed101'
+out.mkdir(exist_ok=True)
+cfg=load_config(f'configs/n04/v1_1/codex_v5_{platform}.json')
+receipt={'platform':platform,'optimizer_updates':0,'evaluations':[]}
+def write():write_json_atomic(out/'repeat.json',receipt)
+trainer=V11Trainer(cfg,seed=101,run_dir=out)
+trainer.load_checkpoint(run/'checkpoint-step0000008.pt')
+payload=torch.load(run/'checkpoint-step0000008.pt',map_location='cpu',mmap=True,weights_only=False)
+final=torch.load(run/'checkpoint-final.pt',map_location='cpu',mmap=True,weights_only=False)
+for name,module in [('encoder',trainer.encoder),('backend',trainer.backend)]:
+ actual=module.state_dict(); stored=payload[name]
+ mismatches=[key for key,value in actual.items() if value.dtype!=stored[key].dtype or not torch.equal(value.cpu(),stored[key])]
+ changed_in_terminal_eval=[key for key,value in final[name].items() if not torch.equal(value,stored[key])]
+ receipt[name]={'keys':len(actual),'loaded_mismatches':mismatches,'terminal_eval_changes':changed_in_terminal_eval}
+assert all(not receipt[name]['loaded_mismatches'] and not receipt[name]['terminal_eval_changes'] for name in ('encoder','backend'))
+del payload,final
+write()
+@contextlib.contextmanager
+def native():
+ saved=[]
+ try:
+  for module,name,eager in trainer._eager_methods:
+   saved.append((module,name,getattr(module,name))); setattr(module,name,eager)
+  yield
+ finally:
+  for module,name,method in saved:setattr(module,name,method)
+for stage in ('compiled_before','native_before','compiled_after','native_after'):
+ if stage=='compiled_after':trainer.load_checkpoint(run/'checkpoint-step0000008.pt')
+ for repeat in range(3):
+  with native() if stage.startswith('native') else contextlib.nullcontext():
+   result=trainer.evaluate_dev_action_loss()
+  row={'stage':stage,'repeat':repeat,**result}; receipt['evaluations'].append(row);write();print(json.dumps(row),flush=True)
+receipt['complete']=True;write()

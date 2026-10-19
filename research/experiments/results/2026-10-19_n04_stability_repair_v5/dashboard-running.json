@@ -1,0 +1,1058 @@
+{
+  "sampled_at_local": "2026-10-19 11:16:13 CST",
+  "repair": null,
+  "runs": [
+    {
+      "run_id": "robotwin-D-stable-v5-seed101",
+      "stage": "S2",
+      "platform": "robotwin",
+      "arm": "D",
+      "seed": 101,
+      "phase": "representation_cache",
+      "job": {
+        "status": "running",
+        "note": "\u53d1\u73b0 1 \u4e2a\u5f15\u7528\u8be5 run \u76ee\u5f55\u7684\u8fdb\u7a0b",
+        "pids": [
+          782631
+        ],
+        "pids_source": "cmdline"
+      },
+      "updated_at": "2026-10-19T03:16:13Z",
+      "updated_at_local": "2026-10-19 11:16:13 CST",
+      "updated_at_epoch": 1792379773.0,
+      "data_age_s": 0.1,
+      "step": 11,
+      "budget_steps": 2000,
+      "phase_step": null,
+      "train_step": 11,
+      "train_budget_steps": 2000,
+      "remaining_steps": 1989,
+      "train_loss": 5.5236743735462035,
+      "dev_loss": 0.2907838970422745,
+      "owner": "Codex",
+      "gpu_index": 1,
+      "assessment": {
+        "warmup_steps": 200,
+        "warmup_complete": false,
+        "dev_windows": 2,
+        "best_dev_loss": 0.2907838970422745,
+        "best_dev_step": 10,
+        "convergence": "not_assessed",
+        "representation_mode": "independent_windows",
+        "representation_coefficients": {
+          "variance_weight": 25.0,
+          "covariance_weight": 1.0
+        },
+        "loss_weights": {
+          "action": 1.0,
+          "correspondence": 0.1,
+          "forecast": 0.1,
+          "representation": 0.1
+        },
+        "compiled_modules": [
+          "readout",
+          "prediction",
+          "measurement",
+          "raft_update"
+        ]
+      },
+      "activity": {
+        "completed_windows": 5,
+        "total_windows": 8,
+        "initial_dev_loss": 2.453332781791687,
+        "best_dev_loss": 0.2907838970422745,
+        "last_checkpoint_step": 10,
+        "representation_diag": {
+          "variance": 0.8858515620231628,
+          "covariance": 0.42509227991104126,
+          "std": 0.11352236568927765,
+          "windows": 8
+        },
+        "update_started_at": 1792379557.587727,
+        "objective_coverage": {
+          "action": {
+            "windows": 8,
+            "valid_items": 32
+          },
+          "correspondence": {
+            "windows": 8,
+            "valid_items": 256
+          },
+          "forecast": {
+            "windows": 8,
+            "valid_items": 2136
+          },
+          "representation": {
+            "windows": 8,
+            "valid_items": 8
+          }
+        },
+        "forecast_skip_reasons": {
+          "window_too_short": 168
+        },
+        "auxiliary_validation": {
+          "step": 10,
+          "windows": 2,
+          "forecast": {
+            "1": {
+              "forecast_quad": 19.46085233073081,
+              "forecast_logdet": 81.4136570345971,
+              "forecast_mode_w0": 0.9497041769566075,
+              "forecast_mode_w1": 0.05029587211307659,
+              "forecast_S_mean": 1.4250741915036274,
+              "forecast_S_min": 0.967740951366322,
+              "forecast_S_max": 2.140135074174532,
+              "forecast_R_mean": 1.0015032765685872,
+              "forecast_R_min": 0.6556714318131888,
+              "forecast_R_max": 1.421941009900903,
+              "prediction_mse": 0.10394272712930556,
+              "persistence_mse": 0.10396481229252713,
+              "target_rms": 0.9974803040104527
+            },
+            "2": {
+              "forecast_quad": 18.575346687104968,
+              "forecast_logdet": 100.66740523444281,
+              "forecast_mode_w0": 0.917314875125885,
+              "forecast_mode_w1": 0.0826851197414928,
+              "forecast_S_mean": 1.5461955746014913,
+              "forecast_S_min": 1.0691583043999142,
+              "forecast_S_max": 2.2787351687749227,
+              "forecast_R_mean": 1.001500619782342,
+              "forecast_R_min": 0.6560306903388765,
+              "forecast_R_max": 1.4213935169908736,
+              "prediction_mse": 0.10702606934226222,
+              "persistence_mse": 0.10707414996706777,
+              "target_rms": 0.9974730451901753
+            },
+            "4": {
+              "forecast_quad": 16.997787731034414,
+              "forecast_logdet": 136.00552776881628,
+              "forecast_mode_w0": 0.8825993843021847,
+              "forecast_mode_w1": 0.1174006284258905,
+              "forecast_S_mean": 1.7839833391564233,
+              "forecast_S_min": 1.2779735149372191,
+              "forecast_S_max": 2.5012394998754774,
+              "forecast_R_mean": 1.0015012110982622,
+              "forecast_R_min": 0.6564946834530149,
+              "forecast_R_max": 1.4214087029298146,
+              "prediction_mse": 0.11251102589691679,
+              "persistence_mse": 0.11262039463257506,
+              "target_rms": 0.9974513898293177
+            }
+          },
+          "representation": {
+            "variance": 0.9417241811752319,
+            "covariance": 0.058844830840826035,
+            "std": 0.05643866956233978,
+            "windows": 2
+          }
+        },
+        "validation_measurements": 3,
+        "last_validation_step": 10
+      },
+      "step_seconds_reported": 256.89775097183883,
+      "gpu_memory_gb": 70.180433408,
+      "gpu_memory_gb_source": "progress.json",
+      "eval": {
+        "completed": 0,
+        "planned": null,
+        "successes": 0,
+        "errors": 0,
+        "libero": {
+          "completed": 0,
+          "planned": null,
+          "successes": 0,
+          "errors": 0
+        },
+        "robotwin": {
+          "completed": 0,
+          "planned": null,
+          "successes": 0,
+          "errors": 0
+        },
+        "rows": 0,
+        "planned_source": null,
+        "counts_note": null
+      },
+      "recent_failures": [],
+      "series": {
+        "train": [
+          [
+            1,
+            6.002315878868103
+          ],
+          [
+            2,
+            4.99557363986969
+          ],
+          [
+            3,
+            4.140231758356094
+          ],
+          [
+            4,
+            3.397005081176758
+          ],
+          [
+            5,
+            3.1001522541046143
+          ],
+          [
+            6,
+            3.2568810880184174
+          ],
+          [
+            7,
+            3.060569703578949
+          ],
+          [
+            8,
+            3.0934652984142303
+          ],
+          [
+            8,
+            5.6795555224238035
+          ],
+          [
+            9,
+            3.090617597103119
+          ],
+          [
+            10,
+            2.8914265632629395
+          ],
+          [
+            11,
+            3.1042804419994354
+          ]
+        ],
+        "action": [
+          [
+            1,
+            3.3852545768022537
+          ],
+          [
+            2,
+            2.3789299726486206
+          ],
+          [
+            3,
+            1.5026051253080368
+          ],
+          [
+            4,
+            0.752547986805439
+          ],
+          [
+            5,
+            0.44866951555013657
+          ],
+          [
+            6,
+            0.6289836764335632
+          ],
+          [
+            7,
+            0.4325913991779089
+          ],
+          [
+            8,
+            0.45325010269880295
+          ],
+          [
+            9,
+            0.4464178644120693
+          ],
+          [
+            10,
+            0.25653765350580215
+          ],
+          [
+            11,
+            0.498083159327507
+          ]
+        ],
+        "dev": [
+          [
+            0,
+            2.453107237815857
+          ],
+          [
+            5,
+            0.3372391015291214
+          ],
+          [
+            10,
+            0.2907838970422745
+          ]
+        ],
+        "corr": [
+          [
+            1,
+            2.53787624835968
+          ],
+          [
+            2,
+            2.2200366854667664
+          ],
+          [
+            3,
+            2.488225355744362
+          ],
+          [
+            4,
+            2.434489518404007
+          ],
+          [
+            5,
+            2.32176610827446
+          ],
+          [
+            6,
+            2.4639976918697357
+          ],
+          [
+            7,
+            2.397797629237175
+          ],
+          [
+            8,
+            2.5881379395723343
+          ],
+          [
+            9,
+            2.5944647043943405
+          ],
+          [
+            10,
+            2.420056477189064
+          ],
+          [
+            11,
+            2.3489355593919754
+          ]
+        ],
+        "forecast": [
+          [
+            1,
+            1.138108029961586
+          ],
+          [
+            2,
+            1.148758128285408
+          ],
+          [
+            3,
+            1.1471332907676697
+          ],
+          [
+            4,
+            1.1488604098558426
+          ],
+          [
+            5,
+            1.1675462275743484
+          ],
+          [
+            6,
+            1.1486989557743073
+          ],
+          [
+            7,
+            1.1649932116270065
+          ],
+          [
+            8,
+            1.1630664020776749
+          ],
+          [
+            9,
+            1.1440785229206085
+          ],
+          [
+            10,
+            1.152336061000824
+          ],
+          [
+            11,
+            1.1416544616222382
+          ]
+        ],
+        "repr": [
+          [
+            1,
+            22.49462890625
+          ],
+          [
+            2,
+            22.79764175415039
+          ],
+          [
+            3,
+            22.740907669067383
+          ],
+          [
+            4,
+            22.86121940612793
+          ],
+          [
+            5,
+            23.025514602661133
+          ],
+          [
+            6,
+            22.666276931762695
+          ],
+          [
+            7,
+            22.716991424560547
+          ],
+          [
+            8,
+            22.65094757080078
+          ],
+          [
+            9,
+            22.703454971313477
+          ],
+          [
+            10,
+            22.77649688720703
+          ],
+          [
+            11,
+            22.571382522583008
+          ]
+        ]
+      },
+      "series_keys": {
+        "train": "train_loss",
+        "action": "terms.action",
+        "dev": "dev_loss",
+        "corr": "terms.correspondence",
+        "forecast": "terms.forecast",
+        "repr": "terms.representation"
+      },
+      "artifacts": [],
+      "log": {
+        "tail": [
+          "`torch_dtype` is deprecated! Use `dtype` instead!",
+          "[2026-10-19T03:07:24] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/raw/rawvla_sequence.py:295: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)",
+          "  tensor = torch.as_tensor(np.ascontiguousarray(array))",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:134: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:145: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "/workspace/owac/research/n04-v1/envs/n04v11/lib/python3.12/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/TensorShape.cpp:4221.)",
+          "  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:162: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "[2026-10-19T03:11:28] step      10 loss=2.8914 action=0.2565 lr=5.50e-06 243.95s",
+          "[2026-10-19T03:11:55] fixed dev action loss at step 10: 0.2908",
+          "[2026-10-19T03:15:58] step      11 loss=3.1043 action=0.4981 lr=6.00e-06 222.54s"
+        ],
+        "last_error": null,
+        "source": "train.log"
+      },
+      "log_tail": [
+        "`torch_dtype` is deprecated! Use `dtype` instead!",
+        "[2026-10-19T03:07:24] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/raw/rawvla_sequence.py:295: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)",
+        "  tensor = torch.as_tensor(np.ascontiguousarray(array))",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:134: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:145: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "/workspace/owac/research/n04-v1/envs/n04v11/lib/python3.12/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/TensorShape.cpp:4221.)",
+        "  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:162: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "[2026-10-19T03:11:28] step      10 loss=2.8914 action=0.2565 lr=5.50e-06 243.95s",
+        "[2026-10-19T03:11:55] fixed dev action loss at step 10: 0.2908",
+        "[2026-10-19T03:15:58] step      11 loss=3.1043 action=0.4981 lr=6.00e-06 222.54s"
+      ],
+      "sources": {
+        "progress_json": true,
+        "metrics_rows": 13,
+        "eval_rows": 0
+      },
+      "step_seconds": 256.898,
+      "speed_source": "reported",
+      "eta_seconds": 510970.0,
+      "eta_at": "2026-10-25T01:12:22Z",
+      "eta_at_local": "2026-10-25 09:12:22 CST",
+      "model_eval": {
+        "stage": "S2",
+        "arm": "D",
+        "seed": 101,
+        "completed": 0,
+        "planned": 100,
+        "successes": 0,
+        "errors": 0,
+        "libero": {
+          "completed": 0,
+          "planned": 50,
+          "successes": 0,
+          "errors": 0,
+          "source_run": "libero-D-stable-v5-seed101",
+          "planned_source": "protocol-default"
+        },
+        "robotwin": {
+          "completed": 0,
+          "planned": 50,
+          "successes": 0,
+          "errors": 0,
+          "source_run": "robotwin-D-stable-v5-seed101",
+          "planned_source": "protocol-default"
+        },
+        "planned_source": "protocol-default",
+        "run_ids": [
+          "libero-D-aux-v4-seed101",
+          "libero-D-seed101",
+          "libero-D-stable-v5-seed101",
+          "robotwin-D-aux-v4-seed101",
+          "robotwin-D-seed101",
+          "robotwin-D-stable-v5-seed101"
+        ]
+      }
+    },
+    {
+      "run_id": "libero-D-stable-v5-seed101",
+      "stage": "S2",
+      "platform": "libero",
+      "arm": "D",
+      "seed": 101,
+      "phase": "train",
+      "job": {
+        "status": "running",
+        "note": "\u53d1\u73b0 1 \u4e2a\u5f15\u7528\u8be5 run \u76ee\u5f55\u7684\u8fdb\u7a0b",
+        "pids": [
+          782451
+        ],
+        "pids_source": "cmdline"
+      },
+      "updated_at": "2026-10-19T03:15:57Z",
+      "updated_at_local": "2026-10-19 11:15:57 CST",
+      "updated_at_epoch": 1792379757.0,
+      "data_age_s": 16.1,
+      "step": 12,
+      "budget_steps": 2000,
+      "phase_step": null,
+      "train_step": 12,
+      "train_budget_steps": 2000,
+      "remaining_steps": 1988,
+      "train_loss": 3.4409674819135283,
+      "dev_loss": 0.9558265805244446,
+      "owner": "Codex",
+      "gpu_index": 0,
+      "assessment": {
+        "warmup_steps": 200,
+        "warmup_complete": false,
+        "dev_windows": 2,
+        "best_dev_loss": 0.9558265805244446,
+        "best_dev_step": 10,
+        "convergence": "not_assessed",
+        "representation_mode": "independent_windows",
+        "representation_coefficients": {
+          "variance_weight": 25.0,
+          "covariance_weight": 1.0
+        },
+        "loss_weights": {
+          "action": 1.0,
+          "correspondence": 0.1,
+          "forecast": 0.1,
+          "representation": 0.1
+        },
+        "compiled_modules": [
+          "readout",
+          "prediction",
+          "measurement",
+          "raft_update"
+        ]
+      },
+      "activity": {
+        "completed_windows": 2,
+        "total_windows": 8,
+        "initial_dev_loss": 1.1885035932064056,
+        "best_dev_loss": 0.9558265805244446,
+        "last_checkpoint_step": 10,
+        "representation_diag": {
+          "variance": 0.9419286847114563,
+          "covariance": 0.024643700569868088,
+          "std": 0.05692135542631149,
+          "windows": 8
+        },
+        "update_started_at": 1792379719.5485504,
+        "objective_coverage": {
+          "action": {
+            "windows": 8,
+            "valid_items": 32
+          },
+          "correspondence": {
+            "windows": 8,
+            "valid_items": 256
+          },
+          "forecast": {
+            "windows": 8,
+            "valid_items": 1424
+          },
+          "representation": {
+            "windows": 8,
+            "valid_items": 8
+          }
+        },
+        "forecast_skip_reasons": {
+          "window_too_short": 112
+        },
+        "auxiliary_validation": {
+          "step": 10,
+          "windows": 2,
+          "forecast": {
+            "1": {
+              "forecast_quad": 3.968314399642329,
+              "forecast_logdet": 85.25722719007923,
+              "forecast_mode_w0": 0.9482881042265123,
+              "forecast_mode_w1": 0.051711907249785236,
+              "forecast_S_mean": 1.443906915764655,
+              "forecast_S_min": 1.223473738278112,
+              "forecast_S_max": 2.1325912389063064,
+              "forecast_R_mean": 1.0007917717579873,
+              "forecast_R_min": 0.8685638015308688,
+              "forecast_R_max": 1.1303169746552744,
+              "prediction_mse": 0.021634455680126143,
+              "persistence_mse": 0.02163972489295467,
+              "target_rms": 0.9936432189518406
+            },
+            "2": {
+              "forecast_quad": 4.490015363196532,
+              "forecast_logdet": 103.91613833109538,
+              "forecast_mode_w0": 0.9166032865643501,
+              "forecast_mode_w1": 0.08339675813913346,
+              "forecast_S_mean": 1.5630780061086018,
+              "forecast_S_min": 1.3245414406061173,
+              "forecast_S_max": 2.2847162753343584,
+              "forecast_R_mean": 1.0007877618074417,
+              "forecast_R_min": 0.8688879832625389,
+              "forecast_R_max": 1.1300974547863007,
+              "prediction_mse": 0.026383814646396785,
+              "persistence_mse": 0.02640209816163406,
+              "target_rms": 0.9935621991753578
+            },
+            "4": {
+              "forecast_quad": 4.65652234000819,
+              "forecast_logdet": 138.98780604771204,
+              "forecast_mode_w0": 0.8822471196097987,
+              "forecast_mode_w1": 0.11775295755692891,
+              "forecast_S_mean": 1.8025690402303423,
+              "forecast_S_min": 1.5334542489477567,
+              "forecast_S_max": 2.551684933049338,
+              "forecast_R_mean": 1.0007898488215037,
+              "forecast_R_min": 0.8703753394739968,
+              "forecast_R_max": 1.1282223335334234,
+              "prediction_mse": 0.03151485488550471,
+              "persistence_mse": 0.03156338237541994,
+              "target_rms": 0.9932932401342052
+            }
+          },
+          "representation": {
+            "variance": 0.9480966329574585,
+            "covariance": 0.033151041716337204,
+            "std": 0.04990904778242111,
+            "windows": 2
+          }
+        },
+        "validation_measurements": 3,
+        "last_validation_step": 10
+      },
+      "step_seconds_reported": 177.3139891040822,
+      "gpu_memory_gb": 47.66874624,
+      "gpu_memory_gb_source": "progress.json",
+      "eval": {
+        "completed": 0,
+        "planned": null,
+        "successes": 0,
+        "errors": 0,
+        "libero": {
+          "completed": 0,
+          "planned": null,
+          "successes": 0,
+          "errors": 0
+        },
+        "robotwin": {
+          "completed": 0,
+          "planned": null,
+          "successes": 0,
+          "errors": 0
+        },
+        "rows": 0,
+        "planned_source": null,
+        "counts_note": null
+      },
+      "recent_failures": [],
+      "series": {
+        "train": [
+          [
+            1,
+            3.4061818718910217
+          ],
+          [
+            2,
+            3.8766297101974487
+          ],
+          [
+            3,
+            3.3788252770900726
+          ],
+          [
+            4,
+            3.7931661903858185
+          ],
+          [
+            5,
+            3.8518995344638824
+          ],
+          [
+            6,
+            3.529175043106079
+          ],
+          [
+            7,
+            3.6659867465496063
+          ],
+          [
+            8,
+            3.51005420088768
+          ],
+          [
+            8,
+            3.439083193852135
+          ],
+          [
+            9,
+            3.4141652584075928
+          ],
+          [
+            10,
+            3.569313555955887
+          ],
+          [
+            11,
+            3.4277419447898865
+          ],
+          [
+            12,
+            3.4427913427352905
+          ]
+        ],
+        "action": [
+          [
+            1,
+            0.7073204591870308
+          ],
+          [
+            2,
+            1.0840508937835693
+          ],
+          [
+            3,
+            0.6971046403050423
+          ],
+          [
+            4,
+            1.1276551261544228
+          ],
+          [
+            5,
+            1.1554740592837334
+          ],
+          [
+            6,
+            0.8306395709514618
+          ],
+          [
+            7,
+            1.0059897005558014
+          ],
+          [
+            8,
+            0.8198230564594269
+          ],
+          [
+            9,
+            0.782116636633873
+          ],
+          [
+            10,
+            0.8367464691400528
+          ],
+          [
+            11,
+            0.7633849307894707
+          ],
+          [
+            12,
+            0.7760367467999458
+          ]
+        ],
+        "dev": [
+          [
+            0,
+            1.1880189776420593
+          ],
+          [
+            5,
+            1.0797021985054016
+          ],
+          [
+            10,
+            0.9558265805244446
+          ]
+        ],
+        "corr": [
+          [
+            1,
+            2.463403195142746
+          ],
+          [
+            2,
+            2.724583476781845
+          ],
+          [
+            3,
+            2.343541234731674
+          ],
+          [
+            4,
+            2.4089414477348328
+          ],
+          [
+            5,
+            2.3347800374031067
+          ],
+          [
+            6,
+            2.4181486517190933
+          ],
+          [
+            7,
+            2.427572250366211
+          ],
+          [
+            8,
+            2.181740865111351
+          ],
+          [
+            9,
+            2.0778310894966125
+          ],
+          [
+            10,
+            2.1704028844833374
+          ],
+          [
+            11,
+            2.276934653520584
+          ],
+          [
+            12,
+            2.203758552670479
+          ]
+        ],
+        "forecast": [
+          [
+            1,
+            1.1515898257493973
+          ],
+          [
+            2,
+            1.1366280019283295
+          ],
+          [
+            3,
+            1.160614624619484
+          ],
+          [
+            4,
+            1.156920075416565
+          ],
+          [
+            5,
+            1.157102346420288
+          ],
+          [
+            6,
+            1.1605689972639084
+          ],
+          [
+            7,
+            1.1758799105882645
+          ],
+          [
+            8,
+            1.1753170192241669
+          ],
+          [
+            9,
+            1.1906706541776657
+          ],
+          [
+            10,
+            1.145310878753662
+          ],
+          [
+            11,
+            1.1542725265026093
+          ],
+          [
+            12,
+            1.1567571014165878
+          ]
+        ],
+        "repr": [
+          [
+            1,
+            23.373619079589844
+          ],
+          [
+            2,
+            24.064577102661133
+          ],
+          [
+            3,
+            23.31304931640625
+          ],
+          [
+            4,
+            23.089248657226562
+          ],
+          [
+            5,
+            23.472373962402344
+          ],
+          [
+            6,
+            23.40663719177246
+          ],
+          [
+            7,
+            22.996517181396484
+          ],
+          [
+            8,
+            23.54525375366211
+          ],
+          [
+            9,
+            23.051984786987305
+          ],
+          [
+            10,
+            24.00995635986328
+          ],
+          [
+            11,
+            23.21236228942871
+          ],
+          [
+            12,
+            23.307029724121094
+          ]
+        ]
+      },
+      "series_keys": {
+        "train": "train_loss",
+        "action": "terms.action",
+        "dev": "dev_loss",
+        "corr": "terms.correspondence",
+        "forecast": "terms.forecast",
+        "repr": "terms.representation"
+      },
+      "artifacts": [],
+      "log": {
+        "tail": [
+          "`torch_dtype` is deprecated! Use `dtype` instead!",
+          "[2026-10-19T03:06:11] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/raw/rawvla_sequence.py:295: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)",
+          "  tensor = torch.as_tensor(np.ascontiguousarray(array))",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:134: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:145: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "/workspace/owac/research/n04-v1/envs/n04v11/lib/python3.12/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/TensorShape.cpp:4221.)",
+          "  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]",
+          "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:162: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+          "  with autocast(enabled=self.args.mixed_precision):",
+          "[2026-10-19T03:09:10] step      10 loss=3.5693 action=0.8367 lr=5.50e-06 179.34s",
+          "[2026-10-19T03:09:28] fixed dev action loss at step 10: 0.9558",
+          "[2026-10-19T03:12:22] step      11 loss=3.4277 action=0.7634 lr=6.00e-06 153.21s",
+          "[2026-10-19T03:15:03] step      12 loss=3.4428 action=0.7760 lr=6.50e-06 160.55s"
+        ],
+        "last_error": null,
+        "source": "train.log"
+      },
+      "log_tail": [
+        "`torch_dtype` is deprecated! Use `dtype` instead!",
+        "[2026-10-19T03:06:11] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/raw/rawvla_sequence.py:295: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)",
+        "  tensor = torch.as_tensor(np.ascontiguousarray(array))",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:134: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:145: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "/workspace/owac/research/n04-v1/envs/n04v11/lib/python3.12/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/TensorShape.cpp:4221.)",
+        "  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]",
+        "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src/owac/frameworks/n04/_vendor/raft/raft.py:162: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.",
+        "  with autocast(enabled=self.args.mixed_precision):",
+        "[2026-10-19T03:09:10] step      10 loss=3.5693 action=0.8367 lr=5.50e-06 179.34s",
+        "[2026-10-19T03:09:28] fixed dev action loss at step 10: 0.9558",
+        "[2026-10-19T03:12:22] step      11 loss=3.4277 action=0.7634 lr=6.00e-06 153.21s",
+        "[2026-10-19T03:15:03] step      12 loss=3.4428 action=0.7760 lr=6.50e-06 160.55s"
+      ],
+      "sources": {
+        "progress_json": true,
+        "metrics_rows": 14,
+        "eval_rows": 0
+      },
+      "step_seconds": 177.314,
+      "speed_source": "reported",
+      "eta_seconds": 352500.0,
+      "eta_at": "2026-10-23T05:11:13Z",
+      "eta_at_local": "2026-10-23 13:11:13 CST",
+      "model_eval": {
+        "stage": "S2",
+        "arm": "D",
+        "seed": 101,
+        "completed": 0,
+        "planned": 100,
+        "successes": 0,
+        "errors": 0,
+        "libero": {
+          "completed": 0,
+          "planned": 50,
+          "successes": 0,
+          "errors": 0,
+          "source_run": "libero-D-stable-v5-seed101",
+          "planned_source": "protocol-default"
+        },
+        "robotwin": {
+          "completed": 0,
+          "planned": 50,
+          "successes": 0,
+          "errors": 0,
+          "source_run": "robotwin-D-stable-v5-seed101",
+          "planned_source": "protocol-default"
+        },
+        "planned_source": "protocol-default",
+        "run_ids": [
+          "libero-D-aux-v4-seed101",
+          "libero-D-seed101",
+          "libero-D-stable-v5-seed101",
+          "robotwin-D-aux-v4-seed101",
+          "robotwin-D-seed101",
+          "robotwin-D-stable-v5-seed101"
+        ]
+      }
+    }
+  ]
+}

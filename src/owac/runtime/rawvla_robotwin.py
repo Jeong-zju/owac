@@ -1,18 +1,70 @@
 """RoboTwin policy plugin and server for the author's SidneyXie/pi05_robotwin.
 
 Use the pinned RawVLA StarVLA implementation, original LeRobot safetensors and
-normalizers. The generic Qwen RoboTwin client reorders joints and uses min/max;
+normalizers.
+
+可选协议扩展（N04 v1.1 契约，2026-10-15）：``Policy.predict_action`` 接受可选 payload
+``proprio_history``（``[3,14]``、旧→新、含当前帧、原始物理量），校验后不转发给 π0.5 模型；
+不带该字段时行为与扩展前逐位相同。客户端侧同一开关：设 ``RAWVLA_PROPRIO_HISTORY=1`` 后
+``ModelClient`` 会按同一契约把最近 3 帧真实观测本体放进 payload（每 episode 重置、不足 3 帧
+不发）；**默认关闭**，关闭时一个字节都不多发。
+
+The generic Qwen RoboTwin client reorders joints and uses min/max;
 this checkpoint instead requires left-arm/gripper/right-arm/gripper and z-score.
 Image preprocessing remains the author StarVLA PI05 implementation.
 """
 
 import argparse
+import collections
 import json
+import logging
 import os
 import time
 from pathlib import Path
 
 import numpy as np
+
+LOGGER = logging.getLogger(__name__)
+
+#: 客户端精确本体历史开关：**默认关闭**，只有显式设为 1/true/yes/on 时 `ModelClient` 才会在
+#: payload 里多发 ``proprio_history``（服务端 metadata 的 ``n04.proprio_history_source`` 随之
+#: 变成 ``observation_frames``）；关闭时一个字节都不多发。
+PROPRIO_HISTORY_ENV = "RAWVLA_PROPRIO_HISTORY"
+
+#: N04 v1.1 契约：payload 里的精确本体历史 = ``proprio_history+1`` 帧，旧→新、含当前帧、原始物理量。
+ROBOTWIN_PROPRIO_HISTORY_FRAMES = 3
+ROBOTWIN_STATE_DIM = 14
+
+
+def validate_proprio_history(proprio_history):
+    """校验可选的 payload ``proprio_history``；``None`` 原样返回（官方 π0.5 路径逐位不变）。
+
+    契约与 N04 v1.1 策略服务一致：``[3, 14]``（允许前置批维 ``[1,3,14]``）、旧→新、含当前帧、
+    原始物理量；长度/维度/有限性不符直接报错，不截断也不补零。**官方 π0.5 模型不消费这个字段**
+    （它没有状态估计器），这里只做协议兼容与显式校验，真正用它的是 N04 v1.1 服务端。
+
+    注意（避免空对照）：编码器在 episode 首帧走 ``state_stack.reset()``（spawn），本体条件只
+    在**非首帧**的状态预测里起作用——所以"比较每个 episode 的首个动作块"区分不出带不带历史。
+    """
+    if proprio_history is None:
+        return None
+    array = np.asarray(proprio_history, dtype=np.float32)
+    if array.ndim == 3 and array.shape[0] == 1:
+        array = array[0]
+    expected = (ROBOTWIN_PROPRIO_HISTORY_FRAMES, ROBOTWIN_STATE_DIM)
+    if array.ndim != 2 or array.shape != expected:
+        raise ValueError(
+            f"proprio_history 需要 {expected} = [proprio_history+1, 平台本体维]"
+            f"（旧→新、含当前帧），实际 {array.shape}；不截断也不补零"
+        )
+    if not np.isfinite(array).all():
+        raise ValueError("proprio_history 含 NaN/Inf")
+    return array
+
+
+def proprio_history_enabled():
+    """开关默认关闭（未设置 / 空串 / 0 / false 都算关闭）。"""
+    return os.environ.get(PROPRIO_HISTORY_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def normalize_state(state, stats):
@@ -62,11 +114,14 @@ class Policy:
         )
         (self.evidence / "load-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
 
-    def predict_action(self, examples):
+    def predict_action(self, examples, proprio_history=None):
         import torch
 
         if len(examples) != 1 or len(examples[0]["image"]) != 3:
             raise ValueError("RoboTwin deployment uses batch=1 and head/left/right cameras")
+        # 可选：客户端按 N04 v1.1 契约带上的真实连续本体历史。只校验、不转发给 π0.5 模型，
+        # 所以"不带历史"的路径与改动前逐位相同（官方 π0.5 闭环依赖这一点）。
+        validate_proprio_history(proprio_history)
         example = dict(examples[0])
         flow_seed = example.get("flow_seed")
         if flow_seed is not None:
@@ -122,14 +177,53 @@ class ModelClient:
         self.client = WebsocketClientPolicy(args.get("host", "127.0.0.1"), args.get("port", 18005))
         self.actions = None
         self.chunk_start = 0
+        #: 最近 ``ROBOTWIN_PROPRIO_HISTORY_FRAMES`` 帧真实观测本体（旧→新，含当前帧）。
+        self.proprio_history = collections.deque(maxlen=ROBOTWIN_PROPRIO_HISTORY_FRAMES)
+
+    def _history(self):
+        """本体历史 deque（旧→新）；懒建，替身对象（测试里 ``__new__`` 出来的）也能用。"""
+        history = getattr(self, "proprio_history", None)
+        if history is None:
+            history = collections.deque(maxlen=ROBOTWIN_PROPRIO_HISTORY_FRAMES)
+            self.proprio_history = history
+        return history
+
+    def _proprio_history_payload(self):
+        """开关打开且已攒够 3 帧真实观测时给出 ``(3,14)`` 历史；否则 ``None``（不发该字段）。
+
+        不足 3 帧时**不发**，而不是重复最早帧：训练侧的补齐口径是"重复最早真实帧"，与本客户端
+        "只发真实观测"的语义不同，宁可让服务端退回 ``policy_calls_approx``（metadata 里可区分）。
+        坏值（维度不对 / 非有限）也不会被上送。
+        """
+        history = self._history()
+        if not proprio_history_enabled():
+            return None
+        if len(history) < ROBOTWIN_PROPRIO_HISTORY_FRAMES:
+            return None
+        try:
+            return validate_proprio_history(np.stack(history))
+        except ValueError as error:  # 坏输入不上送，只在本机日志里报出来
+            LOGGER.warning("跳过 proprio_history（未上送）：%s", error)
+            return None
 
     def step(self, example, step):
+        history = self._history()
+        if self.actions is None:  # episode 首次推理（作者 harness 每 episode 调 reset_model）
+            history.clear()
+        if proprio_history_enabled():
+            state = np.asarray(example["state"], dtype=np.float32).reshape(-1)
+            if state.shape == (ROBOTWIN_STATE_DIM,) and np.isfinite(state).all():
+                history.append(state)
         if self.actions is None or step - self.chunk_start >= 50:
             if os.environ.get("RAWVLA_FLOW_SEED") is not None:
                 example = dict(example)
                 example["flow_seed"] = (int(os.environ["RAWVLA_FLOW_SEED"]) + step) % (2**32)
                 example["case_id"] = os.environ["RAWVLA_CASE_ID"]
-            response = self.client.predict_action({"examples": [example]})
+            payload = {"examples": [example]}
+            history_payload = self._proprio_history_payload()
+            if history_payload is not None:
+                payload["proprio_history"] = history_payload
+            response = self.client.predict_action(payload)
             if not response.get("ok"):
                 raise RuntimeError(f"π0.5 inference failed: {response}")
             self.actions = np.asarray(response["data"]["actions"], dtype=np.float32)
@@ -158,6 +252,9 @@ def get_model(usr_args):
 def reset_model(model):
     model.actions = None
     model.chunk_start = 0
+    history = getattr(model, "proprio_history", None)
+    if history is not None:
+        history.clear()  # episode 边界：本体历史绝不跨 episode 拼接
 
 
 def eval(TASK_ENV, model, observation):

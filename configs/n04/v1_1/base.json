@@ -1,0 +1,198 @@
+{
+  "schema": "n04-v1.1-s2-v1",
+  "stage": "S2",
+  "platform": "libero",
+  "arm": "D",
+  "seed": 101,
+  "device": "cuda:0",
+  "data": {
+    "root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+    "platform_dirs": {
+      "libero": "libero/raw",
+      "robotwin": "robotwin2/raw"
+    },
+    "split_file": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+    "splits": [
+      "train",
+      "dev"
+    ],
+    "train_split": "train",
+    "dev_split": "dev",
+    "window": {
+      "burn_in": 16,
+      "gradient": 32,
+      "stride": 16,
+      "supervision_points": 4
+    },
+    "proprio_history": 2,
+    "dev_windows": 4,
+    "norm_stats": {
+      "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/dataset_statistics.json",
+      "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+    }
+  },
+  "model": {
+    "name": "owac-n04-v1.1-convnext-base",
+    "builder": "owac.frameworks.n04.encoder_v11:build_encoder",
+    "input_mode": "rawvla_raw3",
+    "backbone": "convnext_base",
+    "depths": [
+      3,
+      3,
+      27,
+      3
+    ],
+    "dims": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "fusion_channels": 256,
+    "fusion_stride": 4,
+    "raft_small": false,
+    "raft_iterations": 12,
+    "supports_per_camera": 128,
+    "state_dim": 512,
+    "observation_dim": 256,
+    "readout_blocks": 6,
+    "tokens_per_camera": 256,
+    "token_dim": 2048,
+    "gradient_checkpointing": false,
+    "modules": {
+      "correspondence": true,
+      "state_estimator": true,
+      "dual_mode": true,
+      "readout": true
+    },
+    "proprio_dim": 24,
+    "scale_name": "libero_uint8",
+    "saturation_level": 1.0,
+    "raft_resize_hw": null
+  },
+  "backend": {
+    "builder": "owac.training.n04_v11:build_pi05_backend",
+    "tokenizer": "/workspace/owac/rawvla/checkpoints/tokenizers/paligemma_tokenizer.model",
+    "checkpoints": {
+      "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/bfloat16/model.safetensors",
+      "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+    },
+    "action_dim": 32,
+    "num_denoise_steps": 10,
+    "adapter": {
+      "lora": {
+        "enabled": true,
+        "rank": 16,
+        "alpha": 16.0,
+        "targets": [
+          "self_attn.q_proj",
+          "self_attn.k_proj",
+          "self_attn.v_proj",
+          "self_attn.o_proj"
+        ]
+      },
+      "trainable_prefixes": [
+        "action_head."
+      ]
+    }
+  },
+  "loss": {
+    "weights": {
+      "action": 1.0,
+      "correspondence": 0.1,
+      "forecast": 0.1,
+      "representation": 0.01
+    },
+    "forecast": true,
+    "forecast_horizons": [
+      1,
+      2,
+      4
+    ],
+    "forecast_anchor_stride": 1,
+    "forecast_diagnostics_every": 1
+  },
+  "optim": {
+    "batch": 8,
+    "micro_batch": 1,
+    "steps": 100000,
+    "warmup_steps": 2000,
+    "min_lr_ratio": 0.0,
+    "grad_clip": 1.0,
+    "amp": true,
+    "amp_dtype": "bfloat16",
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "unmatched": "pi05_adapt",
+    "groups": [
+      {
+        "name": "convnext",
+        "lr": 0.0001,
+        "weight_decay": 0.05,
+        "patterns": [
+          "encoder.measurement",
+          "backbone",
+          "convnext"
+        ]
+      },
+      {
+        "name": "raft_state_readout",
+        "lr": 0.0003,
+        "weight_decay": 0.05,
+        "patterns": [
+          "raft",
+          "correspondence",
+          "state",
+          "support",
+          "quality",
+          "evidence",
+          "readout"
+        ]
+      },
+      {
+        "name": "pi05_lora",
+        "lr": 1e-05,
+        "weight_decay": 0.05,
+        "patterns": [
+          "lora_a",
+          "lora_b"
+        ]
+      },
+      {
+        "name": "pi05_adapt",
+        "lr": 1e-05,
+        "weight_decay": 0.0,
+        "patterns": [
+          "action_head"
+        ]
+      }
+    ],
+    "micro_batch_note": "逐监督点 backward 后 micro_batch 不再决定显存；有效 batch 仍是 optim.batch 段窗口"
+  },
+  "monitor": {
+    "log_every": 20,
+    "checkpoint_every": 5000,
+    "eval_every": 1000,
+    "profile": false
+  },
+  "eval": {
+    "list": "configs/n04/v1_1/eval100.json",
+    "planned": 50,
+    "lighting_domains": [
+      "ExtremeLow",
+      "Low",
+      "Normal",
+      "Over",
+      "ExtremeOver"
+    ]
+  },
+  "closed_loop": {
+    "command": [],
+    "cwd": null,
+    "timeout_seconds": 900,
+    "note": "把单 episode 交给现有 LIBERO/RoboTwin 执行器：command 用 {entry} {artifacts} {checkpoint} {platform} 占位，执行器在 artifacts 里写 result.json(status/success)；rt=124 视为超时失败"
+  },
+  "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3"
+}

@@ -1,0 +1,125 @@
+{
+  "platform": "libero",
+  "configured_budget": 2000,
+  "batch": 8,
+  "warmup": 200,
+  "loss_weights": {
+    "action": 1.0,
+    "correspondence": 0.1,
+    "forecast": 0.1,
+    "representation": 0.1
+  },
+  "checkpoint_step": 8,
+  "checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-libero-seed101/checkpoint-step0000008.pt",
+  "complete": true,
+  "original_failed_verification": {
+    "platform": "libero",
+    "configured_budget": 2000,
+    "batch": 8,
+    "warmup": 200,
+    "loss_weights": {
+      "action": 1.0,
+      "correspondence": 0.1,
+      "forecast": 0.1,
+      "representation": 0.1
+    },
+    "complete": false,
+    "checkpoint_step": 8,
+    "checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-libero-seed101/checkpoint-step0000008.pt",
+    "error": "AssertionError: reload changed fixed dev: 0.9221061170101166 -> 0.9234932959079742"
+  },
+  "deterministic_control": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-deterministic-dev-libero-seed101/verification.json",
+  "dev_reference": "native_deterministic_v1",
+  "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019",
+  "state_identity": {
+    "encoder": {
+      "keys": 653,
+      "loaded_mismatches": [],
+      "terminal_evaluation_changes": []
+    },
+    "backend": {
+      "keys": 662,
+      "loaded_mismatches": [],
+      "terminal_evaluation_changes": []
+    }
+  },
+  "reload": {
+    "step": 8,
+    "dev_before": 0.9205259084701538,
+    "dev_after": 0.9205259084701538,
+    "scheduler_restored": true,
+    "independent_control_instances": 2,
+    "independent_control_evaluations": 6,
+    "native_initial_dev_loss": 1.1885035932064056,
+    "historical_compiled_initial_dev_loss": 1.1880189776420593
+  },
+  "next_update": {
+    "step": 9,
+    "terms": {
+      "action": 0.782116636633873,
+      "correspondence": 2.0778310894966125,
+      "forecast": 1.1906706541776657,
+      "representation": 23.051984786987305
+    },
+    "coverage": {
+      "action": {
+        "windows": 8,
+        "valid_items": 32
+      },
+      "correspondence": {
+        "windows": 8,
+        "valid_items": 256
+      },
+      "forecast": {
+        "windows": 8,
+        "valid_items": 1424
+      },
+      "representation": {
+        "windows": 8,
+        "valid_items": 8
+      }
+    },
+    "forecast_diag": {
+      "h1_forecast_quad": 29.049542236472327,
+      "h1_forecast_logdet": 90.35063452874459,
+      "h1_forecast_mode_w0": 0.9456054547861699,
+      "h1_forecast_mode_w1": 0.054394535953179,
+      "h1_forecast_S_mean": 1.4770055809809315,
+      "h1_forecast_S_min": 1.1333496842172837,
+      "h1_forecast_S_max": 2.3544688912168623,
+      "h1_forecast_R_mean": 1.0012489328941991,
+      "h1_forecast_R_min": 0.7942110464697884,
+      "h1_forecast_R_max": 1.2074097399750063,
+      "h1_prediction_mse": 0.1628230938579016,
+      "h1_persistence_mse": 0.16286931660837464,
+      "h1_target_rms": 0.9781497178539154,
+      "h2_forecast_quad": 27.835579585035642,
+      "h2_forecast_logdet": 109.05638216336565,
+      "h2_forecast_mode_w0": 0.9146895732730627,
+      "h2_forecast_mode_w1": 0.08531040457698207,
+      "h2_forecast_S_mean": 1.5989607997238635,
+      "h2_forecast_S_min": 1.2344997892777125,
+      "h2_forecast_S_max": 2.5199242800474164,
+      "h2_forecast_R_mean": 1.001239548623562,
+      "h2_forecast_R_min": 0.7942168852935235,
+      "h2_forecast_R_max": 1.207080062975486,
+      "h2_prediction_mse": 0.1677560835281232,
+      "h2_persistence_mse": 0.1678557797179868,
+      "h2_target_rms": 0.977726527179281,
+      "h4_forecast_quad": 24.982818763170926,
+      "h4_forecast_logdet": 143.66267739023482,
+      "h4_forecast_mode_w0": 0.8813719062932901,
+      "h4_forecast_mode_w1": 0.11862805756806796,
+      "h4_forecast_S_mean": 1.8396327492914029,
+      "h4_forecast_S_min": 1.4434004609606095,
+      "h4_forecast_S_max": 2.801747789872544,
+      "h4_forecast_R_mean": 1.0012374797037669,
+      "h4_forecast_R_min": 0.7946442684956959,
+      "h4_forecast_R_max": 1.2064358916665827,
+      "h4_prediction_mse": 0.17279850829176477,
+      "h4_persistence_mse": 0.17300851924145327,
+      "h4_target_rms": 0.9770553602970073
+    }
+  },
+  "resume_checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-libero-seed101/checkpoint-step0000009.pt"
+}

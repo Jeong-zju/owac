@@ -1,0 +1,130 @@
+{
+  "platform": "robotwin",
+  "source": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/place_dual_shoes/episode_000023.npz",
+  "window": [
+    64,
+    48
+  ],
+  "loss": 2.984736680984497,
+  "info": {
+    "terms": {
+      "action": 2.646790027618408,
+      "correspondence": 2.000532627105713,
+      "forecast": 1.281855821609497,
+      "representation": 0.9707990884780884
+    },
+    "applied_terms": {
+      "action": 2.646790027618408,
+      "correspondence": 2.000532627105713,
+      "forecast": 1.281855821609497,
+      "representation": 0.9707990884780884
+    },
+    "applied_train_loss": 2.984736680984497,
+    "term_sources": {
+      "correspondence": "encoder.losses(all gradient frames)",
+      "forecast": "causal forecast, live source / stop-grad target",
+      "representation": "VICReg across observations at fixed query"
+    },
+    "supervision_points": 4,
+    "forecast": {
+      "created": 267,
+      "settled": 267,
+      "skipped": 21,
+      "skip_reasons": {
+        "window_too_short": 21
+      },
+      "diagnostics": {
+        "1": {
+          "forecast_quad": 12.308745240652433,
+          "forecast_logdet": 117.76691420360278,
+          "forecast_mode_w0": 0.9488590410960618,
+          "forecast_mode_w1": 0.051141008814816834,
+          "forecast_S_mean": 1.6344004728460824,
+          "forecast_S_min": 1.1521994670232136,
+          "forecast_S_max": 2.4286290163634927,
+          "forecast_R_mean": 1.001728242443454,
+          "forecast_R_min": 0.6810133482820244,
+          "forecast_R_max": 1.3920988126467633,
+          "count": 93.0
+        },
+        "2": {
+          "forecast_quad": 19.280602264404298,
+          "forecast_logdet": 156.31323801676433,
+          "forecast_mode_w0": 0.9167657885286543,
+          "forecast_mode_w1": 0.08323421428600947,
+          "forecast_S_mean": 1.9053795562850104,
+          "forecast_S_min": 1.3879832612143623,
+          "forecast_S_max": 2.668786626391941,
+          "forecast_R_mean": 1.0017296089066399,
+          "forecast_R_min": 0.6813988857799106,
+          "forecast_R_max": 1.3912105427847967,
+          "count": 90.0
+        },
+        "4": {
+          "forecast_quad": 36.134851955232165,
+          "forecast_logdet": 226.25548680623373,
+          "forecast_mode_w0": 0.8824700642199743,
+          "forecast_mode_w1": 0.11752992770856335,
+          "forecast_S_mean": 2.5005023195630027,
+          "forecast_S_min": 1.9311134091445379,
+          "forecast_S_max": 3.310768783092499,
+          "forecast_R_mean": 1.0017303015504564,
+          "forecast_R_min": 0.6825091264077595,
+          "forecast_R_max": 1.39032163080715,
+          "count": 84.0
+        }
+      }
+    },
+    "windows": 1,
+    "segments": 4,
+    "valid_loss_counts": {
+      "correspondence": 32,
+      "forecast": 267,
+      "action": 4,
+      "representation": 4
+    },
+    "gradient_fast_path": true,
+    "denominators": {
+      "windows": 1.0,
+      "points": 4,
+      "gradient_frames": 32,
+      "forecast_anchors": 267
+    }
+  },
+  "gradients": {
+    "encoder.measurement": {
+      "elements": 88647040,
+      "abs_sum": 6056383337.277913
+    },
+    "encoder.quality_head": {
+      "elements": 58240,
+      "abs_sum": 1.2038199214730412
+    },
+    "encoder.correspondence": {
+      "elements": 5257536,
+      "abs_sum": 6.670937344364352
+    },
+    "encoder.state_stack": {
+      "elements": 378882,
+      "abs_sum": 35.334195957324944
+    },
+    "encoder.readout": {
+      "elements": 66637824,
+      "abs_sum": 531022.535597831
+    },
+    "backend.vlm": {
+      "elements": 3620864,
+      "abs_sum": 745.5673929452896
+    },
+    "backend.action_head": {
+      "elements": 432605216,
+      "abs_sum": 134467.6100660488
+    }
+  },
+  "peak_gb": 74.681032704,
+  "seconds": 29.884318239986897,
+  "optimizer_updates": 0,
+  "parameter_versions_unchanged": true,
+  "checkpoint_written": false,
+  "weights": "fresh N04 encoder and official pretrained pi05; no encoder migration"
+}

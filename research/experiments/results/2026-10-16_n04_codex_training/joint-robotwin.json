@@ -1,0 +1,130 @@
+{
+  "platform": "robotwin",
+  "source": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/robotwin2/raw/place_dual_shoes/episode_000023.npz",
+  "window": [
+    64,
+    48
+  ],
+  "loss": 2.711542844772339,
+  "info": {
+    "terms": {
+      "action": 2.3735976219177246,
+      "correspondence": 2.000532627105713,
+      "forecast": 1.281840443611145,
+      "representation": 0.9707902669906616
+    },
+    "applied_terms": {
+      "action": 2.3735976219177246,
+      "correspondence": 2.000532627105713,
+      "forecast": 1.281840443611145,
+      "representation": 0.9707902669906616
+    },
+    "applied_train_loss": 2.711542844772339,
+    "term_sources": {
+      "correspondence": "encoder.losses(all gradient frames)",
+      "forecast": "causal forecast, live source / stop-grad target",
+      "representation": "VICReg across observations at fixed query"
+    },
+    "supervision_points": 4,
+    "forecast": {
+      "created": 267,
+      "settled": 267,
+      "skipped": 21,
+      "skip_reasons": {
+        "window_too_short": 21
+      },
+      "diagnostics": {
+        "1": {
+          "forecast_quad": 12.304055419019473,
+          "forecast_logdet": 117.76475180349043,
+          "forecast_mode_w0": 0.948866194294345,
+          "forecast_mode_w1": 0.05113378067010192,
+          "forecast_S_mean": 1.6343795855840046,
+          "forecast_S_min": 1.1521769005765197,
+          "forecast_S_max": 2.4392821070968465,
+          "forecast_R_mean": 1.0017275079604118,
+          "forecast_R_min": 0.6810190094414578,
+          "forecast_R_max": 1.3920989664652015,
+          "count": 93.0
+        },
+        "2": {
+          "forecast_quad": 19.269584782918294,
+          "forecast_logdet": 156.31732177734375,
+          "forecast_mode_w0": 0.9167701284090678,
+          "forecast_mode_w1": 0.08322987399167485,
+          "forecast_S_mean": 1.9054038180245294,
+          "forecast_S_min": 1.387973631752862,
+          "forecast_S_max": 2.6764257881376476,
+          "forecast_R_mean": 1.0017287691434225,
+          "forecast_R_min": 0.6814026719994015,
+          "forecast_R_max": 1.3912295712365044,
+          "count": 90.0
+        },
+        "4": {
+          "forecast_quad": 36.11020192645845,
+          "forecast_logdet": 226.2704233442034,
+          "forecast_mode_w0": 0.8824670548949923,
+          "forecast_mode_w1": 0.11753291140000026,
+          "forecast_S_mean": 2.5006478230158486,
+          "forecast_S_min": 1.9311090792928423,
+          "forecast_S_max": 3.309541262331463,
+          "forecast_R_mean": 1.00172938761257,
+          "forecast_R_min": 0.6825239119075593,
+          "forecast_R_max": 1.3903314698310125,
+          "count": 84.0
+        }
+      }
+    },
+    "windows": 1,
+    "segments": 4,
+    "valid_loss_counts": {
+      "correspondence": 32,
+      "forecast": 267,
+      "action": 4,
+      "representation": 4
+    },
+    "gradient_fast_path": true,
+    "denominators": {
+      "windows": 1.0,
+      "points": 4,
+      "gradient_frames": 32,
+      "forecast_anchors": 267
+    }
+  },
+  "gradients": {
+    "encoder.measurement": {
+      "elements": 88647040,
+      "abs_sum": 7470293697.366257
+    },
+    "encoder.quality_head": {
+      "elements": 58240,
+      "abs_sum": 1.6860991050489247
+    },
+    "encoder.correspondence": {
+      "elements": 5257536,
+      "abs_sum": 16.787356247212536
+    },
+    "encoder.state_stack": {
+      "elements": 378882,
+      "abs_sum": 77.96422862844338
+    },
+    "encoder.readout": {
+      "elements": 66637824,
+      "abs_sum": 709364.5040456504
+    },
+    "backend.vlm": {
+      "elements": 3620864,
+      "abs_sum": 677.6896006464958
+    },
+    "backend.action_head": {
+      "elements": 432605216,
+      "abs_sum": 135105.88820411265
+    }
+  },
+  "peak_gb": 85.325321728,
+  "seconds": 46.074489396065474,
+  "optimizer_updates": 0,
+  "parameter_versions_unchanged": true,
+  "checkpoint_written": false,
+  "weights": "fresh N04 encoder and official pretrained pi05; no encoder migration"
+}

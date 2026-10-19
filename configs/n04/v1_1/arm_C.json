@@ -1,0 +1,21 @@
+{
+  "arm": "C",
+  "notes": "RAW 单帧同骨干／同读出（无状态、无对应）；S3 补对照",
+  "model": {
+    "input_mode": "rawvla_raw3",
+    "modules": {
+      "correspondence": false,
+      "state_estimator": false,
+      "dual_mode": false,
+      "readout": true
+    }
+  },
+  "loss": {
+    "weights": {
+      "action": 1.0,
+      "correspondence": 0.0,
+      "forecast": 0.0,
+      "representation": 0.01
+    }
+  }
+}

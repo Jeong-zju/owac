@@ -1,0 +1,356 @@
+{
+  "stage": "S1",
+  "implementation_status": "complete",
+  "experiment_status": "completed_terminal_by_user_decision",
+  "claim_status": "not_applicable",
+  "claim_status_note": "S1 只建立正式当前帧测量并度量其误差；H1/H2/H3 与任何机制主张都不在本阶段判定。",
+  "date": "2026-10-14",
+  "checkout": "/home/jeong/zeno/owac/worktrees/n04-egomotion-separation",
+  "branch": "lzh/n04-egomotion-separation",
+  "head": "a81cf25148870fd83fbc06a4fabf374510493978",
+  "stage_record": "research/experiments/2026-10-14_n04_v1_s1_measurement.md",
+  "source_manifest": {
+    "snapshot_id": "n04-s1-20261014T103419Z-d40c91817264",
+    "package_sha256": "d40c918172640abab46264f82f2e66cf7ec7dd3ead739cc8e4300394a1e17612",
+    "packed_files": 958,
+    "uncommitted_evidence": true,
+    "remote_path": "/workspace/owac/research/n04-v1/source/n04-s1-20261014T103419Z-d40c91817264",
+    "remote_verify": "958 checked, differences=0; archive sha256 verified before extraction",
+    "run_snapshots": {
+      "data_stats": "n04-s1-20261014T080828Z-90332023bb77",
+      "profile": "n04-s1-20261014T085055Z-a4a336d2661f",
+      "lr_grid": "n04-s1-20261014T085055Z-a4a336d2661f",
+      "train_seed17_first_1000": "n04-s1-20261014T085055Z-a4a336d2661f",
+      "train_seed17_resume": "n04-s1-20261014T103419Z-d40c91817264"
+    },
+    "vendored_source": {
+      "path": "src/owac/frameworks/n04/_vendor/convnext/provenance.json",
+      "repository": "https://github.com/facebookresearch/ConvNeXt",
+      "commit": "048efcea897d999aed302f2639b6270aedf8d4c8",
+      "license": "MIT",
+      "upstream_convnext_sha256": "e081a71bcad826035cdac2c314bc26de93b0dcb95a70ce8b7668f3e61490b7d2",
+      "local_convnext_sha256": "b3c6b135508a2719f67483ee1ebdffb2f0d6fea34218f2ffd757f83cc8c968e7",
+      "changes": "timm 导入替换为本地等价实现；移除 @register_model；网络层定义与 depth/width 不变"
+    }
+  },
+  "data_manifest": {
+    "paired_root": "/workspace/owac/research/n04-v1/data/s0-paired-v1-20261014",
+    "factor_root": "/workspace/owac/research/n04-v1/runs/s0/completion-factors-20261014",
+    "s0_splits": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+    "depth_scale_m_frozen": 0.8361701369285583,
+    "depth_scale_source": "S1 data-stats over train split; 10,766,243 support pixels (LIBERO 0.9748 / RoboTwin 0.6368 / rendered 3.0 median)",
+    "train_scenes": 2592,
+    "real_data_contract_checks": {
+      "provenance_invariance_bitwise": "libero/agentview, robotwin2/front_camera, rendered_factor/camera_0 全部 true",
+      "repeat_measurement_bitwise": true,
+      "repeat_export_byte_identical": true
+    }
+  },
+  "split_manifest": {
+    "path": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+    "usage": "S1 使用 source 分组的 train/dev；final 未使用"
+  },
+  "configs": [
+    {
+      "path": "configs/n04/full/s1_measurement.json",
+      "file_sha256": "7294a0b111521c7ad5b6df87cb28ef11c0e3e82c8782de047401c821287e145f",
+      "config_sha256_canonical": "014ad2d65838018db65fda06870ff3a6a7d5ebb3c49ec9da06a4835e53e955f5"
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "train-seed17 step 4000 (迁移点，两台服务器一致)",
+      "path_old_server": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/checkpoint-step0004000.pt",
+      "path_new_server": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/checkpoint-step0004000.pt",
+      "bytes": 1067787709,
+      "location": "both servers (新机为活跃续训点)"
+    },
+    {
+      "name": "train-seed17 step 50000（终止点最新检查点）",
+      "path": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/checkpoint-step0050000.pt",
+      "bytes": 1067873277,
+      "location": "remote-only"
+    }
+  ],
+  "commands": [
+    "uv run --locked --extra encoder pytest -q tests/encoders/n04_full            # 206 passed (S0 163 + S1 43)",
+    "uv run --locked --extra encoder pytest -q tests/encoders/n04_full -m gpu     # 3 passed (CUDA 路径)",
+    "uv run --locked --extra encoder pytest -q tests/encoders/n04 tests/encoders/n04_full  # 404 passed 合计 (198 + 206)",
+    "make check",
+    "$N04_PYTHON -m owac.training.n04_full --config configs/n04/full/s1_measurement.json --mode data-stats --run-dir <dir>",
+    "$N04_PYTHON -m owac.training.n04_full --config configs/n04/full/s1_measurement.json --mode profile --run-dir <dir> --steps 200",
+    "$N04_PYTHON -m owac.training.n04_full --config configs/n04/full/s1_measurement.json --mode lr-grid --run-dir <dir> --steps 250",
+    "$N04_PYTHON -m owac.training.n04_full --config configs/n04/full/s1_measurement.json --mode train --run-dir <dir> --steps 100000 [--resume <ckpt>]",
+    "$N04_PYTHON -m owac.training.n04_full --config configs/n04/full/s1_measurement.json --mode export-measurements --checkpoint <ckpt> --run-dir <dir> --splits dev",
+    "$N04_PYTHON -m owac.evaluation.n04_full --config configs/n04/full/s1_measurement.json --checkpoint <ckpt> --split dev --output <dev.json>"
+  ],
+  "metrics": {
+    "profile": {
+      "steps": 200,
+      "elapsed_s": 420.25,
+      "s_per_step": 2.101,
+      "frames_per_s": 60.9,
+      "peak_gpu_memory_bytes": 35232954880,
+      "params": 88942210,
+      "gradient_audit": "no missing / zero / non-finite gradients",
+      "estimated_gpu_hours_100k": 58.4,
+      "artifact": "/workspace/owac/research/n04-v1/runs/s1/profile-20261014/profile.json"
+    },
+    "lr_grid": {
+      "steps_per_lr": 250,
+      "seed": 17,
+      "selection": "3e-4",
+      "results": {
+        "1e-4": {
+          "dev_depth_norm_mae": 0.181,
+          "dev_depth_mae_m": 0.1513,
+          "coverage_1sigma": 0.827,
+          "nll": -0.977
+        },
+        "3e-4": {
+          "dev_depth_norm_mae": 0.1746,
+          "dev_depth_mae_m": 0.146,
+          "coverage_1sigma": 0.801,
+          "nll": -1.12
+        },
+        "1e-3": {
+          "dev_depth_norm_mae": 0.1745,
+          "dev_depth_mae_m": 0.1459,
+          "coverage_1sigma": 0.78,
+          "nll": -1.164
+        }
+      },
+      "artifact": "/workspace/owac/research/n04-v1/runs/s1/lr-grid-20261014/lr-grid.json"
+    },
+    "train_seed17": {
+      "declared_steps": 100000,
+      "completed_steps_at_handoff": 4650,
+      "dev_curve": [
+        {
+          "step": 500,
+          "depth_mae_m": 0.3976,
+          "depth_norm_mae": 0.4755,
+          "coverage_1sigma": 0.393,
+          "nll": 0.216
+        },
+        {
+          "step": 1000,
+          "depth_mae_m": 0.1395,
+          "depth_norm_mae": 0.1668,
+          "coverage_1sigma": 0.702,
+          "nll": -1.613
+        },
+        {
+          "step": 1500,
+          "depth_mae_m": 0.143,
+          "depth_norm_mae": 0.1711,
+          "coverage_1sigma": 0.648,
+          "nll": -1.985
+        },
+        {
+          "step": 2000,
+          "depth_mae_m": 0.1592,
+          "depth_norm_mae": 0.1904,
+          "coverage_1sigma": 0.737,
+          "nll": -2.107
+        },
+        {
+          "step": 2500,
+          "depth_mae_m": 0.1121,
+          "depth_norm_mae": 0.1341,
+          "coverage_1sigma": 0.724,
+          "nll": -1.766
+        },
+        {
+          "step": 3000,
+          "depth_mae_m": 0.1123,
+          "depth_norm_mae": 0.1343,
+          "coverage_1sigma": 0.463,
+          "nll": -1.801
+        },
+        {
+          "step": 3500,
+          "depth_mae_m": 0.0433,
+          "depth_norm_mae": 0.0518,
+          "coverage_1sigma": 0.803,
+          "coverage_2sigma": 0.971,
+          "nll": -2.8
+        },
+        {
+          "step": 4000,
+          "depth_mae_m": 0.0538,
+          "depth_norm_mae": 0.0644,
+          "coverage_1sigma": 0.525,
+          "coverage_2sigma": 0.757,
+          "nll": -1.501
+        }
+      ],
+      "untrained_reference": {
+        "depth_mae_m": 0.7428,
+        "depth_norm_mae": 0.8884,
+        "coverage_1sigma": 0.407,
+        "nll": 9.307,
+        "sigma_m": 0.251
+      },
+      "best_dev_so_far": {
+        "step": 3500,
+        "depth_mae_m": 0.0433,
+        "note": "相对初始化下降 94%，但仍比一个原图像素门槛高 15–25 倍"
+      },
+      "variance_calibration_note": "覆盖@1σ 在 0.46–0.80 间波动，σ 在 0.075–0.262 m 波动；方差头尚未稳定，S4 必须按分组与轨迹报告",
+      "note": "训练未充分（4300/100k）；不下结论",
+      "completed_steps_at_termination": 50725,
+      "termination": {
+        "by": "user decision 2026-10-15 15:12 CST",
+        "reason": "S1 深度已进入 ~2 cm 平台；用户判断可以终止，未跑满 100k",
+        "final_checkpoint": "checkpoint-step0050000.pt",
+        "best_depth_mae_m": 0.0096,
+        "last10_mean_depth_mae_m": 0.0186,
+        "coverage_1sigma_range": [
+          0.23,
+          0.48
+        ],
+        "nll_last": 85.36,
+        "nll_max": 139.83
+      }
+    },
+    "memoryless_carry_at_step1000": {
+      "latent_relative_drift": {
+        "1": 0.0838,
+        "2": 0.0954,
+        "3": 0.1037
+      },
+      "depth_drift_m": {
+        "1": 0.0152,
+        "2": 0.0173,
+        "3": 0.0187
+      }
+    },
+    "measurement_cache": {
+      "path": "/workspace/owac/research/n04-v1/runs/s1/cache-seed17-step1000-v2",
+      "entries": 624,
+      "bytes": "1.5 GB",
+      "splits": [
+        "dev"
+      ],
+      "weights_sha256_prefix": "faf5a2ff9855e2b4",
+      "config_sha256_prefix": "e104ea4a7b6af536",
+      "verification": "4 抽样在线重算：ID 全部一致，最大绝对差 0.0",
+      "gt_separate_files": true
+    },
+    "measurement_cache_final": {
+      "path": "/workspace/owac/research/n04-v1/runs/s1/cache-final-step50000",
+      "entries": 624,
+      "bytes": "1.5 GB",
+      "splits": [
+        "dev"
+      ],
+      "weights_sha256_prefix": "2ddb0bb1c6050f3c",
+      "checkpoint_step": 50000,
+      "verification": "4 抽样在线重算：ID 一致、最大绝对差 0.0"
+    },
+    "final_dev_eval_step50000": {
+      "depth_mae_m": 0.0197,
+      "depth_median_m": 0.0092,
+      "depth_rmse_m": 0.0794,
+      "depth_norm_mae": 0.0236,
+      "coverage_1sigma": 0.2325,
+      "coverage_2sigma": 0.3604,
+      "nll": 139.7781,
+      "sigma_m": 0.0072,
+      "position_error_m": 0.0212,
+      "protocol_ratio": {
+        "libero/agentview": 5.73,
+        "robotwin2/front_camera": 10.12,
+        "robotwin2/left_camera": 11.86
+      },
+      "groups_depth_mae_m": {
+        "rendered_factor/camera_0": 0.0156,
+        "libero/agentview": 0.0183,
+        "robotwin2/left_camera": 0.0206,
+        "robotwin2/front_camera": 0.0234
+      },
+      "carry_depth_drift_m": {
+        "1": 0.00396,
+        "2": 0.00557,
+        "3": 0.00671
+      },
+      "artifact": "/workspace/owac/research/n04-v1/runs/s1/eval-final-step50000/dev.json"
+    }
+  },
+  "failed_groups": [
+    "受控渲染分组在未训练模型上 MAE 2.24 m（物体恒在 3 m），远大于其它分组；分组指标必须单列",
+    "对应监督余弦区分在第 1000 步仍弱（正负差 0.0033）"
+  ],
+  "resources": {
+    "active_host": {
+      "ssh": "ssh -p 16724 root@154.59.156.22",
+      "gpu": "2 × NVIDIA RTX PRO 6000 Blackwell Server Edition 97887 MiB；使用 GPU 1（CUDA_VISIBLE_DEVICES=1），GPU 0 留给同机其它项目",
+      "encoder_python": "/workspace/owac/research/n04-v1/envs/encoder/bin/python (Python 3.12.3 / torch 2.14.1+cu130 / numpy 2.5.1)",
+      "n04_root": "/workspace/owac/research/n04-v1",
+      "supervisor_programs": [
+        "owac-n04-s1-train-seed17 (STOPPED by user decision, 终止于 step 50725)",
+        "owac-n04-s1-chain (STOPPED，防止自动拉起 seed29)",
+        "owac-n04-s1-train-seed29 (STOPPED 从未启动)",
+        "owac-n04-s1-train-seed43 (STOPPED 从未启动)",
+        "owac-n04-s1-progress-sync / -http (STOPPED 按用户要求，端口 8090 已释放)"
+      ],
+      "throughput": "迁移后实测 1.16 s/step（step 4000→4650 用 755 s，batch 128），约为旧机共享卡的 1.8 倍；显存 35.9 GB",
+      "sequential_chain": "supervisor owac-n04-s1-chain：seed17 正常结束后自动串行启动 seed29、seed43；异常退出则 STOP 等人工",
+      "monitoring": "本会话每 30 分钟周期检查（状态/速率/dev 指标/GPU/chain 日志），只报告不干预",
+      "eta": {
+        "rate_s_per_step": "1.08–1.20（实测窗口）",
+        "seed17_finish_cst": "2026-10-16 ~04:00–06:30",
+        "seed29_finish_cst": "2026-10-17 ~noon–evening",
+        "seed43_finish_cst": "2026-10-18 evening – 2026-10-19 early",
+        "all_three_by_declared_budget": "约 3.9–4.2 天（至 10 月 18 日晚–19 日凌晨）",
+        "earlier_if_stable_rule_triggers": "约 2.5–4 天"
+      },
+      "progress_dashboard": {
+        "html": "src/owac/runtime/n04_s1_progress.html (sha256 d8e73717d7ea9d23258ab9eed258f19f16d7ee379d9de8761502e36bafb4b8d7)",
+        "sync_tool": "src/owac/runtime/n04_s1_progress.py (只读采样；远端 supervisor owac-n04-s1-progress-sync, 30 s)",
+        "http_server": "远端 supervisor owac-n04-s1-progress-http, 127.0.0.1:8090 (8080 被 Jupyter 占用)",
+        "access": "ssh -p 16724 root@154.59.156.22 -L 8080:localhost:8080 -L 8090:localhost:8090 → http://localhost:8090/",
+        "remote_dir": "/workspace/owac/research/n04-v1/runs/s1/progress/",
+        "status": "STOPPED 2026-10-15 15:40 CST by user request（8090 已释放；conf/脚本/页面保留，可 supervisorctl start 复用）"
+      }
+    },
+    "previous_host": {
+      "ssh": "ssh -p 44327 root@107.209.104.125",
+      "status": "训练程序已禁用（conf 改名 *.disabled-migrated-20261014 并 reread，防误启），运行已停在 step 4050；环境/数据/检查点/日志原地保留",
+      "last_step": 4050,
+      "last_checkpoint": "checkpoint-step0004000.pt"
+    },
+    "migration": {
+      "data_tar_sha256": "f84a74070807d447c84f1f4a5b222524edde121c76af94d85c8443d29e9a9e42",
+      "data_bytes": 2427115520,
+      "checkpoint_bytes": 1067787709,
+      "snapshot_verify_on_new_host": "958 文件 / 0 差异",
+      "tests_on_new_host": "40 passed (5m48s)",
+      "transfer": "服务器直连（临时 ed25519 传输密钥 + 旧机 authorized_keys 修正）；本机中转为慢链路（7 MB / 11 min）已放弃"
+    },
+    "gpu_hours_so_far": "约 4.5 GPU 小时（profile 0.1 + 网格 0.5 + 训练 ~3.9）"
+  },
+  "next_stage_inputs": {
+    "s2_entry_ready": true,
+    "checkpoint": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/checkpoint-step0004000.pt (新机续训，最新检查点随训练推进)",
+    "metrics_curve": "/workspace/owac/research/n04-v1/runs/s1/train-seed17/metrics.json",
+    "measurement_cache": "/workspace/owac/research/n04-v1/runs/s1/cache-seed17-step1000-v2/index.json（旧机；如需按新机最新检查点重导出，从新机运行 export-measurements）",
+    "memoryless_baseline": "owac.frameworks.n04.measurement.MemorylessCarry + 移交的 age 漂移表",
+    "frozen_scale": 0.8361701369285583,
+    "decision_needed": "继续 100k/5% warmup 调度，还是改成绝对 warmup（200–500 步）或更短正式预算；三种子必须同一决定",
+    "data_note": "S1 只用 source 分组的 train/dev；final 未使用；40 条源轨迹仍是唯一有几何标签的机器人数据",
+    "active_host": "ssh -p 16724 root@154.59.156.22:/workspace/owac/research/n04-v1"
+  },
+  "remaining_work": [
+    "S1 收尾：最终 checkpoint(step 50000) 的 dev 评测与 dev 缓存导出（本轮已执行，结果见 metrics.measurement_cache_final）",
+    "S2 开始前决定：是否补跑剩余 49% 预算、是否跑 seed 29/43、以及方差标定方案（S4 第一号输入）",
+    "按平台归一化或分组的损失权重方案（三平台深度尺度 0.64/0.97/3.0 m）仍待定",
+    "训练进度看板（n04_s1_progress.html + 同步器）可复用于 S2；无需训练时可停掉两个 progress program"
+  ],
+  "notes": [
+    "本轮未提交、未推送、未跨入 S2；工作树包含全部 S1 改动，由用户安排提交。",
+    "导出复核抽样抓出同一 seed 下 factor 变体共享 measurement ID 导致的缓存互相覆盖，已修复并加回归测试。",
+    "2026-10-14 21:20 CST：训练迁移到 ssh -p 16724 root@154.59.156.22 的 GPU 1；数据/检查点/快照校验一致，旧机训练已停并保留全部产物。"
+  ]
+}

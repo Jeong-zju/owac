@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="data:,">
+<title>N04-S1 训练实时看板</title>
+<!--
+  N04-S1 长跑训练实时看板 —— 离线自包含单文件。
+  · 数据：同目录 data.json，每 30 秒 fetch('data.json',{cache:'no-store'}) 一次。
+  · 无外部请求：无 CDN / 无外部字体 / 无第三方 JS；图表为内联 SVG 手绘。
+  · 容错：所有字段经 pick()/num()/str() 校验，缺失显示「—」或等待态，不抛异常。
+-->
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0e1621;
+  --bg-glow:radial-gradient(1100px 520px at 18% -12%, rgba(56,110,168,.18), rgba(0,0,0,0) 62%);
+  --panel:#151f2c;
+  --panel-2:#1a2634;
+  --border:#243447;
+  --border-soft:#1e2b3b;
+  --text:#e4ecf5;
+  --muted:#93a6b8;
+  --faint:#61748a;
+  --track:#213245;
+  --blue:#8acaff;
+  --green:#5bd0a8;
+  --orange:#e8b76a;
+  --red:#f27d85;
+  --purple:#c39bf0;
+  --radius:10px;
+  --shadow:0 1px 0 rgba(255,255,255,.02), 0 8px 22px rgba(0,0,0,.22);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:var(--bg-glow);
+  background-repeat:no-repeat;
+  color:var(--text);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+  min-height:100vh;
+}
+main{max-width:1760px;margin:0 auto;padding:24px 30px 36px}
+h1,h2,p,ul{margin:0}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Mono CJK SC","Courier New",monospace}
+.dim{color:var(--faint)!important}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.btn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:5px 13px;font-size:12px}
+.btn:hover{border-color:var(--faint)}
+.btn[disabled]{opacity:.5;cursor:default}
+.scroll{overflow:auto;scrollbar-width:thin;scrollbar-color:#33475e transparent}
+.scroll::-webkit-scrollbar{width:9px;height:9px}
+.scroll::-webkit-scrollbar-thumb{background:#2c3f55;border-radius:6px}
+
+/* ---------- 头部 ---------- */
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:26px;margin-bottom:16px}
+.eyebrow{font-size:11px;letter-spacing:2.2px;color:var(--faint);font-weight:650;text-transform:uppercase}
+h1{font-size:25px;font-weight:700;letter-spacing:-.4px;margin:3px 0 10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:baseline;gap:7px;background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:4px 13px;font-size:12px;max-width:100%}
+.chip i{color:var(--faint);font-style:normal;white-space:nowrap}
+.chip b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:280px;text-align:right}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:5px 13px;border-radius:999px;font-size:13px;font-weight:650;background:var(--panel);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.badge.ok{color:var(--green);border-color:rgba(91,208,168,.4);background:rgba(91,208,168,.10)}
+.badge.done{color:var(--blue);border-color:rgba(138,202,255,.4);background:rgba(138,202,255,.10)}
+.badge.bad{color:var(--red);border-color:rgba(242,125,133,.45);background:rgba(242,125,133,.12)}
+.badge.warn{color:var(--orange);border-color:rgba(232,183,106,.4);background:rgba(232,183,106,.10)}
+.badge.wait,.badge.unknown{color:var(--muted)}
+.badge.small{font-size:12px;padding:3px 10px;gap:6px}
+.badge.ok .dot{animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.kv{font-size:12px;color:var(--muted)}
+.kv b{color:var(--text);font-weight:600}
+
+/* ---------- 横幅 ---------- */
+.banner{margin:0 0 16px;padding:12px 16px;border-radius:var(--radius);font-size:13px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--muted);color:var(--muted)}
+.banner.wait{border-left-color:var(--blue);color:var(--blue);background:rgba(138,202,255,.06)}
+.banner.warn{border-left-color:var(--orange);color:var(--orange);background:rgba(232,183,106,.06)}
+.banner.error{border-left-color:var(--red);color:var(--red);background:rgba(242,125,133,.07)}
+.banner[hidden]{display:none}
+
+/* ---------- 面板 ---------- */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.panel+.panel{margin-top:16px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;min-height:24px}
+.panel-head h2{font-size:15px;font-weight:650;letter-spacing:.2px}
+.panel-meta{font-size:12px;color:var(--muted);text-align:right}
+
+/* ---------- 总进度条 ---------- */
+.bar{position:relative;height:14px;background:var(--track);border-radius:999px;overflow:hidden}
+.bar .fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#3d7fbd,#5bd0a8);transition:width .6s ease}
+.bar .marker{position:absolute;top:0;bottom:0;width:2px;background:rgba(228,236,245,.75)}
+.bar.sm{height:7px}
+.bar.sm .fill{background:linear-gradient(90deg,#3d7fbd,#8acaff)}
+.bar-labels{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--faint);margin-top:7px}
+.bar-labels span:nth-child(2){color:var(--muted)}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft);font-size:12px;color:var(--muted)}
+.meta-row b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---------- KPI 卡 ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0}
+@media (min-width:1600px){.kpis{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px 13px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-width:0}
+.stat-label{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-value{font-size:26px;font-weight:650;letter-spacing:-.6px;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-value .u{font-size:13px;color:var(--muted);font-weight:500;margin-left:5px;letter-spacing:0}
+.stat-note{font-size:12px;color:var(--muted);line-height:1.5}
+.stat-note.sub{color:var(--faint)}
+.stat-note.ok{color:var(--green)}
+.stat-note.warn{color:var(--orange)}
+.mini-bar{position:relative;height:6px;background:var(--track);border-radius:999px;margin-top:2px}
+.mini-fill{height:100%;width:0;border-radius:999px;background:var(--green);transition:width .5s ease}
+.mini-mark{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:1px;background:var(--orange);left:68%}
+.mini-bar[hidden]{display:none}
+
+/* ---------- 主内容栅格 ---------- */
+.content{display:grid;grid-template-columns:minmax(0,2.05fr) minmax(306px,1fr);gap:16px;align-items:start;margin-bottom:16px}
+.col-main,.col-side{min-width:0}
+.col-main .panel+.panel{margin-top:16px}
+
+/* ---------- 图表 ---------- */
+.chart-block+.chart-block{margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.chart-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px;color:var(--text);font-weight:600;margin-bottom:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);font-weight:400}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:16px;height:2.5px;border-radius:2px;background:var(--blue)}
+.lg.dash i{height:0;border-top:2px dashed var(--muted);background:none}
+.chart{width:100%;display:block;height:220px}
+.chart text{font:11px system-ui,-apple-system,"Noto Sans CJK SC",sans-serif;fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart .grid{stroke:var(--border);stroke-width:1;opacity:.6}
+.chart .axis{stroke:var(--border);stroke-width:1}
+.chart .tick{fill:var(--muted)}
+.chart .ref{stroke-width:1.4;stroke-dasharray:5 4;opacity:.85}
+.chart .ref-label{font-size:10.5px;fill:var(--muted);paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}
+.chart .note{font-size:12px;fill:var(--faint)}
+.chart-foot{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* ---------- 表格 ---------- */
+.table-wrap{overflow-x:auto;scrollbar-width:thin}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;letter-spacing:.6px;color:var(--faint);text-transform:uppercase;font-weight:650;text-align:left;padding:0 10px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--border-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(138,202,255,.04)}
+th.num,td.num{text-align:right}
+.empty-cell{color:var(--faint);text-align:center;padding:18px 10px!important;white-space:normal}
+
+/* ---------- 运行 / GPU / checkpoint ---------- */
+.run-row,.ck-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px;min-width:0}
+.run-row:last-child,.ck-row:last-child{border-bottom:0}
+.run-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.run-uptime{color:var(--muted);font-size:12px;white-space:nowrap}
+.ck-row .ck-step{color:var(--text)}
+.ck-tag{font-size:10.5px;color:var(--green);border:1px solid rgba(91,208,168,.4);border-radius:5px;padding:1px 6px;margin-left:8px}
+.gpu{padding:9px 0;border-bottom:1px solid var(--border-soft)}
+.gpu:last-child{border-bottom:0}
+.gpu-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12.5px;margin-bottom:7px}
+.gpu-title{font-weight:600}
+.gpu-util{color:var(--muted);font-variant-numeric:tabular-nums}
+.gpu-util.hot{color:var(--orange)}
+.gpu-meta{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+.empty-note{color:var(--faint);font-size:12.5px;padding:10px 0}
+
+/* ---------- 日志 ---------- */
+.logs{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:14px}
+.log-title{font-size:11px;letter-spacing:.7px;color:var(--faint);font-weight:650;text-transform:uppercase;margin-bottom:6px}
+pre.log{margin:0;font:12px/1.62 ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Mono CJK SC","Courier New",monospace;background:#0b121b;border:1px solid var(--border-soft);border-radius:8px;padding:10px 12px;max-height:250px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:#c7d6e4;scrollbar-width:thin;scrollbar-color:#33475e transparent}
+pre.log::-webkit-scrollbar{width:9px;height:9px}
+pre.log::-webkit-scrollbar-thumb{background:#2c3f55;border-radius:6px}
+.err-box{margin:0 0 12px;padding:10px 13px;border:1px solid rgba(242,125,133,.4);background:rgba(242,125,133,.07);border-radius:8px}
+.err-box[hidden]{display:none}
+.err-box .err-head{font-size:12px;color:var(--red);font-weight:650;margin-bottom:6px}
+.err-box ul{margin:0;padding-left:18px}
+.err-box li{font-size:12px;color:#e9b8bd;margin:3px 0;overflow-wrap:anywhere}
+
+/* ---------- 页脚 ---------- */
+.footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:var(--faint);font-size:12px}
+.footer code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted)}
+.footer .sep{color:var(--faint)}
+noscript{display:block;margin:14px 0;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);color:var(--orange);background:var(--panel)}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1180px){
+  main{padding:20px 18px 30px}
+  .content{grid-template-columns:1fr}
+  .header{flex-direction:column;gap:12px}
+  .header-right{align-items:flex-start;text-align:left;min-width:0}
+}
+@media (max-width:640px){
+  h1{font-size:21px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat-value{font-size:22px}
+  .logs{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .bar .fill,.mini-fill{transition:none}
+  .badge.ok .dot{animation:none}
+}
+</style>
+</head>
+<body>
+<main>
+
+  <header class="header">
+    <div class="header-left">
+      <div class="eyebrow">OWAC · N04 · S1 训练监控</div>
+      <h1>训练实时进度看板</h1>
+      <div class="chips">
+        <span class="chip"><i>阶段</i><b class="dim" id="h-stage">—</b></span>
+        <span class="chip"><i>run</i><b class="mono dim" id="h-run">—</b></span>
+        <span class="chip"><i>快照</i><b class="mono dim" id="h-snapshot">—</b></span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="badge wait" id="h-badge"><span class="dot"></span><span id="h-status">等待数据</span></span>
+      <div class="kv">数据生成 <b class="mono dim" id="h-generated">—</b></div>
+      <div class="kv" id="h-age">等待首次读取 data.json</div>
+      <button type="button" class="btn" id="h-refresh">立即刷新</button>
+    </div>
+  </header>
+
+  <noscript>本页面依赖 JavaScript 每 30 秒读取同目录 data.json；当前浏览器未启用脚本，请启用后刷新。</noscript>
+
+  <div class="banner wait" id="banner" role="status" aria-live="polite">等待数据 · 正在读取 data.json（每 30 秒自动重试）</div>
+
+  <section class="panel" aria-label="总进度">
+    <div class="panel-head"><h2>总进度</h2><span class="panel-meta mono" id="p-steps">等待数据</span></div>
+    <div class="bar"><div class="fill" id="p-fill"></div><span class="marker" id="p-ckpt" hidden></span></div>
+    <div class="bar-labels"><span>0 步</span><span class="mono" id="p-pct">—</span><span class="mono" id="p-total">—</span></div>
+    <div class="meta-row">
+      <span>速度 <b class="mono" id="p-speed">—</b></span>
+      <span>剩余 <b class="mono" id="p-remain">—</b></span>
+      <span>ETA <b class="mono" id="p-eta">—</b></span>
+      <span>最新 checkpoint <b class="mono" id="p-ckpt-step">—</b></span>
+    </div>
+  </section>
+
+  <section class="kpis" aria-label="关键指标">
+    <div class="stat">
+      <div class="stat-label">当前 step</div>
+      <div class="stat-value"><span id="k-step-v">—</span><small class="u" id="k-step-u"></small></div>
+      <div class="stat-note" id="k-step-note">等待数据</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">训练速度</div>
+      <div class="stat-value"><span id="k-speed-v">—</span><small class="u" id="k-speed-u"></small></div>
+      <div class="stat-note" id="k-speed-note">等待数据</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">预计完成 ETA</div>
+      <div class="stat-value"><span id="k-eta-v">—</span><small class="u" id="k-eta-u"></small></div>
+      <div class="stat-note" id="k-eta-note">等待数据</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">最新 dev 深度 MAE</div>
+      <div class="stat-value"><span id="k-mae-v">—</span><small class="u" id="k-mae-u"></small></div>
+      <div class="stat-note" id="k-mae-note">等待评估数据</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">历史最优深度 MAE</div>
+      <div class="stat-value"><span id="k-best-v">—</span><small class="u" id="k-best-u"></small></div>
+      <div class="stat-note" id="k-best-note">等待评估数据</div>
+      <div class="stat-note sub" id="k-best-extra"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">最新覆盖率 @1σ</div>
+      <div class="stat-value"><span id="k-cov-v">—</span><small class="u" id="k-cov-u"></small></div>
+      <div class="mini-bar" id="k-cov-bar" hidden><div class="mini-fill" id="k-cov-fill"></div><span class="mini-mark" id="k-cov-mark"></span></div>
+      <div class="stat-note" id="k-cov-note">等待评估数据</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">最新 NLL</div>
+      <div class="stat-value"><span id="k-nll-v">—</span><small class="u" id="k-nll-u"></small></div>
+      <div class="stat-note" id="k-nll-note">等待评估数据</div>
+    </div>
+  </section>
+
+  <div class="content">
+    <div class="col-main">
+      <section class="panel" aria-label="开发集曲线">
+        <div class="panel-head"><h2>开发集曲线</h2><span class="panel-meta" id="chart-meta">等待评估数据</span></div>
+        <div class="chart-block">
+          <div class="chart-title"><span>深度 MAE <span class="dim">（m · 对数轴）</span></span>
+            <span class="legend" id="legend-mae"><span class="lg"><i style="background:var(--blue)"></i>开发 MAE</span></span>
+          </div>
+          <svg id="chart-mae" class="chart" style="height:230px" viewBox="0 0 900 230" role="img" aria-label="开发集深度 MAE 随训练步数变化（对数纵轴）"></svg>
+        </div>
+        <div class="chart-block">
+          <div class="chart-title"><span>覆盖率 @1σ</span>
+            <span class="legend" id="legend-cov"><span class="lg"><i style="background:var(--green)"></i>覆盖率</span></span>
+          </div>
+          <svg id="chart-cov" class="chart" style="height:190px" viewBox="0 0 900 190" role="img" aria-label="覆盖率 @1σ 随训练步数变化"></svg>
+        </div>
+        <div class="chart-block">
+          <div class="chart-title"><span>NLL</span>
+            <span class="legend" id="legend-nll"><span class="lg"><i style="background:var(--purple)"></i>NLL</span></span>
+          </div>
+          <svg id="chart-nll" class="chart" style="height:170px" viewBox="0 0 900 170" role="img" aria-label="NLL 随训练步数变化"></svg>
+        </div>
+        <p class="chart-foot">横轴为训练 step，三张图共用一个评估序列；缺失字段的评估点不绘制。MAE 采用对数纵轴，参考线与门槛取自 data.json 的 reference 字段。</p>
+      </section>
+
+      <section class="panel" aria-label="分组指标">
+        <div class="panel-head"><h2>分组指标</h2><span class="panel-meta" id="g-meta">等待分组数据</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>组</th><th class="num">深度 MAE (m)</th><th class="num">覆盖率 @1σ</th><th class="num">像素数</th></tr></thead>
+            <tbody id="g-body"><tr><td colspan="4" class="empty-cell">等待分组数据</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-side">
+      <section class="panel" aria-label="运行状态">
+        <div class="panel-head"><h2>运行状态</h2><span class="panel-meta" id="r-meta">等待数据</span></div>
+        <div id="r-body"><div class="empty-note">等待运行信息</div></div>
+      </section>
+
+      <section class="panel" aria-label="GPU">
+        <div class="panel-head"><h2>GPU</h2><span class="panel-meta" id="gpu-meta">等待数据</span></div>
+        <div id="gpu-body"><div class="empty-note">等待 GPU 数据</div></div>
+      </section>
+
+      <section class="panel" aria-label="Checkpoint">
+        <div class="panel-head"><h2>Checkpoint</h2><span class="panel-meta" id="ck-meta">等待数据</span></div>
+        <div id="ck-body" class="scroll" style="max-height:238px"><div class="empty-note">等待 checkpoint 数据</div></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel" aria-label="日志尾部">
+    <div class="panel-head">
+      <h2>日志尾部</h2>
+      <span class="panel-meta"><span class="badge wait small" id="err-badge"><span class="dot"></span><span id="err-badge-text">错误 —</span></span></span>
+    </div>
+    <div class="err-box" id="err-box" hidden>
+      <div class="err-head">errors.recent</div>
+      <ul id="err-list"></ul>
+    </div>
+    <div class="logs">
+      <div class="log-col">
+        <div class="log-title">训练日志 · train.latest_log</div>
+        <pre class="log" id="log-train">等待数据</pre>
+      </div>
+      <div class="log-col">
+        <div class="log-title">链路日志尾部 · chain.log_tail</div>
+        <pre class="log" id="log-chain">等待数据</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>每 30 秒自动刷新（<code>fetch('data.json', {cache:'no-store'})</code>）</span>
+    <span id="f-refresh">最近刷新 — · 下次刷新 —</span>
+    <span>离线自包含单文件 · 无外部请求 · 图表为内联 SVG</span>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var REFRESH_MS = 30000;
+  var TZ = 'Asia/Shanghai';
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  var state = {
+    data: null,
+    ctx: null,
+    ok: false,
+    err: null,
+    lastOkAt: null,
+    nextAt: 0,
+    busy: false,
+    issues: []
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ================= 取值与格式化 ================= */
+
+  function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+  function asArray(v) { return Array.isArray(v) ? v : []; }
+  function listOf(v) { if (Array.isArray(v)) return v; return (typeof v === 'string' && v.trim()) ? [v] : []; }
+  function num(v) {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    if (typeof v === 'string' && v.trim() !== '') { var n = Number(v); return Number.isFinite(n) ? n : null; }
+    return null;
+  }
+  function str(v) {
+    if (typeof v === 'string') return v.trim() ? v.trim() : null;
+    if (typeof v === 'number' && Number.isFinite(v)) return String(v);
+    return null;
+  }
+  function pick(obj, path) {
+    var cur = obj, parts = String(path).split('.');
+    for (var i = 0; i < parts.length; i++) {
+      if (cur === null || cur === undefined || typeof cur !== 'object') return null;
+      cur = cur[parts[i]];
+      if (cur === undefined || cur === null) return null;
+    }
+    return cur;
+  }
+  function errMsg(e) {
+    if (!e) return '未知异常';
+    return (e && e.message) ? String(e.message) : String(e);
+  }
+  function safe(name, fn) {
+    try { return fn(); } catch (e) { state.issues.push(name + '：' + errMsg(e)); return null; }
+  }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = String(text);
+    return n;
+  }
+  function clearNode(n) { while (n && n.firstChild) n.removeChild(n.firstChild); }
+  function setText(id, text) { var n = $(id); if (n) n.textContent = (text === null || text === undefined || text === '') ? '—' : String(text); }
+  function setDim(id, dim) { var n = $(id); if (n) n.classList.toggle('dim', !!dim); }
+  function setStat(id, value, unit) {
+    var v = $(id + '-v'), u = $(id + '-u');
+    var empty = (value === null || value === undefined || value === '');
+    if (v) { v.textContent = empty ? '—' : String(value); v.classList.toggle('dim', empty); }
+    if (u) u.textContent = empty ? '' : (unit || '');
+  }
+  function setNote(id, text, cls) {
+    var n = $(id);
+    if (!n) return;
+    n.textContent = text || '';
+    n.className = 'stat-note' + (id === 'k-best-extra' ? ' sub' : '') + (cls ? ' ' + cls : '');
+  }
+  function fmtInt(v) { var n = num(v); return n === null ? null : Math.round(n).toLocaleString('zh-CN'); }
+  function fmtFixed(v, d) { var n = num(v); return n === null ? null : n.toFixed(d); }
+  function fmtSig(v, d) { var n = num(v); return n === null ? null : String(Number(n.toPrecision(d))); }
+  function fmtBytes(b) {
+    var n = num(b);
+    if (n === null) return null;
+    if (n >= 1073741824) return (n / 1073741824).toFixed(2) + ' GiB';
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MiB';
+    if (n >= 1024) return (n / 1024).toFixed(1) + ' KiB';
+    return Math.round(n) + ' B';
+  }
+  function fmtDur(sec) {
+    var s = num(sec);
+    if (s === null || s < 0) return null;
+    var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+    if (d > 0) return d + ' 天 ' + h + ' 小时';
+    if (h > 0) return h + ' 小时 ' + m + ' 分';
+    if (m > 0) return m + ' 分';
+    return Math.round(s) + ' 秒';
+  }
+  function ageText(ms) {
+    if (ms === null || ms === undefined || !Number.isFinite(ms)) return null;
+    var s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60) return s + ' 秒前';
+    var m = Math.floor(s / 60);
+    if (m < 60) return m + ' 分钟前';
+    var h = Math.floor(m / 60);
+    if (h < 48) return h + ' 小时前';
+    return Math.floor(h / 24) + ' 天前';
+  }
+  function toDate(v) {
+    var s = str(v);
+    if (!s) return null;
+    var d = new Date(s);
+    return Number.isFinite(d.getTime()) ? d : null;
+  }
+  function stampParts(d, tz, kind) {
+    var opts = { timeZone: tz, hourCycle: 'h23' };
+    if (kind === 'full') { opts.year = 'numeric'; opts.month = '2-digit'; opts.day = '2-digit'; opts.hour = '2-digit'; opts.minute = '2-digit'; opts.second = '2-digit'; }
+    else { opts.month = '2-digit'; opts.day = '2-digit'; opts.hour = '2-digit'; opts.minute = '2-digit'; }
+    var parts = new Intl.DateTimeFormat('zh-CN', opts).formatToParts(d);
+    var g = function (t) { for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value; return ''; };
+    if (kind === 'full') return g('year') + '-' + g('month') + '-' + g('day') + ' ' + g('hour') + ':' + g('minute') + ':' + g('second');
+    return g('month') + '-' + g('day') + ' ' + g('hour') + ':' + g('minute');
+  }
+  function fmtFull(d, tz) { return d ? stampParts(d, tz || TZ, 'full') : null; }
+  function fmtShort(d, tz) { return d ? stampParts(d, tz || TZ, 'short') : null; }
+
+  function statusInfo(raw0) {
+    var raw = str(raw0);
+    if (!raw) return { cls: 'wait', text: '等待数据', raw: null };
+    var t = raw.toUpperCase();
+    var head = t.split(/[\s(（:：]/)[0];
+    if (/^(RUN|TRAIN|ACTIVE|PROGRESS)/.test(head)) return { cls: 'ok', text: '运行中', raw: raw };
+    if (/^(COMPLETE|DONE|SUCCESS|FINISH|PASS|END)/.test(head)) return { cls: 'done', text: '已完成', raw: raw };
+    if (/^(FAIL|ERROR|CRASH)/.test(head)) return { cls: 'bad', text: '失败', raw: raw };
+    if (/^(STOP|CANCEL|KILL|TERMINAT|ABORT)/.test(head)) return { cls: 'warn', text: '已停止', raw: raw };
+    if (/^(PEND|QUEUE|WAIT|INIT|CREATED|SCHEDUL)/.test(head)) return { cls: 'wait', text: '排队中', raw: raw };
+    if (/^(PAUSE|HOLD|SUSPEND)/.test(head)) return { cls: 'warn', text: '已暂停', raw: raw };
+    return { cls: 'unknown', text: raw, raw: raw };
+  }
+  function badgeEl(status, small) {
+    var info = statusInfo(status);
+    var b = el('span', 'badge ' + info.cls + (small ? ' small' : ''));
+    b.appendChild(el('span', 'dot'));
+    b.appendChild(el('span', null, info.text));
+    b.title = info.raw ? ('原始状态：' + info.raw) : '未读到状态字段';
+    return b;
+  }
+
+  /* ================= 图表（内联 SVG 手绘） ================= */
+
+  function svgNode(tag, attrs) {
+    var n = document.createElementNS(SVG_NS, tag);
+    if (attrs) for (var k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, String(attrs[k]));
+    return n;
+  }
+  function niceTicks(min, max, count) {
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return [];
+    if (min === max) return [min];
+    var span = max - min;
+    var raw = span / Math.max(1, count);
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var norm = raw / mag;
+    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+    var out = [];
+    for (var v = Math.ceil(min / step) * step, i = 0; i < 40 && v <= max + step * 1e-9; v += step, i++) {
+      out.push(Number(v.toPrecision(12)));
+    }
+    return out;
+  }
+  function logTicks(min, max) {
+    var out = [];
+    if (!(min > 0) || !(max > 0)) return out;
+    var e0 = Math.floor(Math.log10(min)), e1 = Math.ceil(Math.log10(max));
+    for (var e = e0; e <= e1; e++) {
+      var mults = [1, 2, 5];
+      for (var i = 0; i < mults.length; i++) {
+        var v = mults[i] * Math.pow(10, e);
+        if (v >= min * (1 - 1e-9) && v <= max * (1 + 1e-9)) out.push(v);
+      }
+    }
+    if (out.length > 8) {
+      var decades = out.filter(function (v) { var l = Math.log10(v); return Math.abs(l - Math.round(l)) < 1e-9; });
+      if (decades.length >= 3) return decades;
+    }
+    return out;
+  }
+  function fmtTick(v) {
+    if (v === 0) return '0';
+    var a = Math.abs(v);
+    if (a >= 1000) return String(Number(v.toPrecision(4)));
+    if (a >= 1) return String(Number(v.toPrecision(3)));
+    return String(Number(v.toPrecision(2)));
+  }
+  function fmtStepTick(v) {
+    var a = Math.abs(v);
+    if (a >= 1e6) return (v / 1e6).toFixed(v % 1e6 ? 1 : 0) + 'M';
+    if (a >= 1e3) return (v / 1e3).toFixed(v % 1e3 ? 1 : 0) + 'k';
+    return String(Math.round(v));
+  }
+  function decimate(pts, limit) {
+    if (pts.length <= limit) return pts;
+    var k = Math.ceil(pts.length / limit), out = [];
+    for (var i = 0; i < pts.length; i += k) out.push(pts[i]);
+    if (out[out.length - 1] !== pts[pts.length - 1]) out.push(pts[pts.length - 1]);
+    return out;
+  }
+  function drawChart(svg, cfg) {
+    if (!svg) return;
+    clearNode(svg);
+    var box = svg.getBoundingClientRect ? svg.getBoundingClientRect() : null;
+    var w = Math.round((box && box.width) || svg.clientWidth || (svg.parentElement ? svg.parentElement.clientWidth : 0) || 880);
+    var h = Math.round((box && box.height) || svg.clientHeight || 0) || (cfg.height || 220);
+    w = Math.max(320, w);
+    h = Math.max(120, h);
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+    var log = !!cfg.log;
+    var rawPts = (cfg.points || []).filter(function (p) { return Number.isFinite(p.x) && Number.isFinite(p.y); });
+    var pts = decimate(log ? rawPts.filter(function (p) { return p.y > 0; }) : rawPts, 1200);
+    var m = { l: 62, r: 18, t: 14, b: cfg.showXAxis === false ? 10 : 26 };
+
+    if (!pts.length) {
+      var note = svgNode('text', { x: Math.round(w / 2), y: Math.round(h / 2), 'text-anchor': 'middle', class: 'note' });
+      note.textContent = (log && rawPts.length) ? '无正数值可绘制（对数轴）' : (cfg.emptyText || '等待数据');
+      svg.appendChild(note);
+      return;
+    }
+
+    var T = function (v) { return log ? Math.log10(v) : v; };
+    var refs = (cfg.refs || []).filter(function (r) { return Number.isFinite(r.y) && (!log || r.y > 0); });
+    var band = (cfg.band && Number.isFinite(cfg.band.y0) && Number.isFinite(cfg.band.y1) && (!log || (cfg.band.y0 > 0 && cfg.band.y1 > 0))) ? cfg.band : null;
+
+    var xVals = pts.map(function (p) { return p.x; });
+    var x0 = Math.min.apply(null, xVals), x1 = Math.max.apply(null, xVals);
+    if (x0 === x1) { x0 -= 0.5; x1 += 0.5; }
+
+    var lows = pts.map(function (p) { return p.y; }), highs = pts.map(function (p) { return p.y; });
+    refs.forEach(function (r) { lows.push(r.y); highs.push(r.y); });
+    if (band) { lows.push(band.y0, band.y1); }
+    var yLo = Math.min.apply(null, lows), yHi = Math.max.apply(null, highs);
+    var t0 = T(yLo), t1 = T(yHi);
+    if (!Number.isFinite(t0) || !Number.isFinite(t1)) { t0 = 0; t1 = 1; }
+    if (t0 === t1) { var pad0 = log ? 0.3 : Math.max(Math.abs(t0) * 0.1, 0.5); t0 -= pad0; t1 += pad0; }
+    else { var pad1 = (t1 - t0) * 0.08; t0 -= pad1; t1 += pad1; }
+
+    var plotL = m.l, plotR = w - m.r, plotT = m.t, plotB = h - m.b;
+    var px = function (x) { return plotL + ((x - x0) / (x1 - x0)) * (plotR - plotL); };
+    var py = function (y) {
+      var tt = T(y);
+      return plotT + ((t1 - tt) / (t1 - t0)) * (plotB - plotT);
+    };
+
+    var yTicks = log ? logTicks(Math.pow(10, t0), Math.pow(10, t1)) : niceTicks(t0, t1, 4);
+    if (yTicks.length < 2) yTicks = [Math.pow(10, t0), Math.pow(10, t1)];
+
+    yTicks.forEach(function (v) {
+      var y = py(v);
+      if (!Number.isFinite(y) || y < plotT - 1 || y > plotB + 1) return;
+      svg.appendChild(svgNode('line', { x1: plotL, x2: plotR, y1: y, y2: y, class: 'grid' }));
+      var lbl = svgNode('text', { x: plotL - 8, y: y + 3.5, 'text-anchor': 'end', class: 'tick' });
+      lbl.textContent = fmtTick(v);
+      svg.appendChild(lbl);
+    });
+
+    if (band) {
+      var byA = py(band.y1), byB = py(band.y0);
+      svg.appendChild(svgNode('rect', {
+        x: plotL, y: Math.min(byA, byB), width: Math.max(0, plotR - plotL), height: Math.max(1, Math.abs(byB - byA)),
+        fill: band.color || 'rgba(242,125,133,.14)'
+      }));
+      if (band.label) {
+        var bl = svgNode('text', { x: plotL + 6, y: Math.min(byA, byB) - 4, class: 'ref-label' });
+        bl.textContent = band.label;
+        svg.appendChild(bl);
+      }
+    }
+
+    refs.forEach(function (r) {
+      var y = py(r.y);
+      if (!Number.isFinite(y)) return;
+      svg.appendChild(svgNode('line', { x1: plotL, x2: plotR, y1: y, y2: y, class: 'ref', stroke: r.color || 'var(--orange)' }));
+      if (r.label) {
+        var rl = svgNode('text', { x: plotL + 6, y: y - 4, class: 'ref-label' });
+        rl.textContent = r.label;
+        svg.appendChild(rl);
+      }
+    });
+
+    var d = pts.map(function (p, i) {
+      return (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1);
+    }).join(' ');
+    if (pts.length > 1) {
+      if (cfg.fill) {
+        svg.appendChild(svgNode('path', {
+          d: d + ' L' + px(pts[pts.length - 1].x).toFixed(1) + ' ' + plotB.toFixed(1) + ' L' + px(pts[0].x).toFixed(1) + ' ' + plotB.toFixed(1) + ' Z',
+          fill: cfg.fill, stroke: 'none'
+        }));
+      }
+      svg.appendChild(svgNode('path', { d: d, fill: 'none', stroke: cfg.color || 'var(--blue)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    }
+    if (pts.length <= 240) {
+      pts.forEach(function (p) {
+        var c = svgNode('circle', { cx: px(p.x), cy: py(p.y), r: 2.6, fill: cfg.color || 'var(--blue)', 'fill-opacity': 0.9 });
+        if (cfg.tip) { var t = svgNode('title'); t.textContent = cfg.tip(p); c.appendChild(t); }
+        svg.appendChild(c);
+      });
+    }
+    var last = pts[pts.length - 1];
+    svg.appendChild(svgNode('circle', { cx: px(last.x), cy: py(last.y), r: 4.1, fill: cfg.color || 'var(--blue)', stroke: 'var(--panel)', 'stroke-width': 2 }));
+
+    if (cfg.showXAxis !== false) {
+      svg.appendChild(svgNode('line', { x1: plotL, x2: plotR, y1: plotB, y2: plotB, class: 'axis' }));
+      var xTicks = (x1 - x0 <= 2) ? [pts[0].x] : niceTicks(pts[0].x, pts[pts.length - 1].x, 5);
+      xTicks.forEach(function (v) {
+        var x = px(v);
+        if (!Number.isFinite(x) || x < plotL - 1 || x > plotR + 1) return;
+        svg.appendChild(svgNode('line', { x1: x, x2: x, y1: plotB, y2: plotB + 4, class: 'axis' }));
+        var t = svgNode('text', { x: x, y: plotB + 16, 'text-anchor': 'middle', class: 'tick' });
+        t.textContent = fmtStepTick(v);
+        svg.appendChild(t);
+      });
+    }
+  }
+
+  /* ================= 数据推导 ================= */
+
+  function extractRows(d) {
+    var evals = asArray(pick(d, 'evals'));
+    var rows = [];
+    evals.forEach(function (e) {
+      if (!isObj(e)) return;
+      var row = {
+        step: num(e.step),
+        mae: num(e.depth_mae_m),
+        norm: num(e.depth_norm_mae),
+        cov1: num(e.coverage_1sigma),
+        cov2: num(e.coverage_2sigma),
+        nll: num(e.nll),
+        sigma: num(e.sigma_m)
+      };
+      if (row.step === null && row.mae === null && row.cov1 === null && row.nll === null) return;
+      rows.push(row);
+    });
+    rows.sort(function (a, b) {
+      var ax = a.step === null ? -Infinity : a.step, bx = b.step === null ? -Infinity : b.step;
+      return ax - bx;
+    });
+    return rows;
+  }
+  function derive(d) {
+    var rows = extractRows(d);
+    var latest = rows.length ? rows[rows.length - 1] : null;
+    var best = null;
+    rows.forEach(function (r) { if (r.mae !== null && r.mae > 0 && (!best || r.mae < best.mae)) best = r; });
+    var ckRows = asArray(pick(d, 'checkpoints')).filter(isObj).map(function (c) {
+      return { step: num(c.step), bytes: num(c.bytes) };
+    }).filter(function (c) { return c.step !== null || c.bytes !== null; })
+      .sort(function (a, b) { return (b.step === null ? -1 : b.step) - (a.step === null ? -1 : a.step); });
+    return {
+      step: num(pick(d, 'train.step')),
+      total: num(pick(d, 'train.declared_steps')),
+      sps: num(pick(d, 'train.s_per_step')),
+      rows: rows,
+      latest: latest,
+      best: best,
+      ckRows: ckRows,
+      gpus: asArray(pick(d, 'gpu')).filter(isObj),
+      ref: isObj(pick(d, 'reference')) ? pick(d, 'reference') : {},
+      groups: isObj(pick(d, 'groups_latest')) ? pick(d, 'groups_latest') : {},
+      programs: asArray(pick(d, 'programs')).filter(isObj),
+      chainStatus: str(pick(d, 'chain.status')),
+      errCount: num(pick(d, 'errors.count')),
+      errRecent: listOf(pick(d, 'errors.recent'))
+    };
+  }
+  function etaInfo(ctx, d) {
+    var etaUtc = toDate(pick(d, 'train.eta_utc'));
+    var etaLocalRaw = str(pick(d, 'train.eta_local'));
+    var derived = false;
+    var when = etaUtc;
+    if (!when && ctx.step !== null && ctx.total !== null && ctx.total > ctx.step && ctx.sps !== null && ctx.sps > 0) {
+      when = new Date(Date.now() + (ctx.total - ctx.step) * ctx.sps * 1000);
+      derived = true;
+    }
+    var remain = (ctx.step !== null && ctx.total !== null && ctx.sps !== null && ctx.total > ctx.step)
+      ? (ctx.total - ctx.step) * ctx.sps : null;
+    var shortLocal = when ? fmtShort(when, TZ) : null;
+    if (!shortLocal && etaLocalRaw) {
+      var mm = etaLocalRaw.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+      if (mm) shortLocal = mm[2] + '-' + mm[3] + ' ' + mm[4] + ':' + mm[5];
+    }
+    return { when: when, derived: derived, remain: remain, shortLocal: shortLocal, localRaw: etaLocalRaw };
+  }
+  function thresholdInfo(maeM, mmRange) {
+    var arr = asArray(mmRange).map(num).filter(function (v) { return v !== null && v > 0; });
+    if (!arr.length || maeM === null) return null;
+    var lo = Math.min.apply(null, arr) / 1000, hi = Math.max.apply(null, arr) / 1000;
+    var range = '门槛 ' + fmtSig(lo * 1000, 3) + '–' + fmtSig(hi * 1000, 3) + ' mm';
+    if (maeM <= lo) return { text: range + ' · 低于门槛下界 ' + fmtSig(maeM / lo, 3) + ' 倍', cls: 'ok' };
+    if (maeM <= hi) return { text: range + ' · 已在门槛区间内', cls: 'ok' };
+    return { text: range + ' · 距门槛 ' + fmtSig(maeM / hi, 4) + ' 倍', cls: 'warn' };
+  }
+
+  /* ================= 各区块渲染 ================= */
+
+  function renderHeader(d, ctx) {
+    setText('h-stage', str(pick(d, 'stage'))); setDim('h-stage', !str(pick(d, 'stage')));
+    setText('h-run', str(pick(d, 'run_id'))); setDim('h-run', !str(pick(d, 'run_id')));
+    setText('h-snapshot', str(pick(d, 'snapshot'))); setDim('h-snapshot', !str(pick(d, 'snapshot')));
+
+    var st = statusInfo(str(pick(d, 'programs.0.status')) || str(pick(d, 'chain.status')));
+    var badge = $('h-badge');
+    if (badge) { badge.className = 'badge ' + st.cls; badge.title = st.raw ? ('原始状态：' + st.raw) : '未读到状态字段'; }
+    setText('h-status', st.text);
+
+    var gen = toDate(pick(d, 'generated_utc'));
+    if (gen) {
+      setText('h-generated', fmtFull(gen, TZ) + '（北京）');
+      setDim('h-generated', false);
+      var ageTxt = ageText(Date.now() - gen.getTime());
+      var ageEl = $('h-age');
+      if (ageEl) {
+        ageEl.textContent = 'UTC ' + fmtFull(gen, 'UTC') + (ageTxt ? ' · ' + ageTxt + '生成' : '');
+        var stale = (Date.now() - gen.getTime()) > 600000;
+        ageEl.className = 'kv' + (stale ? ' ' : '');
+        ageEl.style.color = stale ? 'var(--orange)' : '';
+        if (stale) ageEl.textContent += ' · 可能已停止更新';
+      }
+    } else {
+      setText('h-generated', null); setDim('h-generated', true);
+      var a = $('h-age');
+      if (a) { a.textContent = '等待生成时间字段'; a.style.color = ''; }
+    }
+  }
+
+  function renderProgress(d, ctx) {
+    var pct = (ctx.step !== null && ctx.total !== null && ctx.total > 0)
+      ? Math.max(0, Math.min(1, ctx.step / ctx.total)) : null;
+    var fill = $('p-fill');
+    if (fill) fill.style.width = (pct === null ? 0 : pct * 100).toFixed(2) + '%';
+    setText('p-pct', pct === null ? null : (pct * 100).toFixed(2) + '%');
+    setText('p-total', ctx.total === null ? null : fmtInt(ctx.total) + ' 步');
+    setText('p-steps', ctx.step === null ? null : fmtInt(ctx.step) + ' / ' + (ctx.total === null ? '?' : fmtInt(ctx.total)) + ' 步');
+
+    var eta = etaInfo(ctx, d);
+    setText('p-speed', ctx.sps === null ? null : fmtSig(ctx.sps, 3) + ' s/step');
+    setText('p-remain', eta.remain === null ? null : fmtDur(eta.remain));
+    setText('p-eta', eta.shortLocal);
+    var newest = ctx.ckRows.length ? ctx.ckRows[0] : null;
+    setText('p-ckpt-step', newest && newest.step !== null ? fmtInt(newest.step) : null);
+
+    var mk = $('p-ckpt');
+    if (mk) {
+      if (newest && newest.step !== null && pct !== null && ctx.total > 0) {
+        mk.hidden = false;
+        mk.style.left = 'calc(' + Math.max(0, Math.min(100, (newest.step / ctx.total) * 100)).toFixed(2) + '% - 1px)';
+        mk.title = '最新 checkpoint ' + fmtInt(newest.step) + ' 步';
+      } else { mk.hidden = true; }
+    }
+  }
+
+  function renderKpis(d, ctx) {
+    var eta = etaInfo(ctx, d);
+    setStat('k-step', ctx.step === null ? null : fmtInt(ctx.step), '步');
+    setNote('k-step-note', ctx.total === null
+      ? (ctx.step === null ? '等待 train.step 字段' : '总步数未声明（declared_steps 缺失）')
+      : ('总步数 ' + fmtInt(ctx.total) + ' · 已完成 ' + (ctx.step === null ? '—' : ((ctx.step / ctx.total) * 100).toFixed(2) + '%')));
+
+    setStat('k-speed', ctx.sps === null ? null : fmtSig(ctx.sps, 4), 's/step');
+    setNote('k-speed-note', ctx.sps === null || ctx.sps <= 0 ? '等待 train.s_per_step 字段'
+      : ('≈ ' + fmtSig(1 / ctx.sps, 3) + ' 步/秒 · 采样自最近记录'));
+
+    setStat('k-eta', eta.shortLocal, '北京时间');
+    var etaParts = [];
+    if (eta.when) etaParts.push('UTC ' + fmtShort(eta.when, 'UTC'));
+    if (eta.localRaw) etaParts.push('数据标注 ' + eta.localRaw);
+    if (eta.remain !== null) etaParts.push('剩余约 ' + fmtDur(eta.remain));
+    if (eta.derived) etaParts.push('按 s/step 估算');
+    setNote('k-eta-note', etaParts.length ? etaParts.join(' · ') : '等待 train.eta_utc / eta_local 字段');
+
+    var latest = ctx.latest;
+    setStat('k-mae', latest && latest.mae !== null ? fmtFixed(latest.mae, 4) : null, 'm');
+    var maeParts = [];
+    if (latest) {
+      if (latest.step !== null) maeParts.push('step ' + fmtInt(latest.step));
+      if (latest.norm !== null) maeParts.push('归一化 ' + fmtFixed(latest.norm, 4));
+      if (latest.sigma !== null) maeParts.push('σ ' + fmtFixed(latest.sigma, 4) + ' m');
+    }
+    setNote('k-mae-note', maeParts.length ? maeParts.join(' · ') : '等待 evals 数据');
+
+    var best = ctx.best;
+    setStat('k-best', best ? fmtFixed(best.mae, 4) : null, 'm');
+    var th = best ? thresholdInfo(best.mae, ctx.ref.threshold_mm_range) : null;
+    setNote('k-best-note', th ? th.text : (best ? 'reference.threshold_mm_range 缺失' : '等待 evals 数据'), th ? th.cls : '');
+    var refBest = num(ctx.ref.best_depth_mae_m);
+    var bestExtra = [];
+    if (best && best.step !== null) bestExtra.push('出现于 step ' + fmtInt(best.step));
+    if (refBest !== null) {
+      var s = '参考最优 ' + fmtSig(refBest, 3) + ' m';
+      if (best && best.mae > 0) s += ' · 本最优为其 ' + fmtSig(best.mae / refBest, 4) + ' 倍';
+      bestExtra.push(s);
+    }
+    setNote('k-best-extra', bestExtra.length ? bestExtra.join(' · ') : (best ? '' : 'reference.best_depth_mae_m 缺失'));
+
+    var cov1 = latest ? latest.cov1 : null;
+    setStat('k-cov', cov1 === null ? null : fmtFixed(cov1, 3), '@1σ');
+    var covBar = $('k-cov-bar');
+    if (covBar) {
+      if (cov1 === null) covBar.hidden = true;
+      else {
+        covBar.hidden = false;
+        var cf = $('k-cov-fill');
+        if (cf) cf.style.width = Math.max(0, Math.min(1, cov1)) * 100 + '%';
+      }
+    }
+    var covParts = [];
+    if (cov1 !== null) covParts.push('名义 0.68 · 差 ' + (cov1 - 0.68 >= 0 ? '+' : '') + fmtFixed(cov1 - 0.68, 3));
+    if (latest && latest.cov2 !== null) covParts.push('@2σ ' + fmtFixed(latest.cov2, 3) + '（名义 0.95）');
+    setNote('k-cov-note', covParts.length ? covParts.join(' · ') : '等待 evals.coverage_1sigma');
+
+    setStat('k-nll', latest && latest.nll !== null ? fmtSig(latest.nll, 4) : null, '');
+    setNote('k-nll-note', latest && latest.nll !== null
+      ? ('step ' + (latest.step === null ? '—' : fmtInt(latest.step)) + ' · 越低越好')
+      : '等待 evals.nll');
+  }
+
+  function renderCharts(d, ctx) {
+    var rows = ctx.rows;
+    var pts = function (key) {
+      return rows.filter(function (r) { return r[key] !== null && r.step !== null; }).map(function (r) { return { x: r.step, y: r[key] }; });
+    };
+    var refBest = num(ctx.ref.best_depth_mae_m);
+    var mmRange = asArray(ctx.ref.threshold_mm_range).map(num).filter(function (v) { return v !== null && v > 0; });
+    var band = mmRange.length ? { y0: Math.min.apply(null, mmRange) / 1000, y1: Math.max.apply(null, mmRange) / 1000, label: '门槛 ' + fmtSig(Math.min.apply(null, mmRange), 3) + '–' + fmtSig(Math.max.apply(null, mmRange), 3) + ' mm', color: 'rgba(242,125,133,.13)' } : null;
+
+    var drawIfVisible = function (id, cfg) {
+      var svg = $(id);
+      if (!svg) return;
+      drawChart(svg, cfg);
+    };
+
+    drawIfVisible('chart-mae', {
+      points: pts('mae'), log: true, color: 'var(--blue)', fill: 'rgba(138,202,255,.07)',
+      band: band,
+      refs: refBest !== null ? [{ y: refBest, label: '参考最优 ' + fmtSig(refBest, 3) + ' m', color: 'var(--orange)' }] : [],
+      emptyText: '等待深度 MAE 数据',
+      tip: function (p) { return 'step ' + fmtInt(p.x) + ' · MAE ' + p.y + ' m'; }
+    });
+    drawIfVisible('chart-cov', {
+      points: pts('cov1'), log: false, color: 'var(--green)', fill: 'rgba(91,208,168,.07)',
+      refs: [{ y: 0.68, label: '名义 0.68', color: 'var(--orange)' }],
+      emptyText: '等待覆盖率数据',
+      tip: function (p) { return 'step ' + fmtInt(p.x) + ' · 覆盖率@1σ ' + p.y; }
+    });
+    drawIfVisible('chart-nll', {
+      points: pts('nll'), log: false, color: 'var(--purple)',
+      emptyText: '等待 NLL 数据',
+      tip: function (p) { return 'step ' + fmtInt(p.x) + ' · NLL ' + p.y; }
+    });
+
+    var lm = $('legend-mae');
+    if (lm) {
+      clearNode(lm);
+      var l1 = el('span', 'lg'), l1i = el('i');
+      l1i.style.background = 'var(--blue)';
+      l1.appendChild(l1i);
+      l1.appendChild(document.createTextNode('开发 MAE'));
+      lm.appendChild(l1);
+      if (band) {
+        var b1 = el('span', 'lg dash'); b1.appendChild(el('i')); b1.appendChild(document.createTextNode(band.label));
+        lm.appendChild(b1);
+      }
+      if (refBest !== null) {
+        var b2 = el('span', 'lg dash'); b2.appendChild(el('i')); b2.appendChild(document.createTextNode('参考最优 ' + fmtSig(refBest, 3) + ' m'));
+        lm.appendChild(b2);
+      }
+    }
+    var lc = $('legend-cov');
+    if (lc) {
+      clearNode(lc);
+      var c1 = el('span', 'lg'); var ci = el('i'); ci.style.background = 'var(--green)'; c1.appendChild(ci);
+      c1.appendChild(document.createTextNode('覆盖率 @1σ'));
+      lc.appendChild(c1);
+      var c2 = el('span', 'lg dash'); c2.appendChild(el('i')); c2.appendChild(document.createTextNode('名义 0.68'));
+      lc.appendChild(c2);
+    }
+    var ln = $('legend-nll');
+    if (ln) {
+      clearNode(ln);
+      var n1 = el('span', 'lg'); var ni = el('i'); ni.style.background = 'var(--purple)'; n1.appendChild(ni);
+      n1.appendChild(document.createTextNode('NLL'));
+      ln.appendChild(n1);
+    }
+    setText('chart-meta', rows.length
+      ? (rows.length + ' 个评估点 · 最新 step ' + (ctx.latest && ctx.latest.step !== null ? fmtInt(ctx.latest.step) : '—'))
+      : '等待评估数据');
+  }
+
+  function renderGroups(d, ctx) {
+    var body = $('g-body');
+    if (!body) return;
+    clearNode(body);
+    var keys = Object.keys(ctx.groups);
+    var count = 0;
+    keys.forEach(function (name) {
+      var g = ctx.groups[name];
+      if (!isObj(g)) return;
+      count++;
+      var tr = el('tr');
+      var tdName = el('td', 'mono', name);
+      tr.appendChild(tdName);
+      var mae = num(g.depth_mae_m);
+      var cov = num(g.coverage_1sigma);
+      var px = num(g.pixels);
+      var tMae = el('td', 'num', mae === null ? '—' : fmtFixed(mae, 4));
+      if (mae === null) tMae.classList.add('dim');
+      var tCov = el('td', 'num', cov === null ? '—' : fmtFixed(cov, 3));
+      if (cov === null) tCov.classList.add('dim');
+      var tPx = el('td', 'num', px === null ? '—' : fmtInt(px));
+      if (px === null) tPx.classList.add('dim');
+      tr.appendChild(tMae); tr.appendChild(tCov); tr.appendChild(tPx);
+      body.appendChild(tr);
+    });
+    if (!count) {
+      var tr = el('tr');
+      var td = el('td', 'empty-cell', '等待分组数据');
+      td.colSpan = 4;
+      tr.appendChild(td);
+      body.appendChild(tr);
+    }
+    setText('g-meta', count ? (count + ' 个分组') : '等待分组数据');
+  }
+
+  function renderRun(d, ctx) {
+    var body = $('r-body');
+    if (!body) return;
+    clearNode(body);
+    var n = 0;
+    ctx.programs.forEach(function (p) {
+      n++;
+      var row = el('div', 'run-row');
+      var name = el('span', 'run-name mono', str(p.name) || '未命名程序');
+      name.title = str(p.name) || '';
+      row.appendChild(name);
+      row.appendChild(badgeEl(p.status, true));
+      var up = el('span', 'run-uptime mono', str(p.uptime) || '—');
+      if (!str(p.uptime)) up.classList.add('dim');
+      row.appendChild(up);
+      body.appendChild(row);
+    });
+    if (ctx.chainStatus) {
+      n++;
+      var row2 = el('div', 'run-row');
+      row2.appendChild(el('span', 'run-name', '链路 chain'));
+      row2.appendChild(badgeEl(ctx.chainStatus, true));
+      row2.appendChild(el('span', 'run-uptime dim', ''));
+      body.appendChild(row2);
+    }
+    if (!n) body.appendChild(el('div', 'empty-note', '等待运行信息'));
+    setText('r-meta', n ? (n + ' 项状态') : '等待数据');
+  }
+
+  function renderGpu(d, ctx) {
+    var body = $('gpu-body');
+    if (!body) return;
+    clearNode(body);
+    var usedSum = 0, totalSum = 0, hasSum = false;
+    ctx.gpus.forEach(function (g) {
+      var used = num(g.used_mib), total = num(g.total_mib), util = num(g.util);
+      if (used !== null && total !== null) { usedSum += used; totalSum += total; hasSum = true; }
+      var wrap = el('div', 'gpu');
+      var head = el('div', 'gpu-head');
+      head.appendChild(el('span', 'gpu-title mono', 'GPU ' + (num(g.index) === null ? '—' : String(Math.round(num(g.index))))));
+      var utilEl = el('span', 'gpu-util', util === null ? '利用率 —' : '利用率 ' + fmtSig(util, 3) + '%');
+      if (util !== null && util >= 90) utilEl.classList.add('hot');
+      head.appendChild(utilEl);
+      wrap.appendChild(head);
+      var bar = el('div', 'bar sm');
+      var fill = el('div', 'fill');
+      fill.style.width = (used !== null && total !== null && total > 0) ? Math.max(0, Math.min(1, used / total)) * 100 + '%' : '0%';
+      bar.appendChild(fill);
+      wrap.appendChild(bar);
+      var meta = el('div', 'gpu-meta');
+      meta.appendChild(el('span', null, '显存 ' + (used === null ? '—' : fmtInt(used)) + ' / ' + (total === null ? '—' : fmtInt(total)) + ' MiB'));
+      meta.appendChild(el('span', null, (used !== null && total !== null && total > 0) ? (used / total * 100).toFixed(1) + '%' : '—'));
+      wrap.appendChild(meta);
+      body.appendChild(wrap);
+    });
+    if (!ctx.gpus.length) body.appendChild(el('div', 'empty-note', '等待 GPU 数据'));
+    setText('gpu-meta', hasSum ? (ctx.gpus.length + ' 张 · 已用 ' + fmtInt(usedSum) + ' / ' + fmtInt(totalSum) + ' MiB') : (ctx.gpus.length ? (ctx.gpus.length + ' 张') : '等待数据'));
+  }
+
+  function renderCheckpoints(d, ctx) {
+    var body = $('ck-body');
+    if (!body) return;
+    clearNode(body);
+    if (!ctx.ckRows.length) {
+      body.appendChild(el('div', 'empty-note', '等待 checkpoint 数据'));
+      setText('ck-meta', '等待数据');
+      return;
+    }
+    ctx.ckRows.slice(0, 60).forEach(function (c, i) {
+      var row = el('div', 'ck-row');
+      var left = el('span', 'ck-step mono');
+      left.textContent = c.step === null ? 'step —' : 'step ' + fmtInt(c.step);
+      if (i === 0) left.appendChild(el('span', 'ck-tag', '最新'));
+      row.appendChild(left);
+      var right = el('span', 'mono', c.bytes === null ? '—' : fmtBytes(c.bytes));
+      if (c.bytes === null) right.classList.add('dim');
+      row.appendChild(right);
+      body.appendChild(row);
+    });
+    var meta = ctx.ckRows.length + ' 个';
+    if (ctx.ckRows.length > 60) meta += '（显示前 60）';
+    if (ctx.step !== null && ctx.ckRows[0].step !== null) meta += ' · 最新落后训练 ' + fmtInt(Math.max(0, ctx.step - ctx.ckRows[0].step)) + ' 步';
+    setText('ck-meta', meta);
+  }
+
+  function fmtErrItem(x) {
+    var s;
+    if (typeof x === 'string') s = x;
+    else if (isObj(x)) { try { s = JSON.stringify(x); } catch (e) { s = String(x); } }
+    else s = String(x);
+    s = s.replace(/\s+/g, ' ').trim();
+    return s.length > 320 ? s.slice(0, 320) + ' …' : s;
+  }
+  function setLog(preId, text, emptyText) {
+    var pre = $(preId);
+    if (!pre) return;
+    var stick = pre.scrollHeight - pre.scrollTop - pre.clientHeight < 24;
+    pre.textContent = text || emptyText;
+    if (stick) pre.scrollTop = pre.scrollHeight;
+  }
+  function renderLogs(d, ctx) {
+    var lines = listOf(pick(d, 'train.latest_log')).map(function (x) { return typeof x === 'string' ? x : fmtErrItem(x); });
+    var tail = str(pick(d, 'chain.log_tail'));
+    var tailText = '';
+    if (tail) {
+      var tl = tail.replace(/\s+$/, '').split('\n');
+      if (tl.length > 220) {
+        tailText = '…（省略 ' + (tl.length - 220) + ' 行）\n' + tl.slice(-220).join('\n');
+      } else tailText = tl.join('\n');
+    }
+    setLog('log-train', lines.join('\n'), '等待 train.latest_log');
+    setLog('log-chain', tailText, '等待 chain.log_tail');
+
+    var count = ctx.errCount;
+    var badge = $('err-badge');
+    var text = $('err-badge-text');
+    var cls, label;
+    if (count === null && !ctx.errRecent.length) { cls = 'wait'; label = '错误 —'; }
+    else if (count !== null && count > 0) { cls = 'bad'; label = '错误 ' + fmtInt(count); }
+    else if (count === 0 && !ctx.errRecent.length) { cls = 'done'; label = '错误 0'; }
+    else { cls = 'bad'; label = '错误 ' + fmtInt((count === null || count === 0) ? ctx.errRecent.length : count); }
+    if (badge) badge.className = 'badge ' + cls + ' small';
+    if (text) text.textContent = label;
+
+    var box = $('err-box'), ul = $('err-list');
+    if (box && ul) {
+      clearNode(ul);
+      if (ctx.errRecent.length) {
+        ctx.errRecent.slice(0, 8).forEach(function (x) { ul.appendChild(el('li', null, fmtErrItem(x))); });
+        box.hidden = false;
+      } else box.hidden = true;
+    }
+  }
+
+  function updateBanner() {
+    var b = $('banner');
+    if (!b) return;
+    var parts = [], cls = 'wait';
+    if (state.issues.length) {
+      parts.push('页面渲染异常：' + state.issues.slice(0, 2).join('；') + (state.issues.length > 2 ? ' 等 ' + state.issues.length + ' 项' : ''));
+      cls = 'error';
+    }
+    if (!state.ok && !state.err) {
+      parts.push('等待数据 · 正在读取 data.json（每 30 秒自动重试）');
+      if (cls !== 'error') cls = 'wait';
+    } else if (!state.ok && state.err) {
+      parts.push('等待数据 · ' + state.err + ' · 每 30 秒自动重试');
+      if (cls !== 'error') cls = 'wait';
+    } else if (state.ok && state.err) {
+      parts.push('本次刷新失败：' + state.err + ' · 继续显示上次成功数据（' + (state.lastOkAt ? fmtFull(state.lastOkAt, TZ) : '—') + '）');
+      if (cls !== 'error') cls = 'warn';
+    } else if (state.ok && state.ctx) {
+      var c = state.ctx;
+      var empty = (c.step === null && !c.rows.length && !c.programs.length && !c.gpus.length && !c.ckRows.length && !Object.keys(c.groups).length);
+      if (empty) { parts.push('已读取 data.json，但尚未包含可显示的字段 · 等待任务端写入'); cls = 'warn'; }
+    }
+    if (!parts.length) { b.hidden = true; return; }
+    b.hidden = false;
+    b.className = 'banner ' + cls;
+    b.textContent = parts.join(' ｜ ');
+  }
+  function updateFooter() {
+    var f = $('f-refresh');
+    if (!f) return;
+    var last = state.lastOkAt ? fmtFull(state.lastOkAt, TZ) : null;
+    var next = state.nextAt ? Math.max(0, Math.round((state.nextAt - Date.now()) / 1000)) : null;
+    var parts = [];
+    parts.push('最近刷新 ' + (last || '—'));
+    if (state.busy) parts.push('刷新中…');
+    else if (next !== null) parts.push('下次刷新 ' + next + ' 秒后');
+    else parts.push('等待首次读取');
+    f.textContent = parts.join(' · ');
+  }
+  function initEmptyCharts() {
+    ['chart-mae', 'chart-cov', 'chart-nll'].forEach(function (id) {
+      var svg = $(id);
+      if (!svg) return;
+      drawChart(svg, { points: [], emptyText: '等待数据', showXAxis: id === 'chart-nll', log: id === 'chart-mae', color: 'var(--blue)' });
+    });
+  }
+
+  function render(d) {
+    state.issues = [];
+    var ctx = safe('数据推导', function () { return derive(d); });
+    if (!ctx) return;
+    state.ctx = ctx;
+    safe('头部', function () { renderHeader(d, ctx); });
+    safe('总进度', function () { renderProgress(d, ctx); });
+    safe('KPI', function () { renderKpis(d, ctx); });
+    safe('图表', function () { renderCharts(d, ctx); });
+    safe('分组表', function () { renderGroups(d, ctx); });
+    safe('运行状态', function () { renderRun(d, ctx); });
+    safe('GPU', function () { renderGpu(d, ctx); });
+    safe('Checkpoint', function () { renderCheckpoints(d, ctx); });
+    safe('日志', function () { renderLogs(d, ctx); });
+  }
+
+  /* ================= 数据读取 ================= */
+
+  function refresh(manual) {
+    if (state.busy) return;
+    state.busy = true;
+    var btn = $('h-refresh');
+    if (btn) btn.disabled = true;
+    updateFooter();
+    fetch('data.json', { cache: 'no-store' }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status + (res.status === 404 ? '（data.json 尚未生成）' : ''));
+      return res.text();
+    }).then(function (text) {
+      var data;
+      try { data = JSON.parse(text); }
+      catch (e) { throw new Error('data.json 不是合法 JSON'); }
+      if (!isObj(data)) data = {};
+      state.data = data;
+      state.ok = true;
+      state.err = null;
+      state.lastOkAt = new Date();
+      try { render(data); }
+      catch (e) { state.issues.push('整体渲染：' + errMsg(e)); }
+    }).catch(function (e) {
+      state.err = errMsg(e);
+      if (!state.ok) { state.data = null; state.ctx = null; }
+      if (manual) state.nextAt = Date.now() + REFRESH_MS;
+    }).then(function () {
+      state.busy = false;
+      if (btn) btn.disabled = false;
+      state.nextAt = Date.now() + REFRESH_MS;
+      safe('横幅', updateBanner);
+      safe('页脚', updateFooter);
+    });
+  }
+
+  function debounce(fn, ms) {
+    var t = null;
+    return function () {
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { t = null; fn(); }, ms);
+    };
+  }
+
+  /* ================= 启动 ================= */
+
+  var btn0 = $('h-refresh');
+  if (btn0) btn0.addEventListener('click', function () { refresh(true); });
+
+  window.addEventListener('resize', debounce(function () {
+    if (state.ctx && state.data) safe('图表重绘', function () { renderCharts(state.data, state.ctx); });
+    else initEmptyCharts();
+  }, 180));
+
+  safe('初始空态', initEmptyCharts);
+  updateBanner();
+  updateFooter();
+  refresh(false);
+  setInterval(function () { refresh(false); }, REFRESH_MS);
+  setInterval(function () {
+    safe('页脚计时', updateFooter);
+    // 浏览器会节流后台标签页的定时器；回到前台后的第一个 tick 会立即补一次刷新。
+    if (state.nextAt && !state.busy && Date.now() >= state.nextAt) refresh(false);
+  }, 1000);
+})();
+</script>
+</body>
+</html>

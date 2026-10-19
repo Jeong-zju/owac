@@ -1,0 +1,56 @@
+{
+  "checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101/checkpoint-step0000010.pt",
+  "saved_step": 10,
+  "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016",
+  "before": "[program:owac-n04-codex-monitor]\ncommand=/usr/bin/python3 /workspace/owac/research/n04-v1/monitor/codex/app/n04_v11_progress.py --run-root /workspace/owac/research/n04-v1/runs/v1.1/codex-s2 --out /workspace/owac/research/n04-v1/monitor/codex/state --host 127.0.0.1 --port 8090 --interval 5\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-train-20261016\nautostart=true\nautorestart=unexpected\nstartsecs=2\nstdout_logfile=/workspace/owac/research/n04-v1/monitor/codex/monitor.log\nstdout_logfile_maxbytes=5MB\nstdout_logfile_backups=2\nredirect_stderr=true\n\n[program:owac-n04-codex-libero]\ncommand=/workspace/owac/research/n04-v1/envs/n04v11/bin/python -u scripts/n04_full/run_n04_codex.py --config configs/n04/v1_1/codex_libero_D.json --output /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-train-20261016\nenvironment=CUDA_VISIBLE_DEVICES=\"0\",OMP_NUM_THREADS=\"4\",MKL_NUM_THREADS=\"4\",PYTHONPATH=\"/workspace/owac/research/n04-v1/source/n04-v11-codex-train-20261016/src:/workspace/owac/rawvla/source/starVLA\",PYTORCH_CUDA_ALLOC_CONF=\"expandable_segments:True\",N04V11_ROOT=\"/workspace/owac/research/n04-v1\"\nautostart=false\nautorestart=false\nstartsecs=3\nstopsignal=TERM\nstopasgroup=true\nkillasgroup=true\nstdout_logfile=/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101/logs/train.log\nstdout_logfile_maxbytes=10MB\nstdout_logfile_backups=3\nredirect_stderr=true\n\n[program:owac-n04-codex-robotwin]\ncommand=/workspace/owac/research/n04-v1/envs/n04v11/bin/python -u scripts/n04_full/run_n04_codex.py --config configs/n04/v1_1/codex_compiled_raft_robotwin.json --output /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-seed101\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016\nenvironment=CUDA_VISIBLE_DEVICES=\"1\",OMP_NUM_THREADS=\"4\",MKL_NUM_THREADS=\"4\",TORCHINDUCTOR_COMPILE_THREADS=\"4\",PYTHONPATH=\"/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016/src:/workspace/owac/rawvla/source/starVLA\",PYTORCH_CUDA_ALLOC_CONF=\"expandable_segments:True\",N04V11_ROOT=\"/workspace/owac/research/n04-v1\"\nautostart=false\nautorestart=false\nstartsecs=3\nstopsignal=TERM\nstopasgroup=true\nkillasgroup=true\nstdout_logfile=/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-seed101/logs/train.log\nstdout_logfile_maxbytes=10MB\nstdout_logfile_backups=3\nredirect_stderr=true\n",
+  "after": "[program:owac-n04-codex-monitor]\ncommand=/usr/bin/python3 /workspace/owac/research/n04-v1/monitor/codex/app/n04_v11_progress.py --run-root /workspace/owac/research/n04-v1/runs/v1.1/codex-s2 --out /workspace/owac/research/n04-v1/monitor/codex/state --host 127.0.0.1 --port 8090 --interval 5\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-train-20261016\nautostart=true\nautorestart=unexpected\nstartsecs=2\nstdout_logfile=/workspace/owac/research/n04-v1/monitor/codex/monitor.log\nstdout_logfile_maxbytes=5MB\nstdout_logfile_backups=2\nredirect_stderr=true\n\n[program:owac-n04-codex-libero]\ncommand=/workspace/owac/research/n04-v1/envs/n04v11/bin/python -u scripts/n04_full/run_n04_codex.py --config configs/n04/v1_1/codex_compiled_raft_libero.json --output /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101 --resume /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101/checkpoint-step0000010.pt\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016\nenvironment=CUDA_VISIBLE_DEVICES=\"0\",OMP_NUM_THREADS=\"4\",MKL_NUM_THREADS=\"4\",PYTHONPATH=\"/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016/src:/workspace/owac/rawvla/source/starVLA\",PYTORCH_CUDA_ALLOC_CONF=\"expandable_segments:True\",N04V11_ROOT=\"/workspace/owac/research/n04-v1\"\nautostart=false\nautorestart=false\nstartsecs=3\nstopsignal=TERM\nstopasgroup=true\nkillasgroup=true\nstdout_logfile=/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101/logs/train.log\nstdout_logfile_maxbytes=10MB\nstdout_logfile_backups=3\nredirect_stderr=true\n\n[program:owac-n04-codex-robotwin]\ncommand=/workspace/owac/research/n04-v1/envs/n04v11/bin/python -u scripts/n04_full/run_n04_codex.py --config configs/n04/v1_1/codex_compiled_raft_robotwin.json --output /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-seed101\ndirectory=/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016\nenvironment=CUDA_VISIBLE_DEVICES=\"1\",OMP_NUM_THREADS=\"4\",MKL_NUM_THREADS=\"4\",TORCHINDUCTOR_COMPILE_THREADS=\"4\",PYTHONPATH=\"/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016/src:/workspace/owac/rawvla/source/starVLA\",PYTORCH_CUDA_ALLOC_CONF=\"expandable_segments:True\",N04V11_ROOT=\"/workspace/owac/research/n04-v1\"\nautostart=false\nautorestart=false\nstartsecs=3\nstopsignal=TERM\nstopasgroup=true\nkillasgroup=true\nstdout_logfile=/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-seed101/logs/train.log\nstdout_logfile_maxbytes=10MB\nstdout_logfile_backups=3\nredirect_stderr=true\n",
+  "boundary_progress": {
+    "stage": "S2",
+    "platform": "libero",
+    "arm": "D",
+    "seed": 101,
+    "phase": "train",
+    "updated_at": "2026-10-16T04:09:37Z",
+    "step": 10,
+    "budget_steps": 2000,
+    "train_loss": 1.2046916857018857,
+    "dev_loss": 1.0104377269744873,
+    "step_seconds": 177.637239690125,
+    "gpu_memory_gb": null,
+    "eval": {
+      "planned": null,
+      "completed": 0,
+      "successes": 0,
+      "failures": 0,
+      "errors": 0,
+      "status": "not_started"
+    },
+    "artifacts": [],
+    "log_tail": [
+      "[2026-10-16T03:42:25] step       1 loss=1.1647 action=0.7781 lr=1.00e-06 188.78s",
+      "[2026-10-16T03:45:41] step       2 loss=1.4391 action=1.0259 lr=1.50e-06 183.46s",
+      "[2026-10-16T03:48:34] step       3 loss=1.1153 action=0.7413 lr=2.00e-06 173.04s",
+      "[2026-10-16T03:51:27] step       4 loss=1.4501 action=1.0696 lr=2.50e-06 172.48s",
+      "[2026-10-16T03:54:34] step       5 loss=1.9769 action=1.6040 lr=3.00e-06 186.65s",
+      "[2026-10-16T03:54:48] fixed dev action loss at step 5: 1.6359",
+      "[2026-10-16T03:57:53] step       6 loss=1.3366 action=0.9542 lr=3.50e-06 184.54s",
+      "[2026-10-16T04:00:44] step       7 loss=1.3601 action=0.9754 lr=4.00e-06 170.65s",
+      "[2026-10-16T04:03:26] step       8 loss=1.3166 action=0.9571 lr=4.50e-06 162.14s",
+      "[2026-10-16T04:06:09] step       9 loss=1.2585 action=0.9094 lr=5.00e-06 163.46s",
+      "[2026-10-16T04:08:56] step      10 loss=1.4071 action=1.0465 lr=5.50e-06 166.95s",
+      "[2026-10-16T04:09:09] fixed dev action loss at step 10: 1.0104"
+    ],
+    "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+    "owner": "Codex",
+    "gpu_index": 0,
+    "activity": {
+      "initial_dev_loss": 1.081860065460205,
+      "best_dev_loss": 1.0104377269744873,
+      "last_checkpoint_step": 10,
+      "completed_windows": 0,
+      "total_windows": 8,
+      "update_started_at": 1792123777.166409
+    }
+  },
+  "at": 1792123778.9363668
+}

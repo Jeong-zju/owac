@@ -1,0 +1,650 @@
+{
+  "captured_utc": "2026-10-19T03:12:31.785320+00:00",
+  "implementation_version": "n04-v1.1-s2-stability-repair-v5",
+  "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019",
+  "runs": {
+    "libero": {
+      "run_dir": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101",
+      "supervisor": "owac-n04-v5-libero               RUNNING   pid 782451, uptime 0:07:10\n",
+      "pid": 782451,
+      "environment": {
+        "CUDA_VISIBLE_DEVICES": "0",
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "PYTHONPATH": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src:/workspace/owac/rawvla/source/starVLA"
+      },
+      "progress": {
+        "stage": "S2",
+        "platform": "libero",
+        "arm": "D",
+        "seed": 101,
+        "phase": "representation_cache",
+        "updated_at": "2026-10-19T03:12:30Z",
+        "step": 11,
+        "budget_steps": 2000,
+        "train_loss": 3.4409302602641048,
+        "dev_loss": 0.9558265805244446,
+        "step_seconds": 185.69228924438357,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-19T03:06:11] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+          "[2026-10-19T03:09:10] step      10 loss=3.5693 action=0.8367 lr=5.50e-06 179.34s",
+          "[2026-10-19T03:09:28] fixed dev action loss at step 10: 0.9558",
+          "[2026-10-19T03:12:22] step      11 loss=3.4277 action=0.7634 lr=6.00e-06 153.21s"
+        ],
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "owner": "Codex",
+        "gpu_index": 0,
+        "activity": {
+          "completed_windows": 4,
+          "total_windows": 8,
+          "initial_dev_loss": 1.1885035932064056,
+          "best_dev_loss": 0.9558265805244446,
+          "last_checkpoint_step": 10,
+          "representation_diag": {
+            "variance": 0.9258885383605957,
+            "covariance": 0.06514861434698105,
+            "std": 0.07321252673864365,
+            "windows": 8
+          },
+          "update_started_at": 1792379405.6040714,
+          "objective_coverage": {
+            "action": {
+              "windows": 8,
+              "valid_items": 32
+            },
+            "correspondence": {
+              "windows": 8,
+              "valid_items": 256
+            },
+            "forecast": {
+              "windows": 8,
+              "valid_items": 1424
+            },
+            "representation": {
+              "windows": 8,
+              "valid_items": 8
+            }
+          },
+          "forecast_skip_reasons": {
+            "window_too_short": 112
+          },
+          "auxiliary_validation": {
+            "step": 10,
+            "windows": 2,
+            "forecast": {
+              "1": {
+                "forecast_quad": 3.968314399642329,
+                "forecast_logdet": 85.25722719007923,
+                "forecast_mode_w0": 0.9482881042265123,
+                "forecast_mode_w1": 0.051711907249785236,
+                "forecast_S_mean": 1.443906915764655,
+                "forecast_S_min": 1.223473738278112,
+                "forecast_S_max": 2.1325912389063064,
+                "forecast_R_mean": 1.0007917717579873,
+                "forecast_R_min": 0.8685638015308688,
+                "forecast_R_max": 1.1303169746552744,
+                "prediction_mse": 0.021634455680126143,
+                "persistence_mse": 0.02163972489295467,
+                "target_rms": 0.9936432189518406
+              },
+              "2": {
+                "forecast_quad": 4.490015363196532,
+                "forecast_logdet": 103.91613833109538,
+                "forecast_mode_w0": 0.9166032865643501,
+                "forecast_mode_w1": 0.08339675813913346,
+                "forecast_S_mean": 1.5630780061086018,
+                "forecast_S_min": 1.3245414406061173,
+                "forecast_S_max": 2.2847162753343584,
+                "forecast_R_mean": 1.0007877618074417,
+                "forecast_R_min": 0.8688879832625389,
+                "forecast_R_max": 1.1300974547863007,
+                "prediction_mse": 0.026383814646396785,
+                "persistence_mse": 0.02640209816163406,
+                "target_rms": 0.9935621991753578
+              },
+              "4": {
+                "forecast_quad": 4.65652234000819,
+                "forecast_logdet": 138.98780604771204,
+                "forecast_mode_w0": 0.8822471196097987,
+                "forecast_mode_w1": 0.11775295755692891,
+                "forecast_S_mean": 1.8025690402303423,
+                "forecast_S_min": 1.5334542489477567,
+                "forecast_S_max": 2.551684933049338,
+                "forecast_R_mean": 1.0007898488215037,
+                "forecast_R_min": 0.8703753394739968,
+                "forecast_R_max": 1.1282223335334234,
+                "prediction_mse": 0.03151485488550471,
+                "persistence_mse": 0.03156338237541994,
+                "target_rms": 0.9932932401342052
+              }
+            },
+            "representation": {
+              "variance": 0.9480966329574585,
+              "covariance": 0.033151041716337204,
+              "std": 0.04990904778242111,
+              "windows": 2
+            }
+          }
+        }
+      },
+      "last_metrics": {
+        "step": 11,
+        "phase": "train",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "train_loss": 3.4277419447898865,
+        "dev_loss": 0.9558265805244446,
+        "terms": {
+          "action": 0.7633849307894707,
+          "correspondence": 2.276934653520584,
+          "forecast": 1.1542725265026093,
+          "representation": 23.21236228942871
+        },
+        "applied_train_loss": 3.4277419447898865,
+        "applied_terms": {
+          "action": 0.7633849307894707,
+          "correspondence": 2.276934653520584,
+          "forecast": 1.1542725265026093,
+          "representation": 23.21236228942871
+        },
+        "lr": 6e-06,
+        "gradient_norm_before_clip": 102.5672836303711,
+        "representation_diag": {
+          "variance": 0.9258885383605957,
+          "covariance": 0.06514861434698105,
+          "std": 0.07321252673864365,
+          "windows": 8
+        },
+        "window_plan": [
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket:demo_31",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000081/variant_00.npz",
+            "start": 48
+          },
+          {
+            "source_id": "libero:libero_spatial_no_noops_1.0.0_lerobot:pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate:demo_22",
+            "path": "libero_spatial_no_noops_1.0.0_lerobot/episode_000472/variant_00.npz",
+            "start": 0
+          },
+          {
+            "source_id": "libero:libero_object_no_noops_1.0.0_lerobot:pick_up_the_alphabet_soup_and_place_it_in_the_basket:demo_5",
+            "path": "libero_object_no_noops_1.0.0_lerobot/episode_000005/variant_00.npz",
+            "start": 48
+          },
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy:demo_23",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000273/variant_00.npz",
+            "start": 48
+          },
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE8_put_both_moka_pots_on_the_stove:demo_12",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000412/variant_00.npz",
+            "start": 144
+          },
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it:demo_23",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000473/variant_00.npz",
+            "start": 48
+          },
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it:demo_25",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000475/variant_00.npz",
+            "start": 32
+          },
+          {
+            "source_id": "libero:libero_10_no_noops_1.0.0_lerobot:KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it:demo_26",
+            "path": "libero_10_no_noops_1.0.0_lerobot/episode_000126/variant_00.npz",
+            "start": 96
+          }
+        ],
+        "gradient_fallback_windows": 0,
+        "objective_coverage": {
+          "action": {
+            "windows": 8,
+            "valid_items": 32
+          },
+          "correspondence": {
+            "windows": 8,
+            "valid_items": 256
+          },
+          "forecast": {
+            "windows": 8,
+            "valid_items": 1424
+          },
+          "representation": {
+            "windows": 8,
+            "valid_items": 8
+          }
+        },
+        "forecast_skip_reasons": {
+          "window_too_short": 112
+        },
+        "step_seconds": 185.69228924438357,
+        "gpu_memory_gb": 47.66874624,
+        "gpu_live_gb": 13.90523136,
+        "gpu_reserved_gb": 47.957671936,
+        "forecast_diag": {
+          "h1_forecast_quad": 16.912485568093196,
+          "h1_forecast_logdet": 82.74957226168723,
+          "h1_forecast_mode_w0": 0.949412862259534,
+          "h1_forecast_mode_w1": 0.05058716296879275,
+          "h1_forecast_S_mean": 1.4291492741434804,
+          "h1_forecast_S_min": 1.1538243851354046,
+          "h1_forecast_S_max": 2.08316668892099,
+          "h1_forecast_R_mean": 1.0008129439046307,
+          "h1_forecast_R_min": 0.8099209522047351,
+          "h1_forecast_R_max": 1.1942179128527641,
+          "h1_prediction_mse": 0.09121394157855614,
+          "h1_persistence_mse": 0.0912362931478363,
+          "h1_target_rms": 0.9866776746367255,
+          "h2_forecast_quad": 16.194408081534007,
+          "h2_forecast_logdet": 101.84325677553812,
+          "h2_forecast_mode_w0": 0.9171554708232481,
+          "h2_forecast_mode_w1": 0.08284455545557043,
+          "h2_forecast_S_mean": 1.550125166028738,
+          "h2_forecast_S_min": 1.25473519663016,
+          "h2_forecast_S_max": 2.213325030853351,
+          "h2_forecast_R_mean": 1.0008106378217536,
+          "h2_forecast_R_min": 0.8103821147233247,
+          "h2_forecast_R_max": 1.1934955321252345,
+          "h2_prediction_mse": 0.09408266190924527,
+          "h2_persistence_mse": 0.09413167218590388,
+          "h2_target_rms": 0.986673486729463,
+          "h4_forecast_quad": 14.70154771448246,
+          "h4_forecast_logdet": 137.04812693595886,
+          "h4_forecast_mode_w0": 0.8825071539197649,
+          "h4_forecast_mode_w1": 0.11749291230392245,
+          "h4_forecast_S_mean": 1.7885809796197074,
+          "h4_forecast_S_min": 1.462294421557869,
+          "h4_forecast_S_max": 2.479738906558071,
+          "h4_forecast_R_mean": 1.0008113096867288,
+          "h4_forecast_R_min": 0.8100336366998299,
+          "h4_forecast_R_max": 1.1937122919729777,
+          "h4_prediction_mse": 0.09803018547245301,
+          "h4_persistence_mse": 0.09813690428615832,
+          "h4_target_rms": 0.9867178457123893
+        },
+        "updated_at": "2026-10-19T03:12:22Z"
+      },
+      "checkpoint10": {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-stable-v5-seed101/checkpoint-step0000010.pt",
+        "step": 10,
+        "bytes": 10831849401,
+        "encoder_keys": 653,
+        "backend_keys": 662,
+        "optimizer_groups": 7,
+        "scheduler": {
+          "base_lrs": [
+            0.0001,
+            0.0001,
+            0.0003,
+            0.0003,
+            1e-05,
+            1e-05,
+            1e-05
+          ],
+          "last_epoch": 10,
+          "_step_count": 11,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            5.500000000000001e-06,
+            5.500000000000001e-06,
+            1.6499999999999998e-05,
+            1.6499999999999998e-05,
+            5.5e-07,
+            5.5e-07,
+            5.5e-07
+          ],
+          "lr_lambdas": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "config_fingerprint": "58366cec1ac2c72a3d5e6c374e62039b33ad39bb7450b40fe7b0adbedf1a31ee",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5"
+      },
+      "config_sha256": "4a951297c57cd9bf3e9a0274570316de10c33fba80abf0ff3e40ceef88fc69dc",
+      "resume_notes_present": true,
+      "verification_complete": true
+    },
+    "robotwin": {
+      "run_dir": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101",
+      "supervisor": "owac-n04-v5-robotwin             RUNNING   pid 782631, uptime 0:06:00\n",
+      "pid": 782631,
+      "environment": {
+        "CUDA_VISIBLE_DEVICES": "1",
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "PYTHONPATH": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019/src:/workspace/owac/rawvla/source/starVLA"
+      },
+      "progress": {
+        "stage": "S2",
+        "platform": "robotwin",
+        "arm": "D",
+        "seed": 101,
+        "phase": "representation_cache",
+        "updated_at": "2026-10-19T03:12:32Z",
+        "step": 10,
+        "budget_steps": 2000,
+        "train_loss": 5.5730497599043005,
+        "dev_loss": 0.2907838970422745,
+        "step_seconds": 291.2465695589781,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-19T03:07:24] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101/checkpoint-step0000009.pt at step 9",
+          "[2026-10-19T03:11:28] step      10 loss=2.8914 action=0.2565 lr=5.50e-06 243.95s",
+          "[2026-10-19T03:11:55] fixed dev action loss at step 10: 0.2908"
+        ],
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "owner": "Codex",
+        "gpu_index": 1,
+        "activity": {
+          "completed_windows": 6,
+          "total_windows": 8,
+          "initial_dev_loss": 2.453332781791687,
+          "best_dev_loss": 0.2907838970422745,
+          "last_checkpoint_step": 10,
+          "representation_diag": {
+            "variance": 0.8589366674423218,
+            "covariance": 1.303079605102539,
+            "std": 0.14050965011119843,
+            "windows": 8
+          },
+          "update_started_at": 1792379272.8467808,
+          "objective_coverage": {
+            "action": {
+              "windows": 8,
+              "valid_items": 32
+            },
+            "correspondence": {
+              "windows": 8,
+              "valid_items": 256
+            },
+            "forecast": {
+              "windows": 8,
+              "valid_items": 2136
+            },
+            "representation": {
+              "windows": 8,
+              "valid_items": 8
+            }
+          },
+          "forecast_skip_reasons": {
+            "window_too_short": 168
+          },
+          "auxiliary_validation": {
+            "step": 10,
+            "windows": 2,
+            "forecast": {
+              "1": {
+                "forecast_quad": 19.46085233073081,
+                "forecast_logdet": 81.4136570345971,
+                "forecast_mode_w0": 0.9497041769566075,
+                "forecast_mode_w1": 0.05029587211307659,
+                "forecast_S_mean": 1.4250741915036274,
+                "forecast_S_min": 0.967740951366322,
+                "forecast_S_max": 2.140135074174532,
+                "forecast_R_mean": 1.0015032765685872,
+                "forecast_R_min": 0.6556714318131888,
+                "forecast_R_max": 1.421941009900903,
+                "prediction_mse": 0.10394272712930556,
+                "persistence_mse": 0.10396481229252713,
+                "target_rms": 0.9974803040104527
+              },
+              "2": {
+                "forecast_quad": 18.575346687104968,
+                "forecast_logdet": 100.66740523444281,
+                "forecast_mode_w0": 0.917314875125885,
+                "forecast_mode_w1": 0.0826851197414928,
+                "forecast_S_mean": 1.5461955746014913,
+                "forecast_S_min": 1.0691583043999142,
+                "forecast_S_max": 2.2787351687749227,
+                "forecast_R_mean": 1.001500619782342,
+                "forecast_R_min": 0.6560306903388765,
+                "forecast_R_max": 1.4213935169908736,
+                "prediction_mse": 0.10702606934226222,
+                "persistence_mse": 0.10707414996706777,
+                "target_rms": 0.9974730451901753
+              },
+              "4": {
+                "forecast_quad": 16.997787731034414,
+                "forecast_logdet": 136.00552776881628,
+                "forecast_mode_w0": 0.8825993843021847,
+                "forecast_mode_w1": 0.1174006284258905,
+                "forecast_S_mean": 1.7839833391564233,
+                "forecast_S_min": 1.2779735149372191,
+                "forecast_S_max": 2.5012394998754774,
+                "forecast_R_mean": 1.0015012110982622,
+                "forecast_R_min": 0.6564946834530149,
+                "forecast_R_max": 1.4214087029298146,
+                "prediction_mse": 0.11251102589691679,
+                "persistence_mse": 0.11262039463257506,
+                "target_rms": 0.9974513898293177
+              }
+            },
+            "representation": {
+              "variance": 0.9417241811752319,
+              "covariance": 0.058844830840826035,
+              "std": 0.05643866956233978,
+              "windows": 2
+            }
+          }
+        }
+      },
+      "last_metrics": {
+        "step": 10,
+        "phase": "train",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "train_loss": 2.8914265632629395,
+        "dev_loss": 0.2907838970422745,
+        "terms": {
+          "action": 0.25653765350580215,
+          "correspondence": 2.420056477189064,
+          "forecast": 1.152336061000824,
+          "representation": 22.77649688720703
+        },
+        "applied_train_loss": 2.8914265632629395,
+        "applied_terms": {
+          "action": 0.25653765350580215,
+          "correspondence": 2.420056477189064,
+          "forecast": 1.152336061000824,
+          "representation": 22.77649688720703
+        },
+        "lr": 5.500000000000001e-06,
+        "gradient_norm_before_clip": 954.82470703125,
+        "representation_diag": {
+          "variance": 0.8589366674423218,
+          "covariance": 1.303079605102539,
+          "std": 0.14050965011119843,
+          "windows": 8
+        },
+        "window_plan": [
+          {
+            "source_id": "robotwin:put_bottles_dustbin:episode3.pkl",
+            "path": "put_bottles_dustbin/episode_000003.npz",
+            "start": 176
+          },
+          {
+            "source_id": "robotwin:put_object_cabinet:episode34.pkl",
+            "path": "put_object_cabinet/episode_000034.npz",
+            "start": 144
+          },
+          {
+            "source_id": "robotwin:stack_bowls_two:episode34.pkl",
+            "path": "stack_bowls_two/episode_000034.npz",
+            "start": 48
+          },
+          {
+            "source_id": "robotwin:put_bottles_dustbin:episode24.pkl",
+            "path": "put_bottles_dustbin/episode_000024.npz",
+            "start": 304
+          },
+          {
+            "source_id": "robotwin:stack_bowls_two:episode36.pkl",
+            "path": "stack_bowls_two/episode_000036.npz",
+            "start": 240
+          },
+          {
+            "source_id": "robotwin:put_bottles_dustbin:episode24.pkl",
+            "path": "put_bottles_dustbin/episode_000024.npz",
+            "start": 496
+          },
+          {
+            "source_id": "robotwin:put_bottles_dustbin:episode35.pkl",
+            "path": "put_bottles_dustbin/episode_000035.npz",
+            "start": 432
+          },
+          {
+            "source_id": "robotwin:move_can_pot:episode26.pkl",
+            "path": "move_can_pot/episode_000026.npz",
+            "start": 48
+          }
+        ],
+        "gradient_fallback_windows": 0,
+        "objective_coverage": {
+          "action": {
+            "windows": 8,
+            "valid_items": 32
+          },
+          "correspondence": {
+            "windows": 8,
+            "valid_items": 256
+          },
+          "forecast": {
+            "windows": 8,
+            "valid_items": 2136
+          },
+          "representation": {
+            "windows": 8,
+            "valid_items": 8
+          }
+        },
+        "forecast_skip_reasons": {
+          "window_too_short": 168
+        },
+        "step_seconds": 291.2465695589781,
+        "gpu_memory_gb": 70.180433408,
+        "gpu_live_gb": 14.666691584,
+        "gpu_reserved_gb": 70.562873344,
+        "forecast_diag": {
+          "h1_forecast_quad": 15.196869925951324,
+          "h1_forecast_logdet": 83.31216374263968,
+          "h1_forecast_mode_w0": 0.9491622749195303,
+          "h1_forecast_mode_w1": 0.050837759514369314,
+          "h1_forecast_S_mean": 1.4344897653146458,
+          "h1_forecast_S_min": 1.0987055562036012,
+          "h1_forecast_S_max": 2.193166109342729,
+          "h1_forecast_R_mean": 1.001499994948346,
+          "h1_forecast_R_min": 0.7646930655164103,
+          "h1_forecast_R_max": 1.2756837986169323,
+          "h1_prediction_mse": 0.08180070500638585,
+          "h1_persistence_mse": 0.0818202468244342,
+          "h1_target_rms": 0.9941878979725222,
+          "h2_forecast_quad": 14.600497792516316,
+          "h2_forecast_logdet": 102.43457820680406,
+          "h2_forecast_mode_w0": 0.9169778156611655,
+          "h2_forecast_mode_w1": 0.0830222509904868,
+          "h2_forecast_S_mean": 1.5557484919826188,
+          "h2_forecast_S_min": 1.2000387281179428,
+          "h2_forecast_S_max": 2.343077455295457,
+          "h2_forecast_R_mean": 1.0014948462446531,
+          "h2_forecast_R_min": 0.7647846541470951,
+          "h2_forecast_R_max": 1.274741942849424,
+          "h2_prediction_mse": 0.08473722187387062,
+          "h2_persistence_mse": 0.08478090897557802,
+          "h2_target_rms": 0.9941296983096335,
+          "h4_forecast_quad": 13.304418124319499,
+          "h4_forecast_logdet": 137.67731857299805,
+          "h4_forecast_mode_w0": 0.8824298569843883,
+          "h4_forecast_mode_w1": 0.11757010230351062,
+          "h4_forecast_S_mean": 1.7946893063684306,
+          "h4_forecast_S_min": 1.40873401523346,
+          "h4_forecast_S_max": 2.613967596242825,
+          "h4_forecast_R_mean": 1.0014886345182146,
+          "h4_forecast_R_min": 0.76471922449058,
+          "h4_forecast_R_max": 1.2739353754690714,
+          "h4_prediction_mse": 0.08871317941468859,
+          "h4_persistence_mse": 0.08881155599469606,
+          "h4_target_rms": 0.9939073914928097
+        },
+        "updated_at": "2026-10-19T03:12:16Z"
+      },
+      "checkpoint10": {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/codex-s2/robotwin-D-stable-v5-seed101/checkpoint-step0000010.pt",
+        "step": 10,
+        "bytes": 10831889401,
+        "encoder_keys": 653,
+        "backend_keys": 662,
+        "optimizer_groups": 7,
+        "scheduler": {
+          "base_lrs": [
+            0.0001,
+            0.0001,
+            0.0003,
+            0.0003,
+            1e-05,
+            1e-05,
+            1e-05
+          ],
+          "last_epoch": 10,
+          "_step_count": 11,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            5.500000000000001e-06,
+            5.500000000000001e-06,
+            1.6499999999999998e-05,
+            1.6499999999999998e-05,
+            5.5e-07,
+            5.5e-07,
+            5.5e-07
+          ],
+          "lr_lambdas": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "config_fingerprint": "406fcdd2beb62ff750d248de5bb151ea92620af0ce0f59ab3121d5c6e63d1eec",
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5"
+      },
+      "config_sha256": "07ee83b15bf0fad6f72602046e092c5013b4e354579f1c99fdaea184ddf472b0",
+      "resume_notes_present": true,
+      "verification_complete": true
+    }
+  },
+  "gpu_snapshot": "0, 36 %, 47567 MiB, 121.10 W\n1, 42 %, 69125 MiB, 122.21 W\n",
+  "gpu_fully_utilized_claim": false,
+  "new_closed_loop_episodes": 0,
+  "convergence_claim": false
+}

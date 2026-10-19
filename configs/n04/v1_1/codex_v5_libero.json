@@ -1,0 +1,13 @@
+{
+  "include": ["codex_aux_v4_balanced_libero.json"],
+  "model": {
+    "observation_normalization": "rms",
+    "transition_init": "identity",
+    "transition_norm_limit": 1.0,
+    "correspondence_boundary_weight": 1.0
+  },
+  "loss": {"require_all_objectives": true},
+  "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+  "run": "v1.1/codex-s2/libero-D-stable-v5-seed101",
+  "notes": "Fresh seed101; no v4 weights resumed. Fixed latent RMS and assembled RKN operator norm; out-of-image geometric objective retains gradients without declaring invalid matches valid. Require all positive-weight objectives before updates. Full capacity, official data, batch8 and warmup200 retained."
+}

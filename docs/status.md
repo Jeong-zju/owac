@@ -1,5 +1,33 @@
 # OWAC 当前状态
 
+2026-10-19 **N04服务器代码已同步到本地**：94版源码按内容去重保存并通过SHA-256校验；最新333份代码/配置与本地一致，文档保留较新本地版本。11份服务配置及线上监控代码亦已校验。按用户要求未下载检查点或数据，未恢复训练。见[同步与恢复路径](../research/experiments/2026-10-19_n04_server_code_sync.md)。
+
+
+2026-10-19 **N04 S2 v5工程修复已验证，双卡正式训练中**：v4.2故障权重保留不续入；新轮fresh seed101、batch8、200步预热、每平台2000预算。467 passed/1 skipped、make check与双平台完整真实零更新通过；8次完整优化、独立确定性GPU重载及第9次更新均通过，正式监督服务从9恢复并真实保存step10。最初编译dev重载失败保留，固定参考修复后在原1e-5阈值通过。目标缺失会停止更新，监控实查四项4/4。见[修复与回执](../research/experiments/2026-10-19_n04_stability_repair_v5.md)。S2机制/能力仍partial，GPU利用率优化未完成；未进入S3。下方旧轮状态为历史。
+
+
+2026-10-16 **最新：N04 辅助目标修复 v4.2 已应用，双卡从新初始化训练**。修正表征统计样本轴及梯度、RKN预测初值、RoboTwin零补边梯度放大，增加编译缓存异常的完整原生反传回退。两平台真实完整模型四目标与联合精确反传均通过；443 passed、1 skipped，make check通过。正式配置完整batch8／warmup200／2000更新，表征外权重0.1；旧v3和短程原型不续入。新run `{libero,robotwin}-D-aux-v4-seed101` 已启动，检查点及实际速度见[修复报告](../research/experiments/2026-10-16_n04_aux_repair_v4.md)与[实时监控](http://127.0.0.1:8090/)。新轮长期稳定性、整体收敛、闭环效果尚未成立；串行窗口限制仍在。下方暂停／v3运行状态均为历史。
+
+2026-10-16 **N04辅助项排查暂停**：LIBERO最新保存70、RoboTwin保存45，两平台Supervisor均STOPPED、独立监控继续运行。固定真实窗口确认前缀差异持续缩小，表征0.9899接近常数惩罚；预测有活梯度但比保持上一状态的潜在预测基线差。原因及有效修复尚未完成，不恢复训练。8窗口读取仅0.53／1.52秒，预加载不能解决约170／220秒更新瓶颈；N02 P2每步只有16个时刻／2个动作点，N04为384／32，且后端训练范围不同。两项辅助曲线已显示。见[实测与排查记录](../research/experiments/2026-10-16_n04_aux_acceleration.md)。下方“训练保持同一PID”等为本次暂停前历史。
+
+2026-10-16 **N04训练设置／收敛检查**：有效batch8实际是单窗口串行累计；GPU忙碌度实测约29%／35%，低并行度与同步仍是性能缺口。两平台学习率预热未完成，dev每平台只覆盖2个任务，动作项下降而预测／表征项尚无改善证据，**整体收敛未确认**。训练保持同一配置与PID，监控已补best、预热及验证样本背景。见[本次检查](../research/experiments/2026-10-16_n04_training_settings_audit.md)。
+
+2026-10-16 **最新：Codex 直接运行 N04 v3 训练**。用户授权恢复，由 Codex 而非 DeepSeek 操作。LIBERO／RoboTwin 使用两张 RTX PRO 6000、官方数据、seed101、完整 D 编码器和真实 π0.5；新 run 与旧 v2 权重隔离，首段预算每平台2000次优化更新、warmup200。监控页只突出状态、实际更新速度、固定开发动作误差，GPU忙碌度／功耗用于检查计算空隙；新闭环尚未运行。工程性能与数值验证不代表方法能力成立。见[接管与实测记录](../research/experiments/2026-10-16_n04_codex_training.md)。下文停止约束为先前用户指令的历史快照，已被本次明确授权取代。
+
+2026-10-16 **所有 N04 训练已按用户指令终止**（北京时间 10:36）；已保存 checkpoint：LIBERO200／RoboTwin100。当前优先修复双向对应／裁剪自监督、Perceiver K/V、跨观测防塌缩、forecast 活梯度与跨段归约、输入有效性、纯 RKN 重算、停止与重载门禁。修补版 v3 已通过220项测试及双平台真实48帧完整前后向，optimizer更新0；1项本地协议测试因缺依赖跳过。训练保持停止，能力收益仍未建立。见[本轮修复与回执](../research/experiments/2026-10-16_n04_v11_s2_code_repair.md)。下方“训练继续”均为停止前历史。
+
+2026-10-16 **N04 v1.1 S2 独立核查**：远端 100 个 eval100 身份全部结算，成功 0／失败 100／最终基础设施错误 0，100 个非空视频文件；历史错误和 pre-fix 轮次保留。补齐四臂同源固定 ISP，修复 RAW 白电平接线、dev 随机状态、反传目标日志与完成状态，优化读出 attention；191 passed、1 skipped、make check 通过，完整编码器在两平台真实 dev 连续帧的四臂前后向均通过。**完整 S2 实现仍 partial**：对应路径没有真正启用反向流遮挡，stop-gradient 自监督分支未实现，forecast 的有效权重及梯度边界需按实际解释；能力收益未建立。双平台原冻结源码训练继续，审计修补版未热替换进程；未进入 S3。按初始核查的 129／152 s/update，名义剩余预算约 149／176 天，不能只凭 loss 下降判训练健康。见[独立审计](../research/experiments/2026-10-16_n04_v11_s2_independent_audit.md)与[小型回执](../research/experiments/results/2026-10-16_n04_v11_s2_independent_audit/summary.json)。以下同日之前的“待实施／0/100”为历史记录。
+
+2026-10-15 **N04编程任务补充专用双GPU服务器**：S2／S3／S4已填入用户指定的SSH／8080转发；允许双模型训练、双worker验证或一训一验，独立绑定GPU与输出，验证分片仍每模型合计100次。旧阶段产物保留，HF认证从服务器HF_TOKEN／既有缓存读取，明文token未写入提示词或仓库。监控增加两卡简表，保持单页。当前阶段状态未变；本轮未连接服务器、设置远端认证或启动训练。下方早期“登录留空”记录为历史。
+
+2026-10-15 **N04 v1.1 DeepSeek 各阶段完整提示词已扩写，初期预算已同步**：[S2](prompts/n04_v1_1/S2_full_encoder.md)、[S3](prompts/n04_v1_1/S3_training_ablation.md)、[S4](prompts/n04_v1_1/S4_frozen_evaluation.md)。每份自含实现／训练／参考源码、远端路径、前端专家单页实时监控任务；登录及转发指令留空。用户已确认每个待评模型100次（默认LIBERO50＋RoboTwin50），每平台／方法只训练seed101；不要求三种子、全部方法／消融或官方全清单，不加逐文件hash、收敛判定及无意义硬门槛。当前阶段仍为S2待实施，本轮没有实现模型、启动训练或部署远端网页。下方原方案采用记录中的三种子／完整评测预算由本条取代。
+
+2026-10-15 **N04 v1.1 正式采用，S2 待实施**。用户已认可[当前技术路线](plans/N04_full_development_v1.1.md)，见 [0015 决议](decisions/0015-n04-v1.1-route.md)。S2 直接建立完整 ConvNeXt-B＋RAFT 自监督对应＋条件 RKN／双模式更新＋Perceiver／π0.5，以官方数据整体训练并提供轨迹可视化与开发闭环；S3 充分训练和四臂匹配复验，S4 冻结完整评测。S0 扩展和衍生 S1 权重不进入官方数据主结果；旧 S2—S7 交接已转为历史。当前入口为 [v1.1 阶段包](prompts/n04_v1_1/README.md)，不是下方历史 S1 继续训练要求。本轮仅更新文档、状态及统筹入口，未执行 S2、恢复训练或新增评测。
+
+2026-10-15 N04 v1.0 **S1 独立效果验收：部分达到，尚不能全部通过**。用户确认提前停止是其决定，本轮不以步数或未跑三种子否决交付。远端 958 源码文件、50k 权重、624 唯一测量/GT 共 1248 文件 hash 及 7 相机在线重算均核实；本地 `make check` 与 405 tests passed。独立纠正原相机混标/重复计数后，50k 深度 MAE 为 **16.88 mm**；重跑已保存的 29k 为 **10.51 mm**，优于训练集静态模板 **69.17 mm**。真实稀疏跨视角对应抽样 top-1 为 LIBERO 82.0%、RoboTwin 86.6%/100%，支持局部学习有效；原“正负 cosine”实为同帧自相似，不能沿用。**几何方差未通过**：50k 机器人相机覆盖 @1σ 仅 5.0–12.9%；29k 虽均值更好，方差仍不可靠。发现 NLL 残差比截断会反向奖励异常点收缩方差、训练/评测方差 floor 不同、seed 在模型初始化后才设置。本轮仅验收并保留证据，没有修改训练实现、恢复训练或启动 S2。详见[独立效果报告](../research/experiments/2026-10-15_n04_v1_s1_independent_effect_acceptance.md)；以下早期运行中记录为历史。
+
+2026-10-14 N04 v1.0 **S1 正式 RAW 测量代码完成、训练已迁移到新服务器继续**：新增 `frameworks/n04/{contracts,full_config,measurement}.py`、`training/n04_full.py`（profile/train/lr-grid/export-measurements/data-stats 五模式）、`evaluation/n04_full.py`，vendor 作者 ConvNeXt（commit `048efcea…`、MIT、逐文件 hash；仅把 timm 导入换成本地等价实现）；`rawvla_rgb3` 与 `bayer_cfa` 分别建网，单帧 `measure(frame)` 无历史（真实数据上替换全部身份字段逐位不变、重复导出字节一致）。本地 `make check` 与 `tests/encoders/n04`(198)+`n04_full`(206，含 3 项 CUDA) **404 passed**；快照 `n04-s1-20261014T103419Z-d40c91817264` 在旧机与新机都 958 文件 0 差异。Profile（batch 128）：2.10 s/step、60.9 帧/s、峰值 35.2 GB、梯度审计干净；LR 网格 3×250 选 **3e-4**。seed 17 训练曲线（旧机 4000 步 + 迁移）：dev 深度 MAE **0.743 m（未训练）→ 0.0433 m（第 3500 步，−94%）**，覆盖率@1σ 0.407→0.803、NLL +9.31→−2.80；但仍比每相机一个原图像素门槛高 15–25 倍，且覆盖率在 0.46–0.80 间波动，**训练未充分、方差未稳定**。dev 测量缓存 624 帧 1.5 GB，抽样在线重算最大差 0.0（复核抓出并修复 factor 变体共享 measurement ID 的缓存覆盖缺陷）。**2026-10-14 21:20 CST 迁移训练到 `ssh -p 16724 root@154.59.156.22` 的 GPU 1**（数据/检查点/快照校验一致，旧机训练已停并保留全部产物；seed 29/43 已注册待跑）。无机制主张，S2 未开始。详见[阶段记录](../research/experiments/2026-10-14_n04_v1_s1_measurement.md)与 [handoff](../research/experiments/results/2026-10-14_n04_v1_s1/handoff.json)。
+
 2026-10-14 N04 v1.0 **S0 远端补齐验收通过**：两平台 40 条成对扩展、960 时刻 / 2,880 相机帧，以及 16 因素 / 152 条真实三维渲染诊断；C0–C7 为 8 passed、0 partial，本地与远端各 361 tests passed。实际时序、执行控制、几何支持与输入隔离均已验收，按训练相机重新冻结米制门槛。S1 尚未启动。详见[本轮记录](../research/experiments/2026-10-14_n04_v1_s0_completion.md)。
 
 
@@ -169,3 +197,11 @@
 216 个视角帧的 864 个 RGB/HDR/CFA/noise 文件已在云端逐文件重读，哈希不一致为零，原生 HDR→CFA 最大误差 0 DN；每帧计数与源动作时序匹配，腕部相机与同帧实际夹爪位置最大偏差 0.015673 mm。成功数据集含源动作/状态、实际完整机器人和方块状态、两路新 RGB/RAW、传感器、时间戳、哈希和重建 USD；云端入口为 `/workspace/owac/reference/polaris-replay-pilot-v1/successful-expert-index.json`。数据数组与图像留在云端，本地仅存[数字留档](../research/experiments/results/2026-10-10_polaris_expert_replay_pilot/)和[试验记录](../research/experiments/2026-10-10_polaris_expert_replay_pilot.md)，固定[进度页](../outputs/arena-droid-baseline/progress.html)已加入回放结果。
 
 前四次启动/接口异常完整保留；第 5 次物理回放与配对数据保存完成后发生 NumPy bool 的 JSON 序列化错误，已用独立 CPU 后处理源码修复数字结果，未重跑物理或重新采图。完整 π0.5 基准只暂停外层调度，当前子 episode 自然结束后才运行试验；调度器已恢复，冻结源码、种子和已完成结果没有修改。定时任务仍关闭，不追加训练。`make check` 与 40 项 CPU 测试通过。
+
+## N04 v1.1 S2：完整编码器与单种子训练（2026-10-15）
+
+按 [v1.1 方案](../plans/N04_full_development_v1.1.md) 的 S2，在一轮内建齐完整 N04（ConvNeXt-B 测量 + 完整 RAFT 自监督对应 + 质量头 256D 潜在方差 + 条件 RKN 与双模式证据更新 + Perceiver 读出 + π0.5 特征桥），并接连真实 π0.5 后端（LIBERO 12,439,085,481 B / 812 键；RoboTwin 9,354,050,752 B / 813 键，SHA256 与作者公布值一致）。双平台 seed101 正式训练进行中：`runs/v1.1/s2/{libero,robotwin}-D-seed101`，实测步时 76 s（LIBERO）/ 122–167 s（RoboTwin），四项损失齐全（action/correspondence/forecast/representation）。
+
+同时暴露并修复 8 个真实缺陷（有远端复现），其中三个是硬阻塞：forecast 目标带梯度、forecast anchor 在 RKN 里做多步 roll（+13 GB/帧 → 101 GB OOM）、`gradient_checkpointing` 反向重算再次调用有状态编码器（`CheckpointError` 与重复融合同源）。**按实测步时，100k 名义预算需 LIBERO 85 天 / RoboTwin 125 天**，须先做合批前向等降本，再谈跑满预算。
+
+LIBERO 与 RoboTwin 仿真器已在新实例装好并验证；100 次闭环执行器与可视化工具链已就绪（闭环仅完成官方 π0.5 的 2 条链路冒烟：成功 1 / 失败 1 / 基础设施错误 0，不计入 N04 成绩）。**本轮 100 次闭包含义为 0/100**，待首个真实 checkpoint 与 N04 策略服务就绪后开跑。监控页 `http://127.0.0.1:8090/`（`ssh -p 16724 root@154.59.156.22 -L 8090:localhost:8090`）。详见[阶段报告](../research/experiments/2026-10-15_n04_v11_s2.md)与 [handoff.json](../research/experiments/results/2026-10-15_n04_v11_s2/handoff.json)。本轮未进入 S3、未启动新种子或全清单评测。

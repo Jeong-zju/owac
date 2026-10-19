@@ -17,7 +17,8 @@ Outputs (three files, all inside ``--output-dir``)::
     <snapshot_id>.manifest.json
     <snapshot_id>.sha256sums.txt
 
-with ``snapshot_id = n04-s0-<UTC timestamp>-<package sha256[:12]>``.  The
+with ``snapshot_id = <prefix>-<UTC timestamp>-<package sha256[:12]>`` (默认
+``n04-s0``，S1 及以后用 ``--snapshot-prefix`` 改成本阶段前缀；工具本身不变).  The
 archive is rooted at repo-relative paths and is byte-deterministic for a fixed
 ``--timestamp`` (fixed mtime, uid/gid 0, sorted members, gzip mtime 0).  Every
 manifest hash is computed from the bytes written into the archive in the same
@@ -73,8 +74,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SCHEMA = "n04-source-snapshot-v1"
-SNAPSHOT_PREFIX = "n04-s0"
-SNAPSHOT_ID_RE = re.compile(r"^n04-s0-\d{8}T\d{6}Z-[0-9a-f]{12}$")
+DEFAULT_SNAPSHOT_PREFIX = "n04-s0"
+SNAPSHOT_PREFIX = DEFAULT_SNAPSHOT_PREFIX  # 兼容旧引用
+SNAPSHOT_ID_RE = re.compile(r"^n04-[a-z0-9]+-\d{8}T\d{6}Z-[0-9a-f]{12}$")
 DEFAULT_UNTRACKED_ROOTS = ("src", "tests", "configs", "scripts", "docs", "research")
 DEFAULT_MAX_FILE_BYTES = 8 * 1024 * 1024
 
@@ -498,7 +500,8 @@ def cmd_build(args: argparse.Namespace) -> int:
     staging = out_dir / f".staging-{os.getpid()}.tar.gz"
     try:
         package_sha, entries = build_archive(repo, staged, epoch, staging)
-        snapshot_id = f"{SNAPSHOT_PREFIX}-{epoch_dt.strftime('%Y%m%dT%H%M%SZ')}-{package_sha[:12]}"
+        prefix = getattr(args, "snapshot_prefix", DEFAULT_SNAPSHOT_PREFIX)
+        snapshot_id = f"{prefix}-{epoch_dt.strftime('%Y%m%dT%H%M%SZ')}-{package_sha[:12]}"
         package_path = out_dir / f"{snapshot_id}.tar.gz"
         os.replace(staging, package_path)
     finally:
@@ -712,6 +715,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-dir",
         default="outputs/n04-v1/s0/source-packages",
         help="directory for tar.gz + manifest + sha256sums",
+    )
+    build.add_argument(
+        "--snapshot-prefix",
+        default=DEFAULT_SNAPSHOT_PREFIX,
+        help="snapshot id 前缀（默认 n04-s0；阶段工具可用 n04-s1 等）",
     )
     build.add_argument(
         "--timestamp",

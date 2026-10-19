@@ -1,0 +1,1156 @@
+{
+  "checked_at": "2026-10-16T04:18:53.258112+00:00",
+  "owner": "Codex",
+  "runs": {
+    "libero": {
+      "progress": {
+        "stage": "S2",
+        "platform": "libero",
+        "arm": "D",
+        "seed": 101,
+        "phase": "train",
+        "updated_at": "2026-10-16T04:18:31Z",
+        "step": 12,
+        "budget_steps": 2000,
+        "train_loss": 1.2048699231325048,
+        "dev_loss": 1.0104377269744873,
+        "step_seconds": 206.39192896336317,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-16T04:10:33] resumed from /workspace/owac/research/n04-v1/runs/v1.1/codex-s2/libero-D-seed101/checkpoint-step0000010.pt at step 10",
+          "[2026-10-16T04:14:47] step      11 loss=1.2784 action=0.9097 lr=6.00e-06 254.50s",
+          "[2026-10-16T04:17:25] step      12 loss=1.1414 action=0.7804 lr=6.50e-06 158.28s"
+        ],
+        "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+        "owner": "Codex",
+        "gpu_index": 0,
+        "activity": {
+          "completed_windows": 3,
+          "total_windows": 8,
+          "update_started_at": 1792124245.8194308,
+          "initial_dev_loss": 1.081860065460205,
+          "best_dev_loss": 1.0104377269744873,
+          "last_checkpoint_step": 10
+        }
+      },
+      "config": {
+        "schema": "n04-v1.1-s2-v1",
+        "stage": "S2",
+        "platform": "libero",
+        "arm": "D",
+        "seed": 101,
+        "device": "cuda:0",
+        "data": {
+          "root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+          "platform_dirs": {
+            "libero": "libero/raw",
+            "robotwin": "robotwin2/raw"
+          },
+          "split_file": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+          "splits": [
+            "train",
+            "dev"
+          ],
+          "train_split": "train",
+          "dev_split": "dev",
+          "window": {
+            "burn_in": 16,
+            "gradient": 32,
+            "stride": 16,
+            "supervision_points": 4
+          },
+          "proprio_history": 2,
+          "dev_windows": 2,
+          "norm_stats": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/dataset_statistics.json",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+          }
+        },
+        "model": {
+          "name": "owac-n04-v1.1-convnext-base",
+          "builder": "owac.frameworks.n04.encoder_v11:build_encoder",
+          "input_mode": "rawvla_raw3",
+          "backbone": "convnext_base",
+          "depths": [
+            3,
+            3,
+            27,
+            3
+          ],
+          "dims": [
+            128,
+            256,
+            512,
+            1024
+          ],
+          "fusion_channels": 256,
+          "fusion_stride": 4,
+          "raft_small": false,
+          "raft_iterations": 12,
+          "supports_per_camera": 128,
+          "state_dim": 512,
+          "observation_dim": 256,
+          "readout_blocks": 6,
+          "tokens_per_camera": 256,
+          "token_dim": 2048,
+          "gradient_checkpointing": false,
+          "modules": {
+            "correspondence": true,
+            "state_estimator": true,
+            "dual_mode": true,
+            "readout": true
+          },
+          "proprio_dim": 24,
+          "scale_name": "libero_uint8",
+          "saturation_level": 1.0,
+          "raft_resize_hw": [
+            128,
+            128
+          ]
+        },
+        "backend": {
+          "builder": "owac.training.n04_v11:build_pi05_backend",
+          "tokenizer": "/workspace/owac/rawvla/checkpoints/tokenizers/paligemma_tokenizer.model",
+          "checkpoints": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/bfloat16/model.safetensors",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+          },
+          "action_dim": 32,
+          "num_denoise_steps": 10,
+          "adapter": {
+            "lora": {
+              "enabled": true,
+              "rank": 16,
+              "alpha": 16.0,
+              "targets": [
+                "self_attn.q_proj",
+                "self_attn.k_proj",
+                "self_attn.v_proj",
+                "self_attn.o_proj"
+              ]
+            },
+            "trainable_prefixes": [
+              "action_head."
+            ]
+          }
+        },
+        "loss": {
+          "weights": {
+            "action": 1.0,
+            "correspondence": 0.1,
+            "forecast": 0.1,
+            "representation": 0.01
+          },
+          "forecast": true,
+          "forecast_horizons": [
+            1,
+            2,
+            4
+          ],
+          "forecast_anchor_stride": 1,
+          "forecast_diagnostics_every": 1
+        },
+        "optim": {
+          "batch": 8,
+          "micro_batch": 1,
+          "steps": 2000,
+          "warmup_steps": 200,
+          "min_lr_ratio": 0.0,
+          "grad_clip": 1.0,
+          "amp": true,
+          "amp_dtype": "bfloat16",
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "unmatched": "pi05_adapt",
+          "groups": [
+            {
+              "name": "convnext",
+              "lr": 0.0001,
+              "weight_decay": 0.05,
+              "patterns": [
+                "encoder.measurement",
+                "backbone",
+                "convnext"
+              ]
+            },
+            {
+              "name": "raft_state_readout",
+              "lr": 0.0003,
+              "weight_decay": 0.05,
+              "patterns": [
+                "raft",
+                "correspondence",
+                "state",
+                "support",
+                "quality",
+                "evidence",
+                "readout"
+              ]
+            },
+            {
+              "name": "pi05_lora",
+              "lr": 1e-05,
+              "weight_decay": 0.05,
+              "patterns": [
+                "lora_a",
+                "lora_b"
+              ]
+            },
+            {
+              "name": "pi05_adapt",
+              "lr": 1e-05,
+              "weight_decay": 0.0,
+              "patterns": [
+                "action_head"
+              ]
+            }
+          ],
+          "micro_batch_note": "\u9010\u76d1\u7763\u70b9 backward \u540e micro_batch \u4e0d\u518d\u51b3\u5b9a\u663e\u5b58\uff1b\u6709\u6548 batch \u4ecd\u662f optim.batch \u6bb5\u7a97\u53e3",
+          "fused": true
+        },
+        "monitor": {
+          "log_every": 1,
+          "checkpoint_every": 10,
+          "eval_every": 25,
+          "profile": false,
+          "initial_dev": true,
+          "checkpoint_first": true,
+          "save_best": true,
+          "keep_checkpoints": 2,
+          "eval_every_early": 5,
+          "early_until": 100
+        },
+        "eval": {
+          "list": "configs/n04/v1_1/eval100.json",
+          "planned": 50,
+          "lighting_domains": [
+            "ExtremeLow",
+            "Low",
+            "Normal",
+            "Over",
+            "ExtremeOver"
+          ]
+        },
+        "closed_loop": {
+          "command": [],
+          "cwd": null,
+          "timeout_seconds": 900,
+          "note": "\u628a\u5355 episode \u4ea4\u7ed9\u73b0\u6709 LIBERO/RoboTwin \u6267\u884c\u5668\uff1acommand \u7528 {entry} {artifacts} {checkpoint} {platform} \u5360\u4f4d\uff0c\u6267\u884c\u5668\u5728 artifacts \u91cc\u5199 result.json(status/success)\uff1brt=124 \u89c6\u4e3a\u8d85\u65f6\u5931\u8d25"
+        },
+        "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+        "notes": "Codex-owned repair-v3 training. Fresh initialization; old v2 checkpoints are historical. First budget: 2000 optimizer updates, 200 warmup; preserve effective batch8 and all model/loss contracts. Reassess using fixed-dev trends.",
+        "run": "v1.1/s2/libero-D-seed101",
+        "performance": {
+          "rkn_checkpoint": false,
+          "cudnn_benchmark": true,
+          "preload_window": true,
+          "compile_banded": false,
+          "compile_readout": true,
+          "prefetch_windows": true,
+          "verified_joint_backward": true,
+          "compile_prediction": true,
+          "compile_measurement": true,
+          "compile_raft_update": true
+        },
+        "owner": "Codex"
+      },
+      "pid": 563833,
+      "process_alive": true,
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016",
+      "source_manifest_sha256": "23d7699a4505366f497d0f57dc74ed00fff4657e4490ffefa0b9b07482b2cd04",
+      "checkpoints": [
+        {
+          "name": "checkpoint-best.pt",
+          "bytes": 10831812909
+        },
+        {
+          "name": "checkpoint-step0000001.pt",
+          "bytes": 10831845433
+        },
+        {
+          "name": "checkpoint-step0000010.pt",
+          "bytes": 10831845433
+        }
+      ],
+      "latest_metrics": [
+        {
+          "step": 8,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.316590666770935,
+          "dev_loss": 1.6358698606491089,
+          "terms": {
+            "action": 0.957062840461731,
+            "correspondence": 2.2006830871105194,
+            "forecast": 1.296881452202797,
+            "representation": 0.9771382659673691
+          },
+          "applied_train_loss": 1.316590666770935,
+          "applied_terms": {
+            "action": 0.957062840461731,
+            "correspondence": 2.2006830871105194,
+            "forecast": 1.296881452202797,
+            "representation": 0.9771382659673691
+          },
+          "lr": 4.5e-06,
+          "step_seconds": 178.26430482044816,
+          "gpu_memory_gb": 60.432879104,
+          "gpu_live_gb": 12.755762176,
+          "gpu_reserved_gb": 61.056483328,
+          "forecast_diag": {
+            "h1_forecast_quad": 12.740064377746274,
+            "h1_forecast_logdet": 125.28256611670217,
+            "h1_forecast_mode_w0": 0.9433868613935287,
+            "h1_forecast_mode_w1": 0.05661316062774389,
+            "h1_forecast_S_mean": 1.682645409337936,
+            "h1_forecast_S_min": 1.3412198573350906,
+            "h1_forecast_S_max": 2.400355493830096,
+            "h1_forecast_R_mean": 1.0014063578940207,
+            "h1_forecast_R_min": 0.8163881805394927,
+            "h1_forecast_R_max": 1.1927201577251958,
+            "h2_forecast_quad": 19.565313653151197,
+            "h2_forecast_logdet": 163.20925537745157,
+            "h2_forecast_mode_w0": 0.9131429883340996,
+            "h2_forecast_mode_w1": 0.08685706240745883,
+            "h2_forecast_S_mean": 1.9558290551106137,
+            "h2_forecast_S_min": 1.586987320333719,
+            "h2_forecast_S_max": 2.6158111537496245,
+            "h2_forecast_R_mean": 1.0014017020662624,
+            "h2_forecast_R_min": 0.8168238376577696,
+            "h2_forecast_R_max": 1.1921577915549277,
+            "h4_forecast_quad": 37.548104754516054,
+            "h4_forecast_logdet": 232.8546626567841,
+            "h4_forecast_mode_w0": 0.8807173864915967,
+            "h4_forecast_mode_w1": 0.11928267564092365,
+            "h4_forecast_S_mean": 2.563245159706899,
+            "h4_forecast_S_min": 2.1429090185889175,
+            "h4_forecast_S_max": 3.069135667490108,
+            "h4_forecast_R_mean": 1.0013984508280243,
+            "h4_forecast_R_min": 0.8219329922326972,
+            "h4_forecast_R_max": 1.1847490945032666
+          },
+          "updated_at": "2026-10-16T04:03:26Z"
+        },
+        {
+          "step": 9,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.2584549337625504,
+          "dev_loss": 1.6358698606491089,
+          "terms": {
+            "action": 0.9094392657279968,
+            "correspondence": 2.098441481590271,
+            "forecast": 1.2946312129497528,
+            "representation": 0.9708385169506073
+          },
+          "applied_train_loss": 1.2584549337625504,
+          "applied_terms": {
+            "action": 0.9094392657279968,
+            "correspondence": 2.098441481590271,
+            "forecast": 1.2946312129497528,
+            "representation": 0.9708385169506073
+          },
+          "lr": 5e-06,
+          "step_seconds": 176.45958953872324,
+          "gpu_memory_gb": 60.432879104,
+          "gpu_live_gb": 12.755762176,
+          "gpu_reserved_gb": 61.056483328,
+          "forecast_diag": {
+            "h1_forecast_quad": 13.417068212263048,
+            "h1_forecast_logdet": 124.29932611219346,
+            "h1_forecast_mode_w0": 0.9440150601008245,
+            "h1_forecast_mode_w1": 0.05598490595096541,
+            "h1_forecast_S_mean": 1.6763239476469254,
+            "h1_forecast_S_min": 1.326382776902568,
+            "h1_forecast_S_max": 2.401271596550941,
+            "h1_forecast_R_mean": 1.0013376351806424,
+            "h1_forecast_R_min": 0.8113017118265553,
+            "h1_forecast_R_max": 1.1995962665927027,
+            "h2_forecast_quad": 19.613806267579395,
+            "h2_forecast_logdet": 162.2424754778544,
+            "h2_forecast_mode_w0": 0.9135747537016868,
+            "h2_forecast_mode_w1": 0.08642525674464803,
+            "h2_forecast_S_mean": 1.9487161149581274,
+            "h2_forecast_S_min": 1.566994497925043,
+            "h2_forecast_S_max": 2.6161471128463747,
+            "h2_forecast_R_mean": 1.0013326361775399,
+            "h2_forecast_R_min": 0.8114715464413166,
+            "h2_forecast_R_max": 1.1992388720313707,
+            "h4_forecast_quad": 36.14338830113411,
+            "h4_forecast_logdet": 231.92850146974834,
+            "h4_forecast_mode_w0": 0.8808207228513701,
+            "h4_forecast_mode_w1": 0.1191793025271701,
+            "h4_forecast_S_mean": 2.5544088168867995,
+            "h4_forecast_S_min": 2.115397245224033,
+            "h4_forecast_S_max": 3.0846136483762945,
+            "h4_forecast_R_mean": 1.0013318311955248,
+            "h4_forecast_R_min": 0.8119137067613857,
+            "h4_forecast_R_max": 1.198716557717749
+          },
+          "updated_at": "2026-10-16T04:06:09Z"
+        },
+        {
+          "step": 10,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.4071420580148697,
+          "dev_loss": 1.0104377269744873,
+          "terms": {
+            "action": 1.0464629083871841,
+            "correspondence": 2.2059773206710815,
+            "forecast": 1.302489548921585,
+            "representation": 0.9832440987229347
+          },
+          "applied_train_loss": 1.4071420580148697,
+          "applied_terms": {
+            "action": 1.0464629083871841,
+            "correspondence": 2.2059773206710815,
+            "forecast": 1.302489548921585,
+            "representation": 0.9832440987229347
+          },
+          "lr": 5.500000000000001e-06,
+          "step_seconds": 177.637239690125,
+          "gpu_memory_gb": 60.432879104,
+          "gpu_live_gb": 12.755761664,
+          "gpu_reserved_gb": 61.056483328,
+          "forecast_diag": {
+            "h1_forecast_quad": 15.266491583278103,
+            "h1_forecast_logdet": 121.71100102701493,
+            "h1_forecast_mode_w0": 0.9460126549726533,
+            "h1_forecast_mode_w1": 0.05398737395843191,
+            "h1_forecast_S_mean": 1.658037291659463,
+            "h1_forecast_S_min": 1.3670887461593073,
+            "h1_forecast_S_max": 2.342265762869389,
+            "h1_forecast_R_mean": 1.001258424693538,
+            "h1_forecast_R_min": 0.8422712016730539,
+            "h1_forecast_R_max": 1.1615637382191997,
+            "h2_forecast_quad": 25.002899221579234,
+            "h2_forecast_logdet": 159.69402392705283,
+            "h2_forecast_mode_w0": 0.9149421125650405,
+            "h2_forecast_mode_w1": 0.08505794159136712,
+            "h2_forecast_S_mean": 1.928548877686262,
+            "h2_forecast_S_min": 1.6102492647866409,
+            "h2_forecast_S_max": 2.5598786940177276,
+            "h2_forecast_R_mean": 1.0012497844795385,
+            "h2_forecast_R_min": 0.8421907210101683,
+            "h2_forecast_R_max": 1.1616698170701663,
+            "h4_forecast_quad": 49.36961790919304,
+            "h4_forecast_logdet": 229.0859408719199,
+            "h4_forecast_mode_w0": 0.8814759452694229,
+            "h4_forecast_mode_w1": 0.11852402931877544,
+            "h4_forecast_S_mean": 2.5260261334478855,
+            "h4_forecast_S_min": 2.162180420011282,
+            "h4_forecast_S_max": 3.044478678809745,
+            "h4_forecast_R_mean": 1.001244095553245,
+            "h4_forecast_R_min": 0.8419839153066279,
+            "h4_forecast_R_max": 1.1618437013987983
+          },
+          "updated_at": "2026-10-16T04:09:37Z"
+        },
+        {
+          "step": 11,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.2784099131822586,
+          "dev_loss": 1.0104377269744873,
+          "terms": {
+            "action": 0.9097427502274513,
+            "correspondence": 2.2863251715898514,
+            "forecast": 1.3025040030479431,
+            "representation": 0.9784263446927071
+          },
+          "applied_train_loss": 1.2784099131822586,
+          "applied_terms": {
+            "action": 0.9097427502274513,
+            "correspondence": 2.2863251715898514,
+            "forecast": 1.3025040030479431,
+            "representation": 0.9784263446927071
+          },
+          "lr": 6e-06,
+          "step_seconds": 254.50066344439983,
+          "gpu_memory_gb": 53.355651072,
+          "gpu_live_gb": 12.75576064,
+          "gpu_reserved_gb": 53.766782976,
+          "forecast_diag": {
+            "h1_forecast_quad": 18.346836276592747,
+            "h1_forecast_logdet": 117.55810825286372,
+            "h1_forecast_mode_w0": 0.9488944645610549,
+            "h1_forecast_mode_w1": 0.05110548683742602,
+            "h1_forecast_S_mean": 1.6301091402288408,
+            "h1_forecast_S_min": 1.3414710625525443,
+            "h1_forecast_S_max": 2.2638099787216035,
+            "h1_forecast_R_mean": 1.0010489085989611,
+            "h1_forecast_R_min": 0.8203327227984705,
+            "h1_forecast_R_max": 1.1943896672418042,
+            "h2_forecast_quad": 28.93676830132802,
+            "h2_forecast_logdet": 155.77699060440065,
+            "h2_forecast_mode_w0": 0.916806170841058,
+            "h2_forecast_mode_w1": 0.08319387001295883,
+            "h2_forecast_S_mean": 1.8987374916672706,
+            "h2_forecast_S_min": 1.5836703451971212,
+            "h2_forecast_S_max": 2.5058316687742868,
+            "h2_forecast_R_mean": 1.001045819868644,
+            "h2_forecast_R_min": 0.8200611003985008,
+            "h2_forecast_R_max": 1.1946910796066126,
+            "h4_forecast_quad": 54.37345272728375,
+            "h4_forecast_logdet": 225.16762082917347,
+            "h4_forecast_mode_w0": 0.8823807278115835,
+            "h4_forecast_mode_w1": 0.11761923935929577,
+            "h4_forecast_S_mean": 2.4877470822206567,
+            "h4_forecast_S_min": 2.1354319878986905,
+            "h4_forecast_S_max": 3.0692286810704643,
+            "h4_forecast_R_mean": 1.0010428755943264,
+            "h4_forecast_R_min": 0.8197832754147903,
+            "h4_forecast_R_max": 1.1948795627270425
+          },
+          "updated_at": "2026-10-16T04:14:47Z"
+        },
+        {
+          "step": 12,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.141359694302082,
+          "dev_loss": 1.0104377269744873,
+          "terms": {
+            "action": 0.7804399356245995,
+            "correspondence": 2.2099495828151703,
+            "forecast": 1.3014394044876099,
+            "representation": 0.9780809357762337
+          },
+          "applied_train_loss": 1.141359694302082,
+          "applied_terms": {
+            "action": 0.7804399356245995,
+            "correspondence": 2.2099495828151703,
+            "forecast": 1.3014394044876099,
+            "representation": 0.9780809357762337
+          },
+          "lr": 6.5000000000000004e-06,
+          "step_seconds": 206.39192896336317,
+          "gpu_memory_gb": 53.355651072,
+          "gpu_live_gb": 12.755760128,
+          "gpu_reserved_gb": 53.766782976,
+          "forecast_diag": {
+            "h1_forecast_quad": 18.63456246737511,
+            "h1_forecast_logdet": 116.82275299872123,
+            "h1_forecast_mode_w0": 0.949370531665702,
+            "h1_forecast_mode_w1": 0.05062951092728444,
+            "h1_forecast_S_mean": 1.625307150906132,
+            "h1_forecast_S_min": 1.3521412123114833,
+            "h1_forecast_S_max": 2.146696798503399,
+            "h1_forecast_R_mean": 1.0009640601854173,
+            "h1_forecast_R_min": 0.8328175227488241,
+            "h1_forecast_R_max": 1.1784858210913598,
+            "h2_forecast_quad": 29.13421141306559,
+            "h2_forecast_logdet": 155.10614970525106,
+            "h2_forecast_mode_w0": 0.9171149102350076,
+            "h2_forecast_mode_w1": 0.08288505425055821,
+            "h2_forecast_S_mean": 1.8937647255758445,
+            "h2_forecast_S_min": 1.5930491472283999,
+            "h2_forecast_S_max": 2.405753806233406,
+            "h2_forecast_R_mean": 1.0009628822406134,
+            "h2_forecast_R_min": 0.8328615049521129,
+            "h2_forecast_R_max": 1.1781948566436768,
+            "h4_forecast_quad": 54.22377240232059,
+            "h4_forecast_logdet": 224.58577030045643,
+            "h4_forecast_mode_w0": 0.8824834565499,
+            "h4_forecast_mode_w1": 0.11751656553574973,
+            "h4_forecast_S_mean": 2.4822336190513203,
+            "h4_forecast_S_min": 2.141099614224264,
+            "h4_forecast_S_max": 3.0509454730365957,
+            "h4_forecast_R_mean": 1.0009618066251278,
+            "h4_forecast_R_min": 0.8328586887302143,
+            "h4_forecast_R_max": 1.178243372855442
+          },
+          "updated_at": "2026-10-16T04:17:25Z"
+        }
+      ]
+    },
+    "robotwin": {
+      "progress": {
+        "stage": "S2",
+        "platform": "robotwin",
+        "arm": "D",
+        "seed": 101,
+        "phase": "train",
+        "updated_at": "2026-10-16T04:18:28Z",
+        "step": 5,
+        "budget_steps": 2000,
+        "train_loss": 3.5755616158564654,
+        "dev_loss": 0.6794120073318481,
+        "step_seconds": 217.21846803724765,
+        "gpu_memory_gb": null,
+        "eval": {
+          "planned": null,
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0,
+          "status": "not_started"
+        },
+        "artifacts": [],
+        "log_tail": [
+          "[2026-10-16T04:03:57] step       1 loss=3.6597 action=3.2657 lr=1.00e-06 215.55s",
+          "[2026-10-16T04:07:34] step       2 loss=3.6835 action=3.3212 lr=1.50e-06 204.94s",
+          "[2026-10-16T04:10:53] step       3 loss=2.8862 action=2.4958 lr=2.00e-06 198.62s",
+          "[2026-10-16T04:14:18] step       4 loss=2.2670 action=1.8802 lr=2.50e-06 205.36s",
+          "[2026-10-16T04:17:54] step       5 loss=1.5383 action=1.1654 lr=3.00e-06 215.31s",
+          "[2026-10-16T04:18:15] fixed dev action loss at step 5: 0.6794"
+        ],
+        "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+        "owner": "Codex",
+        "gpu_index": 1,
+        "activity": {
+          "initial_dev_loss": 2.453131318092346,
+          "best_dev_loss": 0.6794120073318481,
+          "last_checkpoint_step": 5,
+          "completed_windows": 0,
+          "total_windows": 8,
+          "update_started_at": 1792124308.2978947
+        }
+      },
+      "config": {
+        "schema": "n04-v1.1-s2-v1",
+        "stage": "S2",
+        "platform": "robotwin",
+        "arm": "D",
+        "seed": 101,
+        "device": "cuda:0",
+        "data": {
+          "root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+          "platform_dirs": {
+            "libero": "libero/raw",
+            "robotwin": "robotwin2/raw"
+          },
+          "split_file": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+          "splits": [
+            "train",
+            "dev"
+          ],
+          "train_split": "train",
+          "dev_split": "dev",
+          "window": {
+            "burn_in": 16,
+            "gradient": 32,
+            "stride": 16,
+            "supervision_points": 4
+          },
+          "proprio_history": 2,
+          "dev_windows": 2,
+          "norm_stats": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/dataset_statistics.json",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+          }
+        },
+        "model": {
+          "name": "owac-n04-v1.1-convnext-base",
+          "builder": "owac.frameworks.n04.encoder_v11:build_encoder",
+          "input_mode": "rawvla_raw3",
+          "backbone": "convnext_base",
+          "depths": [
+            3,
+            3,
+            27,
+            3
+          ],
+          "dims": [
+            128,
+            256,
+            512,
+            1024
+          ],
+          "fusion_channels": 256,
+          "fusion_stride": 4,
+          "raft_small": false,
+          "raft_iterations": 12,
+          "supports_per_camera": 128,
+          "state_dim": 512,
+          "observation_dim": 256,
+          "readout_blocks": 6,
+          "tokens_per_camera": 256,
+          "token_dim": 2048,
+          "gradient_checkpointing": false,
+          "modules": {
+            "correspondence": true,
+            "state_estimator": true,
+            "dual_mode": true,
+            "readout": true
+          },
+          "proprio_dim": 42,
+          "scale_name": "robotwin_float_linear",
+          "saturation_level": 3.5,
+          "raft_resize_hw": [
+            120,
+            160
+          ]
+        },
+        "backend": {
+          "builder": "owac.training.n04_v11:build_pi05_backend",
+          "tokenizer": "/workspace/owac/rawvla/checkpoints/tokenizers/paligemma_tokenizer.model",
+          "checkpoints": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/bfloat16/model.safetensors",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+          },
+          "action_dim": 32,
+          "num_denoise_steps": 10,
+          "adapter": {
+            "lora": {
+              "enabled": true,
+              "rank": 16,
+              "alpha": 16.0,
+              "targets": [
+                "self_attn.q_proj",
+                "self_attn.k_proj",
+                "self_attn.v_proj",
+                "self_attn.o_proj"
+              ]
+            },
+            "trainable_prefixes": [
+              "action_head."
+            ]
+          }
+        },
+        "loss": {
+          "weights": {
+            "action": 1.0,
+            "correspondence": 0.1,
+            "forecast": 0.1,
+            "representation": 0.01
+          },
+          "forecast": true,
+          "forecast_horizons": [
+            1,
+            2,
+            4
+          ],
+          "forecast_anchor_stride": 1,
+          "forecast_diagnostics_every": 1
+        },
+        "optim": {
+          "batch": 8,
+          "micro_batch": 1,
+          "steps": 2000,
+          "warmup_steps": 200,
+          "min_lr_ratio": 0.0,
+          "grad_clip": 1.0,
+          "amp": true,
+          "amp_dtype": "bfloat16",
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "unmatched": "pi05_adapt",
+          "groups": [
+            {
+              "name": "convnext",
+              "lr": 0.0001,
+              "weight_decay": 0.05,
+              "patterns": [
+                "encoder.measurement",
+                "backbone",
+                "convnext"
+              ]
+            },
+            {
+              "name": "raft_state_readout",
+              "lr": 0.0003,
+              "weight_decay": 0.05,
+              "patterns": [
+                "raft",
+                "correspondence",
+                "state",
+                "support",
+                "quality",
+                "evidence",
+                "readout"
+              ]
+            },
+            {
+              "name": "pi05_lora",
+              "lr": 1e-05,
+              "weight_decay": 0.05,
+              "patterns": [
+                "lora_a",
+                "lora_b"
+              ]
+            },
+            {
+              "name": "pi05_adapt",
+              "lr": 1e-05,
+              "weight_decay": 0.0,
+              "patterns": [
+                "action_head"
+              ]
+            }
+          ],
+          "micro_batch_note": "\u9010\u76d1\u7763\u70b9 backward \u540e micro_batch \u4e0d\u518d\u51b3\u5b9a\u663e\u5b58\uff1b\u6709\u6548 batch \u4ecd\u662f optim.batch \u6bb5\u7a97\u53e3",
+          "fused": true
+        },
+        "monitor": {
+          "log_every": 1,
+          "checkpoint_every": 10,
+          "eval_every": 25,
+          "profile": false,
+          "initial_dev": true,
+          "checkpoint_first": true,
+          "save_best": true,
+          "keep_checkpoints": 2,
+          "eval_every_early": 5,
+          "early_until": 100
+        },
+        "eval": {
+          "list": "configs/n04/v1_1/eval100.json",
+          "planned": 50,
+          "lighting_domains": [
+            "ExtremeLow",
+            "Low",
+            "Normal",
+            "Over",
+            "ExtremeOver"
+          ]
+        },
+        "closed_loop": {
+          "command": [],
+          "cwd": null,
+          "timeout_seconds": 900,
+          "note": "\u628a\u5355 episode \u4ea4\u7ed9\u73b0\u6709 LIBERO/RoboTwin \u6267\u884c\u5668\uff1acommand \u7528 {entry} {artifacts} {checkpoint} {platform} \u5360\u4f4d\uff0c\u6267\u884c\u5668\u5728 artifacts \u91cc\u5199 result.json(status/success)\uff1brt=124 \u89c6\u4e3a\u8d85\u65f6\u5931\u8d25"
+        },
+        "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+        "notes": "Codex-owned repair-v3 training. Fresh initialization; old v2 checkpoints are historical. First budget: 2000 optimizer updates, 200 warmup; preserve effective batch8 and all model/loss contracts. Reassess using fixed-dev trends.",
+        "run": "v1.1/s2/robotwin-D-seed101",
+        "performance": {
+          "rkn_checkpoint": false,
+          "cudnn_benchmark": true,
+          "preload_window": true,
+          "compile_banded": false,
+          "compile_readout": true,
+          "prefetch_windows": true,
+          "verified_joint_backward": true,
+          "compile_prediction": true,
+          "compile_measurement": true,
+          "compile_raft_update": true
+        },
+        "owner": "Codex"
+      },
+      "pid": 563070,
+      "process_alive": true,
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-compiled-r3-20261016",
+      "source_manifest_sha256": "23d7699a4505366f497d0f57dc74ed00fff4657e4490ffefa0b9b07482b2cd04",
+      "checkpoints": [
+        {
+          "name": "checkpoint-best.pt",
+          "bytes": 10831852973
+        },
+        {
+          "name": "checkpoint-step0000001.pt",
+          "bytes": 10831885497
+        }
+      ],
+      "latest_metrics": [
+        {
+          "step": 1,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 3.659693419933319,
+          "dev_loss": 2.453131318092346,
+          "terms": {
+            "action": 3.265705168247223,
+            "correspondence": 2.537872165441513,
+            "forecast": 1.3035174906253815,
+            "representation": 0.9849262461066246
+          },
+          "applied_train_loss": 3.659693419933319,
+          "applied_terms": {
+            "action": 3.265705168247223,
+            "correspondence": 2.537872165441513,
+            "forecast": 1.3035174906253815,
+            "representation": 0.9849262461066246
+          },
+          "lr": 1.0000000000000002e-06,
+          "step_seconds": 227.80795646458864,
+          "gpu_memory_gb": 76.02597632,
+          "gpu_live_gb": 12.825898496,
+          "gpu_reserved_gb": 76.560728064,
+          "forecast_diag": {
+            "h1_forecast_quad": 16.19508815837163,
+            "h1_forecast_logdet": 119.24811223758164,
+            "h1_forecast_mode_w0": 0.9482607090825677,
+            "h1_forecast_mode_w1": 0.051739340773232834,
+            "h1_forecast_S_mean": 1.641429435662044,
+            "h1_forecast_S_min": 1.3487687221457882,
+            "h1_forecast_S_max": 2.3099716988302044,
+            "h1_forecast_R_mean": 1.0015759951965784,
+            "h1_forecast_R_min": 0.8246499094110662,
+            "h1_forecast_R_max": 1.1981087113900852,
+            "h2_forecast_quad": 27.29271739853753,
+            "h2_forecast_logdet": 157.56575065188937,
+            "h2_forecast_mode_w0": 0.9165395237505436,
+            "h2_forecast_mode_w1": 0.0834604738280177,
+            "h2_forecast_S_mean": 1.9122307635015914,
+            "h2_forecast_S_min": 1.5954512283205986,
+            "h2_forecast_S_max": 2.526304942038324,
+            "h2_forecast_R_mean": 1.0015741540326013,
+            "h2_forecast_R_min": 0.8280765329798063,
+            "h2_forecast_R_max": 1.1943002596497536,
+            "h4_forecast_quad": 53.87617009026664,
+            "h4_forecast_logdet": 227.66408470698767,
+            "h4_forecast_mode_w0": 0.8822916897812061,
+            "h4_forecast_mode_w1": 0.11770832503125782,
+            "h4_forecast_S_mean": 2.512200212904385,
+            "h4_forecast_S_min": 2.1528197306962245,
+            "h4_forecast_S_max": 3.089860582635516,
+            "h4_forecast_R_mean": 1.0015715584158897,
+            "h4_forecast_R_min": 0.8331557311827228,
+            "h4_forecast_R_max": 1.1883301316272643
+          },
+          "updated_at": "2026-10-16T04:04:10Z"
+        },
+        {
+          "step": 2,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 3.683483138680458,
+          "dev_loss": 2.453131318092346,
+          "terms": {
+            "action": 3.3212296068668365,
+            "correspondence": 2.2277557998895645,
+            "forecast": 1.2967616468667984,
+            "representation": 0.9801891669631004
+          },
+          "applied_train_loss": 3.683483138680458,
+          "applied_terms": {
+            "action": 3.3212296068668365,
+            "correspondence": 2.2277557998895645,
+            "forecast": 1.2967616468667984,
+            "representation": 0.9801891669631004
+          },
+          "lr": 1.5e-06,
+          "step_seconds": 216.3771513812244,
+          "gpu_memory_gb": 79.549835264,
+          "gpu_live_gb": 12.825898496,
+          "gpu_reserved_gb": 80.09023488,
+          "forecast_diag": {
+            "h1_forecast_quad": 15.469495568224179,
+            "h1_forecast_logdet": 118.56727522162979,
+            "h1_forecast_mode_w0": 0.948522602358172,
+            "h1_forecast_mode_w1": 0.0514774192024463,
+            "h1_forecast_S_mean": 1.6382049469537634,
+            "h1_forecast_S_min": 1.2691237288777546,
+            "h1_forecast_S_max": 2.379208194632684,
+            "h1_forecast_R_mean": 1.0018596213351012,
+            "h1_forecast_R_min": 0.7667316270451392,
+            "h1_forecast_R_max": 1.2785060743811312,
+            "h2_forecast_quad": 25.114426185025106,
+            "h2_forecast_logdet": 156.94394446478952,
+            "h2_forecast_mode_w0": 0.9166383509834608,
+            "h2_forecast_mode_w1": 0.08336166152730584,
+            "h2_forecast_S_mean": 1.9087217930290437,
+            "h2_forecast_S_min": 1.51645235137807,
+            "h2_forecast_S_max": 2.5997070865498646,
+            "h2_forecast_R_mean": 1.0018580908576649,
+            "h2_forecast_R_min": 0.7733652622335487,
+            "h2_forecast_R_max": 1.2711049868000879,
+            "h4_forecast_quad": 48.198200310979566,
+            "h4_forecast_logdet": 226.9778472355434,
+            "h4_forecast_mode_w0": 0.8823624523800044,
+            "h4_forecast_mode_w1": 0.11763757323136644,
+            "h4_forecast_S_mean": 2.5063785640966323,
+            "h4_forecast_S_min": 2.0753819344653968,
+            "h4_forecast_S_max": 3.165441140532494,
+            "h4_forecast_R_mean": 1.0018546760437035,
+            "h4_forecast_R_min": 0.781175981763573,
+            "h4_forecast_R_max": 1.2608930252137638
+          },
+          "updated_at": "2026-10-16T04:07:34Z"
+        },
+        {
+          "step": 3,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 2.8862388655543327,
+          "dev_loss": 2.453131318092346,
+          "terms": {
+            "action": 2.4958459585905075,
+            "correspondence": 2.506284534931183,
+            "forecast": 1.2994752079248428,
+            "representation": 0.9816982746124268
+          },
+          "applied_train_loss": 2.8862388655543327,
+          "applied_terms": {
+            "action": 2.4958459585905075,
+            "correspondence": 2.506284534931183,
+            "forecast": 1.2994752079248428,
+            "representation": 0.9816982746124268
+          },
+          "lr": 2.0000000000000003e-06,
+          "step_seconds": 210.46025030935803,
+          "gpu_memory_gb": 79.549835264,
+          "gpu_live_gb": 12.825897984,
+          "gpu_reserved_gb": 80.09023488,
+          "forecast_diag": {
+            "h1_forecast_quad": 15.998746948857463,
+            "h1_forecast_logdet": 118.78293607568227,
+            "h1_forecast_mode_w0": 0.9484927119106374,
+            "h1_forecast_mode_w1": 0.05150733518123787,
+            "h1_forecast_S_mean": 1.639119355909286,
+            "h1_forecast_S_min": 1.322156475756758,
+            "h1_forecast_S_max": 2.3106263670870053,
+            "h1_forecast_R_mean": 1.0015853052177737,
+            "h1_forecast_R_min": 0.8038911179348986,
+            "h1_forecast_R_max": 1.2295858528344863,
+            "h2_forecast_quad": 26.069082176685335,
+            "h2_forecast_logdet": 157.16292690700956,
+            "h2_forecast_mode_w0": 0.9166299440794521,
+            "h2_forecast_mode_w1": 0.08337005195725294,
+            "h2_forecast_S_mean": 1.9099265530705454,
+            "h2_forecast_S_min": 1.569627659685082,
+            "h2_forecast_S_max": 2.538032247291671,
+            "h2_forecast_R_mean": 1.0015845810373625,
+            "h2_forecast_R_min": 0.8071469937761624,
+            "h2_forecast_R_max": 1.2254899758431645,
+            "h4_forecast_quad": 50.29419588475,
+            "h4_forecast_logdet": 227.18631490071616,
+            "h4_forecast_mode_w0": 0.8823235834106095,
+            "h4_forecast_mode_w1": 0.11767642635719053,
+            "h4_forecast_S_mean": 2.5081376525617785,
+            "h4_forecast_S_min": 2.1281038089877087,
+            "h4_forecast_S_max": 3.142990336176895,
+            "h4_forecast_R_mean": 1.0015845898361433,
+            "h4_forecast_R_min": 0.8117173971342189,
+            "h4_forecast_R_max": 1.2199135715407985
+          },
+          "updated_at": "2026-10-16T04:10:53Z"
+        },
+        {
+          "step": 4,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 2.267034888267517,
+          "dev_loss": 2.453131318092346,
+          "terms": {
+            "action": 1.8801922649145126,
+            "correspondence": 2.472283437848091,
+            "forecast": 1.2981483936309814,
+            "representation": 0.97994414716959
+          },
+          "applied_train_loss": 2.267034888267517,
+          "applied_terms": {
+            "action": 1.8801922649145126,
+            "correspondence": 2.472283437848091,
+            "forecast": 1.2981483936309814,
+            "representation": 0.97994414716959
+          },
+          "lr": 2.5e-06,
+          "step_seconds": 209.18699802272022,
+          "gpu_memory_gb": 79.549835776,
+          "gpu_live_gb": 12.825897472,
+          "gpu_reserved_gb": 80.09023488,
+          "forecast_diag": {
+            "h1_forecast_quad": 16.04260106240549,
+            "h1_forecast_logdet": 118.26830562468498,
+            "h1_forecast_mode_w0": 0.9487677812576295,
+            "h1_forecast_mode_w1": 0.05123222436535583,
+            "h1_forecast_S_mean": 1.6360287445206796,
+            "h1_forecast_S_min": 1.2750827804688483,
+            "h1_forecast_S_max": 2.3083005698137384,
+            "h1_forecast_R_mean": 1.0017642502182273,
+            "h1_forecast_R_min": 0.7699374559745994,
+            "h1_forecast_R_max": 1.2678800045803031,
+            "h2_forecast_quad": 25.994276200400456,
+            "h2_forecast_logdet": 156.65248254140215,
+            "h2_forecast_mode_w0": 0.9168109238147736,
+            "h2_forecast_mode_w1": 0.08318908907887008,
+            "h2_forecast_S_mean": 1.9063649536834821,
+            "h2_forecast_S_min": 1.5207167949941423,
+            "h2_forecast_S_max": 2.547454310456912,
+            "h2_forecast_R_mean": 1.0017656203773284,
+            "h2_forecast_R_min": 0.7730160762038496,
+            "h2_forecast_R_max": 1.2638966765668658,
+            "h4_forecast_quad": 49.891794917129324,
+            "h4_forecast_logdet": 226.58290007000878,
+            "h4_forecast_mode_w0": 0.8823895254837615,
+            "h4_forecast_mode_w1": 0.11761048951718424,
+            "h4_forecast_S_mean": 2.5024810958476293,
+            "h4_forecast_S_min": 2.077166030981711,
+            "h4_forecast_S_max": 3.1693269319477535,
+            "h4_forecast_R_mean": 1.0017692767793225,
+            "h4_forecast_R_min": 0.7777400108142978,
+            "h4_forecast_R_max": 1.2578400419581504
+          },
+          "updated_at": "2026-10-16T04:14:18Z"
+        },
+        {
+          "step": 5,
+          "phase": "train",
+          "loss_definition": "v1_1_s2_live_forecast_observation_vicreg_v3",
+          "train_loss": 1.5383436381816864,
+          "dev_loss": 0.6794120073318481,
+          "terms": {
+            "action": 1.1654032841324806,
+            "correspondence": 2.3413892090320587,
+            "forecast": 1.2905624955892563,
+            "representation": 0.9745176509022713
+          },
+          "applied_train_loss": 1.5383436381816864,
+          "applied_terms": {
+            "action": 1.1654032841324806,
+            "correspondence": 2.3413892090320587,
+            "forecast": 1.2905624955892563,
+            "representation": 0.9745176509022713
+          },
+          "lr": 3e-06,
+          "step_seconds": 217.21846803724765,
+          "gpu_memory_gb": 79.549835776,
+          "gpu_live_gb": 12.825897472,
+          "gpu_reserved_gb": 80.09023488,
+          "forecast_diag": {
+            "h1_forecast_quad": 15.190064328973012,
+            "h1_forecast_logdet": 117.4117436357724,
+            "h1_forecast_mode_w0": 0.9490456176541185,
+            "h1_forecast_mode_w1": 0.050954405108206376,
+            "h1_forecast_S_mean": 1.6316698379414054,
+            "h1_forecast_S_min": 1.2501828024784725,
+            "h1_forecast_S_max": 2.3781574523897584,
+            "h1_forecast_R_mean": 1.0016504188058195,
+            "h1_forecast_R_min": 0.753075974282398,
+            "h1_forecast_R_max": 1.2986839559449945,
+            "h2_forecast_quad": 23.646021914482116,
+            "h2_forecast_logdet": 155.8024588902791,
+            "h2_forecast_mode_w0": 0.9169232459531891,
+            "h2_forecast_mode_w1": 0.08307682705215282,
+            "h2_forecast_S_mean": 1.9011664981643361,
+            "h2_forecast_S_min": 1.4915322398145996,
+            "h2_forecast_S_max": 2.6232249465253616,
+            "h2_forecast_R_mean": 1.001650839050611,
+            "h2_forecast_R_min": 0.7548316499425305,
+            "h2_forecast_R_max": 1.2962478521797391,
+            "h4_forecast_quad": 44.09276467845553,
+            "h4_forecast_logdet": 225.4363167399452,
+            "h4_forecast_mode_w0": 0.8824658545532398,
+            "h4_forecast_mode_w1": 0.11753413503590439,
+            "h4_forecast_S_mean": 2.492152250593617,
+            "h4_forecast_S_min": 2.041275986248538,
+            "h4_forecast_S_max": 3.227697424235798,
+            "h4_forecast_R_mean": 1.0016502612048672,
+            "h4_forecast_R_min": 0.7570762134024075,
+            "h4_forecast_R_max": 1.2930879816412926
+          },
+          "updated_at": "2026-10-16T04:18:28Z"
+        }
+      ]
+    }
+  },
+  "supervisor": "owac-n04-codex-libero            RUNNING   pid 563833, uptime 0:09:14\nowac-n04-codex-robotwin          RUNNING   pid 563070, uptime 0:19:40\nowac-n04-codex-monitor           RUNNING   pid 564551, uptime 0:07:00\n",
+  "gpu": "0, NVIDIA RTX PRO 6000 Blackwell Server Edition, 33 %, 53059 MiB, 97887 MiB, 126.88 W, 600.00 W\n1, NVIDIA RTX PRO 6000 Blackwell Server Edition, 24 %, 78163 MiB, 97887 MiB, 108.12 W, 600.00 W\n",
+  "dashboard_health": "{\n  \"ok\": true,\n  \"sampled_at\": \"2026-10-16T04:18:52Z\",\n  \"runs\": 2,\n  \"error\": null\n}"
+}

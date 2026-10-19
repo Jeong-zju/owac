@@ -1,0 +1,13 @@
+[Unit]
+Description=OWAC N04 private training monitor SSH tunnel
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh -N -T -o BatchMode=yes -o StrictHostKeyChecking=yes -o ExitOnForwardFailure=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -p 16724 -L 127.0.0.1:8090:127.0.0.1:8090 root@154.59.156.22
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

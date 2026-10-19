@@ -1,0 +1,501 @@
+{
+  "captured_utc": "2026-10-19T02:25:14.256583+00:00",
+  "host_environment": "Linux-6.8.0-87-generic-x86_64-with-glibc2.39",
+  "jobs": {
+    "libero": {
+      "config": {
+        "schema": "n04-v1.1-s2-v1",
+        "stage": "S2",
+        "platform": "libero",
+        "arm": "D",
+        "seed": 101,
+        "device": "cuda:0",
+        "data": {
+          "root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+          "platform_dirs": {
+            "libero": "libero/raw",
+            "robotwin": "robotwin2/raw"
+          },
+          "split_file": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+          "splits": [
+            "train",
+            "dev"
+          ],
+          "train_split": "train",
+          "dev_split": "dev",
+          "window": {
+            "burn_in": 16,
+            "gradient": 32,
+            "stride": 16,
+            "supervision_points": 4
+          },
+          "proprio_history": 2,
+          "dev_windows": 2,
+          "norm_stats": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/dataset_statistics.json",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+          }
+        },
+        "model": {
+          "name": "owac-n04-v1.1-convnext-base",
+          "builder": "owac.frameworks.n04.encoder_v11:build_encoder",
+          "input_mode": "rawvla_raw3",
+          "backbone": "convnext_base",
+          "depths": [
+            3,
+            3,
+            27,
+            3
+          ],
+          "dims": [
+            128,
+            256,
+            512,
+            1024
+          ],
+          "fusion_channels": 256,
+          "fusion_stride": 4,
+          "raft_small": false,
+          "raft_iterations": 12,
+          "supports_per_camera": 128,
+          "state_dim": 512,
+          "observation_dim": 256,
+          "readout_blocks": 6,
+          "tokens_per_camera": 256,
+          "token_dim": 2048,
+          "gradient_checkpointing": false,
+          "modules": {
+            "correspondence": true,
+            "state_estimator": true,
+            "dual_mode": true,
+            "readout": true
+          },
+          "proprio_dim": 24,
+          "scale_name": "libero_uint8",
+          "saturation_level": 1.0,
+          "raft_resize_hw": [
+            128,
+            128
+          ],
+          "transition_init": "identity",
+          "readout": {
+            "prefix_fp32": true
+          },
+          "measurement_padding_mode": "replicate",
+          "observation_normalization": "rms",
+          "transition_norm_limit": 1.0,
+          "correspondence_boundary_weight": 1.0
+        },
+        "backend": {
+          "builder": "owac.training.n04_v11:build_pi05_backend",
+          "tokenizer": "/workspace/owac/rawvla/checkpoints/tokenizers/paligemma_tokenizer.model",
+          "checkpoints": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/bfloat16/model.safetensors",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+          },
+          "action_dim": 32,
+          "num_denoise_steps": 10,
+          "adapter": {
+            "lora": {
+              "enabled": true,
+              "rank": 16,
+              "alpha": 16.0,
+              "targets": [
+                "self_attn.q_proj",
+                "self_attn.k_proj",
+                "self_attn.v_proj",
+                "self_attn.o_proj"
+              ]
+            },
+            "trainable_prefixes": [
+              "action_head."
+            ]
+          }
+        },
+        "loss": {
+          "weights": {
+            "action": 1.0,
+            "correspondence": 0.1,
+            "forecast": 0.1,
+            "representation": 0.1
+          },
+          "forecast": true,
+          "forecast_horizons": [
+            1,
+            2,
+            4
+          ],
+          "forecast_anchor_stride": 1,
+          "forecast_diagnostics_every": 1,
+          "representation_mode": "independent_windows",
+          "representation": {
+            "variance_weight": 25.0,
+            "covariance_weight": 1.0
+          },
+          "forecast_max_variance": 1000.0,
+          "require_all_objectives": true
+        },
+        "optim": {
+          "batch": 8,
+          "micro_batch": 1,
+          "steps": 2000,
+          "warmup_steps": 200,
+          "min_lr_ratio": 0.0,
+          "grad_clip": 1.0,
+          "amp": true,
+          "amp_dtype": "bfloat16",
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "unmatched": "pi05_adapt",
+          "groups": [
+            {
+              "name": "convnext",
+              "lr": 0.0001,
+              "weight_decay": 0.05,
+              "patterns": [
+                "encoder.measurement",
+                "backbone",
+                "convnext"
+              ]
+            },
+            {
+              "name": "raft_state_readout",
+              "lr": 0.0003,
+              "weight_decay": 0.05,
+              "patterns": [
+                "raft",
+                "correspondence",
+                "state",
+                "support",
+                "quality",
+                "evidence",
+                "readout"
+              ]
+            },
+            {
+              "name": "pi05_lora",
+              "lr": 1e-05,
+              "weight_decay": 0.05,
+              "patterns": [
+                "lora_a",
+                "lora_b"
+              ]
+            },
+            {
+              "name": "pi05_adapt",
+              "lr": 1e-05,
+              "weight_decay": 0.0,
+              "patterns": [
+                "action_head"
+              ]
+            }
+          ],
+          "micro_batch_note": "\u9010\u76d1\u7763\u70b9 backward \u540e micro_batch \u4e0d\u518d\u51b3\u5b9a\u663e\u5b58\uff1b\u6709\u6548 batch \u4ecd\u662f optim.batch \u6bb5\u7a97\u53e3",
+          "fused": true
+        },
+        "monitor": {
+          "log_every": 1,
+          "checkpoint_every": 10,
+          "eval_every": 25,
+          "profile": false,
+          "initial_dev": true,
+          "checkpoint_first": true,
+          "save_best": true,
+          "keep_checkpoints": 2,
+          "eval_every_early": 5,
+          "early_until": 100,
+          "auxiliary_dev": true
+        },
+        "eval": {
+          "list": "configs/n04/v1_1/eval100.json",
+          "planned": 50,
+          "lighting_domains": [
+            "ExtremeLow",
+            "Low",
+            "Normal",
+            "Over",
+            "ExtremeOver"
+          ]
+        },
+        "closed_loop": {
+          "command": [],
+          "cwd": null,
+          "timeout_seconds": 900,
+          "note": "\u628a\u5355 episode \u4ea4\u7ed9\u73b0\u6709 LIBERO/RoboTwin \u6267\u884c\u5668\uff1acommand \u7528 {entry} {artifacts} {checkpoint} {platform} \u5360\u4f4d\uff0c\u6267\u884c\u5668\u5728 artifacts \u91cc\u5199 result.json(status/success)\uff1brt=124 \u89c6\u4e3a\u8d85\u65f6\u5931\u8d25"
+        },
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "notes": "Fresh seed101; no v4 weights resumed. Fixed latent RMS and assembled RKN operator norm; out-of-image geometric objective retains gradients without declaring invalid matches valid. Require all positive-weight objectives before updates. Full capacity, official data, batch8 and warmup200 retained.",
+        "run": "v1.1/codex-s2/libero-D-stable-v5-seed101",
+        "performance": {
+          "rkn_checkpoint": false,
+          "cudnn_benchmark": true,
+          "preload_window": true,
+          "compile_banded": false,
+          "compile_readout": true,
+          "prefetch_windows": true,
+          "verified_joint_backward": true,
+          "compile_prediction": true,
+          "compile_measurement": true,
+          "compile_raft_update": true
+        },
+        "owner": "Codex"
+      },
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-verified-20261019",
+      "supervisor": "owac-n04-v5-validate-libero      RUNNING   pid 779043, uptime 0:05:19\n"
+    },
+    "robotwin": {
+      "config": {
+        "schema": "n04-v1.1-s2-v1",
+        "stage": "S2",
+        "platform": "robotwin",
+        "arm": "D",
+        "seed": 101,
+        "device": "cuda:0",
+        "data": {
+          "root": "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+          "platform_dirs": {
+            "libero": "libero/raw",
+            "robotwin": "robotwin2/raw"
+          },
+          "split_file": "research/experiments/results/2026-10-14_n04_manifest/splits.json",
+          "splits": [
+            "train",
+            "dev"
+          ],
+          "train_split": "train",
+          "dev_split": "dev",
+          "window": {
+            "burn_in": 16,
+            "gradient": 32,
+            "stride": 16,
+            "supervision_points": 4
+          },
+          "proprio_history": 2,
+          "dev_windows": 2,
+          "norm_stats": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/dataset_statistics.json",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/policy_norm_stats.json"
+          }
+        },
+        "model": {
+          "name": "owac-n04-v1.1-convnext-base",
+          "builder": "owac.frameworks.n04.encoder_v11:build_encoder",
+          "input_mode": "rawvla_raw3",
+          "backbone": "convnext_base",
+          "depths": [
+            3,
+            3,
+            27,
+            3
+          ],
+          "dims": [
+            128,
+            256,
+            512,
+            1024
+          ],
+          "fusion_channels": 256,
+          "fusion_stride": 4,
+          "raft_small": false,
+          "raft_iterations": 12,
+          "supports_per_camera": 128,
+          "state_dim": 512,
+          "observation_dim": 256,
+          "readout_blocks": 6,
+          "tokens_per_camera": 256,
+          "token_dim": 2048,
+          "gradient_checkpointing": false,
+          "modules": {
+            "correspondence": true,
+            "state_estimator": true,
+            "dual_mode": true,
+            "readout": true
+          },
+          "proprio_dim": 42,
+          "scale_name": "robotwin_float_linear",
+          "saturation_level": 3.5,
+          "raft_resize_hw": [
+            120,
+            160
+          ],
+          "transition_init": "identity",
+          "readout": {
+            "prefix_fp32": true
+          },
+          "measurement_padding_mode": "replicate",
+          "observation_normalization": "rms",
+          "transition_norm_limit": 1.0,
+          "correspondence_boundary_weight": 1.0
+        },
+        "backend": {
+          "builder": "owac.training.n04_v11:build_pi05_backend",
+          "tokenizer": "/workspace/owac/rawvla/checkpoints/tokenizers/paligemma_tokenizer.model",
+          "checkpoints": {
+            "libero": "/workspace/owac/rawvla/checkpoints/starvla_pi05_libero/bfloat16/model.safetensors",
+            "robotwin": "/workspace/owac/rawvla/checkpoints/pi05_robotwin/model.safetensors"
+          },
+          "action_dim": 32,
+          "num_denoise_steps": 10,
+          "adapter": {
+            "lora": {
+              "enabled": true,
+              "rank": 16,
+              "alpha": 16.0,
+              "targets": [
+                "self_attn.q_proj",
+                "self_attn.k_proj",
+                "self_attn.v_proj",
+                "self_attn.o_proj"
+              ]
+            },
+            "trainable_prefixes": [
+              "action_head."
+            ]
+          }
+        },
+        "loss": {
+          "weights": {
+            "action": 1.0,
+            "correspondence": 0.1,
+            "forecast": 0.1,
+            "representation": 0.1
+          },
+          "forecast": true,
+          "forecast_horizons": [
+            1,
+            2,
+            4
+          ],
+          "forecast_anchor_stride": 1,
+          "forecast_diagnostics_every": 1,
+          "representation_mode": "independent_windows",
+          "representation": {
+            "variance_weight": 25.0,
+            "covariance_weight": 1.0
+          },
+          "forecast_max_variance": 1000.0,
+          "require_all_objectives": true
+        },
+        "optim": {
+          "batch": 8,
+          "micro_batch": 1,
+          "steps": 2000,
+          "warmup_steps": 200,
+          "min_lr_ratio": 0.0,
+          "grad_clip": 1.0,
+          "amp": true,
+          "amp_dtype": "bfloat16",
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "unmatched": "pi05_adapt",
+          "groups": [
+            {
+              "name": "convnext",
+              "lr": 0.0001,
+              "weight_decay": 0.05,
+              "patterns": [
+                "encoder.measurement",
+                "backbone",
+                "convnext"
+              ]
+            },
+            {
+              "name": "raft_state_readout",
+              "lr": 0.0003,
+              "weight_decay": 0.05,
+              "patterns": [
+                "raft",
+                "correspondence",
+                "state",
+                "support",
+                "quality",
+                "evidence",
+                "readout"
+              ]
+            },
+            {
+              "name": "pi05_lora",
+              "lr": 1e-05,
+              "weight_decay": 0.05,
+              "patterns": [
+                "lora_a",
+                "lora_b"
+              ]
+            },
+            {
+              "name": "pi05_adapt",
+              "lr": 1e-05,
+              "weight_decay": 0.0,
+              "patterns": [
+                "action_head"
+              ]
+            }
+          ],
+          "micro_batch_note": "\u9010\u76d1\u7763\u70b9 backward \u540e micro_batch \u4e0d\u518d\u51b3\u5b9a\u663e\u5b58\uff1b\u6709\u6548 batch \u4ecd\u662f optim.batch \u6bb5\u7a97\u53e3",
+          "fused": true
+        },
+        "monitor": {
+          "log_every": 1,
+          "checkpoint_every": 10,
+          "eval_every": 25,
+          "profile": false,
+          "initial_dev": true,
+          "checkpoint_first": true,
+          "save_best": true,
+          "keep_checkpoints": 2,
+          "eval_every_early": 5,
+          "early_until": 100,
+          "auxiliary_dev": true
+        },
+        "eval": {
+          "list": "configs/n04/v1_1/eval100.json",
+          "planned": 50,
+          "lighting_domains": [
+            "ExtremeLow",
+            "Low",
+            "Normal",
+            "Over",
+            "ExtremeOver"
+          ]
+        },
+        "closed_loop": {
+          "command": [],
+          "cwd": null,
+          "timeout_seconds": 900,
+          "note": "\u628a\u5355 episode \u4ea4\u7ed9\u73b0\u6709 LIBERO/RoboTwin \u6267\u884c\u5668\uff1acommand \u7528 {entry} {artifacts} {checkpoint} {platform} \u5360\u4f4d\uff0c\u6267\u884c\u5668\u5728 artifacts \u91cc\u5199 result.json(status/success)\uff1brt=124 \u89c6\u4e3a\u8d85\u65f6\u5931\u8d25"
+        },
+        "loss_definition": "v1_1_s2_normalized_latent_bounded_transition_v5",
+        "notes": "Fresh seed101; no v4 weights resumed. Fixed latent RMS and assembled RKN operator norm; out-of-image geometric objective retains gradients without declaring invalid matches valid. Require all positive-weight objectives before updates. Full capacity, official data, batch8 and warmup200 retained.",
+        "run": "v1.1/codex-s2/robotwin-D-stable-v5-seed101",
+        "performance": {
+          "rkn_checkpoint": false,
+          "cudnn_benchmark": true,
+          "preload_window": true,
+          "compile_banded": false,
+          "compile_readout": true,
+          "prefetch_windows": true,
+          "verified_joint_backward": true,
+          "compile_prediction": true,
+          "compile_measurement": true,
+          "compile_raft_update": true
+        },
+        "owner": "Codex"
+      },
+      "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-verified-20261019",
+      "supervisor": "owac-n04-v5-validate-robotwin    RUNNING   pid 779056, uptime 0:05:16\n"
+    }
+  },
+  "gpu": "0, NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 97887 MiB\n1, NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 97887 MiB\n",
+  "cpu": {
+    "count": 256
+  },
+  "memory": [
+    "MemTotal:       1056422100 kB",
+    "MemFree:        596414708 kB",
+    "MemAvailable:   953601444 kB"
+  ]
+}

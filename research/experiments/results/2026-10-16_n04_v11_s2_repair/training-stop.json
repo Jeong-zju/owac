@@ -1,0 +1,227 @@
+{
+  "stopped_at": "2026-10-16T02:36:09Z",
+  "reason": "user requested stop all N04 training and prioritize code/implementation repairs; no restart authorized",
+  "processes_signalled": [
+    {
+      "pid": 406601,
+      "args": [
+        "/workspace/owac/research/n04-v1/envs/n04v11/bin/python",
+        "-m",
+        "owac.training.n04_v11",
+        "--config",
+        "/workspace/owac/research/n04-v1/source/n04-v11-20261015T165752Z-a81cf25/configs/n04/v1_1/s2_launch_libero_D.json",
+        "--data-root",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/v1.1/s2/libero-D-seed101",
+        "--seed",
+        "101",
+        "--device",
+        "cuda:0"
+      ]
+    },
+    {
+      "pid": 541847,
+      "args": [
+        "/workspace/owac/research/n04-v1/envs/n04v11/bin/python",
+        "-m",
+        "owac.training.n04_v11",
+        "--config",
+        "/workspace/owac/research/n04-v1/source/n04-v11-20261015T165752Z-a81cf25/configs/n04/v1_1/s2_launch_robotwin_D.json",
+        "--data-root",
+        "/workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data",
+        "--output",
+        "/workspace/owac/research/n04-v1/runs/v1.1/s2/robotwin-D-seed101",
+        "--seed",
+        "101",
+        "--device",
+        "cuda:0",
+        "--resume",
+        "/workspace/owac/research/n04-v1/runs/v1.1/s2/robotwin-D-seed101/checkpoint-step0000100.pt"
+      ]
+    }
+  ],
+  "tmux_sessions_terminated": [
+    "n04v11-libero-D101",
+    "n04v11-robotwin-D101"
+  ],
+  "needed_sigkill": [],
+  "progress_before": {
+    "libero": {
+      "stage": "S2",
+      "platform": "libero",
+      "arm": "D",
+      "seed": 101,
+      "phase": "train",
+      "updated_at": "2026-10-16T02:35:15Z",
+      "step": 278,
+      "budget_steps": 100000,
+      "train_loss": 0.6821551769971848,
+      "dev_loss": null,
+      "step_seconds": 130.9885236620903,
+      "gpu_memory_gb": 68.512241152,
+      "eval": {
+        "planned": 50,
+        "completed": 50,
+        "successes": 0,
+        "failures": 50,
+        "errors": 0,
+        "status": "running",
+        "libero": {
+          "completed": 50,
+          "successes": 0,
+          "failures": 50,
+          "errors": 0
+        },
+        "robotwin": {
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0
+        }
+      },
+      "artifacts": [
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000078.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000078.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000079.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000079.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000080.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000080.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000081.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000081.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000082.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000082.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000083.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000083.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000084.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000084.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000085.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_01/frame_0000085.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_02/frame_0000059.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_02/frame_0000059.png",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_02/frame_0000060.json",
+        "artifacts/libero-D-seed101-postfix-step0100/clip_02/frame_0000060.png"
+      ],
+      "log_tail": [
+        "[2026-10-16T01:54:17] step     258 loss=0.6428 action=0.2930 corr=2.1579 fc=1.2411 rep=0.9881 lr=1.30e-05 133.37s",
+        "[2026-10-16T01:56:26] step     259 loss=0.6507 action=0.3070 corr=2.0971 fc=1.2416 rep=0.9881 lr=1.31e-05 129.08s",
+        "[2026-10-16T01:58:31] step     260 loss=0.6561 action=0.3090 corr=2.1313 fc=1.2405 rep=0.9882 lr=1.31e-05 125.22s",
+        "[2026-10-16T02:00:43] step     261 loss=0.6324 action=0.2914 corr=2.0732 fc=1.2375 rep=0.9880 lr=1.32e-05 131.50s",
+        "[2026-10-16T02:02:52] step     262 loss=0.6385 action=0.2968 corr=2.0791 fc=1.2396 rep=0.9883 lr=1.32e-05 129.09s",
+        "[2026-10-16T02:04:55] step     263 loss=0.5609 action=0.2272 corr=2.0014 fc=1.2365 rep=0.9882 lr=1.33e-05 123.60s",
+        "[2026-10-16T02:07:01] step     264 loss=0.6600 action=0.3263 corr=2.0053 fc=1.2325 rep=0.9880 lr=1.33e-05 125.81s",
+        "[2026-10-16T02:09:09] step     265 loss=0.7048 action=0.3581 corr=2.1314 fc=1.2373 rep=0.9882 lr=1.34e-05 127.64s",
+        "[2026-10-16T02:11:19] step     266 loss=0.6621 action=0.3152 corr=2.1317 fc=1.2378 rep=0.9883 lr=1.34e-05 130.32s",
+        "[2026-10-16T02:13:24] step     267 loss=0.6167 action=0.2742 corr=2.0911 fc=1.2348 rep=0.9884 lr=1.35e-05 124.47s",
+        "[2026-10-16T02:15:30] step     268 loss=0.5922 action=0.2439 corr=2.1511 fc=1.2336 rep=0.9883 lr=1.35e-05 125.78s",
+        "[2026-10-16T02:17:35] step     269 loss=0.6305 action=0.2870 corr=2.1026 fc=1.2330 rep=0.9884 lr=1.36e-05 125.76s",
+        "[2026-10-16T02:19:42] step     270 loss=0.6508 action=0.3196 corr=1.9749 fc=1.2382 rep=0.9883 lr=1.36e-05 126.72s",
+        "[2026-10-16T02:21:50] step     271 loss=0.6416 action=0.3060 corr=2.0247 fc=1.2318 rep=0.9882 lr=1.37e-05 127.49s",
+        "[2026-10-16T02:24:05] step     272 loss=0.6902 action=0.3394 corr=2.1733 fc=1.2352 rep=0.9885 lr=1.37e-05 135.48s",
+        "[2026-10-16T02:26:28] step     273 loss=0.6291 action=0.2835 corr=2.1240 fc=1.2325 rep=0.9886 lr=1.38e-05 142.34s",
+        "[2026-10-16T02:28:41] step     274 loss=0.6846 action=0.3408 corr=2.1053 fc=1.2339 rep=0.9884 lr=1.38e-05 133.43s",
+        "[2026-10-16T02:30:52] step     275 loss=0.6710 action=0.3298 corr=2.0832 fc=1.2297 rep=0.9883 lr=1.39e-05 131.32s",
+        "[2026-10-16T02:33:04] step     276 loss=0.6615 action=0.3205 corr=2.0784 fc=1.2328 rep=0.9882 lr=1.39e-05 131.59s",
+        "[2026-10-16T02:35:15] step     277 loss=0.6822 action=0.3388 corr=2.1032 fc=1.2312 rep=0.9882 lr=1.40e-05 130.99s"
+      ],
+      "loss_definition": "v1_1_forecast_perdim_v2"
+    },
+    "robotwin": {
+      "stage": "S2",
+      "platform": "robotwin",
+      "arm": "D",
+      "seed": 101,
+      "phase": "train",
+      "updated_at": "2026-10-16T02:35:44Z",
+      "step": 148,
+      "budget_steps": 100000,
+      "train_loss": 0.6092807725071907,
+      "dev_loss": null,
+      "step_seconds": 163.03885608166456,
+      "gpu_memory_gb": 99.873778688,
+      "eval": {
+        "planned": 50,
+        "completed": 50,
+        "successes": 0,
+        "failures": 50,
+        "errors": 0,
+        "status": "running",
+        "libero": {
+          "completed": 0,
+          "successes": 0,
+          "failures": 0,
+          "errors": 0
+        },
+        "robotwin": {
+          "completed": 50,
+          "successes": 0,
+          "failures": 50,
+          "errors": 0
+        }
+      },
+      "artifacts": [
+        "artifacts/robotwin/robotwin:grab_roller:0:ExtremeLow.mp4",
+        "artifacts/robotwin/robotwin:grab_roller:0:ExtremeOver.mp4",
+        "artifacts/robotwin/robotwin:grab_roller:0:Low.mp4",
+        "artifacts/robotwin/robotwin:grab_roller:0:Normal.mp4",
+        "artifacts/robotwin/robotwin:grab_roller:0:Over.mp4",
+        "artifacts/robotwin/robotwin:handover_mic:23:ExtremeLow.mp4",
+        "artifacts/robotwin/robotwin:handover_mic:23:ExtremeOver.mp4",
+        "artifacts/robotwin/robotwin:handover_mic:23:Low.mp4",
+        "artifacts/robotwin/robotwin:handover_mic:23:Normal.mp4",
+        "artifacts/robotwin/robotwin:handover_mic:23:Over.mp4",
+        "artifacts/robotwin/robotwin:lift_pot:103:ExtremeLow.mp4",
+        "artifacts/robotwin/robotwin:lift_pot:103:ExtremeOver.mp4",
+        "artifacts/robotwin/robotwin:lift_pot:103:Low.mp4",
+        "artifacts/robotwin/robotwin:lift_pot:103:Normal.mp4",
+        "artifacts/robotwin/robotwin:lift_pot:103:Over.mp4",
+        "artifacts/robotwin/robotwin:open_laptop:17:ExtremeLow.mp4",
+        "artifacts/robotwin/robotwin:open_laptop:17:ExtremeOver.mp4",
+        "artifacts/robotwin/robotwin:open_laptop:17:Low.mp4",
+        "artifacts/robotwin/robotwin:open_laptop:17:Normal.mp4",
+        "artifacts/robotwin/robotwin:open_laptop:17:Over.mp4"
+      ],
+      "log_tail": [
+        "[2026-10-16T01:45:31] step     128 loss=0.6006 action=0.2421 corr=2.2034 fc=1.2829 rep=0.9819 lr=6.50e-06 154.68s",
+        "[2026-10-16T01:48:05] step     129 loss=0.8357 action=0.4767 corr=2.2122 fc=1.2801 rep=0.9808 lr=6.55e-06 153.50s",
+        "[2026-10-16T01:50:38] step     130 loss=0.6350 action=0.2713 corr=2.2585 fc=1.2802 rep=0.9813 lr=6.60e-06 153.28s",
+        "[2026-10-16T01:53:16] step     131 loss=0.5953 action=0.2305 corr=2.2661 fc=1.2838 rep=0.9829 lr=6.65e-06 158.19s",
+        "[2026-10-16T01:55:56] step     132 loss=0.6768 action=0.3284 corr=2.1042 fc=1.2811 rep=0.9790 lr=6.70e-06 159.57s",
+        "[2026-10-16T01:58:28] step     133 loss=0.5551 action=0.1889 corr=2.2813 fc=1.2826 rep=0.9797 lr=6.75e-06 152.08s",
+        "[2026-10-16T02:01:00] step     134 loss=0.6242 action=0.2700 corr=2.1633 fc=1.2812 rep=0.9836 lr=6.80e-06 151.79s",
+        "[2026-10-16T02:03:31] step     135 loss=0.5822 action=0.2243 corr=2.2004 fc=1.2805 rep=0.9803 lr=6.85e-06 151.45s",
+        "[2026-10-16T02:06:03] step     136 loss=0.6566 action=0.2965 corr=2.2220 fc=1.2811 rep=0.9775 lr=6.90e-06 152.15s",
+        "[2026-10-16T02:08:45] step     137 loss=0.6009 action=0.2487 corr=2.1419 fc=1.2823 rep=0.9793 lr=6.95e-06 161.47s",
+        "[2026-10-16T02:11:32] step     138 loss=0.6360 action=0.2767 corr=2.2069 fc=1.2881 rep=0.9830 lr=7.00e-06 167.30s",
+        "[2026-10-16T02:14:06] step     139 loss=0.5573 action=0.2092 corr=2.1015 fc=1.2810 rep=0.9808 lr=7.05e-06 153.79s",
+        "[2026-10-16T02:16:45] step     140 loss=0.5936 action=0.2408 corr=2.1494 fc=1.2802 rep=0.9831 lr=7.10e-06 158.59s",
+        "[2026-10-16T02:19:19] step     141 loss=0.6431 action=0.2842 corr=2.2099 fc=1.2808 rep=0.9819 lr=7.15e-06 154.06s",
+        "[2026-10-16T02:21:56] step     142 loss=0.5381 action=0.1828 corr=2.1724 fc=1.2830 rep=0.9817 lr=7.20e-06 157.70s",
+        "[2026-10-16T02:24:45] step     143 loss=0.6321 action=0.2604 corr=2.3340 fc=1.2842 rep=0.9810 lr=7.25e-06 168.74s",
+        "[2026-10-16T02:27:31] step     144 loss=0.5464 action=0.1907 corr=2.1767 fc=1.2827 rep=0.9808 lr=7.30e-06 165.69s",
+        "[2026-10-16T02:30:16] step     145 loss=0.6762 action=0.3221 corr=2.1592 fc=1.2826 rep=0.9851 lr=7.35e-06 164.83s",
+        "[2026-10-16T02:33:01] step     146 loss=0.5893 action=0.2369 corr=2.1418 fc=1.2846 rep=0.9824 lr=7.40e-06 165.49s",
+        "[2026-10-16T02:35:44] step     147 loss=0.6093 action=0.2484 corr=2.2267 fc=1.2841 rep=0.9824 lr=7.45e-06 163.04s"
+      ],
+      "loss_definition": "v1_1_forecast_perdim_v2"
+    }
+  },
+  "checkpoints": {
+    "libero": [
+      {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/s2/libero-D-seed101/checkpoint-step0000100.pt",
+        "bytes": 10831807511
+      },
+      {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/s2/libero-D-seed101/checkpoint-step0000200.pt",
+        "bytes": 10831807511
+      }
+    ],
+    "robotwin": [
+      {
+        "path": "/workspace/owac/research/n04-v1/runs/v1.1/s2/robotwin-D-seed101/checkpoint-step0000100.pt",
+        "bytes": 10831847383
+      }
+    ]
+  }
+}

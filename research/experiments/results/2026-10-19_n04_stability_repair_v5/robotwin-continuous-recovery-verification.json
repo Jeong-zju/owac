@@ -1,0 +1,125 @@
+{
+  "platform": "robotwin",
+  "configured_budget": 2000,
+  "batch": 8,
+  "warmup": 200,
+  "loss_weights": {
+    "action": 1.0,
+    "correspondence": 0.1,
+    "forecast": 0.1,
+    "representation": 0.1
+  },
+  "checkpoint_step": 8,
+  "checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-robotwin-seed101/checkpoint-step0000008.pt",
+  "complete": true,
+  "original_failed_verification": {
+    "platform": "robotwin",
+    "configured_budget": 2000,
+    "batch": 8,
+    "warmup": 200,
+    "loss_weights": {
+      "action": 1.0,
+      "correspondence": 0.1,
+      "forecast": 0.1,
+      "representation": 0.1
+    },
+    "complete": false,
+    "checkpoint_step": 8,
+    "checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-robotwin-seed101/checkpoint-step0000008.pt",
+    "error": "AssertionError: reload changed fixed dev: 0.31157292425632477 -> 0.31249919533729553"
+  },
+  "deterministic_control": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-deterministic-dev-robotwin-seed101/verification.json",
+  "dev_reference": "native_deterministic_v1",
+  "source": "/workspace/owac/research/n04-v1/source/n04-v11-codex-stability-v5-deterministic-dev-20261019",
+  "state_identity": {
+    "encoder": {
+      "keys": 653,
+      "loaded_mismatches": [],
+      "terminal_evaluation_changes": []
+    },
+    "backend": {
+      "keys": 662,
+      "loaded_mismatches": [],
+      "terminal_evaluation_changes": []
+    }
+  },
+  "reload": {
+    "step": 8,
+    "dev_before": 0.3108634054660797,
+    "dev_after": 0.3108634054660797,
+    "scheduler_restored": true,
+    "independent_control_instances": 2,
+    "independent_control_evaluations": 6,
+    "native_initial_dev_loss": 2.453332781791687,
+    "historical_compiled_initial_dev_loss": 2.453107237815857
+  },
+  "next_update": {
+    "step": 9,
+    "terms": {
+      "action": 0.4464178644120693,
+      "correspondence": 2.5944647043943405,
+      "forecast": 1.1440785229206085,
+      "representation": 22.703454971313477
+    },
+    "coverage": {
+      "action": {
+        "windows": 8,
+        "valid_items": 32
+      },
+      "correspondence": {
+        "windows": 8,
+        "valid_items": 256
+      },
+      "forecast": {
+        "windows": 8,
+        "valid_items": 2136
+      },
+      "representation": {
+        "windows": 8,
+        "valid_items": 8
+      }
+    },
+    "forecast_diag": {
+      "h1_forecast_quad": 6.119717680759006,
+      "h1_forecast_logdet": 87.25916277977728,
+      "h1_forecast_mode_w0": 0.9472762523319131,
+      "h1_forecast_mode_w1": 0.052723762484127155,
+      "h1_forecast_S_mean": 1.4573434697043512,
+      "h1_forecast_S_min": 1.1691703927773303,
+      "h1_forecast_S_max": 2.2783807290177194,
+      "h1_forecast_R_mean": 1.0014537556837964,
+      "h1_forecast_R_min": 0.824372634291649,
+      "h1_forecast_R_max": 1.1838157172164607,
+      "h1_prediction_mse": 0.03357564706878889,
+      "h1_persistence_mse": 0.03358825944879726,
+      "h1_target_rms": 0.9927978284897342,
+      "h2_forecast_quad": 6.613829894374227,
+      "h2_forecast_logdet": 106.27957613203262,
+      "h2_forecast_mode_w0": 0.9156964018940926,
+      "h2_forecast_mode_w1": 0.08430361886405284,
+      "h2_forecast_S_mean": 1.5799649904171624,
+      "h2_forecast_S_min": 1.2706070971157817,
+      "h2_forecast_S_max": 2.4375630898608103,
+      "h2_forecast_R_mean": 1.0014462447828718,
+      "h2_forecast_R_min": 0.8246643021702766,
+      "h2_forecast_R_max": 1.1829815745353698,
+      "h2_prediction_mse": 0.039091743209246486,
+      "h2_persistence_mse": 0.03912448937011909,
+      "h2_target_rms": 0.9925892007019784,
+      "h4_forecast_quad": 6.626135476310515,
+      "h4_forecast_logdet": 141.2008913585118,
+      "h4_forecast_mode_w0": 0.8818507299181961,
+      "h4_forecast_mode_w1": 0.11814930576032827,
+      "h4_forecast_S_mean": 1.820257411471435,
+      "h4_forecast_S_min": 1.479859306521359,
+      "h4_forecast_S_max": 2.7149452302782304,
+      "h4_forecast_R_mean": 1.0014436741669974,
+      "h4_forecast_R_min": 0.8249627258628607,
+      "h4_forecast_R_max": 1.1824233833523023,
+      "h4_prediction_mse": 0.04510789416668732,
+      "h4_persistence_mse": 0.04518680211116416,
+      "h4_target_rms": 0.9920977183750698
+    }
+  },
+  "resume_checkpoint": "/workspace/owac/research/n04-v1/runs/v1.1/codex-diagnosis/v5-exact-robotwin-seed101/checkpoint-step0000009.pt"
+}
