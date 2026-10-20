@@ -1,0 +1,81 @@
+{
+  "evidence_level": "real_same_checkpoint_loading_with_synthetic_interface_input",
+  "expert_observations": false,
+  "learned_raw_teacher_available": false,
+  "control_recovered": false,
+  "optimizer_updates": 0,
+  "closed_loops": 0,
+  "started_at": "2026-10-20T11:47:20.245528+08:00",
+  "probes": [
+    {
+      "probe": "same_policy_exact_inherited_weights",
+      "passed": true,
+      "source_tensor_count": 437
+    },
+    {
+      "probe": "real_tower_forward",
+      "passed": true
+    },
+    {
+      "probe": "token_gradient_to_stem",
+      "passed": true
+    },
+    {
+      "probe": "native_action_gradient_to_stem",
+      "passed": true
+    }
+  ],
+  "actual_full_load_audit": {
+    "loaded_keys": 813,
+    "model_keys": 813,
+    "inactive_keys": [],
+    "active_missing": [],
+    "unexpected": [],
+    "shape_mismatch": []
+  },
+  "geometry": {
+    "hidden_size": 1152,
+    "grid_height": 16,
+    "grid_width": 16,
+    "patch_size": 14,
+    "image_size": 224,
+    "num_positions": 256,
+    "encoder_layers": 27,
+    "projector_in": 1152,
+    "projector_out": 2048,
+    "dtype": "float32",
+    "post_layernorm_eps": 1e-06
+  },
+  "trainable_names": [
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.weight",
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.bias",
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.weight",
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.bias"
+  ],
+  "trainable_count": 14453632,
+  "projected_shape": [
+    1,
+    256,
+    2048
+  ],
+  "feature_gradients": {
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.weight": 0.2259233295917511,
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.bias": 0.16951030492782593,
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.weight": 3.9650957584381104,
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.bias": 0.5070597529411316
+  },
+  "native_action_loss_synthetic_only": 0.08814654499292374,
+  "action_gradients": {
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.weight": 0.004611422307789326,
+    "vision_tower.vision_model.embeddings.patch_embedding.conv64.bias": 0.0033651196863502264,
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.weight": 0.09594182670116425,
+    "vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.bias": 0.011730787344276905
+  },
+  "frozen_stable": true,
+  "peak_allocated_bytes_synthetic_only": 11104629248,
+  "status": "passed_synthetic_interface_only",
+  "seconds": 70.4905960400356,
+  "ended_at": "2026-10-20T11:48:30.736153+08:00",
+  "raw_evidence": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/sol-real-checkpoint-interface-result.json",
+  "note": "Actual restored policy weights; synthetic constant RAW and dummy action labels test autograd only. No expert-action accuracy, learned RawVLA teacher, learning or closed-loop acceptance."
+}

@@ -278,6 +278,40 @@ a:hover{ text-decoration:underline; }
 .route-card .rc-actions .btn-primary{ flex:1; }
 
 /* ---------- 折叠区 ---------- */
+.strategy-hero{padding:24px;border:1px solid var(--route-green-line);border-radius:var(--r-lg);background:var(--c-surface);margin-bottom:28px;}
+.strategy-hero h2{font-size:25px;line-height:1.45;margin:10px 0 8px;}
+.strategy-hero p{color:var(--c-text-2);max-width:88ch;}
+.strategy-facts{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+.strategy-facts span{padding:5px 10px;border-radius:6px;background:var(--route-green-soft);color:var(--route-green-ink);font-size:12px;}
+.strategy-hero .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.strategy-boundary{margin-top:14px;font-size:12px;}
+.lineage-panel{border:1px solid var(--c-line);border-radius:12px;background:var(--c-surface);overflow:hidden;margin:24px 0;}
+.lineage-head{padding:20px 20px 10px;}
+.lineage-head h2{font-size:20px;line-height:1.5;}
+.lineage-head p{font-size:13px;color:var(--c-text-2);margin-top:6px;}
+.lineage-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;}
+.lineage-tools button[aria-pressed="true"]{background:var(--route-green-soft);border-color:var(--route-green-line);color:var(--route-green-ink);}
+.lineage-scroll{overflow:auto;padding:0 4px 8px;overscroll-behavior-x:contain;}
+.lineage-canvas{position:relative;isolation:isolate;}
+.lineage-canvas svg{position:absolute;inset:0;pointer-events:none;z-index:-1;}
+.lineage-edge{fill:none;stroke:#A0ABA3;stroke-width:1.6;}
+.lineage-edge[data-kind="conditional"]{stroke-dasharray:6 5;}
+.lineage-edge[data-selected="true"]{stroke:var(--route-green);stroke-width:2.4;}
+.lineage-column{position:absolute;top:12px;text-align:center;font-size:11px;color:var(--c-text-3);letter-spacing:.02em;}
+.lineage-node{position:absolute;height:126px;padding:12px;background:var(--c-surface-2);border:1px solid var(--c-line);border-radius:9px;display:flex;flex-direction:column;gap:5px;box-shadow:var(--sh-1);}
+.lineage-node small{font-size:11px;color:var(--c-text-3);}
+.lineage-node strong{font-size:13px;line-height:20px;}
+.lineage-node span{font-size:11px;line-height:17px;color:var(--c-text-2);}
+.lineage-node[data-state="paused"]{border-top:3px solid var(--route-orange-line);}
+.lineage-node[data-state="current"]{background:var(--route-green-soft);border-color:var(--route-green-line);}
+.lineage-node[data-state="planned"]{border-style:dashed;}
+.lineage-node[aria-pressed="true"]{outline:2px solid var(--route-green);outline-offset:2px;}
+.lineage-detail{border-top:1px solid var(--c-line);padding:18px 20px;background:var(--c-surface-2);}
+.lineage-detail h3{font-size:16px;line-height:24px;margin:6px 0;}
+.lineage-detail p{font-size:13px;color:var(--c-text-2);max-width:95ch;}
+.lineage-detail .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+@media(max-width:600px){.strategy-hero{padding:18px;}.strategy-hero h2{font-size:22px;}.lineage-head,.lineage-detail{padding:16px;}.strategy-hero .actions .btn{flex:1 1 140px;justify-content:center;}}
+
 .disclosure{
   border:1px solid var(--c-line); border-radius:var(--r-lg); background:var(--c-surface);
   box-shadow:var(--sh-1); margin-bottom:var(--sp-3);
@@ -791,6 +825,7 @@ let state = blankState();
 const ui = {
   closedNotices: new Set(), openCards: new Set(), openDescs: new Set(), openGroups: new Set(),
   docShown: 40, docObserver: null, drawerReturn: null, paletteItems: [], paletteIndex: 0, paletteQuery: '',
+  lineageNode: '', lineageMode: 'all',
 };
 function blankState() {
   return { ws: 'overview', routeId: '', sub: '', stageId: '', docId: '', mode: 'render', anchor: '', cat: 'all', q: '', group: '' };
@@ -1112,7 +1147,9 @@ function disclosure(key, title, count, bodyFn) {
     '<div class="disclosure-body" id="' + id + '"' + (open ? '' : ' hidden') + '>' + (open ? bodyFn() : '') + '</div></div>';
 }
 const SHARED_REF = [
-  ['docs/OWAC_research_roadmap_2026-10-08.md', '研究路线图 v6', '三条候选的共同研究边界'],
+  ['docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md', '当前蒸馏研究方案', '唯一当前实施路线'],
+  ['docs/decisions/0016-raw-stem-siglip-distillation.md', '路线收敛决议', '采纳原因与变更边界'],
+  ['docs/OWAC_research_roadmap_2026-10-08.md', '历史路线图 v6', '保留长期候选池'],
   ['docs/decisions/0012-rawvla-pi05-protocol-freeze.md', 'RawVLA / π0.5 固定协议', '部署标签、比较规则与证据边界'],
   ['docs/status.md', '主仓库状态记录', '基准进度以最新记录为准'],
 ];
@@ -1127,7 +1164,7 @@ function sharedBody() {
 }
 function maintenanceBody() {
   const rules = [
-    '开发继续在各自 worktrees/ 中进行；统筹台只读取，不修改工作树。',
+    '当前开发入口为主 checkout 的 main；旧候选暂停，统筹台读取方案与证据，不启动训练。',
     '路线、阶段与摘要变更后，更新主仓库登记表 ' + DATA.registry + '。',
     '摘要来源 hash 变化会提示复核；文档缺失时明确显示缺失，不自动回退旧提示词。',
   ];
@@ -1161,6 +1198,63 @@ function routeCard(r) {
     (canCopy ? '' : ' disabled aria-disabled="true"') + '>复制阶段包</button>' +
     '</div></article>';
 }
+function strategyHero() {
+  const strategy = DATA.strategy || {};
+  const r = routeBy(strategy.active_route);
+  if (!r) return '';
+  const cur = currentStage(r);
+  const plan = docById(r.id + ':' + r.primary_document);
+  const canCopy = !!(cur && cur.prompt && cur.prompt.available);
+  return '<section class="strategy-hero" data-qa="current-strategy">' +
+    '<span class="badge badge-green">唯一当前实施路线</span> ' +
+    '<span class="badge badge-neutral">' + esc(r.status) + '</span>' +
+    '<h2>' + esc(strategy.title || r.name) + '</h2><p>' + esc(strategy.description || r.summary) + '</p>' +
+    '<div class="strategy-facts">' + (strategy.facts || []).map((text) => '<span>' + esc(text) + '</span>').join('') + '</div>' +
+    '<div class="actions"><button class="btn btn-primary" data-act="enter-route" data-route="' + esc(r.id) + '">进入当前方案 →</button>' +
+    (plan ? '<button class="btn btn-secondary" data-act="open-doc" data-doc="' + esc(plan.id) + '">阅读完整方案</button>' : '') +
+    '<button class="btn btn-secondary" data-qa="current-copy-prompt" data-act="copy-prompt" data-route="' + esc(r.id) + '" data-stage="' + esc(cur ? cur.id : '') + '"' + (canCopy ? '' : ' disabled') + '>复制给 GPT-6.1 Sol 的完整 prompt</button></div>' +
+    '<p class="strategy-boundary">' + esc(strategy.boundary || r.boundary) + '</p></section>';
+}
+function lineageView() {
+  const history = DATA.lineage || {};
+  if (!(history.nodes || []).length) return '';
+  const nodes = history.nodes.filter((n) => ui.lineageMode !== 'current' || n.column >= 2);
+  const columns = [...new Set(nodes.map((n) => n.column))].sort((a, b) => a - b);
+  const step = Math.min(190, Math.max(156, (document.documentElement.clientWidth - 112) / columns.length));
+  const nodeWidth = step - 18;
+  const width = columns.length * step + 16;
+  const height = ui.lineageMode === 'current' ? 210 : 480;
+  const selected = nodes.find((n) => n.id === ui.lineageNode) || nodes.find((n) => n.id === history.selected) || nodes[0];
+  const positions = new Map(nodes.map((n) => [n.id, { x: 16 + columns.indexOf(n.column) * step, y: ui.lineageMode === 'current' ? 55 : 50 + n.row * 146 }]));
+  const headings = ['候选池', '并行机制探索', '暂停与保全', '恢复控制的诊断', '当前实施主线', '条件性后续'];
+  const edges = (history.edges || []).filter((e) => positions.has(e.from) && positions.has(e.to));
+  const paths = edges.map((edge) => {
+    const a = positions.get(edge.from), b = positions.get(edge.to);
+    const x1 = a.x + nodeWidth, y1 = a.y + 63, x2 = b.x, y2 = b.y + 63, mid = (x1 + x2) / 2;
+    return '<path class="lineage-edge" data-kind="' + esc(edge.kind) + '" data-selected="' + (edge.from === selected.id || edge.to === selected.id) + '" d="M ' + x1 + ' ' + y1 + ' C ' + mid + ' ' + y1 + ', ' + mid + ' ' + y2 + ', ' + x2 + ' ' + y2 + '" marker-end="url(#lineage-arrow)"/>';
+  }).join('');
+  const sourceButtons = (selected.documents || []).map((path) => {
+    const doc = docById('shared:' + path);
+    return doc && doc.available
+      ? '<button class="btn btn-secondary btn-sm" data-act="open-doc" data-doc="' + esc(doc.id) + '">' + esc(doc.title) + '</button>'
+      : '<span class="small muted">来源不可用：' + esc(path) + '</span>';
+  }).join('');
+  return '<section class="lineage-panel" data-qa="route-lineage" aria-label="路线分支与收敛历史">' +
+    '<div class="lineage-head"><h2>' + esc(history.title) + '</h2><p>' + esc(history.description) + '</p>' +
+    (history.summary_stale ? '<p class="badge badge-warn">历史依据已变化，节点摘要待复核</p>' : '') +
+    '<div class="lineage-tools" role="group" aria-label="历史图显示范围">' +
+    '<button class="btn btn-secondary btn-sm" data-act="lineage-mode" data-mode="all" aria-pressed="' + (ui.lineageMode === 'all') + '">全部分支</button>' +
+    '<button class="btn btn-secondary btn-sm" data-act="lineage-mode" data-mode="current" aria-pressed="' + (ui.lineageMode === 'current') + '">当前收敛链路</button><span class="small muted">点选节点查看原因与证据 · 窄屏可横向滚动</span></div></div>' +
+    '<div class="lineage-scroll" data-qa="lineage-scroll" tabindex="0" aria-label="路线历史图，可横向滚动"><div class="lineage-canvas" style="width:' + width + 'px;height:' + height + 'px">' +
+    '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" aria-hidden="true"><defs><marker id="lineage-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7A8B80"/></marker></defs>' + paths + '</svg>' +
+    columns.map((c, i) => '<div class="lineage-column" style="left:' + (16 + i * step) + 'px;width:' + nodeWidth + 'px">' + esc(headings[c] || '') + '</div>').join('') +
+    nodes.map((n) => {
+      const pos = positions.get(n.id);
+      return '<button class="lineage-node" data-qa="lineage-node" data-node="' + esc(n.id) + '" data-act="lineage-node" data-state="' + esc(n.state) + '" aria-pressed="' + (selected.id === n.id) + '" aria-controls="lineage-detail" style="left:' + pos.x + 'px;top:' + pos.y + 'px;width:' + nodeWidth + 'px"><small>' + esc(n.date) + '</small><strong>' + esc(n.title) + '</strong><span>' + esc(n.status) + '</span></button>';
+    }).join('') + '</div><ul class="sr-only" aria-label="路线连接关系">' + edges.map((e) => '<li>' + esc(history.nodes.find((n) => n.id === e.from).title) + ' → ' + esc(history.nodes.find((n) => n.id === e.to).title) + (e.kind === 'conditional' ? '（条件计划）' : '') + '</li>').join('') + '</ul></div>' +
+    '<div class="lineage-detail" id="lineage-detail" data-qa="lineage-detail" data-node="' + esc(selected.id) + '" aria-live="polite"><span class="badge badge-neutral">' + esc(selected.date + ' · ' + selected.status) + '</span><h3>' + esc(selected.title) + '</h3><p>' + esc(selected.description) + '</p><div class="actions">' +
+    (selected.route_id ? '<button class="btn btn-primary btn-sm" data-act="enter-route" data-route="' + esc(selected.route_id) + '">' + (selected.state === 'current' ? '进入当前路线' : '查看历史路线与证据') + '</button>' : '') + sourceButtons + '</div></div></section>';
+}
 function viewOverview() {
   const stale = ROUTES().filter((r) => r.summary_stale);
   const showNotice = stale.length && !ui.closedNotices.has('stale');
@@ -1170,14 +1264,16 @@ function viewOverview() {
       '<button class="iconbtn close" data-qa="notice-close" data-act="dismiss-notice" data-notice="stale" aria-label="关闭提示">✕</button></div>'
     : '';
   return '<section class="section" data-qa="overview">' +
-    '<div class="pagehead"><div><h1>研究统筹台</h1><p>确认各条候选的当前节点，复制阶段交接包。</p></div></div>' +
+    '<div class="pagehead"><div><h1>研究统筹台</h1><p>当前方案、研究选择的来路，以及下一步可执行的完整交接。</p></div></div>' +
     '<div class="statusbar" data-qa="statusbar">' +
       '<span class="badge ' + (isLive() ? 'badge-green' : 'badge-neutral') + '"><span class="dot ' + (isLive() ? 'dot-green' : 'dot-warn') + '" aria-hidden="true"></span>' + (isLive() ? '本地服务模式' : '离线快照') + '</span>' +
       '<span>最近读取 ' + timeTag(DATA.generated_at, fmtDate(DATA.generated_at)) + '（北京时间）</span>' +
       '<span class="sep">·</span><span>' + allDocs().filter((d) => d.available).length + ' 份文档</span>' +
-      '<span class="sep">·</span><span>' + ROUTES().length + ' 条路线</span>' +
+      '<span class="sep">·</span><span>' + ROUTES().filter((r) => r.lifecycle !== 'archived').length + ' 条当前路线 · ' + ROUTES().filter((r) => r.lifecycle === 'archived').length + ' 条历史路线</span>' +
     '</div>' + notice +
-    '<div class="route-grid">' + ROUTES().map(routeCard).join('') + '</div>' +
+    strategyHero() + lineageView() +
+    (DATA.strategy && DATA.strategy.active_route ? '' : '<div class="route-grid">' + ROUTES().filter((r) => r.lifecycle !== 'archived').map(routeCard).join('') + '</div>') +
+    (ROUTES().some((r) => r.lifecycle === 'archived') ? disclosure('archives', '历史路线与原始证据', '3 条暂停探索 · 保留原文', () => '<div class="route-grid">' + ROUTES().filter((r) => r.lifecycle === 'archived').map(routeCard).join('') + '</div>') : '') +
   '</section>' +
   '<section class="section">' +
     disclosure('shared', '共同参考', allDocs().length + ' 份文档', sharedBody) +
@@ -1965,6 +2061,18 @@ document.addEventListener('click', (e) => {
   if (act === 'copy-prompt') { copyPrompt(el.dataset.route, el.dataset.stage); return; }
   if (act === 'download-prompt') { downloadPrompt(el.dataset.route, el.dataset.stage); return; }
   if (act === 'open-doc') { openDoc(el.dataset.doc); return; }
+  if (act === 'lineage-node' || act === 'lineage-mode') {
+    const scroll = document.querySelector('[data-qa="lineage-scroll"]');
+    const left = scroll ? scroll.scrollLeft : 0;
+    if (act === 'lineage-node') ui.lineageNode = el.dataset.node;
+    else ui.lineageMode = el.dataset.mode;
+    render();
+    const next = document.querySelector('[data-qa="lineage-scroll"]');
+    if (next) next.scrollLeft = act === 'lineage-mode' ? 0 : left;
+    const target = act === 'lineage-node' ? document.querySelector('[data-act="lineage-node"][data-node="' + ui.lineageNode + '"]') : document.querySelector('[data-act="lineage-mode"][data-mode="' + ui.lineageMode + '"]');
+    if (target) target.focus({ preventScroll: true });
+    return;
+  }
   if (act === 'toggle-card') { toggleCard(el.dataset.route); return; }
   if (act === 'toggle-desc') { toggleDesc(el.dataset.route, el.dataset.stage); return; }
   if (act === 'toggle-group') { toggleGroup(el.dataset.group); return; }

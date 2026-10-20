@@ -1,0 +1,23 @@
+{
+  "schema": "owac.raw-teacher.operator-correction.v1",
+  "recorded_at": "2026-10-20T14:16:51.997778+08:00",
+  "wrong_claim": "Sol inferred nativepad=-2 affectsLIBERO basedon classdefault withoutcheckingruntimeflag, and mistakenlycalled155updatesinvalid",
+  "verified_configuration": {
+    "restored_checkpoint": "outputs/checkpoints/raw-distillation/pi05_libero_starvla/config.yaml",
+    "historical_backend_constructor": "src/owac/backends/rawvla.py:new_model(libero)",
+    "author_child_config": "configs/libero/pi05.yaml",
+    "discrete_state_input": false,
+    "actual_native_state_pad": 0,
+    "tokenizer_state": null
+  },
+  "correction": "oldexplicitstate32zero andnative8->0padding should bebitwise equivalentunderactualFalse; verifywithrealmodel beforemoreactions;155updatesremainvalidfrontend-onlytraining",
+  "observed_validation": {
+    "completed_successes": 8,
+    "charged_attempts": 9,
+    "operator_interruption": 1,
+    "not_run": 1,
+    "full_planned_denominator": 10
+  },
+  "predeclared_10of10_gate": "not_met/not_fully_measurable; neverclaimpassed ordeleteinterruptedtrial",
+  "counters_not_reset": true
+}

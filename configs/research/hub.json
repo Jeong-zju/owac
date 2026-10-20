@@ -1,7 +1,154 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-10-19",
+  "reviewed_at": "2026-10-20",
   "routes": [
+    {
+      "id": "DISTILL",
+      "name": "RAW stem 与 SigLIP 蒸馏",
+      "short": "先继承正常光控制能力，再研究弱光收益",
+      "color": "green",
+      "checkout": "repo",
+      "branch": "main",
+      "version": "OWAC-D1.1 · RAW 教师与因果时序",
+      "lifecycle": "active",
+      "status": "PREP已通过 · ALIGN进行中 · 学生未训练",
+      "current_stage": "ALIGN",
+      "question": "直接 RAW 编码能否保住已有策略的控制能力，再利用 RAW 测量超越教师？",
+      "summary": "本地重建RAW输入教师：Normal task6共同20新初态教师／参照各20/20；选前端初始化0，155次前端优化不宣称收益。50真实示范、完整控制账本和首／后／reset真实tokens接口已验收；时序学生输入与训练仍待对接。",
+      "next": "将验证教师artifact与每相机6帧／递归历史绑定蒸馏缓存和学生入口，先真实数据零更新梯度检查；正式B/C/D学生训练仍需具体授权。",
+      "boundary": "教师开发筛查通过，非统计非劣／非作者训练后权重／非学习收益。验证9成功＋1人为中断保留N10；学生0更新／0闭环，弱光／Bayer／四任务／实机未运行。",
+      "primary_document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+      "evidence_document": "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+      "documents": [
+        "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+        "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md",
+        "docs/decisions/0016-raw-stem-siglip-distillation.md",
+        "research/candidates/RAW_STEM_SIGLIP.md",
+        "research/archives/2026-10-19_worktree_consolidation/README.md",
+        "research/experiments/2026-10-19_visual_replacement_recovery.md",
+        "research/reviews/2026-10-20_rawvla_public_teacher_assets.md",
+        "research/experiments/2026-10-20_raw_stem_siglip_distillation.md",
+        "research/experiments/raw_stem_siglip_20261020/independent-review.md",
+        "research/experiments/raw_stem_siglip_20261020/RUNBOOK.md",
+        "docs/plans/RAWVLA_TEACHER_REPRODUCTION_PROPOSAL_2026-10-20.md",
+        "research/experiments/raw_stem_siglip_20261020/teacher-release-audit.md",
+        "research/experiments/raw_stem_siglip_20261020/teacher-recipe-inventory.md",
+        "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+        "research/experiments/2026-10-20_rawvla_teacher_reproduction.md",
+        "research/experiments/raw_stem_siglip_20261020/TEACHER_RUNBOOK.md"
+      ],
+      "summary_sources": {
+        "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "5262fb7453c598f8137afc825dc27c03999950de82b22d4fbf2f422cfa138edd",
+        "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md": "836a1502bb32cea637855cf7b331ff0089b5dacfc9e32e1b33fb592839ab3473",
+        "docs/decisions/0016-raw-stem-siglip-distillation.md": "54d76712968a9dca3d3b0c1ccdbabdb8fd7f3bf89be9e7afce4f73725f400c11",
+        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
+        "research/experiments/raw_stem_siglip_20261020/independent-review.md": "58282d0303281c28ebc500f4ab1315017e1211a26af2824bb4b0ca284c5a05c5",
+        "docs/plans/RAWVLA_TEACHER_REPRODUCTION_PROPOSAL_2026-10-20.md": "9fc0f93603c9b325116c910331aecb8fc213a77568771aeeeb9e87756712550d",
+        "research/experiments/raw_stem_siglip_20261020/teacher-recipe-inventory.md": "f6d6d392c6ef0b64a9d1622379886937a45d7b39427c57618d9f1f4b2be4b9ac",
+        "research/experiments/raw_stem_siglip_20261020/teacher-release-audit.md": "552c1ff4698772c2614d3d75faca2c4ff1e1c0a0705e235984479acb0bfa06f5",
+        "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f"
+      },
+      "research_focus": {
+        "title": "保留有效时序能力，优先恢复控制",
+        "description": "完整 RAW 输入教师可使用 burst 与递归；学生按效果选择因果历史／状态，继承匹配的视觉表征。",
+        "chain": [
+          "因果 RAW 观测／历史",
+          "RAW stem 与时序聚合／状态",
+          "继承 SigLIP 与原投影",
+          "冻结 π0.5 后端",
+          "纯学生配对闭环"
+        ],
+        "arms": [
+          {
+            "id": "A",
+            "label": "完整 RAW 教师",
+            "detail": "RAW 历史＋前端＋VLA，保留有效时序能力"
+          },
+          {
+            "id": "B",
+            "label": "RGB stem 蒸馏",
+            "detail": "检查替换 stem 和训练流程"
+          },
+          {
+            "id": "C",
+            "label": "RAW 特征蒸馏",
+            "detail": "检验纯表征迁移"
+          },
+          {
+            "id": "D",
+            "label": "RAW 特征＋动作",
+            "detail": "检验动作目标的增益，匹配视觉适配范围"
+          }
+        ],
+        "budget": "首轮诊断：单任务、50 条真实示范、seed101；每适配臂累计最多 5,000 更新。训练／闭环执行需具体新授权。",
+        "data_boundary": "主教师接收 RAW，内部允许 ISP 生成 RGB；RGB 输入策略只作另列辅助对照。学生部署直接 RAW→tokens，pseudo-RAW 与真实 CFA 分报。",
+        "status": "教师Normal20/20 · 初始化0 · 学生历史匹配待完成"
+      },
+      "stages": [
+        {
+          "id": "PREP",
+          "title": "工程实现与资产预检",
+          "state": "recorded",
+          "label": "PREP 已通过 · 教师与真实资产齐备",
+          "description": "工程、50条真实示范及有效RAW教师已验收；教师与参照20/20仅开发筛查。选0点，155次前端更新未证明收益；学生未训练，进入ALIGN。",
+          "document": "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+          "prompt_kind": "none",
+          "prompt_sources": [
+            "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
+          ],
+          "acceptance": "passed",
+          "accepted_at": "2026-10-20T15:20:09.331247+08:00"
+        },
+        {
+          "id": "ALIGN",
+          "title": "教师与桥接核验",
+          "state": "current",
+          "label": "真实数值接口通过 · 学生历史待匹配",
+          "description": "真实RAW教师tokens首窗口／后续／reset有效前缀和10步动作误差0；未观测相机占位原始差异显式记录。下一步绑定相机独立历史、缓存和学生输入，不启动未经授权训练。",
+          "document": "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+          "prompt_kind": "complete",
+          "prompt_sources": [
+            "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
+          ]
+        },
+        {
+          "id": "STEM",
+          "title": "RAW 输入侧适配",
+          "state": "blocked",
+          "label": "未训练",
+          "description": "冻结继承视觉层与后端，更新 stem 及声明的输入侧时序模块；不要求所有策略固定单帧。",
+          "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+          "prompt_kind": "none"
+        },
+        {
+          "id": "ADAPT",
+          "title": "有限视觉适配与动作监督",
+          "state": "blocked",
+          "label": "按瓶颈证据选择",
+          "description": "少量 blocks 或视觉 LoRA，匹配特征对照；后端仍冻结。",
+          "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+          "prompt_kind": "none"
+        },
+        {
+          "id": "CONTROL",
+          "title": "正常光纯学生确认",
+          "state": "blocked",
+          "label": "未评估",
+          "description": "验证集选型，固定新初态配对闭环；无教师回退，保留完整分母和视频。",
+          "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+          "prompt_kind": "none"
+        },
+        {
+          "id": "LOWLIGHT",
+          "title": "弱光与后续扩展",
+          "state": "blocked",
+          "label": "正常光恢复后再议",
+          "description": "正常光纯学生控制恢复后再研究弱光；扩任务／新实验另定预算。因果时序允许从首轮按效果选择。",
+          "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+          "prompt_kind": "none"
+        }
+      ]
+    },
     {
       "id": "N01",
       "name": "面向VLA的RAW时空证据编码",
@@ -10,11 +157,11 @@
       "checkout": "repo",
       "branch": "main",
       "version": "v1.2 · RAW信息利用与行动归因",
-      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "status": "历史探索 · 当前暂停",
       "current_stage": "PAUSED",
       "question": "同源RAW相对固定ISP的RGB多保留了哪些行动信息，N01如何利用？",
       "summary": "P3暂停；RAW/RGB各0/12，同四个Normal原策略4/4，两臂各0/4；视觉—动作适配待定位。",
-      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "next": "先执行新的 RAW stem 与 SigLIP 蒸馏主线；本路线保留历史证据，不恢复训练。",
       "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
       "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
       "evidence_document": "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md",
@@ -54,7 +201,7 @@
         "research/experiments/n01_full/P2_acceptance_report.md"
       ],
       "summary_sources": {
-        "docs/status.md": "feea588d27fc15c3c2577cc53a31eb5e6ef8ff134e64d1bdba6b6cfc55e41756",
+        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
         "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md": "b4454061d6dd5fbc66beb8b778cd01c7985243590b715b7663aad4a367e1cf69"
       },
       "stages": [
@@ -172,7 +319,7 @@
       "legacy_prompt": "docs/prompts/DeepSeek_N01_implementation.md",
       "research_focus": {
         "title": "RAW信息到VLA行动",
-        "description": "同源RAW/RGB × 成熟融合/N01机制；来源撤回保障证据正确，任务结果检验研究价值。",
+        "description": "历史方案：同源RAW/RGB × 成熟融合/N01机制；来源撤回保障证据正确，任务结果检验研究价值。",
         "chain": [
           "同源RAW测量",
           "固定ISP与信息差异",
@@ -203,10 +350,11 @@
         ],
         "budget": "2个平台×4方法×1个种子101，共8个主体run；GPU0 RAW、GPU1 RGB，训练/验证可并行。开发每轮总100次，不能按GPU翻倍；正式P4另行安排。",
         "data_boundary": "RoboTwin：HDR派生浮点；LIBERO：RGB8逆处理/量化缓存；两者都不是原生Bayer。正常光配对RGB不直接用作暗光RAW对照。",
-        "status": "新机部署就绪 · 两卡96GiB · P3模型/训练待实施"
+        "status": "历史比较计划 · 已暂停 · 不作为当前执行入口"
       },
       "historical_checkout": "worktrees/n01-evidence-integration",
-      "historical_branch": "lzh/n01-evidence-integration"
+      "historical_branch": "lzh/n01-evidence-integration",
+      "lifecycle": "archived"
     },
     {
       "id": "N02",
@@ -216,11 +364,11 @@
       "checkout": "repo",
       "branch": "main",
       "version": "v1.2 · 完整 RAW 编码器",
-      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "status": "历史探索 · 当前暂停",
       "current_stage": "PAUSED",
       "question": "能否利用 RAW 保留的动作线索，纠正潜在解释，并让 π0.5 改善操作？",
       "summary": "P2/r17暂停；Normal小样本冻结RAW动作读出有收益，联合更新无额外总体收益；r17学习策略闭环0，历史r11为0/3。",
-      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "next": "先执行新的 RAW stem 与 SigLIP 蒸馏主线；本路线保留历史证据，不恢复训练。",
       "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
       "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
       "evidence_document": "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md",
@@ -242,7 +390,7 @@
         "research/candidates/N02.md"
       ],
       "summary_sources": {
-        "docs/status.md": "feea588d27fc15c3c2577cc53a31eb5e6ef8ff134e64d1bdba6b6cfc55e41756",
+        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
         "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md": "d7452eadcb4a6a3309695235044b94124d8f9149a7084fd0c9e9498292a2c0dd"
       },
       "stages": [
@@ -404,7 +552,7 @@
       "legacy_prompt": "docs/prompts/DeepSeek_N02_implementation.md",
       "research_focus": {
         "title": "RAW 信息如何进入表征与动作",
-        "description": "完整架构待实现；以下四臂是比较计划，不是已有模型或成绩。",
+        "description": "历史方案：完整架构待实现；以下四臂是比较计划，不是已有模型或成绩。",
         "chain": [
           "RAW 弱测量",
           "噪声与有效性约束",
@@ -436,10 +584,11 @@
         ],
         "budget": "仅训练seed1103；100k预训练＋50k适配为资源计划；所选模型共100次，默认RoboTwin100，预定双平台50+50。RAW/RGB分卡并行，不要求全矩阵/三种子/全集/hash/收敛门槛。",
         "data_boundary": "LIBERO 为 RGB8-derived pseudo-RAW；RoboTwin 为 HDR-derived。正常光配对 RGB 不冒充同源退化输入；当前不主张原生 CFA 信息增量。",
-        "status": "P2—P4完整包已备；代码/环境/原策略迁移检查通过，数据同步中；P2模型待实现"
+        "status": "历史比较计划 · 已暂停 · 不作为当前执行入口"
       },
       "historical_checkout": "worktrees/n02-measurement-completion",
-      "historical_branch": "lzh/n02-measurement-completion"
+      "historical_branch": "lzh/n02-measurement-completion",
+      "lifecycle": "archived"
     },
     {
       "id": "N04",
@@ -449,11 +598,11 @@
       "checkout": "repo",
       "branch": "main",
       "version": "v1.1 · 单种子／每模型100次",
-      "status": "全部暂停 · 远端不可达 · 本地证据已收敛",
+      "status": "历史探索 · 当前暂停",
       "current_stage": "PAUSED",
       "question": "机器人运动时，如何充分利用 RAW 相比同源 RGB 保留的任务证据，并在新证据反驳预测时及时更新表征？",
       "summary": "S2暂停；v4.2故障与v5工程修复保留，历史开发闭环0/100；长期效果未验收。",
-      "next": "从主线已有证据重新讨论研究设置；任何训练须用户重新授权。",
+      "next": "先执行新的 RAW stem 与 SigLIP 蒸馏主线；本路线保留历史证据，不恢复训练。",
       "boundary": "远端独有数据和权重未恢复，历史运行状态不能当作实时状态；合并不是能力验收。",
       "primary_document": "research/archives/2026-10-19_worktree_consolidation/README.md",
       "evidence_document": "research/experiments/2026-10-19_n04_stability_repair_v5.md",
@@ -474,7 +623,7 @@
         "docs/prompts/n04_v1_0/README.md"
       ],
       "summary_sources": {
-        "docs/status.md": "feea588d27fc15c3c2577cc53a31eb5e6ef8ff134e64d1bdba6b6cfc55e41756",
+        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
         "research/experiments/2026-10-19_n04_stability_repair_v5.md": "5b008b70fa4dd32bccae89a14531784591604d75070bbbafe5f090cc219e535a"
       },
       "stages": [
@@ -552,16 +701,218 @@
       ],
       "legacy_prompt": "docs/prompts/DeepSeek_N04_implementation.md",
       "historical_checkout": "worktrees/n04-egomotion-separation",
-      "historical_branch": "lzh/n04-egomotion-separation"
+      "historical_branch": "lzh/n04-egomotion-separation",
+      "lifecycle": "archived"
     }
   ],
   "shared_documents": [
+    "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+    "docs/decisions/0016-raw-stem-siglip-distillation.md",
     "AGENTS.md",
     "docs/status.md",
     "docs/OWAC_research_roadmap_2026-10-08.md",
     "docs/OWAC_academic_research_proposal_2026-10-09.md",
     "docs/architecture.md",
     "docs/decisions/0011-rawvla-bench-main-route.md",
-    "docs/decisions/0012-rawvla-pi05-protocol-freeze.md"
-  ]
+    "docs/decisions/0012-rawvla-pi05-protocol-freeze.md",
+    "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md",
+    "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md",
+    "research/experiments/2026-10-19_n04_stability_repair_v5.md",
+    "research/archives/2026-10-19_worktree_consolidation/README.md",
+    "research/experiments/2026-10-19_visual_replacement_recovery.md",
+    "research/reviews/2026-10-20_rawvla_public_teacher_assets.md",
+    "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md"
+  ],
+  "strategy": {
+    "active_route": "DISTILL",
+    "title": "先恢复控制，再研究 RAW 的额外价值",
+    "description": "OWAC-D1.1：完整教师策略接收 RAW，内部可经 Neural ISP；学生按效果选择因果时序，部署直接产生 RAW 表征。",
+    "facts": [
+      "正常光单任务 · 单帧／burst／递归按效果选择",
+      "完整 RAW 输入教师 · 学生无 ISP 中间图像",
+      "Sol 统筹验收 · Harness V41-Flash Max 编码"
+    ],
+    "boundary": "教师开发筛查通过，非统计非劣／非作者训练后权重／非学习收益。验证9成功＋1人为中断保留N10；学生0更新／0闭环，弱光／Bayer／四任务／实机未运行。"
+  },
+  "lineage": {
+    "title": "路线怎样分支，又为什么收敛",
+    "description": "实线表示研究选择的演进与暂停收敛；虚线表示满足条件后的计划。连线不表示算法验收通过或旧机制融合。",
+    "selected": "distill",
+    "nodes": [
+      {
+        "id": "pool",
+        "title": "架构与机制候选池",
+        "date": "10/08—09",
+        "state": "history",
+        "column": 0,
+        "row": 1,
+        "status": "F01—F12 保留探索",
+        "description": "广泛候选设计与生物机制问题；候选池保留，当前实施资源集中到一条可检验主线。",
+        "documents": [
+          "docs/OWAC_research_roadmap_2026-10-08.md"
+        ]
+      },
+      {
+        "id": "n01",
+        "title": "N01 时空证据编码",
+        "date": "10/12—19",
+        "state": "paused",
+        "column": 1,
+        "row": 0,
+        "status": "暂停 · RAW/RGB 各 0/12",
+        "description": "同四个 Normal 场景原策略 4/4，RAW/RGB 两臂各 0/4。说明先要解决表征与动作后端的兼容性，不能只归因于弱光。",
+        "route_id": "N01",
+        "documents": [
+          "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md"
+        ]
+      },
+      {
+        "id": "n02",
+        "title": "N02 测量约束补全",
+        "date": "10/12—19",
+        "state": "paused",
+        "column": 1,
+        "row": 1,
+        "status": "暂停 · 局部读出≠闭环",
+        "description": "r17 小样本冻结 RAW 有动作读出收益，联合更新无额外总体收益；r17 学习策略闭环未运行，历史 r11 为 0/3。",
+        "route_id": "N02",
+        "documents": [
+          "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md"
+        ]
+      },
+      {
+        "id": "n04",
+        "title": "N04 预测与变化分离",
+        "date": "10/12—19",
+        "state": "paused",
+        "column": 1,
+        "row": 2,
+        "status": "暂停 · 历史闭环 0/100",
+        "description": "v4.2 故障与 v5 工程修复保留；短程修复未证明长期稳定或控制收益。",
+        "route_id": "N04",
+        "documents": [
+          "research/experiments/2026-10-19_n04_stability_repair_v5.md"
+        ]
+      },
+      {
+        "id": "merge",
+        "title": "暂停并合入本地主线",
+        "date": "10/19",
+        "state": "history",
+        "column": 2,
+        "row": 1,
+        "status": "保全代码、证据与负结果",
+        "description": "三条旧路线暂停，本地代码和已有证据汇入 main。此处是开发与研究投入收敛，不表示三机制融合或能力验收。",
+        "documents": [
+          "research/archives/2026-10-19_worktree_consolidation/README.md"
+        ]
+      },
+      {
+        "id": "recovery",
+        "title": "单任务视觉替换诊断",
+        "date": "10/19",
+        "state": "history",
+        "column": 3,
+        "row": 1,
+        "status": "旧 ConvNeXt 方案 · 未训练",
+        "description": "先正常光 RGB，再 RAW；独立前端已准备，但没有新策略训练或闭环。保留诊断顺序，新主线不沿用后端 LoRA。",
+        "documents": [
+          "research/experiments/2026-10-19_visual_replacement_recovery.md"
+        ]
+      },
+      {
+        "id": "distill",
+        "title": "RAW stem＋继承 SigLIP",
+        "date": "10/20 当前",
+        "state": "current",
+        "column": 4,
+        "row": 1,
+        "status": "RAW教师20/20 · 学生0更新",
+        "description": "本地重建RAW输入教师：Normal task6共同20新初态教师／参照各20/20；选前端初始化0，155次前端优化不宣称收益。50真实示范、完整控制账本和首／后／reset真实tokens接口已验收；时序学生输入与训练仍待对接。",
+        "route_id": "DISTILL",
+        "documents": [
+          "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
+          "docs/decisions/0016-raw-stem-siglip-distillation.md",
+          "research/reviews/2026-10-20_rawvla_public_teacher_assets.md",
+          "research/experiments/2026-10-20_raw_stem_siglip_distillation.md",
+          "research/experiments/raw_stem_siglip_20261020/independent-review.md",
+          "research/experiments/raw_stem_siglip_20261020/RUNBOOK.md",
+          "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+          "research/experiments/raw_stem_siglip_20261020/teacher-control-acceptance.json"
+        ]
+      },
+      {
+        "id": "extend",
+        "title": "弱光与后续扩展",
+        "date": "满足恢复条件后",
+        "state": "planned",
+        "column": 5,
+        "row": 1,
+        "status": "条件计划 · 尚未开展",
+        "description": "正常光纯学生控制恢复后，再研究曝光、噪声和弱光；多任务与新实验另定预算。教师和学生从首轮允许因果时序。",
+        "documents": [
+          "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "pool",
+        "to": "n01",
+        "kind": "branch"
+      },
+      {
+        "from": "pool",
+        "to": "n02",
+        "kind": "branch"
+      },
+      {
+        "from": "pool",
+        "to": "n04",
+        "kind": "branch"
+      },
+      {
+        "from": "n01",
+        "to": "merge",
+        "kind": "converge"
+      },
+      {
+        "from": "n02",
+        "to": "merge",
+        "kind": "converge"
+      },
+      {
+        "from": "n04",
+        "to": "merge",
+        "kind": "converge"
+      },
+      {
+        "from": "merge",
+        "to": "recovery",
+        "kind": "diagnose"
+      },
+      {
+        "from": "recovery",
+        "to": "distill",
+        "kind": "adopt"
+      },
+      {
+        "from": "distill",
+        "to": "extend",
+        "kind": "conditional"
+      }
+    ],
+    "summary_sources": {
+      "docs/OWAC_research_roadmap_2026-10-08.md": "c45e0a38d20f501998faeca725ebf78c8fc5ad6e05d9d741cb7ab9c3052b46f9",
+      "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md": "b4454061d6dd5fbc66beb8b778cd01c7985243590b715b7663aad4a367e1cf69",
+      "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md": "d7452eadcb4a6a3309695235044b94124d8f9149a7084fd0c9e9498292a2c0dd",
+      "research/experiments/2026-10-19_n04_stability_repair_v5.md": "5b008b70fa4dd32bccae89a14531784591604d75070bbbafe5f090cc219e535a",
+      "research/archives/2026-10-19_worktree_consolidation/README.md": "48d951e4f161b6ea6f3335c02a39298e3069be2c1fec03d95641c7ba393a7146",
+      "research/experiments/2026-10-19_visual_replacement_recovery.md": "d3aac501e9e995025e1989a30f619d5fd1fe8112360b85ca39aa861b43c1a0cd",
+      "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "5262fb7453c598f8137afc825dc27c03999950de82b22d4fbf2f422cfa138edd",
+      "docs/decisions/0016-raw-stem-siglip-distillation.md": "54d76712968a9dca3d3b0c1ccdbabdb8fd7f3bf89be9e7afce4f73725f400c11",
+      "research/reviews/2026-10-20_rawvla_public_teacher_assets.md": "5780db38048e3797fb79616c23b082e7f54aefd754282f226cc5665a574c3f45",
+      "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f"
+    }
+  }
 }

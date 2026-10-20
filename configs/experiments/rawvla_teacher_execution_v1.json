@@ -1,0 +1,119 @@
+{
+  "schema": "owac.raw-teacher.execution.v1",
+  "frozen_at": "2026-10-20T13:29:14.279139+08:00",
+  "run_root": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020",
+  "authority": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/authority.json",
+  "authority_sha256": "74369e71b27867f83660066ec81d377c971be1d4dc9592a1a90783948e8316fc",
+  "task": {
+    "suite": "libero_goal",
+    "zero_based_task_id": 6,
+    "task_order_index": 0,
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "source_type": "libero_rgb8_unprocessed_pseudo_raw3"
+  },
+  "training": {
+    "scope": "author_rawvla_frontend_only",
+    "frozen": "siglip,projector,language,action_backend",
+    "seed": 101,
+    "effective_batch": 8,
+    "microbatch": 1,
+    "gradient_accumulation": 8,
+    "max_cumulative_updates": 2000,
+    "pilot_included_updates": 100,
+    "max_anchor_presentations": 16000,
+    "learning_rate": 0.0001,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "epsilon": 1e-08,
+    "weight_decay": 1e-08,
+    "warmup_updates": 100,
+    "cosine_min_lr": 1e-06,
+    "gradient_clip": 1.0,
+    "lambda_native_action": 0.15,
+    "lambda_brightness": 0.01,
+    "lambda_chroma": 0.001,
+    "save_updates": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ]
+  },
+  "temporal": {
+    "burst_frames": 6,
+    "recurrent_endpoints": 6,
+    "endpoint_stride": 5,
+    "detach_within_window": false,
+    "single_frame_required": false,
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "replan_steps": 5
+  },
+  "limits": {
+    "additional_disk_bytes": 53687091200,
+    "local_gpu_hours": 12,
+    "gpu_count": 1,
+    "cloud_spending": 0,
+    "demonstrations_replayed_max": 50,
+    "policy_validation_episodes_max": 10,
+    "paired_test_initial_states": 20,
+    "policy_test_episodes_max": 40
+  },
+  "data": {
+    "required_source_demonstrations": 50,
+    "train": 40,
+    "validation": 5,
+    "test": 5,
+    "allow_silent_smaller_n": false,
+    "allow_mixed_lighting": false,
+    "download_entire_public_dataset": false
+  },
+  "identities": {
+    "authority.json": "74369e71b27867f83660066ec81d377c971be1d4dc9592a1a90783948e8316fc",
+    "raw/sources-audited.json": "c84966687c649ca6782c345f53a9a16f907b048184cc583d60067c1a58e8ed23",
+    "validation-catalog.json": "8ca6e0e73d0bb7377e523e0cfc44800b459dacfde66be190d470e1b7dc6d21b0",
+    "initial-states/manifest.json": "7187d931e585273d5408da0103d77f9947fb9c2da99d01c662120740c4f20061"
+  },
+  "backend_checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+  "author_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+  "starvla_revision": "57d508cb180d0510ac9060358009c0f6ffaac420",
+  "activation_memory_mode": "none",
+  "learning_rate_rule": "native linear warmup step/100 then cosine to1e-6 at2000; first update lr0 counts within budget",
+  "selection": {
+    "split": "validation",
+    "anchors": 102,
+    "metric": "physical first5 real7 MAE",
+    "tie": "earlier cumulative update",
+    "candidates": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ],
+    "closed_loop_validation": "diagnostic only"
+  },
+  "normalization": {
+    "training": "author rawvla_npz_datasets._minmax quantile/max(range,1e-6),clip[-1,1]",
+    "deployment": "native pi_libero_common.normalize_quantile range+1e-6,unclipped",
+    "physical_postprocess": "native PI05/openpi postprocess once; no extra gripper inversion"
+  },
+  "runtime": {
+    "python": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/runtime/bin/python",
+    "gpu": "local RTX5090 single GPU",
+    "torch": "2.7.1+cu128",
+    "python_version": "3.11.14"
+  },
+  "pilot_rule": "100 cumulative updates included; continue only finite nonzero gradients, actual frontend changes, full813 backend stable, valid offline action metrics, and projected total phase below12GPUh/50GiB; no new hyperparameter search",
+  "pretraining_source_sha256": {
+    "/home/jeong/zeno/owac/repo/src/owac/training/rawvla_teacher.py": "34310bd5f1623495b09eee43713749203b3adf461b82dfff18ec2c7f6fe9f3c2",
+    "/home/jeong/zeno/owac/repo/src/owac/raw/teacher_data.py": "5554a0a9e12bc21a9646ef7cb8826e395a04e98a04678eadfd4772b130688fc1",
+    "/home/jeong/zeno/owac/repo/src/owac/runtime/rawvla_teacher_budget.py": "301127f96f0c9a0f6eadacb96f91582431a720bf4473696cb361dde8e8fb1fac"
+  },
+  "evidence_limits": "not exact paper reproduction; Normal LIBERO RGB8 inverse pseudoRAW3; no nativeCFA/lowlight/student conclusions",
+  "policy_state": "canonical observable robot8 only; privileged simulation79 forbidden"
+}

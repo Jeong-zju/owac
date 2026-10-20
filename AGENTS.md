@@ -1,10 +1,18 @@
 # OWAC 开发与研究规则
 
+2026-10-20 限定教师阶段已验收：[独立报告](research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md)。Normal task6共同20新初态：参照20/20、RAW教师20/20，仅开发筛查。选定前端初始化0；实际155前端更新／1240 anchors未带来已证明收益，未作为选定权重。验证9成功＋1人为中断保留完整N10；50回放／50策略场次已用完。学生0更新／0闭环，尚未恢复；旧N01／N02／N04仍暂停，不授权学生／弱光／实机扩展。
+
+
 本文件适用于本仓库及其子目录。后续 OWAC 开发以本仓库为基础；并行工作使用本仓库的分支或 worktree，避免另建脱离版本历史的实现。用户当前明确要求优先于本文件。
 
 本地工作空间为 `/home/jeong/zeno/owac/`，主 checkout 为 `repo/`。新 worktree 必须位于 `/home/jeong/zeno/owac/worktrees/<task>/`，不得散落到 `zeno/` 或嵌套进主 checkout。已有 worktree 内的任务继续使用当前 checkout；Git、安装与检查都在该 checkout 内执行。工作空间容器自身不初始化 Git。
 
 ## 开始工作
+
+2026-10-20 授权前工程交付记录：每帧 RAW stem／SigLIP 蒸馏基线与受授权门控的训练、纯 artifact 评估入口已可审阅；68 项针对性测试通过，实际同源后端恢复及合成输入数值／梯度核对通过。新增优化更新0、闭环0，控制未恢复。完整 RAW 教师权重、真实配对数据和时序训练端到端尚未验收；不固定最终策略为单帧。见 [独立验收](research/experiments/raw_stem_siglip_20261020/independent-review.md)。
+
+
+2026-10-20 当前实施路线收敛为 **RAW stem＋继承当前策略 SigLIP＋蒸馏**，先正常光单任务恢复控制，后研究弱光。见 `docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md`、采用决议 `docs/decisions/0016-raw-stem-siglip-distillation.md` 和 `docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md`。当前版本 OWAC-D1.1，主教师对外必须接收 RAW，可内部经 Neural ISP 成像；教师／学生不限定单帧，按效果选择因果 burst／递归／状态，并披露历史与成本。学生部署直接 RAW→非图像 tokens→动作。首轮冻结语言／动作后端，不沿用旧后端 LoRA。旧 ConvNeXt 方案转为诊断历史，N01／N02／N04 仍暂停，F01—F12 保留候选池。方案认可和统筹台更新不代表已经实现或启动新实验；正式训练及闭环须有新的具体授权。
 
 2026-10-19 用户决定将 N01、N02、N04 的独立 worktree 收敛到本地主线 `main`，三个方向全部暂停，远程服务器已不可达。当前开发入口为 `/home/jeong/zeno/owac/repo/`，后续按用户要求直接在 `main` 开发；只有另行要求隔离时再创建 worktree。历史训练授权、提示词和状态快照不构成恢复训练或启动下一阶段的授权；后续训练需用户明确重新授权。
 
@@ -17,7 +25,7 @@
 完整 Default π0.5 基线见 `research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md`：LIBERO 58.20%、RoboTwin 15.63%，主清单 13,250/13,250；论文数值未复现。现成输入为作者三通道 pseudo-RAW，LIBERO 来自 RGB8 逆处理、RoboTwin 来自 HDR；不冒充原生 Bayer CFA。原部署标签 `owac-rawvla-pi05-v0.1.0` 保持不动。后续 benchmark 仍采用 RAWVLA-Bench；Arena/PolaRiS 仅作历史留档。
 
 1. 阅读 `README.md`、`docs/status.md` 和与任务相关的设计/实验记录。
-2. 当前研究依据是 `docs/OWAC_research_roadmap_2026-10-08.md`（v6）；`docs/archive/` 仅保留历史。涉及研究边界时阅读路线图对应章节。
+2. 当前实施依据是 2026-10-20 蒸馏方案与采用决议；`docs/OWAC_research_roadmap_2026-10-08.md`（v6）保留长期候选池与历史边界，与新决定冲突时以新决定为准。
 3. 先检查 `git status --short --branch`，保留用户和其他 agent 的未提交变更。确认任务范围后直接推进已授权的可逆开发。
 4. 多 agent 并行时明确文件所有权；共享接口变更先同步，不能覆盖或回退他人的工作。
 
@@ -37,8 +45,8 @@
 
 ## RAW 与系统边界
 
-- 主方法处理原始 CFA 测量并替换原 RGB 图像塔；主编码链路不得生成 RGB/sRGB/XYZ 中间图像作为下游输入，不采用 RGB 教师蒸馏或 RGB 重建。
-- 允许黑电平/响应/增益校准、坏点掩码、CFA 重排、噪声建模和 RAW 域预测，逐项披露。RGB 仅用于独立基线、预览和人工标注。
+- 学生部署直接处理 RAW 测量并输出非图像表征，不生成 RGB/sRGB/XYZ 中间图像作为下游输入，不调用教师或教师缓存。2026-10-20 起允许完整 RAW 输入教师在内部经 RGB 成像并指导学生，及继承当前策略视觉权重，须披露依赖；主教师不以 RGB 输入策略代替，时序形式按效果选择；首轮不加入 RGB 重建目标。真实 CFA 与三通道 pseudo-RAW 分开报告。
+- 允许黑电平/响应/增益校准、坏点掩码、CFA 重排、噪声建模和 RAW 域预测，逐项披露。RGB 可用于训练教师、独立基线、预览和人工标注，不进入学生部署链路。
 - C0—C2 的独立强系统基线可以使用原视觉塔；C3/C4 与主方法采用可比的后端替换和适配协议。基线强于候选不是删除基线的理由。
 - 原始采样保留无损整数值；记录 CFA、实际坐标、有效位深、黑白电平、曝光/增益、时间戳、传感器和处理历史。区分缺失、坏点及饱和；不能将重新马赛克或逆处理 sRGB 当作真实 RAW。
 - 校准、早期滤波及方差计算优先 FP32，转 BF16 前验证误差。检查 PIL/JPEG/uint8、视频编码、resize、归一化等隐式转换。

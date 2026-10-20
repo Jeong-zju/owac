@@ -1,5 +1,7 @@
 # OWAC 工程架构边界
 
+2026-10-20 当前实施实例采用[RAW stem 与 SigLIP 蒸馏方案](plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)。OWAC-D1.1 主教师接收因果 RAW 观测／历史，可内部经 RGB；学生部署为 RAW 校准／打包→stem 及按效果选择的时序聚合／状态→从当前策略继承的 SigLIP blocks／位置编码／原投影→冻结语言与动作后端，不生成中间图像或调用教师。当前是已认可的设计，模型实现与行为待验收。下文保留通用接口草案和历史假设；与新实例冲突时以[采用决议](decisions/0016-raw-stem-siglip-distillation.md)为准。
+
 当前实现基准固定为 RawVLA-Bench 与对应 π0.5，标签 `owac-rawvla-pi05-v0.1.0`，见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。这是部署及比较协议边界；候选特征接口和 RAW encoder 尚未完成验收。
 
 本文件将 roadmap v6 的共享外部约定映射到代码目录。它是初始设计草案，尚未冻结 API。当前已建立 π0.5 PyTorch 部署工具与独立环境；候选算法、RAW/特征入口、训练器和驱动尚未实现。

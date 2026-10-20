@@ -208,6 +208,60 @@ def test_actual_registry_packets_resolve_and_do_not_mix_routes():
             assert all(route["id"].lower() in path.lower() for path in stage["prompt"]["sources"])
 
 
+def test_current_strategy_has_exact_prompt_and_archives_cannot_launch():
+    repo = Path(__file__).resolve().parents[1]
+    snapshot = build_snapshot(repo)
+    routes = {route["id"]: route for route in snapshot["routes"]}
+    active = routes[snapshot["strategy"]["active_route"]]
+    assert active["id"] == "DISTILL"
+    assert [route["id"] for route in routes.values() if route["lifecycle"] == "active"] == [
+        "DISTILL"
+    ]
+    current = next(s for s in active["stages"] if s["id"] == active["current_stage"])
+    prompt_path = "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
+    assert current["prompt"]["text"] == (repo / prompt_path).read_text()
+    assert not active["summary_stale"]
+    assert not snapshot["lineage"]["summary_stale"]
+    for route_id in ("N01", "N02", "N04"):
+        assert routes[route_id]["lifecycle"] == "archived"
+        assert not any(stage["prompt"]["available"] for stage in routes[route_id]["stages"])
+    edges = {(edge["from"], edge["to"]) for edge in snapshot["lineage"]["edges"]}
+    assert all((route_id, "merge") in edges for route_id in ("n01", "n02", "n04"))
+    assert ("recovery", "distill") in edges
+    assert all(doc["available"] for doc in snapshot["shared_documents"])
+
+
+def test_history_rejects_broken_links_cycles_and_invalid_active_route(workspace):
+    repo, _, registry, _ = workspace
+    settings = json.loads(registry.read_text())
+    settings["lineage"] = {
+        "selected": "later",
+        "nodes": [
+            {"id": "early", "column": 0, "row": 0},
+            {"id": "later", "column": 1, "row": 0},
+        ],
+        "edges": [{"from": "early", "to": "missing"}],
+        "summary_sources": {"AGENTS.md": "outdated"},
+    }
+    registry.write_text(json.dumps(settings))
+    with pytest.raises(ValueError, match="不存在的节点"):
+        build_snapshot(repo, registry)
+    settings["lineage"]["edges"] = [
+        {"from": "early", "to": "later"},
+        {"from": "later", "to": "early"},
+    ]
+    registry.write_text(json.dumps(settings))
+    with pytest.raises(ValueError, match="循环"):
+        build_snapshot(repo, registry)
+    settings["lineage"]["edges"].pop()
+    registry.write_text(json.dumps(settings))
+    assert build_snapshot(repo, registry)["lineage"]["summary_stale"]
+    settings["strategy"] = {"active_route": "missing"}
+    registry.write_text(json.dumps(settings))
+    with pytest.raises(ValueError, match="当前主线"):
+        build_snapshot(repo, registry)
+
+
 def test_refresh_runs_make_in_repo_and_reports_failures(workspace):
     repo, _, registry, _ = workspace
     makefile = repo / "Makefile"

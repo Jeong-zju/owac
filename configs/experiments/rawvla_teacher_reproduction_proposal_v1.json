@@ -1,0 +1,100 @@
+{
+  "schema": "owac.research.authorization-proposal.v1",
+  "status": "proposal_not_authorized_not_trainer_config",
+  "plan": "docs/plans/RAWVLA_TEACHER_REPRODUCTION_PROPOSAL_2026-10-20.md",
+  "authorization": {
+    "teacher_optimizer_updates": false,
+    "demonstration_replay": false,
+    "simulation_policy_closed_loop": false,
+    "physical_actions": false,
+    "student_training": false
+  },
+  "task": {
+    "suite": "libero_goal",
+    "zero_based_task_id": 6,
+    "task_order_index": 0,
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "source_type": "libero_rgb8_unprocessed_pseudo_raw3"
+  },
+  "sources": {
+    "rawvla_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+    "starvla_revision": "57d508cb180d0510ac9060358009c0f6ffaac420",
+    "backend_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "recipe_choice": "released_source_not_exact_paper",
+    "learned_frontend_checkpoint": null,
+    "paired_manifest": null,
+    "split_manifest": null,
+    "test_initial_states_manifest": null
+  },
+  "temporal": {
+    "burst_frames": 6,
+    "recurrent_endpoints": 6,
+    "endpoint_stride": 5,
+    "detach_within_window": false,
+    "single_frame_required": false,
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "replan_steps": 5
+  },
+  "training": {
+    "scope": "author_rawvla_frontend_only",
+    "frozen": "siglip,projector,language,action_backend",
+    "seed": 101,
+    "effective_batch": 8,
+    "microbatch": 1,
+    "gradient_accumulation": 8,
+    "max_cumulative_updates": 2000,
+    "pilot_included_updates": 100,
+    "max_anchor_presentations": 16000,
+    "learning_rate": 0.0001,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "epsilon": 1e-08,
+    "weight_decay": 1e-08,
+    "warmup_updates": 100,
+    "cosine_min_lr": 1e-06,
+    "gradient_clip": 1.0,
+    "lambda_native_action": 0.15,
+    "lambda_brightness": 0.01,
+    "lambda_chroma": 0.001,
+    "save_updates": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ]
+  },
+  "data": {
+    "required_source_demonstrations": 50,
+    "train": 40,
+    "validation": 5,
+    "test": 5,
+    "allow_silent_smaller_n": false,
+    "allow_mixed_lighting": false,
+    "download_entire_public_dataset": false
+  },
+  "proposed_caps_not_measurements": {
+    "additional_disk_bytes": 53687091200,
+    "local_gpu_hours": 12,
+    "gpu_count": 1,
+    "cloud_spending": 0,
+    "demonstrations_replayed_max": 50,
+    "policy_validation_episodes_max": 10,
+    "paired_test_initial_states": 20,
+    "policy_test_episodes_max": 40
+  },
+  "checkpoints": {
+    "selection": "validation_fully_denoised_first5_mae_real7_then_earlier",
+    "require_optimizer_scheduler_rng_sampler_resume": true
+  },
+  "actual": {
+    "teacher_optimizer_updates": 0,
+    "demonstration_replays": 0,
+    "policy_closed_loop_episodes": 0,
+    "valid_raw_teacher_obtained": false
+  }
+}

@@ -177,10 +177,54 @@ def prompt_packet(route: dict, stage: dict, docs: dict[str, dict]) -> dict:
     return {"available": True, "kind": kind, "sources": sources, "text": "".join(chunks)}
 
 
+def validate_lineage(registry: dict) -> None:
+    """Keep the editorial history a navigable DAG with an explicit active route."""
+    routes = {route["id"]: route for route in registry["routes"]}
+    active = registry.get("strategy", {}).get("active_route")
+    if active and (active not in routes or routes[active].get("lifecycle") != "active"):
+        raise ValueError("当前主线必须指向有效的 active 路线")
+    if active and sum(route.get("lifecycle") == "active" for route in routes.values()) != 1:
+        raise ValueError("收敛后的当前主线必须唯一")
+    lineage = registry.get("lineage", {})
+    nodes = lineage.get("nodes", [])
+    ids = {node["id"] for node in nodes}
+    if len(ids) != len(nodes):
+        raise ValueError("路线历史节点 ID 重复")
+    if nodes and lineage.get("selected") not in ids:
+        raise ValueError("路线历史默认节点不存在")
+    graph: dict[str, list[str]] = {node_id: [] for node_id in ids}
+    for node in nodes:
+        if node.get("route_id") and node["route_id"] not in routes:
+            raise ValueError("路线历史引用了不存在的路线")
+        if node.get("column", -1) < 0 or node.get("row", -1) < 0:
+            raise ValueError("路线历史缺少有效布局位置")
+    for edge in lineage.get("edges", []):
+        if edge["from"] not in ids or edge["to"] not in ids:
+            raise ValueError("路线历史连线引用了不存在的节点")
+        graph[edge["from"]].append(edge["to"])
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(node_id: str) -> None:
+        if node_id in visiting:
+            raise ValueError("路线历史不能包含循环")
+        if node_id in visited:
+            return
+        visiting.add(node_id)
+        for child in graph[node_id]:
+            visit(child)
+        visiting.remove(node_id)
+        visited.add(node_id)
+
+    for node_id in ids:
+        visit(node_id)
+
+
 def build_snapshot(repo: Path, registry_path: Path | None = None) -> dict:
     repo = repo.resolve()
     registry_path = registry_path or repo / "configs/research/hub.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    validate_lineage(registry)
     workspace = repo.parent
     snapshot = {
         "schema_version": 1,
@@ -191,6 +235,8 @@ def build_snapshot(repo: Path, registry_path: Path | None = None) -> dict:
         "routes": [],
         "shared_documents": [],
         "warnings": [],
+        "strategy": registry.get("strategy", {}),
+        "lineage": registry.get("lineage", {}),
     }
     for entry in registry["routes"]:
         route = dict(entry)
@@ -249,6 +295,11 @@ def build_snapshot(repo: Path, registry_path: Path | None = None) -> dict:
     snapshot["shared_documents"] = [
         read_document(repo, path, "shared") for path in registry["shared_documents"]
     ]
+    shared = {doc["relative"]: doc for doc in snapshot["shared_documents"]}
+    snapshot["lineage"]["summary_stale"] = any(
+        shared.get(path, {}).get("sha256") != expected
+        for path, expected in snapshot["lineage"].get("summary_sources", {}).items()
+    )
     return snapshot
 
 
@@ -270,6 +321,8 @@ def write_snapshot(repo: Path, output: Path, registry_path: Path | None = None) 
         json.dumps(
             {
                 "generated_at": snapshot["generated_at"],
+                "strategy": snapshot["strategy"],
+                "lineage": snapshot["lineage"],
                 "routes": [
                     {
                         "id": route["id"],

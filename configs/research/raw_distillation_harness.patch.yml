@@ -1,0 +1,30 @@
+- id: agent-default-model
+  config:
+    provider: deepseek-official
+    model: deepseek-flash
+    reasoningEffort: max
+- id: llm-deepseek
+  config:
+    reasoningEffort: max
+- id: fs-sandbox
+  config:
+    cwd: /home/jeong/zeno/owac/repo
+- id: sandbox-policy
+  config:
+    workspaceRoot: /home/jeong/zeno/owac/repo
+    mode: workspace-write
+- id: system-prompt
+  config:
+    personaSuffix: >-
+      Your coding workspace is /home/jeong/zeno/owac/repo.
+      Read its AGENTS.md before working. Set workdir explicitly for shell calls.
+      The launcher directory holds dispatch receipts, not implementation files.
+- id: credentials
+  disabled: false
+- id: authorization
+  disabled: false
+- id: deepseek-account
+  disabled: false
+- id: permission
+  config:
+    defaultPreset: workspace-write

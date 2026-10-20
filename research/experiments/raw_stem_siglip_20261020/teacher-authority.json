@@ -1,0 +1,93 @@
+{
+  "schema": "owac.raw-teacher.authorization.v1",
+  "authorized_at": "2026-10-20T12:46:12.336014+08:00",
+  "human_authorization": "授权上述限定教师复现、必要示范回放和仿真验证范围",
+  "proposal": "configs/experiments/rawvla_teacher_reproduction_proposal_v1.json",
+  "authorization": {
+    "teacher_optimizer_updates": true,
+    "demonstration_replay": true,
+    "simulation_policy_closed_loop": true,
+    "physical_actions": false,
+    "student_training": false
+  },
+  "limits": {
+    "additional_disk_bytes": 53687091200,
+    "local_gpu_hours": 12,
+    "gpu_count": 1,
+    "cloud_spending": 0,
+    "demonstrations_replayed_max": 50,
+    "policy_validation_episodes_max": 10,
+    "paired_test_initial_states": 20,
+    "policy_test_episodes_max": 40
+  },
+  "training": {
+    "scope": "author_rawvla_frontend_only",
+    "frozen": "siglip,projector,language,action_backend",
+    "seed": 101,
+    "effective_batch": 8,
+    "microbatch": 1,
+    "gradient_accumulation": 8,
+    "max_cumulative_updates": 2000,
+    "pilot_included_updates": 100,
+    "max_anchor_presentations": 16000,
+    "learning_rate": 0.0001,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "epsilon": 1e-08,
+    "weight_decay": 1e-08,
+    "warmup_updates": 100,
+    "cosine_min_lr": 1e-06,
+    "gradient_clip": 1.0,
+    "lambda_native_action": 0.15,
+    "lambda_brightness": 0.01,
+    "lambda_chroma": 0.001,
+    "save_updates": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ]
+  },
+  "task": {
+    "suite": "libero_goal",
+    "zero_based_task_id": 6,
+    "task_order_index": 0,
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "source_type": "libero_rgb8_unprocessed_pseudo_raw3"
+  },
+  "temporal": {
+    "burst_frames": 6,
+    "recurrent_endpoints": 6,
+    "endpoint_stride": 5,
+    "detach_within_window": false,
+    "single_frame_required": false,
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "replan_steps": 5
+  },
+  "data": {
+    "required_source_demonstrations": 50,
+    "train": 40,
+    "validation": 5,
+    "test": 5,
+    "allow_silent_smaller_n": false,
+    "allow_mixed_lighting": false,
+    "download_entire_public_dataset": false
+  },
+  "run_root": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020",
+  "initial_usage": {
+    "optimizer_updates": 0,
+    "demonstration_replay_attempts": 0,
+    "policy_episode_attempts": 0,
+    "gpu_reserved_wall_seconds": 0
+  },
+  "excluded_preexisting_assets": [
+    "outputs/checkpoints/raw-distillation",
+    "outputs/raw-distillation-20261020-sol"
+  ],
+  "source_head": "63cf8a41e4a3833d6df03221af08179b6d3e9a33"
+}

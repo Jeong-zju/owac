@@ -1,0 +1,167 @@
+{
+  "schema": "owac.raw-teacher.acceptance.v1",
+  "recorded_at": "2026-10-20T14:57:25.669617+08:00",
+  "status": "teacher_task6_normal_development_screen_passed",
+  "student_status": "untrained_not_control_verified",
+  "artifact": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-validated-normal-task6-init0.pt",
+  "artifact_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+  "identity": {
+    "backend": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "tokenizer": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+    "stats": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "source": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+    "starvla_revision": "57d508cb180d0510ac9060358009c0f6ffaac420",
+    "burst_frames": 6,
+    "recurrent_endpoints": 6,
+    "cameras": [
+      "agentview",
+      "wrist"
+    ],
+    "cumulative_updates": 0,
+    "input_provenance": "LIBERO RGB8 inverse pseudoRAW3 uint8; causal6burst/persistentcameraGRU; neuralISP to RGB then frozenpi05",
+    "frontend_state_sha256": "99641d1bdad1e014daa6b78e0831d7f1a9b9fb58bb5e723f8aa30f502f55dc37",
+    "checkpoint_sha256": "45cca08b85099d37c742ecb24fd0a861d06d135d2b7d6c151e1f1f1368004ff5"
+  },
+  "selected_frontend_updates": 0,
+  "actual_attempted_frontend_updates": 155,
+  "trainable_frontend_parameters": 829172,
+  "changed_frontend_parameter_tensors_at100": 74,
+  "trained_backend_parameters": 0,
+  "anchor_presentations": 1240,
+  "selection": "minimum validation physical first5 real7MAE amongpreset0and100;0.04319213129404822 vs0.04350191758032704; lockedbeforetest;nolearningbenefitclaimed",
+  "validation": {
+    "planned": 10,
+    "success": 9,
+    "valid_completed": 9,
+    "operator_interrupted": 1,
+    "retries": 0,
+    "extra10of10costgate": "not_passed; withdrawntransparentlybeforetestafteroperatorerror; neverreportedpassed"
+  },
+  "test": {
+    "shared_new_initial_states": 20,
+    "reference_success": 20,
+    "teacher_success": 20,
+    "reference_N": 20,
+    "teacher_N": 20,
+    "regression_ids": [],
+    "recovery_ids": [],
+    "wilson95_each": [
+      0.8388698745050667,
+      1.0
+    ],
+    "development_screen_both_ge16_andteacher_within2": true,
+    "statistical_noninferiority_claim": false
+  },
+  "runtime": {
+    "renderer": "OSMesa CPU",
+    "model_placement": "original FP32 NeuralISP onGPU and originalmixedprecisionpi05 onGPU",
+    "history": "6 adjacentRAWframes eachcamera; per-camera persistentGRU/theta updatedevery5environmentsteps;10dummysettlingsteps;resetepisode",
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "execute_replan_steps": 5,
+    "physical_control_dims": 7,
+    "internal_action_dims": 32,
+    "total_parameters": 3617586692,
+    "frontend_parameters": 829172,
+    "latency_ms_shared_gpu": {
+      "default_reference": {
+        "samples": 399,
+        "p50": 130.62745903152972,
+        "p95": 261.992006318178,
+        "warmup_excluded": 0
+      },
+      "learned_raw_teacher": {
+        "samples": 387,
+        "p50": 128.05669999215752,
+        "p95": 281.85023685218766,
+        "warmup_excluded": 0
+      }
+    },
+    "native_module_contract": {
+      "configured_discrete_state_input": false,
+      "instance_discrete_state_input": false,
+      "configured_pad_state_value": -2.0,
+      "effective_pad_state_value": 0.0,
+      "tokenizer_state_mode": "none",
+      "image_keys": [
+        "base_0_rgb",
+        "left_wrist_0_rgb",
+        "right_wrist_0_rgb"
+      ],
+      "image_resolution": [
+        224,
+        224
+      ],
+      "action_dim": 32,
+      "action_horizon": 10,
+      "flow_steps": 10,
+      "max_state_dim": 32,
+      "language_module_dtype": "torch.bfloat16",
+      "action_module_dtype": "torch.bfloat16"
+    }
+  },
+  "independent_checks": {
+    "all40executedchunks_matchsampledfirst5": true,
+    "all40_video_frame_counts_match_realsteps": true,
+    "backend_all813_stable": true,
+    "teacher_frontend_all83_stable": true,
+    "standalone_policy_trainingdata_read_attempts": [],
+    "actual_raw_frontend_calls_in20teacher_tests": 774,
+    "stage0_first_later_episode_reset": {
+      "passed": true,
+      "native_repeat_maxerror": 0,
+      "frozen_tolerance": 1e-06,
+      "active_prefix_and_all10velocity_action_maxerror": 0,
+      "inactive_camera": "right_wrist_0_rgb",
+      "masked_slots": 256,
+      "raw_prefix_delta_explicit": 158.0,
+      "hidden_learned_bridge_projection_parameters": 0
+    },
+    "no_trainingdata_or_featurecache_fallback": true,
+    "teacher_RGB_ISP_dependency": "explicit NeuralISP->RGB->SigLIP path; this is teacher, notRGB-free student"
+  },
+  "visual_diagnostics": {
+    "baseline": {
+      "physical_first5_mae7": 0.04319213129404822,
+      "physical_full10_mae7": 0.0422836987902103,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.0,
+      "seconds": 13.476711611030623,
+      "anchors": 102
+    },
+    "zero_raw": {
+      "physical_first5_mae7": 0.31101441566306764,
+      "physical_full10_mae7": 0.3008574115745912,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.3050380349159241,
+      "seconds": 13.074544609989971,
+      "anchors": 102
+    },
+    "cross_demo_raw": {
+      "physical_first5_mae7": 0.22746057613651352,
+      "physical_full10_mae7": 0.22737730553912633,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.22171352803707123,
+      "seconds": 13.306670513004065,
+      "anchors": 102
+    }
+  },
+  "not_run": [
+    "studentoptimization",
+    "studentclosedloop",
+    "controlledsinglefactor_targetposition_intervention",
+    "EGL_Neuralteacher_closedloop",
+    "lowlight",
+    "nativeBayer_or_crosssensor",
+    "other3tasks",
+    "physicalrobot"
+  ],
+  "cost_as_of_checks": {
+    "gpu_reserved_wall_hours": 0.8673128538157067,
+    "new_bytes": 6173812963,
+    "gpu_cap_hours": 12,
+    "new_disk_cap_bytes": 53687091200,
+    "demo_replays": 50,
+    "policy_episodes": 50
+  },
+  "limits": "LIBERO RGB8 inversepseudoRAW3, Normaltask6only; RGBpretrainedLIBEROadaptedpi05 dependency;current40/5/5onlyfrontendadaptationsplitnotclaimallpolicy-pretrainingdataunseen; notauthorreleasedtrainedfrontend; selectedauthorarchitectureinitialization0locallyreconstructed",
+  "source_head": "63cf8a41e4a3833d6df03221af08179b6d3e9a33",
+  "run_root": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020"
+}

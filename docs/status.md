@@ -1,6 +1,19 @@
 # OWAC 当前状态
 
-2026-10-19 主线研究转向[单任务视觉替换与控制恢复](../research/experiments/2026-10-19_visual_replacement_recovery.md)。用户已选择先做单任务，再扩到四任务；首轮50条真实示范、相同后端LoRA、每臂最多5,000更新。当前新增独立单帧空间前端、排除原视觉塔的LoRA范围选项和[比较协议](../configs/experiments/visual_replacement_single_task_v1.json)。旧N01/N02/N04继续暂停；新策略训练与闭环均为0。配套RawVLA运行环境、LIBERO策略权重／统计／tokenizer、真实配对示范及初态清单尚待完整核验；DROID本地部署权重不能替代。
+2026-10-20 **PREP 已验收通过，进入 ALIGN**；当前执行版本 OWAC-D1.1。教师／学生历史、相机状态与缓存对接及真实零更新梯度检查仍待完成；学生未训练、控制未恢复。见[阶段验收记录](../research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md)。
+
+2026-10-20 限定教师阶段已验收：[独立报告](../research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md)。Normal task6共同20新初态：参照20/20、RAW教师20/20，仅开发筛查。选定前端初始化0；实际155前端更新／1240 anchors未带来已证明收益，未作为选定权重。验证9成功＋1人为中断保留完整N10；50回放／50策略场次已用完。学生0更新／0闭环，尚未恢复；旧N01／N02／N04仍暂停，不授权学生／弱光／实机扩展。
+
+
+2026-10-20 授权前教师取得补查记录：官方6公开分支／main32历史提交与公开主页未找到训练后的RawVLA前端；完整源码已取得并独立合并配置，后端已恢复但不等于完整教师。已写[限定单任务教师复现提案](plans/RAWVLA_TEACHER_REPRODUCTION_PROPOSAL_2026-10-20.md)，拟仅训前端、累计≤2000更新，执行待明确授权；0优化、0新闭环。保留因果burst／递归，不固定单帧。
+
+
+2026-10-20 授权前工程交付记录：每帧 RAW stem／SigLIP 蒸馏基线与受授权门控的训练、纯 artifact 评估入口已可审阅；68 项针对性测试通过，实际同源后端恢复及合成输入数值／梯度核对通过。新增优化更新0、闭环0，控制未恢复。完整 RAW 教师权重、真实配对数据和时序训练端到端尚未验收；不固定最终策略为单帧。见 [独立验收](../research/experiments/raw_stem_siglip_20261020/independent-review.md)。
+
+
+2026-10-20 当前实施路线收敛到[RAW stem＋继承 SigLIP＋蒸馏](plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)。用户认可方案，执行 prompt 与采用决议已落库；统筹台默认展示此主线、完整提示词和可点击的分支／收敛历史。当前版本 OWAC-D1.1：主教师对外接收 RAW，内部可经 Neural ISP 成像；教师和学生不固定单帧，以控制效果、稳定性和成本选择因果历史／状态。学生部署直接 RAW→tokens，首轮后端冻结。工程实现进行中，本次修订未训练教师／学生或运行新闭环。作者模型实现已公开，训练后 RawVLA 前端／完整教师公开权重尚未找到，见[资源核查](../research/reviews/2026-10-20_rawvla_public_teacher_assets.md)。
+
+2026-10-19 的[ConvNeXt 单任务视觉替换方案](../research/experiments/2026-10-19_visual_replacement_recovery.md)及其单帧前端转为诊断历史；旧后端 LoRA 配方不沿用。50 条真实示范、每适配臂累计最多 5,000 更新作为新方案首轮诊断规模，不能视为已执行或充分收敛。配套 RawVLA runtime、LIBERO 策略／统计／tokenizer、真实配对示范及初态仍须核验；DROID 权重不能替代。
 
 2026-10-19 本地 worktree 清理完成：三个候选 checkout 均已移除，当前只保留 `/home/jeong/zeno/owac/repo/` 的 `main`，后续直接在此开发。清理前重新核验提交祖先关系、工作区、91,270 个证据文件与归档哈希；另保全 N02 本地第三方源码。历史分支、代码快照和主仓库证据归档保留，见[清理收据](../research/archives/2026-10-19_worktree_consolidation/worktree-cleanup.json)。
 

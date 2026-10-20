@@ -1,6 +1,14 @@
 # OWAC
 
-当前主线工作是[单任务视觉替换与控制恢复](research/experiments/2026-10-19_visual_replacement_recovery.md)：先以50条真实示范、相同后端LoRA、最多5,000更新建立单帧RGB基础对照，再比较RAW，恢复后再扩四任务。新实验协议与单帧前端已加入；当前缺少完整配套资产，尚未启动新策略训练。原视觉塔仅作诊断与基线，RAW目标保持不变。
+2026-10-20 限定教师阶段已验收：[独立报告](research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md)。Normal task6共同20新初态：参照20/20、RAW教师20/20，仅开发筛查。选定前端初始化0；实际155前端更新／1240 anchors未带来已证明收益，未作为选定权重。验证9成功＋1人为中断保留完整N10；50回放／50策略场次已用完。学生0更新／0闭环，尚未恢复；旧N01／N02／N04仍暂停，不授权学生／弱光／实机扩展。
+
+
+2026-10-20 授权前工程交付记录：每帧 RAW stem／SigLIP 蒸馏基线与受授权门控的训练、纯 artifact 评估入口已可审阅；68 项针对性测试通过，实际同源后端恢复及合成输入数值／梯度核对通过。新增优化更新0、闭环0，控制未恢复。完整 RAW 教师权重、真实配对数据和时序训练端到端尚未验收；不固定最终策略为单帧。见 [独立验收](research/experiments/raw_stem_siglip_20261020/independent-review.md)。
+
+
+当前唯一实施主线是[RAW stem 与 SigLIP 蒸馏](docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)：继承当前策略的视觉权重，先只训练 RAW stem，再有限适配视觉层并加入动作监督；首轮冻结语言／动作后端，先恢复正常光单任务控制。OWAC-D1.1 明确教师必须接收 RAW，内部可经 Neural ISP；教师与学生的单帧／burst／递归按效果选择。学生部署直接 RAW→tokens→动作。用户已认可方案，[GPT-6.1 Sol 执行 prompt](docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md)已准备；工程实现进行中；本次更新 prompt 与方案，未启动训练／闭环。
+
+[研究统筹台](http://127.0.0.1:8876/)展示当前方案、完整提示词，以及历史分支如何暂停、合并并收敛到新主线。旧[ConvNeXt 视觉替换方案](research/experiments/2026-10-19_visual_replacement_recovery.md)作为诊断历史保留，后端 LoRA 配方不沿用。N01／N02／N04 继续暂停，候选池不删除。
 
 2026-10-19：N01、N02、N04 的代码、研究结论和本地已有训练记录统一收敛到本地主线 `main`。三个方向全部暂停；远程服务器不可达。历史文档中的“运行中”“下一阶段”和训练授权均为当时快照，当前不恢复训练。
 

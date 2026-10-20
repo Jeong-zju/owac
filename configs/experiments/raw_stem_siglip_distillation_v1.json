@@ -1,0 +1,232 @@
+{
+  "schema": "owac.raw-stem-distillation.v1",
+  "candidate": "RAW_STEM_SIGLIP",
+  "decision": "0016",
+  "evidence_level": "engineering_preparation",
+  "authorization": {
+    "optimizer_updates": false,
+    "simulation_closed_loop": false,
+    "physical_actions": false,
+    "zero_update_forward_backward": true
+  },
+  "task": {
+    "dataset": "RAWVLA-Bench",
+    "suite": "libero_goal",
+    "task_key": "task6",
+    "instruction": "put the cream cheese in the bowl",
+    "numbering_verified": true,
+    "lighting": "Normal",
+    "input_regime": "rawvla_rgb3",
+    "raw_origin": "LIBERO RGB8 inverse processing; not native Bayer",
+    "index_base": 0,
+    "task_order_index": 0,
+    "task_index": 6,
+    "numbering_source": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/third_party/openpi/third_party/libero/libero/libero/benchmark/libero_suite_task_map.py"
+  },
+  "assets": {
+    "runtime": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/starvla-pinned-source",
+    "checkpoint": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "load_audit": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/load-audit.json",
+    "tokenizer": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/paligemma_tokenizer.model",
+    "statistics": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+    "paired_manifest": null,
+    "init_states": null,
+    "teacher_validation": null,
+    "stage0_parity": null,
+    "teacher_frontend_checkpoint": null,
+    "teacher_frontend_config": null,
+    "teacher_history_contract": null,
+    "stats_key": "",
+    "converter_sha256": "62980fda1a1b1a09167d413232a2a9295db8370e52b58a70cfba52ef5d88c440",
+    "backend_recovery_record": "research/experiments/raw_stem_siglip_20261020/backend-recovery.json"
+  },
+  "student": {
+    "stem_hidden": 64,
+    "stem_lr": 0.0001,
+    "siglip_initialization": "same_actual_policy_checkpoint",
+    "geometry": "read_from_loaded_checkpoint",
+    "extra_projection": false,
+    "metadata_missing": "explicit_unavailable",
+    "bayer_config": "separate manifest and geometry; no mixing",
+    "history_policy": {
+      "fixed_single_frame": false,
+      "engineering_baseline": "per-frame RAW stem encoder remains reusable; temporal policy to match chosen teacher/evidence",
+      "selection": "control quality and stability first, then measured cost; no future leakage",
+      "teacher_student_scope": "declared causal histories; may compare unequal histories only with explicit information advantage disclosure",
+      "reset_required": true
+    },
+    "implementation_scope": "per-frame baseline encoder implemented; temporal teacher adapter supported; no accepted temporal student/training path yet; not a fixed single-frame research constraint"
+  },
+  "training": {
+    "seed": 101,
+    "effective_batch": 16,
+    "source_demonstrations": 50,
+    "split": {
+      "train": 40,
+      "validation": 5,
+      "test": 5
+    },
+    "max_cumulative_updates_per_arm": 5000,
+    "max_anchor_presentations_per_arm": 80000,
+    "checkpoint_updates": [
+      0,
+      500,
+      2000,
+      5000
+    ],
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "gradient_clip": 1.0,
+    "warmup_updates": 100,
+    "scheduler": "linear_warmup_then_constant",
+    "stage1": "stem_only",
+    "stage2": {
+      "enabled": false,
+      "selection": "after bottleneck diagnosis only",
+      "method": "input_first_blocks",
+      "block_count": 2,
+      "lr": 1e-06,
+      "matched_C_D": true
+    },
+    "backend_trainable": false,
+    "loss": {
+      "token_mse_weight": 1.0,
+      "token_cosine_weight": 0.1,
+      "lambda_f": 1.0,
+      "lambda_a_D": 1.0,
+      "lambda_a_B_C": 0.0,
+      "reduction": "FP32 MSE sum/(valid_tokens*width), cosine sum/valid_tokens",
+      "action": "unchanged native flow objective with valid future/action mask; 7D and padding reported separately"
+    },
+    "selection": {
+      "split": "validation",
+      "metric": "fully_denoised_first5_MAE7",
+      "tie_break": "earlier_cumulative_step",
+      "test_selection": false
+    },
+    "resume": "optimizer/scheduler/RNG/sampler plus cumulative per-arm counter",
+    "phase_gate": {
+      "first_phase": "B/C stem-only feature alignment; D shares any recorded feature warm-start",
+      "action_objective_activation": "after phase1 diagnosis and predeclared matched C/D comparison",
+      "automatic_stage2_activation": false,
+      "common_warm_start_updates_count_in_each_arm": true
+    },
+    "frozen_audit_interval": 500
+  },
+  "arms": {
+    "A": {
+      "input": "original_teacher",
+      "trainable": "none"
+    },
+    "B": {
+      "input": "teacher_actual_rgb",
+      "objective": "feature",
+      "trainable": "stem_only"
+    },
+    "C": {
+      "input": "rawvla_rgb3",
+      "objective": "feature",
+      "trainable": "stem_only"
+    },
+    "D": {
+      "input": "rawvla_rgb3",
+      "objective": "feature+native_action",
+      "trainable": "stem_only"
+    }
+  },
+  "action_protocol": {
+    "action_horizon": 10,
+    "flow_steps": 10,
+    "replan_steps": 5,
+    "control_dim": 7,
+    "padded_dim": 32,
+    "native_image_keys": [
+      "base_0_rgb",
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ]
+  },
+  "evaluation": {
+    "offline_windows": [
+      1,
+      5,
+      10
+    ],
+    "groups": [
+      "translation",
+      "rotation",
+      "gripper",
+      "padding"
+    ],
+    "visual_controls": [
+      "zero_visual",
+      "cross_source_shuffle",
+      "target_position_intervention_with_correct_new_actions"
+    ],
+    "validation_init_count": 10,
+    "test_init_count": 20,
+    "test_once_per_selected_arm": true,
+    "development_screen": {
+      "teacher_success_min": 16,
+      "student_success_min": 16,
+      "student_max_success_gap": 2,
+      "statistical_noninferiority_claim": false
+    }
+  },
+  "resource_limits": {
+    "gpu_hours": null,
+    "training_disk_bytes": null,
+    "profile_status": "real_checkpoint_synthetic_interface_measured; real_expert_training_profile_unavailable",
+    "extra_data": false,
+    "download_authorized": false,
+    "weight_download_authorized": true,
+    "weight_recovery_source": "same immutable original objects as prior successful OWAC baseline"
+  },
+  "cli_module": "owac.runtime.raw_distillation",
+  "learning_rate_rationale": "New local stem uses fixed 1e-4; inherited blocks stay frozen initially; optional first2 block adaptation 1e-6 only after diagnosis, no sweep. Not inherited ConvNeXt/backend LoRA recipe.",
+  "baseline_reference": {
+    "report": "research/experiments/2026-10-14_rawvla_pi05_complete_evaluation.md",
+    "ledger": "research/experiments/results/2026-10-14_rawvla_pi05_complete_evaluation/per-episode-baseline.jsonl",
+    "libero_success": [
+      5820,
+      10000
+    ],
+    "normal_success": [
+      1918,
+      2000
+    ],
+    "target_task_normal_success": [
+      50,
+      50
+    ],
+    "model_source": "gs://openpi-assets/checkpoints/pi05_libero",
+    "converted_model_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "converter_sha256": "62980fda1a1b1a09167d413232a2a9295db8370e52b58a70cfba52ef5d88c440",
+    "rawvla_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+    "starvla_revision": "57d508cb180d0510ac9060358009c0f6ffaac420",
+    "new_run_requires_revalidation": true,
+    "role": "historical Default diagnostic baseline only; not accepted requested RAW-input learned teacher",
+    "reference_isp": "author default_isp, single frame; not learned neural ISP"
+  },
+  "teacher_requirement": {
+    "requested_model": "author RawVLA learned RAW frontend + its frozen pi05 backend",
+    "input": "RAW",
+    "pretrained_frontend_checkpoint_status": "not_found_public_as_of_2026-10-20",
+    "default_isp_fallback": false,
+    "code_released": true,
+    "source": "https://github.com/ShuhongLL/RawVLA",
+    "temporal_default": {
+      "burst_frames": 6,
+      "rnn_frames": 6
+    },
+    "single_frame_teacher_status": "not_required_by_user; temporal teacher allowed with explicit history contract",
+    "distillation_ready": false,
+    "gate": "author learned checkpoint or separately authorized reproduction; declared causal history, alignment and reset; no Default ISP substitution",
+    "temporal_teacher_allowed": true,
+    "student_may_use_history": true,
+    "source_root": "/home/jeong/zeno/owac/repo/outputs/encoder-handoff-references/rawvla",
+    "code_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+    "adapter_name": "rawvla_author"
+  }
+}

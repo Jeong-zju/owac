@@ -1,0 +1,47 @@
+{
+  "evidence_level": "actual_offline_visual_dependence_diagnostics_only",
+  "pid": 1366537,
+  "optimizer_updates": 0,
+  "policy_episodes": 0,
+  "activation_memory_mode": "normal_gpu_activations",
+  "seed": 101,
+  "source_sha256": {
+    "src/owac/training/rawvla_teacher.py": "827a76efb0fa0b7245bfb80a3485fbf2ae5c344ca3f74bc91f9bc711067c3a71",
+    "src/owac/raw/teacher_data.py": "2f94fd9ef7a442c9a1b0f8839e52a26a62b265082bcc5ff0b1b7425002d77a48",
+    "src/owac/runtime/rawvla_teacher_budget.py": "301127f96f0c9a0f6eadacb96f91582431a720bf4473696cb361dde8e8fb1fac"
+  },
+  "derangement": {
+    "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+    "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_30",
+    "libero_goal/put_the_cream_cheese_in_the_bowl/demo_30": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_41",
+    "libero_goal/put_the_cream_cheese_in_the_bowl/demo_41": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_42",
+    "libero_goal/put_the_cream_cheese_in_the_bowl/demo_42": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+  },
+  "scope": "offlineonly; same expert targets, state, language, camera masks, noise/time; no policy actions executed or checkpoint reselection",
+  "passed": true,
+  "conditions": {
+    "baseline": {
+      "physical_first5_mae7": 0.04319213129404822,
+      "physical_full10_mae7": 0.0422836987902103,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.0,
+      "seconds": 13.476711611030623,
+      "anchors": 102
+    },
+    "zero_raw": {
+      "physical_first5_mae7": 0.31101441566306764,
+      "physical_full10_mae7": 0.3008574115745912,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.3050380349159241,
+      "seconds": 13.074544609989971,
+      "anchors": 102
+    },
+    "cross_demo_raw": {
+      "physical_first5_mae7": 0.22746057613651352,
+      "physical_full10_mae7": 0.22737730553912633,
+      "mean_absolute_first5_prediction_change_from_baseline": 0.22171352803707123,
+      "seconds": 13.306670513004065,
+      "anchors": 102
+    }
+  },
+  "target_position_single_factor_intervention": "not_run; no remaining policyepisodebudget, no controlledrelabeled target intervention; randomheldoutstatesvaryjointly so notsinglefactorcausalproof",
+  "elapsed_seconds": 74.0540715350071
+}

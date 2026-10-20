@@ -1,5 +1,7 @@
 # 研究记录
 
+2026-10-20 当前唯一实施主线为[RAW stem 与 SigLIP 蒸馏](../docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)，[新研究卡](candidates/RAW_STEM_SIGLIP.md)与[执行 prompt](../docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md)已准备；模型、训练与闭环待验证。旧候选继续保留，N01／N02／N04 暂停。统筹台可查看历史分支与收敛原因，旧记录中的运行状态和授权均不构成新作业入口。
+
 2026-10-19：三个方向全部暂停并收敛到本地主线，远端不可达。以下计划、授权和运行状态仅作历史回查；当前以[合并与证据说明](archives/2026-10-19_worktree_consolidation/README.md)为准，不能据旧包启动训练。
 
 

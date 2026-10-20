@@ -1,4 +1,6 @@
-# 三项编码器研究的 DeepSeek 使用入口
+# OWAC 当前执行 prompt 与历史交接入口
+
+2026-10-20：新增 [GPT-6.1 Sol 的 RAW stem 与 SigLIP 蒸馏执行 prompt](GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md)。用户已认可“RAW stem＋继承当前策略 SigLIP＋蒸馏”的路线；新 prompt 指定本机 DeepSeek Harness V41-Flash Max 承担主要编码，Sol 负责研究判断和独立验收。当前 OWAC-D1.1 要求完整 RAW 输入教师，允许内部 ISP 成像；教师／学生不限定单帧，学生部署直接 RAW→tokens；先正常光单任务、冻结语言／动作后端。该文件准备完成不代表已派工、已实现或已启动训练，旧 N01／N02／N04 仍暂停。
 
 2026-10-19：三个方向全部暂停并收敛到本地主线，远端不可达。以下计划、授权和运行状态仅作历史回查；当前以[合并与证据说明](../../research/archives/2026-10-19_worktree_consolidation/README.md)为准，不能据旧包启动训练。
 

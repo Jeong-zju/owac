@@ -1,0 +1,591 @@
+{
+  "schema": "owac.raw-distillation.inventory.v1",
+  "round": "round-01",
+  "generated_at_utc": "2026-10-20T02:50:17Z",
+  "checkout": "/home/jeong/zeno/owac/repo",
+  "scope": {
+    "kind": "local_read_only_asset_and_interface_inventory",
+    "remote_access": false,
+    "downloads": false,
+    "archive_extraction": false,
+    "optimizer_updates": 0,
+    "gpu_forward": false,
+    "notes": "Targeted searches only. Historical remote paths are listed as provenance, never as available assets."
+  },
+  "system": {
+    "gpu": {
+      "status": "unavailable",
+      "command": "nvidia-smi --query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu --format=csv,noheader",
+      "result": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.",
+      "compute_processes": "unavailable for the same reason"
+    },
+    "memory": {
+      "total": "62Gi",
+      "available": "36Gi",
+      "swap_used": "29Gi"
+    },
+    "disk": {
+      "filesystem": "/dev/nvme0n1p2",
+      "size": "1.8T",
+      "used": "1.5T",
+      "available": "208G",
+      "use_percent": 89
+    },
+    "tempdir": {
+      "default_probe": "tempfile.gettempdir() failed from the sandboxed process even though /tmp exists",
+      "bounded_load_workaround": "TMPDIR=/dev/shm",
+      "writes_to_tmp_attempted": false
+    },
+    "uv": {
+      "status": "blocked_by_read_only_uv_cache",
+      "command": "uv run --locked pytest -q tests/encoders/n01_full/test_paired_views.py tests/integration/test_n01_v12_frozen_isp.py",
+      "error": "failed to open file /home/jeong/.cache/uv/sdists-v9/.git: Read-only file system (os error 30)"
+    }
+  },
+  "task6": {
+    "status": "verified",
+    "suite": "libero_goal",
+    "index": 6,
+    "index_base": 0,
+    "default_task_order_index": 0,
+    "default_order_is_identity": true,
+    "task_name": "put_the_cream_cheese_in_the_bowl",
+    "instruction_from_task_name": "put the cream cheese in the bowl",
+    "bddl_language_string": "Put the cream cheese on the bowl",
+    "bddl_language_note": "The BDDL (:language ...) text uses 'on'; the benchmark task name, OpenPI episode records and archived metrics use 'in'. Use the task-name/description string for training and evaluation unless a source-specific replay explicitly requires the BDDL literal.",
+    "source": {
+      "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/third_party/openpi/third_party/libero/libero/libero/benchmark/libero_suite_task_map.py",
+      "lines": "26-37 (libero_goal list; cream cheese is element 6); 83-84 (task_order_index 0 is [0..9])",
+      "sha256": null,
+      "revision": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
+      "revision_source": "git -C .../third_party/openpi/third_party/libero rev-parse HEAD"
+    },
+    "bddl": {
+      "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/third_party/openpi/third_party/libero/libero/libero/bddl_files/libero_goal/put_the_cream_cheese_in_the_bowl.bddl",
+      "bytes": 2948,
+      "sha256": "81c54eace32b92466598103b3b6e8435ce90f10996ef18cec4a35fe6c4d31a98",
+      "status": "present"
+    },
+    "independent_benchmark_records": [
+      {
+        "path": "/home/jeong/zeno/owac/repo/research/experiments/results/2026-10-10_pi05_official_libero_reference/evaluation/episodes.jsonl",
+        "line": 7,
+        "evidence": "task_id=6, task_name=put_the_cream_cheese_in_the_bowl, episode_index=0, seen=True, initial_state_sha256=485e7e27990ed3190e7ef7d9cf4bf2a79fb673410033ced06a99f184b74e9c95",
+        "status": "present"
+      },
+      {
+        "path": "/home/jeong/zeno/owac/repo/research/experiments/results/2026-10-14_rawvla_pi05_complete_evaluation/libero-complete-metrics.json",
+        "line": 1514,
+        "evidence": "key libero_goal/6, description put the cream cheese in the bowl, overall 167/250",
+        "status": "present"
+      },
+      {
+        "path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/records/pi05-full-20261010-v3/libero/libero_goal/task_6.episodes.jsonl",
+        "line": 1,
+        "evidence": "task_id=6, suite=libero_goal, instruction put the cream cheese in the bowl; historical remote-address provenance only, not a live remote",
+        "status": "present"
+      }
+    ],
+    "numbering_warning": "Index 6 is only guaranteed for task_order_index=0. Other LIBERO task-order permutations reorder the suite and change the index."
+  },
+  "policy": {
+    "target": "current-policy-lineage pi05_libero (official Libero PyTorch conversion)",
+    "status": "available_external_artifact_bounded_verified",
+    "accepted_as_owac_pin": false,
+    "reason_not_accepted": "The complete artifact is outside this checkout; its lineage is documented but no cryptographic link to the OWAC conversion or to a signed upstream manifest is present.",
+    "root": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/checkpoints/week1-review/pi05_libero_pytorch",
+    "artifact": {
+      "checkpoint": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/checkpoints/week1-review/pi05_libero_pytorch/model.safetensors",
+        "bytes": 7233650408,
+        "sha256": "b9fe91921a7d7e25ff0574d786260c3f2843e20a619da99eca76715055b334ac",
+        "format": "safetensors",
+        "tensor_count": 812,
+        "metadata_tied_aliases": {
+          "paligemma_with_expert.paligemma.model.language_model.embed_tokens.weight": "paligemma_with_expert.paligemma.lm_head.weight"
+        },
+        "status": "present"
+      },
+      "config": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/checkpoints/week1-review/pi05_libero_pytorch/config.json",
+        "bytes": 149,
+        "sha256": "5c2728c53f4b33ee16380140f303713fdb5df78a8d26ee1489ace374fc54327a",
+        "content": {
+          "action_dim": 32,
+          "action_horizon": 10,
+          "paligemma_variant": "gemma_2b",
+          "action_expert_variant": "gemma_300m",
+          "precision": "bfloat16"
+        },
+        "status": "present"
+      },
+      "norm_stats": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/checkpoints/week1-review/pi05_libero_pytorch/assets/physical-intelligence/libero/norm_stats.json",
+        "bytes": 1914,
+        "sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+        "matched_archived_official_stats": "sha256 matches outputs/rawvla-archives/.../pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+        "status": "present"
+      },
+      "tokenizer": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/results/pi05-remote-20261014/paligemma_tokenizer.model",
+        "bytes": 4264023,
+        "sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+        "source_receipt": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/results/pi05-remote-20261014/tokenizer-receipt.json",
+        "upstream_source": "gs://big_vision/paligemma_tokenizer.model",
+        "hash_matches_archived_owac_load_audit": true,
+        "status": "present"
+      }
+    },
+    "geometry_from_checkpoint_header": {
+      "vision_hidden_size": 1152,
+      "vision_layers": 27,
+      "patch_size": 14,
+      "image_size": 224,
+      "grid": [16, 16],
+      "positions": 256,
+      "vision_post_layernorm": true,
+      "pooling_head_present_in_checkpoint": false,
+      "projector_in_features": 1152,
+      "projector_out_features": 2048,
+      "projector_bias": true,
+      "language_hidden_size": 2048,
+      "language_layers": 18,
+      "action_expert_hidden_size": 1024,
+      "action_expert_layers": 18,
+      "dtype": "BF16 in checkpoint; selected tensors loaded as float32 for verification"
+    },
+    "exact_tensor_names": {
+      "patch_embedding_weight": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight",
+      "patch_embedding_bias": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias",
+      "position_embedding": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.position_embedding.weight",
+      "encoder_layer_template": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.encoder.layers.{i}.{layer_norm1,layer_norm2,self_attn.{q,k,v,out}_proj,mlp.fc1,mlp.fc2}.{weight,bias}",
+      "post_layernorm_weight": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.post_layernorm.weight",
+      "post_layernorm_bias": "paligemma_with_expert.paligemma.model.vision_tower.vision_model.post_layernorm.bias",
+      "projector_weight": "paligemma_with_expert.paligemma.model.multi_modal_projector.linear.weight",
+      "projector_bias": "paligemma_with_expert.paligemma.model.multi_modal_projector.linear.bias"
+    },
+    "load_checks": {
+      "header_parse": {
+        "status": "passed",
+        "header_bytes": 135360,
+        "tensor_count": 812
+      },
+      "selected_tensor_load": {
+        "status": "passed",
+        "tool": "safetensors.safe_open(framework='pt', device='cpu') under TMPDIR=/dev/shm",
+        "tensors": [
+          "patch_embedding.weight [1152,3,14,14] BF16->FP32 finite",
+          "position_embedding.weight [256,1152] BF16->FP32 finite",
+          "post_layernorm.weight [1152] BF16->FP32 finite",
+          "multi_modal_projector.linear.weight [2048,1152] BF16->FP32 finite",
+          "multi_modal_projector.linear.bias [2048] BF16->FP32 finite"
+        ],
+        "note": "This is a bounded tensor read, not a claim that a 3.35B-parameter policy was instantiated or run."
+      },
+      "tokenizer_load": {
+        "status": "passed",
+        "loader": "sentencepiece.SentencePieceProcessor(model_file=...)",
+        "vocab_size": 257152,
+        "task6_prompt_ids": [2, 1065, 573, 9450, 13624, 575, 573, 14581],
+        "empty_prompt_ids": [2]
+      },
+      "full_model_instantiation": {
+        "status": "not_attempted",
+        "reason": "No GPU driver is visible, StarVLA is not importable, and a 6.8 GiB BF16 model load is outside the bounded round."
+      }
+    },
+    "provenance": {
+      "documented_as_official_pi05_libero_conversion": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/results/pi05-libero-review-20261014/source/README.md",
+        "lines": "169-245",
+        "content": "OpenPI config pi05_libero; official gs://openpi-assets/checkpoints/pi05_libero; convert_jax_model_to_pytorch.py; copy assets; expected model.safetensors+config.json+norm_stats layout"
+      },
+      "prior_local_use": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/docs/experiments/week1-closed-loop-20261017/simulation-summaries.json",
+        "content": "checkpoint identity and hashes recorded for a LIBERO closed-loop run; identity status is reported_by_server_not_independently_verified, but the local hash equals the recorded hash",
+        "hash_recorded": "b9fe91921a7d7e25ff0574d786260c3f2843e20a619da99eca76715055b334ac",
+        "config_recorded": "5c2728c53f4b33ee16380140f303713fdb5df78a8d26ee1489ace374fc54327a"
+      },
+      "archived_owac_conversion_is_a_different_artifact": {
+        "load_audit_path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/openpi_converted_protocol/pi05_libero_starvla/load-audit.json",
+        "load_audit_model_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+        "warning": "Do not use the archived model hash as the hash of this local file; the two conversions are not byte-identical. The stats and tokenizer hashes do match."
+      }
+    },
+    "normalization": {
+      "stats_keys": ["state.mean", "state.std", "state.q01", "state.q99", "actions.mean", "actions.std", "actions.q01", "actions.q99"],
+      "quantile_formula": "clip(2*(x-q01)/max(q99-q01,1e-6)-1, -1, 1)",
+      "state_width": 8,
+      "action_width": 7,
+      "padded_width": 32,
+      "state_pad_value": 0.0,
+      "action_pad_value": 0.0,
+      "state_text": "disabled for LIBERO (discrete_state_input=false); no state tokens are written into the prompt",
+      "max_token_len": 200,
+      "unnormalize_formula": "(x+1)/2*(q99-q01+1e-6)+q01; preserve padded dimensions unchanged"
+    },
+    "siglip_forward_semantics": {
+      "source_path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/modules/vlm/openpi_transformers/siglip/modeling_siglip.py",
+      "embeddings_lines": "212-281",
+      "transformer_lines": "748-796",
+      "operations": [
+        "Conv2d(3->1152, kernel=14, stride=14, padding=valid) on [-1,1] pixel_values",
+        "flatten H,W to 256 tokens and transpose to [B,256,1152]",
+        "add learned position_embedding[position_ids], fixed 256 positions, no interpolation by default",
+        "27 pre-norm SigLIP encoder layers, eager attention",
+        "post_layernorm (LayerNorm 1152)",
+        "return last_hidden_state; no pooling head is used for embed_image",
+        "OpenPIMultiModalProjector.linear: 1152->2048 with bias, no activation"
+      ],
+      "source_openpi_paligemma": {
+        "path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/modules/vlm/OpenPIPaliGemma.py",
+        "projector_lines": "12-19",
+        "get_image_features_lines": "28-30",
+        "embed_image_lines": "124-134",
+        "note": "embed_image is exactly vision_tower(pixel_values).last_hidden_state then multi_modal_projector.linear. No extra scale, normalization, or post-projector norm."
+      },
+      "prefix_semantics": {
+        "path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/framework/VLM4A/PI0.py",
+        "embed_prefix_lines": "383-398",
+        "layout": "for each of 3 image_keys in order: 256 visual tokens; then language embeddings * sqrt(2048)",
+        "visual_mask": "image_mask expanded over the 256 tokens; LIBERO has 2 supplied cameras and a masked third camera",
+        "att_masks": "0 for every prefix token",
+        "position_ids": "cumsum(pad_masks, dim=1)-1 at the consumer, not stored in the prefix"
+      }
+    },
+    "preprocessing_semantics": {
+      "source_path": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/framework/VLM4A/PI0.py",
+      "lines": "254-276",
+      "steps": [
+        "policy input is RGB CHW float32 in [0,1]",
+        "resize with bilinear interpolation, align_corners=false, preserving aspect ratio to fit 224x224",
+        "symmetric/center pad to exactly 224x224",
+        "map [0,1] to [-1,1] via x*2-1",
+        "no ImageNet mean/std subtraction in this path"
+      ],
+      "warning": "The historical client path once resized RAW to 128 before the frozen ISP. That is not the reference order; use RAW at native cache resolution -> ISP -> policy resize/pad unless the caller explicitly reproduces the historical defect."
+    }
+  },
+  "droid_reference": {
+    "status": "present_but_incompatible_substitute",
+    "reason": "DROID action_horizon=15 and DROID normalization; DROID is not LIBERO and must not replace pi05_libero.",
+    "root": "/home/jeong/zeno/owac/repo/outputs/checkpoints/pi05_droid_pytorch",
+    "checkpoint": {
+      "path": "/home/jeong/zeno/owac/repo/outputs/checkpoints/pi05_droid_pytorch/model.safetensors",
+      "bytes": 7233650408,
+      "sha256": null,
+      "sha256_note": "not re-hashed in this round; the existing conversion receipt records 07094e2d4d85c81444d341443fdcaf863c05232835ab7376805193b749b17e41",
+      "config": {
+        "action_dim": 32,
+        "action_horizon": 15,
+        "paligemma_variant": "gemma_2b",
+        "action_expert_variant": "gemma_300m",
+        "precision": "bfloat16"
+      }
+    },
+    "config_sha256": "b6307dc69bbcf4bc5932d39e9b8b6bfa1fbffd7dec30e0fcca0648259485ade7",
+    "norm_stats": {
+      "path": "/home/jeong/zeno/owac/repo/outputs/checkpoints/pi05_droid_pytorch/assets/droid/norm_stats.json",
+      "sha256": "403b3a22f897e9ae5dd617966a3c8f7d1835ac79dfd5a8993179514be26a3b8b",
+      "status": "present"
+    }
+  },
+  "teacher": {
+    "requested": "verified single-frame ISP teacher",
+    "status": "deterministic_isp_available_and_locally_tested; no learned single-frame neural ISP weights found",
+    "implementation": {
+      "path": "/home/jeong/zeno/owac/repo/src/owac/raw/n01_paired_views.py",
+      "bytes": 11208,
+      "sha256": "abb0c132bfabc90af7220cff90015d19f56896bf20a34ebe0d3da8bc7a16a2d7",
+      "key_lines": {
+        "fixed_params": "84-89",
+        "provenance": "96-144",
+        "numpy_oracle": "153-174",
+        "torch_path": "177-205",
+        "same_tensor_pair": "226-259"
+      },
+      "parameters": {
+        "red_gain": 1.8,
+        "green_gain": 1.0,
+        "blue_gain": 1.7,
+        "inverse_global_gain": 1.0,
+        "raw_bit_depth": 10
+      },
+      "formula": "round(255 * smoothstep(linear_to_srgb(clip(raw10/1023*gains,0,1))))",
+      "inputs": "three-channel pseudo-RAW / HDR-derived linear view; not a native Bayer CFA",
+      "weights": "none; deterministic arithmetic"
+    },
+    "author_source": {
+      "expected_relative_path": "starVLA/examples/simBenchmarks/LIBERO/eval_files/raw_rgb10_unprocessing.py",
+      "status": "unavailable_local",
+      "reason": "No copy found in repo or candidate project; the frozen test skips without OWAC_RAWVLA_SOURCE",
+      "consequence": "Local arithmetic is tested, but the local cross-check against the author module did not execute."
+    },
+    "tests": {
+      "command": "TMPDIR=/dev/shm PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -p no:cacheprovider -q tests/encoders/n01_full/test_paired_views.py tests/integration/test_n01_v12_frozen_isp.py",
+      "result": "9 passed, 3 skipped",
+      "skipped": [
+        "author LIBERO ISP cross-check: OWAC_RAWVLA_SOURCE unset",
+        "author LIBERO quantisation cross-check: OWAC_RAWVLA_SOURCE unset"
+      ],
+      "historical_remote_claim": "P3_isp_note.md records a remote 4 passed/0 skipped run with the author checkout; this round did not reproduce that remote check."
+    },
+    "teacher_chain_gap": "No local code yet composes RAW -> frozen ISP -> exact policy 224x224 [-1,1] preprocessing -> SigLIP; this is a thin API to implement next.",
+    "rejected_alternatives": [
+      "ColorChecker finetune/calibration/default_isp.py (different same-name object, two profiles only; not present locally)",
+      "streaming RAWVLA neural frontend (burst/recurrent; not the single-frame teacher, and no weights locally)",
+      "DROID visual tower (wrong policy lineage)"
+    ]
+  },
+  "data": {
+    "task6_initial_states": {
+      "status": "available_not_split",
+      "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/third_party/openpi/third_party/libero/libero/libero/init_files/libero_goal/put_the_cream_cheese_in_the_bowl.pruned_init",
+      "bytes": 37551,
+      "sha256": "524de11d240f33b93d5218b1779a1ded1037950fcf865f07d0c0029cc48cf3f5",
+      "load_check": "torch.load(..., map_location='cpu', weights_only=False) -> numpy.ndarray list, len=50",
+      "state_shape": [17],
+      "state_count": 50,
+      "source_semantics": "LIBERO goal suite pruned initial states; loader source lines 158-165 in benchmark/__init__.py",
+      "split_status": "No frozen 10-validation / 20-test selection; 50 states are a candidate pool, not yet proven disjoint from training demonstrations."
+    },
+    "task6_demonstrations": {
+      "status": "unavailable",
+      "required": "50 real paired source demonstrations, split 40/5/5 by source demonstration, with same-acquisition RAW/RGB or enough data to form the teacher pair",
+      "local_evidence": [
+        "No task6 demo HDF5/LeRobot dataset found under repo or /home/jeong/zeno/zhanshuxie/xzs_iros_2027.",
+        "data/manifests/n01-full-v1 is a benchmark-cache inventory (1771 files, 500 episodes, five lighting variants), not the 50 expert demonstrations.",
+        "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/data/week1/libero is 92 episodes for two different Week 1 tasks (bowl and drawer), not task6.",
+        "research/experiments/results/2026-10-14_n02_p0_foundation/real-cache/audit_libero_curated.json contains one remote-derived task6 audit sample; it is not a local dataset."
+      ],
+      "split_manifest": null,
+      "paired_rgb_or_raw": null
+    },
+    "other_local_data": {
+      "n01_manifest": {
+        "path": "/home/jeong/zeno/owac/repo/data/manifests/n01-full-v1/n01-full-v1-libero-manifest.json",
+        "bytes": 2289069,
+        "sha256": "3462b7321409d054bf74a0414ce35f6a593d4c9a4154d3646e51cba2595019c9",
+        "status": "present_metadata_only",
+        "content": "1771 files / 500 groups / five lighting variants across four LIBERO suites; remote raw root /workspace/owac/rawvla/source/benchmark_data/RawVLA-Bench/data/libero/raw"
+      },
+      "n01_index": {
+        "path": "/home/jeong/zeno/owac/repo/data/manifests/n01-full-v1/n01-full-v1-index.json",
+        "bytes": 7945,
+        "sha256": "33de7d02c86f993a562686037271f540ac5d850ddebed0c9e8641475d2e4e30d",
+        "status": "present_metadata_only"
+      },
+      "week1_libero": {
+        "path": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/data/week1/libero",
+        "status": "present_wrong_task",
+        "episodes": 92,
+        "scope": "all available episodes for the two Week 1 tasks (bowl and drawer), not cream cheese"
+      }
+    }
+  },
+  "source_availability": {
+    "starvla": {
+      "status": "partial_source_archive_only",
+      "root": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA",
+      "importable": false,
+      "important_files": {
+        "PI05.py": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/framework/VLM4A/PI05.py",
+        "PI0.py": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/framework/VLM4A/PI0.py",
+        "OpenPIPaliGemma.py": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/modules/vlm/OpenPIPaliGemma.py",
+        "modeling_siglip.py": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/modules/vlm/openpi_transformers/siglip/modeling_siglip.py",
+        "OpenPI_ActionHead.py": "/home/jeong/zeno/owac/repo/outputs/rawvla-archives/2026-10-14_rawvla_pi05_baseline/remote/source/starVLA/starVLA/model/modules/action_model/OpenPI_ActionHead.py"
+      },
+      "source_hashes": {
+        "PI0.py": "286936ef8cf921e44d5718b1e617e9d91505326ec4be17ca88363523ebcb1617",
+        "modeling_siglip.py": "1f19bea478b045acfee0e1e15eff58b7dec36f4a2185521ec9d97431300dcff0",
+        "OpenPI_ActionHead.py": "03abef03f93e54cd78d4785b977b6633b526731ad30f617e9d5250adae1becb0"
+      },
+      "modeling_siglip_bytes": 50317,
+      "OpenPI_ActionHead_bytes": 12235,
+      "note": "Only the files needed for audit were archived; this is not a runnable StarVLA environment."
+    },
+    "openpi": {
+      "status": "complete_official_source_present_but_working_tree_dirty",
+      "root": "/home/jeong/zeno/owac/repo/third_party/openpi",
+      "revision": "15a9616a00943ada6c20a0f158e3adb39df2ccac",
+      "relevant_files": [
+        "third_party/openpi/src/openpi/models_pytorch/pi0_pytorch.py",
+        "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/siglip/modeling_siglip.py",
+        "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/paligemma/modeling_paligemma.py",
+        "third_party/openpi/src/openpi/policies/libero_policy.py"
+      ],
+      "note": "This is OpenPI PyTorch, not the StarVLA wrapper used by RawVLAFeaturePolicy."
+    },
+    "libero": {
+      "status": "source_and_init_states_present_outside_repo",
+      "root": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/third_party/openpi/third_party/libero",
+      "revision": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
+      "note": "Task list, BDDL, init states, and benchmark loader are present. This is LIBERO standard; it is not the Lightwheel-LIBERO deployment in the OWAC repo."
+    }
+  },
+  "runtime": {
+    "pi05_runtime": {
+      "root": "/home/jeong/zeno/owac/repo/configs/backends/pi05-runtime",
+      "status": "present",
+      "python": "3.11",
+      "modules": {
+        "torch": true,
+        "safetensors": true,
+        "omegaconf": true,
+        "openpi": true,
+        "transformers": true,
+        "sentencepiece": true,
+        "starVLA": false
+      }
+    },
+    "repo_runtime": {
+      "root": "/home/jeong/zeno/owac/repo/.venv",
+      "python": "3.12",
+      "modules": {
+        "torch": true,
+        "safetensors": false,
+        "omegaconf": false,
+        "starVLA": false,
+        "openpi": false,
+        "transformers": false,
+        "sentencepiece": false
+      }
+    },
+    "candidate_week1_sim": {
+      "root": "/home/jeong/zeno/zhanshuxie/xzs_iros_2027/.venvs/week1-sim",
+      "modules": {
+        "torch": true,
+        "safetensors": true,
+        "omegaconf": true,
+        "starVLA": false,
+        "openpi": false,
+        "transformers": true,
+        "sentencepiece": false
+      }
+    },
+    "caches": {
+      "/home/jeong/.cache/openpi": "absent",
+      "/home/jeong/.cache/huggingface": "absent",
+      "conclusion": "Do not rely on either cache path for model or tokenizer discovery."
+    }
+  },
+  "bridge_interface": {
+    "module": "/home/jeong/zeno/owac/repo/src/owac/backends/rawvla_features_n02.py",
+    "sha256": "27ef46697c637a6ec57d221f6d7a827533999e53be1fb7b1eb04b303deb4b84d",
+    "status": "available_thin_bridge_but_release_trap",
+    "release_trap": {
+      "lines": "1517-1524, 1598-1672",
+      "description": "load_audited_replaced_vision defaults release_vision=True. It filters all vision prefixes out of the source state, never loads them, and then sets vision_tower and multi_modal_projector to None. That destroys the exact SigLIP and projector weights a distillation student must inherit.",
+      "required_usage": "For raw-stem distillation call a full strict loader that loads both vision and projector; do not call this method with default arguments. If release is needed later, release only after all inherited weights have been copied and audited.",
+      "second_trap": "The source state's vision tensors are reported in replaced_vision_present but are not loaded into the module. Presence in the checkpoint is not evidence that the constructed policy uses them."
+    },
+    "native_flow_loss": {
+      "lines": "1206-1266",
+      "prepare_targets": "OpenPIActionHead.prepare_flow_targets at OpenPI_ActionHead.py:189-195",
+      "noise": "N(0,1) float32 [B,H,32]",
+      "time": "Beta(1.5,1.0)*0.999+0.001, float32 [B]",
+      "x_t": "time*noise + (1-time)*actions",
+      "u_t": "noise - actions",
+      "loss": "MSE(u_t, v_t) over [B,H,32]; optional action_mask [B,H] masks whole time rows, denominator valid.sum()*32",
+      "default": "no mask; padded action dimensions participate in the mean",
+      "action_mask_shape": "[B,H], not [B,H,32]"
+    },
+    "denoise": {
+      "lines": "1326-1407",
+      "solver": "explicit Euler with dt=-1/num_steps from time=1.0; 10 steps for LIBERO",
+      "cache": "prefix KV built once; denoise_step uses past_key_values and never calls the encoder",
+      "output": "normalized internal action tensor [B,10,32]; control_actions slices first 7 dimensions and does not unnormalize"
+    },
+    "prefix": {
+      "lines": "1018-1095",
+      "visual_shape": "[B,C*N,2048], C=3, N=256",
+      "camera_order": ["base_0_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb"],
+      "language_scale": "sqrt(2048)",
+      "att_masks": "all False",
+      "position_ids": "cumsum(pad_masks,1)-1",
+      "masked_token_handling": "zero before projection; non-finite values and positions are masked"
+    },
+    "action_protocol": {
+      "LIBERO": {
+        "action_horizon": 10,
+        "replan_steps": 5,
+        "control_dim": 7,
+        "action_dim": 32,
+        "max_state_dim": 32,
+        "num_denoise_steps": 10
+      }
+    }
+  },
+  "gaps": [
+    {
+      "id": "G01",
+      "severity": "blocking_for_real_forward",
+      "gap": "StarVLA is not importable in any available environment; only a partial archived source tree exists.",
+      "impact": "RawVLAFeaturePolicy cannot construct the real PI05 backend in this checkout."
+    },
+    {
+      "id": "G02",
+      "severity": "blocking_for_canonical_pin",
+      "gap": "The complete pi05_libero checkpoint, tokenizer and stats are outside the OWAC checkout and are not cryptographically tied to the archived OWAC conversion; the local model hash differs from the archived load-audit hash.",
+      "impact": "Useful current artifact, but not yet an accepted immutable OWAC asset."
+    },
+    {
+      "id": "G03",
+      "severity": "blocking_for_training",
+      "gap": "No local 50 task6 expert demonstrations and no 40/5/5 source-demonstration split.",
+      "impact": "The planned distillation dataset cannot be constructed from local assets."
+    },
+    {
+      "id": "G04",
+      "severity": "blocking_for_heldout_claim",
+      "gap": "50 task6 initial states exist, but no frozen 10-validation/20-test subset and no proof they are disjoint from the missing training demonstrations.",
+      "impact": "Do not call any of these states held-out until a split is frozen."
+    },
+    {
+      "id": "G05",
+      "severity": "teacher_boundary",
+      "gap": "The only available teacher is the deterministic pseudo-RAW ISP, not a learned single-frame neural ISP. Its author module is absent, so only local arithmetic tests passed and the upstream cross-check skipped.",
+      "impact": "This supports same-acquisition pseudo-RAW teachers; it does not establish a learned ISP or native Bayer teacher."
+    },
+    {
+      "id": "G06",
+      "severity": "integration",
+      "gap": "No local RAW -> ISP -> exact policy 224x224 [-1,1] preprocessing -> SigLIP -> projector -> bridge integration.",
+      "impact": "The first thin teacher/student API still has to be written and tested on one batch."
+    },
+    {
+      "id": "G07",
+      "severity": "environment",
+      "gap": "No GPU driver is visible; full model load, forward, and VRAM profile were not attempted.",
+      "impact": "Existence and bounded tensor/tokenizer loads are verified, not end-to-end policy execution."
+    },
+    {
+      "id": "G08",
+      "severity": "data",
+      "gap": "No task6 RGB or RAW images/actions exist locally; the N01 manifest points at a remote cache root and is metadata only.",
+      "impact": "Teacher-student paired views cannot be produced without new local data."
+    }
+  ],
+  "command_evidence": [
+    {
+      "command": "sha256sum .../pi05_libero_pytorch/model.safetensors",
+      "output": "b9fe91921a7d7e25ff0574d786260c3f2843e20a619da99eca76715055b334ac"
+    },
+    {
+      "command": "sha256sum .../paligemma_tokenizer.model",
+      "output": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+    },
+    {
+      "command": "sha256sum .../libero/norm_stats.json",
+      "output": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84"
+    },
+    {
+      "command": "TMPDIR=/dev/shm ... pytest ... test_paired_views.py test_n01_v12_frozen_isp.py",
+      "output": "9 passed, 3 skipped"
+    },
+    {
+      "command": "nvidia-smi ...",
+      "output": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver."
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # OWAC 研究路线与 RSS 2027 投稿计划
 
+2026-10-20 当前实施投入已[收敛到 RAW stem 与 SigLIP 蒸馏](plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)，OWAC-D1.1 主教师接收 RAW、内部可经 ISP 成像；教师／学生不限定单帧，学生直接生成非图像表征。下文 v6 保留长期候选池与当时的研究假设，不作为恢复 N01／N02／N04 或并行执行全部家族的指令；新实施边界以[0016 决议](decisions/0016-raw-stem-siglip-distillation.md)为准。
+
 2026-10-12 实施基准固定为 RawVLA-Bench 与对应 π0.5，部署/协议标签 `owac-rawvla-pi05-v0.1.0`。本段更新 benchmark 路线；以下架构研究目标继续适用，旧 Arena/PolaRiS 路径仅保留历史。完整范围见 [0012](decisions/0012-rawvla-pi05-protocol-freeze.md)。
 
 **版本：v6，2026 年 10 月 9 日。项目从设计起就以“具备 ResNet／Transformer 级影响力潜力的新网络架构或实现框架”为目标，围绕整体计算方式展开原创研究。** 这一目标落实到表示、交互、组合、学习、推理、规模扩展、计算实现和复用接口，作为当前设计标准，而不只写成远期愿景。实际影响力由研究结果与后续应用检验。

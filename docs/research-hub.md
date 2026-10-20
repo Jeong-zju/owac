@@ -1,6 +1,6 @@
 # OWAC 研究统筹台
 
-统一查看 N01、N02、N04 的开发树、当前技术路线、说明文档和提示词。2026-10-19 起代码、路线登记和说明统一从主 checkout 的本地 `main` 读取。三个方向全部暂停、远端不可达；旧阶段仅供回查，生成结果在 `outputs/research-hub/`。
+统一查看当前 RAW stem 与 SigLIP 蒸馏主线、历史分支与收敛原因、方案原文和执行 prompt。N01／N02／N04 作为暂停历史保留，旧阶段只供回查。路线与说明从主 checkout 的本地 `main` 读取，生成结果在 `outputs/research-hub/`。
 
 ## 打开与更新
 
@@ -44,7 +44,15 @@ systemctl --user enable --now owac-research-hub.service
 
 服务运行时无需另开 `make research-hub-serve`。如需临时前台调试，先停止常驻服务，Ctrl+C 结束调试后再用 `systemctl --user start owac-research-hub.service` 恢复。离线快照中的“重新读取”默认进入 8876 端口。
 
-## 当前暂停与历史内容
+## 当前主线与分支收敛历史
+
+2026-10-20 首页收敛到唯一当前实施路线：[RAW stem 与 SigLIP 蒸馏](plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md)。首页可阅读完整方案、进入阶段和一键复制给 GPT-6.1 Sol 的完整 prompt；复制内容与源 Markdown 一致，不叠加旧阶段包装。当前 PREP 已验收通过，进入 ALIGN：完整 RAW 教师与参考策略在共同20个新初态各20/20，仅单任务开发筛查；选定前端初始化0，实际155前端更新不宣称学习收益。学生仍为0更新／0闭环，历史范围、每相机状态、缓存及真实零更新梯度检查待完成。
+
+“路线怎样分支，又为什么收敛”以可点击图展示：架构候选池分支到 N01／N02／N04，三路暂停后合入本地 main，转向单任务视觉替换诊断，再采纳 RAW stem＋继承 SigLIP＋蒸馏。虚线末端是恢复正常光控制后才考虑的弱光和其他扩展。点击节点可阅读收敛原因、原始证据或进入相应路线；支持“全部分支／当前收敛链路”切换和窄屏横向滚动。
+
+连线表示研究选择的演进，不表示三个旧机制已经融合，也不表示各节点通过科学或行为验收。当前主线与归档路线分别展示，历史卡片收在“历史路线与原始证据”，仍可打开。
+
+## 暂停路线与历史内容
 
 三个方向当前节点均为“暂停与本地证据”，分别显示 N01 的 P3 停止/动作诊断、N02 的 r17 读出结论及历史闭环、N04 的 S2 故障/修复边界。所有旧阶段改为历史节点，原文仍可阅读；当前不提供旧训练包作为执行入口。
 
@@ -56,12 +64,13 @@ systemctl --user enable --now owac-research-hub.service
 
 路线登记：[configs/research/hub.json](../configs/research/hub.json)。
 
-1. 当前三个方向的登记 checkout 为 `repo`、分支为 `main`；三个原 worktree 已清理，历史分支与主仓库归档保留作恢复来源。统筹台只读取文档和 Git 状态，不启动训练。
+1. 当前主线 DISTILL 与历史 N01／N02／N04 的登记 checkout 均为 `repo`、分支为 `main`。`strategy.active_route` 指向唯一 `lifecycle=active` 路线；旧路线标为 `archived`。原 worktree 已清理，历史分支与归档保留；统筹台不启动训练。
 2. 自包含提示词可设`prompt_kind=complete`，直接复制文件全文；其工作位置/阶段范围由完整包本身给出，不再叠加通用旧门槛或来源hash前缀。可选`research_focus`展示研究链路、比较方法、预算和数据边界，缺省时其他路线保持原界面。
 3. 每条路线配置 `version`、`current_stage`、阶段说明与 `prompt_sources`。`current_stage` 是人工登记的当前核对点，不代表自动批准执行。
 3. 文档自动收录各自 `docs/`、`research/candidates/`、`research/experiments/`、`research/reviews/` 内路径含本方向编号的 Markdown，另含 README、AGENTS、status 和 `documents` 明确列出的来源。不把工作树中其他方向的旧提示词副本混入。
 4. 阶段变更后，先读原始证据，再更新登记表。`summary_sources` 是摘要所依据文件的 SHA256；原文变化后页面立即提示“摘要待复核”。核对并改好摘要后才更新对应 hash 和 `reviewed_at`，不能仅刷新 hash 消除提示。
 5. 新路线可在登记表添加；checkout 只允许主仓库自身或同一容器的 `worktrees/` 下。原文缺失会显示原因并禁用依赖它的交接包，不自动选择旧版本。
+6. `lineage.nodes` 登记日期、状态、分支位置、原因和来源文档；`lineage.edges` 登记分支、汇合与条件性扩展。构建拒绝不存在的节点／路线、循环和非唯一当前主线。历史摘要的来源 hash 变化单独提示复核，不自动改写原因或推进状态。
 
 日期统一显示为北京时间。文件修改时间表示本地文件时间，不是实验完成时间；Git HEAD 与未提交修改分报。摘要和阶段标签不会通过文档里出现“通过”二字自行升级。页面没有实验完成百分比，路线节点仅展示顺序。
 
@@ -84,3 +93,7 @@ make check
 自动刷新变更验证（2026-10-14）：9 项测试及本次文件 Ruff 检查通过。实际在应用浏览器分别点击“重新读取”和刷新标签页，均显示构建成功；收据确认 cwd 为主 repo、命令为 `make research-hub`、退出码 0。当时全库 `make check` 因 `research/archives/2026-10-14_rawvla_pi05_baseline/` 中的冻结源码及第三方代码格式问题失败，未修改这些历史资产。完整基线归档随后移至被忽略的 `outputs/rawvla-archives/`；本次全库提交前重新执行 `make check`（151 个 Python 文件）及 `uv run --locked pytest -q`，均通过，全部 122 项测试通过。
 
 常驻服务验证（2026-10-15）：unit 校验通过，状态 enabled/active；向服务主进程发送 SIGKILL 后，systemd 自动创建新 PID，HTTP 页面和 snapshot 均恢复 200。恢复后实际 `POST /api/rebuild` 的收据确认主 repo 下 `make research-hub` 退出码为 0。用户 linger 已启用；开机启动配置已核对，未为测试而重启整机。回执见本地 `outputs/research-hub/service-verification.json`。
+
+路线收敛更新验证（2026-10-20）：13 项统筹台测试、`make check`、`git diff --check` 和 JavaScript 语法检查通过。常驻服务已加载新代码；实际浏览器核对 8 个历史节点、全部分支／当前链路切换、证据／方案阅读、6 个主线阶段、4 个对照，以及剪贴板全文与最新 prompt 一致。收据与截图为本地 `outputs/research-hub/route-convergence-verification.json`、`route-convergence-browser.json`、`route-convergence.png`。当前桌面视口已检查，专门的手机视口尚未实测。本次没有启动模型派工、训练或闭环。
+
+PREP验收登记（2026-10-20）：按用户要求将主线 PREP 明确登记为已通过，ALIGN 保持当前阶段。方案版本保留 OWAC-D1.1，旧分支继续暂停；证据入口指向教师独立验收报告。模型权重、缓存和视频保留在忽略目录，Git提交实现、配置与小型证据清单。
