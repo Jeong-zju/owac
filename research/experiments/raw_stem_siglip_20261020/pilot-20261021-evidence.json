@@ -1,0 +1,1298 @@
+{
+  "schema": "owac.raw-distillation.pilot-evidence.v1",
+  "run_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-pilot-20261021-101725",
+  "assessment_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-pilot-20261021-101725/postprocess/run-20261021T035315Z",
+  "source_version": {
+    "git_head": "9b7ad89961ea36c7f4e5530d278a513223c043ac",
+    "checkout": "/home/jeong/zeno/owac/repo",
+    "branch": "main",
+    "source_snapshot": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-pilot-20261021-101725/frozen-source-snapshot.tar.gz",
+    "snapshot_sha256": "8b9be32c916cc75ae146e01ebf8a66921c4b5ff68533d95459eb25a9f72b25e1",
+    "snapshot_bytes": 2160921,
+    "exact_frozen_files": 382,
+    "scope": "all frozen OWAC Python implementation and run-specific recipe/authority/readiness; no weights, data, credentials, or unrelated changes",
+    "commit_or_push_performed": false
+  },
+  "authorization_and_final_acceptance": {
+    "schema": "owac.sol.pilot-final-acceptance.v1",
+    "passed": true,
+    "accepted_at": "2026-10-21T12:08:46.159011+08:00",
+    "actual_optimizer_updates": {
+      "B": 50,
+      "C": 50
+    },
+    "actual_anchor_presentations_each": 800,
+    "additional_optimizer_updates_by_assessment": 0,
+    "attached_pure_max_abs_metric_delta": 0.0,
+    "tolerance_predeclared": 1e-06,
+    "all_owned_model_processes_ended": true,
+    "teacher_cache_or_isp_forbidden_attempts": [],
+    "factory_definitions_imported_explicitly": true,
+    "disabled_factory_calls": [
+      "build_raw_frontend(None)"
+    ],
+    "source_freeze_mismatches": [],
+    "training_process_wall_seconds": {
+      "B": 2326.7473533153534,
+      "C": 2401.3961119651794
+    },
+    "attached_assessment_wall_seconds": 635.2593560218811,
+    "pure_assessment_wall_seconds": 157.50320053100586,
+    "offline_owner_wall_seconds": 800.2744133472443,
+    "training_plus_offline_model_wall_hours": 1.5356716329521602,
+    "conservative_first_training_to_offline_end_hours": 1.5938536259200837,
+    "new_output_bytes": 11115259881,
+    "existing_cache_bytes": 5254539235,
+    "closed_loop_episodes": 0,
+    "D_updates": 0,
+    "test_used": false,
+    "c_native_exit_code": null,
+    "c_native_exit_scope": "unavailable after original supervisor exit143; complete50 artifacts and final trained JSON independently audited",
+    "control_recovery": "not_established",
+    "offline_result": "B/C learned tokens improve; full validation first5 action MAE worsens at50; Bselected1 Cselected0"
+  },
+  "offline_independent_aggregate": {
+    "schema": "owac.sol.offline-aggregate-audit.v1",
+    "passed": true,
+    "optimizer_updates": 0,
+    "arms": {
+      "B": {
+        "checkpoint_metrics": {
+          "0": {
+            "action": {
+              "first1_mae7": 0.3406864825782238,
+              "first5_mae7": 0.3002346694690756,
+              "full10_mae7": 0.3011599973751809,
+              "gripper_mae": 0.8947356417526959,
+              "normalized_padding_mae": 0.0010524204866558804,
+              "rotation_mae": 0.029500585879071565,
+              "translation_mae": 0.3749608320406246,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.06255969050906453,
+              "feature_mse": 4.1587107345169665,
+              "feature_total": 4.164966703567873,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          },
+          "1": {
+            "action": {
+              "first1_mae7": 0.33993684610023217,
+              "first5_mae7": 0.29862855880862416,
+              "full10_mae7": 0.30034375642308125,
+              "gripper_mae": 0.886790683737904,
+              "normalized_padding_mae": 0.0010521439746788083,
+              "rotation_mae": 0.029517491273865635,
+              "translation_mae": 0.3756876928930355,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.06231289064767314,
+              "feature_mse": 4.140290241615445,
+              "feature_total": 4.146521530680213,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          },
+          "50": {
+            "action": {
+              "first1_mae7": 0.3156405432405425,
+              "first5_mae7": 0.31219482748667793,
+              "full10_mae7": 0.31281459317140775,
+              "gripper_mae": 1.0269586778352235,
+              "normalized_padding_mae": 0.0010131921860280677,
+              "rotation_mae": 0.02865030872588268,
+              "translation_mae": 0.3589308266561043,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.04031758434047886,
+              "feature_mse": 2.3500940308851352,
+              "feature_total": 2.354125789319183,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          }
+        },
+        "source_pairs_0_to_50": [
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+            "first5_before": 0.27597231684928447,
+            "first5_after": 0.280412487026337,
+            "delta": 0.004440170177052505,
+            "valid_first5": 113
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_30",
+            "first5_before": 0.31417946635108246,
+            "first5_after": 0.32695624820495905,
+            "delta": 0.012776781853876595,
+            "valid_first5": 95
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_41",
+            "first5_before": 0.3240423697150416,
+            "first5_after": 0.3827638626098633,
+            "delta": 0.0587214928948217,
+            "valid_first5": 90
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_42",
+            "first5_before": 0.2890818358864635,
+            "first5_after": 0.2969056411446737,
+            "delta": 0.007823805258210192,
+            "valid_first5": 112
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+            "first5_before": 0.3057432429570901,
+            "first5_after": 0.28640793499193695,
+            "delta": -0.019335307965153148,
+            "valid_first5": 95
+          }
+        ],
+        "feature_MSE_reduction_fraction": 0.4348984142177664,
+        "first5_MAE_increase_fraction": 0.03983603239010414,
+        "offline_sources_improved": 1,
+        "offline_sources_regressed": 4,
+        "scope": "five validation source demonstrations, offline error; not closed-loop successes"
+      },
+      "C": {
+        "checkpoint_metrics": {
+          "0": {
+            "action": {
+              "first1_mae7": 0.34635576912585425,
+              "first5_mae7": 0.3056066959063605,
+              "full10_mae7": 0.3036554380532751,
+              "gripper_mae": 0.8716540023826327,
+              "normalized_padding_mae": 0.001071165959577686,
+              "rotation_mae": 0.02954646874559561,
+              "translation_mae": 0.3884315330213702,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.0614535645673088,
+              "feature_mse": 4.0071218948738245,
+              "feature_total": 4.013267251330555,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          },
+          "1": {
+            "action": {
+              "first1_mae7": 0.34884971815764027,
+              "first5_mae7": 0.3069382754661659,
+              "full10_mae7": 0.3043882255778095,
+              "gripper_mae": 0.8773667529584641,
+              "normalized_padding_mae": 0.0010744962101414573,
+              "rotation_mae": 0.02954782246077802,
+              "translation_mae": 0.3882357665427445,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.061406884963313736,
+              "feature_mse": 4.0028354981366325,
+              "feature_total": 4.008976186632964,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          },
+          "50": {
+            "action": {
+              "first1_mae7": 0.3361076121309809,
+              "first5_mae7": 0.3273349465931406,
+              "full10_mae7": 0.3205143834771541,
+              "gripper_mae": 0.9379666868393985,
+              "normalized_padding_mae": 0.0009641030541536053,
+              "rotation_mae": 0.02824504026282711,
+              "translation_mae": 0.4069662739707129,
+              "valid_first5": 505,
+              "valid_full10": 985,
+              "valid_step1": 102
+            },
+            "feature": {
+              "anchors": 102,
+              "cosine_weight": 0.1,
+              "feature_cosine": 0.047423013905976336,
+              "feature_mse": 2.7655930869719563,
+              "feature_total": 2.770335388362554,
+              "scalar_denominator": 106954752.0,
+              "valid_tokens": 52224
+            }
+          }
+        },
+        "source_pairs_0_to_50": [
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+            "first5_before": 0.28429966357297604,
+            "first5_after": 0.3125044641175629,
+            "delta": 0.02820480054458685,
+            "valid_first5": 113
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_30",
+            "first5_before": 0.34165564649983454,
+            "first5_after": 0.3287422347225641,
+            "delta": -0.012913411777270456,
+            "valid_first5": 95
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_41",
+            "first5_before": 0.325406392208404,
+            "first5_after": 0.35917243133816457,
+            "delta": 0.03376603912976056,
+            "valid_first5": 90
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_42",
+            "first5_before": 0.2871430453711322,
+            "first5_after": 0.3261422047923718,
+            "delta": 0.038999159421239604,
+            "valid_first5": 112
+          },
+          {
+            "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+            "first5_before": 0.2979119647490351,
+            "first5_after": 0.3148124792466038,
+            "delta": 0.01690051449756874,
+            "valid_first5": 95
+          }
+        ],
+        "feature_MSE_reduction_fraction": 0.30983055681188887,
+        "first5_MAE_increase_fraction": 0.07109873892762386,
+        "offline_sources_improved": 1,
+        "offline_sources_regressed": 4,
+        "scope": "five validation source demonstrations, offline error; not closed-loop successes"
+      }
+    }
+  },
+  "pure_state": {
+    "c0_state_rejected_by_c50": true,
+    "same_artifact_max_abs_delta": 0.0,
+    "snapshot_cpu": true,
+    "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+  },
+  "pure_timing": {
+    "gpu_peak_allocated": 7793506304,
+    "gpu_peak_reserved": 7937720320,
+    "p50_ms": 206.9337120046839,
+    "p95_ms": 211.91313001327217,
+    "samples": 20,
+    "unique_parameters": 3630533776,
+    "unique_tensor_objects": 815,
+    "warmup": 2
+  },
+  "pure_controls": {
+    "0": {
+      "conditions": {
+        "baseline": {
+          "first1_mae7": 0.49969667941331863,
+          "first5_mae7": 0.37955398857593536,
+          "full10_mae7": 0.32134028151631355,
+          "gripper_mae": 0.6508354842662811,
+          "padding_mae": 0.001015108558931388,
+          "rotation_mae": 0.021419808734208345,
+          "translation_mae": 0.5114289745688438,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        },
+        "cross_demo": {
+          "first1_mae7": 0.49385634809732437,
+          "first5_mae7": 0.37762633711099625,
+          "full10_mae7": 0.32146117091178894,
+          "gripper_mae": 0.6511759757995605,
+          "padding_mae": 0.0010796926217153668,
+          "rotation_mae": 0.02149106888100505,
+          "translation_mae": 0.5115262940526009,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        },
+        "zero_visual": {
+          "first1_mae7": 0.43915411829948425,
+          "first5_mae7": 0.3216056637465954,
+          "full10_mae7": 0.3066018521785736,
+          "gripper_mae": 0.7538799978792667,
+          "padding_mae": 0.001967300398973748,
+          "rotation_mae": 0.016925904201343656,
+          "translation_mae": 0.44718506932258606,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        }
+      },
+      "denominators": {
+        "matched_anchors": 4,
+        "valid_actions": 40
+      },
+      "donor_mapping": [
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 0,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 5,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 0,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 5,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        }
+      ],
+      "excluded": [],
+      "excluded_count": 0,
+      "flow_steps": 10,
+      "matched": [
+        {
+          "baseline": {
+            "first1_mae7": 0.4948810338973999,
+            "first5_mae7": 0.48031559586524963,
+            "full10_mae7": 0.39797893166542053,
+            "gripper_mae": 1.198242425918579,
+            "padding_mae": null,
+            "rotation_mae": 0.02205275185406208,
+            "translation_mae": 0.5071505904197693,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0010610339231789112,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.4820876717567444,
+            "first5_mae7": 0.47657352685928345,
+            "full10_mae7": 0.4000844955444336,
+            "gripper_mae": 1.198931336402893,
+            "padding_mae": null,
+            "rotation_mae": 0.022129008546471596,
+            "translation_mae": 0.5117576718330383,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0011532497592270374,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 0,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 79238781631727,
+          "noise_sha256": "515b67db7733e5b0dbec64a7ecaa1d0fdc955b9106cb39b429942af3799c2213",
+          "paired_action_delta": {
+            "cross_demo": 0.01600213535130024,
+            "zero_visual": 0.18264904618263245
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.4160449802875519,
+            "first5_mae7": 0.45355892181396484,
+            "full10_mae7": 0.479823499917984,
+            "gripper_mae": 1.9821144342422485,
+            "padding_mae": null,
+            "rotation_mae": 0.014154593460261822,
+            "translation_mae": 0.444728821516037,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0019430392421782017
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.6231288909912109,
+            "first5_mae7": 0.4167049527168274,
+            "full10_mae7": 0.3420320451259613,
+            "gripper_mae": 0.40218040347099304,
+            "padding_mae": null,
+            "rotation_mae": 0.01676873490214348,
+            "translation_mae": 0.6472458243370056,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0009963825577870011,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.6178500652313232,
+            "first5_mae7": 0.4069845378398895,
+            "full10_mae7": 0.3394388258457184,
+            "gripper_mae": 0.4028995633125305,
+            "padding_mae": null,
+            "rotation_mae": 0.016585661098361015,
+            "translation_mae": 0.6411383748054504,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0010853670537471771,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 5,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 21672405192734,
+          "noise_sha256": "c7e4137f712af539052f70da737d37ee6de4c29ac34b23cd187fe77f6b36b08d",
+          "paired_action_delta": {
+            "cross_demo": 0.009280786849558353,
+            "zero_visual": 0.049089763313531876
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.5517761707305908,
+            "first5_mae7": 0.36710184812545776,
+            "full10_mae7": 0.3092428743839264,
+            "gripper_mae": 0.4105384945869446,
+            "padding_mae": null,
+            "rotation_mae": 0.012169742956757545,
+            "translation_mae": 0.5725507140159607,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0020603372249752283
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.37581923604011536,
+            "first5_mae7": 0.2160504162311554,
+            "full10_mae7": 0.22180934250354767,
+            "gripper_mae": 0.40187355875968933,
+            "padding_mae": null,
+            "rotation_mae": 0.016755716875195503,
+            "translation_mae": 0.36684152483940125,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0009538441081531346,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.37807610630989075,
+            "first5_mae7": 0.21892321109771729,
+            "full10_mae7": 0.22290435433387756,
+            "gripper_mae": 0.4025331139564514,
+            "padding_mae": null,
+            "rotation_mae": 0.017050767317414284,
+            "translation_mae": 0.36888161301612854,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0009966770885512233,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 0,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 89827275025425,
+          "noise_sha256": "a3bfd5795f6a4eea16e8efbea35eb860ec98713fcf0aae36aebb8a58a652a772",
+          "paired_action_delta": {
+            "cross_demo": 0.003995080478489399,
+            "zero_visual": 0.04678734391927719
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.3320610523223877,
+            "first5_mae7": 0.20430417358875275,
+            "full10_mae7": 0.19829927384853363,
+            "gripper_mae": 0.4089261591434479,
+            "padding_mae": null,
+            "rotation_mae": 0.01577610708773136,
+            "translation_mae": 0.3106134533882141,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0019893820863217115
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.5049575567245483,
+            "first5_mae7": 0.40514498949050903,
+            "full10_mae7": 0.3235408067703247,
+            "gripper_mae": 0.601045548915863,
+            "padding_mae": null,
+            "rotation_mae": 0.03010203130543232,
+            "translation_mae": 0.5244779586791992,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.001049173646606505,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.4974115490913391,
+            "first5_mae7": 0.4080240726470947,
+            "full10_mae7": 0.3234170079231262,
+            "gripper_mae": 0.6003398895263672,
+            "padding_mae": null,
+            "rotation_mae": 0.0301988385617733,
+            "translation_mae": 0.5243275165557861,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0010834765853360295,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 5,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 104515791105151,
+          "noise_sha256": "502430c756541924890912f5d1009f03c6efcfbb98cd590985d9ee23f26746e3",
+          "paired_action_delta": {
+            "cross_demo": 0.007246765773743391,
+            "zero_visual": 0.12060783803462982
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.4567342698574066,
+            "first5_mae7": 0.2614577114582062,
+            "full10_mae7": 0.2390417605638504,
+            "gripper_mae": 0.21394090354442596,
+            "padding_mae": null,
+            "rotation_mae": 0.025603173300623894,
+            "translation_mae": 0.46084728837013245,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0018764430424198508
+        }
+      ],
+      "matched_count": 4,
+      "paired_action_delta": {
+        "cross_demo": 0.009131192113272846,
+        "zero_visual": 0.09978349786251783
+      },
+      "provenance": {
+        "camera_ids": [
+          "base_0_rgb",
+          "left_wrist_0_rgb"
+        ],
+        "checkpoint_selection": false,
+        "donor_rule": "cyclic_next_different_source_same_split_exact_endpoint",
+        "mask_strategy": "target_camera_ids_positions_mask_preserved; donor values only",
+        "noise_rule": "independent_torch_generator_seed_plus_stable_anchor_identity",
+        "source_order": [
+          "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        ],
+        "target_position_intervention": "not_run",
+        "teacher_or_cache_used": false,
+        "test_selection": false,
+        "zero_visual": "values_zero_and_mask_zero"
+      },
+      "schema": "owac.temporal.visual-controls.v1",
+      "selected_total": 4,
+      "split": "validation",
+      "status": "visual_controls_complete",
+      "step": 0,
+      "supplied_total": 4
+    },
+    "50": {
+      "conditions": {
+        "baseline": {
+          "first1_mae7": 0.4555314928293228,
+          "first5_mae7": 0.3199484273791313,
+          "full10_mae7": 0.2679058499634266,
+          "gripper_mae": 0.5369029678404331,
+          "padding_mae": 0.0008592529047746211,
+          "rotation_mae": 0.02174990950152278,
+          "translation_mae": 0.4243960604071617,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        },
+        "cross_demo": {
+          "first1_mae7": 0.34602765552699566,
+          "first5_mae7": 0.2974638566374779,
+          "full10_mae7": 0.26469074934720993,
+          "gripper_mae": 0.5235309779527597,
+          "padding_mae": 0.000978685638983734,
+          "rotation_mae": 0.020581120159476995,
+          "translation_mae": 0.42252030968666077,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        },
+        "zero_visual": {
+          "first1_mae7": 0.43915411829948425,
+          "first5_mae7": 0.3216056637465954,
+          "full10_mae7": 0.3066018521785736,
+          "gripper_mae": 0.7538799978792667,
+          "padding_mae": 0.001967300398973748,
+          "rotation_mae": 0.016925904201343656,
+          "translation_mae": 0.44718506932258606,
+          "valid_first5": 20,
+          "valid_full10": 40,
+          "valid_step1": 4
+        }
+      },
+      "denominators": {
+        "matched_anchors": 4,
+        "valid_actions": 40
+      },
+      "donor_mapping": [
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 0,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 5,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 0,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        },
+        {
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 5,
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        }
+      ],
+      "excluded": [],
+      "excluded_count": 0,
+      "flow_steps": 10,
+      "matched": [
+        {
+          "baseline": {
+            "first1_mae7": 0.4837060868740082,
+            "first5_mae7": 0.4755760133266449,
+            "full10_mae7": 0.37992048263549805,
+            "gripper_mae": 1.1961925029754639,
+            "padding_mae": null,
+            "rotation_mae": 0.021511416882276535,
+            "translation_mae": 0.4662388861179352,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0008925825823098421,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.49064627289772034,
+            "first5_mae7": 0.47803211212158203,
+            "full10_mae7": 0.41306042671203613,
+            "gripper_mae": 1.3965115547180176,
+            "padding_mae": null,
+            "rotation_mae": 0.020991060882806778,
+            "translation_mae": 0.4773128032684326,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.000950269284658134,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 0,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 79238781631727,
+          "noise_sha256": "515b67db7733e5b0dbec64a7ecaa1d0fdc955b9106cb39b429942af3799c2213",
+          "paired_action_delta": {
+            "cross_demo": 0.04654976353049278,
+            "zero_visual": 0.19089797139167786
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.4160449802875519,
+            "first5_mae7": 0.45355892181396484,
+            "full10_mae7": 0.479823499917984,
+            "gripper_mae": 1.9821144342422485,
+            "padding_mae": null,
+            "rotation_mae": 0.014154593460261822,
+            "translation_mae": 0.444728821516037,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0019430392421782017
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.5523678064346313,
+            "first5_mae7": 0.31272274255752563,
+            "full10_mae7": 0.24446888267993927,
+            "gripper_mae": 0.2020678073167801,
+            "padding_mae": null,
+            "rotation_mae": 0.01626032404601574,
+            "translation_mae": 0.4868110716342926,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0008961035055108368,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.5939915180206299,
+            "first5_mae7": 0.3947775363922119,
+            "full10_mae7": 0.3172481060028076,
+            "gripper_mae": 0.40217310190200806,
+            "padding_mae": null,
+            "rotation_mae": 0.015062235295772552,
+            "translation_mae": 0.5911256670951843,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0008061514236032963,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "endpoint": 5,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 21672405192734,
+          "noise_sha256": "c7e4137f712af539052f70da737d37ee6de4c29ac34b23cd187fe77f6b36b08d",
+          "paired_action_delta": {
+            "cross_demo": 0.12296229600906372,
+            "zero_visual": 0.1372242271900177
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.5517761707305908,
+            "first5_mae7": 0.36710184812545776,
+            "full10_mae7": 0.3092428743839264,
+            "gripper_mae": 0.4105384945869446,
+            "padding_mae": null,
+            "rotation_mae": 0.012169742956757545,
+            "translation_mae": 0.5725507140159607,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0020603372249752283
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.3441004455089569,
+            "first5_mae7": 0.20265141129493713,
+            "full10_mae7": 0.19787408411502838,
+            "gripper_mae": 0.40105852484703064,
+            "padding_mae": null,
+            "rotation_mae": 0.02031196840107441,
+            "translation_mae": 0.3077080547809601,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.0007027622195892036,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.17568661272525787,
+            "first5_mae7": 0.16602246463298798,
+            "full10_mae7": 0.1673642098903656,
+            "gripper_mae": 0.2932833135128021,
+            "padding_mae": null,
+            "rotation_mae": 0.01777348667383194,
+            "translation_mae": 0.27498188614845276,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.001298363320529461,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 0,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 89827275025425,
+          "noise_sha256": "a3bfd5795f6a4eea16e8efbea35eb860ec98713fcf0aae36aebb8a58a652a772",
+          "paired_action_delta": {
+            "cross_demo": 0.040244586765766144,
+            "zero_visual": 0.026158643886446953
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.3320610523223877,
+            "first5_mae7": 0.20430417358875275,
+            "full10_mae7": 0.19829927384853363,
+            "gripper_mae": 0.4089261591434479,
+            "padding_mae": null,
+            "rotation_mae": 0.01577610708773136,
+            "translation_mae": 0.3106134533882141,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0019893820863217115
+        },
+        {
+          "baseline": {
+            "first1_mae7": 0.4419516324996948,
+            "first5_mae7": 0.2888435423374176,
+            "full10_mae7": 0.24935995042324066,
+            "gripper_mae": 0.3482930362224579,
+            "padding_mae": null,
+            "rotation_mae": 0.028915928676724434,
+            "translation_mae": 0.436826229095459,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "baseline_padding": 0.000945563311688602,
+          "camera_ids": [
+            "base_0_rgb",
+            "left_wrist_0_rgb"
+          ],
+          "cross_demo": {
+            "first1_mae7": 0.12378621846437454,
+            "first5_mae7": 0.15102331340312958,
+            "full10_mae7": 0.16109025478363037,
+            "gripper_mae": 0.002155941678211093,
+            "padding_mae": null,
+            "rotation_mae": 0.02849769778549671,
+            "translation_mae": 0.34666088223457336,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "cross_demo_padding": 0.0008599585271440446,
+          "donor_mask_used": false,
+          "donor_source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "endpoint": 5,
+          "mask_strategy": "target_mask_preserved",
+          "noise_seed": 104515791105151,
+          "noise_sha256": "502430c756541924890912f5d1009f03c6efcfbb98cd590985d9ee23f26746e3",
+          "paired_action_delta": {
+            "cross_demo": 0.1016380563378334,
+            "zero_visual": 0.05960722640156746
+          },
+          "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+          "token_shape": [
+            1,
+            512,
+            2048
+          ],
+          "valid_actions": 10,
+          "zero_visual": {
+            "first1_mae7": 0.4567342698574066,
+            "first5_mae7": 0.2614577114582062,
+            "full10_mae7": 0.2390417605638504,
+            "gripper_mae": 0.21394090354442596,
+            "padding_mae": null,
+            "rotation_mae": 0.025603173300623894,
+            "translation_mae": 0.46084728837013245,
+            "valid_first5": 5,
+            "valid_full10": 10,
+            "valid_step1": 1
+          },
+          "zero_visual_padding": 0.0018764430424198508
+        }
+      ],
+      "matched_count": 4,
+      "paired_action_delta": {
+        "cross_demo": 0.07784867566078901,
+        "zero_visual": 0.10347201721742749
+      },
+      "provenance": {
+        "camera_ids": [
+          "base_0_rgb",
+          "left_wrist_0_rgb"
+        ],
+        "checkpoint_selection": false,
+        "donor_rule": "cyclic_next_different_source_same_split_exact_endpoint",
+        "mask_strategy": "target_camera_ids_positions_mask_preserved; donor values only",
+        "noise_rule": "independent_torch_generator_seed_plus_stable_anchor_identity",
+        "source_order": [
+          "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+          "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27"
+        ],
+        "target_position_intervention": "not_run",
+        "teacher_or_cache_used": false,
+        "test_selection": false,
+        "zero_visual": "values_zero_and_mask_zero"
+      },
+      "schema": "owac.temporal.visual-controls.v1",
+      "selected_total": 4,
+      "split": "validation",
+      "status": "visual_controls_complete",
+      "step": 0,
+      "supplied_total": 4
+    }
+  },
+  "harness_rounds": [
+    {
+      "round": "round-01",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T10:19:18.419847+08:00",
+      "ended_at": "2026-10-21T10:23:28.254717+08:00",
+      "event_sha256": "7442cd9b3bc0fbd8fae30a8d9b035ef86ed4c11c1192ed5dbe89d88b7e3eeada",
+      "api_step_end_records": 58,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 26867,
+        "outputTokens": 34675,
+        "cacheReadTokens": 27753472,
+        "cacheWriteTokens": 0,
+        "totalTokens": 27815014
+      }
+    },
+    {
+      "round": "round-02",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T10:25:47.470425+08:00",
+      "ended_at": "2026-10-21T10:27:36.632948+08:00",
+      "event_sha256": "2876a0fe4ffde9ca965b163e138fa8a3bd7dc617f5ee9a619030f37469e69614",
+      "api_step_end_records": 26,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 10479,
+        "outputTokens": 17188,
+        "cacheReadTokens": 13320576,
+        "cacheWriteTokens": 0,
+        "totalTokens": 13348243
+      }
+    },
+    {
+      "round": "round-03",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T10:51:55.478535+08:00",
+      "ended_at": "2026-10-21T10:54:43.883438+08:00",
+      "event_sha256": "9f67370d5f6b5260005c65ff58636592754cfca216b5bdd9c482c71d0022a541",
+      "api_step_end_records": 30,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 19712,
+        "outputTokens": 29856,
+        "cacheReadTokens": 16558464,
+        "cacheWriteTokens": 0,
+        "totalTokens": 16608032
+      }
+    },
+    {
+      "round": "round-04",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T10:59:55.084321+08:00",
+      "ended_at": "2026-10-21T11:03:16.688969+08:00",
+      "event_sha256": "2c9f8e5cd5a48bcc356f0c0e0aaa2f0720a5155bbae41f977b39bb00fd495b99",
+      "api_step_end_records": 39,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 16300,
+        "outputTokens": 32240,
+        "cacheReadTokens": 23138432,
+        "cacheWriteTokens": 0,
+        "totalTokens": 23186972
+      }
+    },
+    {
+      "round": "round-05",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T11:04:51.240365+08:00",
+      "ended_at": "2026-10-21T11:06:37.028490+08:00",
+      "event_sha256": "d802d169f491aeb43d31cc9126c0b4a292a1c13f6980b8b47d200d9a62793a47",
+      "api_step_end_records": 23,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 11501,
+        "outputTokens": 15928,
+        "cacheReadTokens": 14365824,
+        "cacheWriteTokens": 0,
+        "totalTokens": 14393253
+      }
+    },
+    {
+      "round": "round-06",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T11:17:27.122378+08:00",
+      "ended_at": "2026-10-21T11:18:15.977105+08:00",
+      "event_sha256": "a6ea70a8024ad43e3eeb3b5d821969b8ea38a5b61eb9e76e9ebf942a8dbc9b51",
+      "api_step_end_records": 10,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 7437,
+        "outputTokens": 7978,
+        "cacheReadTokens": 6434176,
+        "cacheWriteTokens": 0,
+        "totalTokens": 6449591
+      }
+    },
+    {
+      "round": "round-07",
+      "session_id": "session-20cc796d-d7cb-4338-b059-bf8f9e8b28f0",
+      "all_expected_selections": true,
+      "exit_code": 0,
+      "started_at": "2026-10-21T11:22:03.811847+08:00",
+      "ended_at": "2026-10-21T11:24:03.465987+08:00",
+      "event_sha256": "6e4bc6c82900835a9ee0bd33f4261e8eee657e375391c4600d023a50c43dd6c9",
+      "api_step_end_records": 27,
+      "sum_step_end_reported_token_usage": {
+        "inputTokens": 9765,
+        "outputTokens": 16041,
+        "cacheReadTokens": 17862144,
+        "cacheWriteTokens": 0,
+        "totalTokens": 17887950
+      }
+    }
+  ],
+  "checkpoint_summaries": {
+    "B": {
+      "checkpoint_sha256": {
+        "0": "77e71f2227caedc15e42e73fa0d4e7f4cb83dcf1b1072015ef46b4fa84d2ebd7",
+        "1": "fcb3b649061fb7883ad247c26d364b75f29b2ee13ba4220f04fb5a5b3f5d2076",
+        "50": "37781ef3bd6ba37932d8d2b2bab1a98494f0a7a658c2c89904171a3805535166"
+      },
+      "trainable_changes": [
+        {
+          "name": "gate_logit",
+          "numel": 1152,
+          "max_abs_delta": 0.0014956995146349072,
+          "changed_elements": 1152
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.conv64.weight",
+          "numel": 1728,
+          "max_abs_delta": 0.0012482255697250366,
+          "changed_elements": 1728
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.conv64.bias",
+          "numel": 64,
+          "max_abs_delta": 0.0012992974370718002,
+          "changed_elements": 64
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.weight",
+          "numel": 14450688,
+          "max_abs_delta": 0.0015985502395778894,
+          "changed_elements": 14450682
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.bias",
+          "numel": 1152,
+          "max_abs_delta": 0.001370880170725286,
+          "changed_elements": 1152
+        }
+      ],
+      "selection": {
+        "arm": "B",
+        "best_step": 1,
+        "best_value": 0.29862855880862416,
+        "checkpoint_path": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-pilot-20261021-101725/pilot-B/checkpoint_final_000001.pt",
+        "checkpoint_sha256": "fcb3b649061fb7883ad247c26d364b75f29b2ee13ba4220f04fb5a5b3f5d2076",
+        "cumulative_updates": 1,
+        "metrics": {
+          "first1_mae7": 0.33993684610023217,
+          "first5_mae7": 0.29862855880862416,
+          "full10_mae7": 0.30034375642308125,
+          "groups": {
+            "gripper": 0.886790683737904,
+            "rotation": 0.029517491273865635,
+            "translation": 0.3756876928930355
+          },
+          "padding_mae": 0.0010521439746788083,
+          "split": "validation",
+          "step": 1,
+          "valid_first5": 505,
+          "valid_full10": 985,
+          "valid_step1": 102
+        },
+        "model_identity": "e5ddcad6e469d06c36401f8be7d501378be61343670d67924314004b629ef227",
+        "run_cumulative_updates": 50,
+        "run_identity": {
+          "backend_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+          "cache_identity_key": "ba146ed39acd112d02855618cbc3436d31a6f07992fda86aadefddbd4ddc4b60",
+          "research_config_sha256": "ccd0ec412f85113e28f54f4dc50dab41ae5f6d39e858ef3e8988290d404b7477",
+          "scope": "stem_plus_gate",
+          "source_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+          "sources_sha256": "c84966687c649ca6782c345f53a9a16f907b048184cc583d60067c1a58e8ed23",
+          "stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+          "teacher_artifact_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+          "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+        },
+        "schema": "owac.raw-stem-temporal.selection.v1",
+        "scope": "stem_plus_gate",
+        "split": "validation"
+      },
+      "candidate_anchors": 667,
+      "distinct_anchor_presentations": 667
+    },
+    "C": {
+      "checkpoint_sha256": {
+        "0": "9ab7de2acff04e9c1cfa813d419ee7be5bd12ac0700b5972a122b8ef45065bd9",
+        "1": "28a4fc8299e75f6f3db2c77736c1d35476f8515f05f6237e6f756e3de53d7109",
+        "50": "631b6ea1e21bbe01e4e08b9da56432a0b9a703229a14a59463ac01a009052e1a"
+      },
+      "trainable_changes": [
+        {
+          "name": "gate_logit",
+          "numel": 1152,
+          "max_abs_delta": 0.0015530792297795415,
+          "changed_elements": 1152
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.conv64.weight",
+          "numel": 1728,
+          "max_abs_delta": 0.0013524293899536133,
+          "changed_elements": 1728
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.conv64.bias",
+          "numel": 64,
+          "max_abs_delta": 0.0013667402090504766,
+          "changed_elements": 64
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.weight",
+          "numel": 14450688,
+          "max_abs_delta": 0.0016360096633434296,
+          "changed_elements": 14450680
+        },
+        {
+          "name": "base.vision_tower.vision_model.embeddings.patch_embedding.patch_embedding.bias",
+          "numel": 1152,
+          "max_abs_delta": 0.0015128484228625894,
+          "changed_elements": 1152
+        }
+      ],
+      "selection": {
+        "arm": "C",
+        "best_step": 0,
+        "best_value": 0.3056066959063605,
+        "checkpoint_path": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-pilot-20261021-101725/pilot-C/checkpoint_0000.pt",
+        "checkpoint_sha256": "9ab7de2acff04e9c1cfa813d419ee7be5bd12ac0700b5972a122b8ef45065bd9",
+        "cumulative_updates": 0,
+        "metrics": {
+          "first1_mae7": 0.34635576912585425,
+          "first5_mae7": 0.3056066959063605,
+          "full10_mae7": 0.3036554380532751,
+          "groups": {
+            "gripper": 0.8716540023826327,
+            "rotation": 0.02954646874559561,
+            "translation": 0.3884315330213702
+          },
+          "padding_mae": 0.001071165959577686,
+          "split": "validation",
+          "step": 0,
+          "valid_first5": 505,
+          "valid_full10": 985,
+          "valid_step1": 102
+        },
+        "model_identity": "0e7a857a49933c9c94db927328a8169be362be72618454cfa46f53521b9f2154",
+        "run_cumulative_updates": 50,
+        "run_identity": {
+          "backend_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+          "cache_identity_key": "ba146ed39acd112d02855618cbc3436d31a6f07992fda86aadefddbd4ddc4b60",
+          "research_config_sha256": "ccd0ec412f85113e28f54f4dc50dab41ae5f6d39e858ef3e8988290d404b7477",
+          "scope": "stem_plus_gate",
+          "source_revision": "ba9c56b04da2c4931b70d8844710f5928d43775b",
+          "sources_sha256": "c84966687c649ca6782c345f53a9a16f907b048184cc583d60067c1a58e8ed23",
+          "stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+          "teacher_artifact_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+          "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+        },
+        "schema": "owac.raw-stem-temporal.selection.v1",
+        "scope": "stem_plus_gate",
+        "split": "validation"
+      },
+      "candidate_anchors": 667,
+      "distinct_anchor_presentations": 667
+    }
+  },
+  "limitations": [
+    "no student closed loop",
+    "pseudo-RAW3 only",
+    "local init0 teacher frontend, not author trained weights",
+    "C native exit code unavailable after original supervisor143",
+    "target position intervention not run",
+    "next diagnosis not run"
+  ]
+}

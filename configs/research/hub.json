@@ -11,14 +11,14 @@
       "branch": "main",
       "version": "OWAC-D1.1 · RAW 教师与因果时序",
       "lifecycle": "active",
-      "status": "PREP已通过 · ALIGN进行中 · 学生未训练",
-      "current_stage": "ALIGN",
+      "status": "C单臂充分蒸馏运行中 · C51独立验收通过",
+      "current_stage": "STEM",
       "question": "直接 RAW 编码能否保住已有策略的控制能力，再利用 RAW 测量超越教师？",
-      "summary": "本地重建RAW输入教师：Normal task6共同20新初态教师／参照各20/20；选前端初始化0，155次前端优化不宣称收益。50真实示范、完整控制账本和首／后／reset真实tokens接口已验收；时序学生输入与训练仍待对接。",
-      "next": "将验证教师artifact与每相机6帧／递归历史绑定蒸馏缓存和学生入口，先真实数据零更新梯度检查；正式B/C/D学生训练仍需具体授权。",
-      "boundary": "教师开发筛查通过，非统计非劣／非作者训练后权重／非学习收益。验证9成功＋1人为中断保留N10；学生0更新／0闭环，弱光／Bayer／四任务／实机未运行。",
+      "summary": "用户已授权C50→累计最多5000更新，真实C51首步及后续恢复已独立验收，连续蒸馏运行中。按留出token MSE＋0.1cosine选型；实时监控 http://127.0.0.1:8878/。",
+      "next": "继续同一C臂至累计5000或新阶段64 GPU小时/20GiB上限；无动作误差早停或B/D切换。完成后在剩余预算内做离线动作与纯学生重载检查；闭环另需授权。",
+      "boundary": "同源RAW因果历史，当前仅LIBERO inverse pseudoRAW3单任务。本地init0 RAW教师并非作者训练权重；闭环0，控制恢复未证明。历史B/C50动作回退保留。",
       "primary_document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
-      "evidence_document": "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+      "evidence_document": "research/experiments/raw_stem_siglip_20261020/c-full-20261021-independent-review.md",
       "documents": [
         "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
         "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md",
@@ -35,18 +35,37 @@
         "research/experiments/raw_stem_siglip_20261020/teacher-recipe-inventory.md",
         "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
         "research/experiments/2026-10-20_rawvla_teacher_reproduction.md",
-        "research/experiments/raw_stem_siglip_20261020/TEACHER_RUNBOOK.md"
+        "research/experiments/raw_stem_siglip_20261020/TEACHER_RUNBOOK.md",
+        "docs/deepseek-credentials.md",
+        "docs/plans/RAW_DISTILLATION_ALIGN_CONTRACT_2026-10-20.md",
+        "research/experiments/raw_stem_siglip_20261020/align-independent-review.md",
+        "research/experiments/raw_stem_siglip_20261020/ALIGN_RUNBOOK.md",
+        "docs/architecture.md",
+        "research/experiments/raw_stem_siglip_20261020/pilot-20261021-independent-review.md",
+        "docs/plans/RAW_TEACHER_STUDENT_FRAMEWORK_2026-10-21.md",
+        "research/experiments/raw_stem_siglip_20261020/c-full-20261021-independent-review.md",
+        "research/experiments/raw_stem_siglip_20261020/C_FULL_RUNBOOK.md"
       ],
       "summary_sources": {
-        "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "5262fb7453c598f8137afc825dc27c03999950de82b22d4fbf2f422cfa138edd",
-        "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md": "836a1502bb32cea637855cf7b331ff0089b5dacfc9e32e1b33fb592839ab3473",
+        "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "a260c66f300e4bbf069d82e251a572578059f28698f9a61244ef4a53c3fcb526",
+        "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md": "78f99856809836ef9c8ad1cc87562b8c16c8b3ff7b9a653a9c3230fcaea8a156",
         "docs/decisions/0016-raw-stem-siglip-distillation.md": "54d76712968a9dca3d3b0c1ccdbabdb8fd7f3bf89be9e7afce4f73725f400c11",
-        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
+        "docs/status.md": "8e6eeaf3b382357d80273645e5f2aa170a2180d66312b17a1c51332bd640dd9f",
         "research/experiments/raw_stem_siglip_20261020/independent-review.md": "58282d0303281c28ebc500f4ab1315017e1211a26af2824bb4b0ca284c5a05c5",
         "docs/plans/RAWVLA_TEACHER_REPRODUCTION_PROPOSAL_2026-10-20.md": "9fc0f93603c9b325116c910331aecb8fc213a77568771aeeeb9e87756712550d",
         "research/experiments/raw_stem_siglip_20261020/teacher-recipe-inventory.md": "f6d6d392c6ef0b64a9d1622379886937a45d7b39427c57618d9f1f4b2be4b9ac",
         "research/experiments/raw_stem_siglip_20261020/teacher-release-audit.md": "552c1ff4698772c2614d3d75faca2c4ff1e1c0a0705e235984479acb0bfa06f5",
-        "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f"
+        "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f",
+        "docs/architecture.md": "79c0a994a009d79cad7a79ba1bfce9f8f11774e2b2e86a25a22ba6a1c9e28d5f",
+        "research/experiments/raw_stem_siglip_20261020/ALIGN_RUNBOOK.md": "dbd3bf2bd12afc79af10af603a8ba1b93e3eb5b103e7f3ea57ecc77b2cf7b1c7",
+        "research/candidates/RAW_STEM_SIGLIP.md": "1e7d5342194ee146027341bd21561990c62c4b84d2c86e61d68a97cb1216addb",
+        "docs/plans/RAW_DISTILLATION_ALIGN_CONTRACT_2026-10-20.md": "eb46401cd7e51ca567910179f70288eb3a3e89b470fc47b41d65732a7f8497ed",
+        "AGENTS.md": "da1f8c1d57feb18f77602924ca867dd3aa9637cb8d1d90601ecf8764cfe008dd",
+        "README.md": "71f4764afedda6608e6f11d82698b58e423d421c6555802a6d4a286e55a9cdad",
+        "research/experiments/raw_stem_siglip_20261020/align-independent-review.md": "30c837d8273bdc552e7766f2959921eaee42eb1224a35da7a82a0989827244cd",
+        "research/experiments/raw_stem_siglip_20261020/pilot-20261021-independent-review.md": "d5328f118e4e281d95e11abf2f44491ddb3ecd4c1f9c871d16502ef8ceee7bda",
+        "docs/plans/RAW_TEACHER_STUDENT_FRAMEWORK_2026-10-21.md": "fdf67ac61b69d40ddd59837e2e1b6c9fe062fa9f871b34f7370200a02bde2d31",
+        "research/experiments/raw_stem_siglip_20261020/c-full-20261021-independent-review.md": "a0273c2d1514d21a613d0f1992877f784ba549a08795e639da914c7316f5cb78"
       },
       "research_focus": {
         "title": "保留有效时序能力，优先恢复控制",
@@ -65,24 +84,14 @@
             "detail": "RAW 历史＋前端＋VLA，保留有效时序能力"
           },
           {
-            "id": "B",
-            "label": "RGB stem 蒸馏",
-            "detail": "检查替换 stem 和训练流程"
-          },
-          {
             "id": "C",
             "label": "RAW 特征蒸馏",
             "detail": "检验纯表征迁移"
-          },
-          {
-            "id": "D",
-            "label": "RAW 特征＋动作",
-            "detail": "检验动作目标的增益，匹配视觉适配范围"
           }
         ],
-        "budget": "首轮诊断：单任务、50 条真实示范、seed101；每适配臂累计最多 5,000 更新。训练／闭环执行需具体新授权。",
+        "budget": "C单臂累计5000更新／80000 anchors；新增64 GPU小时／20GiB。B/D、视觉解冻、闭环未授权。",
         "data_boundary": "主教师接收 RAW，内部允许 ISP 生成 RGB；RGB 输入策略只作另列辅助对照。学生部署直接 RAW→tokens，pseudo-RAW 与真实 CFA 分报。",
-        "status": "教师Normal20/20 · 初始化0 · 学生历史匹配待完成"
+        "status": "C连续蒸馏运行中 · tokens验证选型 · 闭环未测"
       },
       "stages": [
         {
@@ -102,23 +111,27 @@
         {
           "id": "ALIGN",
           "title": "教师与桥接核验",
-          "state": "current",
-          "label": "真实数值接口通过 · 学生历史待匹配",
-          "description": "真实RAW教师tokens首窗口／后续／reset有效前缀和10步动作误差0；未观测相机占位原始差异显式记录。下一步绑定相机独立历史、缓存和学生输入，不启动未经授权训练。",
-          "document": "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+          "state": "recorded",
+          "label": "因果时序／缓存／真实梯度／纯部署工程通过",
+          "description": "真实RAW教师首/后/reset阶段零及独立纯学生重载通过；45源969缓存、164测试、make check通过。仅零优化预检，学习与控制未验收。",
+          "document": "research/experiments/raw_stem_siglip_20261020/align-independent-review.md",
           "prompt_kind": "complete",
           "prompt_sources": [
             "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
-          ]
+          ],
+          "acceptance": "passed"
         },
         {
           "id": "STEM",
           "title": "RAW 输入侧适配",
-          "state": "blocked",
-          "label": "未训练",
-          "description": "冻结继承视觉层与后端，更新 stem 及声明的输入侧时序模块；不要求所有策略固定单帧。",
-          "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
-          "prompt_kind": "none"
+          "state": "current",
+          "label": "C充分蒸馏进行中 · C51首步验收通过",
+          "description": "实际C50恢复至51并继续，stem＋gate更新、SigLIP及动作后端冻结；验证token选型，监控8878每5秒刷新，新增64 GPU小时/20GiB上限。",
+          "document": "research/experiments/raw_stem_siglip_20261020/c-full-20261021-independent-review.md",
+          "prompt_kind": "complete",
+          "prompt_sources": [
+            "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
+          ]
         },
         {
           "id": "ADAPT",
@@ -198,10 +211,11 @@
         "research/experiments/n01_full/P0_acceptance_report.md",
         "research/experiments/n01_full/P1_acceptance_report.md",
         "research/experiments/n01_full/P2_report.md",
-        "research/experiments/n01_full/P2_acceptance_report.md"
+        "research/experiments/n01_full/P2_acceptance_report.md",
+        "docs/deepseek-credentials.md"
       ],
       "summary_sources": {
-        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
+        "docs/status.md": "dc9123158e47ba4a402978988d7a8043c30925a85964ffdd4adee2ed3240d986",
         "research/experiments/n01_v1_2/P3_action_diagnosis_20261019.md": "b4454061d6dd5fbc66beb8b778cd01c7985243590b715b7663aad4a367e1cf69"
       },
       "stages": [
@@ -387,10 +401,11 @@
         "research/experiments/2026-10-14_n02_p0_independent_acceptance.md",
         "docs/plans/N02_full_development_plan_2026-10-13.md",
         "docs/decisions/0014-n02-scheduler-archive.md",
-        "research/candidates/N02.md"
+        "research/candidates/N02.md",
+        "docs/deepseek-credentials.md"
       ],
       "summary_sources": {
-        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
+        "docs/status.md": "dc9123158e47ba4a402978988d7a8043c30925a85964ffdd4adee2ed3240d986",
         "research/experiments/n02_v1_2/P2_code_review_r10_20261017.md": "d7452eadcb4a6a3309695235044b94124d8f9149a7084fd0c9e9498292a2c0dd"
       },
       "stages": [
@@ -620,10 +635,11 @@
         "docs/plans/N04_full_development_v1.0.md",
         "research/experiments/2026-10-13_n04_matched_tracking.md",
         "docs/prompts/n04_v1_0/S1_raw_measurement.md",
-        "docs/prompts/n04_v1_0/README.md"
+        "docs/prompts/n04_v1_0/README.md",
+        "docs/deepseek-credentials.md"
       ],
       "summary_sources": {
-        "docs/status.md": "3796abd627a6b97acad6769ba40076175ae108fbe77f0c26ea3df99f40560992",
+        "docs/status.md": "dc9123158e47ba4a402978988d7a8043c30925a85964ffdd4adee2ed3240d986",
         "research/experiments/2026-10-19_n04_stability_repair_v5.md": "5b008b70fa4dd32bccae89a14531784591604d75070bbbafe5f090cc219e535a"
       },
       "stages": [
@@ -721,7 +737,12 @@
     "research/archives/2026-10-19_worktree_consolidation/README.md",
     "research/experiments/2026-10-19_visual_replacement_recovery.md",
     "research/reviews/2026-10-20_rawvla_public_teacher_assets.md",
-    "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md"
+    "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
+    "docs/deepseek-credentials.md",
+    "docs/plans/RAW_DISTILLATION_ALIGN_CONTRACT_2026-10-20.md",
+    "research/experiments/raw_stem_siglip_20261020/align-independent-review.md",
+    "research/experiments/raw_stem_siglip_20261020/ALIGN_RUNBOOK.md",
+    "research/experiments/raw_stem_siglip_20261020/pilot-20261021-independent-review.md"
   ],
   "strategy": {
     "active_route": "DISTILL",
@@ -732,7 +753,7 @@
       "完整 RAW 输入教师 · 学生无 ISP 中间图像",
       "Sol 统筹验收 · Harness V41-Flash Max 编码"
     ],
-    "boundary": "教师开发筛查通过，非统计非劣／非作者训练后权重／非学习收益。验证9成功＋1人为中断保留N10；学生0更新／0闭环，弱光／Bayer／四任务／实机未运行。"
+    "boundary": "本地init0 RAW教师的前阶段20/20仅开发筛查，非作者训练权重／非学习收益；本轮仅pseudo-RAW3单任务，闭环0场。C原生退出码不可得，真实50权重及最终日志独立审计；不伪造exit0。"
   },
   "lineage": {
     "title": "路线怎样分支，又为什么收敛",
@@ -823,12 +844,12 @@
       {
         "id": "distill",
         "title": "RAW stem＋继承 SigLIP",
-        "date": "10/20 当前",
+        "date": "10/21 当前",
         "state": "current",
         "column": 4,
         "row": 1,
-        "status": "RAW教师20/20 · 学生0更新",
-        "description": "本地重建RAW输入教师：Normal task6共同20新初态教师／参照各20/20；选前端初始化0，155次前端优化不宣称收益。50真实示范、完整控制账本和首／后／reset真实tokens接口已验收；时序学生输入与训练仍待对接。",
+        "status": "C单臂充分蒸馏运行中 · C51独立验收通过",
+        "description": "用户已授权C50→累计最多5000更新，真实C51首步及后续恢复已独立验收，连续蒸馏运行中。按留出token MSE＋0.1cosine选型；实时监控 http://127.0.0.1:8878/。",
         "route_id": "DISTILL",
         "documents": [
           "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
@@ -838,7 +859,11 @@
           "research/experiments/raw_stem_siglip_20261020/independent-review.md",
           "research/experiments/raw_stem_siglip_20261020/RUNBOOK.md",
           "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md",
-          "research/experiments/raw_stem_siglip_20261020/teacher-control-acceptance.json"
+          "research/experiments/raw_stem_siglip_20261020/teacher-control-acceptance.json",
+          "research/experiments/raw_stem_siglip_20261020/align-independent-review.md",
+          "research/experiments/raw_stem_siglip_20261020/ALIGN_RUNBOOK.md",
+          "research/experiments/raw_stem_siglip_20261020/pilot-20261021-independent-review.md",
+          "docs/plans/RAW_TEACHER_STUDENT_FRAMEWORK_2026-10-21.md"
         ]
       },
       {
@@ -909,10 +934,13 @@
       "research/experiments/2026-10-19_n04_stability_repair_v5.md": "5b008b70fa4dd32bccae89a14531784591604d75070bbbafe5f090cc219e535a",
       "research/archives/2026-10-19_worktree_consolidation/README.md": "48d951e4f161b6ea6f3335c02a39298e3069be2c1fec03d95641c7ba393a7146",
       "research/experiments/2026-10-19_visual_replacement_recovery.md": "d3aac501e9e995025e1989a30f619d5fd1fe8112360b85ca39aa861b43c1a0cd",
-      "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "5262fb7453c598f8137afc825dc27c03999950de82b22d4fbf2f422cfa138edd",
+      "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md": "a260c66f300e4bbf069d82e251a572578059f28698f9a61244ef4a53c3fcb526",
       "docs/decisions/0016-raw-stem-siglip-distillation.md": "54d76712968a9dca3d3b0c1ccdbabdb8fd7f3bf89be9e7afce4f73725f400c11",
       "research/reviews/2026-10-20_rawvla_public_teacher_assets.md": "5780db38048e3797fb79616c23b082e7f54aefd754282f226cc5665a574c3f45",
-      "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f"
+      "research/experiments/raw_stem_siglip_20261020/teacher-independent-review.md": "f5704b661aea1017d15b26b0559abea7eeec0f6ed2a2b3cd6c5d767749d4b22f",
+      "research/experiments/raw_stem_siglip_20261020/align-independent-review.md": "30c837d8273bdc552e7766f2959921eaee42eb1224a35da7a82a0989827244cd",
+      "research/experiments/raw_stem_siglip_20261020/ALIGN_RUNBOOK.md": "dbd3bf2bd12afc79af10af603a8ba1b93e3eb5b103e7f3ea57ecc77b2cf7b1c7",
+      "research/experiments/raw_stem_siglip_20261020/pilot-20261021-independent-review.md": "d5328f118e4e281d95e11abf2f44491ddb3ecd4c1f9c871d16502ef8ceee7bda"
     }
   }
 }

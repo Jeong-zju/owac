@@ -1,0 +1,146 @@
+{
+  "schema": "owac.raw-stem-align.v1",
+  "candidate": "RAW_STEM_SIGLIP_TEMPORAL",
+  "decision": "0016",
+  "evidence_level": "engineering_integration_fixture_and_real_readiness",
+  "authorization": {
+    "optimizer_updates": false,
+    "simulation_closed_loop": false,
+    "physical_actions": false,
+    "zero_update_forward_backward": true,
+    "policy_episodes": 0,
+    "optimizer_budget": 0
+  },
+  "task": {
+    "dataset": "RAWVLA-Bench",
+    "suite": "libero_goal",
+    "task_key": "task6",
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "input_regime": "rawvla_rgb3",
+    "raw_origin": "LIBERO RGB8 inverse pseudoRAW3; not native Bayer"
+  },
+  "assets": {
+    "teacher_registry": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-registry.json",
+    "teacher_frontend_checkpoint": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-validated-normal-task6-init0.pt",
+    "teacher_frontend_checkpoint_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+    "source_manifest": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/raw/sources-audited.json",
+    "source_manifest_sha256": "c84966687c649ca6782c345f53a9a16f907b048184cc583d60067c1a58e8ed23",
+    "author_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main",
+    "starvla_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/starvla-pinned-source",
+    "teacher_config_paths": [
+      "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main/configs/libero/pi05.yaml"
+    ],
+    "checkpoint": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "load_audit": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/load-audit.json",
+    "tokenizer": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/paligemma_tokenizer.model",
+    "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+    "statistics": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+    "statistics_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "runtime": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/runtime/bin/python",
+    "cache_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-align-20261020-153948/sol-cli-final-cache",
+    "output_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-align-20261020-153948/authorized-output",
+    "device": "cuda"
+  },
+  "teacher_requirement": {
+    "selected_checkpoint": "teacher-validated-normal-task6-init0.pt",
+    "provenance": "init0 locally rebuilt author architecture; not published trained author weights",
+    "input": "RAW",
+    "temporal_teacher_allowed": true,
+    "temporal_teacher_implemented": true,
+    "stateless_single_frame": false,
+    "freeze_all": true
+  },
+  "student": {
+    "stem_hidden": 64,
+    "stem_seed": 101,
+    "input_mode": "rawvla_rgb3",
+    "inherited_vision": "same_actual_policy_checkpoint",
+    "extra_projection": false,
+    "gate": "channelwise_sigmoid",
+    "raw_burst_frames": 6,
+    "endpoint_stride": 5,
+    "recurrent_endpoints": 6,
+    "camera_order": [
+      "agentview",
+      "wrist"
+    ],
+    "native_image_keys": [
+      "base_0_rgb",
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ],
+    "inactive_native_image_key": "right_wrist_0_rgb",
+    "raw_resize": "bilinear_align_corners_false_256_to_224_full_fov",
+    "physical_position_backmap": "224_patch14_center_to_256_patch16"
+  },
+  "training": {
+    "seed": 101,
+    "effective_batch": 16,
+    "microbatch": 1,
+    "max_cumulative_updates_per_arm": 5000,
+    "max_anchor_presentations_per_arm": 80000,
+    "pilot_max_updates_per_arm": 50,
+    "combined_gpu_hours": 4,
+    "max_wall_seconds": 14400,
+    "max_output_bytes": 21474836480,
+    "learning_rate": 0.0001,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "gradient_clip": 1.0,
+    "warmup_updates": 100,
+    "frozen_audit_interval": 500,
+    "earlystop_patience": 1000,
+    "activation_memory_mode": "save_on_cpu",
+    "checkpoint_updates": [
+      0,
+      500,
+      2000,
+      5000
+    ],
+    "lambda_f": 1.0,
+    "cosine_weight": 0.1,
+    "lambda_a_D": 1.0,
+    "stage1": "stem_plus_gate",
+    "stage2": {
+      "enabled": false,
+      "input_blocks": 2,
+      "lr": 1e-06,
+      "explicit": false
+    },
+    "phase_gate": {
+      "teacher_ready": false,
+      "parity_ready": false,
+      "source_split_ready": false,
+      "resource_ready": false,
+      "phase1_diagnosis_passed": false,
+      "matched_cd_declared": false
+    }
+  },
+  "evaluation": {
+    "flow_steps": 10,
+    "action_horizon": 10,
+    "execute_steps": 5,
+    "selection_split": "validation",
+    "selection_metric": "physical_first5_mae7",
+    "test_selection": false,
+    "groups": [
+      "translation",
+      "rotation",
+      "gripper",
+      "padding"
+    ],
+    "controls": [
+      "zero_visual",
+      "cross_demo_shuffle"
+    ],
+    "target_position_intervention": "not_run_requires_real_changed_correct_actions"
+  },
+  "cleanup_policy": {
+    "old_phase_budget_ledger": "do_not_consume_or_alter",
+    "new_engineering_optimizer_updates": 0,
+    "new_engineering_episodes": 0,
+    "formal_training_receipt": false
+  }
+}

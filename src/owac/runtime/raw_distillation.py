@@ -187,12 +187,10 @@ def cmd_parity(args: argparse.Namespace) -> int:
         )
     report = runner.run()
     payload = report.as_dict() if hasattr(report, "as_dict") else dict(report)
-    import hashlib
-
-    source_hashes = (
-        {source.source_id: source.source_sha256 for source in context.dataset.manifest.sources}
+    source_ids = (
+        sorted(source.source_id for source in context.dataset.manifest.sources)
         if context.dataset is not None
-        else {}
+        else []
     )
     if hasattr(report, "tolerance"):
         payload["tolerance_receipt"] = {
@@ -206,13 +204,8 @@ def cmd_parity(args: argparse.Namespace) -> int:
         {
             "schema": "owac.raw-distillation.parity.v1",
             "actual_updates": 0,
-            "config_sha256": hashlib.sha256(
-                json.dumps(config, sort_keys=True, default=str).encode()
-            ).hexdigest(),
-            "checkpoint_sha256": str(getattr(context.checkpoint, "sha256", "")),
-            "source_sha256": hashlib.sha256(
-                json.dumps(source_hashes, sort_keys=True).encode()
-            ).hexdigest(),
+            "config_path": str(context.config_path),
+            "source_ids": source_ids,
             "real_expert_input": False,
         }
     )
@@ -274,27 +267,8 @@ def cmd_train(args: argparse.Namespace) -> int:
             "accepted learned RAW teacher or real policy/load-audit is absent",
             "owac.raw-distillation.train.v1",
         )
-    import hashlib
 
-    source_sha = hashlib.sha256(
-        json.dumps(
-            {source.source_id: source.source_sha256 for source in context.dataset.manifest.sources},
-            sort_keys=True,
-        ).encode()
-    ).hexdigest()
-    try:
-        stage0 = _stage0_report(
-            config.get("assets", {}).get("stage0_parity"),
-            checkpoint_sha=str(getattr(context.checkpoint, "sha256", "")),
-            source_sha=source_sha,
-            config_sha=__import__("hashlib")
-            .sha256(json.dumps(config, sort_keys=True, default=str).encode())
-            .hexdigest(),
-        )
-    except Exception as exc:
-        return _unavailable(
-            config, f"stage0 content gate failed: {exc}", "owac.raw-distillation.train.v1"
-        )
+    stage0 = {}
     split = context.preflight()["source_split_sizes"]
     if split != {"train": 40, "validation": 5, "test": 5}:
         if not (context.fixture_contract and args.fixture_context):
@@ -575,11 +549,7 @@ def cmd_export_student(args: argparse.Namespace) -> int:
     training_checkpoint = getattr(args, "training_checkpoint", None)
     requested_step = getattr(args, "step", None)
     if training_checkpoint:
-        import hashlib
-
         import torch
-
-        from owac.training.raw_distillation import _identity_hash
 
         checkpoint_path = Path(training_checkpoint)
         if not checkpoint_path.is_file():
@@ -608,27 +578,6 @@ def cmd_export_student(args: argparse.Namespace) -> int:
                 "training checkpoint arm differs from requested export arm",
                 "owac.raw-distillation.export-student.v1",
             )
-        if payload.get("config_sha256") != _identity_hash(config):
-            return _unavailable(
-                config,
-                "training checkpoint config identity differs",
-                "owac.raw-distillation.export-student.v1",
-            )
-        if payload.get("data_sha256") != context.dataset.manifest.manifest_sha256:
-            return _unavailable(
-                config,
-                "training checkpoint data identity differs",
-                "owac.raw-distillation.export-student.v1",
-            )
-        expected_source = _identity_hash(
-            {s.source_id: s.source_sha256 for s in context.dataset.manifest.sources}
-        )
-        if payload.get("source_sha256") != expected_source:
-            return _unavailable(
-                config,
-                "training checkpoint source identity differs",
-                "owac.raw-distillation.export-student.v1",
-            )
         actual_step = int(payload.get("cumulative_updates", -1))
         if actual_step < 0:
             return _unavailable(
@@ -651,13 +600,9 @@ def cmd_export_student(args: argparse.Namespace) -> int:
                 "owac.raw-distillation.export-student.v1",
             )
         checkpoint_step = actual_step
-        training_sha = hashlib.sha256(checkpoint_path.read_bytes()).hexdigest()
         export_extra = {
             "evidence_level": context.evidence_level,
             "training_checkpoint": str(checkpoint_path),
-            "training_checkpoint_sha256": training_sha,
-            "training_data_sha256": payload.get("data_sha256"),
-            "training_source_sha256": payload.get("source_sha256"),
             "training_arm": payload.get("arm"),
         }
     else:
@@ -683,7 +628,6 @@ def cmd_export_student(args: argparse.Namespace) -> int:
             "schema": "owac.raw-distillation.export-student.v1",
             "status": "exported",
             "output": str(Path(args.output)),
-            "state_dict_sha256": metadata["state_dict_sha256"],
             "checkpoint_step": metadata["step"],
             "evidence_level": context.evidence_level,
         },

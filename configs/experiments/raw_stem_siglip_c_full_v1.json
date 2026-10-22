@@ -1,0 +1,175 @@
+{
+  "schema": "owac.raw-stem-align.v1",
+  "candidate": "RAW_STEM_SIGLIP_TEMPORAL",
+  "decision": "0016",
+  "evidence_level": "engineering_integration_fixture_and_real_readiness",
+  "authorization": {
+    "optimizer_updates": true,
+    "simulation_closed_loop": false,
+    "physical_actions": false,
+    "zero_update_forward_backward": true,
+    "policy_episodes": 0,
+    "optimizer_budget": 5000,
+    "user_authorization_receipt_sha256": "44c717fe3545ae87f4c0e5e875dea6e18110b3d484215a552061c8d5914c0537",
+    "closed_loop": false
+  },
+  "task": {
+    "dataset": "RAWVLA-Bench",
+    "suite": "libero_goal",
+    "task_key": "task6",
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "input_regime": "rawvla_rgb3",
+    "raw_origin": "LIBERO RGB8 inverse pseudoRAW3; not native Bayer"
+  },
+  "assets": {
+    "teacher_registry": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-registry.json",
+    "teacher_frontend_checkpoint": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-validated-normal-task6-init0.pt",
+    "teacher_frontend_checkpoint_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+    "source_manifest": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/raw/sources-audited.json",
+    "source_manifest_sha256": "c84966687c649ca6782c345f53a9a16f907b048184cc583d60067c1a58e8ed23",
+    "author_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main",
+    "starvla_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/starvla-pinned-source",
+    "teacher_config_paths": [
+      "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main/configs/libero/pi05.yaml"
+    ],
+    "checkpoint": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "load_audit": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/load-audit.json",
+    "tokenizer": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/paligemma_tokenizer.model",
+    "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+    "statistics": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+    "statistics_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "runtime": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/runtime/bin/python",
+    "cache_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-align-20261020-153948/sol-cli-final-cache",
+    "output_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-c-full-20261021-123313",
+    "device": "cuda"
+  },
+  "teacher_requirement": {
+    "selected_checkpoint": "teacher-validated-normal-task6-init0.pt",
+    "provenance": "init0 locally rebuilt author architecture; not published trained author weights",
+    "input": "RAW",
+    "temporal_teacher_allowed": true,
+    "temporal_teacher_implemented": true,
+    "stateless_single_frame": false,
+    "freeze_all": true
+  },
+  "student": {
+    "stem_hidden": 64,
+    "stem_seed": 101,
+    "input_mode": "rawvla_rgb3",
+    "inherited_vision": "same_actual_policy_checkpoint",
+    "extra_projection": false,
+    "gate": "channelwise_sigmoid",
+    "raw_burst_frames": 6,
+    "endpoint_stride": 5,
+    "recurrent_endpoints": 6,
+    "camera_order": [
+      "agentview",
+      "wrist"
+    ],
+    "native_image_keys": [
+      "base_0_rgb",
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ],
+    "inactive_native_image_key": "right_wrist_0_rgb",
+    "raw_resize": "bilinear_align_corners_false_256_to_224_full_fov",
+    "physical_position_backmap": "224_patch14_center_to_256_patch16"
+  },
+  "training": {
+    "seed": 101,
+    "effective_batch": 16,
+    "microbatch": 1,
+    "max_cumulative_updates_per_arm": 5000,
+    "max_anchor_presentations_per_arm": 80000,
+    "pilot_max_updates_per_arm": 5000,
+    "combined_gpu_hours": 64,
+    "max_wall_seconds": 230400,
+    "max_output_bytes": 21474836480,
+    "learning_rate": 0.0001,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "gradient_clip": 1.0,
+    "warmup_updates": 100,
+    "frozen_audit_interval": 500,
+    "earlystop_patience": 0,
+    "activation_memory_mode": "save_on_cpu",
+    "checkpoint_updates": [
+      500,
+      2000,
+      5000
+    ],
+    "lambda_f": 1.0,
+    "cosine_weight": 0.1,
+    "lambda_a_D": 1.0,
+    "stage1": "stem_plus_gate",
+    "stage2": {
+      "enabled": false,
+      "input_blocks": 2,
+      "lr": 1e-06,
+      "explicit": false
+    },
+    "phase_gate": {
+      "teacher_ready": false,
+      "parity_ready": false,
+      "source_split_ready": false,
+      "resource_ready": false,
+      "phase1_diagnosis_passed": false,
+      "matched_cd_declared": false
+    },
+    "checkpoint_interval_updates": 250,
+    "recovery_checkpoints": 2,
+    "selection_metric": "validation_token_total"
+  },
+  "evaluation": {
+    "flow_steps": 10,
+    "action_horizon": 10,
+    "execute_steps": 5,
+    "selection_split": "validation",
+    "selection_metric": "validation_token_total",
+    "test_selection": false,
+    "groups": [
+      "translation",
+      "rotation",
+      "gripper",
+      "padding"
+    ],
+    "controls": [
+      "zero_visual",
+      "cross_demo_shuffle"
+    ],
+    "target_position_intervention": "not_run_requires_real_changed_correct_actions"
+  },
+  "cleanup_policy": {
+    "old_phase_budget_ledger": "do_not_consume_or_alter",
+    "new_engineering_optimizer_updates": 0,
+    "new_engineering_episodes": 0,
+    "formal_training_receipt": false
+  },
+  "continuation": {
+    "schema": "owac.raw-stem-temporal.c-full.config.v1",
+    "parent_run": "outputs/raw-distillation-pilot-20261021-101725",
+    "parent_checkpoint": "outputs/raw-distillation-pilot-20261021-101725/pilot-C/checkpoint_final_000050.pt",
+    "parent_checkpoint_sha256": "631b6ea1e21bbe01e4e08b9da56432a0b9a703229a14a59463ac01a009052e1a",
+    "parent_config": "outputs/raw-distillation-pilot-20261021-101725/authorized-config.json",
+    "parent_config_sha256": "8f04c2d438e8d8d74f2462a8b335a0cd48b24f061169683ac5a419c921cdb040",
+    "old_recipe_sha256": "ccd0ec412f85113e28f54f4dc50dab41ae5f6d39e858ef3e8988290d404b7477",
+    "parent_assessment": "outputs/raw-distillation-pilot-20261021-101725/postprocess/run-20261021T035315Z/attached-assessment.json",
+    "parent_assessment_sha256": "40dcf8d17276f9582f314e74b0088b930199fed907a09cf04b1a1e6afcdb8c98",
+    "baseline_tolerance_abs": 1e-06,
+    "validation_windows": 102,
+    "validation_sources": 5,
+    "validation_episode_resets": 5,
+    "validation_valid_tokens": 52224,
+    "validation_scalar_denominator": 106954752,
+    "selection_metric": "validation_token_total",
+    "selection_direction": "min",
+    "selection_tie_break": "earlier_step",
+    "action_mae": "diagnostic_only_never_selects_or_early_stops",
+    "closed_loop": "not_run",
+    "control_restored": false,
+    "teacher_provenance": "local author-architecture init0 frontend + actual LIBERO pi05",
+    "raw_origin": "LIBERO RGB8 inverse pseudoRAW3; not native Bayer"
+  }
+}

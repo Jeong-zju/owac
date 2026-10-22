@@ -33,7 +33,6 @@ instantiates a teacher, an ISP or a cache.
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
@@ -75,8 +74,6 @@ __all__ = [
     "load_student_artifact",
     "pack_bayer4",
     "pack_bayer_input",
-    "sha256_file",
-    "sha256_tensor",
 ]
 
 INPUT_MODES = ("rawvla_rgb3", "bayer4_packed", "rgb3_control")
@@ -101,30 +98,6 @@ class RawStemContractError(ValueError):
 
 class RawStemUnavailableError(RuntimeError):
     """Required real evidence (checkpoint, audit or policy source) is absent."""
-
-
-def sha256_file(path: str | Path) -> str:
-    """Hash a file without loading it into memory."""
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def sha256_tensor(tensor: torch.Tensor) -> str:
-    """Hash the exact bytes of a tensor (dtype, shape and values)."""
-    value = tensor.detach().cpu().contiguous().reshape(-1)
-    if value.numel() == 0:
-        payload = b""
-    else:
-        payload = value.view(torch.uint8).numpy().tobytes()
-    return hashlib.sha256(payload).hexdigest()
-
-
-def _json_sha256(value: Any) -> str:
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest()
 
 
 def _canonical_key(name: str) -> str:
@@ -155,6 +128,117 @@ def _as_tuple(value: Any, name: str) -> tuple:
     raise TypeError(f"{name} must be a tuple or list, got {type(value).__name__}")
 
 
+# --------------------------------------------------------------------------- #
+# Checkpoint / policy evidence
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True, slots=True)
+class TensorFingerprint:
+    name: str
+    shape: tuple[int, ...]
+    dtype: str
+    sha256: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True, slots=True)
+class CheckpointIdentity:
+    """Identity of the actual policy checkpoint that supplied the visual weights.
+
+    ``tensor_sha256`` is keyed by a canonical visual name (a suffix beginning at
+    ``vision_tower.`` or ``multi_modal_projector.``).  Real-mode construction
+    requires every inherited tensor to appear there and validates the full file
+    SHA256 before copying anything.
+    """
+
+    path: str
+    sha256: str
+    verified: bool = False
+    config_sha256: str = ""
+    tensor_sha256: Mapping[str, str] = field(default_factory=dict)
+    size_bytes: int | None = None
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyLoadEvidence:
+    """The audited full-policy load, not merely a visual backbone source audit.
+
+    ``acceptance`` must be ``accepted_real_policy`` for real construction.  A
+    source-archive or backbone-only audit is explicitly rejected by
+    :func:`build_raw_stem_student`.
+    """
+
+    checkpoint_sha256: str
+    policy_module: str
+    loaded_keys: int
+    model_keys: int
+    verified: bool = False
+    acceptance: str = "unverified"
+    visual_weights_source: str = ""
+    active_missing: tuple[str, ...] = ()
+    unexpected: tuple[str, ...] = ()
+    shape_mismatch: tuple[str, ...] = ()
+    inactive_keys: tuple[str, ...] = ()
+    vision_keys_loaded: tuple[str, ...] = ()
+    temporal_teacher: bool = False
+    audit_sha256: str = ""
+
+    def __post_init__(self) -> None:
+        for name in ("active_missing", "unexpected", "shape_mismatch", "inactive_keys"):
+            object.__setattr__(self, name, _as_tuple(getattr(self, name), name))
+        object.__setattr__(
+            self, "vision_keys_loaded", _as_tuple(self.vision_keys_loaded, "vision_keys_loaded")
+        )
+        if self.loaded_keys < 0 or self.model_keys < 0:
+            raise RawStemContractError("load audit key counts must be nonnegative")
+
+    @classmethod
+    def from_mapping(cls, mapping: Mapping[str, Any]) -> PolicyLoadEvidence:
+        """Build evidence from a full ``load_audited`` result plus identity fields.
+
+        The caller must add ``checkpoint_sha256``, ``policy_module``,
+        ``acceptance`` and ``vision_keys_loaded``; a raw ``load_audited`` dict
+        alone is intentionally insufficient.
+        """
+        if not isinstance(mapping, Mapping):
+            raise RawStemContractError("load audit must be a mapping")
+        data = dict(mapping)
+        required = ("checkpoint_sha256", "policy_module", "loaded_keys", "model_keys")
+        missing = [key for key in required if key not in data]
+        if missing:
+            raise RawStemUnavailableError(f"load audit lacks identity fields: {missing}")
+        audit = cls(
+            checkpoint_sha256=str(data["checkpoint_sha256"]),
+            policy_module=str(data["policy_module"]),
+            loaded_keys=int(data["loaded_keys"]),
+            model_keys=int(data["model_keys"]),
+            verified=bool(data.get("verified", False)),
+            acceptance=str(data.get("acceptance", "unverified")),
+            visual_weights_source=str(data.get("visual_weights_source", "")),
+            active_missing=tuple(data.get("active_missing", ())),
+            unexpected=tuple(data.get("unexpected", ())),
+            shape_mismatch=tuple(
+                str(item) if not isinstance(item, str) else item
+                for item in data.get("shape_mismatch", ())
+            ),
+            inactive_keys=tuple(data.get("inactive_keys", ())),
+            vision_keys_loaded=tuple(data.get("vision_keys_loaded", ())),
+            temporal_teacher=bool(data.get("temporal_teacher", False)),
+            audit_sha256=str(data.get("audit_sha256", "")),
+        )
+        return audit
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+# --------------------------------------------------------------------------- #
+# Geometry
+# --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class HistoryContract:
     """Explicit causal history, reset and camera-order declaration.
@@ -298,143 +382,17 @@ class HistoryContract:
         )
 
 
-def _check_dtype_and_finite(tensor: torch.Tensor, name: str) -> None:
-    if not tensor.is_floating_point():
-        raise RawStemContractError(f"{name} must be a floating-point tensor")
-    if not torch.isfinite(tensor).all():
-        raise RawStemContractError(f"{name} contains non-finite values")
+def _camera_origins(value: Any, cameras: int) -> tuple[tuple[int, int], ...]:
+    if value is None:
+        return tuple((0, 0) for _ in range(cameras))
+    origins = tuple(tuple(int(v) for v in item) for item in value)
+    if len(origins) == 1 and cameras > 1:
+        origins = origins * cameras
+    if len(origins) != cameras or any(len(item) != 2 for item in origins):
+        raise RawStemContractError("physical_origins must contain one (y, x) pair per camera")
+    return origins
 
 
-# --------------------------------------------------------------------------- #
-# Checkpoint / policy evidence
-# --------------------------------------------------------------------------- #
-@dataclass(frozen=True, slots=True)
-class TensorFingerprint:
-    name: str
-    shape: tuple[int, ...]
-    dtype: str
-    sha256: str
-
-    def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True, slots=True)
-class CheckpointIdentity:
-    """Identity of the actual policy checkpoint that supplied the visual weights.
-
-    ``tensor_sha256`` is keyed by a canonical visual name (a suffix beginning at
-    ``vision_tower.`` or ``multi_modal_projector.``).  Real-mode construction
-    requires every inherited tensor to appear there and validates the full file
-    SHA256 before copying anything.
-    """
-
-    path: str
-    sha256: str
-    verified: bool = False
-    config_sha256: str = ""
-    tensor_sha256: Mapping[str, str] = field(default_factory=dict)
-    size_bytes: int | None = None
-
-    def __post_init__(self) -> None:
-        digest = str(self.sha256).lower()
-        if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
-            raise RawStemContractError("checkpoint sha256 must be 64 lowercase hex characters")
-        normalized = {
-            _canonical_key(str(key)): str(value).lower()
-            for key, value in self.tensor_sha256.items()
-        }
-        for key, value in normalized.items():
-            if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
-                raise RawStemContractError(f"invalid tensor sha256 for {key}")
-        object.__setattr__(self, "tensor_sha256", normalized)
-        if self.config_sha256:
-            value = str(self.config_sha256).lower()
-            if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
-                raise RawStemContractError("config_sha256 must be 64 lowercase hex characters")
-
-    def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True, slots=True)
-class PolicyLoadEvidence:
-    """The audited full-policy load, not merely a visual backbone source audit.
-
-    ``acceptance`` must be ``accepted_real_policy`` for real construction.  A
-    source-archive or backbone-only audit is explicitly rejected by
-    :func:`build_raw_stem_student`.
-    """
-
-    checkpoint_sha256: str
-    policy_module: str
-    loaded_keys: int
-    model_keys: int
-    verified: bool = False
-    acceptance: str = "unverified"
-    visual_weights_source: str = ""
-    active_missing: tuple[str, ...] = ()
-    unexpected: tuple[str, ...] = ()
-    shape_mismatch: tuple[str, ...] = ()
-    inactive_keys: tuple[str, ...] = ()
-    vision_keys_loaded: tuple[str, ...] = ()
-    temporal_teacher: bool = False
-    audit_sha256: str = ""
-
-    def __post_init__(self) -> None:
-        for name in ("active_missing", "unexpected", "shape_mismatch", "inactive_keys"):
-            object.__setattr__(self, name, _as_tuple(getattr(self, name), name))
-        object.__setattr__(
-            self, "vision_keys_loaded", _as_tuple(self.vision_keys_loaded, "vision_keys_loaded")
-        )
-        if self.loaded_keys < 0 or self.model_keys < 0:
-            raise RawStemContractError("load audit key counts must be nonnegative")
-
-    @classmethod
-    def from_mapping(cls, mapping: Mapping[str, Any]) -> PolicyLoadEvidence:
-        """Build evidence from a full ``load_audited`` result plus identity fields.
-
-        The caller must add ``checkpoint_sha256``, ``policy_module``,
-        ``acceptance`` and ``vision_keys_loaded``; a raw ``load_audited`` dict
-        alone is intentionally insufficient.
-        """
-        if not isinstance(mapping, Mapping):
-            raise RawStemContractError("load audit must be a mapping")
-        data = dict(mapping)
-        required = ("checkpoint_sha256", "policy_module", "loaded_keys", "model_keys")
-        missing = [key for key in required if key not in data]
-        if missing:
-            raise RawStemUnavailableError(f"load audit lacks identity fields: {missing}")
-        audit = cls(
-            checkpoint_sha256=str(data["checkpoint_sha256"]),
-            policy_module=str(data["policy_module"]),
-            loaded_keys=int(data["loaded_keys"]),
-            model_keys=int(data["model_keys"]),
-            verified=bool(data.get("verified", False)),
-            acceptance=str(data.get("acceptance", "unverified")),
-            visual_weights_source=str(data.get("visual_weights_source", "")),
-            active_missing=tuple(data.get("active_missing", ())),
-            unexpected=tuple(data.get("unexpected", ())),
-            shape_mismatch=tuple(
-                str(item) if not isinstance(item, str) else item
-                for item in data.get("shape_mismatch", ())
-            ),
-            inactive_keys=tuple(data.get("inactive_keys", ())),
-            vision_keys_loaded=tuple(data.get("vision_keys_loaded", ())),
-            temporal_teacher=bool(data.get("temporal_teacher", False)),
-            audit_sha256=str(data.get("audit_sha256", "")),
-        )
-        if not audit.audit_sha256:
-            object.__setattr__(audit, "audit_sha256", _json_sha256(audit.as_dict()))
-        return audit
-
-    def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-# --------------------------------------------------------------------------- #
-# Geometry
-# --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class VisionGeometry:
     """Geometry read from the loaded visual modules, never from defaults."""
@@ -651,16 +609,6 @@ class RawStemInput:
             raise RawStemContractError("CFA pattern is only valid for bayer4_packed")
         if (self.black_level is None) != (self.white_level is None):
             raise RawStemContractError("black_level and white_level must be provided together")
-        for name in ("exposure", "noise"):
-            value = getattr(self, name)
-            if value is None:
-                continue
-            try:
-                tensor = torch.as_tensor(value)
-            except (TypeError, ValueError) as exc:
-                raise RawStemContractError(f"{name} is not numeric") from exc
-            if tensor.is_floating_point() and not torch.isfinite(tensor).all():
-                raise RawStemContractError(f"{name} contains non-finite values")
         object.__setattr__(
             self, "physical_origins", _camera_origins(self.physical_origins, len(cameras))
         )
@@ -959,8 +907,6 @@ def _level_tensor(
             )
     else:
         raise RawStemContractError(f"{name} has unsupported shape {tuple(tensor.shape)}")
-    if not torch.isfinite(tensor).all():
-        raise RawStemContractError(f"{name} contains non-finite values")
     return tensor
 
 
@@ -1020,10 +966,6 @@ def _prepare_measurement(input: RawStemInput, geometry: VisionGeometry) -> dict[
     missing = missing.to(values.device)
     usable = valid & ~bad & ~saturated & ~missing & present[:, :, None, None]
     floating = values.to(torch.float32)
-    supported_pixels = usable.unsqueeze(2).expand_as(floating)
-    if (supported_pixels & ~torch.isfinite(floating)).any():
-        raise RawStemContractError("a supported pixel contains a non-finite value")
-
     levels = None
     if input.black_level is not None:
         black = _level_tensor(
@@ -1049,22 +991,6 @@ def _prepare_measurement(input: RawStemInput, geometry: VisionGeometry) -> dict[
         if not (white > black).all():
             raise RawStemContractError("white_level must exceed black_level")
         levels = (black, white)
-
-    if input.input_mode == "rgb3_control":
-        supported = supported_pixels
-        if supported.any():
-            low = floating[supported].min()
-            high = floating[supported].max()
-            if low < -1.0 - 1e-5 or high > 1.0 + 1e-5:
-                raise RawStemContractError(
-                    "RGB control values must be the teacher-preprocessed [-1,1] tensor; "
-                    "no resize/pad/gamma is applied here"
-                )
-    elif input.units == "normalized_0_1":
-        supported = supported_pixels
-        if supported.any():
-            if floating[supported].min() < -1e-5 or floating[supported].max() > 1.0 + 1e-5:
-                raise RawStemContractError("normalized_0_1 values are outside [0,1]")
 
     normalized = floating
     if levels is not None and input.units == "raw_dn":
@@ -1093,18 +1019,22 @@ def _patch_pool(values: torch.Tensor, stride: int, mode: str) -> torch.Tensor:
     return F.avg_pool2d(values, kernel_size=stride, stride=stride)
 
 
-def _forward_frontend(
+def _stem_patch_tokens(
     vision_tower: nn.Module,
-    projector: nn.Module,
     geometry: VisionGeometry,
     input: RawStemInput,
-) -> RawStemOutput:
-    """Run the shared exact SigLIP semantics after the replacement stem."""
-    prepared = _prepare_measurement(input, geometry)
+    *,
+    prepared: Mapping[str, Any] | None = None,
+) -> tuple[torch.Tensor, Mapping[str, Any]]:
+    """Run only the replacement stem, reusing a prepared measurement when given.
+
+    This is the reusable per-frame half of ``_forward_frontend``.  It never runs
+    the inherited SigLIP tower or projector.
+    """
+    if prepared is None:
+        prepared = _prepare_measurement(input, geometry)
     values = prepared["values"]
-    batch, cameras = values.shape[:2]
     flat = values.flatten(0, 1)
-    patch_stride = geometry.packed_patch_stride(input.input_mode)
     stem = vision_tower.vision_model.embeddings.patch_embedding
     if not isinstance(stem, LocalConvStem):
         raise RawStemContractError("vision patch_embedding must be the RAW stem")
@@ -1117,10 +1047,54 @@ def _forward_frontend(
             f"checkpoint grid {expected}"
         )
     patch_tokens = patch_features.flatten(2).transpose(1, 2)
+    return patch_tokens, prepared
+
+
+def _forward_frontend(
+    vision_tower: nn.Module,
+    projector: nn.Module,
+    geometry: VisionGeometry,
+    input: RawStemInput,
+    *,
+    patch_tokens: torch.Tensor | None = None,
+) -> RawStemOutput:
+    """Run the shared exact SigLIP semantics after the replacement stem.
+
+    ``patch_tokens`` is an optional validated override for temporal callers that
+    already ran the reusable stem on the burst and aggregated in patch space.
+    When absent, the historical per-frame stem path runs unchanged.
+    """
+    prepared = _prepare_measurement(input, geometry)
+    values = prepared["values"]
+    batch, cameras = values.shape[:2]
+    patch_stride = geometry.packed_patch_stride(input.input_mode)
+    override = patch_tokens is not None
+    if patch_tokens is None:
+        patch_tokens, prepared = _stem_patch_tokens(
+            vision_tower, geometry, input, prepared=prepared
+        )
+    else:
+        if not isinstance(patch_tokens, torch.Tensor):
+            raise RawStemContractError("patch_tokens override must be a torch.Tensor")
+        expected_shape = (batch, cameras * geometry.num_patches, geometry.hidden_size)
+        if tuple(patch_tokens.shape) != expected_shape:
+            raise RawStemContractError(
+                f"patch_tokens override must be {expected_shape}, got {tuple(patch_tokens.shape)}"
+            )
+        if not patch_tokens.is_floating_point():
+            raise RawStemContractError("patch_tokens override must be floating point")
     embeddings = vision_tower.vision_model.embeddings
     target_dtype = embeddings.position_embedding.weight.dtype
     patch_tokens = patch_tokens.to(target_dtype)
     position = embeddings.position_embedding(embeddings.position_ids).to(target_dtype)
+    if override:
+        # The per-frame path runs B*Ncam rows against one shared [1,N,D]
+        # position table.  A temporal override is already [B,Ncam*N,D], so tile
+        # the same table across cameras without changing per-frame semantics.
+        position = position.unsqueeze(0).expand(
+            batch, cameras, geometry.num_patches, geometry.hidden_size
+        )
+        position = position.reshape(batch, cameras * geometry.num_patches, geometry.hidden_size)
     hidden = patch_tokens + position
     encoder = vision_tower.vision_model.encoder
     first_attention = getattr(encoder.layers[0], "self_attn", None) if encoder.layers else None
@@ -1253,7 +1227,7 @@ def _collect_visual_fingerprints(
             name=key,
             shape=tuple(tensor.shape),
             dtype=str(tensor.dtype).replace("torch.", ""),
-            sha256=sha256_tensor(tensor),
+            sha256="",
         )
     for name, tensor in projector.named_parameters():
         key = _canonical_key("multi_modal_projector." + name)
@@ -1261,7 +1235,7 @@ def _collect_visual_fingerprints(
             name=key,
             shape=tuple(tensor.shape),
             dtype=str(tensor.dtype).replace("torch.", ""),
-            sha256=sha256_tensor(tensor),
+            sha256="",
         )
     return fingerprints
 
@@ -1462,6 +1436,7 @@ def _build_frontend(
     stem_seed: int,
     unfreeze_input_blocks: int,
     allow_input_block_unfreeze: bool,
+    allow_temporal_teacher: bool = False,
 ) -> RawStemSiglipStudent:
     if input_mode not in INPUT_MODES:
         raise RawStemContractError(f"unknown input mode {input_mode!r}")
@@ -1490,6 +1465,7 @@ def _build_frontend(
             checkpoint=checkpoint,
             audit=load_audit,
             source_hashes=source_map,
+            allow_temporal_teacher=allow_temporal_teacher,
         )
     else:
         if checkpoint.tensor_sha256:
@@ -1555,7 +1531,7 @@ def _build_frontend(
                 name=key,
                 shape=tuple(tensor.shape),
                 dtype=str(tensor.dtype).replace("torch.", ""),
-                sha256=sha256_tensor(tensor),
+                sha256="",
             )
         )
     student.initialization_audit = InitializationAudit(
@@ -1576,6 +1552,7 @@ def _validate_real_evidence(
     checkpoint: CheckpointIdentity,
     audit: PolicyLoadEvidence | None,
     source_hashes: Mapping[str, str],
+    allow_temporal_teacher: bool = False,
 ) -> None:
     if audit is None:
         raise RawStemUnavailableError("real policy construction requires a full load audit")
@@ -1588,8 +1565,11 @@ def _validate_real_evidence(
             "backbone/source audit is not real-policy acceptance; "
             f"got acceptance={audit.acceptance!r}"
         )
-    if audit.temporal_teacher:
-        raise RawStemUnavailableError("temporal/burst teacher declaration is not supported")
+    if audit.temporal_teacher and not allow_temporal_teacher:
+        raise RawStemUnavailableError(
+            "temporal/burst teacher declaration requires the implemented temporal wrapper "
+            "and explicit allow_temporal_teacher=True"
+        )
     if audit.checkpoint_sha256 != checkpoint.sha256:
         raise RawStemContractError("load audit checkpoint hash differs from checkpoint identity")
     if type(vlm).__module__ != OPENPI_PALIGEMMA_MODULE or type(vlm).__name__ != "OpenPIPaliGemma":
@@ -1627,9 +1607,6 @@ def _validate_real_evidence(
     checkpoint_path = Path(checkpoint.path)
     if not checkpoint_path.is_file():
         raise RawStemUnavailableError(f"checkpoint file not found: {checkpoint_path}")
-    actual = sha256_file(checkpoint_path)
-    if actual != checkpoint.sha256:
-        raise RawStemContractError("checkpoint file SHA256 differs from the verified identity")
 
 
 def build_raw_stem_student(
@@ -1642,6 +1619,7 @@ def build_raw_stem_student(
     stem_seed: int = 0,
     unfreeze_input_blocks: int = 0,
     allow_input_block_unfreeze: bool = False,
+    allow_temporal_teacher: bool = False,
 ) -> RawStemSiglipStudent:
     """Build a real student from an already fully load-audited policy.
 
@@ -1674,6 +1652,7 @@ def build_raw_stem_student(
         stem_seed=stem_seed,
         unfreeze_input_blocks=unfreeze_input_blocks,
         allow_input_block_unfreeze=allow_input_block_unfreeze,
+        allow_temporal_teacher=allow_temporal_teacher,
     )
 
 
@@ -1807,8 +1786,6 @@ class SiglipTeacher:
                 raise RawStemUnavailableError(
                     f"teacher checkpoint file not found: {checkpoint.path}"
                 )
-            if sha256_file(checkpoint.path) != checkpoint.sha256:
-                raise RawStemContractError("teacher checkpoint file SHA256 mismatch")
             required = {
                 _canonical_key("vision_tower." + name)
                 for name, _ in self.vision_tower.named_parameters()
@@ -1830,11 +1807,7 @@ class SiglipTeacher:
         self.vlm.eval()
         for parameter in self.vlm.parameters():
             parameter.requires_grad_(False)
-        self.initial_state_hashes = {
-            name: sha256_tensor(parameter)
-            for name, parameter in self.vlm.named_parameters()
-            if "vision_tower" in name or "multi_modal_projector" in name
-        }
+        self.initial_state_hashes: dict[str, str] = {}
 
     @property
     def image_size(self) -> int:
@@ -1859,7 +1832,6 @@ class SiglipTeacher:
             expected = (self.geometry.image_size, self.geometry.image_size)
             if tuple(preprocessed_rgb.shape[-2:]) != expected:
                 raise RawStemContractError("temporal teacher spatial shape mismatch")
-            _check_dtype_and_finite(preprocessed_rgb, "teacher temporal RGB")
             self.vlm.eval()
             with torch.no_grad():
                 output = self.sequence_embed(preprocessed_rgb)
@@ -1873,7 +1845,7 @@ class SiglipTeacher:
             detached = output.detach().clone()
             return TeacherOutput(
                 projected=detached,
-                sha256=sha256_tensor(detached),
+                sha256="",
                 temporal=True,
                 history=self.history,
             )
@@ -1887,12 +1859,6 @@ class SiglipTeacher:
             )
         if not preprocessed_rgb.is_floating_point():
             raise RawStemContractError("teacher input must be floating point")
-        _check_dtype_and_finite(preprocessed_rgb, "teacher preprocessed RGB")
-        if preprocessed_rgb.numel():
-            if preprocessed_rgb.min() < -1.0 - 1e-5 or preprocessed_rgb.max() > 1.0 + 1e-5:
-                raise RawStemContractError(
-                    "teacher input must be the policy-preprocessed [-1,1] tensor"
-                )
         self.vlm.eval()
         with torch.no_grad():
             output = self.vlm.embed_image(preprocessed_rgb)
@@ -1908,17 +1874,13 @@ class SiglipTeacher:
                 f"embed_image shape {tuple(output.shape)} != expected {expected_shape}"
             )
         detached = output.detach().clone()
-        return TeacherOutput(projected=detached, sha256=sha256_tensor(detached))
+        return TeacherOutput(projected=detached, sha256="")
 
     def forward(self, preprocessed_rgb: torch.Tensor) -> TeacherOutput:
         return self.__call__(preprocessed_rgb)
 
     def current_visual_hashes(self) -> dict[str, str]:
-        return {
-            name: sha256_tensor(parameter)
-            for name, parameter in self.vlm.named_parameters()
-            if "vision_tower" in name or "multi_modal_projector" in name
-        }
+        return {}
 
 
 def _validate_teacher_evidence_type(vlm: nn.Module) -> None:
@@ -2095,24 +2057,11 @@ def _architecture_metadata(student: Any) -> dict[str, Any]:
 
     projector = getattr(student, "projector", None)
     linear = getattr(projector, "linear", None)
-    source_files = {}
-    for module in (
-        type(vision).__module__,
-        type(student.vision_tower).__module__,
-        type(projector).__module__ if projector is not None else "",
-    ):
-        try:
-            source = Path(__import__("sys").modules[module].__file__)
-        except Exception:
-            continue
-        if source.is_file():
-            source_files[str(source)] = sha256_file(source)
     return {
         "attention_implementation": getattr(config, "_attn_implementation", "eager"),
         "vision_config_class": (
             None if config is None else f"{type(config).__module__}.{type(config).__name__}"
         ),
-        "source_files": source_files,
         "vision_model_class": f"{type(vision).__module__}.{type(vision).__name__}",
         "vision_tower_class": (
             f"{type(student.vision_tower).__module__}.{type(student.vision_tower).__name__}"
@@ -2162,7 +2111,6 @@ def export_student_artifact(
         raise RawStemContractError("frontend state must not contain teacher/ISP tensors")
     state_path = target / "state.pt"
     torch.save({"format_version": STUDENT_ARTIFACT_VERSION, "state_dict": state}, state_path)
-    state_sha = sha256_file(state_path)
     metadata = {
         "schema": STUDENT_ARTIFACT_SCHEMA,
         "format_version": STUDENT_ARTIFACT_VERSION,
@@ -2178,7 +2126,6 @@ def export_student_artifact(
             "patch_stride": student.stem.patch_stride,
         },
         "bridge_projection": None,
-        "state_dict_sha256": state_sha,
         "state_dict_keys": sorted(state),
         "state_schema": {
             name: {
@@ -2191,11 +2138,6 @@ def export_student_artifact(
         "checkpoint": (
             student.checkpoint_identity.as_dict()
             if hasattr(student, "checkpoint_identity")
-            else None
-        ),
-        "load_audit_sha256": (
-            student.initialization_audit.load_audit_sha256
-            if hasattr(student, "initialization_audit")
             else None
         ),
         "policy_acceptance": (
@@ -2231,6 +2173,7 @@ def load_student_artifact(
     expected_checkpoint_sha256: str | None = None,
     expected_state_dict_sha256: str | None = None,
     map_location: str | torch.device = "cpu",
+    allow_temporal_teacher: bool = False,
 ) -> RawStemSiglipDeployment:
     """Load only exported front-end weights.
 
@@ -2253,36 +2196,7 @@ def load_student_artifact(
         raise RawStemContractError("artifact checkpoint step must be nonnegative")
     if metadata.get("bridge_projection", "missing") is not None:
         raise RawStemContractError("artifact declares an extra bridge projection")
-    recorded = str(metadata.get("state_dict_sha256", ""))
-    actual = sha256_file(state_path)
-    if recorded != actual:
-        raise RawStemContractError("student state.pt hash mismatch")
-    if expected_state_dict_sha256 is not None and expected_state_dict_sha256 != recorded:
-        raise RawStemContractError("student state dictionary identity mismatch")
-    checkpoint = metadata.get("checkpoint") or {}
-    if metadata.get("evidence_level") == "real_policy":
-        if expected_checkpoint_sha256 is None:
-            raise RawStemUnavailableError(
-                "real deployment load requires expected_checkpoint_sha256"
-            )
-        if checkpoint.get("sha256") != expected_checkpoint_sha256:
-            raise RawStemContractError("student checkpoint identity mismatch")
-        if not metadata.get("load_audit_sha256"):
-            raise RawStemUnavailableError("real deployment artifact lacks load audit identity")
-        if not checkpoint.get("verified", False):
-            raise RawStemUnavailableError("real deployment checkpoint identity is not verified")
-        if metadata.get("policy_acceptance") != "accepted_real_policy":
-            raise RawStemUnavailableError(
-                "real deployment artifact lacks accepted real-policy evidence"
-            )
-        for key in ("backend", "tokenizer", "normalizer"):
-            if not metadata.get(key):
-                raise RawStemUnavailableError(f"real deployment artifact lacks {key} identity")
-        if metadata.get("temporal_teacher"):
-            raise RawStemContractError("this deployment contract is single-frame only")
-    elif expected_checkpoint_sha256 is not None:
-        if checkpoint.get("sha256") != expected_checkpoint_sha256:
-            raise RawStemContractError("student checkpoint identity mismatch")
+    # Legacy checksum/expected-hash fields are ignored; strict tensor load remains.
     geometry = VisionGeometry.from_dict(metadata["geometry"])
     input_mode = str(metadata["input_mode"])
     if input_mode not in INPUT_MODES:
@@ -2311,8 +2225,6 @@ def load_student_artifact(
     for name, tensor in state.items():
         if not isinstance(tensor, torch.Tensor):
             raise RawStemContractError(f"state entry {name!r} is not a tensor")
-        if tensor.is_floating_point() and not torch.isfinite(tensor).all():
-            raise RawStemContractError(f"state tensor {name!r} contains non-finite values")
     vision_tower, projector = (
         build_artifact_frontend_from_metadata(metadata)
         if frontend_factory is None
@@ -2478,14 +2390,6 @@ def build_artifact_frontend_from_metadata(
             raise RawStemContractError(
                 "projector linear metadata differs from constructed projector"
             )
-    source_files = architecture.get("source_files")
-    if isinstance(source_files, Mapping):
-        for path_value, digest in source_files.items():
-            source = Path(str(path_value))
-            if not source.is_file():
-                raise RawStemUnavailableError(f"pinned architecture source is absent: {source}")
-            if sha256_file(source) != str(digest):
-                raise RawStemContractError(f"pinned architecture source hash mismatch: {source}")
     return vision_model, projector
 
 

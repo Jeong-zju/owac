@@ -1,0 +1,308 @@
+{
+  "schema": "owac.align.resource-portrait.v1",
+  "actual_optimizer_updates": 0,
+  "actual_policy_episodes": 0,
+  "device": "RTX 5090 32GB shared; own process torch allocated/reserved separately from nvidia-smi total",
+  "activation_mode": "save_on_cpu; pin_memory; microbatch1; full current-stem prefix and six-endpoint unroll",
+  "parameter_counts": {
+    "trainable": 14454784,
+    "inherited_visual_frozen": 414125168,
+    "student_visual_and_stem": 428579952,
+    "unique_pure_deployment": 3630533776
+  },
+  "longest_train_source": "demo_23 length152 anchor150 prefix25 unroll6",
+  "C_long": {
+    "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_23",
+    "anchor_endpoint": 150,
+    "prefix_endpoints": 25,
+    "unroll_endpoints": 6,
+    "timing": {
+      "action_only_seconds": 7.337221079971641,
+      "conservative_token_plus_action_seconds": 13.668545173015445,
+      "diagnostic_total_seconds": 13.668563410057686,
+      "effective_batch": 16,
+      "profile_seconds": 5.776993930339813e-06,
+      "scope": "full_prefix_unroll6_shared_teacher_targets",
+      "token_only_seconds": 6.331324093043804
+    },
+    "memory": {
+      "peak_allocated": 8969472000,
+      "start_allocated": 8616606208
+    },
+    "disk": {
+      "cache_bytes": 5254539235,
+      "checkpoint_estimate_bytes": 1069406432,
+      "checkpoint_state_bytes": 886659296,
+      "metadata_rng_margin_bytes": 67108864,
+      "optimizer_moments_fp32_bytes": 115638272
+    }
+  },
+  "B_long": {
+    "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_23",
+    "anchor_endpoint": 150,
+    "prefix_endpoints": 25,
+    "unroll_endpoints": 6,
+    "timing": {
+      "action_only_seconds": null,
+      "conservative_token_plus_action_seconds": 5.214610890951008,
+      "diagnostic_total_seconds": 5.214622625033371,
+      "effective_batch": 16,
+      "profile_seconds": 1.7560087144374847e-06,
+      "scope": "full_prefix_unroll6_shared_teacher_targets",
+      "token_only_seconds": 5.214610890951008
+    },
+    "memory": {
+      "peak_allocated": 8765605376,
+      "start_allocated": 8425454080
+    },
+    "disk": {
+      "cache_bytes": 5254539235,
+      "checkpoint_estimate_bytes": 1069406432,
+      "checkpoint_state_bytes": 886659296,
+      "metadata_rng_margin_bytes": 67108864,
+      "optimizer_moments_fp32_bytes": 115638272
+    }
+  },
+  "pure_inference": {
+    "latency": {
+      "individual_calls": 20,
+      "warmup_excluded": 2,
+      "p50_ms": 204.9096825066954,
+      "p95_ms": 214.34586212271824,
+      "all_ms": [
+        200.53125103004277,
+        203.76910304185003,
+        204.80847300495952,
+        204.6593250706792,
+        203.09736102353781,
+        207.15302997268736,
+        217.70798903889954,
+        206.43758005462587,
+        210.5542669305578,
+        205.4818170145154,
+        204.36536299530417,
+        205.01089200843126,
+        203.4435300156474,
+        203.44142999965698,
+        205.02078905701637,
+        203.6701429169625,
+        203.52409698534757,
+        205.55340906139463,
+        205.9602689696476,
+        214.16890807449818
+      ],
+      "scope": "RAW in-memory episode assembly+normalization/resize/H2D+state checks+10step sampling+physical action postprocessing; no disk decode per call",
+      "state": "same causal state25 cloned/immutable per call; no duplicate endpoint advancement",
+      "shared_gpu": true
+    },
+    "peak_allocated_bytes": 7744128000,
+    "peak_reserved_bytes": 7826571264,
+    "unique_deployment_parameters": 3630533776
+  },
+  "teacher_cache": {
+    "schema": "owac.align.cache-preparation.v1",
+    "sources": 45,
+    "splits": {
+      "train": 40,
+      "validation": 5
+    },
+    "expected_rows": 969,
+    "optimizer_updates": 0,
+    "policy_episodes": 0,
+    "new_run_disk_cap_bytes": 21474836480,
+    "owned_bytes_before": 4414121128,
+    "command": [
+      "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/runtime/bin/python",
+      "-m",
+      "owac.runtime.raw_temporal_distillation",
+      "prepare-cache",
+      "--config",
+      "/home/jeong/zeno/owac/repo/configs/experiments/raw_stem_siglip_align_v1.json",
+      "--device",
+      "cuda:0",
+      "--cache-dir",
+      "/home/jeong/zeno/owac/repo/outputs/raw-distillation-align-20261020-153948/sol-cli-final-cache",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_0",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_1",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_2",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_3",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_4",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_5",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_6",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_7",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_8",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_10",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_11",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_12",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_13",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_14",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_15",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_16",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_17",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_18",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_19",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_20",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_23",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_24",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_25",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_26",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_28",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_29",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_31",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_32",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_34",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_35",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_36",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_37",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_38",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_39",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_40",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_44",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_45",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_46",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_48",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_49",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_9",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_27",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_30",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_41",
+      "--source-id",
+      "libero_goal/put_the_cream_cheese_in_the_bowl/demo_42"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 81.60269715997856,
+    "owned_bytes_after": 9500559007,
+    "actual_cache_bytes": 5254539235
+  },
+  "proposed_next_scope": {
+    "authorized": false,
+    "arms": [
+      "B",
+      "C"
+    ],
+    "max_cumulative_updates_each": 50,
+    "effective_batch": 16,
+    "max_anchor_presentations_each": 800,
+    "combined_gpu_hour_cap": 4,
+    "new_output_disk_cap_bytes": 21474836480,
+    "recommended_per_arm_wall_seconds": {
+      "B": 5400,
+      "C": 7200
+    },
+    "wall_safety_reserve_seconds": 1800,
+    "checkpoint_points": [
+      0,
+      50
+    ],
+    "same_seed": 101,
+    "actual_optimizer_first_update_and_reload": "must validate after new authorization; not_run now",
+    "no_auto_D_stage2_closed_loop": true
+  },
+  "estimates": {
+    "B50_worst_prefix_hours": 1.158802420211335,
+    "C50_worst_prefix_hours": 1.4069609095652897,
+    "meaning": "upper-prefix forward/backward extrapolation only; excludes optimizer, repeated validation and full frozen checks; actual update execution not measured",
+    "all50_cache_rows_estimate": 1088,
+    "train_validation_rows_actual": 969,
+    "checkpoint_tensor_plus_optimizer_and_margin_bytes": 1069406432
+  },
+  "earlier_profiles_before_pointer_pilot_freeze": {
+    "C_long": {
+      "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_23",
+      "anchor_endpoint": 150,
+      "prefix_endpoints": 25,
+      "unroll_endpoints": 6,
+      "timing": {
+        "action_only_seconds": 7.085869422066025,
+        "conservative_token_plus_action_seconds": 12.927846869104542,
+        "diagnostic_total_seconds": 18.76947931095492,
+        "effective_batch": 16,
+        "profile_seconds": 5.841624099062756,
+        "scope": "full_prefix_unroll6_shared_teacher_targets",
+        "token_only_seconds": 5.841977447038516
+      },
+      "memory": {
+        "peak_allocated": 8972594688,
+        "start_allocated": 8650775040
+      },
+      "disk": {
+        "cache_bytes": 168119561,
+        "checkpoint_estimate_bytes": 1069406432,
+        "checkpoint_state_bytes": 886659296,
+        "metadata_rng_margin_bytes": 67108864,
+        "optimizer_moments_fp32_bytes": 115638272
+      }
+    },
+    "B_long": {
+      "source_id": "libero_goal/put_the_cream_cheese_in_the_bowl/demo_23",
+      "anchor_endpoint": 150,
+      "prefix_endpoints": 25,
+      "unroll_endpoints": 6,
+      "timing": {
+        "action_only_seconds": null,
+        "conservative_token_plus_action_seconds": 5.068894299911335,
+        "diagnostic_total_seconds": 5.068905834923498,
+        "effective_batch": 16,
+        "profile_seconds": 1.7239945009350777e-06,
+        "scope": "full_prefix_unroll6_shared_teacher_targets",
+        "token_only_seconds": 5.068894299911335
+      },
+      "memory": {
+        "peak_allocated": 8765605376,
+        "start_allocated": 8425454080
+      },
+      "disk": {
+        "cache_bytes": 168119561,
+        "checkpoint_estimate_bytes": 1069406432,
+        "checkpoint_state_bytes": 886659296,
+        "metadata_rng_margin_bytes": 67108864,
+        "optimizer_moments_fp32_bytes": 115638272
+      }
+    }
+  },
+  "recipe_binding": "ccd0ec412f85113e28f54f4dc50dab41ae5f6d39e858ef3e8988290d404b7477"
+}

@@ -231,7 +231,6 @@ def test_stage0_parity_freezes_native_repeat_before_bridge_and_localizes_mismatc
     ).run("fixed")
     assert report.passed is False
     assert report.first_mismatch == "actions"
-    assert report.native_repeat_digest
 
     def incomplete(batch):
         return ParityTrace(

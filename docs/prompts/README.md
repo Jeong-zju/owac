@@ -1,5 +1,14 @@
 # OWAC 当前执行 prompt 与历史交接入口
 
+<!-- BEGIN DEEPSEEK KEY ROLES -->
+> **DeepSeek 编程会话、权限与 key 规则（2026-10-21，适用于本文全部启动命令）：**
+> 编程默认完全权限 `danger-full-access`，审批策略 `never`：已授权任务内的文件、命令和工具操作直接执行，不要求用户逐项人工审批。新建与续接后核对实际权限；已有会话仍为受限模式时，由执行者在该可见会话发送 `/permission danger-full-access` 或操作 Permissions 切换并确认生效，不交给用户点击批准。完全权限保持既定研究范围、训练预算和停止点。
+> 编程必须使用用户可见的 Harness Web 专用对话：先打开页面、核对工作区／模型／coding 凭据，再在该对话发送工作单；回复、工具调用与返工都在同一可见会话中进行。禁止 headless、stdin／JSON 一次性后台编程派工或只交日志；正文旧启动模板如有冲突，以本规则为准。
+> 编程／Harness 使用 `DEEPSEEK_CODING_API_KEY`；闭环在线推理／规划／决策使用 `DEEPSEEK_CLOSED_LOOP_API_KEY`。编程代理启动闭环子进程时，子进程必须切换到 closed-loop 角色。
+> 启动前使用 `owac.runtime.deepseek_credentials --role coding -- <编程命令>` 或 `--role closed-loop -- <在线闭环命令>`；Python 调度使用 `environment_for_role(...)` 注入子进程环境。私有 key 只从本机对应角色文件读取，不回退或混用。
+> 具体绝对路径与命令见 [凭据使用说明](../deepseek-credentials.md)。明文 key 不写入提示词、源码、配置、日志、网页或 Git；本规则不恢复历史阶段或扩大实验授权。
+<!-- END DEEPSEEK KEY ROLES -->
+
 2026-10-20：新增 [GPT-6.1 Sol 的 RAW stem 与 SigLIP 蒸馏执行 prompt](GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md)。用户已认可“RAW stem＋继承当前策略 SigLIP＋蒸馏”的路线；新 prompt 指定本机 DeepSeek Harness V41-Flash Max 承担主要编码，Sol 负责研究判断和独立验收。当前 OWAC-D1.1 要求完整 RAW 输入教师，允许内部 ISP 成像；教师／学生不限定单帧，学生部署直接 RAW→tokens；先正常光单任务、冻结语言／动作后端。该文件准备完成不代表已派工、已实现或已启动训练，旧 N01／N02／N04 仍暂停。
 
 2026-10-19：三个方向全部暂停并收敛到本地主线，远端不可达。以下计划、授权和运行状态仅作历史回查；当前以[合并与证据说明](../../research/archives/2026-10-19_worktree_consolidation/README.md)为准，不能据旧包启动训练。

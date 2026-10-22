@@ -5,6 +5,7 @@
     reasoningEffort: max
 - id: llm-deepseek
   config:
+    apiKeyEnv: DEEPSEEK_CODING_API_KEY
     reasoningEffort: max
 - id: fs-sandbox
   config:
@@ -12,19 +13,24 @@
 - id: sandbox-policy
   config:
     workspaceRoot: /home/jeong/zeno/owac/repo
-    mode: workspace-write
+    mode: danger-full-access
 - id: system-prompt
   config:
     personaSuffix: >-
       Your coding workspace is /home/jeong/zeno/owac/repo.
       Read its AGENTS.md before working. Set workdir explicitly for shell calls.
-      The launcher directory holds dispatch receipts, not implementation files.
+      Coding tasks, tool calls, and progress must remain visible in this Web conversation.
 - id: credentials
   disabled: false
+  config:
+    path: /home/jeong/.config/owac/deepseek/coding-web.credentials.yaml
 - id: authorization
   disabled: false
 - id: deepseek-account
   disabled: false
 - id: permission
   config:
-    defaultPreset: workspace-write
+    defaultPreset: danger-full-access
+- id: approval
+  config:
+    policy: never

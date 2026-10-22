@@ -1,5 +1,14 @@
 # GPT-6.1 Sol 执行 OWAC-D1.1 RAW 教师蒸馏方案
 
+<!-- BEGIN DEEPSEEK KEY ROLES -->
+> **DeepSeek 编程会话、权限与 key 规则（2026-10-21，适用于本文全部启动命令）：**
+> 编程默认完全权限 `danger-full-access`，审批策略 `never`：已授权任务内的文件、命令和工具操作直接执行，不要求用户逐项人工审批。新建与续接后核对实际权限；已有会话仍为受限模式时，由执行者在该可见会话发送 `/permission danger-full-access` 或操作 Permissions 切换并确认生效，不交给用户点击批准。完全权限保持既定研究范围、训练预算和停止点。
+> 编程必须使用用户可见的 Harness Web 专用对话：先打开页面、核对工作区／模型／coding 凭据，再在该对话发送工作单；回复、工具调用与返工都在同一可见会话中进行。禁止 headless、stdin／JSON 一次性后台编程派工或只交日志；正文旧启动模板如有冲突，以本规则为准。
+> 编程／Harness 使用 `DEEPSEEK_CODING_API_KEY`；闭环在线推理／规划／决策使用 `DEEPSEEK_CLOSED_LOOP_API_KEY`。编程代理启动闭环子进程时，子进程必须切换到 closed-loop 角色。
+> 启动前使用 `owac.runtime.deepseek_credentials --role coding -- <编程命令>` 或 `--role closed-loop -- <在线闭环命令>`；Python 调度使用 `environment_for_role(...)` 注入子进程环境。私有 key 只从本机对应角色文件读取，不回退或混用。
+> 具体绝对路径与命令见 [凭据使用说明](../deepseek-credentials.md)。明文 key 不写入提示词、源码、配置、日志、网页或 Git；本规则不恢复历史阶段或扩大实验授权。
+<!-- END DEEPSEEK KEY ROLES -->
+
 你是本任务的负责人 GPT-6.1 Sol。请在 OWAC 中落实已经认可的研究路线：**RAW stem＋继承当前策略的 SigLIP 权重＋教师蒸馏，先恢复正常光单任务控制，再研究弱光条件下的收益。** 你负责研究判断、接口设计、任务拆分、独立验收和返工；机械性简单工作与主要编码工作实际委派给用户本机的 DeepSeek Harness，默认 **V41-Flash，推理强度 Max**。
 
 请实际完成当前授权范围内的工作，不只回复计划。先完成工程实现与验收；正式训练和机器人闭环按照下文的授权范围执行。不要把写好启动命令、Harness 自报完成或单元测试通过，写成控制能力已经恢复。
@@ -186,13 +195,15 @@ reasoningEffort: max
 
 优先一名 Harness 执行者，按可独立验收的模块分轮；仅确有不相交任务时并行。每份任务单明确文件／模块所有权，告知“你不是唯一在此代码库工作的人，保留他人修改，不回退不属于自己的变更”。共享接口由你先定，公共接线与集成顺序由你控制。
 
-### 已核对的本机入口
+### 可见 Web 编程会话（2026-10-21 最新要求）
 
-2026-10-20 已只读核对 `/home/jeong/.local/bin/dsh`，版本为 `0.2.1-rc.2`，支持 headless 的 stdin、`--json`、`--session-id`。随包说明在 `/home/jeong/.local/share/dsh-0.2.1-rc.2/node_modules/@deepseek-ai/dsh-headless/README.md`；实际执行时先检查版本和 `--help`，若安装变化，以本机对应版本文档为准。帮助／配置核对不代表模型 API 已通过调用。
+用户要求能直接看到 DeepSeek 的完整对话。**编程只使用 Harness Web 可见会话，不使用 headless、单次 stdin／JSON 后台任务或只提供日志的派工方式。** 会话必须展示工作单、DeepSeek 回复、工具调用、执行进展和返工过程。
 
-headless 与已有 Web 人工会话分开，不重启或接管 `dsh-web.service`，不使用旧机器人运行适配器冒充编码 Harness。headless 默认不读 GUI 托管凭据，按官方规则读取启动环境／调度目录 `.env`／`$DSH_HOME/.env`。使用现有认证，缺失时报告准确缺项；如需现有托管认证，只按本机文档配置本轮 overlay，不复制密钥进仓库、不打印完整环境或配置、不放宽全局权限。
+本机入口 `/home/jeong/.local/bin/dsh`，已核对版本 `0.2.1-rc.2` 的 `--profile web --help`。Web 用法见本机 `/home/jeong/.local/share/dsh-0.2.1-rc.2/node_modules/@deepseek-ai/dsh-web-app/README.md`。版本变化后核对对应帮助，不自行假设存在会话创建／消息发送 API。
 
-在仓库创建任务专用覆盖 `configs/research/raw_distillation_harness.patch.yml`，内容如下；若当前工作在获准的其他 checkout，将其中三个工作区路径同步改为该 checkout：
+沿用用户指定的编程 key：`DEEPSEEK_CODING_API_KEY`；闭环在线推理仍用 `DEEPSEEK_CLOSED_LOOP_API_KEY`。编码 Web 服务通过角色启动入口注入 coding，配置的 `apiKeyEnv` 必须指向 coding。Web 保留 credentials／authorization／deepseek-account 服务以支持界面；credentials 使用任务专属私有文件，不读取共用 GUI 的已保存 key。任务专属文件初始为空，凭据来自 coding 启动环境，禁止在设置中保存其他用途的 key。详见 `docs/deepseek-credentials.md`。
+
+仓库的任务覆盖 `configs/research/raw_distillation_harness.patch.yml` 为：
 
 ```yaml
 - id: agent-default-model
@@ -202,6 +213,7 @@ headless 与已有 Web 人工会话分开，不重启或接管 `dsh-web.service`
     reasoningEffort: max
 - id: llm-deepseek
   config:
+    apiKeyEnv: DEEPSEEK_CODING_API_KEY
     reasoningEffort: max
 - id: fs-sandbox
   config:
@@ -209,69 +221,58 @@ headless 与已有 Web 人工会话分开，不重启或接管 `dsh-web.service`
 - id: sandbox-policy
   config:
     workspaceRoot: /home/jeong/zeno/owac/repo
+    mode: danger-full-access
 - id: system-prompt
   config:
     personaSuffix: >-
       Your coding workspace is /home/jeong/zeno/owac/repo.
       Read its AGENTS.md before working. Set workdir explicitly for shell calls.
-      The launcher directory holds dispatch receipts, not implementation files.
+      Coding tasks, tool calls, and progress must remain visible in this Web conversation.
+- id: credentials
+  disabled: false
+  config:
+    path: /home/jeong/.config/owac/deepseek/coding-web.credentials.yaml
+- id: authorization
+  disabled: false
+- id: deepseek-account
+  disabled: false
+- id: permission
+  config:
+    defaultPreset: danger-full-access
+- id: approval
+  config:
+    policy: never
 ```
 
-从独立的新调度目录启动，避免项目 `.env` 干扰；不要修改用户原 `.env`。每轮使用 `outputs/raw-distillation-<run-id>/harness/round-01/` 等新目录。只读预检命令为：
+### 打开、核对和发送工作单
+
+1. 先检查是否已有本任务可见 Web 服务和本轮专用对话，有则复用；核对会话不是其他人工任务，provider 为 `deepseek-official`、模型 `deepseek-flash`、effort 为 Max，权限为 `danger-full-access`、审批为 `never`，工作区是 `/home/jeong/zeno/owac/repo`，凭据来源为 coding。
+2. 如果没有符合上述配置的服务，在主仓库运行下面的 Web 启动命令。默认任务端口为 3081；使用前检查占用，已有服务可复用，不重复启动。原 3080 人工 Web 服务不重启、不接管。
+3. 将启动时的认证入口打开在用户可见浏览器中，确认已进入聊天界面，再创建标题明确的本轮专用对话。普通无认证 localhost URL 返回 401 时按安装文档使用启动入口，不关闭认证。认证 token 仅用于打开页面，不写入共享记录、提示词或报告。
+4. 把工作单实际发送到这条可见对话，并观察 DeepSeek 的首条回复或工具调用。发送后给用户该对话的可访问入口／会话身份；核对页面可查看工作单和后续回复，不能用创建任务文件、打开空页面或一个进程 PID 代替完成派工。
+5. 调度优先使用当前可用的浏览器操作工具；若安装确有支持的会话接口，也必须核对版本文档，并在 Web 中确认任务及回复可见。界面／接口暂不可用时，保留工作单与具体阻塞，不改为后台模式。暂时无法操作可见会话时不宣称 DeepSeek 已接单。
 
 ```bash
-/home/jeong/.local/bin/dsh --profile headless \
+cd /home/jeong/zeno/owac/repo
+/home/jeong/zeno/owac/repo/.venv/bin/python -m owac.runtime.deepseek_credentials \
+  --role coding -- /home/jeong/.local/bin/dsh --profile web \
   --patch /home/jeong/zeno/owac/repo/configs/research/raw_distillation_harness.patch.yml \
-  --help
+  --host 127.0.0.1 --port 3081
 ```
 
-只输出非敏感的有效 provider／model／effort／workspace 字段进行核对。若使用 `--dump-config`，不要直接打印整个配置树；它可能含凭据和 `!!js` 标签，按数据解析，不能执行标签内容。实际运行／续接时还要核对会话记录的模型选择，不能仅凭 overlay 默认值断言已有会话已切换。
+长期编码会话的 Web 服务应由独立进程管理器托管，保持用户可查看；托管的是 Web 服务，工作单仍在可见对话中发送，不以无界面执行器替代。用户已有符合工作区、模型与 coding 凭据要求的可见会话时直接复用，不为更换端口中断正在运行的工作。
 
-### 工作单与启动模板
+### 工作单、续接与独立验收
 
-每轮先写 `task.md`，包括：本轮目标、允许写的文件、必须读的规则／前序证据、已确定接口、真实资产绝对路径、可执行命令与环境、预算、交付文件、验收条件、停止条件。不要整段复制聊天和所有历史日志。DeepSeek 不能自行更改研究目标、拆分／测试集、扩预算、解冻后端或进入下一实验阶段。
+编程 Web 默认完全权限，`sandbox-policy.mode` 和 `permission.defaultPreset` 均为 `danger-full-access`，`approval.policy` 为 `never`。配置默认只保证新会话的起点；已保存的设置与续接会话可能保留旧权限。负责人须核对当前 Web 会话的真实权限，必要时自行发送 `/permission danger-full-access` 或使用 Permissions 控件完成切换，看到 Full access 且审批 never 后再继续。不让用户逐项批准命令、读写文件或工具调用。任务目标、既定实验预算与阶段停止点继续按当前用户指令执行。
 
-建议按“资产／权重接口清点→配对 loader 与 stem／教师抽取→蒸馏及动作训练入口→独立评估与集成修复”分轮，具体文件职责由你读代码后确定。复用可用组件；原接口不适配时增加薄层，不把旧 N01／N02／N04 机制接进来。
+每轮保存 `outputs/raw-distillation-<run-id>/harness/round-01/task.md`，包括目标、文件／模块所有权、必读规则与前序证据、确定接口、资产绝对路径、可执行命令、预算、交付文件、验收条件和停止条件。工作单必须实际发送到上述 Web 对话。DeepSeek 不能自行修改研究目标、拆分／测试集、扩预算、解冻后端或进入下一阶段。
 
-以下模板由你通过本机终端工具执行。先写好任务单，将第一行参数替换为本轮已创建的绝对目录；返工续接时在目录后追加从事件中读到的准确 session ID：
+按“资产／权重清点→配对 loader 与 stem／教师抽取→蒸馏及动作训练入口→独立评估与集成修复”分轮。主要代码继续由真实 DeepSeek 派工完成；负责人控制公共接口与集成，保留其他人修改。
 
-```bash
-python3 - '<本轮绝对目录>' <<'PY'
-import datetime, json, os, pathlib, subprocess, sys
+记录本轮可见会话身份、无认证 token 的入口、实际 provider/model/effort/workspace、发送的任务、最终答复、真实 diff 和原始实验产物。失败时写 `round-02/task.md`，在自己创建的同一可见会话中发送具体返工要求；会话失效时新建同配置的可见对话并提供交接，不能悄悄转为 headless，也不能向其他人工会话注入任务。
 
-repo = pathlib.Path('/home/jeong/zeno/owac/repo')
-round_dir = pathlib.Path(sys.argv[1]).resolve(strict=True)
-round_dir.relative_to(repo / 'outputs')
-os.chmod(round_dir, 0o700)
-command = ['/home/jeong/.local/bin/dsh', '--profile', 'headless',
-           '--patch', str(repo / 'configs/research/raw_distillation_harness.patch.yml'),
-           '--json']
-if len(sys.argv) > 2:
-    command += ['--session-id', sys.argv[2]]
-command += ['-']
-receipt = {'command': command, 'launch_cwd': str(round_dir), 'workspace': str(repo),
-           'started_at': datetime.datetime.now().astimezone().isoformat()}
-with (round_dir / 'task.md').open('rb') as task, \
-     (round_dir / 'events.jsonl').open('xb') as events, \
-     (round_dir / 'stderr.log').open('xb') as errors:
-    child = subprocess.Popen(command, cwd=round_dir, stdin=task, stdout=events,
-                             stderr=errors, start_new_session=True)
-    receipt.update(pid=child.pid, pgid=os.getpgid(child.pid))
-    (round_dir / 'launch.json').write_text(json.dumps(receipt, indent=2) + '\n')
-    print(json.dumps(receipt), flush=True)
-    receipt['exit_code'] = child.wait()
-receipt['ended_at'] = datetime.datetime.now().astimezone().isoformat()
-(round_dir / 'exit.json').write_text(json.dumps(receipt, indent=2) + '\n')
-print('Harness exit:', receipt['exit_code'], flush=True)
-sys.exit(receipt['exit_code'])
-PY
-```
-
-用终端工具的持续进程会话运行并分段读取进展；工具短时返回不等于 Harness 失败，不重复启动同一工作单。保存 opening `session` 事件的准确身份、有效模型／effort、原始事件、stderr、退出码和最终答复。若已有事件不足以确认选择，读取本轮会话的非敏感选择记录，不能虚构证据。
-
-Harness 退出 0、`final` 或“任务完成”只是执行收据。你必须检查真实 diff，运行关键复核、读取原始输出并写 `review.md`。失败时在新的 `round-02` 写具体返工单，使用 `--session-id` 续接自己创建且空闲的 headless 会话；续接拒绝时保留错误，以完整交接新建同模型会话。不得接管人工 Web 会话，不因超时或无输出擅自重复启动。
-
-本轮模型调用和训练进程分开记账。获准的长训练使用独立、可恢复进程，保存 optimizer／scheduler／RNG／sampler 与 checkpoint，登记本轮拥有的进程、日志、实际 GPU 和监控责任人。你跟进到授权阶段的结果，不把“已启动”当交付，也不停止其他作业。
+DeepSeek 回复完成后，你仍须按原始要求亲自复核代码、运行关键检查、读取原始输出并写 `review.md`。Web 中的“完成”消息是执行报告，能力结论以实际证据为准。
 
 ## 交付与开始执行
 
@@ -281,4 +282,4 @@ Harness 退出 0、`final` 或“任务完成”只是执行收据。你必须�
 
 最终向用户用自然中文说明：**目标是什么，实际改了什么，训练了哪些参数／多少更新，独立检查了什么，控制能力是否恢复，负结果或缺口是什么，下一步最小行动是什么。** 如果未获训练授权，交付可审阅的实现、通过／未通过／不可测项目和具体启动方案，再一次性说明所需训练范围与资源。
 
-现在开始：按 OWAC-D1.1 核对完整 RAW 教师资产与因果历史契约，读取当前仓库与实际资产，完成你负责的路线／接口判断，写第一轮具体工作单，并通过本机 DeepSeek Harness V41-Flash Max 实际派工。每轮交付由你验收；已授权且证据通过的工程后续继续推进。
+现在开始：按 OWAC-D1.1 核对完整 RAW 教师资产与因果历史契约，读取当前仓库与实际资产，完成你负责的路线／接口判断，写第一轮具体工作单，并打开本机 DeepSeek Harness Web 专用对话，以 V41-Flash Max 实际发送工作单，让用户看见完整执行对话。每轮交付由你验收；已授权且证据通过的工程后续继续推进。

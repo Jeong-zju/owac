@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAW学生蒸馏训练进度</title>
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#f2f5f8;--panel:#ffffff;--text:#202a35;--muted:#68788a;--border:#e2e8ef;
+  --track:#e9eef4;--blue:#4967c7;--green:#0d8177;--green-soft:#e5f3f0;
+  --orange:#a86413;--red:#bd403b;--purple:#7b5ea8;--gold:#b8860b;
+  --shadow:0 2px 14px #1f29330a;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0f161d;--panel:#17212b;--text:#e4edf5;--muted:#9fb1c2;--border:#2b3a48;
+    --track:#2b3946;--blue:#93aaf2;--green:#5cc9b6;--green-soft:#183d37;
+    --orange:#edb35e;--red:#f6847c;--purple:#c3a7ee;--gold:#e3be62;--shadow:none}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:14px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+main{max-width:1300px;margin:auto;padding:26px 28px 30px}
+h1,h2,h3,p{margin:0}
+h1{font-size:26px;font-weight:650;letter-spacing:-.5px}
+h2{font-size:16px;font-weight:600}
+h3{font-size:13px;font-weight:600}
+.eyebrow{font-size:11px;letter-spacing:2.2px;color:var(--muted);font-weight:600}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-top:4px}
+.intro{margin-top:4px;color:var(--muted);font-size:12.5px}
+.header-right{text-align:right;min-width:210px}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:4px 12px;
+  border-radius:20px;background:var(--green-soft);color:var(--green);font-weight:600}
+.badge .dot{height:7px;width:7px;border-radius:50%;background:currentColor}
+.badge.muted{background:var(--track);color:var(--muted)}
+.badge.warn{background:color-mix(in srgb,var(--orange) 14%,var(--panel));color:var(--orange)}
+.badge.danger{background:color-mix(in srgb,var(--red) 14%,var(--panel));color:var(--red)}
+.subtle{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.numbers{font-variant-numeric:tabular-nums}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;font-size:12px;color:var(--muted)}
+.meta-row strong{font-weight:600;color:var(--text)}
+.banner{display:none;margin-top:14px;padding:11px 15px;background:var(--panel);
+  border:1px solid var(--border);border-left:3px solid var(--orange);color:var(--orange);
+  border-radius:6px;font-size:13px}
+.banner.danger{border-left-color:var(--red);color:var(--red)}
+.banner.info{border-left-color:var(--blue);color:var(--blue)}
+.banner[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-top:18px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:9px;
+  padding:14px 16px;box-shadow:var(--shadow);min-width:0}
+.stat-label{font-size:12px;color:var(--muted)}
+.stat-value{font-size:24px;line-height:1.28;margin:4px 0 2px;font-weight:600;letter-spacing:-.4px;
+  overflow-wrap:anywhere}
+.stat-note{color:var(--muted);font-size:11.5px;overflow-wrap:anywhere}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:16px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:9px;
+  padding:17px 18px;box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.panel-note{font-size:11.5px;color:var(--muted)}
+.explain p{margin-top:8px;font-size:13px}
+.explain .plain-note{color:var(--muted);font-size:12.5px}
+.tech{margin-top:18px;border:1px solid var(--border);border-radius:9px;background:var(--panel);
+  padding:12px 16px;box-shadow:var(--shadow)}
+.tech summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted);user-select:none}
+.tech summary:hover{color:var(--text)}
+.tech[open] summary{margin-bottom:6px}
+.legend{display:flex;flex-wrap:wrap;gap:7px 16px;font-size:11.5px;color:var(--muted);margin:2px 0 4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:16px;height:2px;background:var(--muted);border-radius:2px}
+.swatch.point{width:7px;height:7px;border-radius:50%}
+.chart{width:100%;height:250px;display:block}
+.chart.compact{height:250px}
+.chart text{fill:var(--muted);font:10.5px system-ui,sans-serif}
+.chart .grid{stroke:var(--border);stroke-width:1}
+.chart .axis{stroke:var(--muted);stroke-width:1;opacity:.55}
+.chart .empty-label{fill:var(--muted);font-size:12px}
+.bar{height:7px;background:var(--track);border-radius:6px;position:relative;margin:10px 0 6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--green);border-radius:6px;width:0;transition:width .35s ease}
+.bar-fill.blue{background:var(--blue)}
+.bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.rows{margin-top:2px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--muted);flex:0 0 auto}
+.row .v{text-align:right;overflow-wrap:anywhere}
+.row .v.mono{font-size:11.5px}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;
+  background:var(--track);color:var(--muted);margin-left:6px;font-weight:500}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tag.warn{background:color-mix(in srgb,var(--orange) 15%,var(--panel));color:var(--orange)}
+.tag.danger{background:color-mix(in srgb,var(--red) 15%,var(--panel));color:var(--red)}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{text-align:left;border-bottom:1px solid var(--border);padding:7px 5px;white-space:nowrap}
+th{color:var(--muted);font-weight:500;position:sticky;top:0;background:var(--panel)}
+td:last-child,th:last-child{text-align:right}
+tbody tr:last-child td{border-bottom:0}
+.table-wrap{max-height:310px;overflow:auto}
+.diag{background:color-mix(in srgb,var(--orange) 7%,var(--panel));border-color:color-mix(in srgb,var(--orange) 35%,var(--border))}
+.diag .panel-note{color:var(--orange)}
+.closed{background:color-mix(in srgb,var(--blue) 6%,var(--panel))}
+.empty{padding:18px 0;color:var(--muted);font-size:12.5px;text-align:center}
+.warnings{margin-top:16px;font-size:12px;color:var(--muted)}
+.warnings ul{margin:6px 0 0;padding-left:20px}
+.footer{margin-top:22px;padding-top:13px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.hidden{display:none!important}
+@media (max-width:1050px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}}
+@media (max-width:560px){main{padding:18px 13px}.header{flex-direction:column;gap:10px}
+  .header-right{text-align:left;min-width:0}.stats{grid-template-columns:1fr}
+  .stat-value{font-size:22px}.panel{padding:14px 13px}.chart{height:230px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">RAW 学生蒸馏实验 · 实时只读页面</div>
+  <header class="header">
+    <div>
+      <h1>RAW学生蒸馏训练进度</h1>
+      <p class="intro">这是一个本机只读进度页，每 5 秒自动刷新。尚未测量或记录的数据会显示“未知”，页面不会猜测。</p>
+    </div>
+    <div class="header-right">
+      <span class="badge muted" id="status-badge"><span class="dot"></span><span id="status-text">读取快照</span></span>
+      <div class="subtle" id="status-sub" style="font-size:11.5px;margin-top:6px">尚未读取</div>
+    </div>
+  </header>
+
+
+  <div class="banner danger" id="banner-stale" hidden><span id="banner-stale-text"></span></div>
+  <div class="banner danger" id="banner-error" hidden><span id="banner-error-text"></span></div>
+  <div class="banner info" id="banner-unknown" hidden><span id="banner-unknown-text"></span></div>
+  <div class="banner danger" id="banner-connect" hidden><span id="banner-connect-text"></span></div>
+
+  <section class="panel explain" style="margin-top:16px" aria-label="这项实验在做什么">
+    <h2>这项实验在做什么</h2>
+    <p>教师和学生接收同源RAW观测，学生学习教师交给动作模型的视觉特征。已训练50步的学生继续训练，累计最多5000步。只训练RAW输入模块和历史融合门控，其他模型参数冻结。</p>
+    <p class="plain-note">一步＝用一批样本更新一次参数，不是一次机器人执行，也不是把全部训练数据完整学习一遍。</p>
+    <p class="plain-note">每250个训练步进行一次留出验证。曲线越低表示学生特征越接近教师；训练样本会参与参数更新，留出示范不参与参数更新。较低的特征误差不代表动作成功。</p>
+  </section>
+
+  <section class="stats" aria-label="关键指标">
+    <div class="stat">
+      <div class="stat-label">累计训练步数</div>
+      <div class="stat-value numbers" id="stat-cumulative">未知</div>
+      <div class="stat-note" id="stat-cumulative-note">未读取</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">本轮续训步数</div>
+      <div class="stat-value numbers" id="stat-new">未知</div>
+      <div class="stat-note" id="stat-new-note">未读取</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">最新留出验证总损失</div>
+      <div class="stat-value numbers" id="stat-validation">未知</div>
+      <div class="stat-note" id="stat-validation-note">尚无留出验证记录</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">选择出的最佳步数</div>
+      <div class="stat-value numbers" id="stat-best">未知</div>
+      <div class="stat-note" id="stat-best-note">尚无最佳模型记录</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">最近保存的模型</div>
+      <div class="stat-value numbers" id="stat-checkpoint">未知</div>
+      <div class="stat-note" id="stat-checkpoint-note">尚无保存的模型记录</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">显卡显存占用</div>
+      <div class="stat-value numbers" id="stat-gpu">未知</div>
+      <div class="stat-note" id="stat-gpu-note">尚无真实更新记录</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">本轮续训用时</div>
+      <div class="stat-value numbers" id="stat-wall">未知</div>
+      <div class="stat-note" id="stat-wall-note">上限未知</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">本轮新增文件</div>
+      <div class="stat-value numbers" id="stat-disk">未知</div>
+      <div class="stat-note" id="stat-disk-note">上限未知</div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px" aria-label="本轮训练进度">
+    <div class="panel-head"><h2>本轮续训进度</h2><span class="panel-note">从已训练50步的模型继续，最多累计5000步；未完成前不代表已经收敛。</span></div>
+    <div class="bar" aria-label="累计训练步数进度"><div class="bar-fill" id="bar-cumulative"></div></div>
+    <div class="bar-labels"><span>开始本轮训练时的模型（已训练50步）</span><span id="bar-cumulative-label">未知</span><span id="bar-cumulative-cap">上限未知</span></div>
+    <div class="rows">
+      <div class="row"><span class="k">训练步数</span><span class="v" id="progress-update-detail">未知</span></div>
+      <div class="row"><span class="k">训练样本使用次数</span><span class="v" id="progress-anchor">未知</span></div>
+      <div class="row"><span class="k">本轮用时 / 上限</span><span class="v" id="progress-wall">未知</span></div>
+      <div class="row"><span class="k">本轮新增文件 / 上限</span><span class="v" id="progress-disk">未知</span></div>
+      <div class="row"><span class="k">新增文件统计范围</span><span class="v" id="progress-disk-scope">未知</span></div>
+      <div class="row"><span class="k">显卡显存 已用 / 预留</span><span class="v mono" id="progress-gpu">未知</span></div>
+      <div class="row"><span class="k">内存占用（最后一次记录）</span><span class="v mono" id="progress-rss">未知</span></div>
+    </div>
+  </section>
+
+  <section class="grid-3" aria-label="本轮训练曲线">
+    <div class="panel">
+      <div class="panel-head"><h2>总损失（越低越好）</h2><span class="panel-note" id="chart-total-note">尚未读取</span></div>
+      <div class="legend" id="legend-total"></div>
+      <svg class="chart" id="chart-total" viewBox="0 0 640 280" role="img" aria-label="训练样本总损失与留出验证总损失"></svg>
+      <p class="panel-note">总损失＝特征数值误差＋0.1×特征方向误差。训练曲线来自做过参数更新的训练样本，验证曲线来自不用于参数更新的留出示范。</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>特征数值误差（越低越接近教师）</h2><span class="panel-note" id="chart-mse-note">尚未读取</span></div>
+      <div class="legend" id="legend-mse"></div>
+      <svg class="chart" id="chart-mse" viewBox="0 0 640 280" role="img" aria-label="训练样本与留出验证的特征数值误差"></svg>
+      <p class="panel-note">数值误差越低，学生的特征数值越接近教师。它不直接说明机器人动作是否成功。</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>特征方向误差（越低越好）</h2><span class="panel-note" id="chart-cosine-note">尚未读取</span></div>
+      <div class="legend" id="legend-cosine"></div>
+      <svg class="chart" id="chart-cosine" viewBox="0 0 640 280" role="img" aria-label="训练样本与留出验证的特征方向误差"></svg>
+      <p class="panel-note">方向误差越低，学生的特征方向越接近教师。它不评估动作或闭环能力。</p>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px" aria-label="续训前的训练历史">
+    <div class="panel-head"><h2>续训前的50步训练记录（与本轮分开）</h2><span class="panel-note" id="parent-note">未读取</span></div>
+    <div class="legend" id="legend-parent"></div>
+    <svg class="chart compact" id="chart-parent" viewBox="0 0 640 280" role="img" aria-label="续训前的真实训练记录"></svg>
+    <div class="rows" style="margin-top:8px">
+      <div class="row"><span class="k">续训前训练记录</span><span class="v" id="parent-points">未知</span></div>
+      <div class="row"><span class="k">开始本轮训练时的模型（已训练50步）：总损失</span><span class="v" id="parent-baseline-total">未知</span></div>
+      <div class="row"><span class="k">开始本轮训练时的模型（已训练50步）：数值误差 / 方向误差</span><span class="v" id="parent-baseline-parts">未知</span></div>
+      <div class="row"><span class="k">开始本轮训练时的模型（已训练50步）文件 SHA256（核查）</span><span class="v mono" id="parent-baseline-sha">未知</span></div>
+    </div>
+    <p class="panel-note" style="margin-top:8px">这段历史来自真实旧记录，只用于对照；与本轮曲线分开绘图、分开坐标，不拼接成一条曲线。</p>
+  </section>
+
+  <div class="grid-2">
+    <section class="panel" aria-label="留出验证记录">
+      <div class="panel-head"><h2>留出验证记录与最佳模型</h2><span class="panel-note" id="validation-note">尚无记录</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>训练步数</th><th>数值误差</th><th>方向误差</th><th>总损失</th><th>有效特征数</th><th>是否最佳</th><th>保存的模型（核查）</th></tr></thead>
+          <tbody id="validation-table"></tbody>
+        </table>
+      </div>
+      <p class="panel-note" style="margin-top:8px">每250个训练步进行一次留出验证；固定使用 102 个窗口、5 条留出示范。只按总损失选择最佳模型；未知信息显示为“未知”。</p>
+    </section>
+    <section class="panel" aria-label="最佳模型选择信息">
+      <div class="panel-head"><h2>最佳模型怎么选</h2><span class="panel-note">只按留出验证总损失；动作误差不参与选择或停止</span></div>
+      <div class="rows">
+        <div class="row"><span class="k">选择依据</span><span class="v" id="sel-metric">未知</span></div>
+        <div class="row"><span class="k">比较方式 / 平手规则</span><span class="v" id="sel-direction">未知</span></div>
+        <div class="row"><span class="k">最佳训练步数 / 总损失</span><span class="v" id="sel-best">未知</span></div>
+        <div class="row"><span class="k">最佳模型文件 SHA256（核查）</span><span class="v mono" id="sel-sha">未知</span></div>
+        <div class="row"><span class="k">有效特征数 / 误差分母</span><span class="v" id="sel-tokens">未知</span></div>
+        <div class="row"><span class="k">开始本轮训练时的模型（已训练50步）</span><span class="v" id="sel-parent">未知</span></div>
+        <div class="row"><span class="k">旧动作误差记录（仅历史）</span><span class="v" id="sel-legacy">未知</span></div>
+        <div class="row"><span class="k">最佳模型记录更新时间</span><span class="v" id="sel-updated">未知</span></div>
+        <div class="row"><span class="k">是否使用测试集</span><span class="v" id="sel-test">未知</span></div>
+      </div>
+      <p class="panel-note" style="margin-top:8px">只按留出验证总损失选择最佳模型；旧的行动作误差记录只作历史来源展示，不决定本轮选择。</p>
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section class="panel diag" aria-label="动作误差诊断">
+      <div class="panel-head"><h2>动作误差（仅诊断）</h2><span class="panel-note">不参与最佳模型选择、停止或预算</span></div>
+      <div id="diag-empty" class="empty">尚未记录动作误差诊断（未知）</div>
+      <div class="rows hidden" id="diag-body">
+        <div class="row"><span class="k">诊断指标</span><span class="v" id="diag-metric">未知</span></div>
+        <div class="row"><span class="k">数值</span><span class="v numbers" id="diag-value">未知</span></div>
+        <div class="row"><span class="k">模型文件 SHA256（核查）</span><span class="v mono" id="diag-sha">未知</span></div>
+        <div class="row"><span class="k">时间</span><span class="v" id="diag-time">未知</span></div>
+        <div class="row"><span class="k">诊断来源</span><span class="v" id="diag-source">未知</span></div>
+        <div class="row"><span class="k">对应训练步数</span><span class="v" id="diag-step">未知</span></div>
+      </div>
+      <p class="panel-note" style="margin-top:8px">动作误差只作诊断记录；不能据此早停、切换或声称闭环能力。</p>
+    </section>
+    <section class="panel closed" aria-label="闭环与控制">
+      <div class="panel-head"><h2>闭环与控制（本阶段未运行）</h2><span class="panel-note">没有进行机器人闭环</span></div>
+      <div class="rows">
+        <div class="row"><span class="k">闭环运行</span><span class="v" id="closed-status">未知</span></div>
+        <div class="row"><span class="k">闭环执行次数</span><span class="v" id="closed-episodes">未知</span></div>
+        <div class="row"><span class="k">控制是否恢复</span><span class="v" id="closed-control">未知</span></div>
+        <div class="row"><span class="k">说明</span><span class="v" id="closed-note">未知</span></div>
+      </div>
+      <p class="panel-note" style="margin-top:8px">没有运行机器人闭环，控制恢复未证明；不能把离线特征误差说成控制成功。</p>
+    </section>
+  </div>
+
+  <details class="tech" aria-label="技术详情（核查信息）">
+    <summary>技术详情（核查信息，通常不需要展开）</summary>
+    <p class="panel-note" style="margin:8px 0 12px">这里放进程、文件、哈希、验收与原始记录等核查信息；训练效果请看上方曲线和留出验证。</p>
+    <div class="meta-row">
+      <span>运行目录（核查信息） <strong class="mono" id="run-root">未知</strong></span>
+      <span>配置文件（核查信息） <strong class="mono" id="config-text">未知</strong></span>
+      <span>快照生成 <strong class="numbers" id="generated-at">未知</strong></span>
+      <span>页面每 <strong class="numbers" id="poll-seconds">5</strong> 秒刷新</span>
+    </div>
+
+  <div class="grid-3">
+    <section class="panel" aria-label="训练进程与心跳（核查）">
+      <div class="panel-head"><h2>训练进程与心跳（核查）</h2><span class="panel-note" id="proc-note">未知</span></div>
+      <div class="rows">
+        <div class="row"><span class="k">进程号</span><span class="v numbers" id="proc-pid">未知</span></div>
+        <div class="row"><span class="k">训练程序 / 旧进程号</span><span class="v numbers" id="proc-runner">未知</span></div>
+        <div class="row"><span class="k">启动时间核验值</span><span class="v numbers" id="proc-ticks">未知</span></div>
+        <div class="row"><span class="k">实际启动时间核验值</span><span class="v numbers" id="proc-observed">未知</span></div>
+        <div class="row"><span class="k">进程组号</span><span class="v numbers" id="proc-pgid">未知</span></div>
+        <div class="row"><span class="k">进程状态</span><span class="v" id="proc-state">未知</span></div>
+        <div class="row"><span class="k">是否存活</span><span class="v" id="proc-alive">未知</span></div>
+        <div class="row"><span class="k">心跳距今</span><span class="v" id="proc-heartbeat-age">未知</span></div>
+        <div class="row"><span class="k">心跳序号 / 当前阶段</span><span class="v" id="proc-seq">未知</span></div>
+        <div class="row"><span class="k">状态记录距今</span><span class="v" id="proc-status-age">未知</span></div>
+        <div class="row"><span class="k">来源 / 核验时间</span><span class="v mono" id="proc-source">未知</span></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="训练守护进程（核查）">
+      <div class="panel-head"><h2>训练守护进程（核查）</h2><span class="panel-note" id="sup-note">未知</span></div>
+      <div id="sup-empty" class="empty">尚未发现守护进程记录（未知）</div>
+      <div class="rows hidden" id="sup-body">
+        <div class="row"><span class="k">运行状态 / 阶段</span><span class="v" id="sup-status">未知</span></div>
+        <div class="row"><span class="k">守护进程号 / 是否存活</span><span class="v" id="sup-pid">未知</span></div>
+        <div class="row"><span class="k">训练进程号 / 进程组</span><span class="v" id="sup-child">未知</span></div>
+        <div class="row"><span class="k">训练进程状态</span><span class="v" id="sup-child-state">未知</span></div>
+        <div class="row"><span class="k">存活核验（心跳 / 训练进程）</span><span class="v" id="sup-live">未知</span></div>
+        <div class="row"><span class="k">进程退出码</span><span class="v" id="sup-exit">未知</span></div>
+        <div class="row"><span class="k">本轮用时</span><span class="v" id="sup-wall">未知</span></div>
+        <div class="row"><span class="k">本轮新增文件</span><span class="v" id="sup-output">未知</span></div>
+        <div class="row"><span class="k">最近错误</span><span class="v" id="sup-error">未知</span></div>
+        <div class="row"><span class="k">心跳距今</span><span class="v" id="sup-heartbeat">未知</span></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="首步人工验收（核查）">
+      <div class="panel-head"><h2>首步人工验收记录（核查）</h2><span class="panel-note" id="acc-note">未知</span></div>
+      <div class="rows">
+        <div class="row"><span class="k">验收记录是否存在</span><span class="v" id="acc-present">未知</span></div>
+        <div class="row"><span class="k">训练步数</span><span class="v" id="acc-step">未知</span></div>
+        <div class="row"><span class="k">模型文件 SHA256（核查）</span><span class="v mono" id="acc-sha">未知</span></div>
+        <div class="row"><span class="k">验收人</span><span class="v" id="acc-reviewer">未知</span></div>
+        <div class="row"><span class="k">与最近保存模型是否一致</span><span class="v" id="acc-match">未知</span></div>
+        <div class="row"><span class="k">是否通过</span><span class="v" id="acc-status">未知</span></div>
+        <div class="row"><span class="k">时间</span><span class="v" id="acc-time">未知</span></div>
+        <div class="row"><span class="k">验收备注（原文，核查）</span><span class="v" id="acc-note-text">未知</span></div>
+      </div>
+      <p class="panel-note" style="margin-top:8px">只展示真实验收记录；缺失不表示通过。</p>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px" aria-label="最近训练记录（核查）">
+    <div class="panel-head"><h2>最近训练记录（核查）</h2><span class="panel-note" id="updates-note">尚无记录</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>累计训练步数</th><th>本轮续训步数</th><th>总损失</th><th>数值误差</th><th>方向误差</th><th>本次学习率</th><th>训练样本数</th><th>显卡显存占用</th><th>时间</th></tr></thead>
+        <tbody id="updates-table"></tbody>
+      </table>
+    </div>
+    <p class="panel-note" style="margin-top:8px">记录逐行写入；末尾未写完的行会被忽略；表格只显示完整记录。</p>
+  </section>
+
+  <section class="warnings" id="warnings-panel" hidden aria-label="读取提示">
+    <div>读取提示（仅本机固定文件）：</div>
+    <ul id="warnings-list"></ul>
+  </section>
+
+  </details>
+
+  <footer class="footer">
+    <span>只读页面 · 只在本机访问 · 不能启动或停止训练 · 不能读取任意文件</span>
+    <span>最近刷新 <strong id="last-refresh" class="numbers">尚未刷新</strong> · 未知值显示“未知”，不会填 0 或编造曲线</span>
+  </footer>
+</main>
+<script>
+(() => {
+  'use strict';
+
+  const UNKNOWN = '未知';
+  const STATUS_LABELS = {
+    preparing: '正在准备',
+    prepared: '预检完成，等待训练',
+    running: '训练中',
+    stopping: '正在停止',
+    stopped: '已停止',
+    stopped_at_update_limit: '本轮训练已暂停',
+    waiting_acceptance: '等待人工验收',
+    paused: '本轮已暂停',
+    created: '已创建',
+    completed: '已完成',
+    error: '出现错误',
+    stale: '不在运行',
+    unknown: '未知'
+  };
+  const STATUS_DETAIL_LABELS = {
+    loading_model: '正在加载模型 / 初始化',
+    preflight_complete_waiting_training: '预检完成，等待训练',
+    stopped: '已停止'
+  };
+  const PHASE_LABELS = {
+    'phase-1': '加载与首步训练',
+    'phase-2': '连续训练',
+    preparing: '准备',
+    running: '训练中',
+    waiting_acceptance: '等待人工验收',
+    paused: '本轮已暂停',
+    stopped: '已停止',
+    finished: '已结束',
+    completed: '已完成',
+    error: '错误',
+    engineering_review: '工程检查'
+  };
+  const METRIC_LABELS = {
+    validation_token_total: '留出验证总损失',
+    physical_first5_mae7: '动作误差（前5步平均）',
+    physical_first1_mae7: '动作误差（第1步）',
+    physical_full10_mae7: '动作误差（10步平均）'
+  };
+  const SOURCE_LABELS = {
+    'run-status.json': '训练状态记录',
+    'heartbeat.json': '训练心跳记录',
+    'supervisor-state.json': '守护进程记录',
+    'supervisor-state.json:child': '守护进程核验的训练进程',
+    offline: '离线诊断',
+    sparse: '少量抽样诊断'
+  };
+  const DIRECTION_LABELS = { min: '总损失越低越好' };
+  const TIE_LABELS = { earlier_step: '总损失相同时，选择更早的训练步' };
+  const ACCEPT_LABELS = {
+    accepted: '通过',
+    pending: '待验收',
+    failed: '未通过',
+    error: '错误'
+  };
+  const CLOSED_STATUS_LABELS = { not_run: '未运行' };
+  const PROCESS_LABELS = {
+    alive: '正在运行（启动时间匹配）',
+    dead: '已结束（进程不存在）',
+    reused: '进程号已被其他进程复用（启动时间不匹配）',
+    unknown: '未知（无法核验）'
+  };
+  const STALE_REASON = {
+    process_dead: '记录的进程已经结束。页面不再显示为正在运行，下方是最后写入的记录。',
+    process_reused: '记录的进程号已被其他进程复用。页面不会把它显示为正在运行。',
+    process_unverified: '无法核验记录的进程（缺少启动时间或系统信息不可读）。当前状态未知。',
+    heartbeat_missing: '进程存在，但还没有心跳记录；不能确认仍在运行。',
+    heartbeat_stale: '心跳超过 30 秒没有更新；不能确认仍在运行。'
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const finite = (value) => typeof value === 'number' && Number.isFinite(value);
+  const has = (value) => value !== null && value !== undefined && value !== '';
+  const set = (id, text) => { const el = $(id); if (el) el.textContent = text; };
+  const fmtText = (value) => has(value) ? String(value) : UNKNOWN;
+  const fmtInt = (value) => finite(value) ? Math.round(value).toLocaleString('zh-CN') : UNKNOWN;
+  const fmtNum = (value, digits = 4) => finite(value) ? value.toFixed(digits) : UNKNOWN;
+  const fmtSci = (value) => {
+    if (!finite(value)) return UNKNOWN;
+    if (value === 0) return '0';
+    return Math.abs(value) < 0.001 ? value.toExponential(3) : value.toFixed(6);
+  };
+  const fmtBytes = (value) => {
+    if (!finite(value)) return UNKNOWN;
+    const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+    let number = value, index = 0;
+    while (Math.abs(number) >= 1024 && index < units.length - 1) { number /= 1024; index += 1; }
+    return number.toFixed(index === 0 ? 0 : 2) + ' ' + units[index];
+  };
+  const fmtGiB = (value) => finite(value) ? (value / 1073741824).toFixed(2) + ' GiB' : UNKNOWN;
+  const fmtPct = (value) => finite(value) ? (value * 100).toFixed(2) + '%' : UNKNOWN;
+  const fmtClock = (value) => {
+    if (!has(value)) return UNKNOWN;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return UNKNOWN;
+    return date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false });
+  };
+  const fmtDuration = (seconds) => {
+    if (!finite(seconds)) return UNKNOWN;
+    const total = Math.max(0, Math.round(seconds));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    return hours > 0 ? hours + ' 小时 ' + minutes + ' 分' : minutes > 0 ? minutes + ' 分 ' + secs + ' 秒' : secs + ' 秒';
+  };
+  const fmtHours = (seconds) => finite(seconds) ? (seconds / 3600).toFixed(2) + ' 小时' : UNKNOWN;
+  const fmtSha = (value) => has(value) ? String(value).slice(0, 12) + '…' : UNKNOWN;
+  const fmtBool = (value, yes = '是', no = '否') => value === true ? yes : value === false ? no : UNKNOWN;
+  const fmtPhase = (value) => has(value) ? (PHASE_LABELS[String(value)] || '未知阶段') : UNKNOWN;
+  const fmtMetric = (value) => has(value) ? (METRIC_LABELS[String(value)] || '其他核查指标') : UNKNOWN;
+  const fmtSource = (value) => has(value) ? (SOURCE_LABELS[String(value)] || '本机记录') : UNKNOWN;
+  const fmtError = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'string') return value;
+    try { return JSON.stringify(value); } catch (error) { return UNKNOWN; }
+  };
+  const fmtAge = (seconds) => finite(seconds) ? (seconds < 1 ? '刚刚' : seconds.toFixed(1) + ' 秒前') : UNKNOWN;
+  const latestByStep = (rows) => {
+    let best = null;
+    for (const row of rows) {
+      if (!row || !finite(row.step)) continue;
+      if (best === null || row.step >= best.step) best = row;
+    }
+    return best;
+  };
+  const statusClass = (status) => {
+    if (status === 'running' || status === 'completed') return '';
+    if (status === 'preparing' || status === 'prepared' || status === 'stopping'
+      || status === 'stopped' || status === 'stopped_at_update_limit') return 'warn';
+    if (status === 'error' || status === 'stale') return 'danger';
+    return 'muted';
+  };
+
+  function render(snapshot) {
+    const data = snapshot || {};
+    renderHeader(data);
+    renderBanners(data);
+    renderStats(data);
+    renderProgress(data);
+    renderCharts(data);
+    renderParent(data);
+    renderValidation(data);
+    renderSelection(data);
+    renderDiagnostic(data);
+    renderClosedLoop(data);
+    renderProcess(data);
+    renderSupervisor(data);
+    renderAcceptance(data);
+    renderUpdates(data);
+    renderWarnings(data);
+  }
+
+  function renderHeader(data) {
+    const badge = $('status-badge');
+    badge.className = 'badge ' + statusClass(data.status);
+    set('status-text', STATUS_LABELS[data.status] || UNKNOWN);
+    const detailLabel = data.status_detail
+      ? ' · ' + (STATUS_DETAIL_LABELS[data.status_detail] || data.status_detail)
+      : '';
+    set('status-sub', '页面状态：' + (STATUS_LABELS[data.status_declared] || UNKNOWN)
+      + ' · 当前阶段：' + fmtPhase(data.phase) + detailLabel);
+    set('run-root', fmtText(data.run_root));
+    const config = data.config || {};
+    const configName = config.filename ? config.filename + (config.present ? ' · ' + fmtSha(config.sha256) : ' · 文件缺失') : UNKNOWN;
+    set('config-text', configName);
+    set('generated-at', fmtClock(data.generated_at));
+    set('poll-seconds', String(Math.round(data.poll_seconds || 5)));
+  }
+
+  function renderBanners(data) {
+    const staleBanner = $('banner-stale');
+    if (data.status === 'stale') {
+      staleBanner.hidden = false;
+      set('banner-stale-text', STALE_REASON[data.stale_reason] || '状态已经过期，页面不再显示为正在运行。');
+    } else {
+      staleBanner.hidden = true;
+    }
+    const errorText = fmtError(data.error);
+    const errorBanner = $('banner-error');
+    if (errorText || data.status === 'error') {
+      errorBanner.hidden = false;
+      set('banner-error-text', errorText ? '训练出现问题：' + errorText : '页面显示出现错误，但没有写入错误信息（未知）。');
+    } else {
+      errorBanner.hidden = true;
+    }
+    const unknownBanner = $('banner-unknown');
+    if (data.status === 'unknown' && !errorText) {
+      unknownBanner.hidden = false;
+      set('banner-unknown-text', '还没有发现有效的运行状态记录；当前状态未知，页面不会把它当成正在运行。');
+    } else {
+      unknownBanner.hidden = true;
+    }
+  }
+
+  function renderStats(data) {
+    const progress = data.progress || {};
+    const selection = data.selection || {};
+    const validations = Array.isArray(data.validation_series) ? data.validation_series : [];
+    const updates = Array.isArray(data.train_series) ? data.train_series : [];
+    const latestValidation = latestByStep(validations);
+    const lastCheckpoint = data.last_checkpoint || null;
+    const gpu = progress.gpu || null;
+
+    set('stat-cumulative', fmtInt(progress.cumulative_updates));
+    set('stat-cumulative-note', '最多 ' + fmtInt(progress.target_cumulative_updates)
+      + ' 步 · 本轮 ' + fmtInt(progress.new_stage_updates) + ' 步 · 进度 '
+      + fmtPct(progress.progress_fraction) + ' · 开始前已训练 '
+      + fmtInt(progress.parent_cumulative_updates) + ' 步');
+    set('stat-new', fmtInt(progress.new_stage_updates));
+    set('stat-new-note', '本轮目标 ' + fmtInt(progress.new_stage_target_updates)
+      + ' 步 · 完成 ' + fmtPct(progress.new_stage_fraction));
+    set('stat-validation', latestValidation ? fmtNum(latestValidation.feature_total) : UNKNOWN);
+    set('stat-validation-note', latestValidation
+      ? '第 ' + fmtInt(latestValidation.step) + ' 步 · 数值误差 '
+        + fmtNum(latestValidation.feature_mse) + ' · 方向误差 '
+        + fmtNum(latestValidation.feature_cosine, 5)
+      : '尚无留出验证记录');
+    set('stat-best', selection.available ? fmtInt(selection.best_step) : UNKNOWN);
+    set('stat-best-note', selection.available
+      ? '第 ' + fmtInt(selection.best_step) + ' 步 · 总损失 ' + fmtNum(selection.best_value)
+      : '尚无最佳模型记录');
+    set('stat-checkpoint', lastCheckpoint ? fmtInt(lastCheckpoint.step) : UNKNOWN);
+    set('stat-checkpoint-note', lastCheckpoint
+      ? '第 ' + fmtInt(lastCheckpoint.step) + ' 步 · 已保存（核查信息见技术详情）'
+      : '尚无保存的模型记录');
+    set('stat-gpu', gpu ? fmtGiB(gpu.allocated_bytes) : UNKNOWN);
+    set('stat-gpu-note', gpu
+      ? '预留 ' + fmtGiB(gpu.reserved_bytes) + ' · 记录于第 ' + fmtInt(gpu.record_step) + ' 步'
+      : '尚无真实训练记录');
+    set('stat-wall', fmtHours(progress.new_stage_wall_seconds));
+    set('stat-wall-note', '已用 ' + fmtPct(progress.wall_fraction)
+      + ' · 上限 ' + fmtHours(progress.new_stage_wall_cap_seconds) + ' · 守护进程累计');
+    set('stat-disk', fmtGiB(progress.output_bytes));
+    set('stat-disk-note', '已用 ' + fmtPct(progress.disk_fraction)
+      + ' · 上限 ' + fmtGiB(progress.output_cap_bytes) + ' · 本轮全部新增文件');
+    return { updates, latestValidation };
+  }
+
+  function renderProgress(data) {
+    const progress = data.progress || {};
+    const bar = $('bar-cumulative');
+    if (finite(progress.progress_fraction)) {
+      bar.style.width = (progress.progress_fraction * 100).toFixed(2) + '%';
+      bar.className = 'bar-fill';
+    }
+    set('bar-cumulative-label', '累计 ' + fmtInt(progress.cumulative_updates) + ' 步');
+    set('bar-cumulative-cap', '最多 ' + fmtInt(progress.target_cumulative_updates) + ' 步');
+    set('progress-update-detail', '累计 ' + fmtInt(progress.cumulative_updates)
+      + ' / 最多 ' + fmtInt(progress.target_cumulative_updates) + ' 步 · 本轮 '
+      + fmtInt(progress.new_stage_updates) + ' / ' + fmtInt(progress.new_stage_target_updates)
+      + ' 步 · 开始前已训练 ' + fmtInt(progress.parent_cumulative_updates) + ' 步');
+    const anchorCap = progress.anchor_presentations_cap;
+    set('progress-anchor', '使用 ' + fmtInt(progress.anchor_presentations)
+      + ' 次（本轮 ' + fmtInt(progress.new_stage_anchor_presentations) + ' 次） / 上限 '
+      + (anchorCap === null || anchorCap === undefined ? UNKNOWN : fmtInt(anchorCap) + ' 次'));
+    set('progress-wall', fmtHours(progress.new_stage_wall_seconds) + ' / 上限 '
+      + fmtHours(progress.new_stage_wall_cap_seconds) + ' · 已用 ' + fmtPct(progress.wall_fraction));
+    set('progress-disk', fmtGiB(progress.output_bytes) + ' / 上限 '
+      + fmtGiB(progress.output_cap_bytes) + ' · 已用 ' + fmtPct(progress.disk_fraction));
+    set('progress-disk-scope', '统计本轮新产生的全部文件（含日志与记录）；排除外部共享缓存，硬链接只计一次。');
+    const gpu = progress.gpu || null;
+    set('progress-gpu', gpu
+      ? fmtBytes(gpu.allocated_bytes) + ' / ' + fmtBytes(gpu.reserved_bytes)
+      : UNKNOWN);
+    set('progress-rss', gpu ? fmtBytes(gpu.host_rss_bytes) : UNKNOWN);
+  }
+
+  function drawChart(svg, series, options) {
+    if (!svg) return;
+    const W = 640, H = 280, margin = { left: 62, right: 14, top: 16, bottom: 34 };
+    const points = [];
+    for (const item of series) {
+      for (const point of item.points || []) {
+        if (finite(point.x) && finite(point.y)) points.push(point);
+      }
+    }
+    if (points.length === 0) {
+      svg.innerHTML = '<text class="empty-label" x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle">尚无真实记录 · 未知</text>';
+      return;
+    }
+    let xMin = Math.min(...points.map((point) => point.x));
+    let xMax = Math.max(...points.map((point) => point.x));
+    let yMin = Math.min(...points.map((point) => point.y));
+    let yMax = Math.max(...points.map((point) => point.y));
+    if (xMin === xMax) { xMin -= 1; xMax += 1; }
+    if (yMin === yMax) {
+      const pad = Math.abs(yMin) > 0 ? Math.abs(yMin) * 0.1 : 1;
+      yMin -= pad; yMax += pad;
+    } else {
+      const pad = (yMax - yMin) * 0.08;
+      yMin -= pad; yMax += pad;
+    }
+    if (Math.min(...points.map((point) => point.y)) >= 0 && yMin < 0) yMin = 0;
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+    const sx = (value) => margin.left + ((value - xMin) / (xMax - xMin)) * plotW;
+    const sy = (value) => margin.top + (1 - (value - yMin) / (yMax - yMin)) * plotH;
+    const axisFmt = (value) => {
+      if (!finite(value)) return UNKNOWN;
+      const absolute = Math.abs(value);
+      if (absolute === 0) return '0';
+      if (absolute < 0.001 || absolute >= 10000) return value.toExponential(1);
+      if (absolute < 1) return value.toFixed(3);
+      return value.toFixed(2);
+    };
+    const parts = [];
+    for (let index = 0; index <= 4; index += 1) {
+      const value = yMin + ((yMax - yMin) * index) / 4;
+      const y = sy(value).toFixed(1);
+      parts.push('<line class="grid" x1="' + margin.left + '" y1="' + y + '" x2="' + (W - margin.right) + '" y2="' + y + '"/>');
+      parts.push('<text x="' + (margin.left - 8) + '" y="' + (Number(y) + 4).toFixed(1) + '" text-anchor="end">' + axisFmt(value) + '</text>');
+    }
+    for (let index = 0; index <= 3; index += 1) {
+      const value = xMin + ((xMax - xMin) * index) / 3;
+      parts.push('<text x="' + sx(value).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle">' + fmtInt(Math.round(value)) + '</text>');
+    }
+    parts.push('<line class="axis" x1="' + margin.left + '" y1="' + (H - margin.bottom) + '" x2="' + (W - margin.right) + '" y2="' + (H - margin.bottom) + '"/>');
+    parts.push('<line class="axis" x1="' + margin.left + '" y1="' + margin.top + '" x2="' + margin.left + '" y2="' + (H - margin.bottom) + '"/>');
+    for (const item of series) {
+      const ordered = (item.points || [])
+        .filter((point) => finite(point.x) && finite(point.y))
+        .sort((left, right) => left.x - right.x);
+      if (item.kind === 'line' && ordered.length > 0) {
+        const path = ordered.map((point, index) => (index === 0 ? 'M' : 'L') + sx(point.x).toFixed(1) + ',' + sy(point.y).toFixed(1)).join(' ');
+        const dash = item.dash ? ' stroke-dasharray="' + item.dash + '"' : '';
+        parts.push('<path d="' + path + '" fill="none" stroke="' + item.color + '" stroke-width="' + (item.width || 2) + '" stroke-linejoin="round" stroke-linecap="round"' + dash + '/>');
+      }
+      if (item.kind !== 'line' || item.showPoints) {
+        for (const point of ordered) {
+          const title = item.label + ' · 第 ' + fmtInt(point.x) + ' 步 · ' + fmtNum(point.y, 5);
+          parts.push('<circle cx="' + sx(point.x).toFixed(1) + '" cy="' + sy(point.y).toFixed(1) + '" r="' + (item.radius || 3) + '" fill="' + item.color + '"><title>' + title + '</title></circle>');
+        }
+      }
+    }
+    if (options && options.zeroLine && yMin < 0 && yMax > 0) {
+      const y = sy(0).toFixed(1);
+      parts.push('<line class="grid" x1="' + margin.left + '" y1="' + y + '" x2="' + (W - margin.right) + '" y2="' + y + '"/>');
+    }
+    svg.innerHTML = parts.join('');
+  }
+
+  function renderLegend(id, entries) {
+    const holder = $(id);
+    if (!holder) return;
+    holder.replaceChildren();
+    for (const entry of entries) {
+      const span = document.createElement('span');
+      const swatch = document.createElement('i');
+      swatch.className = 'swatch' + (entry.kind === 'points' ? ' point' : '');
+      swatch.style.background = entry.color;
+      span.appendChild(swatch);
+      span.appendChild(document.createTextNode(entry.label));
+      holder.appendChild(span);
+    }
+  }
+
+  function seriesFor(data, metric) {
+    const updates = Array.isArray(data.train_series) ? data.train_series : [];
+    const validations = Array.isArray(data.validation_series) ? data.validation_series : [];
+    const train = updates
+      .filter((row) => finite(row[metric]))
+      .map((row) => ({ x: row.step, y: row[metric] }));
+    const validation = validations
+      .filter((row) => finite(row[metric]))
+      .map((row) => ({ x: row.step, y: row[metric] }));
+    return { train, validation };
+  }
+
+  function renderCharts(data) {
+    const definitions = [
+      { metric: 'feature_total', label: '总损失', chart: 'chart-total', legend: 'legend-total', note: 'chart-total-note', color: 'var(--blue)' },
+      { metric: 'feature_mse', label: '特征数值误差', chart: 'chart-mse', legend: 'legend-mse', note: 'chart-mse-note', color: 'var(--blue)' },
+      { metric: 'feature_cosine', label: '特征方向误差', chart: 'chart-cosine', legend: 'legend-cosine', note: 'chart-cosine-note', color: 'var(--blue)' }
+    ];
+    for (const definition of definitions) {
+      const values = seriesFor(data, definition.metric);
+      drawChart($(definition.chart), [
+        { label: '训练样本', color: definition.color, kind: 'line' },
+        { label: '留出验证', color: 'var(--green)', kind: 'points', radius: 3.4 }
+      ].map((entry) => entry.label === '训练样本'
+        ? { ...entry, points: values.train }
+        : { ...entry, points: values.validation }));
+      renderLegend(definition.legend, [
+        { label: '训练样本（做过参数更新）', color: definition.color, kind: 'line' },
+        { label: '留出验证（不更新参数）', color: 'var(--green)', kind: 'points' }
+      ]);
+      set(definition.note, '训练样本 ' + values.train.length + ' 条 · 留出验证 '
+        + values.validation.length + ' 个点');
+    }
+  }
+
+  function renderParent(data) {
+    const parent = data.parent_history || {};
+    const points = Array.isArray(parent.points) ? parent.points : [];
+    const baseline = parent.baseline || null;
+    const trainPoints = points
+      .filter((point) => finite(point.feature_total))
+      .map((point) => ({ x: point.step, y: point.feature_total }));
+    const baselinePoint = baseline && finite(baseline.step) && finite(baseline.feature_total)
+      ? [{ x: baseline.step, y: baseline.feature_total }]
+      : [];
+    drawChart($('chart-parent'), [
+      { label: '续训前的训练记录', color: 'var(--purple)', kind: 'line', points: trainPoints },
+      { label: '开始本轮训练时的模型（已训练50步）', color: 'var(--red)', kind: 'points', radius: 4.5, points: baselinePoint }
+    ]);
+    renderLegend('legend-parent', [
+      { label: '续训前的50步训练记录', color: 'var(--purple)', kind: 'line' },
+      { label: '开始本轮训练时的模型（已训练50步）', color: 'var(--red)', kind: 'points' }
+    ]);
+    set('parent-note', parent.available ? '真实续训前记录 · 独立坐标' : '尚无续训前的逐次训练记录（未知）');
+    set('parent-points', parent.available
+      ? fmtInt(parent.point_count) + ' 条 · 最后第 ' + fmtInt(parent.last_step) + ' 步'
+      : UNKNOWN);
+    set('parent-baseline-total', baseline ? fmtNum(baseline.feature_total) : UNKNOWN);
+    set('parent-baseline-parts', baseline
+      ? '数值误差 ' + fmtNum(baseline.feature_mse) + ' · 方向误差 '
+        + fmtNum(baseline.feature_cosine, 5)
+      : UNKNOWN);
+    set('parent-baseline-sha', baseline ? fmtSha(baseline.checkpoint_sha256) : UNKNOWN);
+  }
+
+  function tableRows(tbody, rows) {
+    if (!tbody) return;
+    tbody.replaceChildren(...rows);
+  }
+
+  function makeRow(cells) {
+    const tr = document.createElement('tr');
+    for (const cell of cells) {
+      const td = document.createElement('td');
+      td.textContent = cell;
+      tr.appendChild(td);
+    }
+    return tr;
+  }
+
+  function renderValidation(data) {
+    const validations = Array.isArray(data.validation_series) ? data.validation_series : [];
+    const sorted = validations.slice().sort((left, right) => right.step - left.step).slice(0, 12);
+    set('validation-note', validations.length ? '共 ' + validations.length + ' 个真实留出验证点' : '尚无留出验证记录');
+    const rows = sorted.map((row) => makeRow([
+      fmtInt(row.step),
+      fmtNum(row.feature_mse),
+      fmtNum(row.feature_cosine, 5),
+      fmtNum(row.feature_total),
+      fmtInt(row.valid_tokens),
+      row.is_best === true ? '当前最佳' : row.selection_eligible === true ? '可参与选择' : '不参与选择',
+      fmtText(row.checkpoint_path)
+    ]));
+    if (rows.length === 0) rows.push(makeRow([UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN]));
+    tableRows($('validation-table'), rows);
+  }
+
+  function renderSelection(data) {
+    const selection = data.selection || {};
+    if (!selection.available) {
+      for (const id of ['sel-metric', 'sel-direction', 'sel-best', 'sel-sha', 'sel-tokens', 'sel-parent', 'sel-updated', 'sel-test']) {
+        set(id, UNKNOWN);
+      }
+      set('sel-legacy', UNKNOWN);
+      return;
+    }
+    set('sel-metric', fmtMetric(selection.metric));
+    const direction = DIRECTION_LABELS[selection.direction] || '未知';
+    const tie = TIE_LABELS[selection.tie_break] || '未知';
+    set('sel-direction', direction + ' · ' + tie);
+    set('sel-best', '第 ' + fmtInt(selection.best_step) + ' 步 · 总损失 '
+      + fmtNum(selection.best_value) + ' · 选择依据 '
+      + fmtMetric(selection.best_metric || selection.metric));
+    set('sel-sha', fmtText(selection.checkpoint_sha256));
+    set('sel-tokens', fmtInt(selection.valid_tokens) + ' 个 / ' + fmtInt(selection.scalar_denominator));
+    const parent = selection.parent_c50_baseline || null;
+    set('sel-parent', parent
+      ? '第 ' + fmtInt(parent.step) + ' 步 · 总损失 ' + fmtNum(parent.feature_total)
+        + ' · ' + fmtSha(parent.checkpoint_sha256)
+      : UNKNOWN);
+    const legacy = selection.legacy_action_selector || null;
+    set('sel-legacy', legacy
+      ? '第 ' + fmtInt(legacy.best_step) + ' 步 · ' + fmtMetric(legacy.metric)
+        + ' ' + fmtNum(legacy.best_value, 6) + ' · 已清除 '
+        + fmtBool(legacy.cleared) + ' · 不参与选择'
+      : '无旧动作误差记录');
+    set('sel-updated', fmtClock(selection.updated_at));
+    set('sel-test', selection.test_used === true ? '使用了测试集' : '没有使用测试集');
+  }
+
+  function renderDiagnostic(data) {
+    const diagnostic = data.action_diagnostic;
+    const empty = $('diag-empty');
+    const body = $('diag-body');
+    if (!diagnostic) {
+      empty.classList.remove('hidden');
+      body.classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    body.classList.remove('hidden');
+    set('diag-metric', fmtMetric(diagnostic.metric));
+    set('diag-value', fmtNum(diagnostic.value, 6));
+    set('diag-sha', fmtText(diagnostic.checkpoint_sha256));
+    set('diag-time', fmtClock(diagnostic.timestamp));
+    set('diag-source', fmtSource(diagnostic.source));
+    set('diag-step', '第 ' + fmtInt(diagnostic.record_step) + ' 步');
+  }
+
+  function renderClosedLoop(data) {
+    const loop = data.closed_loop || {};
+    set('closed-status', CLOSED_STATUS_LABELS[loop.status] || '未知');
+    set('closed-episodes', fmtInt(loop.episodes) + ' 次');
+    set('closed-control', fmtBool(loop.control_restored, '已恢复', '未恢复'));
+    set('closed-note', fmtText(loop.note));
+  }
+
+  function renderProcess(data) {
+    const process = data.process || {};
+    const heartbeat = data.heartbeat || null;
+    set('proc-pid', fmtInt(process.pid));
+    set('proc-runner', fmtInt(process.runner_pid) + ' / 启动核验值 '
+      + fmtInt(process.runner_pid_start_ticks));
+    set('proc-ticks', fmtInt(process.pid_start_ticks));
+    set('proc-observed', fmtInt(process.observed_start_ticks));
+    set('proc-pgid', fmtInt(process.pgid));
+    set('proc-state', PROCESS_LABELS[process.state] || UNKNOWN);
+    set('proc-alive', fmtBool(process.alive, '是', '否'));
+    set('proc-heartbeat-age', fmtAge(process.heartbeat_age_seconds));
+    set('proc-seq', heartbeat
+      ? '序号 ' + fmtInt(heartbeat.seq) + ' / 当前阶段 ' + fmtPhase(heartbeat.phase)
+        + ' · 更新 ' + fmtClock(heartbeat.updated_at)
+      : UNKNOWN);
+    set('proc-status-age', fmtAge(process.status_age_seconds));
+    set('proc-source', fmtSource(process.source) + ' · 核验时间 '
+      + fmtClock(process.liveness_checked_at));
+    set('proc-note', (process.active_source === 'supervisor_child'
+      ? '当前显示的是守护进程核验到的训练进程；'
+      : '') + (process.alive === true
+      ? '进程号与启动时间核验通过'
+      : process.state === 'dead' ? '进程已结束'
+      : process.state === 'reused' ? '进程号已被其他进程复用' : '无法核验'));
+  }
+
+  function renderSupervisor(data) {
+    const supervisor = data.supervisor;
+    const empty = $('sup-empty');
+    const body = $('sup-body');
+    if (!supervisor) {
+      empty.classList.remove('hidden');
+      body.classList.add('hidden');
+      set('sup-note', '未知（尚未发现守护进程记录）');
+      return;
+    }
+    empty.classList.add('hidden');
+    body.classList.remove('hidden');
+    set('sup-note', supervisor.live_verified === true
+      ? '已核验：守护进程和当前训练进程都在运行'
+      : '来自本机守护进程记录；当前未核验为正在运行');
+    set('sup-status', (STATUS_LABELS[supervisor.status] || '未知状态')
+      + ' / ' + fmtPhase(supervisor.phase));
+    set('sup-pid', fmtInt(supervisor.pid) + ' / '
+      + (supervisor.alive === true ? '存活' : supervisor.alive === false ? '已结束' : UNKNOWN));
+    set('sup-child', '训练进程 ' + fmtInt(supervisor.child_pid) + ' / 进程组 '
+      + fmtInt(supervisor.child_pgid));
+    set('sup-child-state', PROCESS_LABELS[supervisor.child_process_state] || UNKNOWN);
+    set('sup-live', '心跳新鲜：' + fmtBool(supervisor.supervisor_fresh)
+      + ' · 训练进程存活：' + fmtBool(supervisor.child_alive)
+      + ' · 启动核验值：' + fmtInt(supervisor.child_pid_start_ticks));
+    set('sup-exit', supervisor.child_alive === true && !has(supervisor.child_native_exit)
+      ? '仍在运行（暂无退出码）'
+      : fmtInt(supervisor.child_native_exit));
+    set('sup-wall', fmtHours(supervisor.new_stage_wall_seconds) + ' / 上限 '
+      + fmtHours(supervisor.new_stage_wall_cap_seconds));
+    set('sup-output', fmtGiB(supervisor.new_stage_output_bytes) + ' / 上限 '
+      + fmtGiB(supervisor.new_stage_output_cap_bytes));
+    set('sup-error', fmtError(supervisor.last_error) || UNKNOWN);
+    const heartbeat = supervisor.heartbeat || null;
+    set('sup-heartbeat', heartbeat
+      ? fmtAge(heartbeat.age_seconds) + ' · 序号 ' + fmtInt(heartbeat.seq)
+        + ' · ' + (STATUS_LABELS[heartbeat.status] || UNKNOWN)
+      : UNKNOWN);
+  }
+
+  function renderAcceptance(data) {
+    const acceptance = data.acceptance || {};
+    set('acc-note', acceptance.present ? '来自真实验收记录' : '缺失（不表示通过）');
+    set('acc-present', fmtBool(acceptance.present));
+    set('acc-step', acceptance.present ? fmtInt(acceptance.step) : UNKNOWN);
+    set('acc-sha', fmtText(acceptance.checkpoint_sha256));
+    set('acc-reviewer', fmtText(acceptance.reviewer));
+    set('acc-match', fmtBool(acceptance.matches_last_checkpoint));
+    set('acc-status', acceptance.passed === true ? '通过'
+      : acceptance.passed === false ? '未通过'
+      : ACCEPT_LABELS[acceptance.status] || '未知');
+    set('acc-time', fmtClock(acceptance.accepted_at));
+    set('acc-note-text', fmtText(acceptance.note));
+  }
+
+  function renderUpdates(data) {
+    const updates = Array.isArray(data.train_series) ? data.train_series : [];
+    const sorted = updates.slice().sort((left, right) => right.step - left.step).slice(0, 10);
+    set('updates-note', updates.length
+      ? '共 ' + updates.length + ' 条真实训练记录（显示最近 ' + sorted.length + ' 条）'
+      : '尚无真实训练记录');
+    const rows = sorted.map((row) => makeRow([
+      fmtInt(row.step),
+      fmtInt(row.new_stage_updates),
+      fmtNum(row.feature_total),
+      fmtNum(row.feature_mse),
+      fmtNum(row.feature_cosine, 5),
+      fmtSci(row.lr_used),
+      fmtInt(row.anchor_presentations),
+      fmtBytes(row.gpu_allocated_bytes),
+      fmtClock(row.timestamp)
+    ]));
+    if (rows.length === 0) rows.push(makeRow([UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN]));
+    tableRows($('updates-table'), rows);
+    const read = data.series_read || {};
+    const names = { updates: '训练记录', validation: '验证记录' };
+    const parts = [];
+    for (const [name, meta] of Object.entries(read)) {
+      if (!meta) continue;
+      const flags = [];
+      if (meta.torn_tail) flags.push('忽略末尾未完成行');
+      if (meta.invalid_lines) flags.push(meta.invalid_lines + ' 个坏行');
+      if (meta.truncated) flags.push('已截断');
+      parts.push((names[name] || '记录') + ': ' + (meta.present ? '已读取' : '不存在')
+        + (flags.length ? '（' + flags.join('，') + '）' : ''));
+    }
+    if (parts.length) set('updates-note', $('updates-note').textContent + ' · ' + parts.join(' · '));
+  }
+
+  function renderWarnings(data) {
+    const warnings = Array.isArray(data.read_warnings) ? data.read_warnings : [];
+    const panel = $('warnings-panel');
+    const list = $('warnings-list');
+    if (warnings.length === 0) {
+      panel.hidden = true;
+      list.replaceChildren();
+      return;
+    }
+    panel.hidden = false;
+    list.replaceChildren(...warnings.map((warning) => {
+      const item = document.createElement('li');
+      item.textContent = warning;
+      return item;
+    }));
+  }
+
+  async function poll() {
+    try {
+      const response = await fetch('/api/snapshot', {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const snapshot = await response.json();
+      render(snapshot);
+      $('banner-connect').hidden = true;
+    } catch (error) {
+      $('banner-connect').hidden = false;
+      set('banner-connect-text', '无法连接监控服务（' + (error && error.message ? error.message : '未知错误') + '）。页面保留最后一次成功快照，不代表当前实时状态。');
+      const badge = $('status-badge');
+      badge.className = 'badge danger';
+      set('status-text', '连接中断');
+    } finally {
+      set('last-refresh', new Date().toLocaleTimeString('zh-CN', { hour12: false }));
+    }
+  }
+
+  poll();
+  setInterval(poll, 5000);
+})();
+</script>
+</body>
+</html>

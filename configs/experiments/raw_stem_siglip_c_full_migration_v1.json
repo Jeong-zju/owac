@@ -1,0 +1,62 @@
+{
+  "schema": "owac.raw-stem-temporal.c-full.migration.v1",
+  "authorized": false,
+  "authorized_by": "",
+  "authorized_at": null,
+  "arm": "C",
+  "c_only": true,
+  "b_arm": false,
+  "d_arm": false,
+  "vision_unfreeze": false,
+  "action_loss": false,
+  "closed_loop": false,
+  "download": false,
+  "parent_checkpoint": "outputs/raw-distillation-pilot-20261021-101725/pilot-C/checkpoint_final_000050.pt",
+  "parent_checkpoint_sha256": "631b6ea1e21bbe01e4e08b9da56432a0b9a703229a14a59463ac01a009052e1a",
+  "parent_config": "outputs/raw-distillation-pilot-20261021-101725/authorized-config.json",
+  "parent_config_sha256": "8f04c2d438e8d8d74f2462a8b335a0cd48b24f061169683ac5a419c921cdb040",
+  "new_config": "configs/experiments/raw_stem_siglip_c_full_v1.json",
+  "new_config_sha256": "eb4537fa5a0e74613a1a1ae8d9d0252615a1ac0dab40e4712de3936c42bd4d49",
+  "old_recipe_sha256": "ccd0ec412f85113e28f54f4dc50dab41ae5f6d39e858ef3e8988290d404b7477",
+  "new_recipe_sha256": "5aa06daf56e21254cf85e67b4b9d9a08e5c481232bc7d07b4f97d11872f31eba",
+  "run_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-c-full-20261021-123313",
+  "allowed_operational_changes": [
+    "assets.output_root",
+    "authorization",
+    "continuation",
+    "training.pilot_max_updates_per_arm",
+    "training.checkpoint_updates",
+    "training.checkpoint_interval_updates",
+    "training.earlystop_patience",
+    "training.max_wall_seconds",
+    "training.max_output_bytes",
+    "training.combined_gpu_hours",
+    "training.recovery_checkpoints",
+    "training.selection_metric",
+    "evaluation.selection_metric"
+  ],
+  "carried_readiness_receipts": [
+    {
+      "kind": "parity",
+      "path": "outputs/raw-distillation-pilot-20261021-101725/parity-receipt.json",
+      "sha256": "301aac75f42edd6073c015c66034a4ac1efc37e53ee98b23dbe0cfaac94cccc3"
+    },
+    {
+      "kind": "resource",
+      "path": "outputs/raw-distillation-pilot-20261021-101725/resource-receipt-C.json",
+      "sha256": "6025a164667cd9ea1bb26e0d846c2802f1c0479c4268d4f1465a6c444716e8f1"
+    }
+  ],
+  "parent_assessment": "outputs/raw-distillation-pilot-20261021-101725/postprocess/run-20261021T035315Z/attached-assessment.json",
+  "parent_assessment_sha256": "40dcf8d17276f9582f314e74b0088b930199fed907a09cf04b1a1e6afcdb8c98",
+  "parent_assessment_tolerance_abs": 1e-06,
+  "declared_caps": {
+    "max_cumulative_updates": 5000,
+    "max_new_updates": 4950,
+    "max_cumulative_anchor_presentations": 80000,
+    "max_new_anchor_presentations": 79200,
+    "max_new_gpu_wall_seconds": 230400,
+    "max_new_output_bytes": 21474836480
+  },
+  "notes": "Implementation-only template. Sol must independently set authorized=true, authorized_by, authorized_at after auditing the parent state, new config, and carried receipts. The carry-over is identity-preserving, not a new measurement and not a re-signed pass."
+}

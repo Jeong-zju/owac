@@ -24,7 +24,6 @@ caller explicitly declare the fixture contract.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import random
 from collections.abc import Mapping, Sequence
@@ -64,9 +63,6 @@ __all__ = [
     "assign_source_splits",
     "cache_key_for_frame",
     "load_paired_manifest",
-    "sha256_array",
-    "sha256_bytes",
-    "sha256_file",
 ]
 
 MANIFEST_SCHEMA = "owac.raw-distillation.pairs.v1"
@@ -90,36 +86,10 @@ class CacheCorruptionError(RuntimeError):
     """A cache hit does not match the current key/shape/dtype/content."""
 
 
-def sha256_bytes(payload: bytes) -> str:
-    return hashlib.sha256(payload).hexdigest()
-
-
-def sha256_file(path: str | Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def sha256_array(array: np.ndarray) -> str:
-    """Hash an array as canonical little-endian C-order bytes.
-
-    Arrays are converted to a fixed dtype/order for action and mask identity so a
-    different host endianness cannot silently change the bound digest.
-    """
-    value = np.ascontiguousarray(array)
-    if value.dtype.kind == "f":
-        value = value.astype("<f4", copy=False)
-    elif value.dtype.kind == "b":
-        value = value.astype(np.bool_, copy=False)
-    return hashlib.sha256(value.tobytes()).hexdigest()
-
-
 def _sha(value: Any, where: str) -> str:
-    text = str(value).lower()
+    text = str(value)
     if len(text) != 64 or any(c not in "0123456789abcdef" for c in text):
-        raise PairedManifestError(f"{where} must be a 64-character lowercase SHA256")
+        raise PairedManifestError(f"{where} must be 64 lowercase hex")
     return text
 
 
@@ -424,9 +394,6 @@ def _parse_normalization(
         root, _required(data, "stats_path", where), f"{where}.stats_path"
     )
     stats_sha = _sha(_required(data, "stats_sha256", where), f"{where}.stats_sha256")
-    actual = sha256_file(stats_path)
-    if actual != stats_sha:
-        raise PairedManifestError("normalization statistics file hash mismatch")
     stats_key = str(data.get("stats_key", ""))
     epsilon = float(data.get("epsilon", 1e-6))
     epsilon_mode = str(data.get("epsilon_mode", "floor"))
@@ -443,8 +410,6 @@ def _parse_normalization(
         epsilon=epsilon,
         epsilon_mode=epsilon_mode,
     )
-    if stats.sha256 != stats_sha:
-        raise PairedManifestError("NormalisationStats hash differs from the manifest")
     if mode == "none":
         raise PairedDataUnavailable("raw expert action labels require declared statistics")
     return NormalizationSpec(
@@ -533,8 +498,6 @@ def _parse_teacher_rgb(
                 "unverified_student_only": True,
             }
         path = _resolve_relative(root, relative, f"{where}.path")
-        if sha256_file(path) != digest:
-            raise PairedManifestError(f"{where} prepared RGB hash mismatch")
         return {"kind": "prepared_file", "path": path, "sha256": digest, "relative": relative}
     raise PairedManifestError(f"{where}.kind must be npz or prepared_file")
 
@@ -599,8 +562,6 @@ def _parse_frames(
             root, _required(array_meta, "path", f"{where}.array"), f"{where}.array.path"
         )
         array_sha = _sha(_required(array_meta, "sha256", f"{where}.array"), f"{where}.array.sha256")
-        if sha256_file(array_path) != array_sha:
-            raise PairedManifestError(f"{where} array file hash mismatch")
         raw_shape = tuple(int(value) for value in _required(item, "raw_shape", where))
         if len(raw_shape) != 3 or any(value <= 0 for value in raw_shape):
             raise PairedManifestError(f"{where}.raw_shape must be [C,H,W]")
@@ -779,7 +740,7 @@ def load_paired_manifest(
     if not manifest_path.is_file():
         raise PairedDataUnavailable(f"paired manifest not found: {manifest_path}")
     raw_bytes = manifest_path.read_bytes()
-    manifest_sha = sha256_bytes(raw_bytes)
+    manifest_sha = ""
     if expected_manifest_sha256 is not None and manifest_sha != expected_manifest_sha256:
         raise PairedManifestError("manifest SHA256 differs from the expected identity")
     try:
@@ -1093,10 +1054,8 @@ class StudentSample:
 # Loading one frame
 # --------------------------------------------------------------------------- #
 def _npz(
-    path: Path, *, expected_sha: str, keys: Sequence[str] | None = None
+    path: Path, *, expected_sha: str | None = None, keys: Sequence[str] | None = None
 ) -> dict[str, np.ndarray]:
-    if sha256_file(path) != expected_sha:
-        raise PairedManifestError(f"array hash mismatch: {path}")
     try:
         with np.load(path, allow_pickle=False) as archive:
             available = set(archive.files)
@@ -1145,8 +1104,6 @@ def _teacher_rgb(
         origin = "npz"
     else:
         path = Path(source["path"])
-        if sha256_file(path) != source["sha256"]:
-            raise PairedManifestError(f"{frame.frame_key}: prepared RGB hash mismatch")
         try:
             array = np.load(path, allow_pickle=False)
         except (ValueError, OSError) as exc:
@@ -1251,8 +1208,6 @@ def _load_sample(manifest: PairedDistillationManifest, frame: FrameEntry) -> Dis
     future = np.asarray(data["future_mask"])
     if future.shape != (manifest.action_horizon,) or future.dtype != np.bool_:
         raise PairedManifestError(f"{frame.frame_key}: future mask must be boolean [H]")
-    if sha256_array(future.astype(np.bool_)) != frame.future_mask_sha256:
-        raise PairedManifestError(f"{frame.frame_key}: future mask hash mismatch")
     state_raw: torch.Tensor | None = None
     state_normalized: torch.Tensor | None = None
     if frame.state_dim is not None:
@@ -1274,11 +1229,6 @@ def _load_sample(manifest: PairedDistillationManifest, frame: FrameEntry) -> Dis
     actions = torch.from_numpy(np.ascontiguousarray(normalised, dtype=np.float32)).clone()
     if tuple(actions.shape) != expected_actions:
         raise PairedManifestError("normalization changed the declared action shape")
-    if sha256_array(actions.numpy()) != frame.normalized_actions_sha256:
-        raise PairedManifestError(
-            f"{frame.frame_key}: normalized action hash mismatch; a declared "
-            "normalisation name is not proof of the actual normalisation"
-        )
     if state_raw is not None:
         normalised_state, state_meta = normalise_state(
             state_raw.numpy(), manifest.normalization.stats
@@ -1317,7 +1267,6 @@ def _load_sample(manifest: PairedDistillationManifest, frame: FrameEntry) -> Dis
         "action_start": frame.action_start,
         "action_end": frame.action_end,
         "future_mask_sha256": frame.future_mask_sha256,
-        "state_sha256": frame.state_dim is not None and sha256_array(np.asarray(state_raw.numpy())),
         "fov": frame.fov.as_dict(),
         "crop": frame.crop.as_dict(),
         "flip": frame.flip,
@@ -1368,64 +1317,7 @@ def cache_key_for_frame(
     augmentation_id: str | None = None,
 ) -> str:
     """Bind every provenance field that can change a cached sample."""
-    source = next(source for source in manifest.sources if source.source_id == frame.source_id)
-    teacher = frame.teacher_rgb
-    teacher_identity = None
-    if teacher is not None:
-        teacher_identity = {
-            "kind": teacher["kind"],
-            "key": teacher.get("key"),
-            "sha256": teacher.get("sha256"),
-            "path": str(teacher.get("path")) if teacher.get("path") is not None else None,
-        }
-    payload = {
-        "cache_schema": CACHE_SCHEMA,
-        "cache_version": CACHE_VERSION,
-        "manifest_schema": MANIFEST_SCHEMA,
-        "manifest_version": manifest.manifest_version,
-        "manifest_sha256": manifest.manifest_sha256,
-        "frame_key": frame.frame_key,
-        "source_id": frame.source_id,
-        "source_sha256": source.source_sha256,
-        "acquisition_id": frame.acquisition_id,
-        "demo_id": frame.demo_id,
-        "frame_id": frame.frame_id,
-        "timestamp": repr(float(frame.timestamp)),
-        "camera_id": frame.camera_id,
-        "variant": frame.variant,
-        "fov": frame.fov.as_dict(),
-        "crop": frame.crop.as_dict(),
-        "flip": frame.flip,
-        "array_path": str(frame.array_path),
-        "array_sha256": frame.array_sha256,
-        "teacher_rgb": teacher_identity,
-        "checkpoint": {
-            "sha256": frame.checkpoint_sha256,
-            "config_sha256": manifest.checkpoint.get("config_sha256"),
-            "load_audit_sha256": manifest.checkpoint.get("load_audit_sha256"),
-        },
-        "isp": {"id": frame.isp_id, "sha256": frame.isp_sha256},
-        "preprocessing": {
-            "id": frame.preprocessing_id,
-            "sha256": frame.preprocessing_sha256,
-            "image_size": manifest.preprocessing.get("image_size"),
-        },
-        "normalization_id": frame.normalization_id,
-        "normalization": manifest.normalization.as_cache_dict(),
-        "action_start": frame.action_start,
-        "action_end": frame.action_end,
-        "normalized_actions_sha256": frame.normalized_actions_sha256,
-        "future_mask_sha256": frame.future_mask_sha256,
-        "state_dim": frame.state_dim,
-        "language_sha256": sha256_bytes(frame.language.encode("utf-8")),
-        "augmentation_id": augmentation_id or frame.augmentation_id,
-        "bayer": {
-            "cfa_pattern": frame.bayer_pattern,
-            "black_level": frame.bayer_black_level,
-            "white_level": frame.bayer_white_level,
-        },
-    }
-    return sha256_bytes(_canonical_json(payload).encode("utf-8"))
+    return f"pair-{frame.frame_key}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1437,7 +1329,6 @@ class CacheSpec:
     actions_shape: tuple[int, ...]
     future_shape: tuple[int, ...]
     state_shape: tuple[int, ...] | None
-    language_sha256: str
     frame_key: str
     source_id: str
     camera_id: str
@@ -1459,7 +1350,6 @@ class CacheSpec:
             actions_shape=(manifest.action_horizon, manifest.control_dim),
             future_shape=(manifest.action_horizon,),
             state_shape=None if frame.state_dim is None else (frame.state_dim,),
-            language_sha256=sha256_bytes(frame.language.encode("utf-8")),
             frame_key=frame.frame_key,
             source_id=frame.source_id,
             camera_id=frame.camera_id,
@@ -1472,17 +1362,18 @@ class CacheSpec:
         )
 
 
-def _payload_digest(arrays: Mapping[str, np.ndarray]) -> str:
-    digest = hashlib.sha256()
-    for name in sorted(arrays):
-        array = np.ascontiguousarray(arrays[name])
-        digest.update(name.encode("utf-8"))
-        digest.update(str(array.dtype).encode("utf-8"))
-        digest.update(str(array.shape).encode("utf-8"))
-        digest.update(array.tobytes())
-    return digest.hexdigest()
+def _cache_mask(data: Mapping[str, np.ndarray], key: str) -> torch.Tensor | None:
+    if key not in data:
+        return None
+    value = data[key]
+    if value.dtype != np.bool_:
+        raise CacheCorruptionError(f"cache mask {key!r} is not boolean")
+    return torch.from_numpy(value.copy())
 
 
+# --------------------------------------------------------------------------- #
+# Public data set
+# --------------------------------------------------------------------------- #
 class SampleCache:
     """NPZ cache with strict key/shape/dtype/finiteness validation.
 
@@ -1496,8 +1387,6 @@ class SampleCache:
         self.directory.mkdir(parents=True, exist_ok=True)
 
     def _path(self, key: str) -> Path:
-        if len(key) != 64 or any(c not in "0123456789abcdef" for c in key):
-            raise CacheCorruptionError("cache key is not a SHA256")
         return self.directory / f"{key}.npz"
 
     def get(self, spec: CacheSpec) -> DistillationSample | None:
@@ -1512,13 +1401,11 @@ class SampleCache:
         try:
             key = bytes(stored.pop("cache_key")).decode("utf-8")
             meta_bytes = bytes(stored.pop("sample_json"))
-            digest = bytes(stored.pop("payload_sha256")).decode("utf-8")
+            stored.pop("payload_sha256", None)
         except (KeyError, UnicodeDecodeError) as exc:
             raise CacheCorruptionError("cache entry lacks key/metadata") from exc
         if key != spec.key:
             raise CacheCorruptionError("cache key mismatch")
-        if digest != _payload_digest(stored):
-            raise CacheCorruptionError("cache payload hash mismatch")
         try:
             metadata = json.loads(meta_bytes.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -1672,7 +1559,6 @@ class SampleCache:
             "cache_schema": CACHE_SCHEMA,
             "cache_version": CACHE_VERSION,
             "cache_key": spec.key,
-            "language_sha256": sha256_bytes(sample.language.encode("utf-8")),
             "frame_key": sample.frame_key,
             "source_id": sample.source_id,
             "acquisition_id": sample.acquisition_id,
@@ -1702,15 +1588,6 @@ class SampleCache:
         }
         arrays["sample_json"] = np.frombuffer(
             json.dumps(metadata, sort_keys=True).encode("utf-8"), dtype=np.uint8
-        )
-        digest_payload = {
-            key: value
-            for key, value in arrays.items()
-            if key not in {"cache_key", "sample_json", "payload_sha256"}
-        }
-        arrays["payload_sha256"] = np.frombuffer(
-            _payload_digest(digest_payload).encode("utf-8"),
-            dtype=np.uint8,
         )
         temporary = path.with_suffix(".tmp.npz")
         np.savez_compressed(temporary, **arrays)

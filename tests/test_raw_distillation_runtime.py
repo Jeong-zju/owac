@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 import pytest
+import torch
 
 from owac.runtime.raw_distillation import main
 
@@ -53,8 +54,6 @@ def test_prepare_parity_and_evaluate_are_unavailable(capsys):
 
 
 def _fixture_context(tmp_path):
-    import torch
-
     from owac.backends.raw_distillation_context import ExperimentContext
     from owac.baselines.raw_stem_siglip import HistoryContract
     from owac.training.raw_distillation import (
@@ -71,17 +70,9 @@ def _fixture_context(tmp_path):
         def prepare(self, raw, history=None):
             receipt = TeacherPreparationReceipt(
                 adapter_name="fixture",
-                checkpoint_sha256="0" * 64,
-                config_sha256="1" * 64,
                 code_revision="fixture",
                 evidence_level="fixture_contract",
                 real_ready=False,
-                raw_sha256="2" * 64,
-                teacher_tokens_sha256="3" * 64,
-                prepared_rgb_sha256="4" * 64,
-                state_before_sha256="5" * 64,
-                state_after_sha256="6" * 64,
-                causal_prefix_sha256="7" * 64,
                 history=history,
                 geometry={},
                 preprocessing={},
@@ -109,7 +100,6 @@ def _fixture_context(tmp_path):
     )
     return context, TrainingAuthority(
         path="fixture-authority",
-        sha256="d" * 64,
         authorized=True,
         max_updates=0,
         max_anchors=0,
@@ -379,13 +369,11 @@ def test_fixture_context_train_cli_positive_with_spy_optimizer(tmp_path, capsys)
 
 
 def test_export_from_training_checkpoint_preserves_changed_stem_weights(tmp_path, capsys):
-    import hashlib
 
     import torch
 
     from owac.baselines.raw_stem_siglip import load_student_artifact
     from owac.raw.distillation_pairs import PairedDistillationDataset, load_paired_manifest
-    from owac.training.raw_distillation import _identity_hash
     from tests.test_distillation_pairs import _make_fixture
 
     ctx, _ = _fixture_context(tmp_path)
@@ -405,11 +393,9 @@ def test_export_from_training_checkpoint_preserves_changed_stem_weights(tmp_path
         "student": state,
         "arm": "C",
         "cumulative_updates": 500,
-        "config_sha256": _identity_hash(config),
-        "data_sha256": dataset.manifest.manifest_sha256,
-        "source_sha256": _identity_hash(
-            {s.source_id: s.source_sha256 for s in dataset.manifest.sources}
-        ),
+        "config_sha256": "",
+        "data_sha256": "",
+        "source_sha256": "",
     }
     checkpoint = tmp_path / "checkpoint_500.pt"
     torch.save(payload, checkpoint)
@@ -434,10 +420,7 @@ def test_export_from_training_checkpoint_preserves_changed_stem_weights(tmp_path
     assert report["checkpoint_step"] == 500
     artifact_meta = json.loads((tmp_path / "artifact" / "frontend.json").read_text())
     assert artifact_meta["step"] == 500
-    assert (
-        artifact_meta["extra"]["training_checkpoint_sha256"]
-        == hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-    )
+
     # Recreate the fixture architecture and compare the exact trained stem tensor.
     from tests.test_raw_stem_siglip import make_policy
 

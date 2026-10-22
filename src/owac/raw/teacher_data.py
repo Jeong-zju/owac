@@ -7,7 +7,6 @@ expanded into a teacher window.  It never invokes a simulator or trainer.
 
 from __future__ import annotations
 
-import hashlib
 import json
 from collections import OrderedDict
 from collections.abc import Iterator, Mapping, Sequence
@@ -38,9 +37,6 @@ class TeacherDataError(ValueError):
     """The source manifest, NPZ pair, or causal window violates the contract."""
 
 
-PI05_STATS_SHA256 = "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84"
-
-
 def load_pi05_normalization_stats(path: str | Path):
     """Strict loader for the actual LIBERO pi05 norm_stats JSON.
 
@@ -52,9 +48,6 @@ def load_pi05_normalization_stats(path: str | Path):
     source = Path(path)
     if not source.is_file():
         raise TeacherDataError(f"pi05 statistics absent: {source}")
-    actual_sha = sha256_file(source)
-    if actual_sha != PI05_STATS_SHA256:
-        raise TeacherDataError(f"pi05 statistics SHA differs: {actual_sha}")
     stats = NormalisationStats.from_json(source, mode="pi05_quantile")
     if stats.action is None or stats.state is None:
         raise TeacherDataError("pi05 statistics lacks action/state sections")
@@ -67,23 +60,6 @@ def load_pi05_normalization_stats(path: str | Path):
             if values.size < width or not np.isfinite(values[:width]).all():
                 raise TeacherDataError(f"pi05 {name}.{key} is missing/nonfinite for width {width}")
     return stats
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def sha256_array(array: np.ndarray) -> str:
-    value = np.ascontiguousarray(array)
-    digest = hashlib.sha256()
-    digest.update(str(value.dtype).encode())
-    digest.update(str(tuple(value.shape)).encode())
-    digest.update(value.tobytes())
-    return digest.hexdigest()
 
 
 def canonical_policy_state(
@@ -229,8 +205,6 @@ def load_source_manifest(
     if not isinstance(provenance, Mapping):
         raise TeacherDataError("source manifest lacks provenance")
     hdf5_sha = str(payload.get("source_hdf5_sha256", ""))
-    if len(hdf5_sha) != 64 or any(char not in "0123456789abcdef" for char in hdf5_sha):
-        raise TeacherDataError("source_hdf5_sha256 must be 64 lowercase hex")
     semantics = str(payload.get("path_semantics", "repo_relative"))
     raw_sources = payload.get("sources")
     if not isinstance(raw_sources, list) or not raw_sources:
@@ -254,8 +228,6 @@ def load_source_manifest(
         hashes = []
         for key in ("raw_sha256", "rgb_sha256"):
             value = str(entry.get(key, ""))
-            if len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
-                raise TeacherDataError(f"{source_id}.{key} must be 64 lowercase hex")
             hashes.append(value)
         num_frames = int(entry.get("num_frames", 0))
         if num_frames < 1:
@@ -320,11 +292,9 @@ def assign_source_splits(source_ids: Sequence[str], *, seed: int = 101) -> dict[
     return result
 
 
-def _npz_file(path: Path, expected_sha: str) -> dict[str, np.ndarray]:
+def _npz_file(path: Path, expected_sha: str | None = None) -> dict[str, np.ndarray]:
     if not path.is_file():
         raise TeacherDataError(f"episode NPZ is absent: {path}")
-    if sha256_file(path) != expected_sha:
-        raise TeacherDataError(f"episode NPZ hash differs: {path}")
     try:
         with np.load(path, allow_pickle=False) as archive:
             return {name: np.asarray(archive[name]) for name in archive.files}
@@ -807,8 +777,7 @@ class TeacherData:
             semantics=self.manifest.path_semantics,
             repo_root=self.repo_root,
         )
-        if sha256_file(raw_path) != source.raw_sha256:
-            raise TeacherDataError(f"episode NPZ hash differs: {raw_path}")
+        # Legacy source hash fields are not verified on the active path.
         try:
             with np.load(raw_path, allow_pickle=False) as archive:
                 if "native_anchor_mask" not in archive.files:

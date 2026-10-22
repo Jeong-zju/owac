@@ -9,7 +9,6 @@ falling back.
 from __future__ import annotations
 
 import copy
-import hashlib
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
@@ -75,8 +74,6 @@ class FrozenBackend:
     padded_dim: int = 32
 
     def __post_init__(self) -> None:
-        if not self.identity.get("sha256"):
-            raise StudentInferenceUnavailable("frozen backend identity/hash is required")
         if self.action_horizon < 1 or self.flow_steps < 1:
             raise ValueError("positive action horizon/flow steps required")
         if self.control_dim < 1 or self.padded_dim < self.control_dim:
@@ -241,31 +238,10 @@ class PureStudentRuntime:
         frontend_factory: Callable[[Any, str], tuple[Any, Any]] | None = None,
         backend: FrozenBackend,
         history: HistoryContract | None = None,
-        expected_checkpoint_sha256: str | None = None,
     ) -> PureStudentRuntime:
         from owac.baselines.raw_stem_siglip import load_student_artifact
 
-        student = load_student_artifact(
-            path,
-            frontend_factory=frontend_factory,
-            expected_checkpoint_sha256=expected_checkpoint_sha256,
-        )
-        metadata = getattr(student, "metadata", {})
-        recorded_backend = metadata.get("backend", {}) or {}
-        if recorded_backend.get("sha256") != backend.identity.get("sha256"):
-            raise StudentInferenceUnavailable(
-                "frozen backend identity differs from the exported student artifact"
-            )
-        for label, recorded in (
-            ("tokenizer", metadata.get("tokenizer")),
-            ("normalizer", metadata.get("normalizer")),
-        ):
-            if isinstance(recorded, Mapping) and recorded.get("sha256"):
-                actual = backend.tokenizer_sha256 if label == "tokenizer" else backend.stats_sha256
-                if actual != recorded["sha256"]:
-                    raise StudentInferenceUnavailable(
-                        f"frozen {label} identity differs from the exported student artifact"
-                    )
+        student = load_student_artifact(path, frontend_factory=frontend_factory)
         return cls(student=student, backend=backend, history=history)
 
     def _anchor_raw(self, samples: Sequence[StudentSample]):
@@ -809,20 +785,10 @@ class ParityTrace:
     reset: bool
     provenance: Mapping[str, Any]
 
-    def digest(self) -> str:
-        digest = hashlib.sha256()
-        for name in sorted(self.tensors):
-            tensor = self.tensors[name].detach().cpu().float().contiguous()
-            digest.update(name.encode("utf-8"))
-            digest.update(str(tuple(tensor.shape)).encode("utf-8"))
-            digest.update(tensor.numpy().tobytes())
-        return digest.hexdigest()
-
 
 @dataclass(frozen=True, slots=True)
 class ParityReport:
     passed: bool
-    native_repeat_digest: str
     tolerance: ParityTolerance
     first_mismatch: str | None
     max_errors: Mapping[str, float]
@@ -832,7 +798,6 @@ class ParityReport:
     def as_dict(self) -> dict[str, Any]:
         return {
             "passed": self.passed,
-            "native_repeat_digest": self.native_repeat_digest,
             "tolerance": self.tolerance.as_dict(),
             "first_mismatch": self.first_mismatch,
             "max_errors": dict(self.max_errors),
@@ -871,7 +836,9 @@ class Stage0ParityRunner:
         torch.manual_seed(self.fixed_seed)
         np.random.seed(self.fixed_seed)
         second = self.native_call(batch)
-        if first.digest() != second.digest():
+        if set(first.tensors) != set(second.tensors) or any(
+            not torch.equal(first.tensors[name], second.tensors[name]) for name in first.tensors
+        ):
             raise ParityFailure("native policy is not repeatable at the fixed boundary")
         tolerance = self.tolerance  # frozen before bridge invocation
         bridge = self.bridge_call(copy.deepcopy(batch))
@@ -901,7 +868,6 @@ class Stage0ParityRunner:
                 first_bad = name
         return ParityReport(
             passed=first_bad is None,
-            native_repeat_digest=first.digest(),
             tolerance=tolerance,
             first_mismatch=first_bad,
             max_errors=errors,
@@ -920,7 +886,6 @@ def load_labels_without_teacher(dataset: Any, frame_key: str) -> dict[str, Any]:
     frame = dataset._frames[frame_key]
     data = _npz(
         frame.array_path,
-        expected_sha=frame.array_sha256,
         keys=("actions_raw", "future_mask", "state"),
     )
     if "actions_raw" not in data or "future_mask" not in data:

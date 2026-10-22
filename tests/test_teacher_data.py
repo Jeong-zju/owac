@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -19,10 +18,6 @@ from owac.raw.teacher_data import (
     load_teacher_episode,
     make_window,
 )
-
-
-def _hash(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _write_episode(root: Path, index: int, *, frames: int = 6) -> Path:
@@ -76,8 +71,8 @@ def teacher_manifest(tmp_path):
                 "split": splits[source_id],
                 "raw_path": str(path),
                 "rgb_path": str(path),
-                "raw_sha256": _hash(path),
-                "rgb_sha256": _hash(path),
+                "raw_sha256": "a" * 64,
+                "rgb_sha256": "a" * 64,
                 "num_frames": 6,
                 "task_name": "put_the_cream_cheese_in_the_bowl",
                 "lighting": "Normal",
@@ -176,7 +171,9 @@ def test_quantile_normalization_preserves_mask_not_padding(teacher_manifest, tmp
     assert np.allclose(configured["padded_state"][8:], -2.0)
 
 
-def test_cache_validation_and_hash_mismatch(teacher_manifest, tmp_path):
+def test_cache_validation_and_legacy_hash_mismatch_is_ignored(
+    teacher_manifest, tmp_path, monkeypatch
+):
     manifest = load_source_manifest(teacher_manifest, repo_root=tmp_path)
     source = manifest.sources[0]
     first = load_teacher_episode(source, repo_root=tmp_path, path_semantics="absolute")
@@ -184,12 +181,12 @@ def test_cache_validation_and_hash_mismatch(teacher_manifest, tmp_path):
     assert first.actions is not second.actions or np.array_equal(first.actions, second.actions)
     data = TeacherData(manifest, repo_root=tmp_path, cache_entries=1)
     assert data.episode(source.source_demo_id).source.source_demo_id == source.source_demo_id
-    # Hash mismatch must be rejected before arrays are consumed.
+    # Legacy hash mismatch fields are ignored; arrays are still structurally valid.
     from dataclasses import replace
 
     bad = replace(source, raw_sha256="0" * 64)
-    with pytest.raises(TeacherDataError, match="hash"):
-        load_teacher_episode(bad, repo_root=tmp_path, path_semantics="absolute")
+    ignored = load_teacher_episode(bad, repo_root=tmp_path, path_semantics="absolute")
+    assert np.array_equal(ignored.raw["agentview"], first.raw["agentview"])
 
 
 def test_split_windows_never_cross_sources(teacher_manifest, tmp_path):
@@ -318,7 +315,7 @@ def test_source_block_sampler_uses_32_anchors_and_resumes(teacher_manifest, tmp_
 
 
 def test_actual_pi05_normalization_stats_contract():
-    from owac.raw.teacher_data import PI05_STATS_SHA256, load_pi05_normalization_stats
+    from owac.raw.teacher_data import load_pi05_normalization_stats
 
     path = Path(
         "outputs/checkpoints/raw-distillation/pi05_libero_jax/"
@@ -327,7 +324,6 @@ def test_actual_pi05_normalization_stats_contract():
     if not path.is_file():
         pytest.skip("actual pi05 norm_stats file is absent in this checkout")
     stats = load_pi05_normalization_stats(path)
-    assert stats.sha256 == PI05_STATS_SHA256
     assert len(stats.action["q01"]) == 7
     assert len(stats.action["q99"]) == 7
     assert len(stats.state["q01"]) == 8

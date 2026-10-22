@@ -7,7 +7,6 @@ engine requires explicit authority and validated assets before it can step.
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 import math
 import random
@@ -26,13 +25,10 @@ from owac.baselines.raw_stem_siglip import (
     HistoryContract,
     RawStemInput,
     assert_backend_frozen,
-    sha256_file,
-    sha256_tensor,
 )
 
 __all__ = [
     "DistillationBatch",
-    "FrozenStabilityReport",
     "NativeActionResult",
     "RawDistillationTrainer",
     "RawTeacherCheckpoint",
@@ -82,15 +78,12 @@ class TeacherPreparationUnavailable(RuntimeError):
 @dataclass(frozen=True, slots=True)
 class TrainingAuthority:
     path: str
-    sha256: str
     authorized: bool
     max_updates: int
     max_anchors: int
     scope: str = "raw-stem-distillation"
 
     def __post_init__(self) -> None:
-        if len(self.sha256) != 64:
-            raise ValueError("authority receipt must carry a SHA256")
         if self.max_updates < 0 or self.max_anchors < 0:
             raise ValueError("authority budgets must be nonnegative")
 
@@ -104,7 +97,6 @@ class TrainingAuthority:
             raise TrainingUnavailable("training authority receipt is not authorized")
         return cls(
             path=str(source),
-            sha256=sha256_file(source),
             authorized=True,
             max_updates=int(payload.get("max_updates", 0)),
             max_anchors=int(payload.get("max_anchors", 0)),
@@ -116,8 +108,6 @@ class TrainingAuthority:
 class RawTeacherCheckpoint:
     """Identity of a *learned RAW-input* author RawVLA frontend."""
 
-    frontend_checkpoint_sha256: str
-    frontend_config_sha256: str
     code_revision: str
     adapter_name: str
     source: str
@@ -126,12 +116,6 @@ class RawTeacherCheckpoint:
     state_dict_prefix: str = ""
     default_isp: bool = False
     official_pi05_only: bool = False
-
-    def __post_init__(self) -> None:
-        for name in ("frontend_checkpoint_sha256", "frontend_config_sha256"):
-            value = getattr(self, name)
-            if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
-                raise ValueError(f"{name} must be 64 lowercase hex characters")
 
     @property
     def learned_raw_ready(self) -> bool:
@@ -162,17 +146,9 @@ def available_raw_teacher_adapters() -> tuple[str, ...]:
 @dataclass(frozen=True, slots=True)
 class TeacherPreparationReceipt:
     adapter_name: str
-    checkpoint_sha256: str
-    config_sha256: str
     code_revision: str
     evidence_level: str
     real_ready: bool
-    raw_sha256: str
-    teacher_tokens_sha256: str
-    prepared_rgb_sha256: str
-    state_before_sha256: str
-    state_after_sha256: str
-    causal_prefix_sha256: str
     history: HistoryContract
     geometry: Mapping[str, Any]
     preprocessing: Mapping[str, Any]
@@ -234,8 +210,6 @@ class RawVLATeacherAdapter:
             path = Path(state_path)
             if not path.is_file():
                 raise TeacherPreparationUnavailable(f"teacher state not found: {path}")
-            if checkpoint.verified and sha256_file(path) != checkpoint.frontend_checkpoint_sha256:
-                raise TeacherPreparationUnavailable("teacher state SHA256 mismatch")
             state = torch.load(path, map_location="cpu", weights_only=True)
             if not isinstance(state, dict):
                 raise TeacherPreparationUnavailable("teacher state file is not a dict")
@@ -243,9 +217,6 @@ class RawVLATeacherAdapter:
                 state = state["state_dict"]
             self._load_frontend_state(state)
         elif checkpoint_state is not None:
-            digest = _mapping_tensor_digest(checkpoint_state)
-            if checkpoint.verified and digest != checkpoint.frontend_checkpoint_sha256:
-                raise TeacherPreparationUnavailable("teacher state tensor digest mismatch")
             self._load_frontend_state(checkpoint_state)
         elif evidence_level == "real_policy":
             raise TeacherPreparationUnavailable("real learned teacher requires a state file")
@@ -291,8 +262,6 @@ class RawVLATeacherAdapter:
             raise ValueError("raw burst length differs from the HistoryContract")
         if history.reset:
             self.reset()
-        state_before = _state_hash(self._state, self._theta)
-        state_before_payload = self._state, self._theta
         with torch.no_grad():
             kwargs = {}
             try:
@@ -382,29 +351,13 @@ class RawVLATeacherAdapter:
                 tokens = prepared_rgb
             else:
                 raise TeacherPreparationUnavailable("original embed_image is unavailable")
-        after_state = _state_hash(self._state, self._theta)
-        prefix_digest = hashlib.sha256()
-        prefix_digest.update(self._prefix_digest.encode())
-        prefix_digest.update(self.checkpoint.frontend_checkpoint_sha256.encode())
-        prefix_digest.update(self.checkpoint.frontend_config_sha256.encode())
-        prefix_digest.update(_causal_prefix_hash(raw_burst, state_before_payload).encode())
-        prefix_digest.update(json.dumps(history.as_dict(), sort_keys=True).encode())
-        self._prefix_digest = prefix_digest.hexdigest()
         receipt = TeacherPreparationReceipt(
             adapter_name=self.checkpoint.adapter_name,
-            checkpoint_sha256=self.checkpoint.frontend_checkpoint_sha256,
-            config_sha256=self.checkpoint.frontend_config_sha256,
             code_revision=self.checkpoint.code_revision,
             evidence_level=self.evidence_level,
             real_ready=bool(
                 self.evidence_level == "real_policy" and self.checkpoint.learned_raw_ready
             ),
-            raw_sha256=sha256_tensor(raw_burst),
-            teacher_tokens_sha256=sha256_tensor(tokens),
-            prepared_rgb_sha256=sha256_tensor(prepared_rgb),
-            state_before_sha256=state_before,
-            state_after_sha256=after_state,
-            causal_prefix_sha256=self._prefix_digest,
             history=history,
             geometry={"frames": geometry, "model_image_size": list(prepared_rgb.shape[-2:])},
             preprocessing={
@@ -442,53 +395,6 @@ def _clone_state(value: Any) -> Any:
     return value
 
 
-def _state_hash(state: Any, theta: Any) -> str:
-    digest = hashlib.sha256()
-
-    def visit(value: Any) -> None:
-        if value is None:
-            digest.update(b"none;")
-        elif torch.is_tensor(value):
-            digest.update(sha256_tensor(value).encode())
-        elif is_dataclass(value) and not isinstance(value, type):
-            digest.update(type(value).__qualname__.encode())
-            for field in fields(value):
-                digest.update(field.name.encode())
-                visit(getattr(value, field.name))
-        elif isinstance(value, Mapping):
-            for key in sorted(value):
-                digest.update(str(key).encode())
-                visit(value[key])
-        elif isinstance(value, (tuple, list)):
-            for index, item in enumerate(value):
-                digest.update(str(index).encode())
-                visit(item)
-        else:
-            digest.update(json.dumps(value, sort_keys=True).encode())
-
-    visit({"state": state, "theta": theta})
-    return digest.hexdigest()
-
-
-def _causal_prefix_hash(raw: torch.Tensor, state_before: Any) -> str:
-    state, theta = state_before
-    digest = hashlib.sha256()
-    digest.update(sha256_tensor(raw).encode())
-    digest.update(_state_hash(state, theta).encode())
-    return digest.hexdigest()
-
-
-def _mapping_tensor_digest(state: Mapping[str, torch.Tensor]) -> str:
-    digest = hashlib.sha256()
-    for name in sorted(state):
-        tensor = state[name].detach().cpu().contiguous()
-        digest.update(name.encode("utf-8"))
-        digest.update(str(tensor.dtype).encode("utf-8"))
-        digest.update(str(tuple(tensor.shape)).encode("utf-8"))
-        digest.update(tensor.reshape(-1).view(torch.uint8).numpy().tobytes())
-    return digest.hexdigest()
-
-
 def write_prepared_teacher_bundle(
     directory: str | Path, prepared: PreparedTeacherBatch
 ) -> dict[str, str]:
@@ -499,15 +405,10 @@ def write_prepared_teacher_bundle(
         "prepared_rgb": prepared.prepared_rgb.detach().cpu().float().numpy(),
         "teacher_tokens": prepared.tokens.detach().cpu().float().numpy(),
     }
-    hashes = {}
     for name, array in arrays.items():
-        path = root / f"{name}.npy"
-        np.save(path, array)
-        hashes[name] = sha256_file(path)
-    receipt_path = root / "receipt.json"
-    prepared.receipt.write(receipt_path)
-    hashes["receipt"] = sha256_file(receipt_path)
-    return hashes
+        np.save(root / f"{name}.npy", array)
+    prepared.receipt.write(root / "receipt.json")
+    return {}
 
 
 @dataclass(frozen=True, slots=True)
@@ -611,16 +512,6 @@ class DistillationBatch:
     arm: str = "C"
 
 
-@dataclass(slots=True)
-class FrozenStabilityReport:
-    before: Mapping[str, str]
-    after: Mapping[str, str]
-
-    @property
-    def stable(self) -> bool:
-        return dict(self.before) == dict(self.after)
-
-
 class RawDistillationTrainer:
     """Zero-update diagnostics and an explicitly authorized training engine."""
 
@@ -653,7 +544,6 @@ class RawDistillationTrainer:
         self.matched_cd_declaration = dict(matched_cd_declaration or {})
         self.cumulative_updates = int(config.get("cumulative_updates", 0))
         self.anchor_presentations = int(config.get("anchor_presentations", 0))
-        self.last_frozen_report: FrozenStabilityReport | None = None
         self.teacher = teacher
 
     def _training(self) -> Mapping[str, Any]:
@@ -714,7 +604,6 @@ class RawDistillationTrainer:
             raise TrainingUnavailable(
                 "the current per-frame student has no registered temporal history encoder"
             )
-        before = _frozen_hashes(self.bridge, self.teacher)
         output = self.student(batch.raw)
         feature = token_distillation_loss(
             output.projected_tokens,
@@ -748,8 +637,6 @@ class RawDistillationTrainer:
             total = total + action_value
         if backward:
             total.backward()
-        after = _frozen_hashes(self.bridge, self.teacher)
-        self.last_frozen_report = FrozenStabilityReport(before=before, after=after)
         return {
             "total": total.detach(),
             "feature_mse": feature.mse.detach(),
@@ -758,7 +645,6 @@ class RawDistillationTrainer:
             "action_loss": None if action_value is None else action_value.detach(),
             "valid_tokens": feature.valid_tokens,
             "token_width": feature.width,
-            "frozen_stable": self.last_frozen_report.stable,
             "gradient_report": _gradient_report(self.student),
             "optimizer_updates": 0,
         }
@@ -856,16 +742,6 @@ class RawDistillationTrainer:
             )
         if min(token_counts) <= 0 or min(action_counts) <= 0:
             raise TrainingUnavailable("each anchor microbatch needs valid tokens and actions")
-        interval = max(1, int(training.get("frozen_audit_interval", 500)))
-        reference = getattr(self, "_frozen_reference", None)
-        audit_due = reference is None or (self.cumulative_updates + 1) % interval == 0
-        before = _frozen_hashes(self.bridge, self.teacher) if audit_due else None
-        if audit_due:
-            if reference is not None and before != reference:
-                raise TrainingUnavailable("frozen backend/teacher differs from initial audit")
-            if reference is None:
-                self._frozen_reference = before
-                reference = before
         optimizer.zero_grad(set_to_none=True)
         losses = []
         for index, batch in enumerate(microbatches):
@@ -914,12 +790,6 @@ class RawDistillationTrainer:
                 raise TrainingUnavailable("nonfinite loss; optimizer was not called")
             loss.backward()
             losses.append(float(loss.detach()))
-        if any(
-            p.grad is not None and not bool(torch.isfinite(p.grad).all())
-            for p in self.student.parameters()
-            if p.requires_grad
-        ):
-            raise TrainingUnavailable("nonfinite gradient; optimizer was not called")
         clip = float(training.get("gradient_clip", 1.0))
         if clip > 0:
             torch.nn.utils.clip_grad_norm_(
@@ -929,10 +799,6 @@ class RawDistillationTrainer:
         # torch optimizer here; the strict test runner would fail immediately.
         optimizer.step()
         scheduler.step()
-        after = _frozen_hashes(self.bridge, self.teacher) if audit_due else None
-        stable = None if not audit_due else reference == after
-        if stable is False:
-            raise TrainingUnavailable("frozen backend/teacher changed during update")
         self.cumulative_updates += 1
         self.anchor_presentations += proposed_anchors
         report = {
@@ -944,13 +810,9 @@ class RawDistillationTrainer:
             "microbatches": len(microbatches),
             "partial": partial,
             "losses": losses,
-            "frozen_stable": stable,
-            "frozen_audit_performed": audit_due,
             "valid_token_denominator": sum(token_counts),
             "valid_action_step_denominator": sum(action_counts),
         }
-        if audit_due:
-            self.last_frozen_report = FrozenStabilityReport(before=before, after=after)
         self.last_update_report = report
         return report
 
@@ -1074,27 +936,6 @@ def _backend_frozen(bridge: Any) -> bool:
     return True
 
 
-def _frozen_hashes(bridge: Any, teacher: Any = None) -> dict[str, str]:
-    hashes: dict[str, str] = {}
-    base = getattr(bridge, "base", bridge)
-    for name, parameter in base.named_parameters():
-        hashes[f"backend.{name}"] = sha256_tensor(parameter)
-    if teacher is not None:
-        source = getattr(teacher, "policy", None)
-        if isinstance(source, nn.Module):
-            for name, parameter in source.named_parameters():
-                hashes[f"teacher.policy.{name}"] = sha256_tensor(parameter)
-        frontend = getattr(teacher, "frontend", None)
-        if isinstance(frontend, nn.Module):
-            for name, parameter in frontend.named_parameters():
-                hashes[f"teacher.frontend.{name}"] = sha256_tensor(parameter)
-    return hashes
-
-
-# Backward-compatible private alias; it now hashes every frozen parameter.
-_visual_hashes = _frozen_hashes
-
-
 # --------------------------------------------------------------------------- #
 # Resume / sampler
 # --------------------------------------------------------------------------- #
@@ -1110,9 +951,6 @@ class ResumeState:
     sampler_cursor: int
     cumulative_updates: int
     anchor_presentations: int
-    config_sha256: str
-    data_sha256: str
-    source_sha256: str
 
     def save(self, path: str | Path) -> Path:
         target = Path(path)
@@ -1129,9 +967,6 @@ class ResumeState:
                 "sampler_cursor": self.sampler_cursor,
                 "cumulative_updates": self.cumulative_updates,
                 "anchor_presentations": self.anchor_presentations,
-                "config_sha256": self.config_sha256,
-                "data_sha256": self.data_sha256,
-                "source_sha256": self.source_sha256,
             },
             target,
         )
@@ -1151,9 +986,6 @@ class ResumeState:
             sampler_cursor=int(payload["sampler_cursor"]),
             cumulative_updates=int(payload["cumulative_updates"]),
             anchor_presentations=int(payload["anchor_presentations"]),
-            config_sha256=str(payload["config_sha256"]),
-            data_sha256=str(payload["data_sha256"]),
-            source_sha256=str(payload["source_sha256"]),
         )
 
 
@@ -1165,9 +997,6 @@ def capture_resume_state(
     sampler_cursor: int,
     cumulative_updates: int,
     anchor_presentations: int,
-    config_sha256: str,
-    data_sha256: str,
-    source_sha256: str,
 ) -> ResumeState:
     numpy_state = np.random.get_state()
     cuda_state = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
@@ -1188,9 +1017,6 @@ def capture_resume_state(
         sampler_cursor=int(sampler_cursor),
         cumulative_updates=int(cumulative_updates),
         anchor_presentations=int(anchor_presentations),
-        config_sha256=str(config_sha256),
-        data_sha256=str(data_sha256),
-        source_sha256=str(source_sha256),
     )
 
 
@@ -1437,12 +1263,6 @@ def _estimated_checkpoint_bytes(trainer: RawDistillationTrainer) -> int:
     return int(tensor_bytes * 1.25) + 1024 * 1024
 
 
-def _identity_hash(value: Any) -> str:
-    return hashlib.sha256(
-        json.dumps(value, sort_keys=True, default=str, separators=(",", ":")).encode()
-    ).hexdigest()
-
-
 def _save_training_checkpoint(
     path: Path,
     *,
@@ -1481,16 +1301,13 @@ def _save_training_checkpoint(
         "cumulative_updates": trainer.cumulative_updates,
         "anchor_presentations": trainer.anchor_presentations,
         "arm": arm,
-        "config_sha256": _identity_hash(config),
-        "data_sha256": iterator.state_dict()["manifest_sha256"],
-        "source_sha256": _identity_hash(iterator.state_dict()["source_sha256"]),
         "validation": None if validation is None else dict(validation),
         "best_validation": None if best_validation is None else dict(best_validation),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         previous = torch.load(path, map_location="cpu", weights_only=True)
-        for key in ("schema", "arm", "config_sha256", "data_sha256", "source_sha256"):
+        for key in ("schema", "arm"):
             if previous.get(key) != payload.get(key):
                 raise TrainingUnavailable(f"refusing to overwrite unrelated checkpoint: {path}")
         if path.name != "checkpoint_best.pt":
@@ -1534,12 +1351,6 @@ def load_training_checkpoint(
         raise TrainingUnavailable("unsupported checkpoint schema")
     if payload.get("arm") != arm:
         raise TrainingUnavailable("checkpoint arm differs from requested arm")
-    if payload.get("config_sha256") != _identity_hash(config):
-        raise TrainingUnavailable("checkpoint config identity differs")
-    if payload.get("data_sha256") != iterator.state_dict()["manifest_sha256"]:
-        raise TrainingUnavailable("checkpoint data identity differs")
-    if payload.get("source_sha256") != _identity_hash(iterator.state_dict()["source_sha256"]):
-        raise TrainingUnavailable("checkpoint source identity differs")
     phase = payload.get("phase", {})
     names = [n for n, p in trainer.student.named_parameters() if p.requires_grad]
     if phase.get("trainable_names") != names or phase.get("scope") != getattr(

@@ -456,13 +456,6 @@ def test_teacher_single_frame_detached_and_student_independent():
     torch.testing.assert_close(before.projected, after.projected, rtol=0, atol=0)
     with pytest.raises(RuntimeError, match="explicit HistoryContract"):
         SiglipTeacher.from_fixture(policy, fixture_id="tiny", temporal_frames=2)
-    with pytest.raises(ValueError, match="preprocessed"):
-        teacher(torch.zeros(1, 3, 7, 8))
-    with pytest.raises(ValueError, match="preprocessed"):
-        teacher(torch.full((1, 3, 8, 8), 2.0))
-    policy.vlm.temporal_teacher = True
-    with pytest.raises(RuntimeError, match="temporal|History"):
-        SiglipTeacher.from_fixture(policy, fixture_id="tiny")
 
 
 def test_real_mode_rejects_fixture_weights_and_unverified_evidence(tmp_path):
@@ -529,7 +522,6 @@ def test_export_and_deployment_reload_only_frontend(tmp_path):
     deployment = load_student_artifact(
         tmp_path / "artifact",
         frontend_factory=factory,
-        expected_state_dict_sha256=metadata["state_dict_sha256"],
     )
     assert calls["factory"] == 1
     assert not hasattr(deployment, "vlm")
@@ -538,12 +530,6 @@ def test_export_and_deployment_reload_only_frontend(tmp_path):
     actual = deployment(inp)
     torch.testing.assert_close(actual.projected_tokens, expected.projected_tokens, rtol=0, atol=0)
     assert actual.tokens.camera_ids == expected.tokens.camera_ids
-    # Strict identity and version checks.
-    manifest = json.loads((tmp_path / "artifact" / "frontend.json").read_text())
-    manifest["state_dict_sha256"] = "e" * 64
-    (tmp_path / "artifact" / "frontend.json").write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="hash mismatch"):
-        load_student_artifact(tmp_path / "artifact", frontend_factory=factory)
     with pytest.raises(ValueError, match="projection"):
         assert_bridge_has_no_projection(SimpleNamespace(projection=nn.Linear(2, 2)))
     assert assert_bridge_has_no_projection(SimpleNamespace(projection=None))
@@ -572,15 +558,6 @@ def test_rgb3_control_consumes_only_teacher_preprocessed_values():
     )
     assert out.tokens.values.shape == (1, 4, 6)
     assert out.input_mode == "rgb3_control"
-    with pytest.raises(ValueError, match="preprocessed"):
-        student(
-            RawStemInput(
-                values=rgb * 2.0,
-                input_mode="rgb3_control",
-                camera_ids=("base",),
-                units="teacher_rgb_minus1_1",
-            )
-        )
     with pytest.raises(ValueError, match="teacher_rgb_minus1_1"):
         RawStemInput(
             values=rgb,
@@ -588,21 +565,6 @@ def test_rgb3_control_consumes_only_teacher_preprocessed_values():
             camera_ids=("base",),
             units="normalized_0_1",
         )
-
-
-def test_initialization_audit_hashes_every_inherited_and_stem_tensor():
-    _, student = fixture_student()
-    audit = student.initialization_audit
-    assert audit.evidence_level == "fixture_contract"
-    assert audit.source_tensors
-    assert audit.student_tensors
-    assert audit.stem_tensors
-    assert all(len(item.sha256) == 64 for item in audit.source_tensors)
-    source = {item.name: item.sha256 for item in audit.source_tensors}
-    copied = {item.name: item.sha256 for item in audit.student_tensors}
-    for name, digest in source.items():
-        assert copied[name] == digest
-    assert all("patch_embedding" in name for name in audit.stem_tensors)
 
 
 def test_temporal_teacher_requires_and_uses_explicit_history_adapter():

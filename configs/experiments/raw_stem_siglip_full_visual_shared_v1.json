@@ -1,0 +1,276 @@
+{
+  "schema": "owac.raw-full-visual.shared.v1",
+  "candidate": "RAW_STEM_SIGLIP_TEMPORAL",
+  "decision": "0016",
+  "evidence_level": "engineering_integration_fixture_and_real_readiness",
+  "authorization": {
+    "optimizer_updates": false,
+    "teacher_cache_preparation": true,
+    "training_launch_authorized": false,
+    "simulation_closed_loop": false,
+    "physical_actions": false,
+    "scope": "shared RAW -> frozen init0 teacher -> token cache; full-visual student stage after Sol review",
+    "max_new_global_updates": 3116,
+    "max_new_anchor_presentations": 49856,
+    "remote_host": "101.71.76.104",
+    "remote_port": 27786,
+    "note": "no training/GPU launch in this work round; old50/cache excluded"
+  },
+  "task": {
+    "dataset": "RAWVLA-Bench",
+    "suite": "libero_goal",
+    "task_key": "task6",
+    "instruction": "put the cream cheese in the bowl",
+    "lighting": "Normal",
+    "input_regime": "rawvla_rgb3",
+    "raw_origin": "LIBERO RGB8 inverse pseudoRAW3; not native Bayer"
+  },
+  "assets": {
+    "teacher_registry": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-registry.json",
+    "teacher_frontend_checkpoint": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/teacher-validated-normal-task6-init0.pt",
+    "teacher_frontend_checkpoint_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+    "source_manifest": "/root/owac/repo/outputs/raw-distillation-full-vision-20261022/shared-stage/source-manifest.json",
+    "source_manifest_sha256": null,
+    "author_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main",
+    "starvla_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/starvla-pinned-source",
+    "teacher_config_paths": [
+      "/home/jeong/zeno/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main/configs/libero/pi05.yaml"
+    ],
+    "checkpoint": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "load_audit": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/load-audit.json",
+    "tokenizer": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/paligemma_tokenizer.model",
+    "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+    "statistics": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+    "statistics_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "runtime": "/home/jeong/zeno/owac/repo/outputs/rawvla-teacher-20261020/runtime/bin/python",
+    "cache_root": "/root/owac/repo/outputs/raw-distillation-full-vision-20261022/shared-stage/teacher-cache",
+    "output_root": "/root/owac/repo/outputs/raw-distillation-full-vision-20261022/shared-stage",
+    "device": "cuda",
+    "source_manifest_sha256_source": "teacher_preparation_receipt.manifest_sha256",
+    "source_manifest_sha256_pending_preparation": true
+  },
+  "teacher_requirement": {
+    "selected_checkpoint": "teacher-validated-normal-task6-init0.pt",
+    "provenance": "init0 locally rebuilt author architecture; not published trained author weights",
+    "input": "RAW",
+    "temporal_teacher_allowed": true,
+    "temporal_teacher_implemented": true,
+    "stateless_single_frame": false,
+    "freeze_all": true
+  },
+  "student": {
+    "stem_hidden": 64,
+    "stem_seed": 101,
+    "input_mode": "rawvla_rgb3",
+    "inherited_vision": "actual_pi05_vision_positions_siglip_projector",
+    "extra_projection": false,
+    "gate": "channelwise_sigmoid",
+    "raw_burst_frames": 6,
+    "endpoint_stride": 5,
+    "recurrent_endpoints": 6,
+    "camera_order": [
+      "agentview",
+      "wrist"
+    ],
+    "native_image_keys": [
+      "base_0_rgb",
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ],
+    "inactive_native_image_key": "right_wrist_0_rgb",
+    "raw_resize": "bilinear_align_corners_false_256_to_224_full_fov",
+    "physical_position_backmap": "224_patch14_center_to_256_patch16",
+    "trainable_scope": "full_visual_head",
+    "trainable_parameters": 428579952,
+    "gate_init": "zero",
+    "vision_architecture": {
+      "hidden_size": 1152,
+      "intermediate_size": 4304,
+      "num_hidden_layers": 27,
+      "num_attention_heads": 16,
+      "image_size": 224,
+      "patch_size": 14,
+      "projection_dim": 2048,
+      "num_channels": 3
+    },
+    "evidence_level": "standalone_visual_subset",
+    "prior_full_policy_load_audit": "outputs/checkpoints/raw-distillation/pi05_libero_starvla/load-audit.json",
+    "prior_full_policy_load_audit_sha256": "d66885a9db463da61bf4cc6727e7f6f67cf4e2818632b8fcf21671020d5286ac",
+    "forward_semantics": {
+      "attention_implementation": "eager",
+      "hidden_act": "gelu_pytorch_tanh",
+      "layer_norm_eps": 1e-06,
+      "image_size": 224,
+      "patch_size": 14,
+      "grid": [
+        16,
+        16
+      ],
+      "num_positions": 256,
+      "encoder_layers": 27,
+      "projector_in": 1152,
+      "projector_out": 2048,
+      "projected_token_order": "camera_major_then_patch_row_major",
+      "projected_token_scale": "linear_projector_only_no_extra_normalization",
+      "position_table_shared_across_cameras": true
+    }
+  },
+  "training": {
+    "seed": 101,
+    "effective_batch": 16,
+    "microbatch": 1,
+    "micro_batch_per_rank": 1,
+    "gradient_accumulation_steps": 8,
+    "max_new_global_updates": 3116,
+    "max_new_anchor_presentations": 49856,
+    "total_update_equivalents": 5000,
+    "total_anchor_equivalents": 80000,
+    "learning_rate": 1e-05,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "gradient_clip": 1.0,
+    "warmup_updates": 100,
+    "lambda_f": 1.0,
+    "cosine_weight": 0.1,
+    "lambda_a_D": 0.0,
+    "include_action_loss": false,
+    "activation_checkpointing": true,
+    "find_unused_parameters": false,
+    "frozen_audit_interval": 500,
+    "validation_interval_new_updates": 250,
+    "checkpoint_interval_new_updates": 250,
+    "checkpoint_reserve_bytes": 5200000000,
+    "stage1": "full_visual_head",
+    "stage2": {
+      "enabled": false,
+      "input_blocks": 0,
+      "lr": null,
+      "explicit": false
+    },
+    "finalization_reserve_seconds": 600.0,
+    "checkpoint_write_reserve_seconds": 120.0
+  },
+  "evaluation": {
+    "selection_split": "validation",
+    "selection_metric": "validation_token_total",
+    "test_selection": false,
+    "validation_windows": 46,
+    "validation_sources": 2,
+    "validation_episode_resets": 2,
+    "validation_interval_new_updates": 250,
+    "test_used": false,
+    "action_diagnostic": "not_run_not_used"
+  },
+  "cleanup_policy": {
+    "old_phase_budget_ledger": "do_not_alter",
+    "old_local_run": "preserve untouched",
+    "old50_manifest_cache": "historical_only_never_read_or_migrated",
+    "shared_dataset": "readonly",
+    "new_engineering_optimizer_updates": 0,
+    "new_engineering_episodes": 0,
+    "formal_training_receipt": false
+  },
+  "remote": {
+    "host": "101.71.76.104",
+    "ssh_port": 27786,
+    "world_size": 2,
+    "backend": "nccl",
+    "output_root": "/root/owac/repo/outputs/raw-distillation-full-vision-20261022/shared-stage",
+    "path_alias": "/home/jeong/zeno/owac/repo",
+    "path_mapping": [
+      {
+        "logical_prefix": "/home/jeong/zeno/owac",
+        "physical_prefix": "/root/owac"
+      }
+    ],
+    "total_gpu_wall_seconds": 230400,
+    "total_output_bytes": 21474836480,
+    "torchrun_command": "torchrun --standalone --nnodes=1 --nproc_per_node=2 -m owac.runtime.raw_full_visual_distillation",
+    "shared_dataset_inventory": "outputs/raw-distillation-full-vision-20261022/shared-task6-inventory.json",
+    "teacher_preparation_receipt": "/root/owac/repo/outputs/raw-distillation-full-vision-20261022/shared-stage/teacher-preparation-receipt.json",
+    "require_teacher_preparation_receipt": true,
+    "teacher_preparation_command": "torchrun --standalone --nnodes=1 --nproc_per_node=2 -m owac.raw.shared_rawvla_distillation prepare",
+    "shared_dataset_root": "/root/autodl-pub/datasets/rawvla"
+  },
+  "prior_stage": {
+    "run_root": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-c-full-20261021-123313",
+    "final_supervisor_state": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-c-full-20261021-123313/supervisor-state.json",
+    "gpu_wall_seconds": 89558.73680601672,
+    "output_bytes": 6078252068,
+    "spent_update_equivalents": 1884,
+    "spent_anchor_equivalents": 30144,
+    "parent_checkpoint_provenance": "/home/jeong/zeno/owac/repo/outputs/raw-distillation-c-full-20261021-123313/checkpoints/checkpoint_final_001872.pt",
+    "parent_checkpoint_sha256_provenance": "9f1a4b760727b258e40d20cba612e2c512e0a53e628a9d12394db7f48c0e50a6",
+    "parent_student_checkpoint_used": false,
+    "reason": "shared RAW new protocol; old50/cache are historical only"
+  },
+  "cache": {
+    "identity_from_teacher_preparation_receipt": true,
+    "identity_key": null,
+    "expected_rows": 204,
+    "expected_train_anchors": 118,
+    "expected_validation_windows": 46,
+    "immutable": true,
+    "schema": "owac.raw-stem-temporal.cache.v2",
+    "teacher_artifact_sha256": "9de297ef2e1deefbf961a773f81491e6c4ee8e1a22bfc34b611519481b5b6d9d",
+    "backend_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "tokenizer_sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6",
+    "stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "sources_sha256": null,
+    "raw_files_sha256": null
+  },
+  "visual_source": {
+    "checkpoint": "/home/jeong/zeno/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors",
+    "checkpoint_sha256": "68710f4e7906d1fbf65fc73f57a6d9de3369831aba0e4fed433e09d6407ba6e8",
+    "inherit_keys": [
+      "position_embedding",
+      "siglip_blocks",
+      "post_layernorm",
+      "original_projector"
+    ],
+    "fresh_keys": [
+      "raw_stem",
+      "history_gate"
+    ],
+    "total_model_parameters": 428579952,
+    "audit": {
+      "kind": "standalone_visual_subset",
+      "inherited_tensor_count": 437,
+      "backbone_loaded": false,
+      "teacher_loaded": false,
+      "value_comparison": "independent student tensors vs actual pi05 source after BF16->FP32 cast",
+      "prior_full_policy_load_audit_linked_not_reused_as_acceptance": true
+    }
+  },
+  "checkpointing": {
+    "step0": true,
+    "interval_new_updates": 250,
+    "final": true,
+    "format": "directory_model_optimizer_split",
+    "retention": "latest_full_plus_best_model_plus_step0_model_only; max_latest_plus_best_under_unique_inode_cap",
+    "checkpoint_reserve_bytes": 5200000000,
+    "prior_output_bytes": 6078252068,
+    "total_output_bytes": 21474836480
+  },
+  "protocol": "owac.shared-rawvla.task6-normal.8-2-2.v1",
+  "data": {
+    "protocol": "owac.shared-rawvla.task6-normal.8-2-2.v1",
+    "expected_source_count": 12,
+    "expected_splits": {
+      "train": 8,
+      "validation": 2,
+      "test": 2
+    },
+    "expected_train_anchors": 118,
+    "expected_validation_windows": 46,
+    "expected_cache_rows": 204,
+    "test_targets_generated": false,
+    "source_selection": "task6 Normal only; other lighting excluded",
+    "grouping": "original hdf5_path + demo_key; lighting variants same partition",
+    "shared_root": "/root/autodl-pub/datasets/rawvla",
+    "shared_release_revision": "8586c594fff9ce38580e29745f074e82e96e74f7",
+    "old_50_manifest_used": false,
+    "old_teacher_cache_used": false
+  }
+}
