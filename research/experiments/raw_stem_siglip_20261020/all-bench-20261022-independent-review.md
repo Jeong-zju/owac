@@ -44,3 +44,7 @@ Sol只读取已生成目标，在同一真实Normal task6 demo1、endpoint0、�
 同一DeepSeek会话修复为每卡16源RAW工作缓存，并让配置实际传入Dataset；这是数据保留策略，不是增加内存停止阈值。global16/每卡8、所有源和完整因果历史、损失/参数范围不变。首次真实更新1即保存完整状态，此后每250更新/每遍继续保存。11项新入口CPU测试+24项共享路径+7项监控测试累计42项及make check通过。
 
 失败日志、native exit、cgroup证据、初始模型、SwanLab及已记录更新全部保存在outputs/raw-distillation-all-bench-20261022/attempts/train-oom-20261022-183605；未重试教师。修复经Sol独立读diff及检查后，下一次学生作业从相同初始化/seed101、优化器和采样器0开始；另用SwanLab attempt2避免曲线混接。重新启动尚待实际日志确认，不把测试通过称为运行恢复。
+
+## 只读RAW映射切换
+
+修复后的训练已真实推进137更新，SIGUSR1在共同更新边界完整保存模型/Adam/scheduler/各rank RNG/采样epoch+cursor后native0暂停，未重置。读取器现支持ZIP_STORED NPZ内部.npy直接只读np.memmap；按实际NPY头定位payload，压缩成员保留正常np.load后备。既不解包复制RAW，也不增加缓存磁盘。小夹具验证存储成员、压缩后备及帧数值一致，未增加GPU微基准或准入门槛。恢复加载后释放CPUcheckpoint payload引用，避免两卡长期各留一份完整CPU权重/Adam副本。累计43相关功能测试及make check通过。下一作业从137完整状态续训，实际重载推进尚待日志确认。

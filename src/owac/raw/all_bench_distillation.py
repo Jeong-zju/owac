@@ -9,7 +9,9 @@ from __future__ import annotations
 import json
 import os
 import random
+import struct
 import time
+import zipfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -122,11 +124,60 @@ def normalize_raw(values: np.ndarray, domain: str) -> torch.Tensor:
     raise AllBenchError(f"unsupported domain {domain!r}")
 
 
+def read_npz_member(path: str | Path, member: str) -> Any:
+    """Zero-copy readonly memmap for a numeric NPY member stored uncompressed.
+
+    The local ZIP header is parsed only; no extraction, CRC scan, hashing or
+    dataset write. Compressed/non-stored members fall back to normal np.load.
+    """
+    archive_path = Path(path)
+    with zipfile.ZipFile(archive_path) as archive:
+        info = archive.getinfo(member)
+        if info.compress_type != zipfile.ZIP_STORED:
+            with np.load(archive_path, allow_pickle=False) as loaded:
+                return loaded[member]
+        header_offset = int(info.header_offset)
+    with archive_path.open("rb") as raw:
+        raw.seek(header_offset)
+        header = raw.read(30)
+        if len(header) != 30:
+            raise AllBenchError(f"truncated local ZIP header: {archive_path}")
+        signature, _ver, _flags, method, _t, _d, _crc, _cs, _us, fn_len, extra_len = struct.unpack(
+            "<4s5H3I2H", header
+        )
+        if signature != b"PK\x03\x04" or method != zipfile.ZIP_STORED:
+            with np.load(archive_path, allow_pickle=False) as loaded:
+                return loaded[member]
+        raw.seek(header_offset + 30 + int(fn_len) + int(extra_len))
+        version = np.lib.format.read_magic(raw)
+        if version == (1, 0):
+            shape, fortran, dtype = np.lib.format.read_array_header_1_0(raw)
+        elif version == (2, 0):
+            shape, fortran, dtype = np.lib.format.read_array_header_2_0(raw)
+        else:
+            with np.load(archive_path, allow_pickle=False) as loaded:
+                return loaded[member]
+        data_offset = raw.tell()
+    if dtype.hasobject:
+        with np.load(archive_path, allow_pickle=False) as loaded:
+            return loaded[member]
+    return np.memmap(
+        archive_path,
+        mode="r",
+        offset=data_offset,
+        dtype=dtype,
+        shape=shape,
+        order="F" if fortran else "C",
+    )
+
+
 class Episode:
     def __init__(self, source: BenchSource) -> None:
         self.source = source
-        with np.load(source.path, allow_pickle=False) as archive:
-            self.raw = {key: np.asarray(archive[key]) for key in DOMAIN_RAW_KEYS[source.domain]}
+        self.raw = {
+            key: read_npz_member(source.path, f"{key}.npy")
+            for key in DOMAIN_RAW_KEYS[source.domain]
+        }
         self.frames = int(next(iter(self.raw.values())).shape[0])
         if self.frames != source.num_frames:
             raise AllBenchError(f"frame count differs for {source.group_id}")
@@ -786,6 +837,7 @@ def train_all_bench(
         best_total = payload.get("best_total")
         if payload.get("rng_by_rank"):
             _restore_rng(payload["rng_by_rank"][rank], local)
+        del payload
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     metrics_path = output / "updates.jsonl"

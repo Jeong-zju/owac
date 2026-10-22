@@ -237,3 +237,45 @@ def test_first_full_checkpoint_and_periodic_predicate():
     assert not should_save_checkpoint(2)
     assert should_save_checkpoint(250)
     assert should_save_checkpoint(500)
+
+
+def test_npz_stored_memmap_selected_frames_and_compressed_fallback(tmp_path):
+    import zipfile
+
+    import numpy as np
+
+    from owac.raw.all_bench_distillation import BenchSource, Episode, read_npz_member
+
+    raw = np.arange(12 * 256 * 256 * 3, dtype=np.uint8).reshape(12, 256, 256, 3) % 251
+    wrist = np.flip(raw, axis=0).copy()
+    stored = tmp_path / "stored.npz"
+    np.savez(stored, agentview_raw_uint8=raw, wrist_raw_uint8=wrist)
+    with zipfile.ZipFile(stored) as archive:
+        assert archive.getinfo("agentview_raw_uint8.npy").compress_type == zipfile.ZIP_STORED
+    member = read_npz_member(stored, "agentview_raw_uint8.npy")
+    assert isinstance(member, np.memmap) and not member.flags.writeable
+    assert member.dtype == raw.dtype and member.shape == raw.shape
+    assert np.array_equal(np.asarray(member[3:9]), raw[3:9])
+
+    compressed = tmp_path / "compressed.npz"
+    np.savez_compressed(compressed, agentview_raw_uint8=raw, wrist_raw_uint8=wrist)
+    fallback = read_npz_member(compressed, "agentview_raw_uint8.npy")
+    assert not isinstance(fallback, np.memmap)
+    assert np.array_equal(fallback, raw)
+
+    src = BenchSource(
+        "stored",
+        "libero",
+        "s",
+        "t",
+        "train",
+        stored,
+        12,
+        "Normal",
+        ("base_0_rgb", "left_wrist_0_rgb"),
+    )
+    episode = Episode(src)
+    burst = episode.burst(5)
+    assert burst.shape == (2, 6, 3, 256, 256)
+    expected = np.stack([raw[i] for i in range(6)]).transpose(0, 3, 1, 2) / 255.0
+    assert np.allclose(burst[0].numpy(), expected)
