@@ -16,7 +16,7 @@ LIBERO两相机uint8/255；RoboTwin三相机线性float32不除255，全视野24
 
 新路径不调用旧3116更新/GPU预算门槛，不哈希、不做继承权重全张量重复比较或GPU准入benchmark。CPU RAW预取4线程/每rank256源工作缓存；mmap教师目标按源读取，历史留CPU，每次仅搬当前burst到GPU。FP32目标仅存tokens与元数据，不存RGB/动作/语言/递归状态快照，train+val tokens预计340.914GiB。完整源提交；部分源重启从头回放教师状态；测试目标0。
 
-独立检查：新增全量接入8测试、共享batched/temporal24测试、SwanLab7测试，合计39项功能测试通过，make check通过。监控8880和新SwanLab运行已实际连通；额外修复CPU监控SDK重启后初始化/finish状态。工程功能测试不代表学生已经学习或控制恢复。
+独立检查：新增全量接入9测试、共享batched/temporal24测试、SwanLab7测试，合计40项功能测试通过，make check通过。监控8880和新SwanLab运行已实际连通；额外修复CPU监控SDK重启后初始化/finish状态。工程功能测试不代表学生已经学习或控制恢复。
 
 ## 启动事实
 
@@ -28,3 +28,9 @@ LIBERO两相机uint8/255；RoboTwin三相机线性float32不除255，全视野24
 
 监控：http://127.0.0.1:8880/
 SwanLab：https://swanlab.cn/@Jeong/OWAC/runs/owac-all-bench-20261022
+
+## 教师目标数值补充
+
+Sol只读取已生成目标，在同一真实Normal task6 demo1、endpoint0、形状[2,256,2048]上比较旧/新教师路径：MSE0.00103437854，最大绝对差2.59603882（单分量峰值，不等同平均误差）。新独立视觉教师以FP32执行；旧完整策略按作者precision:bfloat16初始化，部分参数留FP32，并有原生autocast回退。权重、模块和目标公式沿用，浮点执行精度已单列披露；不能称与旧目标逐位一致，或将新旧实验差别全部归因于数据。此为读取现成结果的诊断，不是新GPU作业或数值准入阈值，不据此重跑缓存。
+
+训练数据入口补充：每卡以4个CPU线程预取下一批8个完整样本，包括解码、归一化、缩放和历史窗口组装，按原采样顺序消费；不在worker中创建CUDA张量。验证直接复用训练token_distillation_loss以避免另一入口的全张量finite扫描，公式不变。40项相关功能测试和make check通过。

@@ -569,8 +569,8 @@ def validate_all_bench(
     student: Any, dataset: AllBenchDataset, *, device: torch.device, rank: int = 0, world: int = 1
 ) -> dict[str, Any]:
     """Streaming BF16 validation sharded over ranks; startup/eligible separated."""
-    from owac.evaluation.raw_temporal_features import masked_feature_components
     from owac.runtime.raw_full_visual_distillation import set_full_visual_train_mode
+    from owac.training.raw_distillation import token_distillation_loss
 
     rows: list[dict[str, Any]] = []
     original = student.training
@@ -601,9 +601,9 @@ def validate_all_bench(
                         1, -1, target.teacher_tokens.shape[-1]
                     ).to(values.device)
                     mask = output.tokens.mask
-                    mse, cosine, total, valid, width = masked_feature_components(
-                        values, teacher, mask
-                    )
+                    components = token_distillation_loss(values, teacher, mask)
+                    mse, cosine, total = components.mse, components.cosine, components.total
+                    valid, width = components.valid_tokens, components.width
                     rows.append(
                         {
                             "domain": source.domain,
@@ -705,11 +705,17 @@ def _enforce_disk(output: Path, temp: Path, cap_bytes: int, extra: int = 0) -> N
         raise AllBenchError(f"disk cap exceeded: used={used} extra={extra} cap={cap_bytes}")
 
 
+def submit_cpu_samples(executor: Any, loader: Any, keys: Sequence[tuple[str, int]]) -> list[Any]:
+    """Submit CPU-only full-sample construction, preserving sampler order."""
+    return [executor.submit(loader, source_id, endpoint) for source_id, endpoint in keys]
+
+
 def train_all_bench(
     config: Mapping[str, Any], args: Any, *, device: torch.device
 ) -> dict[str, Any]:
     """3-epoch distributed token training with complete resumable checkpoints."""
     import signal
+    from concurrent.futures import ThreadPoolExecutor
 
     import torch.distributed as dist
     from torch.nn.parallel import DistributedDataParallel as DDP
@@ -810,6 +816,9 @@ def train_all_bench(
         * sum(len(_chunks_for_epoch(keys, dataset.sources, seed=101, epoch=e)) for e in range(1))
         + start_step
     )
+    prefetch_workers = max(1, int(config["training"].get("prefetch_workers", 4)))
+    sample_executor = ThreadPoolExecutor(max_workers=prefetch_workers)
+    pending_samples: list[Any] | None = None
     for epoch in range(start_epoch, epochs):
         chunks = _chunks_for_epoch(keys, dataset.sources, seed=101, epoch=epoch)
         for step, chunk in enumerate(chunks):
@@ -820,16 +829,17 @@ def train_all_bench(
             # A rank must always see exactly eight samples; tail chunks are padded.
             while len(same) < 8:
                 same.append(chunk[-1])
-            # Keep every prefix/unroll packet on CPU; the batched primitive
-            # moves only its stacked current burst. Prefetch the next local
-            # eight sources so CPU decode overlaps GPU compute.
+            if pending_samples is None:
+                pending_samples = submit_cpu_samples(sample_executor, dataset.sample, same)
+            samples = [future.result() for future in pending_samples]
             if step + 1 < len(chunks):
                 next_chunk = chunks[step + 1]
                 next_same = next_chunk[rank * 8 : (rank + 1) * 8]
-                dataset.cache.prefetch([source_id for source_id, _ in next_same], workers=4)
-            samples = [
-                dataset.sample(source_id, endpoint, device=None) for source_id, endpoint in same
-            ]
+                while len(next_same) < 8:
+                    next_same.append(next_chunk[-1])
+                pending_samples = submit_cpu_samples(sample_executor, dataset.sample, next_same)
+            else:
+                pending_samples = None
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
                 result = model(BatchedTemporalRequest(tuple(samples)))
@@ -960,6 +970,7 @@ def train_all_bench(
             + "\n",
             encoding="utf-8",
         )
+    sample_executor.shutdown(wait=True)
     if world > 1:
         dist.destroy_process_group()
     return {"epochs": epochs, "global_updates": global_step, "unique_train_anchors": len(keys)}

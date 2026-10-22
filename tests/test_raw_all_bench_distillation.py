@@ -172,3 +172,32 @@ def test_stacked_burst_mover_preserves_geometry_and_masks_on_cpu():
     )
     moved = move_raw_input_to_device(item, torch.device("cpu"))
     assert moved.values.shape == (6, 2, 3, 224, 224) and moved.valid_mask.shape == mask.shape
+
+
+def test_full_sample_prefetch_preserves_order_and_runs_workers():
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    from owac.raw.all_bench_distillation import submit_cpu_samples
+
+    active = 0
+    peak = 0
+    lock = threading.Lock()
+
+    def fake_loader(source_id, endpoint):
+        nonlocal active, peak
+        with lock:
+            active += 1
+            peak = max(peak, active)
+        time.sleep(0.02)
+        with lock:
+            active -= 1
+        return (source_id, endpoint)
+
+    keys = [("s0", 25), ("s1", 25), ("s2", 25), ("s3", 25)]
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = submit_cpu_samples(executor, fake_loader, keys)
+        result = [future.result() for future in futures]
+    assert result == keys
+    assert peak >= 2
