@@ -1,5 +1,8 @@
 # OWAC 当前状态
 
+2026-10-22 19:04 后续故障：训练记录至300步后因目标mmap句柄未回收触发OSError24/native1，非OOM。已保留原始日志；完整状态在250步（含442参数Adam、2rank RNG/采样游标），不能称从300恢复。DeepSeek修复为目标行复制后立即关闭映射，不新增资源停止门槛；45相关功能测试及make check通过。将从250恢复，废弃分支260～300记录保留另列，尚待实际恢复日志。
+
+
 2026-10-22 19:00 实际运行：全量RAW教师2163源/74129窗口已完成native0、测试目标0。学生在137完整状态重载后已实际推进210更新/3360呈现，双卡global16、全视觉头训练；只读RAW映射生效，无新增OOM。SwanLab实际同步210且无上传错误：https://swanlab.cn/@Jeong/OWAC/runs/owac-all-bench-20261022-attempt2 。训练仍在运行，首遍验证未完成，不宣称泛化/控制恢复。源码e658cd6，独立报告见research/experiments/raw_stem_siglip_20261020/all-bench-20261022-independent-review.md。仅380GiB磁盘上限，其他人为资源门槛移除；无定时任务重建。
 
 

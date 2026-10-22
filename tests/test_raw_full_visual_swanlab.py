@@ -20,6 +20,7 @@ class FakeSwanLab:
         self.init_kwargs = None
         self.logs = []
         self.finishes = 0
+        self.finish_calls = []
         self.url = "https://swanlab.example/OWAC/owac-fullvisual-shared-stage"
 
     def login(self, **kwargs):
@@ -32,8 +33,9 @@ class FakeSwanLab:
     def log(self, metrics, step):
         self.logs.append((int(step), dict(metrics)))
 
-    def finish(self):
+    def finish(self, **kwargs):
         self.finishes += 1
+        self.finish_calls.append(kwargs)
 
 
 def _write_run(tmp_path: Path, *, paused: bool = False, completed: bool = False) -> Path:
@@ -251,3 +253,21 @@ def test_restarted_sdk_session_finishes_after_previous_session_stopped(tmp_path,
     restarted.gpu = SimpleNamespace(sample=lambda: {})
     assert restarted.poll_once() is True
     assert sdk.finishes == 1
+
+
+def test_failed_status_finishes_crashed_and_does_not_loop(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("SWANLAB_API_KEY", "secret-not-uploaded")
+    root = _write_run(tmp_path)
+    (root / "run-status.json").write_text(
+        json.dumps({"status": "failed", "native_exit": 1, "error": "too many open files"}),
+        encoding="utf-8",
+    )
+    sdk = FakeSwanLab()
+    sidecar = _sidecar(root, sdk)
+    sidecar.gpu = SimpleNamespace(sample=lambda **kwargs: {})
+    assert sidecar.poll_once() is True
+    assert sdk.finish_calls == [
+        {"state": "crashed", "error": "native training error; inspect logs"}
+    ]
+    assert sidecar.cursor.status == "failed"
+    assert sidecar.cursor.finished_sdk is True

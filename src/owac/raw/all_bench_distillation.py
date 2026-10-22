@@ -247,7 +247,6 @@ class TargetStore:
         self.max_bytes = None if max_bytes is None else int(max_bytes)
         self.used_bytes = 0
         self._meta_cache: dict[str, dict[str, Any]] = {}
-        self._mmap_cache: dict[str, Any] = {}
         for path in self.root.rglob("*"):
             try:
                 if path.is_file():
@@ -290,11 +289,16 @@ class TargetStore:
             self._meta_cache[source_id] = info
         endpoints = [int(x) for x in info["endpoints"]]
         index = endpoints.index(int(endpoint))
-        data = self._mmap_cache.get(source_id)
-        if data is None:
-            data = np.load(npy, mmap_mode="r")
-            self._mmap_cache[source_id] = data
-        tokens = torch.from_numpy(np.asarray(data[index])).float().clone()
+        # Random source locality: own the row then close immediately. OS page
+        # cache provides reuse; no per-source mmap FD is retained.
+        data = np.load(npy, mmap_mode="r")
+        try:
+            owned = np.array(data[index], copy=True, dtype=np.float32)
+        finally:
+            mapping = getattr(data, "_mmap", None)
+            if mapping is not None:
+                mapping.close()
+        tokens = torch.from_numpy(owned)
         mask = torch.ones(tokens.shape[0], dtype=torch.bool)
         return SimpleNamespace(
             teacher_tokens=tokens,

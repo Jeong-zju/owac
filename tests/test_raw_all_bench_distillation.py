@@ -279,3 +279,40 @@ def test_npz_stored_memmap_selected_frames_and_compressed_fallback(tmp_path):
     assert burst.shape == (2, 6, 3, 256, 256)
     expected = np.stack([raw[i] for i in range(6)]).transpose(0, 3, 1, 2) / 255.0
     assert np.allclose(burst[0].numpy(), expected)
+
+
+def test_target_store_open_copy_close_repeated_and_concurrent(tmp_path):
+    import json
+    import os
+    from concurrent.futures import ThreadPoolExecutor
+
+    import numpy as np
+    import torch
+
+    from owac.raw.all_bench_distillation import TargetStore
+
+    store = TargetStore(tmp_path)
+    ids = [f"s{i}" for i in range(20)]
+    for i, source_id in enumerate(ids):
+        npy, meta = store.paths(source_id)
+        data = np.lib.format.open_memmap(npy, mode="w+", dtype=np.float32, shape=(1, 2, 3, 8))
+        data[0] = float(i)
+        data.flush()
+        del data
+        meta.write_text(json.dumps({"complete": True, "windows": 1, "endpoints": [0]}))
+
+    first = store.read(ids[0], 0)
+    old = first.teacher_tokens.clone()
+    before = len(os.listdir("/proc/self/fd"))
+    for source_id in ids + ids:
+        store.read(source_id, 0)
+    torch.testing.assert_close(first.teacher_tokens, old)
+    assert len(os.listdir("/proc/self/fd")) <= before + 2
+
+    def work(source_id):
+        return float(store.read(source_id, 0).teacher_tokens.mean())
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        values = list(executor.map(work, ids * 3))
+    assert len(values) == 60
+    torch.testing.assert_close(first.teacher_tokens, old)

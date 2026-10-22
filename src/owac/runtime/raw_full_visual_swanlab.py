@@ -112,8 +112,11 @@ def _status(record: dict[str, Any]) -> tuple[str, bool, bool, int | float | None
     status = str(record.get("status") or record.get("phase") or "")
     reason = str(record.get("stop_reason") or "")
     text = f"{status} {reason}".lower()
-    finished = status.lower() in {"completed", "finished"} or any(
-        key in text for key in ("maxcap", "max_cap", "max_capacity", "max_updates")
+    failed = status.lower() in {"failed", "error", "crashed"}
+    finished = (
+        failed
+        or status.lower() in {"completed", "finished"}
+        or any(key in text for key in ("maxcap", "max_cap", "max_capacity", "max_updates"))
     )
     paused = "paused" in text or reason.lower() in {"pause", "paused"}
     budget = _num(record.get("remote_gpu_wall_used_seconds") or record.get("gpu_wall_sum_seconds"))
@@ -265,9 +268,12 @@ class SwanLabUploader:
         self.initialize()
         self.sdk.log(metrics, step=step)
 
-    def finish(self) -> None:
+    def finish(self, *, state: str = "success", error: str | None = None) -> None:
         if self.ready:
-            self.sdk.finish()
+            if state == "success":
+                self.sdk.finish()
+            else:
+                self.sdk.finish(state=state, error=error)
             self.ready = False
 
 
@@ -292,7 +298,10 @@ class Sidecar:
 
     def _finish(self) -> None:
         if not self.cursor.finished_sdk:
-            self.uploader.finish()
+            if self.cursor.status == "failed":
+                self.uploader.finish(state="crashed", error="native training error; inspect logs")
+            else:
+                self.uploader.finish()
             self.cursor.finished_sdk = True
 
     def _save(self) -> None:
@@ -319,6 +328,7 @@ class Sidecar:
             json.loads(status_path.read_text(encoding="utf-8")) if status_path.is_file() else {}
         )
         status_text, finished, paused, budget = _status(status)
+        failed = status_text.lower() in {"failed", "error", "crashed"}
         train = {
             int(row["new_global_updates"]): row for row in updates if "new_global_updates" in row
         }
@@ -348,7 +358,13 @@ class Sidecar:
             if gpu and self.cursor.last_step is not None:
                 self.uploader.log(gpu, step=self.cursor.last_step)
             self.cursor.status = (
-                "waiting_paused" if paused else "finished" if finished else "running"
+                "failed"
+                if failed
+                else "waiting_paused"
+                if paused
+                else "finished"
+                if finished
+                else "running"
             )
             self.cursor.finished = finished
             self.cursor.error = None
@@ -377,9 +393,20 @@ class Sidecar:
                     break
                 time.sleep(self.interval)
         finally:
+            # A manual SIGTERM must not turn a failed run into success.
+            status_path = self.root / "run-status.json"
+            if status_path.is_file():
+                try:
+                    current = json.loads(status_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    current = {}
+                if str(current.get("status", "")).lower() == "failed":
+                    self.cursor.status = "failed"
+                    self.cursor.finished = True
             if self.uploader.ready:
                 self._finish()
-            self.cursor.status = "finished" if self.cursor.finished else "stopped"
+            if self.cursor.status != "failed":
+                self.cursor.status = "finished" if self.cursor.finished else "stopped"
             self._save()
             for sig, old in previous.items():
                 signal.signal(sig, old)
