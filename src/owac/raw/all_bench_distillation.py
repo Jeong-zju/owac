@@ -710,6 +710,12 @@ def submit_cpu_samples(executor: Any, loader: Any, keys: Sequence[tuple[str, int
     return [executor.submit(loader, source_id, endpoint) for source_id, endpoint in keys]
 
 
+def should_save_checkpoint(global_step: int) -> bool:
+    """First full checkpoint at update 1, then every 250 updates."""
+    step = int(global_step)
+    return step == 1 or step % 250 == 0
+
+
 def train_all_bench(
     config: Mapping[str, Any], args: Any, *, device: torch.device
 ) -> dict[str, Any]:
@@ -735,7 +741,12 @@ def train_all_bench(
         dist.init_process_group("nccl")
     torch.manual_seed(101)
     sources, _ = load_inventory(config["data"]["inventory"])
-    dataset = AllBenchDataset(sources, targets=TargetStore(args.temp / "targets"))
+    working_sources = max(1, int(config["training"].get("working_cache_sources", 16)))
+    dataset = AllBenchDataset(
+        sources,
+        targets=TargetStore(args.temp / "targets"),
+        capacity=working_sources,
+    )
     student = build_all_bench_student(config, device=str(device))
     if bool(config["training"].get("activation_checkpointing", True)):
         _checkpoint_wrap_vision(student)
@@ -859,7 +870,7 @@ def train_all_bench(
             if world > 1:
                 dist.all_reduce(pause_tensor, op=dist.ReduceOp.MAX)
             paused_any = bool(pause_tensor.item())
-            if global_step % 250 == 0 or paused_any:
+            if should_save_checkpoint(global_step) or paused_any:
                 save_state(epoch, step + 1, best_total)
             if paused_any:
                 if rank == 0:

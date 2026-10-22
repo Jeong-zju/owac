@@ -201,3 +201,39 @@ def test_full_sample_prefetch_preserves_order_and_runs_workers():
         result = [future.result() for future in futures]
     assert result == keys
     assert peak >= 2
+
+
+def test_working_cache_capacity_wiring_and_bounded_retention(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    import owac.raw.all_bench_distillation as module
+
+    config = {"training": {"working_cache_sources": 16}}
+    capacity = int(config["training"]["working_cache_sources"])
+    source = module.BenchSource(
+        "g", "libero", "s", "t", "train", Path("x"), 31, "Normal", ("a", "b")
+    )
+    dataset = module.AllBenchDataset(
+        [source], targets=module.TargetStore(tmp_path), capacity=capacity
+    )
+    assert dataset.cache.capacity == 16
+    monkeypatch.setattr(module, "Episode", lambda item: object())
+    sources = {
+        f"g{i}": module.BenchSource(
+            f"g{i}", "libero", "s", "t", "train", Path("x"), 31, "Normal", ("a", "b")
+        )
+        for i in range(20)
+    }
+    cache = module.EpisodeCache(sources, capacity=16)
+    for source_id in sources:
+        cache.get(source_id)
+    assert len(cache._items) <= 16
+
+
+def test_first_full_checkpoint_and_periodic_predicate():
+    from owac.raw.all_bench_distillation import should_save_checkpoint
+
+    assert should_save_checkpoint(1)
+    assert not should_save_checkpoint(2)
+    assert should_save_checkpoint(250)
+    assert should_save_checkpoint(500)
