@@ -1,0 +1,145 @@
+{
+  "schema": "owac.raw-all-bench-distillation.v1",
+  "experiment": "raw_stem_siglip_all_bench_v1",
+  "assets": {
+    "teacher_frontend_checkpoint": "/root/owac/repo/outputs/rawvla-teacher-20261020/teacher-validated-normal-task6-init0.pt",
+    "author_root": "/root/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main",
+    "starvla_root": "/root/owac/repo/outputs/raw-distillation-20261020-sol/starvla-pinned-source",
+    "teacher_config_paths": [
+      "/root/owac/repo/outputs/raw-distillation-20261020-sol/teacher-search-v2/author-main/configs/libero/pi05.yaml"
+    ],
+    "checkpoint": "/root/owac/repo/outputs/checkpoints/raw-distillation/pi05_libero_starvla/bfloat16/model.safetensors"
+  },
+  "student": {
+    "stem_hidden": 64,
+    "stem_seed": 101,
+    "input_mode": "rawvla_rgb3",
+    "inherited_vision": "actual_pi05_vision_positions_siglip_projector",
+    "extra_projection": false,
+    "gate": "channelwise_sigmoid",
+    "raw_burst_frames": 6,
+    "endpoint_stride": 5,
+    "recurrent_endpoints": 6,
+    "camera_order": [
+      "agentview",
+      "wrist"
+    ],
+    "native_image_keys": [
+      "base_0_rgb",
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ],
+    "inactive_native_image_key": "right_wrist_0_rgb",
+    "raw_resize": "bilinear_align_corners_false_256_to_224_full_fov",
+    "physical_position_backmap": "224_patch14_center_to_256_patch16",
+    "trainable_scope": "full_visual_head",
+    "trainable_parameters": 428579952,
+    "gate_init": "zero",
+    "vision_architecture": {
+      "hidden_size": 1152,
+      "intermediate_size": 4304,
+      "num_hidden_layers": 27,
+      "num_attention_heads": 16,
+      "image_size": 224,
+      "patch_size": 14,
+      "projection_dim": 2048,
+      "num_channels": 3
+    },
+    "evidence_level": "standalone_visual_subset",
+    "forward_semantics": {
+      "attention_implementation": "eager",
+      "hidden_act": "gelu_pytorch_tanh",
+      "layer_norm_eps": 1e-06,
+      "image_size": 224,
+      "patch_size": 14,
+      "grid": [
+        16,
+        16
+      ],
+      "num_positions": 256,
+      "encoder_layers": 27,
+      "projector_in": 1152,
+      "projector_out": 2048,
+      "projected_token_order": "camera_major_then_patch_row_major",
+      "projected_token_scale": "linear_projector_only_no_extra_normalization",
+      "position_table_shared_across_cameras": true
+    }
+  },
+  "teacher_requirement": {
+    "selected_checkpoint": "teacher-validated-normal-task6-init0.pt",
+    "provenance": "init0 locally rebuilt author architecture; not published trained author weights",
+    "input": "RAW",
+    "temporal_teacher_allowed": true,
+    "temporal_teacher_implemented": true,
+    "stateless_single_frame": false,
+    "freeze_all": true
+  },
+  "data": {
+    "inventory": "/root/owac/repo/outputs/raw-distillation-all-bench-20261022/inventory.json",
+    "shared_root": "/root/autodl-pub/datasets/rawvla",
+    "expected_groups": 2403,
+    "split_counts": {
+      "train": 1923,
+      "validation": 240,
+      "test": 240
+    },
+    "seed": 101,
+    "test_targets_generated": false,
+    "domains": [
+      "libero",
+      "robotwin2"
+    ]
+  },
+  "training": {
+    "seed": 101,
+    "epochs": 3,
+    "effective_batch": 16,
+    "micro_batch_per_rank": 8,
+    "gradient_accumulation_steps": 1,
+    "optimizer": "AdamW",
+    "learning_rate": 1e-05,
+    "weight_decay": 0.01,
+    "warmup_updates": 100,
+    "cosine_weight": 0.1,
+    "include_action_loss": false,
+    "bf16_forward": true,
+    "fp32_weights": true,
+    "camera_batch_homogeneous": true,
+    "sampler": "seeded grouped anchors; domain-homogeneous global16; 3 passes",
+    "activation_checkpointing": true,
+    "gradient_clip": 1.0,
+    "working_cache_sources": 256,
+    "prefetch_workers": 4
+  },
+  "resource_policy": {
+    "only_cap": "newly_owned_outputs_plus_tokens_cache 380GiB",
+    "no_gpu_time_cap": true,
+    "no_vram_cap": true,
+    "no_utilization_cap": true,
+    "no_timing_deadline": true
+  },
+  "outputs": {
+    "persistent_root": "/root/owac/repo/outputs/raw-distillation-all-bench-20261022",
+    "temp_root": "/root/autodl-tmp/owac-all-bench-20261022",
+    "swanlab_run_id": "owac-all-bench-20261022"
+  },
+  "camera_domains": {
+    "libero": {
+      "count": 2,
+      "camera_ids": [
+        "base_0_rgb",
+        "left_wrist_0_rgb"
+      ],
+      "raw": "uint8_256_div255"
+    },
+    "robotwin2": {
+      "count": 3,
+      "camera_ids": [
+        "robotwin_head",
+        "robotwin_left",
+        "robotwin_right"
+      ],
+      "raw": "float32_linear_full_fov_240x320_to_256"
+    }
+  }
+}

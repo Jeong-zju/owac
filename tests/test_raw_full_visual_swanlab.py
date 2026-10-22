@@ -212,3 +212,42 @@ def test_uploader_uses_get_url_fallback(monkeypatch) -> None:
 
     uploader = SwanLabUploader(sdk=SDK(), logdir=Path("/tmp/swanlab-test"))
     assert uploader.initialize() == "https://swanlab.example/@Jeong/OWAC/runs/stable"
+
+
+def test_validation_metrics_include_nested_startup_eligible_domain_lighting() -> None:
+    from owac.runtime.raw_full_visual_swanlab import _validation_metrics
+
+    metrics = _validation_metrics(
+        {
+            "feature_total": 1.2,
+            "feature_mse": 1.0,
+            "feature_cosine": 2.0,
+            "valid_tokens": 512,
+            "windows": 46,
+            "startup": {"feature_mse": 0.8},
+            "eligible_ge_25": {"feature_mse": 1.1},
+            "per_domain": {"libero": {"feature_mse": 0.9}, "robotwin2": {"feature_mse": 1.1}},
+            "per_lighting": {"Normal": {"feature_mse": 0.7}, "Low": {"feature_mse": 1.3}},
+        }
+    )
+    assert metrics["val/startup_mse"] == 0.8
+    assert metrics["val/eligible_mse"] == 1.1
+    assert metrics["val/domain_libero/mse"] == 0.9
+    assert metrics["val/light_Low/mse"] == 1.3
+    assert metrics["val/mse"] == 1.0
+
+
+def test_restarted_sdk_session_finishes_after_previous_session_stopped(tmp_path, monkeypatch):
+    monkeypatch.setenv("SWANLAB_API_KEY", "test-key")
+    root = _write_run(tmp_path)
+    first = _sidecar(root, FakeSwanLab())
+    first.gpu = SimpleNamespace(sample=lambda: {})
+    first.poll_once()
+    first._finish()
+    first._save()
+    (root / "run-status.json").write_text(json.dumps({"status": "completed"}))
+    sdk = FakeSwanLab()
+    restarted = _sidecar(root, sdk)
+    restarted.gpu = SimpleNamespace(sample=lambda: {})
+    assert restarted.poll_once() is True
+    assert sdk.finishes == 1

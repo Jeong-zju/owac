@@ -11,7 +11,7 @@ another sample's hidden state.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import torch
@@ -131,6 +131,18 @@ def _stack_inputs(inputs: Sequence[RawStemInput]) -> RawStemInput:
     )
 
 
+def move_raw_input_to_device(value: RawStemInput, device: torch.device) -> RawStemInput:
+    """Move only one stacked current burst; prefix packets stay on CPU."""
+    if value.values.device == device:
+        return value
+    updates = {"values": value.values.to(device)}
+    for name in ("valid_mask", "bad_mask", "saturated_mask", "missing_mask", "camera_present"):
+        item = getattr(value, name)
+        if torch.is_tensor(item):
+            updates[name] = item.to(device)
+    return replace(value, **updates)
+
+
 def flatten_teacher_target(
     teacher_tokens: torch.Tensor, teacher_token_mask: torch.Tensor
 ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -200,6 +212,9 @@ def _burst_components(
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, RawStemInput]:
     batch = len(packets)
     stacked, padding = _stack_packets(packets)
+    device = student.gate_logit.device
+    stacked = move_raw_input_to_device(stacked, device)
+    padding = padding.to(device)
     prepared = _prepare_measurement(stacked, student.geometry)
     patch_tokens, _ = _stem_patch_tokens(
         student.base.vision_tower,
@@ -225,7 +240,9 @@ def _burst_components(
     masks = (support >= 1.0 - 1e-6) & present[:, :, :, None]
     masks = masks & ~padding.to(support.device)[:, :, None, None]
     mean, has_support = _masked_mean(patch_tokens, masks)
-    current_input = _stack_inputs([packet.frames[-1] for packet in packets])
+    current_input = move_raw_input_to_device(
+        _stack_inputs([packet.frames[-1] for packet in packets]), device
+    )
     return mean, has_support, current_present, current_input, support
 
 

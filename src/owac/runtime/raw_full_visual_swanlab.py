@@ -89,6 +89,22 @@ def _validation_metrics(record: dict[str, Any]) -> dict[str, int | float]:
         "val/valid_tokens": _num(record.get("valid_tokens")),
         "val/windows": _num(record.get("windows")),
     }
+    startup = record.get("startup")
+    if isinstance(startup, dict):
+        metrics["val/startup_mse"] = _num(startup.get("feature_mse"))
+    eligible = record.get("eligible_ge_25")
+    if isinstance(eligible, dict):
+        metrics["val/eligible_mse"] = _num(eligible.get("feature_mse"))
+    per_domain = record.get("per_domain")
+    if isinstance(per_domain, dict):
+        for domain, item in per_domain.items():
+            if isinstance(item, dict):
+                metrics[f"val/domain_{domain}/mse"] = _num(item.get("feature_mse"))
+    per_lighting = record.get("per_lighting")
+    if isinstance(per_lighting, dict):
+        for lighting, item in per_lighting.items():
+            if isinstance(item, dict):
+                metrics[f"val/light_{lighting}/mse"] = _num(item.get("feature_mse"))
     return {key: value for key, value in metrics.items() if value is not None}
 
 
@@ -271,6 +287,8 @@ class Sidecar:
         self.state_path = run_root / "swanlab-sidecar-state.json"
         self.status_path = run_root / "swanlab-sidecar-status.json"
         self.cursor = Cursor.load(self.state_path)
+        # A new uploader session needs its own finish, including after a restart.
+        self.cursor.finished_sdk = False
 
     def _finish(self) -> None:
         if not self.cursor.finished_sdk:
@@ -306,7 +324,8 @@ class Sidecar:
         }
         val = {int(row["step"]): row for row in validations if "step" in row}
         try:
-            self.cursor.url = self.cursor.url or self.uploader.initialize()
+            session_url = self.uploader.initialize()
+            self.cursor.url = self.cursor.url or session_url
             for step in sorted(set(train) | set(val)):
                 new_train = step in train and step not in self.cursor.train_steps
                 new_val = step in val and step not in self.cursor.validation_steps
