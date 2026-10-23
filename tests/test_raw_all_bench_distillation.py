@@ -499,3 +499,149 @@ def test_whole_prefix_two_step_chunk_matches_original_sequential_reference(monke
             expected[sample_index] = hidden
     torch.testing.assert_close(got, expected)
     assert torch.equal(got_has, expected_has)
+
+
+def test_sample_frame_cache_reuses_storage_numeric_and_chunks(tmp_path, monkeypatch):
+    import json
+
+    import numpy as np
+    import torch
+
+    from owac.raw import all_bench_distillation as module
+    from owac.raw.all_bench_distillation import AllBenchDataset, BenchSource, TargetStore
+
+    frames = np.arange(36 * 256 * 256, dtype=np.uint32).reshape(36, 256, 256, 1)
+    frames = ((frames * 7) % 251).astype(np.uint8).repeat(3, axis=3)
+    wrist = np.flip(frames, axis=0).copy()
+    raw = tmp_path / "raw.npz"
+    np.savez(raw, agentview_raw_uint8=frames, wrist_raw_uint8=wrist)
+    source = BenchSource(
+        "g", "libero", "s", "t", "train", raw, 36, "Normal", ("base_0_rgb", "left_wrist_0_rgb")
+    )
+    targets = TargetStore(tmp_path / "targets")
+    npy, meta = targets.paths("g")
+    data = np.lib.format.open_memmap(npy, mode="w+", dtype=np.float32, shape=(1, 2, 3, 8))
+    data[0] = 3
+    data.flush()
+    del data
+    meta.write_text(json.dumps({"complete": True, "windows": 1, "endpoints": [35]}))
+    dataset = AllBenchDataset([source], targets=targets)
+
+    calls = {"normalize": 0, "interpolate": 0}
+    real_normalize = module.normalize_raw
+    real_interpolate = module.F.interpolate
+
+    def count_normalize(values, domain):
+        calls["normalize"] = max(calls["normalize"], int(values.shape[0]))
+        return real_normalize(values, domain)
+
+    def count_interpolate(values, *args, **kwargs):
+        calls["interpolate"] = max(calls["interpolate"], int(values.shape[0]))
+        return real_interpolate(values, *args, **kwargs)
+
+    monkeypatch.setattr(module, "normalize_raw", count_normalize)
+    monkeypatch.setattr(module.F, "interpolate", count_interpolate)
+
+    sample = dataset.sample("g", 35, device=None)
+    assert calls["normalize"] <= 16 and calls["interpolate"] <= 16
+    for packet in sample.unroll_packets + sample.prefix_packets:
+        old = dataset.packet_for_endpoint("g", packet.endpoint)
+        for new_frame, old_frame in zip(packet.frames, old.frames, strict=True):
+            torch.testing.assert_close(new_frame.values, old_frame.values)
+
+    # Overlapping endpoint bursts share the exact physical frame storage.
+    shared_new = sample.prefix_packets[-1].frames[-1].values.data_ptr()
+    shared_unroll = sample.unroll_packets[0].frames[0].values.data_ptr()
+    assert shared_new == shared_unroll
+
+    unique = {}
+    duplicated = 0
+    for packet in sample.unroll_packets + sample.prefix_packets:
+        for frame in packet.frames:
+            pointer = frame.values.data_ptr()
+            duplicated += frame.values.numel() * frame.values.element_size()
+            unique[pointer] = frame.values.numel() * frame.values.element_size()
+    assert sum(unique.values()) < duplicated
+
+
+def test_robotwin_three_camera_nonconstant_values_match_old_path(tmp_path):
+    import json
+
+    import numpy as np
+    import torch
+
+    from owac.raw.all_bench_distillation import AllBenchDataset, BenchSource, TargetStore
+
+    t = np.linspace(0.0, 0.4, 36 * 240 * 320 * 3, dtype=np.float32).reshape(36, 240, 320, 3)
+    raw = tmp_path / "r.npz"
+    np.savez(
+        raw,
+        head_camera_raw_float32=t,
+        left_camera_raw_float32=(t * 0.5),
+        right_camera_raw_float32=(t * 0.25),
+    )
+    source = BenchSource(
+        "r",
+        "robotwin2",
+        "task",
+        "task",
+        "train",
+        raw,
+        36,
+        "Normal",
+        ("robotwin_head", "robotwin_left", "robotwin_right"),
+    )
+    targets = TargetStore(tmp_path / "t")
+    npy, meta = targets.paths("r")
+    data = np.lib.format.open_memmap(npy, mode="w+", dtype=np.float32, shape=(1, 3, 3, 8))
+    data[0] = 1
+    data.flush()
+    del data
+    meta.write_text(json.dumps({"complete": True, "windows": 1, "endpoints": [35]}))
+    dataset = AllBenchDataset([source], targets=targets)
+    sample = dataset.sample("r", 35)
+    for packet in sample.unroll_packets + sample.prefix_packets:
+        old = dataset.packet_for_endpoint("r", packet.endpoint)
+        for new_frame, old_frame in zip(packet.frames, old.frames, strict=True):
+            torch.testing.assert_close(new_frame.values, old_frame.values)
+    assert sample.unroll_packets[-1].frames[0].values.shape == (1, 3, 3, 224, 224)
+
+
+def test_robotwin_three_camera_burst_shapes_and_frame_reuse(tmp_path, monkeypatch):
+    import json
+
+    import numpy as np
+
+    from owac.raw.all_bench_distillation import AllBenchDataset, BenchSource, TargetStore
+
+    frames = np.full((31, 240, 320, 3), 0.4, dtype=np.float32)
+    raw = tmp_path / "r.npz"
+    np.savez(
+        raw,
+        head_camera_raw_float32=frames,
+        left_camera_raw_float32=frames,
+        right_camera_raw_float32=frames,
+    )
+    source = BenchSource(
+        "r",
+        "robotwin2",
+        "task",
+        "task",
+        "train",
+        raw,
+        31,
+        "Normal",
+        ("robotwin_head", "robotwin_left", "robotwin_right"),
+    )
+    targets = TargetStore(tmp_path / "t")
+    npy, meta = targets.paths("r")
+    data = np.lib.format.open_memmap(npy, mode="w+", dtype=np.float32, shape=(1, 3, 3, 8))
+    data[0] = 1
+    data.flush()
+    del data
+    meta.write_text(json.dumps({"complete": True, "windows": 1, "endpoints": [25]}))
+    dataset = AllBenchDataset([source], targets=targets)
+    sample = dataset.sample("r", 25)
+    assert sample.unroll_packets[-1].frames[0].values.shape == (1, 3, 3, 224, 224)
+    assert len(sample.unroll_packets) == 6
+    assert sample.unroll_packets[0].padding_mask[0] is True

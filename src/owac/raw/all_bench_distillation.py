@@ -567,20 +567,98 @@ class AllBenchDataset:
             preprocess_id="all_bench_fullfov_256_to_224",
         )
 
-    def sample(self, source_id: str, endpoint: int, device: torch.device | None = None) -> Any:
+    def _frame_cache(self, source_id: str, max_endpoint: int) -> dict[int, torch.Tensor]:
+        """Calibrate and resize every physical frame once for this sample."""
+        from owac.baselines.raw_temporal_siglip import causal_frame_ids
 
+        episode = self.cache.get(source_id)
+        source = self.sources[source_id]
+        needed: set[int] = set()
+        for endpoint in range(0, int(max_endpoint) + 1, 5):
+            needed.update(causal_frame_ids(endpoint))
+        needed = {index for index in needed if 0 <= index < episode.frames}
+        if not needed:
+            return {}
+        start, stop = min(needed), max(needed) + 1
+        cache: dict[int, torch.Tensor] = {}
+        # Bound both normalization and resize temporary batches. Each physical
+        # frame is still processed once and retained as one shared tensor.
+        for chunk_start in range(start, stop, 16):
+            chunk_stop = min(chunk_start + 16, stop)
+            camera_values = []
+            for key in DOMAIN_RAW_KEYS[source.domain]:
+                values = normalize_raw(
+                    np.asarray(episode.raw[key][chunk_start:chunk_stop]), source.domain
+                )
+                camera_values.append(
+                    F.interpolate(values, size=(224, 224), mode="bilinear", align_corners=False)
+                )
+            for offset, frame_id in enumerate(range(chunk_start, chunk_stop)):
+                if frame_id in needed:
+                    cache[frame_id] = torch.stack(
+                        [values[offset] for values in camera_values], dim=0
+                    ).contiguous()
+        return cache
+
+    def _packet_from_cache(
+        self,
+        source_id: str,
+        endpoint: int,
+        frames: dict[int, torch.Tensor],
+    ) -> Any:
+        from owac.baselines.raw_temporal_siglip import (
+            RawStemInput,
+            TemporalPacket,
+            causal_frame_ids,
+            causal_padding_mask,
+        )
+
+        source = self.sources[source_id]
+        ids = causal_frame_ids(endpoint)
+        packet_frames = []
+        for frame_id in ids:
+            frame = frames[frame_id]
+            packet_frames.append(
+                RawStemInput(
+                    values=frame.unsqueeze(0),
+                    input_mode="rawvla_rgb3",
+                    camera_ids=source.cameras,
+                    units="normalized_0_1",
+                )
+            )
+        return TemporalPacket(
+            frames=tuple(packet_frames),
+            source_demo_id=source_id,
+            endpoint=endpoint,
+            frame_ids=ids,
+            padding_mask=causal_padding_mask(endpoint),
+            reset=endpoint == 0,
+            timestamps=None,
+            position_source_size=256,
+            position_target_size=224,
+            position_backmap=True,
+            preprocess_id="all_bench_fullfov_256_to_224",
+        )
+
+    def sample(self, source_id: str, endpoint: int, device: torch.device | None = None) -> Any:
         unroll = tuple(endpoint - 25 + 5 * i for i in range(HISTORY))
         prefix = tuple(range(0, unroll[0], 5))
         target = self.targets.read(source_id, endpoint)
-
+        frame_cache = self._frame_cache(source_id, endpoint)
+        if device is not None:
+            frame_cache = {frame_id: frame.to(device) for frame_id, frame in frame_cache.items()}
         if device is not None:
             target.teacher_tokens = target.teacher_tokens.to(device)
             target.teacher_token_mask = target.teacher_token_mask.to(device)
         return SimpleNamespace(
             source_id=source_id,
             endpoint=endpoint,
-            unroll_packets=tuple(self.packet_for_endpoint(source_id, e, device) for e in unroll),
-            prefix_packets=tuple(self.packet_for_endpoint(source_id, e, device) for e in prefix),
+            unroll_packets=tuple(
+                self._packet_from_cache(source_id, e, frame_cache) for e in unroll
+            ),
+            prefix_packets=tuple(
+                self._packet_from_cache(source_id, e, frame_cache) for e in prefix
+            ),
             target=target,
             unroll_rows=(),
             charged_context_frames=HISTORY * HISTORY,
@@ -1027,6 +1105,15 @@ def train_all_bench(
                         )
                         + "\n"
                     )
+            # Drop the completed graph and batch before validation/next step.
+            # The loss values are already detached and logged.
+            result = None
+            loss = None
+            total = None
+            teacher = None
+            combined = None
+            loss_values = None
+            samples = None
             epoch_end = step == len(chunks) - 1
             interval = int(config["training"].get("validation_interval_updates", 500))
             if should_validate(global_step, epoch_end=epoch_end, interval=interval):
