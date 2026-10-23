@@ -316,3 +316,15 @@ def test_target_store_open_copy_close_repeated_and_concurrent(tmp_path):
         values = list(executor.map(work, ids * 3))
     assert len(values) == 60
     torch.testing.assert_close(first.teacher_tokens, old)
+
+
+def test_validation_interval_and_epoch_boundary_scheduling():
+    from owac.raw.all_bench_distillation import should_validate
+
+    assert not should_validate(1, epoch_end=False, interval=500)
+    assert not should_validate(499, epoch_end=False, interval=500)
+    assert should_validate(500, epoch_end=False, interval=500)
+    assert should_validate(1000, epoch_end=False, interval=500)
+    assert should_validate(17, epoch_end=True, interval=500)  # epoch end
+    assert should_validate(500, epoch_end=True, interval=500)  # coincident bound, one call
+    assert not should_validate(500, epoch_end=False, interval=0)

@@ -771,6 +771,12 @@ def should_save_checkpoint(global_step: int) -> bool:
     return step == 1 or step % 250 == 0
 
 
+def should_validate(global_step: int, *, epoch_end: bool, interval: int) -> bool:
+    step = int(global_step)
+    due = int(interval) > 0 and step > 0 and step % int(interval) == 0
+    return bool(epoch_end or due)
+
+
 def train_all_bench(
     config: Mapping[str, Any], args: Any, *, device: torch.device
 ) -> dict[str, Any]:
@@ -874,6 +880,50 @@ def train_all_bench(
         }
         atomic_save(save / "train.pt", payload)
 
+    def validate_and_save(cursor_epoch: int, cursor_step: int) -> None:
+        nonlocal best_total
+        validation_student = model.module if world > 1 else model
+        validation = validate_all_bench(
+            validation_student, dataset, device=device, rank=rank, world=world
+        )
+        if rank == 0:
+            with validation_path.open("a", encoding="utf-8") as stream:
+                stream.write(
+                    json.dumps(
+                        {
+                            "step": int(global_step),
+                            "epoch": int(cursor_epoch) + int(cursor_step > 0),
+                            "global_step": int(global_step),
+                            **validation,
+                        }
+                    )
+                    + "\n"
+                )
+            total_value = float(validation["feature_total"])
+            best_total, improved = select_best(best_total, total_value)
+            if improved:
+                best = output / "checkpoints" / "best"
+                best.mkdir(parents=True, exist_ok=True)
+                atomic_save(
+                    best / "model.pt",
+                    {
+                        "model": model.state_dict(),
+                        "feature_total": total_value,
+                        "epoch": int(cursor_epoch) + int(cursor_step > 0),
+                    },
+                )
+        if world > 1:
+            value = torch.tensor(
+                [float("inf") if best_total is None else float(best_total)],
+                device=device,
+                dtype=torch.float64,
+            )
+            dist.all_reduce(value, op=dist.ReduceOp.MIN)
+            best_total = None if not torch.isfinite(value).item() else float(value.item())
+        save_state(int(cursor_epoch), int(cursor_step), best_total)
+        if world > 1:
+            dist.barrier()
+
     if rank == 0 and not getattr(args, "resume", None):
         initial = output / "checkpoints" / "initial"
         initial.mkdir(parents=True, exist_ok=True)
@@ -972,47 +1022,16 @@ def train_all_bench(
                         )
                         + "\n"
                     )
+            epoch_end = step == len(chunks) - 1
+            interval = int(config["training"].get("validation_interval_updates", 500))
+            if should_validate(global_step, epoch_end=epoch_end, interval=interval):
+                if epoch_end:
+                    validate_and_save(epoch + 1, 0)
+                else:
+                    validate_and_save(epoch, step + 1)
         if paused_any:
             paused_run = True
             break
-        validation_student = model.module if world > 1 else model
-        validation = validate_all_bench(
-            validation_student, dataset, device=device, rank=rank, world=world
-        )
-        if rank == 0:
-            with validation_path.open("a", encoding="utf-8") as stream:
-                stream.write(
-                    json.dumps(
-                        {
-                            "step": global_step,
-                            "epoch": epoch + 1,
-                            "global_step": global_step,
-                            **validation,
-                        }
-                    )
-                    + "\n"
-                )
-            total_value = float(validation["feature_total"])
-            best_total, improved = select_best(best_total, total_value)
-            if improved:
-                best = output / "checkpoints" / "best"
-                best.mkdir(parents=True, exist_ok=True)
-                atomic_save(
-                    best / "model.pt",
-                    {"model": model.state_dict(), "feature_total": total_value, "epoch": epoch + 1},
-                )
-        # Keep every rank's next save_state consistent with rank-0 selection.
-        if world > 1:
-            value = torch.tensor(
-                [float("inf") if best_total is None else float(best_total)],
-                device=device,
-                dtype=torch.float64,
-            )
-            dist.all_reduce(value, op=dist.ReduceOp.MIN)
-            best_total = None if not torch.isfinite(value).item() else float(value.item())
-        save_state(epoch + 1, 0, best_total)
-        if world > 1:
-            dist.barrier()
     if rank == 0:
         _enforce_disk(output, Path(args.temp), cap_bytes, 6 * 1024**3)
         final = output / "checkpoints" / "final"
