@@ -312,53 +312,70 @@ def _validate_samples(student: Any, samples: Sequence[Any]) -> None:
             raise BatchedTemporalError("sample last unroll source differs")
 
 
+def prefix_gate_step(
+    mean: torch.Tensor,
+    support: torch.Tensor,
+    present: torch.Tensor,
+    previous: torch.Tensor | None,
+    alpha: torch.Tensor,
+    reset: bool,
+) -> torch.Tensor:
+    """One prefix recurrence step; shapes [C,P,H], [C,P], [C], [1,1,H]."""
+    fresh = torch.where(support.unsqueeze(-1), mean, torch.zeros_like(mean))
+    if previous is None or reset:
+        return fresh
+    if previous.dtype != mean.dtype:
+        raise BatchedTemporalError("prefix hidden dtype changed")
+    advanced = (1.0 - alpha) * mean + alpha * previous
+    recurrent = torch.where(support.unsqueeze(-1), advanced, previous)
+    return torch.where(present[:, None, None], recurrent, previous)
+
+
 def _prefix_hidden(
     student: Any, samples: Sequence[Any]
 ) -> tuple[torch.Tensor | None, torch.Tensor]:
+    """Chronological prefix recurrence; two time steps batched at a time."""
     max_length = max((len(sample.prefix_packets) for sample in samples), default=0)
     batch = len(samples)
     cameras = len(samples[0].unroll_packets[0].frames[0].camera_ids)
     num_patches = int(student.geometry.num_patches)
     hidden_size = int(student.geometry.hidden_size)
+    device = student.gate_logit.device
     hidden_by: list[torch.Tensor | None] = [None] * batch
-    has_by = torch.zeros((batch,), dtype=torch.bool, device=student.gate_logit.device)
+    has_by = torch.zeros((batch,), dtype=torch.bool, device=device)
+    alpha = student.gate_alpha.reshape(1, 1, -1)
     with torch.no_grad():
-        for step in range(max_length):
-            active = [
-                index for index, sample in enumerate(samples) if len(sample.prefix_packets) > step
-            ]
-            if not active:
+        for chunk_start in range(0, max_length, 2):
+            entries: list[tuple[int, int, Any]] = []
+            for sample_index, sample in enumerate(samples):
+                for step_index in range(
+                    chunk_start, min(chunk_start + 2, len(sample.prefix_packets))
+                ):
+                    entries.append((sample_index, step_index, sample.prefix_packets[step_index]))
+            if not entries:
                 continue
-            packets = [samples[index].prefix_packets[step] for index in active]
-            existing = [hidden_by[index] for index in active]
-            if any(item is not None for item in existing):
-                dtype = next(item.dtype for item in existing if item is not None)
-                if any(item is not None and item.dtype != dtype for item in existing):
-                    raise BatchedTemporalError("prefix hidden dtypes differ across samples")
-                previous = torch.zeros(
-                    (len(active), cameras, num_patches, hidden_size),
-                    dtype=dtype,
-                    device=student.gate_logit.device,
-                )
-                has_previous = has_by[active].clone()
-                for row, item in enumerate(existing):
-                    if item is not None:
-                        previous[row] = item
-            else:
-                previous = None
-                has_previous = has_by[active].clone()
-            next_hidden, _, _, _, _ = _batched_burst_step(student, packets, previous, has_previous)
-            for row, index in enumerate(active):
-                hidden_by[index] = next_hidden[row].detach()
-            has_by[active] = True
+            packets = [entry[2] for entry in entries]
+            # At most two steps x eight samples = 16 packets (bounded).
+            mean, support, present, _, _ = _burst_components(student, packets)
+            lookup = {(entry[0], entry[1]): row for row, entry in enumerate(entries)}
+            for sample_index, sample in enumerate(samples):
+                for step_index in range(
+                    chunk_start, min(chunk_start + 2, len(sample.prefix_packets))
+                ):
+                    row = lookup[(sample_index, step_index)]
+                    hidden_by[sample_index] = prefix_gate_step(
+                        mean[row].detach(),
+                        support[row].detach(),
+                        present[row].detach(),
+                        hidden_by[sample_index],
+                        alpha,
+                        bool(packets[row].reset),
+                    ).detach()
+                    has_by[sample_index] = True
     if not any(item is not None for item in hidden_by):
         return None, has_by
     dtype = next(item.dtype for item in hidden_by if item is not None)
-    previous = torch.zeros(
-        (batch, cameras, num_patches, hidden_size),
-        dtype=dtype,
-        device=student.gate_logit.device,
-    )
+    previous = torch.zeros((batch, cameras, num_patches, hidden_size), dtype=dtype, device=device)
     for index, item in enumerate(hidden_by):
         if item is not None:
             previous[index] = item

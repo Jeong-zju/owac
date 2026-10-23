@@ -328,3 +328,174 @@ def test_validation_interval_and_epoch_boundary_scheduling():
     assert should_validate(17, epoch_end=True, interval=500)  # epoch end
     assert should_validate(500, epoch_end=True, interval=500)  # coincident bound, one call
     assert not should_validate(500, epoch_end=False, interval=0)
+
+
+def test_prefix_recurrence_matches_reference_camera_masks_and_reset():
+    import torch
+
+    from owac.training.raw_full_visual_batched import prefix_gate_step
+
+    torch.manual_seed(7)
+    cameras, patches, width = 2, 3, 4
+    alpha = torch.rand(1, 1, width)
+    hidden = None
+    for _step, reset in enumerate((True, False, False, True)):
+        mean = torch.randn(cameras, patches, width)
+        support = torch.tensor([[True, False, True], [True, True, False]])
+        present = torch.tensor([True, False])
+        current = prefix_gate_step(mean, support, present, hidden, alpha, reset)
+        fresh = torch.where(support.unsqueeze(-1), mean, torch.zeros_like(mean))
+        if hidden is None or reset:
+            expected = fresh
+        else:
+            advanced = (1.0 - alpha) * mean + alpha * hidden
+            recurrent = torch.where(support.unsqueeze(-1), advanced, hidden)
+            expected = torch.where(present[:, None, None], recurrent, hidden)
+        torch.testing.assert_close(current, expected)
+        hidden = current
+
+
+def test_serial_validation_end_to_end_metrics_and_distinct_cosine(monkeypatch):
+    import contextlib
+    from types import SimpleNamespace
+
+    import torch
+
+    import owac.raw.all_bench_distillation as module
+
+    monkeypatch.setattr(torch, "autocast", lambda *a, **k: contextlib.nullcontext())
+
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeFrame:
+        values: torch.Tensor
+
+    @dataclass
+    class FakePacket:
+        frames: tuple
+
+    class FakeStudent:
+        training = True
+
+        def train(self, mode=True):
+            self.training = mode
+            return self
+
+        def __call__(self, packet, state=None):
+            return SimpleNamespace(
+                projected_tokens=torch.ones(1, 4, 4),
+                tokens=SimpleNamespace(mask=torch.ones(1, 4, dtype=torch.bool)),
+            ), state
+
+    sources = [
+        SimpleNamespace(
+            split="validation", group_id="a", domain="libero", lighting="Normal", endpoints=(0, 25)
+        ),
+        SimpleNamespace(
+            split="validation", group_id="b", domain="robotwin2", lighting="Low", endpoints=(0, 25)
+        ),
+    ]
+    targets = {}
+    for source in sources:
+        targets[source.group_id] = {
+            ep: SimpleNamespace(
+                teacher_tokens=torch.zeros(2, 2, 4),
+                teacher_token_mask=torch.ones(2, dtype=torch.bool),
+            )
+            for ep in source.endpoints
+        }
+
+    sources_map = {source.group_id: source for source in sources}
+
+    class Dataset:
+        sources = sources_map
+        targets = SimpleNamespace(read=lambda sid, ep: targets[sid][ep])
+
+        def packet_for_endpoint(self, sid, ep, device=None):
+            return FakePacket(
+                frames=tuple(FakeFrame(torch.zeros(1, 2, 3, 224, 224)) for _ in range(6))
+            )
+
+    result = module.validate_all_bench(FakeStudent(), Dataset(), device=torch.device("cpu"))
+    assert result["windows"] == 4
+    assert result["valid_tokens"] == 16
+    assert result["feature_mse"] == 1.0
+    assert result["feature_cosine"] == 1.0
+    assert abs(result["feature_total"] - 1.1) < 1e-6
+    assert result["feature_cosine"] != result["feature_total"]
+    assert result["startup"]["windows"] == 2
+    assert result["eligible_ge_25"]["windows"] == 2
+    assert set(result["per_domain"]) == {"libero", "robotwin2"}
+    assert set(result["per_lighting"]) == {"Normal", "Low"}
+
+
+def test_whole_prefix_two_step_chunk_matches_original_sequential_reference(monkeypatch):
+    from types import SimpleNamespace
+
+    import torch
+
+    import owac.training.raw_full_visual_batched as batched
+
+    cameras, patches, width = 2, 3, 4
+
+    def fake_burst(student, packets):
+        means = []
+        supports = []
+        presents = []
+        for packet in packets:
+            ep = int(packet.endpoint)
+            means.append(
+                torch.arange(cameras * patches * width, dtype=torch.float32).reshape(
+                    cameras, patches, width
+                )
+                / (ep + 1)
+            )
+            supports.append(
+                torch.tensor([[True, (ep % 2) == 0, True], [True, True, (ep % 3) != 0]])
+            )
+            presents.append(torch.tensor([True, (ep % 4) != 0]))
+        return (torch.stack(means), torch.stack(supports), torch.stack(presents), None, None)
+
+    monkeypatch.setattr(batched, "_burst_components", fake_burst)
+
+    class Student:
+        gate_logit = torch.zeros(width)
+        gate_alpha = torch.full((width,), 0.25)
+        geometry = SimpleNamespace(num_patches=patches, hidden_size=width)
+
+    def packet(ep, reset):
+        return SimpleNamespace(
+            endpoint=ep,
+            reset=reset,
+            source_demo_id="s",
+            frames=(SimpleNamespace(camera_ids=("a", "b")),),
+        )
+
+    samples = []
+    for length, reset_at in ((1, 0), (3, 0), (2, 0)):
+        prefix = [packet(i * 5, i == reset_at) for i in range(length)]
+        unroll = [packet(25 + 5 * i, i == 0) for i in range(6)]
+        samples.append(SimpleNamespace(prefix_packets=prefix, unroll_packets=unroll))
+    got, got_has = batched._prefix_hidden(Student(), samples)
+
+    expected = torch.zeros((len(samples), cameras, patches, width))
+    expected_has = torch.zeros(len(samples), dtype=torch.bool)
+    for sample_index, sample in enumerate(samples):
+        hidden = None
+        for step_index in range(len(sample.prefix_packets)):
+            pkt = sample.prefix_packets[step_index]
+            mean, support, present, _, _ = fake_burst(Student(), [pkt])
+            hidden = batched.prefix_gate_step(
+                mean[0],
+                support[0],
+                present[0],
+                hidden,
+                Student().gate_alpha.reshape(1, 1, -1),
+                bool(pkt.reset),
+            )
+            expected_has[sample_index] = True
+        if hidden is not None:
+            expected[sample_index] = hidden
+    torch.testing.assert_close(got, expected)
+    assert torch.equal(got_has, expected_has)

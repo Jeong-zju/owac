@@ -948,7 +948,9 @@ def train_all_bench(
                 same.append(chunk[-1])
             if pending_samples is None:
                 pending_samples = submit_cpu_samples(sample_executor, dataset.sample, same)
+            wait_started = time.monotonic()
             samples = [future.result() for future in pending_samples]
+            sample_wait_seconds = time.monotonic() - wait_started
             if step + 1 < len(chunks):
                 next_chunk = chunks[step + 1]
                 next_same = next_chunk[rank * 8 : (rank + 1) * 8]
@@ -957,6 +959,7 @@ def train_all_bench(
                 pending_samples = submit_cpu_samples(sample_executor, dataset.sample, next_same)
             else:
                 pending_samples = None
+            compute_started = time.monotonic()
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
                 result = model(BatchedTemporalRequest(tuple(samples)))
@@ -1014,7 +1017,9 @@ def train_all_bench(
                                 "effective_batch": 16,
                                 "epoch": epoch + 1,
                                 "host_wall_phases": {
-                                    "total_seconds": time.monotonic() - step_started
+                                    "sample_wait_seconds": sample_wait_seconds,
+                                    "compute_seconds": time.monotonic() - compute_started,
+                                    "total_seconds": time.monotonic() - step_started,
                                 },
                                 "seen_anchors": (epoch * len(keys))
                                 + min((step + 1) * 16, len(keys)),
