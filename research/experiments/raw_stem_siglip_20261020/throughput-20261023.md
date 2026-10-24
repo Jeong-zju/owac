@@ -28,3 +28,9 @@ Owned train-r8 paused natively with exit0 at complete update19294. train-r9 resu
 After-resume 31.76 s sample: anonymous memory 23.43–23.88 GiB, file cache 91.02–91.46 GiB; no new OOM. Direct reclaim still scanned 4,257,784 pages with38,787 major faults. Restart/cache warmup and different batches confound comparison; memory pressure and GPU fluctuations are NOT fully resolved. OS file cache still fills available RAM, which by itself is not an allocation leak. Variable full-prefix lengths, three-camera versus two-camera work, full serial validation every500/epoch end, and checkpoint saves remain distinct sources of variation.
 
 Raw evidence: outputs/raw-distillation-all-bench-20261022/harness/round-12/{dispatch.json,task.md,loader-bench-*.jsonl,memory-pressure*.json}; remote train-r8-exit.json and train-r9-launch.json. No test-set/closed-loop/control claim.
+
+## 2026-10-24 continuation to twelve epochs
+
+2026-10-24 18:14：用户授权扩大全量蒸馏，累计目标由6遍扩至12遍（42,384更新）。前6遍21,192更新native0完成，验证MSE从18,500步0.381093降至21,192步0.367036；继续改善，不宣称收敛或控制恢复。从21,192完整Adam/scheduler/两rank RNG/采样游标恢复，已实际推进21,200步（第7遍）。保持全视觉头、global16=2×8、lr1e-5、原token损失、每500步及epoch末验证；仅380GiB新增磁盘上限。train-r11 PID29776/startticks7404486，源码8b5a7b2；SwanLab已同步21,200且无错误。未新增定时任务、测试集评估或闭环。
+
+Remote receipts: extension-twelve-epochs-20261024.json, train-r10-exit.json (native0), train-r11-launch.json. Checkpoint optimizer has442 state entries, epoch6/step0/global_step21192. Full validation denominator remains8013 windows. New training is in progress; completion is not claimed.
