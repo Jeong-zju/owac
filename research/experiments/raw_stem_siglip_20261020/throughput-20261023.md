@@ -34,3 +34,9 @@ Raw evidence: outputs/raw-distillation-all-bench-20261022/harness/round-12/{disp
 2026-10-24 18:14：用户授权扩大全量蒸馏，累计目标由6遍扩至12遍（42,384更新）。前6遍21,192更新native0完成，验证MSE从18,500步0.381093降至21,192步0.367036；继续改善，不宣称收敛或控制恢复。从21,192完整Adam/scheduler/两rank RNG/采样游标恢复，已实际推进21,200步（第7遍）。保持全视觉头、global16=2×8、lr1e-5、原token损失、每500步及epoch末验证；仅380GiB新增磁盘上限。train-r11 PID29776/startticks7404486，源码8b5a7b2；SwanLab已同步21,200且无错误。未新增定时任务、测试集评估或闭环。
 
 Remote receipts: extension-twelve-epochs-20261024.json, train-r10-exit.json (native0), train-r11-launch.json. Checkpoint optimizer has442 state entries, epoch6/step0/global_step21192. Full validation denominator remains8013 windows. New training is in progress; completion is not claimed.
+
+## 2026-10-25 continuation to twenty-four epochs
+
+2026-10-25 15:09：用户授权继续扩大全量蒸馏，累计目标24遍/84,768更新。12遍42,384更新已native0完成，验证MSE0.3097147（8013窗口），末段仍下降。从42,384完整优化器442状态项/scheduler/RNG/采样游标恢复，实际推进42,390步/第13遍，SwanLab同步无错误。保持全视觉头、双卡global16、lr1e-5、原损失、每500步及epoch末验证，仅380GiB新增磁盘上限；无时间门槛、测试集或闭环。train-r12 PID68649/startticks14935363，执行源码733ff6a；上一6遍耗时11.94小时，新增12遍粗估24小时，不等于收敛保证。
+
+Receipts: train-r11-exit.json(native0), extension-24-epochs-20261025.json, train-r12-launch.json. Same validation MSE: 40500=.3127553, 41000=.3117212, 41500=.3105735, 42000=.3099218, 42384=.3097147. In progress, no convergence or control claim.
