@@ -1403,3 +1403,16 @@ def test_validation_noise_is_stable_per_anchor_and_does_not_touch_global_rng():
     assert torch.equal(first, second)
     assert not torch.equal(first, other)
     assert torch.equal(before, after)
+
+
+def test_nonzero_initial_and_explicit_reset_keep_causal_stride_contract():
+    base = _FIXTURE.fixture_student()
+    student = TemporalRawStemStudent(base)
+    first = _FIXTURE.make_packet(10, values=[0.1] * 6, cameras=("base", "wrist"), reset=True)
+    state = student.update_state(first, None)
+    assert state.last_endpoint == 10
+    explicit = _FIXTURE.make_packet(15, values=[0.1] * 6, cameras=("base", "wrist"), reset=True)
+    state = student.update_state(explicit, state)
+    assert state.last_endpoint == 15
+    carried = _FIXTURE.make_packet(20, values=[0.1] * 6, cameras=("base", "wrist"), reset=False)
+    assert student.update_state(carried, state).last_endpoint == 20

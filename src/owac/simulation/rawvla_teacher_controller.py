@@ -8,7 +8,9 @@ RAW frames only; paired clean-RGB data/caches are never consulted.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import os
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -103,6 +105,29 @@ class _AuthorEnv:
         self.env.close()
 
 
+def _load_author_replay_module(author_root: str | Path) -> Any:
+    """Load the author replay script directly; no old replay/hash module."""
+    root = Path(author_root)
+    path = root / "scripts/replay/replay_libero_train_rawvla_light_npz.py"
+    if not path.is_file():
+        raise TeacherControllerError(f"author replay script absent: {path}")
+    for extra in (root, root / "experiments/simulation/libero"):
+        value = str(extra.resolve())
+        if value not in sys.path:
+            sys.path.insert(0, value)
+    name = "owac_author_rawvla_replay"
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise TeacherControllerError(f"cannot load author replay module: {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception as exc:
+        raise TeacherControllerError(f"author replay dependencies/import failed: {exc}") from exc
+    return module
+
+
 class LIBEROEnvAdapter:
     """Pinned task6 environment with deterministic lighting and dummy wait."""
 
@@ -135,16 +160,7 @@ class LIBEROEnvAdapter:
         os.environ["LIBERO_CONFIG_PATH"] = str(self.libero_config.parent)
         from libero.libero import benchmark
 
-        from owac.simulation.rawvla_teacher_replay import ReplayConfig, _load_author_module
-
-        self.author = _load_author_module(
-            ReplayConfig(
-                author_root=self.author_root,
-                hdf5_root=self.author_root,
-                out_root=self.author_root,
-                rgb_out_root=self.author_root,
-            )
-        )
+        self.author = _load_author_replay_module(self.author_root)
         self.task = benchmark.get_benchmark_dict()[TASK_SUITE]().get_task(self.task_id)
         if self.task.name != "put_the_cream_cheese_in_the_bowl":
             raise TeacherControllerError(f"task numbering/name mismatch: {self.task.name}")

@@ -590,10 +590,8 @@ class TemporalRawStemStudent(nn.Module):
             int(self.geometry.hidden_size),
         )
         if state is None:
-            if packet.endpoint != 0 or not packet.reset:
-                raise RawStemContractError(
-                    "the first temporal packet requires endpoint 0 and reset=True"
-                )
+            if not packet.reset:
+                raise RawStemContractError("the first temporal packet requires reset=True")
             return
         if not isinstance(state, TemporalState):
             raise RawStemContractError("state must be a TemporalState")
@@ -606,8 +604,6 @@ class TemporalRawStemStudent(nn.Module):
         if state.hidden.dtype != torch.float32:
             raise RawStemContractError("temporal state hidden must be float32")
         if packet.reset:
-            if packet.endpoint != 0:
-                raise RawStemContractError("explicit reset must be endpoint 0")
             return
         if packet.endpoint != state.last_endpoint + self.endpoint_stride:
             raise RawStemContractError(
