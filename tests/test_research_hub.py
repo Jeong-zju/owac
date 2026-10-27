@@ -208,7 +208,7 @@ def test_actual_registry_packets_resolve_and_do_not_mix_routes():
             assert all(route["id"].lower() in path.lower() for path in stage["prompt"]["sources"])
 
 
-def test_current_strategy_has_exact_prompt_and_archives_cannot_launch():
+def test_accepted_strategy_and_archives_cannot_launch():
     repo = Path(__file__).resolve().parents[1]
     snapshot = build_snapshot(repo)
     routes = {route["id"]: route for route in snapshot["routes"]}
@@ -218,8 +218,12 @@ def test_current_strategy_has_exact_prompt_and_archives_cannot_launch():
         "DISTILL"
     ]
     current = next(s for s in active["stages"] if s["id"] == active["current_stage"])
-    prompt_path = "docs/prompts/GPT61_SOL_RAW_STEM_SIGLIP_DISTILLATION.md"
-    assert current["prompt"]["text"] == (repo / prompt_path).read_text()
+    assert current["id"] == "CONTROL"
+    assert not current["prompt"]["available"]
+    for stage in active["stages"]:
+        if stage["id"] in {"STEM", "ADAPT", "CONTROL"}:
+            assert stage["acceptance"] == "passed"
+            assert stage["state"] == "recorded"
     assert not active["summary_stale"]
     assert not snapshot["lineage"]["summary_stale"]
     for route_id in ("N01", "N02", "N04"):
