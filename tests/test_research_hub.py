@@ -218,8 +218,12 @@ def test_accepted_strategy_and_archives_cannot_launch():
         "DISTILL"
     ]
     current = next(s for s in active["stages"] if s["id"] == active["current_stage"])
-    assert current["id"] == "CONTROL"
-    assert not current["prompt"]["available"]
+    assert current["id"] == "LOWLIGHT"
+    assert current["prompt"]["available"]
+    assert (
+        current["prompt"]["text"]
+        == (repo / "docs/prompts/RAW_DISTILLATION_LOWLIGHT.md").read_text()
+    )
     for stage in active["stages"]:
         if stage["id"] in {"STEM", "ADAPT", "CONTROL"}:
             assert stage["acceptance"] == "passed"

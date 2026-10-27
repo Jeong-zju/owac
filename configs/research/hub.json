@@ -11,11 +11,11 @@
       "branch": "main",
       "version": "OWAC-D1.1 · RAW 教师与因果时序",
       "lifecycle": "active",
-      "status": "STEM · ADAPT · CONTROL 已通过",
-      "current_stage": "CONTROL",
+      "status": "正常光阶段已通过 · LOWLIGHT 已开启",
+      "current_stage": "LOWLIGHT",
       "question": "直接 RAW 编码能否保住已有策略的控制能力，再利用 RAW 测量超越教师？",
       "summary": "全视觉头蒸馏24遍／84,768更新完成；最后学生正常光task6闭环20/20，教师20/20。2026-10-27用户确认STEM、ADAPT、CONTROL阶段通过。",
-      "next": "正常光恢复阶段已验收；下一步讨论弱光实验，尚未启动。",
+      "next": "开展弱光阶段方案与评价准备；具体实验按执行会话授权推进。",
       "boundary": "闭环使用历史固定20初态，仅正常光LIBERO goal/task6；不外推其他任务、弱光、原生Bayer或实机。本地init0 RAW教师不是作者训练后前端权重。",
       "primary_document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
       "evidence_document": "research/experiments/raw_stem_siglip_20261020/closed-loop-final84768-20261026.md",
@@ -45,7 +45,8 @@
         "docs/plans/RAW_TEACHER_STUDENT_FRAMEWORK_2026-10-21.md",
         "research/experiments/raw_stem_siglip_20261020/c-full-20261021-independent-review.md",
         "research/experiments/raw_stem_siglip_20261020/C_FULL_RUNBOOK.md",
-        "research/experiments/raw_stem_siglip_20261020/closed-loop-final84768-20261026.md"
+        "research/experiments/raw_stem_siglip_20261020/closed-loop-final84768-20261026.md",
+        "docs/prompts/RAW_DISTILLATION_LOWLIGHT.md"
       ],
       "research_focus": {
         "title": "保留有效时序能力，优先恢复控制",
@@ -137,11 +138,14 @@
         {
           "id": "LOWLIGHT",
           "title": "弱光与后续扩展",
-          "state": "blocked",
-          "label": "待开展 · 尚未启动",
-          "description": "正常光恢复阶段已通过；弱光条件与评价方案待确定，当前未启动新实验。",
+          "state": "current",
+          "label": "当前阶段 · 可复制交接提示词",
+          "description": "正常光阶段已通过，弱光研究入口已开启；先核对条件与配对评价方案，尚未运行新实验。",
           "document": "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md",
-          "prompt_kind": "none"
+          "prompt_kind": "complete",
+          "prompt_sources": [
+            "docs/prompts/RAW_DISTILLATION_LOWLIGHT.md"
+          ]
         }
       ]
     },
@@ -742,7 +746,7 @@
   "lineage": {
     "title": "路线怎样分支，又为什么收敛",
     "description": "实线表示研究选择的演进与暂停收敛；虚线表示满足条件后的计划。连线不表示算法验收通过或旧机制融合。",
-    "selected": "distill",
+    "selected": "extend",
     "nodes": [
       {
         "id": "pool",
@@ -829,7 +833,7 @@
         "id": "distill",
         "title": "RAW stem＋继承 SigLIP",
         "date": "10/27 已验收",
-        "state": "current",
+        "state": "history",
         "column": 4,
         "row": 1,
         "status": "STEM · ADAPT · CONTROL 已通过",
@@ -854,11 +858,11 @@
       {
         "id": "extend",
         "title": "弱光与后续扩展",
-        "date": "下一阶段",
-        "state": "planned",
+        "date": "10/27 当前",
+        "state": "current",
         "column": 5,
         "row": 1,
-        "status": "待开展 · 尚未启动",
+        "status": "LOWLIGHT 已开启 · 方案与评价准备",
         "description": "正常光恢复阶段已通过，下一步讨论弱光收益及评价方案；尚未启动。",
         "documents": [
           "docs/plans/RAW_STEM_SIGLIP_DISTILLATION_2026-10-20.md"
